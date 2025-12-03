@@ -1,0 +1,9 @@
+# 릴리스 키스토어 설정 파일
+# 이 파일을 복사해서 key.properties로 만들고 실제 값을 입력하세요
+# key.properties는 .gitignore에 포함되어 있어 Git에 커밋되지 않습니다
+
+storePassword=YOUR_KEYSTORE_PASSWORD
+keyPassword=YOUR_KEY_PASSWORD
+keyAlias=YOUR_KEY_ALIAS
+storeFile=../app/upload-keystore.jks
+

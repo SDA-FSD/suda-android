@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SUDA</string>
+    <!-- Google Sign-In Client ID (Default - used if flavor-specific value not found) -->
+    <!-- Note: Flavor-specific values in src/{flavor}/res/values/strings.xml override this -->
+</resources>
+

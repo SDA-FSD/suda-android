@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Google Sign-In Client ID 제거됨 -->
+    <!-- 서버에서 Android Client ID를 이미 알고 있으므로 불필요 -->
+    <!-- default_web_client_id를 설정하면 serverClientId로 자동 사용되어 에러 코드 10 발생 가능 -->
+    <!-- Android Client ID는 패키지명과 SHA-1로 자동 인식되므로 별도 설정 불필요 -->
+</resources>
+
