@@ -1,0 +1,671 @@
+# Suda Application 스크린 정의서
+
+이 문서는 앱 내 모든 스크린에 대한 상세 정보를 담고 있습니다.  
+**스크린 관련 작업 시 이 문서를 함께 업데이트해야 합니다.**
+
+---
+
+## 스크린 타입 정의
+
+앱 내 모든 스크린은 다음 3가지 타입 중 하나로 분류됩니다. 각 타입별로 UI 구성, 네비게이션 방식, 뒤로가기 동작이 다릅니다.
+
+### 1. Full Screen (전체 화면)
+
+**정의**: 독립적으로 표시되는 전체 화면 스크린
+
+**특징**:
+- GNB(Global Navigation Bar) 없음
+- 독립적인 화면으로 표시
+- 시스템 뒤로가기 버튼 클릭 시: **앱 종료**
+- 일반적으로 인증 화면 등 초기 진입 화면에 사용
+
+**사용 예시**:
+- LoginScreen (로그인 화면)
+
+**구현 규칙**:
+- `Scaffold` 사용 (GNB 없음)
+- 시스템 뒤로가기 처리: `WillPopScope` 또는 `PopScope`로 앱 종료 처리
+- 전체 화면을 독립적으로 구성
+
+---
+
+### 2. Main Screen (메인 화면)
+
+**정의**: GNB(Global Navigation Bar)를 가지고 있는 메인 화면
+
+**특징**:
+- **하단 네비게이션 바 (GNB) 필수 포함**
+- GNB 위치: 안드로이드 시스템 네비게이션 바 바로 위
+- GNB 색상: 안드로이드 시스템 네비게이션 바와 색상 통일 (이질감 없도록)
+- 로그인 직후 또는 GNB 클릭을 통해 접근 가능
+- 시스템 뒤로가기 버튼 클릭 시: 이전 화면으로 이동 (일반적인 네비게이션 스택 동작)
+
+**GNB 구성**:
+- 현재: Home 버튼, Profile 버튼 (2개)
+- 향후: Profile 버튼 영역을 사용자 이미지 아이콘으로 대체 예정
+
+**사용 예시**:
+- HomeScreen (홈 화면) - Main Screen으로 전환 예정
+- ProfileScreen (프로필 화면) - Main Screen 속성
+
+**구현 규칙**:
+- `Scaffold` 사용
+- 하단에 `BottomNavigationBar` 또는 커스텀 GNB 위젯 필수
+- GNB 색상은 시스템 네비게이션 바와 통일
+- GNB를 통해 다른 Main Screen으로 전환 가능
+
+---
+
+### 3. Sub Screen (서브 화면)
+
+**정의**: GNB 없이, 기존 화면을 우측에서부터 덮어서 노출되는 전체화면 스크린
+
+**특징**:
+- GNB 없음
+- **iOS 스타일 슬라이드 애니메이션**: 우측에서 좌측으로 슬라이드되어 표시
+- **우측 상단 X 버튼 필수**: 닫기 버튼 (`Icons.close` 또는 `Icons.clear`)
+- X 버튼 클릭 시: 오른쪽으로 밀려나가며 이전 화면(Main/Sub/Full Screen) 노출
+- 시스템 뒤로가기 버튼 클릭 시: X 버튼과 동일한 동작 (오른쪽으로 슬라이드 아웃)
+- Main Screen, Sub Screen, Full Screen 모두에서 진입 가능
+
+**사용 예시**:
+- 상세 화면
+- 설정 화면
+- AI 대화 화면 (향후 추가 예정)
+
+**구현 규칙**:
+- `Scaffold` 사용 (GNB 없음)
+- 네비게이션: `Navigator.push()` 사용 (iOS 스타일 슬라이드 애니메이션)
+- 우측 상단에 X 버튼 필수 (`AppBar`의 `leading` 또는 `actions`에 배치)
+- X 버튼 클릭 시: `Navigator.pop()` 호출
+- 애니메이션: iOS 스타일 슬라이드 (기본 `MaterialPageRoute` 또는 커스텀 `PageRouteBuilder`)
+- **배경색**: 기본 배경색과 동일 (`Color(0xFF121212)`)
+
+---
+
+### 스크린 타입별 비교표
+
+| 구분 | Full Screen | Main Screen | Sub Screen |
+|------|-------------|-------------|------------|
+| GNB | ❌ 없음 | ✅ 있음 (하단) | ❌ 없음 |
+| 독립적 표시 | ✅ 예 | ✅ 예 | ❌ 아니오 (덮어서 표시) |
+| 진입 애니메이션 | 일반 전환 | 일반 전환 | 우측→좌측 슬라이드 |
+| 뒤로가기 버튼 | ❌ 없음 | ❌ 없음 | ✅ 있음 (좌측 상단 화살표) |
+| 시스템 뒤로가기 | 앱 종료 | 이전 화면 | 슬라이드 아웃 |
+| 사용 예시 | LoginScreen | HomeScreen, ProfileScreen | 상세 화면, 설정 화면 |
+
+---
+
+## 네이티브 스플래시 화면
+
+### 스플래시 관련 정의 파일
+- **패키지**: `flutter_native_splash` (버전 2.3.10 이상)
+- **설정 파일**: `pubspec.yaml`의 `flutter_native_splash` 섹션
+- **Android**: `android/app/src/main/res/drawable/launch_background.xml` (자동 생성)
+- **iOS**: `ios/Runner/Base.lproj/LaunchScreen.storyboard` (자동 생성)
+
+### 스플래시 용도
+- 앱 실행 직후 Flutter 엔진 초기화 및 JWT 인증 상태 확인 중 표시
+- 검정 배경 + 중앙 로고 이미지로 구성
+- JWT 토큰 확인 및 서버 검증 완료 후 자동 제거
+
+### 표시 조건
+- 앱 실행 시 자동 표시
+- `FlutterNativeSplash.preserve()`로 Flutter 엔진 초기화 후에도 유지
+- `FlutterNativeSplash.remove()` 호출 시 제거
+
+### 제거 시점
+- JWT 토큰이 없을 때: `_checkAuthStatus()`에서 즉시 제거 → LoginScreen 표시
+- JWT 토큰이 유효할 때: 서버 검증 완료 후 제거 → HomeScreen 표시
+- JWT 토큰이 유효하지 않을 때: 에러 처리 후 제거 → LoginScreen 표시
+
+### 스플래시 내부 구현 특이사항
+- **배경색**: 검정 (`#000000`)
+- **로고 이미지**: `assets/images/logo_3d.png` (중앙 배치)
+- **생성 방법**: `dart run flutter_native_splash:create` 명령으로 자동 생성
+- **Android 12+ 지원**: 별도 설정으로 Android 12 이상 기기 지원
+- **제어 방법**: `lib/main.dart`에서 `FlutterNativeSplash.preserve()` 및 `FlutterNativeSplash.remove()` 사용
+
+---
+
+## 1. LoginScreen
+
+### 스크린 관련 정의 파일
+- **파일 경로**: `lib/screens/login.dart`
+- **클래스명**: `LoginScreen` (StatefulWidget)
+- **스크린 타입**: **Full Screen**
+
+---
+
+## 1.1 AgreementScreen
+
+### 스크린 관련 정의 파일
+- **파일 경로**: `lib/screens/agreement.dart`
+- **클래스명**: `AgreementScreen` (StatefulWidget)
+- **스크린 타입**: **Full Screen**
+
+### 스크린 용도
+- 서비스 이용을 위한 필수 약관 동의 화면
+- 로그인 후 사용자 정보(`SudaUser`)의 `metaInfo` 중 `SUDA_AGREEMENT` 값이 'Y'가 아닌 경우 표시
+
+### 이전 스크린 정보 (진입점)
+- **LoginScreen**: 로그인 성공 후 동의 정보가 없을 때
+- **네이티브 스플래시**: 자동 로그인 후 동의 정보가 없을 때
+
+### 이후 스크린 정보 (이동 가능한 다른 스크린)
+- **HomeScreen**: 동의 완료(`POST /v1/users/agreement`) 성공 시
+- **WebViewScreen**: 이용약관 및 개인정보 처리방침 "자세히 보기" 클릭 시
+
+### 스크린 내부 구현 특이사항
+- **다국어 지원**: 한국어(ko), 영어(en), 포르투갈어(pt) 지원 (기본값 en)
+- **동의 항목**: 이용약관, 개인정보 처리방침 (모두 체크 시에만 버튼 활성화)
+- **API 호출**: `SudaApiClient.updateAgreement()` 호출
+- **디자인**: 어두운 배경색, 중앙 정렬 레이아웃
+
+---
+
+### 스크린 용도
+- Google 로그인을 위한 인증 화면
+- 로그인되지 않은 사용자에게 표시
+- Google Sign-In을 통해 idToken 획득 후 SUDA 서버에 JWT 발급 요청
+
+### 이전 스크린 정보 (진입점)
+- **네이티브 스플래시**: 저장된 JWT 토큰이 없거나 유효하지 않을 때 (스플래시 제거 후 표시)
+- **HomeScreen**: 로그아웃 시 (`onSignOut` 콜백 호출)
+- **조건**: `_MyAppState`의 `_accessToken == null`일 때 표시
+
+### 이후 스크린 정보 (이동 가능한 다른 스크린)
+- **HomeScreen**: Google 로그인 성공 및 JWT 토큰 발급 성공 시
+  - `onSignIn` 콜백 호출 → `_MyAppState._onSignIn()` 실행 → 상태 업데이트로 자동 전환
+
+### 스크린 내부 구현 특이사항
+- **스크린 타입 특성**: Full Screen
+  - GNB 없음
+  - 시스템 뒤로가기 시 앱 종료 처리 필요 (`WillPopScope` 또는 `PopScope` 사용)
+- **Google 로그인 버튼**: `ElevatedButton.icon` 사용
+  - 로딩 중일 때 `CircularProgressIndicator` 표시
+  - Google 로고 이미지: `assets/images/google_logo.png` (없으면 `Icons.login` 아이콘 사용)
+- **로그인 플로우**:
+  1. `AuthService.signInWithGoogle()` 호출하여 Google 로그인 및 idToken 획득
+  2. idToken이 없으면 에러 메시지 표시 (SnackBar)
+  3. `SudaApiClient.loginWithGoogle()` 호출하여 SUDA 서버에 idToken 전달 및 JWT 발급
+  4. `TokenStorage.saveTokens()`로 JWT 토큰 저장
+  5. `onSignIn` 콜백 호출하여 상위로 결과 전달
+  6. 성공 시 환영 메시지 표시 (SnackBar)
+- **환경 표시**: 개발/스테이징 환경일 때 상단에 환경명 표시 (`AppConfig.isPrd == false`)
+- **에러 처리**: 모든 에러는 SnackBar로 표시, 터미널에도 로그 출력
+- **UI 구성**:
+  - 중앙 정렬된 Column 레이아웃
+  - 앱 로고 아이콘 (`Icons.chat_bubble_outline`, 80px)
+  - 앱 이름 "Suda" (32px, bold, deepPurple)
+  - 부제목 "AI와 함께하는 영어 대화" (16px, grey)
+  - 환경 표시 배지 (개발/스테이징 환경만)
+  - Google 로그인 버튼 (전체 너비, 50px 높이)
+
+---
+
+## 2. HomeScreen
+
+### 스크린 관련 정의 파일
+- **파일 경로**: `lib/screens/home.dart`
+- **클래스명**: `HomeScreen` (StatefulWidget)
+- **스크린 타입**: **Main Screen**
+
+### 스크린 용도
+- 로그인 후 메인 화면
+- 앱의 주요 기능 진입점
+- **홈 배너**: 상단에 100% 너비의 정사각형 배너 노출 (스와이프 가능, 무한 루프)
+- 향후 AI 영어 대화 기능이 추가될 예정
+
+### 이전 스크린 정보 (진입점)
+- **네이티브 스플래시**: 저장된 JWT 토큰이 유효하고 사용자 정보 조회 성공 시 (스플래시 제거 후 표시)
+- **LoginScreen**: Google 로그인 성공 및 JWT 토큰 발급 성공 시
+- **ProfileScreen**: GNB의 Home 버튼 클릭 시
+- **조건**: `_MyAppState`의 `_accessToken != null`이고 `_currentMainScreen == 'home'`일 때 표시
+
+### 이후 스크린 정보 (이동 가능한 다른 스크린)
+- **ProfileScreen**: GNB의 Profile 버튼 클릭 시
+  - `onNavigateToProfile` 콜백 호출 → `_MyAppState._navigateToProfile()` 실행 → 상태 업데이트로 전환
+- **AlarmMessageScreen** (Sub Screen): 우측 상단 Info 아이콘 클릭 시
+  - `Navigator.push()`로 iOS 스타일 슬라이드 애니메이션으로 표시
+- **RoleplayOverviewScreen** (Sub Screen): (현재는 명시적 버튼 없음, 향후 추가 예정)
+  - 향후 n개의 롤플레이가 Home Screen에 게시될 예정
+
+### 스크린 내부 구현 특이사항
+- **스크린 타입 특성**: Main Screen
+  - **GNB 포함**: 하단 네비게이션 바 필수 포함 (AppScaffold의 `bottomNavigationBar` 사용)
+  - GNB 구성: 왼쪽 "Home" (현재 화면, 흰색), 오른쪽 "Profile" (회색)
+  - GNB 색상: 검정 (`Colors.black`) - 시스템 네비게이션 바와 색상 통일
+- **UI 구성**: `AppScaffold`를 사용하여 표준 레이아웃 적용
+  - **상단 여백**: 70 (표준)
+  - **헤더**:
+    - 좌측: "Hi, {userName}!" 인사말 (`AppScaffold.title` 사용)
+    - 우측: Info 아이콘 (`AppScaffold.actions` 사용)
+  - **메인 콘텐츠**:
+    - **홈 배너**: 
+      - 위치: 상단 여백 70 바로 아래
+      - 형태: Width 100% 정사각형 (`AspectRatio(1.0)`), `BorderRadius: 20`
+      - 구현: `AppScaffold(usePadding: false)`를 적용하여 배너가 화면 끝까지 닿도록 함
+      - 기능: 무한 루프 스와이프, 자동 슬라이드(4초), 인디케이터, 다국어 오버레이
+    - **롤플레이 카테고리**:
+      - 구성: 카테고리명(h3) + 가로 스크롤 썸네일 리스트
+      - 썸네일: 30% 너비, radius 10, 음영 박스 오버레이 타이틀  
+        (텍스트가 영역을 초과할 때만 Marquee 적용)
+      - 기능: 레이지 로딩(페이징) 지원, 로딩 중 Shimmer 스켈레톤 노출
+- **API 연동**:
+  - **홈 배너 조회**: `GET /v1/home/banners` (`SudaApiClient.getHomeBanners()`)
+  - **롤플레이 그룹 조회**: `GET /v1/home/roleplays/all` (`SudaApiClient.getHomeRoleplayGroups()`)
+  - **롤플레이 페이징 조회**: `GET /v1/home/roleplays` (`SudaApiClient.getRoleplaysByCategory()`)
+  - **푸시 토큰 등록**: `_registerPushToken()` 메서드로 처리
+    - Firebase Messaging 토큰 획득 후 서버에 전송 (`POST /users/push-token`)
+- **초기화 작업**: `initState()`에서 `_performInitialization()` 호출 (한 번만 실행)
+  - `_isInitialized` 플래그로 중복 실행 방지
+- **Props**:
+  - `onNavigateToProfile`: Profile 화면으로 이동 시 호출되는 콜백
+  - `user`: 앱 메모리에 저장된 사용자 정보 (UserDto)
+
+---
+
+## 3. ProfileScreen
+
+### 스크린 관련 정의 파일
+- **파일 경로**: `lib/screens/profile.dart`
+- **클래스명**: `ProfileScreen` (StatefulWidget)
+- **스크린 타입**: **Main Screen**
+
+### 스크린 용도
+- 사용자 프로필 화면
+- 로그아웃 기능 제공
+- 사용자 프로필 이미지/이름 및 서비스 사용 지표(Roleplay/Words/Like) 요약을 표시
+- Profile 화면 노출 시점마다(`/v1/users/profile`)를 호출하여 최신 userDto를 받아 화면을 자연스럽게 갱신하고 앱 메모리의 userInfo도 업데이트
+
+### 이전 스크린 정보 (진입점)
+- **HomeScreen**: GNB의 Profile 버튼 클릭 시
+  - `onNavigateToProfile` 콜백 호출 → `_MyAppState._navigateToProfile()` 실행 → 상태 업데이트로 전환
+- **조건**: `_MyAppState`의 `_accessToken != null`이고 `_currentMainScreen == 'profile'`일 때 표시
+
+### 이후 스크린 정보 (이동 가능한 다른 스크린)
+- **HomeScreen**: GNB의 Home 버튼 클릭 시
+  - `onNavigateToHome` 콜백 호출 → `_MyAppState._navigateToHome()` 실행 → 상태 업데이트로 전환
+- **SettingScreen** (Sub Screen): 우측 상단 원형 버튼 클릭 시
+  - `Navigator.push()`로 iOS 스타일 슬라이드 애니메이션으로 표시
+
+### 스크린 내부 구현 특이사항
+- **스크린 타입 특성**: Main Screen
+  - **GNB 포함**: 하단 네비게이션 바 필수 포함 (AppScaffold의 `bottomNavigationBar` 사용)
+  - GNB 구성: 왼쪽 "Home" (회색), 오른쪽 "Profile" (현재 화면, 흰색)
+  - GNB 색상: 검정 (`Colors.black`) - 시스템 네비게이션 바와 색상 통일
+- **UI 구성**: `AppScaffold`를 사용하여 표준 레이아웃 적용
+  - **상단 여백**: 70 (표준)
+  - **헤더**: 우측 설정 아이콘만 노출 (`AppScaffold.actions` 사용)
+  - **Profile Box**: 
+    - 위치: 상단 여백 80 바로 아래
+    - 배경: 박스가 위치한 세로 구간에 화면 좌우 끝까지 닿는 full-bleed 그라데이션 적용
+    - 구현: `AppScaffold(usePadding: false)`를 적용하여 그라데이션이 화면 끝까지 닿도록 함
+  - Progress Box: Profile Box 아래 gap 50 이후, 가로 중앙 정렬, 너비는 디바이스의 70%
+    - 텍스트: `body-tiny` (`textTheme.labelSmall`), 흰색, `Lv. {currentLevel}`
+    - 프로그레스 바: height 4, radius 2
+      - 바탕: `#635F5F`
+      - 진행: `#80D7CF` (progressPercentage / 100)
+    - Progress Box 아래 gap 50 이후, 남은 하단 영역은 추후 히스토리 영역 예정 (현재는 빈 상태)
+- **Props**:
+  - `onNavigateToHome`: Home 화면으로 이동 시 호출되는 콜백 (VoidCallback?)
+  - `onSignOut`: 로그아웃 시 호출되는 콜백 (VoidCallback?)
+  - `user`: 앱 메모리에 저장된 사용자 정보 (UserDto?)
+
+---
+
+## 4. SettingScreen
+
+### 스크린 관련 정의 파일
+- **파일 경로**: `lib/screens/setting/setting.dart`
+- **클래스명**: `SettingScreen` (StatelessWidget)
+- **스크린 타입**: **Sub Screen**
+
+### 스크린 용도
+- 설정 메뉴 화면
+- ProfileScreen에서 진입
+- 다양한 설정 항목 및 정보 화면으로의 진입점 제공
+
+### 이전 스크린 정보 (진입점)
+- **ProfileScreen**: 우측 상단 원형 버튼 클릭 시
+  - `Navigator.push()`로 iOS 스타일 슬라이드 애니메이션으로 표시
+
+### 이후 스크린 정보 (이동 가능한 다른 스크린)
+- **AccountScreen** (Sub Screen): "Account" 클릭 시
+- **LanguageLevelScreen** (Sub Screen): "Language Level" 클릭 시
+- **FeedbackScreen** (Sub Screen): "Feedback" 클릭 시
+- **WebViewScreen** (Sub Screen): "Privacy policy" 또는 "Terms of Service" 클릭 시
+  - "Privacy policy": `https://sudatalk.kr/public/app/privacy` 웹뷰 표시
+  - "Terms of Service": `https://sudatalk.kr/public/app/terms` 웹뷰 표시
+  - 언어별 제목 표시 (한국어/영어/포르투갈어)
+- **OpenSourceLicenseScreen** (Sub Screen): "Open source license" 클릭 시
+- **LoginScreen**: "Log out" 클릭 시
+  - JWT 토큰 삭제 후 모든 스크린을 pop하고 LoginScreen으로 이동
+
+### 스크린 내부 구현 특이사항
+- **스크린 타입 특성**: Sub Screen
+  - 배경색: RGB(26, 26, 26) - Main Screen(검정) 대비 10% 밝기 증가
+  - 우측 상단 X 버튼 필수
+  - iOS 스타일 슬라이드 애니메이션
+- **메뉴 항목**: 세로로 나열된 텍스트 항목들
+  - Account
+  - Language Level
+  - Feedback
+  - Tutorial (클릭 시 반응 없음, 추후 구현)
+  - Log out
+  - Privacy policy
+  - Terms of Service
+  - Open source license
+- **Props**:
+  - `onSignOut`: 로그아웃 시 호출되는 콜백 (VoidCallback?)
+
+---
+
+## 5. AccountScreen
+
+### 스크린 관련 정의 파일
+- **파일 경로**: `lib/screens/setting/account.dart`
+- **클래스명**: `AccountScreen` (StatefulWidget)
+- **스크린 타입**: **Sub Screen**
+
+### 이전 스크린 정보 (진입점)
+- **SettingScreen**: "Account" 클릭 시
+
+### 스크린 내부 구현 특이사항
+- 배경색: RGB(51, 51, 51) - SettingScreen 대비 10% 밝기 증가
+- 우측 상단 X 버튼 필수
+- 키보드 활성화 시 `AccountScreen`은 `resizeToAvoidBottomInset: false`로 유지  
+  (하단 "계정 삭제" 텍스트 버튼이 키보드와 함께 따라 올라오는 현상 방지)
+
+---
+
+## 6. LanguageLevelScreen
+
+### 스크린 관련 정의 파일
+- **파일 경로**: `lib/screens/setting/language_level.dart`
+- **클래스명**: `LanguageLevelScreen` (StatelessWidget)
+- **스크린 타입**: **Sub Screen**
+
+### 이전 스크린 정보 (진입점)
+- **SettingScreen**: "Language Level" 클릭 시
+
+### 스크린 내부 구현 특이사항
+- 배경색: RGB(51, 51, 51) - SettingScreen 대비 10% 밝기 증가
+- 우측 상단 X 버튼 필수
+
+---
+
+## 7. FeedbackScreen
+
+### 스크린 관련 정의 파일
+- **파일 경로**: `lib/screens/setting/feedback.dart`
+- **클래스명**: `FeedbackScreen` (StatelessWidget)
+- **스크린 타입**: **Sub Screen**
+
+### 이전 스크린 정보 (진입점)
+- **SettingScreen**: "Feedback" 클릭 시
+
+### 스크린 내부 구현 특이사항
+- 배경색: RGB(51, 51, 51) - SettingScreen 대비 10% 밝기 증가
+- 우측 상단 X 버튼 필수
+
+---
+
+## 8. OpenSourceLicenseScreen
+
+### 스크린 관련 정의 파일
+- **파일 경로**: `lib/screens/setting/open_source_license.dart`
+- **클래스명**: `OpenSourceLicenseScreen` (StatelessWidget)
+- **스크린 타입**: **Sub Screen**
+
+### 이전 스크린 정보 (진입점)
+- **SettingScreen**: "Open source license" 클릭 시
+
+### 스크린 내부 구현 특이사항
+- 배경색: RGB(51, 51, 51) - SettingScreen 대비 10% 밝기 증가
+- 우측 상단 X 버튼 필수
+
+---
+
+## 11. RoleplayOverviewScreen
+
+### 스크린 관련 정의 파일
+- **파일 경로**: `lib/screens/roleplay/overview.dart`
+- **클래스명**: `RoleplayOverviewScreen` (StatelessWidget)
+- **스크린 타입**: **Sub Screen**
+
+### 스크린 용도
+- Roleplay 목록 및 개요를 표시하는 화면
+- 향후 n개의 롤플레이가 표시될 예정
+
+### 이전 스크린 정보 (진입점)
+- **HomeScreen**: 중앙 "Roleplay" 텍스트 클릭 시
+  - `Navigator.push()`로 iOS 스타일 슬라이드 애니메이션으로 표시
+
+### 이후 스크린 정보 (이동 가능한 다른 스크린)
+- **RoleplayOpeningScreen** (Full Screen): 중앙 "Play" 텍스트 클릭 시
+  - `Navigator.push()`로 Full Screen 형태로 전환
+
+### 스크린 내부 구현 특이사항
+- 우측 상단 X 버튼 필수
+- 중앙에 "Play" 텍스트 (임시, 향후 롤플레이 목록으로 대체 예정)
+- Route name: `/roleplay/overview` (뒤로가기 시 overview로 돌아가기 위해 사용)
+
+---
+
+## 11.1 AlarmMessageScreen
+
+### 스크린 관련 정의 파일
+- **파일 경로**: `lib/screens/alarm_message.dart`
+- **클래스명**: `AlarmMessageScreen` (StatelessWidget)
+- **스크린 타입**: **Sub Screen**
+
+### 스크린 용도
+- 사용자 알림 메시지 목록을 표시하는 화면
+
+### 이전 스크린 정보 (진입점)
+- **HomeScreen**: 우측 상단 Info 아이콘 클릭 시
+  - `Navigator.push()`로 iOS 스타일 슬라이드 애니메이션으로 표시
+
+### 이후 스크린 정보 (이동 가능한 다른 스크린)
+- 없음 (닫기 시 Home으로 복귀)
+
+### 스크린 내부 구현 특이사항
+- 배경색: RGB(26, 26, 26) - Main Screen 대비 10% 밝기 증가 (AppScaffold 기본 적용)
+- 좌측 상단 뒤로가기 버튼 제공 (AppScaffold 기본 적용)
+- Route name: `/alarm_message`
+
+---
+
+## 12. RoleplayOpeningScreen
+
+### 스크린 관련 정의 파일
+- **파일 경로**: `lib/screens/roleplay/opening.dart`
+- **클래스명**: `RoleplayOpeningScreen` (StatelessWidget)
+- **스크린 타입**: **Full Screen**
+
+### 스크린 용도
+- Roleplay 시작 전 오프닝 화면
+
+### 이전 스크린 정보 (진입점)
+- **RoleplayOverviewScreen**: 중앙 "Play" 텍스트 클릭 시
+  - `Navigator.push()`로 Full Screen 형태로 전환
+
+### 이후 스크린 정보 (이동 가능한 다른 스크린)
+- **RoleplayPlayingScreen** (Full Screen): 중앙 "Start" 텍스트 클릭 시
+  - `Navigator.pushReplacement()`로 전환 (opening screen 삭제, 돌아올 일 없음)
+
+### 스크린 내부 구현 특이사항
+- 시스템 뒤로가기 버튼 클릭 시: opening screen 삭제, 이전 overview 노출
+- 별도 X 버튼 제공 안 함
+- 중앙에 "Start" 텍스트 (임시, 향후 오프닝 콘텐츠로 대체 예정)
+
+---
+
+## 13. RoleplayPlayingScreen
+
+### 스크린 관련 정의 파일
+- **파일 경로**: `lib/screens/roleplay/playing.dart`
+- **클래스명**: `RoleplayPlayingScreen` (StatelessWidget)
+- **스크린 타입**: **Full Screen**
+
+### 스크린 용도
+- Roleplay 진행 중 화면
+
+### 이전 스크린 정보 (진입점)
+- **RoleplayOpeningScreen**: 중앙 "Start" 텍스트 클릭 시
+  - `Navigator.pushReplacement()`로 전환 (opening screen 삭제)
+
+### 이후 스크린 정보 (이동 가능한 다른 스크린)
+- **RoleplayEndingScreen** (Full Screen): 중앙 "Ending" 텍스트 클릭 시
+  - `Navigator.pushReplacement()`로 전환 (playing screen 삭제, 돌아올 일 없음)
+- **RoleplayFailedScreen** (Full Screen): 중앙 "Failed" 텍스트 클릭 시
+  - `Navigator.pushReplacement()`로 전환 (playing screen 삭제, 돌아올 일 없음)
+
+### 스크린 내부 구현 특이사항
+- 시스템 뒤로가기 버튼 클릭 시: "페이지를 나갑니다" 얼럿 노출, 확인 시 playing screen 삭제, 이전 overview 노출
+- 별도 X 버튼 제공 안 함
+- 중앙에 "Ending", "Failed" 텍스트 (임시, 향후 게임 진행 UI로 대체 예정)
+
+---
+
+## 14. RoleplayEndingScreen
+
+### 스크린 관련 정의 파일
+- **파일 경로**: `lib/screens/roleplay/ending.dart`
+- **클래스명**: `RoleplayEndingScreen` (StatelessWidget)
+- **스크린 타입**: **Full Screen**
+
+### 스크린 용도
+- Roleplay 성공 종료 화면
+
+### 이전 스크린 정보 (진입점)
+- **RoleplayPlayingScreen**: 중앙 "Ending" 텍스트 클릭 시
+  - `Navigator.pushReplacement()`로 전환 (playing screen 삭제)
+
+### 이후 스크린 정보 (이동 가능한 다른 스크린)
+- **RoleplayResultScreen** (Full Screen): 중앙 "Result" 텍스트 클릭 시
+  - `Navigator.pushReplacement()`로 전환 (ending screen 삭제, 돌아올 일 없음)
+
+### 스크린 내부 구현 특이사항
+- 시스템 뒤로가기 버튼 클릭 시: "Result에서 밖으로 나갑니다" 얼럿 노출, 확인 시 ending screen 삭제, 이전 overview 노출
+- 별도 X 버튼 제공 안 함
+- 중앙에 "Result" 텍스트 (임시, 향후 성공 결과 UI로 대체 예정)
+
+---
+
+## 15. RoleplayFailedScreen
+
+### 스크린 관련 정의 파일
+- **파일 경로**: `lib/screens/roleplay/failed.dart`
+- **클래스명**: `RoleplayFailedScreen` (StatelessWidget)
+- **스크린 타입**: **Full Screen**
+
+### 스크린 용도
+- Roleplay 실패 종료 화면
+
+### 이전 스크린 정보 (진입점)
+- **RoleplayPlayingScreen**: 중앙 "Failed" 텍스트 클릭 시
+  - `Navigator.pushReplacement()`로 전환 (playing screen 삭제)
+
+### 이후 스크린 정보 (이동 가능한 다른 스크린)
+- **RoleplayResultScreen** (Full Screen): 중앙 "Result" 텍스트 클릭 시
+  - `Navigator.pushReplacement()`로 전환 (failed screen 삭제, 돌아올 일 없음)
+
+### 스크린 내부 구현 특이사항
+- 시스템 뒤로가기 버튼 클릭 시: "Result에서 밖으로 나갑니다" 얼럿 노출, 확인 시 failed screen 삭제, 이전 overview 노출
+- 별도 X 버튼 제공 안 함
+- 중앙에 "Result" 텍스트 (임시, 향후 실패 결과 UI로 대체 예정)
+
+---
+
+## 16. RoleplayResultScreen
+
+### 스크린 관련 정의 파일
+- **파일 경로**: `lib/screens/roleplay/result.dart`
+- **클래스명**: `RoleplayResultScreen` (StatelessWidget)
+- **스크린 타입**: **Full Screen**
+
+### 스크린 용도
+- Roleplay 결과 화면
+
+### 이전 스크린 정보 (진입점)
+- **RoleplayEndingScreen**: 중앙 "Result" 텍스트 클릭 시
+  - `Navigator.pushReplacement()`로 전환 (ending screen 삭제)
+- **RoleplayFailedScreen**: 중앙 "Result" 텍스트 클릭 시
+  - `Navigator.pushReplacement()`로 전환 (failed screen 삭제)
+
+### 이후 스크린 정보 (이동 가능한 다른 스크린)
+- 없음 (최종 결과 화면)
+
+### 스크린 내부 구현 특이사항
+- 중앙에 "Result" 텍스트 (임시, 향후 결과 상세 UI로 대체 예정)
+- 시스템 뒤로가기 동작: 향후 구현 예정
+
+---
+
+## 스크린 네비게이션 흐름도
+
+```
+앱 실행
+  ↓
+[네이티브 스플래시] (검정 배경 + 로고)
+  ↓ (Flutter 엔진 초기화 + JWT 처리)
+  ├─ 토큰 없음/유효하지 않음 → [LoginScreen]
+  └─ 토큰 유효 → [HomeScreen]
+
+[LoginScreen]
+  ├─ 로그인 성공 → [HomeScreen]
+  └─ 로그인 취소/실패 → [LoginScreen] (유지)
+
+[HomeScreen] ←→ [ProfileScreen] (GNB를 통한 전환)
+  ├─ [HomeScreen] → [RoleplayOverviewScreen] (중앙 "Roleplay" 텍스트)
+  │   └─ [RoleplayOpeningScreen] (중앙 "Play" 텍스트)
+  │       └─ [RoleplayPlayingScreen] (중앙 "Start" 텍스트)
+  │           ├─ [RoleplayEndingScreen] (중앙 "Ending" 텍스트)
+  │           │   └─ [RoleplayResultScreen] (중앙 "Result" 텍스트)
+  │           └─ [RoleplayFailedScreen] (중앙 "Failed" 텍스트)
+  │               └─ [RoleplayResultScreen] (중앙 "Result" 텍스트)
+  └─ [ProfileScreen] → [SettingScreen] (우측 상단 원형 버튼)
+      ├─ [AccountScreen]
+      ├─ [LanguageLevelScreen]
+      ├─ [FeedbackScreen]
+      ├─ [WebViewScreen] (Privacy policy / Terms of Service)
+      ├─ [OpenSourceLicenseScreen]
+      └─ Log out → [LoginScreen] (모든 스크린 pop 후 이동)
+```
+
+### 네비게이션 흐름 상세 설명
+
+1. **앱 실행 → 네이티브 스플래시**
+   - 네이티브 스플래시가 자동으로 표시됨 (검정 배경 + 로고 이미지)
+   - `FlutterNativeSplash.preserve()`로 Flutter 엔진 초기화 후에도 유지
+
+2. **네이티브 스플래시 → LoginScreen/HomeScreen**
+   - Flutter 엔진 초기화 완료 후 `_checkAuthStatus()` 실행
+   - JWT 토큰 확인 및 서버 검증 (네이티브 스플래시 유지 중)
+   - 처리 완료 후 `FlutterNativeSplash.remove()` 호출
+   - 토큰 없음/유효하지 않음 → LoginScreen 표시
+   - 토큰 유효 → HomeScreen 표시
+
+3. **LoginScreen ↔ HomeScreen/ProfileScreen**
+   - 로그인 성공 시 HomeScreen으로 전환
+   - 로그아웃 시 (ProfileScreen에서) LoginScreen으로 전환
+
+4. **HomeScreen ↔ ProfileScreen**
+   - GNB의 Home/Profile 버튼 클릭으로 전환
+   - `_MyAppState`의 `_currentMainScreen` 상태로 관리
+   - 화면 전환 시 애니메이션 없이 즉시 전환
+
+---
+
+## 주의사항
+
+- **스크린 추가/수정 시**: 이 문서를 반드시 업데이트해야 합니다.
+- **스크린 타입 지정**: 새 스크린 추가 시 반드시 3가지 타입(Full Screen, Main Screen, Sub Screen) 중 하나로 분류하고, 해당 타입의 규칙을 준수해야 합니다.
+- **네비게이션 변경 시**: "이전 스크린 정보" 및 "이후 스크린 정보" 섹션을 업데이트해야 합니다.
+- **구현 특이사항 변경 시**: 해당 스크린의 "스크린 내부 구현 특이사항" 섹션을 업데이트해야 합니다.
+- **Main Screen GNB 규칙**: Main Screen은 반드시 하단 네비게이션 바를 포함해야 하며, 안드로이드 시스템 네비게이션 바와 색상을 통일해야 합니다.
+- **Sub Screen X 버튼**: Sub Screen은 반드시 우측 상단에 X 버튼을 포함해야 하며, iOS 스타일 슬라이드 애니메이션을 사용해야 합니다.
+- **Full Screen 뒤로가기**: Full Screen에서 시스템 뒤로가기 버튼 클릭 시 앱이 종료되도록 처리해야 합니다.

@@ -49,8 +49,6 @@ class AuthService {
         idToken: idToken,
       );
     } catch (error) {
-      // 에러는 최소한으로 로깅만 하고 상위로 전달
-      print('Google Sign-In Error: $error');
       rethrow;
     }
   }
@@ -60,7 +58,6 @@ class AuthService {
     try {
       await _googleSignIn.signOut();
     } catch (error) {
-      print('Google Sign-Out Error: $error');
       rethrow;
     }
   }
@@ -77,7 +74,6 @@ class AuthService {
           await _googleSignIn.signInSilently();
       return account;
     } catch (error) {
-      print('Silent Sign-In Error: $error');
       return null;
     }
   }

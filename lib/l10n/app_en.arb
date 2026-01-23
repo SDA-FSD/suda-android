@@ -1,0 +1,62 @@
+{
+  "@@locale": "en",
+  "agreementHeading": "Please review and agree to the terms below to continue.",
+  "agreementTermsLabel": "I agree to the Terms of Use.",
+  "agreementPrivacyLabel": "I agree to the Privacy Policy.",
+  "agreementTermsTitle": "Terms of Use",
+  "agreementPrivacyTitle": "Privacy Policy",
+  "agreementDetailsLink": "View details",
+  "agreementButtonConfirm": "Confirm and continue",
+  "settingsTitle": "Settings",
+  "settingsAccount": "Account",
+  "settingsTutorial": "Tutorial",
+  "settingsLanguageLevel": "Language Level",
+  "settingsFeedback": "Feedback",
+  "settingsSignOut": "Sign Out",
+  "settingsPrivacy": "Privacy Policy",
+  "settingsTerms": "Terms of Service",
+  "settingsOpenSource": "Open Source Licenses",
+  "loginWelcome": "Welcome, {name}!",
+  "@loginWelcome": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "loginTermsTemplate": "By continuing, you agree to our {terms} and {privacy}.",
+  "@loginTermsTemplate": {
+    "placeholders": {
+      "terms": {
+        "type": "String"
+      },
+      "privacy": {
+        "type": "String"
+      }
+    }
+  },
+  "loginTermsTitle": "Terms of Use",
+  "loginPrivacyTitle": "Privacy Policy",
+  "loginErrorIdToken": "Failed to get Google ID Token. Please try again.",
+  "loginErrorFailed": "Login failed: {error}",
+  "@loginErrorFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "accountName": "Name",
+  "accountInfo": "Account",
+  "accountDelete": "Delete Account",
+  "accountDeleteTitle": "Delete Account?",
+  "accountDeleteConfirmText": "All your progress and data will be permanently lost. Are you sure?",
+  "accountGoBack": "Go Back",
+  "accountDeleteAction": "Delete",
+  "languageLevelTitle": "Choose your English level",
+  "languageLevelDescription": "SUDA citizens will chat with you at your level.",
+  "feedbackPlaceholder": "Please share your thoughts, suggestions, or any issues you've encountered...",
+  "feedbackSend": "Send",
+  "feedbackSuccess": "Thank you for your feedback.",
+  "microphonePermissionDenied": "Cannot start without microphone permission."
+}

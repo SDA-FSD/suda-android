@@ -1,0 +1,62 @@
+{
+  "@@locale": "ko",
+  "agreementHeading": "서비스 이용을 위하여 아래 항목에 동의해주세요.",
+  "agreementTermsLabel": "이용약관에 동의합니다.",
+  "agreementPrivacyLabel": "개인정보 처리방침에 동의합니다.",
+  "agreementTermsTitle": "이용약관",
+  "agreementPrivacyTitle": "개인정보 처리방침",
+  "agreementDetailsLink": "자세히 보기",
+  "agreementButtonConfirm": "동의하고 이용하기",
+  "settingsTitle": "설정",
+  "settingsAccount": "계정",
+  "settingsTutorial": "튜토리얼",
+  "settingsLanguageLevel": "언어 레벨",
+  "settingsFeedback": "피드백",
+  "settingsSignOut": "로그아웃",
+  "settingsPrivacy": "개인정보처리방침",
+  "settingsTerms": "이용약관",
+  "settingsOpenSource": "오픈소스 라이선스",
+  "loginWelcome": "{name}님, 환영합니다!",
+  "@loginWelcome": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "loginTermsTemplate": "계속 진행하실 경우, {terms} 및 {privacy}에 동의한 것으로 간주합니다.",
+  "@loginTermsTemplate": {
+    "placeholders": {
+      "terms": {
+        "type": "String"
+      },
+      "privacy": {
+        "type": "String"
+      }
+    }
+  },
+  "loginTermsTitle": "이용약관",
+  "loginPrivacyTitle": "개인정보처리방침",
+  "loginErrorIdToken": "Google ID 토큰을 가져오지 못했습니다. 다시 시도해 주세요.",
+  "loginErrorFailed": "로그인 실패: {error}",
+  "@loginErrorFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "accountName": "이름",
+  "accountInfo": "계정",
+  "accountDelete": "계정 삭제",
+  "accountDeleteTitle": "계정을 삭제하시겠습니까?",
+  "accountDeleteConfirmText": "모든 진행 상황과 데이터가 영구적으로 손실됩니다. 정말로 계속하시겠습니까?",
+  "accountGoBack": "이전으로",
+  "accountDeleteAction": "삭제",
+  "languageLevelTitle": "영어 레벨을 선택하세요",
+  "languageLevelDescription": "SUDA의 주민들은 당신의 레벨에 맞추어 대화합니다.",
+  "feedbackPlaceholder": "생각, 제안사항 또는 겪으신 문제점을 공유해 주세요...",
+  "feedbackSend": "전송",
+  "feedbackSuccess": "피드백을 보내주셔서 감사합니다.",
+  "microphonePermissionDenied": "마이크 권한이 없어서 시작할 수 없습니다."
+}

@@ -1,0 +1,62 @@
+{
+  "@@locale": "pt",
+  "agreementHeading": "Para utilizar o serviço, concorde com os itens abaixo.",
+  "agreementTermsLabel": "Concordo com os Termos de Uso.",
+  "agreementPrivacyLabel": "Concordo com a Política de Privacidade.",
+  "agreementTermsTitle": "Termos de Uso",
+  "agreementPrivacyTitle": "Política de Privacidade",
+  "agreementDetailsLink": "Ver detalhes",
+  "agreementButtonConfirm": "Concordar e continuar",
+  "settingsTitle": "Configurações",
+  "settingsAccount": "Conta",
+  "settingsTutorial": "Tutorial",
+  "settingsLanguageLevel": "Nível de Idioma",
+  "settingsFeedback": "Feedback",
+  "settingsSignOut": "Sair",
+  "settingsPrivacy": "Política de Privacidade",
+  "settingsTerms": "Termos de Serviço",
+  "settingsOpenSource": "Licenças de Código Aberto",
+  "loginWelcome": "Bem-vindo, {name}!",
+  "@loginWelcome": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "loginTermsTemplate": "Ao continuar, você concorda com nossos {terms} e {privacy}.",
+  "@loginTermsTemplate": {
+    "placeholders": {
+      "terms": {
+        "type": "String"
+      },
+      "privacy": {
+        "type": "String"
+      }
+    }
+  },
+  "loginTermsTitle": "Termos de Uso",
+  "loginPrivacyTitle": "Política de Privacidade",
+  "loginErrorIdToken": "Falha ao obter o Token de ID do Google. Por favor, tente novamente.",
+  "loginErrorFailed": "Falha no login: {error}",
+  "@loginErrorFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "accountName": "Nome",
+  "accountInfo": "Conta",
+  "accountDelete": "Excluir Conta",
+  "accountDeleteTitle": "Excluir conta?",
+  "accountDeleteConfirmText": "Todos os seus progressos e dados serão perdidos permanentemente. Tem certeza?",
+  "accountGoBack": "Voltar",
+  "accountDeleteAction": "Excluir",
+  "languageLevelTitle": "Escolha seu nível de inglês",
+  "languageLevelDescription": "Em SUDA, todos falarão com você no seu nível de inglês.",
+  "feedbackPlaceholder": "Compartilhe seus pensamentos, sugestões ou problemas que você encontrou...",
+  "feedbackSend": "Enviar",
+  "feedbackSuccess": "Obrigado pelo seu feedback.",
+  "microphonePermissionDenied": "Não é possível iniciar sem permissão do microfone."
+}

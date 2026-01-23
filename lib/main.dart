@@ -1,14 +1,37 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'l10n/app_localizations.dart';
+
 import 'services/auth_service.dart';
 import 'services/token_storage.dart';
 import 'services/suda_api_client.dart';
-import 'screens/login_screen.dart';
-import 'screens/home_screen.dart';
-import 'screens/loading_screen.dart';
+import 'services/version_check_service.dart';
+import 'screens/login.dart';
+import 'screens/home.dart';
+import 'screens/profile.dart';
+import 'screens/agreement.dart';
 import 'config/app_config.dart';
+import 'utils/language_util.dart';
+import 'theme/app_theme.dart';
 
-void main() {
+void main() async {
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  
+  // 앱 방향을 세로로 고정
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+  ]);
+  
+  // Firebase 초기화 (FlutterNativeSplash 이전에 실행)
+  await Firebase.initializeApp();
+  
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+  
   runApp(const MyApp());
 }
 
@@ -20,15 +43,36 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  GoogleSignInAccount? _currentUser;
+  // Navigator를 MaterialApp 빌드 전에도 접근할 수 있도록 GlobalKey 사용
+  final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
+  
+  GoogleSignInAccount? _googleUser;
   String? _accessToken;
-  SudaUser? _currentUserInfo;
+  UserDto? _user;
   bool _isLoading = true;
+  String _currentMainScreen = 'home'; // 'home' or 'profile'
+  bool _hasCheckedVersion = false; // 버전 체크 실행 여부
+  bool _needsAgreement = false; // 서비스 이용 동의 필요 여부
 
   @override
   void initState() {
     super.initState();
-    _checkAuthStatus();
+    // initState에서는 버전 체크를 실행하지 않음
+    // MaterialApp 빌드 후 builder에서 실행
+  }
+
+  /// 버전 체크 후 인증 상태 확인
+  Future<void> _checkVersionAndAuth() async {
+    // 버전 체크 실행 (VersionCheckService 사용)
+    final versionCheckPassed = await VersionCheckService.checkVersion(_navigatorKey);
+    
+    if (!versionCheckPassed) {
+      // 버전 체크 실패 또는 강제 업데이트 필요 시 JWT 처리 진행하지 않음
+      return;
+    }
+
+    // 버전 체크 통과 시 기존 JWT 처리 진행
+    await _checkAuthStatus();
   }
 
   /// 로그인 상태 확인 및 자동 로그인 시도
@@ -36,12 +80,17 @@ class _MyAppState extends State<MyApp> {
     // 1) 저장된 JWT 토큰 확인
     final storedAccessToken = await TokenStorage.loadAccessToken();
 
+    // 언어 코드 저장 (앱 실행 시 항상 최신 언어 코드로 업데이트)
+    final languageCode = LanguageUtil.getCurrentLanguageCode();
+    await TokenStorage.saveLanguageCode(languageCode);
+
     if (storedAccessToken == null) {
-      // 저장된 토큰이 없으면 바로 로그아웃 상태로 진입
+      // 저장된 토큰이 없으면 네이티브 스플래시 제거 후 로그아웃 상태로 진입
+      FlutterNativeSplash.remove();
       setState(() {
         _accessToken = null;
-        _currentUser = null;
-        _currentUserInfo = null;
+        _googleUser = null;
+        _user = null;
         _isLoading = false;
       });
       return;
@@ -53,22 +102,44 @@ class _MyAppState extends State<MyApp> {
         accessToken: storedAccessToken,
       );
 
-      // 3) Google 계정은 부가 정보용 (없어도 로그인 상태로 간주 가능)
+      // 3) 서비스 이용 동의 여부 확인 (SUDA_AGREEMENT == 'Y')
+      bool needsAgreement = true;
+      if (user.metaInfo != null) {
+        for (var meta in user.metaInfo!) {
+          if (meta.key == 'SUDA_AGREEMENT' && meta.value == 'Y') {
+            needsAgreement = false;
+            break;
+          }
+        }
+      }
+
+      // 4) Google 계정 정보는 UI 표시용 부가 정보 (실패해도 JWT 기반 로그인 상태는 유지)
       final account = await AuthService.signInSilently();
 
+      // 프로필 이미지 프리캐시
+      if (user.profileImgUrl != null && user.profileImgUrl!.isNotEmpty) {
+        if (mounted) {
+          precacheImage(NetworkImage(user.profileImgUrl!), context);
+        }
+      }
+
+      // 네이티브 스플래시 제거 후 화면 전환
+      FlutterNativeSplash.remove();
       setState(() {
         _accessToken = storedAccessToken;
-        _currentUser = account ?? AuthService.currentUser;
-        _currentUserInfo = user;
+        _googleUser = account ?? AuthService.currentUser;
+        _user = user;
+        _needsAgreement = needsAgreement;
         _isLoading = false;
       });
     } catch (_) {
-      // 4) 401/403/기타 에러 발생 시 토큰 삭제 후 로그아웃 상태로 전환
+      // 4) 401/403/기타 에러 발생 시 토큰 삭제 후 네이티브 스플래시 제거 및 로그아웃 상태로 전환
       await TokenStorage.clearTokens();
+      FlutterNativeSplash.remove();
       setState(() {
         _accessToken = null;
-        _currentUser = null;
-        _currentUserInfo = null;
+        _googleUser = null;
+        _user = null;
         _isLoading = false;
       });
     }
@@ -80,7 +151,7 @@ class _MyAppState extends State<MyApp> {
   Future<void> _onSignIn(GoogleSignInResult result) async {
     // 1) Google 계정 정보 저장
     setState(() {
-      _currentUser = result.account;
+      _googleUser = result.account;
     });
 
     // 2) 저장된 JWT 토큰 로드 (LoginScreen에서 이미 저장됨)
@@ -89,20 +160,43 @@ class _MyAppState extends State<MyApp> {
       if (!mounted) return;
       setState(() {
         _accessToken = null;
-        _currentUserInfo = null;
+        _user = null;
       });
       return;
     }
+
+    // 언어 코드 저장 (로그인 시에도 최신 언어 코드로 업데이트)
+    final languageCode = LanguageUtil.getCurrentLanguageCode();
+    await TokenStorage.saveLanguageCode(languageCode);
 
     try {
       // 3) JWT를 사용하여 사용자 정보 조회
       final user = await SudaApiClient.getCurrentUser(accessToken: token);
       if (!mounted) return;
       
-      // 4) 상태 업데이트 (화면 전환 트리거)
+      // 4) 서비스 이용 동의 여부 확인
+      bool needsAgreement = true;
+      if (user.metaInfo != null) {
+        for (var meta in user.metaInfo!) {
+          if (meta.key == 'SUDA_AGREEMENT' && meta.value == 'Y') {
+            needsAgreement = false;
+            break;
+          }
+        }
+      }
+
+      // 프로필 이미지 프리캐시
+      if (user.profileImgUrl != null && user.profileImgUrl!.isNotEmpty) {
+        if (mounted) {
+          precacheImage(NetworkImage(user.profileImgUrl!), context);
+        }
+      }
+
+      // 5) 상태 업데이트 (화면 전환 트리거)
       setState(() {
         _accessToken = token;
-        _currentUserInfo = user;
+        _user = user;
+        _needsAgreement = needsAgreement;
       });
     } catch (error) {
       // 5) 실패 시 토큰 삭제 및 로그인 상태 초기화
@@ -110,39 +204,101 @@ class _MyAppState extends State<MyApp> {
       if (!mounted) return;
       setState(() {
         _accessToken = null;
-        _currentUserInfo = null;
+        _user = null;
       });
-      // 에러 로그 출력
-      print('Failed to get user info after login: $error');
     }
   }
 
   /// 로그아웃 시 호출
   void _onSignOut() {
-    // UI에서는 HomeScreen -> LoginScreen 전환만 담당,
-    // 실제 토큰 삭제는 HomeScreen의 로그아웃 핸들러에서 처리.
+    // UI에서는 HomeScreen/ProfileScreen -> LoginScreen 전환만 담당,
+    // 실제 토큰 삭제는 ProfileScreen의 로그아웃 핸들러에서 처리.
     setState(() {
-      _currentUser = null;
+      _googleUser = null;
       _accessToken = null;
+      _currentMainScreen = 'home'; // 로그아웃 후 다시 로그인 시 Home 화면으로
+    });
+  }
+
+  /// GNB를 통한 화면 전환
+  void _navigateToHome() {
+    setState(() {
+      _currentMainScreen = 'home';
+    });
+  }
+
+  /// GNB를 통한 화면 전환
+  void _navigateToProfile() {
+    setState(() {
+      _currentMainScreen = 'profile';
+    });
+  }
+
+  /// 동의 완료 시 호출
+  void _onAgreementComplete() {
+    setState(() {
+      _needsAgreement = false;
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: _navigatorKey,
       title: 'SUDA',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: _isLoading
-          ? const LoadingScreen()
-          : _accessToken == null
-              ? LoginScreen(onSignIn: _onSignIn)
-              : HomeScreen(
-                  onSignOut: _onSignOut,
-                  userInfo: _currentUserInfo,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('en'),
+        Locale('ko'),
+        Locale('pt'),
+      ],
+      locale: Locale(LanguageUtil.getCurrentLanguageCode()),
+      // MaterialApp 빌드 후 첫 프레임이 그려진 후 버전 체크 실행
+      builder: (BuildContext context, Widget? child) {
+        // MaterialApp이 빌드된 후 한 번만 실행
+        if (!_hasCheckedVersion) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted && !_hasCheckedVersion) {
+              _hasCheckedVersion = true;
+              _checkVersionAndAuth();
+            }
+          });
+        }
+        return child ?? const SizedBox.shrink();
+      },
+      theme: AppTheme.themeData,
+      home: _accessToken == null
+          ? LoginScreen(onSignIn: _onSignIn)
+          : _needsAgreement
+              ? AgreementScreen(
+                  accessToken: _accessToken!,
+                  onAgreementComplete: _onAgreementComplete,
+                )
+              : IndexedStack(
+                  index: _currentMainScreen == 'home' ? 0 : 1,
+                  children: [
+                    HomeScreen(
+                      onNavigateToProfile: _navigateToProfile,
+                      user: _user,
+                    ),
+                    ProfileScreen(
+                      onNavigateToHome: _navigateToHome,
+                      onSignOut: _onSignOut,
+                      user: _user,
+                      onUserUpdated: (user) {
+                        setState(() {
+                          _user = user;
+                        });
+                      },
+                      isActive: _currentMainScreen == 'profile',
+                    ),
+                  ],
                 ),
     );
   }

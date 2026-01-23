@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "841694444330",
+    "project_id": "suda-f6884",
+    "storage_bucket": "suda-f6884.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:841694444330:android:ea5f75ef50b68fe0553c53",
+        "android_client_info": {
+          "package_name": "kr.sudatalk.app.dev"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyACp32IAFdM7oNnGHlj2DM5imIxC9syZAQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

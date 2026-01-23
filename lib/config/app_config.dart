@@ -25,6 +25,20 @@ class AppConfig {
     }
   }
 
+  // 환경별 CDN Base URL
+  static String get cdnBaseUrl {
+    switch (env) {
+      case 'local':
+      case 'dev':
+      case 'stg':
+        return 'https://cdn.dev-sudatalk.kr';
+      case 'prd':
+        return 'https://cdn.sudatalk.kr';
+      default:
+        return 'https://cdn.dev-sudatalk.kr';
+    }
+  }
+
   // 환경 이름
   static String get environmentName {
     switch (env) {
@@ -54,5 +68,7 @@ class AppConfig {
     }
   }
 
+  // 앱 버전 (하드코딩)
+  static const String appVersion = '0.5';
 }
 
