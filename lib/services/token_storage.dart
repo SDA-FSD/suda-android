@@ -44,7 +44,7 @@ class TokenStorage {
 
   /// Access Token 만료 임박 여부 확인
   /// 
-  /// 만료 1-3분 전인지 확인 (30분 만료 기준)
+  /// 만료 5분 전인지 확인 (30분 만료 기준)
   /// 반환값: true면 만료 임박 (1-3분 전), false면 아직 여유 있음
   static Future<bool> isAccessTokenExpiringSoon() async {
     final savedAtStr = await _secureStorage.read(key: _keyAccessTokenSavedAt);
@@ -54,9 +54,9 @@ class TokenStorage {
     final now = DateTime.now();
     final elapsed = now.difference(savedAt);
     
-    // 30분 만료 기준: 27분(1-3분 전) 이상 경과 시 만료 임박
+    // 30분 만료 기준: 25분 이상 경과 시 만료 임박
     const expiryDuration = Duration(minutes: 30);
-    const warningThreshold = Duration(minutes: 27);
+    const warningThreshold = Duration(minutes: 25);
     
     return elapsed >= warningThreshold && elapsed < expiryDuration;
   }

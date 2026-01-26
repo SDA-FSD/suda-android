@@ -522,31 +522,6 @@ class SudaAppPage<T> {
   }
 }
 
-/// SUDA API 클라이언트
-class SudaApiClient {
-  static final http.Client _client = http.Client();
-
-  static Uri _buildUri(String path, [Map<String, String>? queryParameters]) {
-    // base URL 파싱
-    final baseUrl = Uri.parse(AppConfig.apiBaseUrl);
-    return Uri(
-      scheme: baseUrl.scheme,
-      host: baseUrl.host,
-      port: baseUrl.port,
-      path: path,
-      queryParameters: queryParameters,
-    );
-  }
-
-  /// Token Refresh Manager (동시 요청 큐잉 처리)
-  static final _refreshManager = _TokenRefreshManager();
-
-  /// Refresh Token으로 Access Token 갱신 (내부용, 동시 요청 방지)
-  static Future<String> _refreshAccessToken() async {
-    return await _refreshManager.refresh();
-  }
-}
-
 /// Token Refresh Manager
 /// 
 /// 동시에 여러 요청이 401을 받을 때 refresh 요청을 1회만 실행하고
@@ -598,6 +573,30 @@ class _TokenRefreshManager {
     _refreshFuture = null;
   }
 }
+
+/// SUDA API 클라이언트
+class SudaApiClient {
+  static final http.Client _client = http.Client();
+
+  static Uri _buildUri(String path, [Map<String, String>? queryParameters]) {
+    // base URL 파싱
+    final baseUrl = Uri.parse(AppConfig.apiBaseUrl);
+    return Uri(
+      scheme: baseUrl.scheme,
+      host: baseUrl.host,
+      port: baseUrl.port,
+      path: path,
+      queryParameters: queryParameters,
+    );
+  }
+
+  /// Token Refresh Manager (동시 요청 큐잉 처리)
+  static final _refreshManager = _TokenRefreshManager();
+
+  /// Refresh Token으로 Access Token 갱신 (내부용, 동시 요청 방지)
+  static Future<String> _refreshAccessToken() async {
+    return await _refreshManager.refresh();
+  }
 
   /// 홈 화면 배너 목록 조회
   ///

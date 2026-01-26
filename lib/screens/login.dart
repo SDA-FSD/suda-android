@@ -62,8 +62,10 @@ class _LoginScreenState extends State<LoginScreen> {
       }
 
       // 3) SUDA 서버에 Google ID Token 전달 (JWT 발급 요청)
+      final deviceId = await TokenStorage.getDeviceId();
       final tokens = await SudaApiClient.loginWithGoogle(
         idToken: result.idToken!,
+        deviceId: deviceId,
       );
 
       // 4) 발급받은 SUDA JWT 토큰 저장

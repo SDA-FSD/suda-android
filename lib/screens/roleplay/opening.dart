@@ -6,6 +6,7 @@ import '../../utils/language_util.dart';
 import '../../utils/app_toast.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../l10n/app_localizations.dart';
+import '../../services/token_refresh_service.dart';
 
 /// Roleplay Opening Screen (Full Screen)
 /// 
@@ -19,6 +20,7 @@ class RoleplayOpeningScreen extends StatelessWidget {
   });
 
   Future<void> _navigateToPlaying(BuildContext context) async {
+    await TokenRefreshService.instance.refreshIfNeeded();
     // 1. 마이크 권한 확인
     final status = await Permission.microphone.request();
 

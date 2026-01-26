@@ -79,6 +79,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _handleSignOut() async {
     try {
+      final refreshToken = await TokenStorage.loadRefreshToken();
+      if (refreshToken != null) {
+        try {
+          final deviceId = await TokenStorage.getDeviceId();
+          await SudaApiClient.logout(
+            refreshToken: refreshToken,
+            deviceId: deviceId,
+          );
+        } catch (_) {
+          // 서버 로그아웃 실패 시에도 로컬 토큰은 삭제
+        }
+      }
       await AuthService.signOut();
       await TokenStorage.clearTokens();
       if (mounted) {

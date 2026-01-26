@@ -47,7 +47,9 @@
   - Google Sign-In을 통해 idToken 추출
   - `AuthService.signInWithGoogle()`: Google 로그인 및 idToken 반환
 - **API 서버 연동**: `lib/services/suda_api_client.dart`
-  - `SudaApiClient.loginWithGoogle()`: idToken을 서버에 전달하여 JWT 발급
+  - `SudaApiClient.loginWithGoogle()`: idToken과 deviceId를 서버에 전달하여 JWT 발급
+  - `SudaApiClient.refreshToken()`: refreshToken과 deviceId로 JWT 갱신 (rotate 반영)
+  - `SudaApiClient.logout()`: refreshToken과 deviceId로 서버 로그아웃 통지
   - `SudaApiClient.getCurrentUser()`: JWT를 사용하여 사용자 정보 조회 (`/v1/users`)
   - `SudaApiClient.getUserProfile()`: 프로필 부가 정보 조회 (`GET /v1/users/profile`, 응답: ProfileDto(userDto, currentLevel, progressPercentage))
   - `SudaApiClient.updateName()`: 사용자 이름 변경 (`PUT /v1/users?name=...`)
@@ -68,6 +70,7 @@
     - 최신 버전 정보는 `TokenStorage.saveLatestVersion()`으로 영구 저장
     - 저장된 버전 정보는 `TokenStorage.loadLatestVersion()`으로 조회 가능
 - JWT 토큰 저장: `lib/services/token_storage.dart` (flutter_secure_storage 사용)
+- deviceId 저장: `TokenStorage.getDeviceId()`로 최초 1회 생성 후 secure storage에 영구 보관
 - **버전 체크 및 강제 업데이트**: `lib/services/version_check_service.dart`
   - `VersionCheckService.checkVersion()`: 앱 실행 시 최신 버전 정보 확인 및 강제 업데이트 여부 판단
   - 앱 실행 시 MaterialApp 빌드 후 첫 프레임 렌더링 완료 시점에 실행
@@ -193,6 +196,7 @@
   - `lib/services/app_dialog_service.dart`: 앱 전역 다이얼로그 관리
   - `lib/theme/app_theme.dart`: 앱 전역 테마 설정
   - `lib/services/roleplay_state_service.dart`: Roleplay 단일 컨텍스트 보관
+  - `lib/services/token_refresh_service.dart`: Access Token 선제 갱신 타이머 및 동시 refresh 단일화
 - **공통 UI 유틸**:
   - `lib/utils/app_toast.dart`: SnackBar 기반 토스트 공통 처리
 - **리팩토링 원칙**: 

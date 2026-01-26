@@ -11,6 +11,7 @@ import 'services/auth_service.dart';
 import 'services/token_storage.dart';
 import 'services/suda_api_client.dart';
 import 'services/version_check_service.dart';
+import 'services/token_refresh_service.dart';
 import 'screens/login.dart';
 import 'screens/home.dart';
 import 'screens/profile.dart';
@@ -42,7 +43,7 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   // Navigator를 MaterialApp 빌드 전에도 접근할 수 있도록 GlobalKey 사용
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
   
@@ -57,8 +58,30 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     // initState에서는 버전 체크를 실행하지 않음
     // MaterialApp 빌드 후 builder에서 실행
+  }
+
+  @override
+  void dispose() {
+    TokenRefreshService.instance.stop();
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      if (_accessToken != null) {
+        TokenRefreshService.instance.start();
+        TokenRefreshService.instance.onAppResumed();
+      }
+    } else if (state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.paused ||
+        state == AppLifecycleState.detached) {
+      TokenRefreshService.instance.stop();
+    }
   }
 
   /// 버전 체크 후 인증 상태 확인
@@ -85,6 +108,7 @@ class _MyAppState extends State<MyApp> {
     await TokenStorage.saveLanguageCode(languageCode);
 
     if (storedAccessToken == null) {
+      TokenRefreshService.instance.stop();
       // 저장된 토큰이 없으면 네이티브 스플래시 제거 후 로그아웃 상태로 진입
       FlutterNativeSplash.remove();
       setState(() {
@@ -125,6 +149,7 @@ class _MyAppState extends State<MyApp> {
 
       // 네이티브 스플래시 제거 후 화면 전환
       FlutterNativeSplash.remove();
+      TokenRefreshService.instance.start();
       setState(() {
         _accessToken = storedAccessToken;
         _googleUser = account ?? AuthService.currentUser;
@@ -135,6 +160,7 @@ class _MyAppState extends State<MyApp> {
     } catch (_) {
       // 4) 401/403/기타 에러 발생 시 토큰 삭제 후 네이티브 스플래시 제거 및 로그아웃 상태로 전환
       await TokenStorage.clearTokens();
+      TokenRefreshService.instance.stop();
       FlutterNativeSplash.remove();
       setState(() {
         _accessToken = null;
@@ -158,6 +184,7 @@ class _MyAppState extends State<MyApp> {
     final token = await TokenStorage.loadAccessToken();
     if (token == null) {
       if (!mounted) return;
+      TokenRefreshService.instance.stop();
       setState(() {
         _accessToken = null;
         _user = null;
@@ -193,6 +220,7 @@ class _MyAppState extends State<MyApp> {
       }
 
       // 5) 상태 업데이트 (화면 전환 트리거)
+      TokenRefreshService.instance.start();
       setState(() {
         _accessToken = token;
         _user = user;
@@ -201,6 +229,7 @@ class _MyAppState extends State<MyApp> {
     } catch (error) {
       // 5) 실패 시 토큰 삭제 및 로그인 상태 초기화
       await TokenStorage.clearTokens();
+      TokenRefreshService.instance.stop();
       if (!mounted) return;
       setState(() {
         _accessToken = null;
@@ -213,6 +242,7 @@ class _MyAppState extends State<MyApp> {
   void _onSignOut() {
     // UI에서는 HomeScreen/ProfileScreen -> LoginScreen 전환만 담당,
     // 실제 토큰 삭제는 ProfileScreen의 로그아웃 핸들러에서 처리.
+    TokenRefreshService.instance.stop();
     setState(() {
       _googleUser = null;
       _accessToken = null;

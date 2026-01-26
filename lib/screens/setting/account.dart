@@ -154,6 +154,18 @@ class _AccountScreenState extends State<AccountScreen> with SingleTickerProvider
     try {
       final token = await TokenStorage.loadAccessToken();
       if (token != null) {
+        final refreshToken = await TokenStorage.loadRefreshToken();
+        if (refreshToken != null) {
+          try {
+            final deviceId = await TokenStorage.getDeviceId();
+            await SudaApiClient.logout(
+              refreshToken: refreshToken,
+              deviceId: deviceId,
+            );
+          } catch (_) {
+            // 서버 로그아웃 실패 시에도 로컬 토큰은 삭제
+          }
+        }
         // (1) 서버 요청은 날리고 기다리지 않음 (Fire-and-forget)
         SudaApiClient.deleteUser(accessToken: token).catchError((e) {
         });
