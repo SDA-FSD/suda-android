@@ -52,7 +52,7 @@
   - `SudaApiClient.getUserProfile()`: 프로필 부가 정보 조회 (`GET /v1/users/profile`, 응답: ProfileDto(userDto, currentLevel, progressPercentage))
   - `SudaApiClient.updateName()`: 사용자 이름 변경 (`PUT /v1/users?name=...`)
   - `SudaApiClient.registerPushToken()`: 푸시 토큰 등록 (`POST /users/push-token`)
-    - Request body: `{ "deviceType": "ANDROID", "pushToken": "<토큰값>" }`
+    - Request body: `{ "deviceType": "ANDROID", "pushToken": "<토큰값>", "languageCode": "en|ko|pt" }`
     - 응답 처리하지 않음 (에러 발생 시에도 무시)
   - `SudaApiClient.getHomeBanners()`: 홈 화면 배너 목록 조회 (`GET /v1/home/banners`)
     - 응답: `List<MainHomeBannerDto>` (imgPath, overlayText)
@@ -67,7 +67,7 @@
     - 응답: `VersionDto` (latestVersion, forceUpdateYn, androidMarketLink?, appleMarketLink?)
     - 최신 버전 정보는 `TokenStorage.saveLatestVersion()`으로 영구 저장
     - 저장된 버전 정보는 `TokenStorage.loadLatestVersion()`으로 조회 가능
-  - JWT 토큰 저장: `lib/services/token_storage.dart` (SharedPreferences 사용)
+- JWT 토큰 저장: `lib/services/token_storage.dart` (flutter_secure_storage 사용)
 - **버전 체크 및 강제 업데이트**: `lib/services/version_check_service.dart`
   - `VersionCheckService.checkVersion()`: 앱 실행 시 최신 버전 정보 확인 및 강제 업데이트 여부 판단
   - 앱 실행 시 MaterialApp 빌드 후 첫 프레임 렌더링 완료 시점에 실행
@@ -82,7 +82,7 @@
 - **언어 코드 관리**: `lib/utils/language_util.dart` 및 `lib/services/token_storage.dart`
   - 앱 실행 시 및 로그인 시 디바이스 언어 코드를 자동으로 보존 데이터 영역에 저장
   - `LanguageUtil.getCurrentLanguageCode()`: 현재 디바이스의 ISO 639-1 언어 코드 반환 (예: 'ko', 'en', 'pt')
-  - `TokenStorage.saveLanguageCode()`: 언어 코드 저장 (SharedPreferences 사용)
+- `TokenStorage.saveLanguageCode()`: 언어 코드 저장 (SharedPreferences 사용)
   - `TokenStorage.loadLanguageCode()`: 저장된 언어 코드 조회 (서버 API 호출 시 사용)
   - 로그아웃 시 언어 코드도 함께 삭제 (`TokenStorage.clearTokens()`)
 - **사용자 정보 모델**: `UserDto` 클래스
@@ -245,3 +245,4 @@
   - `IndexedStack` 도입으로 Home과 Profile 화면 이동 시 기존 스크롤 위치 및 상태 유지
   - Profile 화면 진입 시마다 사용자 정보를 배경에서 최신화하는 Silent Refresh 로직 구현
   - 배너 및 롤플레이 리스트의 렌더링 우선순위 최적화 (배너 완료 후 롤플레이 로드)
+- 로그인 UX 개선: 로그인 성공 플로우에서는 스피너 유지, 실패 확정 시에만 로딩 종료

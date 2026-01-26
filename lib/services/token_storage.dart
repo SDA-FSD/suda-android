@@ -1,36 +1,89 @@
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
 
 /// SUDA JWT 토큰 저장/로드 유틸
 class TokenStorage {
   static const _keyAccessToken = 'suda_access_token';
   static const _keyRefreshToken = 'suda_refresh_token';
+  static const _keyAccessTokenSavedAt = 'suda_access_token_saved_at';
+  static const _keyDeviceId = 'suda_device_id';
   static const _keyLanguageCode = 'suda_language_code';
   static const _keyLatestVersion = 'suda_latest_version';
+  static const _secureStorage = FlutterSecureStorage();
+  static const _uuid = Uuid();
+
+  /// Device ID 가져오기 (없으면 생성)
+  static Future<String> getDeviceId() async {
+    final existing = await _secureStorage.read(key: _keyDeviceId);
+    if (existing != null && existing.isNotEmpty) {
+      return existing;
+    }
+    final newDeviceId = _uuid.v4();
+    await _secureStorage.write(key: _keyDeviceId, value: newDeviceId);
+    return newDeviceId;
+  }
 
   /// Access / Refresh 토큰 저장
+  /// 
+  /// 저장 시점을 기록하여 만료 시간 계산에 사용
   static Future<void> saveTokens({
     required String accessToken,
     String? refreshToken,
   }) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_keyAccessToken, accessToken);
+    await _secureStorage.write(key: _keyAccessToken, value: accessToken);
+    // 저장 시점 기록 (밀리초 단위 타임스탬프)
+    final savedAt = DateTime.now().millisecondsSinceEpoch.toString();
+    await _secureStorage.write(key: _keyAccessTokenSavedAt, value: savedAt);
     if (refreshToken != null) {
-      await prefs.setString(_keyRefreshToken, refreshToken);
+      await _secureStorage.write(key: _keyRefreshToken, value: refreshToken);
     } else {
-      await prefs.remove(_keyRefreshToken);
+      await _secureStorage.delete(key: _keyRefreshToken);
     }
+  }
+
+  /// Access Token 만료 임박 여부 확인
+  /// 
+  /// 만료 1-3분 전인지 확인 (30분 만료 기준)
+  /// 반환값: true면 만료 임박 (1-3분 전), false면 아직 여유 있음
+  static Future<bool> isAccessTokenExpiringSoon() async {
+    final savedAtStr = await _secureStorage.read(key: _keyAccessTokenSavedAt);
+    if (savedAtStr == null) return true; // 저장 시점이 없으면 만료로 간주
+    
+    final savedAt = DateTime.fromMillisecondsSinceEpoch(int.parse(savedAtStr));
+    final now = DateTime.now();
+    final elapsed = now.difference(savedAt);
+    
+    // 30분 만료 기준: 27분(1-3분 전) 이상 경과 시 만료 임박
+    const expiryDuration = Duration(minutes: 30);
+    const warningThreshold = Duration(minutes: 27);
+    
+    return elapsed >= warningThreshold && elapsed < expiryDuration;
+  }
+
+  /// Access Token 만료 여부 확인
+  /// 
+  /// 30분 경과 여부 확인
+  static Future<bool> isAccessTokenExpired() async {
+    final savedAtStr = await _secureStorage.read(key: _keyAccessTokenSavedAt);
+    if (savedAtStr == null) return true;
+    
+    final savedAt = DateTime.fromMillisecondsSinceEpoch(int.parse(savedAtStr));
+    final now = DateTime.now();
+    final elapsed = now.difference(savedAt);
+    
+    const expiryDuration = Duration(minutes: 30);
+    return elapsed >= expiryDuration;
   }
 
   /// 저장된 Access Token 가져오기
   static Future<String?> loadAccessToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_keyAccessToken);
+    return _secureStorage.read(key: _keyAccessToken);
   }
 
   /// 저장된 Refresh Token 가져오기
   static Future<String?> loadRefreshToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_keyRefreshToken);
+    return _secureStorage.read(key: _keyRefreshToken);
   }
 
   /// 언어 코드 저장
@@ -71,8 +124,9 @@ class TokenStorage {
   /// 모든 토큰 및 언어 코드 삭제 (로그아웃 시 사용)
   static Future<void> clearTokens() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_keyAccessToken);
-    await prefs.remove(_keyRefreshToken);
+    await _secureStorage.delete(key: _keyAccessToken);
+    await _secureStorage.delete(key: _keyRefreshToken);
+    await _secureStorage.delete(key: _keyAccessTokenSavedAt);
     await prefs.remove(_keyLanguageCode);
   }
 }

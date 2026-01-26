@@ -31,8 +31,14 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       // 1) Google 로그인 (idToken 포함)
       final result = await AuthService.signInWithGoogle();
-      if (result == null || !mounted) {
+      if (!mounted) {
+        return;
+      }
+      if (result == null) {
         // 로그인 플로우가 취소됐거나 Google 페이지 진입 못한 경우
+        setState(() {
+          _isLoading = false;
+        });
         return;
       }
 
@@ -48,6 +54,9 @@ class _LoginScreenState extends State<LoginScreen> {
               backgroundColor: Colors.red,
             ),
           );
+          setState(() {
+            _isLoading = false;
+          });
         }
         return;
       }
@@ -74,9 +83,6 @@ class _LoginScreenState extends State<LoginScreen> {
             backgroundColor: Colors.red,
           ),
         );
-      }
-    } finally {
-      if (mounted) {
         setState(() {
           _isLoading = false;
         });

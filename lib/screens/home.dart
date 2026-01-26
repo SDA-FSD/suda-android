@@ -172,11 +172,13 @@ class _HomeScreenState extends State<HomeScreen> {
       final messaging = FirebaseMessaging.instance;
       final pushToken = await messaging.getToken();
       if (pushToken == null) return;
+      final languageCode = LanguageUtil.getCurrentLanguageCode();
 
       // 서버에 푸시 토큰 전송 (응답 처리하지 않음)
       await SudaApiClient.registerPushToken(
         accessToken: _accessToken!,
         pushToken: pushToken,
+        languageCode: languageCode,
       );
     } catch (_) {
       // 에러 발생 시에도 무시 (응답 처리하지 않음)

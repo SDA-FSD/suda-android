@@ -5,6 +5,15 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import '../config/app_config.dart';
+import 'token_storage.dart';
+
+/// 401 Unauthorized 예외
+class UnauthorizedException implements Exception {
+  final String message;
+  UnauthorizedException(this.message);
+  @override
+  String toString() => message;
+}
 
 /// SUDA 인증 토큰 응답 모델
 class SudaAuthTokens {
@@ -529,12 +538,80 @@ class SudaApiClient {
     );
   }
 
+  /// Token Refresh Manager (동시 요청 큐잉 처리)
+  static final _refreshManager = _TokenRefreshManager();
+
+  /// Refresh Token으로 Access Token 갱신 (내부용, 동시 요청 방지)
+  static Future<String> _refreshAccessToken() async {
+    return await _refreshManager.refresh();
+  }
+}
+
+/// Token Refresh Manager
+/// 
+/// 동시에 여러 요청이 401을 받을 때 refresh 요청을 1회만 실행하고
+/// 나머지 요청은 대기 후 새 토큰으로 재시도
+class _TokenRefreshManager {
+  Future<String>? _refreshFuture;
+  final Completer<void>? _refreshCompleter = null;
+
+  Future<String> refresh() async {
+    // 이미 refresh가 진행 중이면 대기
+    if (_refreshFuture != null) {
+      return await _refreshFuture!;
+    }
+
+    // refresh 시작
+    _refreshFuture = _doRefresh();
+    try {
+      final newAccessToken = await _refreshFuture!;
+      return newAccessToken;
+    } finally {
+      // refresh 완료 후 초기화
+      _refreshFuture = null;
+    }
+  }
+
+  Future<String> _doRefresh() async {
+    final refreshToken = await TokenStorage.loadRefreshToken();
+    if (refreshToken == null) {
+      throw UnauthorizedException('No refresh token available');
+    }
+
+    final deviceId = await TokenStorage.getDeviceId();
+    final tokens = await SudaApiClient.refreshToken(
+      refreshToken: refreshToken,
+      deviceId: deviceId,
+    );
+
+    // 새 토큰 저장
+    await TokenStorage.saveTokens(
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+    );
+
+    return tokens.accessToken;
+  }
+
+  /// Refresh 실패 시 큐에 대기 중인 요청 모두 실패 처리
+  void clear() {
+    _refreshFuture = null;
+  }
+}
+
   /// 홈 화면 배너 목록 조회
   ///
   /// GET /v1/home/banners
   static Future<List<MainHomeBannerDto>> getHomeBanners({
     required String accessToken,
   }) async {
+    return await _executeWithRefresh(
+      () => _getHomeBannersInternal(accessToken),
+      retryWithNewToken: (newToken) => _getHomeBannersInternal(newToken),
+    );
+  }
+
+  static Future<List<MainHomeBannerDto>> _getHomeBannersInternal(String accessToken) async {
     final uri = _buildUri('/v1/home/banners');
     late final http.Response response;
     try {
@@ -548,6 +625,10 @@ class SudaApiClient {
           .timeout(const Duration(seconds: 10));
     } on TimeoutException catch (e) {
       rethrow;
+    }
+
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
     }
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
@@ -566,6 +647,13 @@ class SudaApiClient {
   static Future<List<AppHomeRoleplayGroupDto>> getHomeRoleplayGroups({
     required String accessToken,
   }) async {
+    return await _executeWithRefresh(
+      () => _getHomeRoleplayGroupsInternal(accessToken),
+      retryWithNewToken: (newToken) => _getHomeRoleplayGroupsInternal(newToken),
+    );
+  }
+
+  static Future<List<AppHomeRoleplayGroupDto>> _getHomeRoleplayGroupsInternal(String accessToken) async {
     final uri = _buildUri('/v1/home/roleplays/all');
     late final http.Response response;
     try {
@@ -580,6 +668,10 @@ class SudaApiClient {
           .timeout(const Duration(seconds: 10));
     } on TimeoutException catch (e) {
       rethrow;
+    }
+
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
     }
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
@@ -600,6 +692,17 @@ class SudaApiClient {
     required int categoryId,
     required int pageNum,
   }) async {
+    return await _executeWithRefresh(
+      () => _getRoleplaysByCategoryInternal(accessToken, categoryId, pageNum),
+      retryWithNewToken: (newToken) => _getRoleplaysByCategoryInternal(newToken, categoryId, pageNum),
+    );
+  }
+
+  static Future<SudaAppPage<AppHomeRoleplayDto>> _getRoleplaysByCategoryInternal(
+    String accessToken,
+    int categoryId,
+    int pageNum,
+  ) async {
     final uri = _buildUri('/v1/home/roleplays/categories/$categoryId', {
       'pageNum': pageNum.toString(),
     });
@@ -616,6 +719,10 @@ class SudaApiClient {
           .timeout(const Duration(seconds: 10));
     } on TimeoutException catch (e) {
       rethrow;
+    }
+
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
     }
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
@@ -638,6 +745,16 @@ class SudaApiClient {
     required String accessToken,
     required int roleplayId,
   }) async {
+    return await _executeWithRefresh(
+      () => _getRoleplayOverviewInternal(accessToken, roleplayId),
+      retryWithNewToken: (newToken) => _getRoleplayOverviewInternal(newToken, roleplayId),
+    );
+  }
+
+  static Future<RoleplayOverviewDto> _getRoleplayOverviewInternal(
+    String accessToken,
+    int roleplayId,
+  ) async {
     final uri = _buildUri('/v1/roleplays/$roleplayId/overview');
     late final http.Response response;
     try {
@@ -652,6 +769,10 @@ class SudaApiClient {
           .timeout(const Duration(seconds: 10));
     } on TimeoutException catch (e) {
       rethrow;
+    }
+
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
     }
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
@@ -694,6 +815,7 @@ class SudaApiClient {
   /// POST /v1/auth/google
   static Future<SudaAuthTokens> loginWithGoogle({
     required String idToken,
+    required String deviceId,
   }) async {
     final uri = _buildUri('/v1/auth/google');
 
@@ -705,7 +827,10 @@ class SudaApiClient {
             headers: const {
               'Content-Type': 'application/json',
             },
-            body: jsonEncode({'idToken': idToken}),
+            body: jsonEncode({
+              'idToken': idToken,
+              'deviceId': deviceId,
+            }),
           )
           .timeout(const Duration(seconds: 10));
     } on TimeoutException catch (e) {
@@ -723,12 +848,103 @@ class SudaApiClient {
     );
   }
 
+  /// Refresh Token으로 Access Token 갱신
+  ///
+  /// POST /v1/auth/refresh
+  static Future<SudaAuthTokens> refreshToken({
+    required String refreshToken,
+    required String deviceId,
+  }) async {
+    final uri = _buildUri('/v1/auth/refresh');
+
+    late final http.Response response;
+    try {
+      response = await _client
+          .post(
+            uri,
+            headers: const {
+              'Content-Type': 'application/json',
+            },
+            body: jsonEncode({
+              'refreshToken': refreshToken,
+              'deviceId': deviceId,
+            }),
+          )
+          .timeout(const Duration(seconds: 10));
+    } on TimeoutException catch (e) {
+      rethrow;
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final Map<String, dynamic> data =
+          jsonDecode(response.body) as Map<String, dynamic>;
+      return SudaAuthTokens.fromJson(data);
+    }
+
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Refresh token expired or invalid');
+    }
+
+    throw Exception(
+      'POST /v1/auth/refresh failed: HTTP ${response.statusCode} ${response.body}',
+    );
+  }
+
+  /// 로그아웃
+  ///
+  /// POST /v1/auth/logout
+  static Future<void> logout({
+    required String refreshToken,
+    required String deviceId,
+  }) async {
+    final uri = _buildUri('/v1/auth/logout');
+
+    late final http.Response response;
+    try {
+      response = await _client
+          .post(
+            uri,
+            headers: const {
+              'Content-Type': 'application/json',
+            },
+            body: jsonEncode({
+              'refreshToken': refreshToken,
+              'deviceId': deviceId,
+            }),
+          )
+          .timeout(const Duration(seconds: 10));
+    } on TimeoutException catch (e) {
+      rethrow;
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return;
+    }
+
+    // 로그아웃은 실패해도 로컬 토큰은 삭제하므로 에러를 무시하지 않지만,
+    // 401이어도 정상 처리로 간주 (이미 만료된 토큰일 수 있음)
+    if (response.statusCode == 401) {
+      return;
+    }
+
+    throw Exception(
+      'POST /v1/auth/logout failed: HTTP ${response.statusCode} ${response.body}',
+    );
+  }
+
   /// 현재 로그인된 사용자 정보 조회
   ///
   /// GET /v1/users
   static Future<UserDto> getCurrentUser({
     required String accessToken,
   }) async {
+    return await _executeWithRefresh(
+      () => _getCurrentUserInternal(accessToken),
+      retryWithNewToken: (newToken) => _getCurrentUserInternal(newToken),
+    );
+  }
+
+  static Future<UserDto> _getCurrentUserInternal(String accessToken) async {
     final uri = _buildUri('/v1/users');
 
     late final http.Response response;
@@ -745,6 +961,10 @@ class SudaApiClient {
       rethrow;
     }
 
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+
     if (response.statusCode >= 200 && response.statusCode < 300) {
       final Map<String, dynamic> data =
           jsonDecode(response.body) as Map<String, dynamic>;
@@ -756,12 +976,45 @@ class SudaApiClient {
     );
   }
 
+  /// 401 발생 시 자동 refresh 후 재시도하는 래퍼
+  static Future<T> _executeWithRefresh<T>(
+    Future<T> Function() apiCall, {
+    Future<T> Function(String newAccessToken)? retryWithNewToken,
+  }) async {
+    try {
+      return await apiCall();
+    } on UnauthorizedException {
+      // 401 발생 시 refresh 시도
+      try {
+        final newAccessToken = await _refreshAccessToken();
+        // refresh 성공 시 새로운 토큰으로 재시도
+        if (retryWithNewToken != null) {
+          return await retryWithNewToken(newAccessToken);
+        }
+        // retryWithNewToken이 제공되지 않은 경우 원래 호출 재시도
+        // (이 경우 클로저로 캡처된 토큰을 사용하므로 제대로 동작하지 않을 수 있음)
+        return await apiCall();
+      } catch (e) {
+        // refresh 실패 시 큐에 대기 중인 요청 모두 실패 처리
+        _refreshManager.clear();
+        rethrow;
+      }
+    }
+  }
+
   /// 사용자 프로필 정보 조회 (user + 부가 정보)
   ///
   /// GET /v1/users/profile
   static Future<ProfileDto> getUserProfile({
     required String accessToken,
   }) async {
+    return await _executeWithRefresh(
+      () => _getUserProfileInternal(accessToken),
+      retryWithNewToken: (newToken) => _getUserProfileInternal(newToken),
+    );
+  }
+
+  static Future<ProfileDto> _getUserProfileInternal(String accessToken) async {
     final uri = _buildUri('/v1/users/profile');
 
     late final http.Response response;
@@ -776,6 +1029,10 @@ class SudaApiClient {
           .timeout(const Duration(seconds: 10));
     } on TimeoutException catch (e) {
       rethrow;
+    }
+
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
     }
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
@@ -861,6 +1118,7 @@ class SudaApiClient {
   static Future<void> registerPushToken({
     required String accessToken,
     required String pushToken,
+    required String languageCode,
   }) async {
     final uri = _buildUri('/v1/users/push-token');
 
@@ -875,6 +1133,7 @@ class SudaApiClient {
             body: jsonEncode({
               'deviceType': 'ANDROID',
               'pushToken': pushToken,
+              'languageCode': languageCode,
             }),
           )
           .timeout(const Duration(seconds: 10));
