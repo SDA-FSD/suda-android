@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'result.dart';
-import 'overview.dart';
 import '../../widgets/roleplay_scaffold.dart';
+import '../../routes/roleplay_router.dart';
 
 /// Roleplay Failed Screen (Full Screen)
 /// 
@@ -16,12 +15,7 @@ class RoleplayFailedScreen extends StatelessWidget {
 
   void _navigateToResult(BuildContext context) {
     // failed screen 삭제하고 result로 전환
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const RoleplayResultScreen(),
-      ),
-    );
+    RoleplayRouter.replaceWithResult(context);
   }
 
   Future<bool> _handleBackButton(BuildContext context) async {
@@ -46,9 +40,7 @@ class RoleplayFailedScreen extends StatelessWidget {
 
     if (shouldPop == true && context.mounted) {
       // failed screen 삭제하고 overview로 돌아감
-      Navigator.of(context).popUntil((route) {
-        return route.isFirst || route.settings.name == RoleplayOverviewScreen.routeName;
-      });
+      RoleplayRouter.popToOverview(context);
     }
 
     return false;

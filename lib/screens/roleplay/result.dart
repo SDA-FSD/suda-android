@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'overview.dart';
 import '../../widgets/roleplay_scaffold.dart';
+import '../../routes/roleplay_router.dart';
 
 /// Roleplay Result Screen (Full Screen)
 /// 
@@ -15,9 +15,7 @@ class RoleplayResultScreen extends StatelessWidget {
 
   void _navigateToOverview(BuildContext context) {
     // result screen 삭제하고 overview로 돌아감
-    Navigator.of(context).popUntil((route) {
-      return route.isFirst || route.settings.name == RoleplayOverviewScreen.routeName;
-    });
+    RoleplayRouter.popToOverview(context);
   }
 
   @override

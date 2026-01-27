@@ -1,0 +1,134 @@
+import '../models/auth_models.dart';
+import '../models/home_models.dart';
+import '../models/pagination.dart';
+import '../models/roleplay_models.dart';
+import '../models/user_models.dart';
+import '../models/version_models.dart';
+import 'endpoints/auth_api.dart';
+import 'endpoints/feedback_api.dart';
+import 'endpoints/home_api.dart';
+import 'endpoints/push_api.dart';
+import 'endpoints/roleplay_api.dart';
+import 'endpoints/user_api.dart';
+import 'endpoints/version_api.dart';
+
+class SudaApiClient {
+  static Future<List<MainHomeBannerDto>> getHomeBanners({
+    required String accessToken,
+  }) {
+    return HomeApi.getHomeBanners(accessToken: accessToken);
+  }
+
+  static Future<List<AppHomeRoleplayGroupDto>> getHomeRoleplayGroups({
+    required String accessToken,
+  }) {
+    return HomeApi.getHomeRoleplayGroups(accessToken: accessToken);
+  }
+
+  static Future<SudaAppPage<AppHomeRoleplayDto>> getRoleplaysByCategory({
+    required String accessToken,
+    required int categoryId,
+    required int pageNum,
+  }) {
+    return HomeApi.getRoleplaysByCategory(
+      accessToken: accessToken,
+      categoryId: categoryId,
+      pageNum: pageNum,
+    );
+  }
+
+  static Future<RoleplayOverviewDto> getRoleplayOverview({
+    required String accessToken,
+    required int roleplayId,
+  }) {
+    return RoleplayApi.getRoleplayOverview(
+      accessToken: accessToken,
+      roleplayId: roleplayId,
+    );
+  }
+
+  static Future<VersionDto> getLatestVersion() {
+    return VersionApi.getLatestVersion();
+  }
+
+  static Future<SudaAuthTokens> loginWithGoogle({
+    required String idToken,
+    required String deviceId,
+  }) {
+    return AuthApi.loginWithGoogle(idToken: idToken, deviceId: deviceId);
+  }
+
+  static Future<SudaAuthTokens> refreshToken({
+    required String refreshToken,
+    required String deviceId,
+  }) {
+    return AuthApi.refreshToken(refreshToken: refreshToken, deviceId: deviceId);
+  }
+
+  static Future<void> logout({
+    required String refreshToken,
+    required String deviceId,
+  }) {
+    return AuthApi.logout(refreshToken: refreshToken, deviceId: deviceId);
+  }
+
+  static Future<UserDto> getCurrentUser({
+    required String accessToken,
+  }) {
+    return UserApi.getCurrentUser(accessToken: accessToken);
+  }
+
+  static Future<ProfileDto> getUserProfile({
+    required String accessToken,
+  }) {
+    return UserApi.getUserProfile(accessToken: accessToken);
+  }
+
+  static Future<void> updateName({
+    required String accessToken,
+    required String name,
+  }) {
+    return UserApi.updateName(accessToken: accessToken, name: name);
+  }
+
+  static Future<void> deleteUser({
+    required String accessToken,
+  }) {
+    return UserApi.deleteUser(accessToken: accessToken);
+  }
+
+  static Future<void> registerPushToken({
+    required String accessToken,
+    required String pushToken,
+    required String languageCode,
+  }) {
+    return PushApi.registerPushToken(
+      accessToken: accessToken,
+      pushToken: pushToken,
+      languageCode: languageCode,
+    );
+  }
+
+  static Future<void> updateAgreement({
+    required String accessToken,
+  }) {
+    return UserApi.updateAgreement(accessToken: accessToken);
+  }
+
+  static Future<void> updateLanguageLevel({
+    required String accessToken,
+    required String languageLevel,
+  }) {
+    return UserApi.updateLanguageLevel(
+      accessToken: accessToken,
+      languageLevel: languageLevel,
+    );
+  }
+
+  static Future<void> sendFeedback({
+    required String accessToken,
+    required String content,
+  }) {
+    return FeedbackApi.sendFeedback(accessToken: accessToken, content: content);
+  }
+}

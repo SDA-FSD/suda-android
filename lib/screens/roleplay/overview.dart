@@ -9,8 +9,9 @@ import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
 import '../../utils/app_toast.dart';
 import '../../utils/language_util.dart';
+import '../../utils/suda_json_util.dart';
 import '../../widgets/app_scaffold.dart';
-import 'opening.dart';
+import '../../routes/roleplay_router.dart';
 
 /// Roleplay Overview Screen (Sub Screen)
 ///
@@ -97,25 +98,11 @@ class _RoleplayOverviewScreenState extends State<RoleplayOverviewScreen> {
   }
 
   void _navigateToOpening(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const RoleplayOpeningScreen(),
-        settings: const RouteSettings(name: '/roleplay/opening'),
-      ),
-    );
+    RoleplayRouter.pushOpening(context);
   }
 
   String _getLocalizedText(List<SudaJson>? values) {
-    if (values == null || values.isEmpty) return '';
-    final langCode = LanguageUtil.getCurrentLanguageCode();
-    for (final value in values) {
-      if (value.key == langCode) return value.value;
-    }
-    for (final value in values) {
-      if (value.key == 'en') return value.value;
-    }
-    return values.first.value;
+    return SudaJsonUtil.localizedText(values);
   }
 
   String _getChooseRoleText() {

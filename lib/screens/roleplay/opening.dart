@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'playing.dart';
 import '../../widgets/roleplay_scaffold.dart';
 import '../../services/roleplay_state_service.dart';
-import '../../utils/language_util.dart';
 import '../../utils/app_toast.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/token_refresh_service.dart';
+import '../../routes/roleplay_router.dart';
+import '../../utils/suda_json_util.dart';
 
 /// Roleplay Opening Screen (Full Screen)
 /// 
@@ -27,12 +27,7 @@ class RoleplayOpeningScreen extends StatelessWidget {
     if (status.isGranted) {
       // 권한 허용 시 playing으로 전환
       if (!context.mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const RoleplayPlayingScreen(),
-        ),
-      );
+      RoleplayRouter.replaceWithPlaying(context);
     } else {
       // 권한 거부 시 안내
       if (!context.mounted) return;
@@ -55,15 +50,7 @@ class RoleplayOpeningScreen extends StatelessWidget {
     );
 
     // 1. 영어 타이틀 추출
-    String titleEn = '';
-    if (roleplay?.title != null) {
-      for (final sudaJson in roleplay!.title!) {
-        if (sudaJson.key == 'en') {
-          titleEn = sudaJson.value;
-          break;
-        }
-      }
-    }
+    final titleEn = SudaJsonUtil.englishText(roleplay?.title);
 
     // 2. 듀레이션 포맷팅 (00:05:00 -> 05:00)
     String durationFormatted = '00:00';
@@ -72,19 +59,6 @@ class RoleplayOpeningScreen extends StatelessWidget {
       if (parts.length >= 3) {
         durationFormatted = '${parts[1]}:${parts[2]}';
       }
-    }
-
-    // 3. 다국어 텍스트 추출 함수
-    String getLocalized(List<dynamic>? values) {
-      if (values == null || values.isEmpty) return '';
-      final langCode = LanguageUtil.getCurrentLanguageCode();
-      for (final v in values) {
-        if (v.key == langCode) return v.value;
-      }
-      for (final v in values) {
-        if (v.key == 'en') return v.value;
-      }
-      return values.first.value;
     }
 
     final theme = Theme.of(context).textTheme;
@@ -109,7 +83,7 @@ class RoleplayOpeningScreen extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               Text(
-                getLocalized(selectedRole?.name),
+                SudaJsonUtil.localizedText(selectedRole?.name),
                 style: theme.headlineLarge?.copyWith(
                   fontWeight: FontWeight.w300,
                   color: const Color(0xFF0CABA8),
@@ -123,7 +97,7 @@ class RoleplayOpeningScreen extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               Text(
-                getLocalized(selectedRole?.scenario),
+                SudaJsonUtil.localizedText(selectedRole?.scenario),
                 style: theme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.w400,
                   color: Colors.white,

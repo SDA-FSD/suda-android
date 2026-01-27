@@ -46,7 +46,12 @@
 - **Google 로그인 연동**: `lib/services/auth_service.dart`
   - Google Sign-In을 통해 idToken 추출
   - `AuthService.signInWithGoogle()`: Google 로그인 및 idToken 반환
-- **API 서버 연동**: `lib/services/suda_api_client.dart`
+- **API 서버 연동**: `lib/api/suda_api_client.dart`
+  - 구현 분리 구조:
+    - HTTP/refresh 공통: `lib/api/client/suda_http_client.dart`
+    - 도메인별 엔드포인트: `lib/api/endpoints/*`
+    - DTO/모델: `lib/models/*`
+  - 기존 경로 호환: `lib/services/suda_api_client.dart`는 re-export용 래퍼
   - `SudaApiClient.loginWithGoogle()`: idToken과 deviceId를 서버에 전달하여 JWT 발급
   - `SudaApiClient.refreshToken()`: refreshToken과 deviceId로 JWT 갱신 (rotate 반영)
   - `SudaApiClient.logout()`: refreshToken과 deviceId로 서버 로그아웃 통지
@@ -58,13 +63,6 @@
     - 응답 처리하지 않음 (에러 발생 시에도 무시)
   - `SudaApiClient.getHomeBanners()`: 홈 화면 배너 목록 조회 (`GET /v1/home/banners`)
     - 응답: `List<MainHomeBannerDto>` (imgPath, overlayText)
-  - `SudaApiClient.getHomeRoleplayGroups()`: 홈 화면 카테고리별 롤플레이 목록 전체 조회 (`GET /v1/home/roleplays/all`)
-    - 응답: `List<AppHomeRoleplayGroupDto>` (roleplayCategoryDto, list)
-  - `SudaApiClient.getRoleplaysByCategory()`: 카테고리별 롤플레이 목록 페이징 조회 (`GET /v1/home/roleplays`)
-    - 파라미터: `roleplayCategoryId`, `pageNum`
-    - 응답: `SudaAppPage<AppHomeRoleplayDto>` (content, number, size, last, first)
-  - `SudaApiClient.getRoleplayOverview()`: 롤플레이 오버뷰 조회 (`GET /v1/roleplays/{roleplayId}/overview`)
-    - 응답: `RoleplayOverviewDto` (roleplay, availableRoleIds, starResultMap, similarRoleplayList)
   - `SudaApiClient.getLatestVersion()`: 최신 버전 정보 조회 (`GET /v1/latest-version`)
     - 응답: `VersionDto` (latestVersion, forceUpdateYn, androidMarketLink?, appleMarketLink?)
     - 최신 버전 정보는 `TokenStorage.saveLatestVersion()`으로 영구 저장
@@ -89,6 +87,9 @@
   - `TokenStorage.loadLanguageCode()`: 저장된 언어 코드 조회 (서버 API 호출 시 사용)
   - 로그아웃 시 언어 코드도 함께 삭제 (`TokenStorage.clearTokens()`)
 - **사용자 정보 모델**: `UserDto` 클래스
+  - 주요 필드: `provider`, `sub`, `name`, `email`, `profileImgUrl`
+  - 통계 필드: `roleplayCount`, `wordsSpokenCount`, `likePoint`
+  - `firstLoginYn` 필드는 최초 로그인 여부 표기
   - `metaInfo` 필드는 `List<SudaJson>` 타입
   - `SudaJson`: `key`, `value` 필드를 가진 구조체
 
@@ -195,7 +196,6 @@
   - `lib/services/version_check_service.dart`: 버전 체크 및 강제 업데이트 로직
   - `lib/services/app_dialog_service.dart`: 앱 전역 다이얼로그 관리
   - `lib/theme/app_theme.dart`: 앱 전역 테마 설정
-  - `lib/services/roleplay_state_service.dart`: Roleplay 단일 컨텍스트 보관
   - `lib/services/token_refresh_service.dart`: Access Token 선제 갱신 타이머 및 동시 refresh 단일화
 - **공통 UI 유틸**:
   - `lib/utils/app_toast.dart`: SnackBar 기반 토스트 공통 처리
@@ -239,14 +239,12 @@
   - `shimmer` 패키지 도입으로 로딩 스켈레톤 UI 구현
   - `GET /v1/home/banners` API 연동 및 무한 루프 `PageView` 배너 구현
   - 100% 너비 정사각형 형태, `BorderRadius: 20` 적용
-  - 디바이스 언어 설정을 고려한 다국어 텍스트 오버레이 로직 적용- **홈 화면 카테고리별 롤플레이 목록 추가**:
-  - `marquee` 패키지 도입으로 흐르는 타이틀 텍스트 구현
-  - `GET /v1/home/roleplays/all` 및 `GET /v1/home/roleplays` API 연동
-  - 카테고리별 가로 스크롤 리스트 및 레이지 로딩(Lazy Loading) 페이징 구현
-  - 30% 너비 썸네일, radius 10, 음영 박스 오버레이 타이틀 적용
-  - 카테고리명(100px) 및 썸네일 리스트에 Shimmer 로딩 스켈레톤 적용
+  - 디바이스 언어 설정을 고려한 다국어 텍스트 오버레이 로직 적용
 - **메인스크린 상태 보존 및 성능 최적화**:
   - `IndexedStack` 도입으로 Home과 Profile 화면 이동 시 기존 스크롤 위치 및 상태 유지
   - Profile 화면 진입 시마다 사용자 정보를 배경에서 최신화하는 Silent Refresh 로직 구현
   - 배너 및 롤플레이 리스트의 렌더링 우선순위 최적화 (배너 완료 후 롤플레이 로드)
 - 로그인 UX 개선: 로그인 성공 플로우에서는 스피너 유지, 실패 확정 시에만 로딩 종료
+
+## 13. 리팩토링 계획 문서
+- 롤플레이 기능 준비를 위한 리팩토링 작업 분해 문서는 `REFACTOR.md`에 기록

@@ -84,7 +84,7 @@ class _AccountScreenState extends State<AccountScreen> with SingleTickerProvider
         final user = await SudaApiClient.getCurrentUser(accessToken: token);
         setState(() {
           _user = user;
-          _nameController.text = user.name;
+          _nameController.text = user.name ?? '';
           _isLoading = false;
         });
       }

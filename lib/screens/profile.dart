@@ -32,7 +32,7 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   UserDto? _user;
   int? _currentLevel; // 이번 단계에서는 UI에 노출하지 않음
-  int? _progressPercentage; // 이번 단계에서는 UI에 노출하지 않음
+  double? _progressPercentage; // 이번 단계에서는 UI에 노출하지 않음
   bool _isRefreshing = false;
 
   @override
@@ -65,11 +65,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (!mounted) return;
 
       setState(() {
-        _user = profile.user;
+        _user = profile.userDto;
         _currentLevel = profile.currentLevel;
         _progressPercentage = profile.progressPercentage;
       });
-      widget.onUserUpdated?.call(profile.user);
+      widget.onUserUpdated?.call(profile.userDto);
     } catch (e) {
       // 프로필 화면은 "자연스럽게 갱신"이 목표라, 실패 시에도 UI는 기존 메모리 값으로 유지
     } finally {
@@ -253,7 +253,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       const SizedBox(width: 10),
                       Expanded(
                         child: _ProgressBar(
-                          progressPercentage: _progressPercentage ?? 0,
+                          progressPercentage: _progressPercentage ?? 0.0,
                         ),
                       ),
                     ],
@@ -425,7 +425,7 @@ class _ProfileStatDivider extends StatelessWidget {
 }
 
 class _ProgressBar extends StatelessWidget {
-  final int progressPercentage;
+  final double progressPercentage;
 
   const _ProgressBar({required this.progressPercentage});
 

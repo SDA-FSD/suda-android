@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'ending.dart';
-import 'failed.dart';
-import 'overview.dart';
 import '../../widgets/roleplay_scaffold.dart';
+import '../../routes/roleplay_router.dart';
 
 /// Roleplay Playing Screen (Full Screen)
 /// 
@@ -17,22 +15,12 @@ class RoleplayPlayingScreen extends StatelessWidget {
 
   void _navigateToEnding(BuildContext context) {
     // playing screen 삭제하고 ending으로 전환
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const RoleplayEndingScreen(),
-      ),
-    );
+    RoleplayRouter.replaceWithEnding(context);
   }
 
   void _navigateToFailed(BuildContext context) {
     // playing screen 삭제하고 failed로 전환
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const RoleplayFailedScreen(),
-      ),
-    );
+    RoleplayRouter.replaceWithFailed(context);
   }
 
   Future<bool> _handleBackButton(BuildContext context) async {
@@ -58,9 +46,7 @@ class RoleplayPlayingScreen extends StatelessWidget {
     if (shouldPop == true && context.mounted) {
       // playing screen 삭제하고 overview로 돌아감
       // overview는 Sub Screen이므로 Navigator.popUntil으로 overview까지 pop
-      Navigator.of(context).popUntil((route) {
-        return route.isFirst || route.settings.name == RoleplayOverviewScreen.routeName;
-      });
+      RoleplayRouter.popToOverview(context);
     }
 
     return false; // PopScope가 자동으로 pop하지 않도록

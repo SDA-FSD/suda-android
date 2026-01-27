@@ -10,7 +10,9 @@ import '../services/token_storage.dart';
 import '../services/suda_api_client.dart';
 import '../config/app_config.dart';
 import '../utils/sub_screen_route.dart';
+import '../routes/roleplay_router.dart';
 import '../utils/language_util.dart';
+import '../utils/suda_json_util.dart';
 import '../widgets/app_scaffold.dart';
 import 'roleplay/overview.dart';
 import 'alarm_message.dart';
@@ -205,16 +207,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _navigateToRoleplayOverview(int roleplayId) {
-    Navigator.push(
-      context,
-      SubScreenRoute(
-        page: RoleplayOverviewScreen(roleplayId: roleplayId),
-        settings: RouteSettings(
-          name: RoleplayOverviewScreen.routeName,
-          arguments: roleplayId,
-        ),
-      ),
-    );
+    RoleplayRouter.pushOverview(context, roleplayId);
   }
 
   @override
@@ -544,28 +537,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   /// 언어 설정에 맞는 오버레이 텍스트 반환
   String _getOverlayText(MainHomeBannerDto banner) {
-    final langCode = LanguageUtil.getCurrentLanguageCode();
-    
-    // 1. 디바이스 언어 코드와 일치하는 텍스트 찾기
-    for (final text in banner.overlayText) {
-      if (text.key == langCode) {
-        return text.value;
-      }
-    }
-    
-    // 2. 못 찾으면 'en' 찾기
-    for (final text in banner.overlayText) {
-      if (text.key == 'en') {
-        return text.value;
-      }
-    }
-    
-    // 3. 그것도 없으면 첫 번째 텍스트 반환
-    if (banner.overlayText.isNotEmpty) {
-      return banner.overlayText.first.value;
-    }
-    
-    return '';
+    return SudaJsonUtil.localizedText(banner.overlayText);
   }
 }
 
@@ -585,18 +557,7 @@ class RoleplayThumbnail extends StatelessWidget {
   });
 
   String _getTitle() {
-    final langCode = LanguageUtil.getCurrentLanguageCode();
-    
-    // 1. 현재 언어
-    for (final t in item.title) {
-      if (t.key == langCode) return t.value;
-    }
-    // 2. en
-    for (final t in item.title) {
-      if (t.key == 'en') return t.value;
-    }
-    // 3. 미노출
-    return '';
+    return SudaJsonUtil.localizedText(item.title);
   }
 
   bool _shouldMarquee({
@@ -808,12 +769,17 @@ class _CategoryRoleplayRowState extends State<CategoryRoleplayRow> {
     }
   }
 
+  String _getCategoryTitle() {
+    return SudaJsonUtil.localizedText(widget.group.roleplayCategoryDto.name);
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final thumbWidth = screenWidth * 0.3;
     // 여유롭게 1.6배 비율 적용
     final rowHeight = thumbWidth * 1.6; 
+    final categoryTitle = _getCategoryTitle();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -821,7 +787,7 @@ class _CategoryRoleplayRowState extends State<CategoryRoleplayRow> {
         Padding(
           padding: const EdgeInsets.only(left: 24, right: 24, bottom: 8), // 상단 패딩 제거 (SizedBox로 제어)
           child: Text(
-            widget.group.roleplayCategoryDto.name,
+            categoryTitle,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: Colors.white),
           ),
         ),
