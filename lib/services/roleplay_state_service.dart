@@ -10,10 +10,14 @@ class RoleplayStateService {
   RoleplayOverviewDto? _overview;
   int? _roleplayId;
   int? _roleId;
+  String? _sessionId;
+  String? _isUserTurnYn;
 
   RoleplayOverviewDto? get overview => _overview;
   int? get roleplayId => _roleplayId;
   int? get roleId => _roleId;
+  String? get sessionId => _sessionId;
+  String? get isUserTurnYn => _isUserTurnYn;
 
   void setOverview({
     required int roleplayId,
@@ -27,9 +31,19 @@ class RoleplayStateService {
     _roleId = roleId;
   }
 
+  void setSessionId(String sessionId) {
+    _sessionId = sessionId;
+  }
+
+  void setIsUserTurnYn(String isUserTurnYn) {
+    _isUserTurnYn = isUserTurnYn;
+  }
+
   void clear() {
     _roleplayId = null;
     _overview = null;
     _roleId = null;
+    _sessionId = null;
+    _isUserTurnYn = null;
   }
 }

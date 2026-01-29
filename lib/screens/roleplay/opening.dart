@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../widgets/roleplay_scaffold.dart';
 import '../../services/roleplay_state_service.dart';
+import '../../services/suda_api_client.dart';
+import '../../services/token_storage.dart';
 import '../../utils/app_toast.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../l10n/app_localizations.dart';
@@ -25,9 +27,43 @@ class RoleplayOpeningScreen extends StatelessWidget {
     final status = await Permission.microphone.request();
 
     if (status.isGranted) {
-      // 권한 허용 시 playing으로 전환
       if (!context.mounted) return;
-      RoleplayRouter.replaceWithPlaying(context);
+      final accessToken = await TokenStorage.loadAccessToken();
+      if (!context.mounted) return;
+      if (accessToken == null) {
+        AppToast.show(context, 'Authentication required.');
+        return;
+      }
+
+      final roleplayId = RoleplayStateService.instance.roleplayId;
+      final roleId = RoleplayStateService.instance.roleId;
+      if (roleplayId == null || roleId == null) {
+        AppToast.show(context, 'Cannot start roleplay');
+        return;
+      }
+
+      try {
+        final session = await SudaApiClient.createRoleplaySession(
+          accessToken: accessToken,
+          roleplayId: roleplayId,
+          roleId: roleId,
+        );
+        if (!context.mounted) return;
+        final sessionId = session.sessionId;
+        if (sessionId == null || sessionId.isEmpty) {
+          AppToast.show(context, 'Cannot start roleplay');
+          return;
+        }
+        RoleplayStateService.instance.setSessionId(sessionId);
+        RoleplayRouter.replaceWithPlaying(context);
+      } catch (e) {
+        if (!context.mounted) return;
+        if (e.toString().contains('HTTP 500')) {
+          AppToast.show(context, 'Cannot start roleplay');
+          return;
+        }
+        AppToast.show(context, 'Cannot start roleplay');
+      }
     } else {
       // 권한 거부 시 안내
       if (!context.mounted) return;

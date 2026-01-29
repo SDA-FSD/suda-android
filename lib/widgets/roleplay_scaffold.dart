@@ -10,6 +10,9 @@ class RoleplayScaffold extends StatelessWidget {
   final VoidCallback? onClose;
   final String? title;    // 헤더 중앙 타이틀 (English)
   final String? duration; // 헤더 중앙 듀레이션 (MM:ss)
+  final Color? durationColor;
+  final Widget? headerExtra;
+  final double headerTopSpacing;
 
   const RoleplayScaffold({
     super.key,
@@ -19,6 +22,9 @@ class RoleplayScaffold extends StatelessWidget {
     this.onClose,
     this.title,
     this.duration,
+    this.durationColor,
+    this.headerExtra,
+    this.headerTopSpacing = 70,
   });
 
   @override
@@ -31,10 +37,10 @@ class RoleplayScaffold extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            // 1. 본문 영역 (헤더 공간 70 확보, 좌우 24 마진)
+            // 1. 본문 영역 (헤더 공간 확보, 좌우 24 마진)
             Column(
               children: [
-                const SizedBox(height: 70),
+                SizedBox(height: headerTopSpacing),
                 Expanded(
                   child: LayoutBuilder(
                     builder: (context, constraints) {
@@ -73,25 +79,29 @@ class RoleplayScaffold extends StatelessWidget {
             // 4. 헤더 중앙 타이틀 및 듀레이션
             Positioned(
               top: 16,
-              left: 56,
-              right: 56,
+              left: 24,
+              right: 24,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (title != null)
-                    Text(
-                      title!,
-                      style: theme.headlineSmall?.copyWith(color: Colors.white),
-                      textAlign: TextAlign.center,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Text(
+                        title!,
+                        style: theme.headlineSmall?.copyWith(color: Colors.white),
+                        textAlign: TextAlign.center,
+                      ),
                     ),
                   if (duration != null)
                     Text(
                       duration!,
-                      style: theme.bodySmall?.copyWith(color: Colors.white),
+                      style: theme.bodySmall?.copyWith(
+                        color: durationColor ?? Colors.white,
+                      ),
                       textAlign: TextAlign.center,
                     ),
+                  if (headerExtra != null) headerExtra!,
                 ],
               ),
             ),

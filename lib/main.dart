@@ -72,14 +72,18 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    debugPrint('[DEBUG] lifecycle: $state');
     if (state == AppLifecycleState.resumed) {
       if (_accessToken != null) {
+        debugPrint('[DEBUG] lifecycle: resumed -> refresh start');
         TokenRefreshService.instance.start();
+        debugPrint('[DEBUG] lifecycle: resumed -> onAppResumed');
         TokenRefreshService.instance.onAppResumed();
       }
     } else if (state == AppLifecycleState.inactive ||
         state == AppLifecycleState.paused ||
         state == AppLifecycleState.detached) {
+      debugPrint('[DEBUG] lifecycle: stop refresh');
       TokenRefreshService.instance.stop();
     }
   }

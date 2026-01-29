@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import '../models/auth_models.dart';
 import '../models/home_models.dart';
 import '../models/pagination.dart';
@@ -44,6 +46,84 @@ class SudaApiClient {
     return RoleplayApi.getRoleplayOverview(
       accessToken: accessToken,
       roleplayId: roleplayId,
+    );
+  }
+
+  static Future<RoleplaySessionDto> createRoleplaySession({
+    required String accessToken,
+    required int roleplayId,
+    required int roleId,
+  }) {
+    return RoleplayApi.createRoleplaySession(
+      accessToken: accessToken,
+      roleplayId: roleplayId,
+      roleId: roleId,
+    );
+  }
+
+  static Future<RoleplayUserMessageResponseDto> sendRoleplayUserMessageText({
+    required String accessToken,
+    required String rpSessionId,
+    required String text,
+  }) {
+    return RoleplayApi.sendUserMessageText(
+      accessToken: accessToken,
+      rpSessionId: rpSessionId,
+      text: text,
+    );
+  }
+
+  static Future<RoleplayUserMessageResponseDto> sendRoleplayUserMessageAudio({
+    required String accessToken,
+    required String rpSessionId,
+    required Uint8List audioData,
+  }) {
+    return RoleplayApi.sendUserMessageAudio(
+      accessToken: accessToken,
+      rpSessionId: rpSessionId,
+      audioData: audioData,
+    );
+  }
+
+  static Future<RoleplayAiMessageDto> getRoleplayAiMessage({
+    required String accessToken,
+    required String rpSessionId,
+  }) {
+    return RoleplayApi.getAiMessage(
+      accessToken: accessToken,
+      rpSessionId: rpSessionId,
+    );
+  }
+
+  static Future<RoleplayNarrationDto> getRoleplayNarration({
+    required String accessToken,
+    required String rpSessionId,
+  }) {
+    return RoleplayApi.getNarration(
+      accessToken: accessToken,
+      rpSessionId: rpSessionId,
+    );
+  }
+
+  static Future<String> getRoleplayHint({
+    required String accessToken,
+    required String rpSessionId,
+  }) {
+    return RoleplayApi.getHint(
+      accessToken: accessToken,
+      rpSessionId: rpSessionId,
+    );
+  }
+
+  static Future<String> getRoleplayTranslation({
+    required String accessToken,
+    required String rpSessionId,
+    required int index,
+  }) {
+    return RoleplayApi.getTranslation(
+      accessToken: accessToken,
+      rpSessionId: rpSessionId,
+      index: index,
     );
   }
 

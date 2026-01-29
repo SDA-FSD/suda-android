@@ -194,7 +194,14 @@ class _RoleplayOverviewScreenState extends State<RoleplayOverviewScreen> {
             AppToast.show(context, message);
           } else {
             // 활성화된 경우 roleId 저장 후 오프닝으로 이동
+            final overview = RoleplayStateService.instance.overview;
+            final starterKey = overview?.roleplay?.starter?.key;
+            final starterRoleId = int.tryParse(starterKey ?? '');
+            final isUserStarter =
+                starterRoleId != null && starterRoleId == role.id;
             RoleplayStateService.instance.setSelectedRole(role.id);
+            RoleplayStateService.instance
+                .setIsUserTurnYn(isUserStarter ? 'Y' : 'N');
             _navigateToOpening(context);
           }
         },

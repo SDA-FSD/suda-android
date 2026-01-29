@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'common_models.dart';
 
 class RoleplayOverviewDto {
@@ -49,6 +52,139 @@ class RoleplayOverviewDto {
     }
     return result;
   }
+}
+
+class RoleplaySessionRequestDto {
+  final int roleplayId;
+  final int roleId;
+
+  const RoleplaySessionRequestDto({
+    required this.roleplayId,
+    required this.roleId,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'roleplayId': roleplayId,
+      'roleId': roleId,
+    };
+  }
+}
+
+class RoleplaySessionDto {
+  final String? sessionId;
+  final String? aiSoundCdnYn;
+  final String? aiSoundCdnPath;
+  final Uint8List? aiSoundFile;
+
+  const RoleplaySessionDto({
+    this.sessionId,
+    this.aiSoundCdnYn,
+    this.aiSoundCdnPath,
+    this.aiSoundFile,
+  });
+
+  factory RoleplaySessionDto.fromJson(Map<String, dynamic> json) {
+    return RoleplaySessionDto(
+      sessionId: json['sessionId'] as String?,
+      aiSoundCdnYn: json['aiSoundCdnYn'] as String?,
+      aiSoundCdnPath: json['aiSoundCdnPath'] as String?,
+      aiSoundFile: _parseBytes(json['aiSoundFile']),
+    );
+  }
+}
+
+class RoleplayUserMessageRequestDto {
+  final String text;
+
+  const RoleplayUserMessageRequestDto({
+    required this.text,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'text': text,
+    };
+  }
+}
+
+class RoleplayUserMessageResponseDto {
+  final String? text;
+  final String? missionCompleteYn;
+
+  const RoleplayUserMessageResponseDto({
+    this.text,
+    this.missionCompleteYn,
+  });
+
+  factory RoleplayUserMessageResponseDto.fromJson(Map<String, dynamic> json) {
+    return RoleplayUserMessageResponseDto(
+      text: json['text'] as String?,
+      missionCompleteYn: json['missionCompleteYn'] as String?,
+    );
+  }
+}
+
+class RoleplayAiMessageDto {
+  final String? text;
+  final String? cdnYn;
+  final String? cdnPath;
+  final Uint8List? sound;
+
+  const RoleplayAiMessageDto({
+    this.text,
+    this.cdnYn,
+    this.cdnPath,
+    this.sound,
+  });
+
+  factory RoleplayAiMessageDto.fromJson(Map<String, dynamic> json) {
+    return RoleplayAiMessageDto(
+      text: json['text'] as String?,
+      cdnYn: json['cdnYn'] as String?,
+      cdnPath: json['cdnPath'] as String?,
+      sound: _parseBytes(json['sound']),
+    );
+  }
+}
+
+class RoleplayNarrationDto {
+  final String? text;
+  final String? missionActiveYn;
+  final int? currentStep;
+  final int? resultId;
+
+  const RoleplayNarrationDto({
+    this.text,
+    this.missionActiveYn,
+    this.currentStep,
+    this.resultId,
+  });
+
+  factory RoleplayNarrationDto.fromJson(Map<String, dynamic> json) {
+    return RoleplayNarrationDto(
+      text: json['text'] as String?,
+      missionActiveYn: json['missionActiveYn'] as String?,
+      currentStep: json['currentStep'] as int?,
+      resultId: json['resultId'] as int?,
+    );
+  }
+}
+
+Uint8List? _parseBytes(dynamic value) {
+  if (value == null) {
+    return null;
+  }
+  if (value is List<int>) {
+    return Uint8List.fromList(value);
+  }
+  if (value is List<dynamic>) {
+    return Uint8List.fromList(value.map((item) => item as int).toList());
+  }
+  if (value is String && value.isNotEmpty) {
+    return Uint8List.fromList(base64Decode(value));
+  }
+  return null;
 }
 
 class RoleplayDto {
@@ -206,12 +342,14 @@ class RoleplayEndingDto {
 class RoleplayMissionDto {
   final int id;
   final int? roleId;
+  final int? scenarioFlowIndex;
   final List<SudaJson>? mission;
   final int? score;
 
   const RoleplayMissionDto({
     required this.id,
     this.roleId,
+    this.scenarioFlowIndex,
     this.mission,
     this.score,
   });
@@ -220,6 +358,7 @@ class RoleplayMissionDto {
     return RoleplayMissionDto(
       id: json['id'] as int? ?? 0,
       roleId: json['roleId'] as int?,
+      scenarioFlowIndex: json['scenarioFlowIndex'] as int?,
       mission: json['mission'] == null
           ? null
           : (json['mission'] as List<dynamic>)
