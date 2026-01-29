@@ -8,6 +8,7 @@ import 'package:marquee/marquee.dart';
 import '../services/auth_service.dart';
 import '../services/token_storage.dart';
 import '../services/suda_api_client.dart';
+import '../services/roleplay_state_service.dart';
 import '../config/app_config.dart';
 import '../utils/sub_screen_route.dart';
 import '../routes/roleplay_router.dart';
@@ -207,6 +208,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _navigateToRoleplayOverview(int roleplayId) {
+    RoleplayStateService.instance.setUser(widget.user);
     RoleplayRouter.pushOverview(context, roleplayId);
   }
 

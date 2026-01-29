@@ -1,9 +1,12 @@
 import 'dart:async';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../widgets/roleplay_scaffold.dart';
 import '../../routes/roleplay_router.dart';
 import '../../services/roleplay_state_service.dart';
+import '../../services/suda_api_client.dart';
+import '../../services/token_storage.dart';
 import '../../utils/suda_json_util.dart';
 
 /// Roleplay Playing Screen (Full Screen)
@@ -39,14 +42,20 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
   final TextEditingController _typingController = TextEditingController();
   int _typingToken = 0;
   bool _isTypingEnabled = true;
+  bool _isSpeedPanelVisible = false;
+  int _speedIndex = 0;
+  int _committedSpeedIndex = 0;
   late final AnimationController _loadingRotationController;
   late final AnimationController _arrowPulseController;
+  static const double _headerTopSpacing = 108;
+  static const List<int> _speedRateSteps = [150, 120, 100, 70];
 
   @override
   void initState() {
     super.initState();
     _initializeCountdown();
     _initializeProgressState();
+    _initializeSpeedRate();
     _loadingRotationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 900),
@@ -109,6 +118,78 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
       if (index != null) {
         _missionStatuses[index] = _MissionStatus.ready;
       }
+    }
+  }
+
+  void _initializeSpeedRate() {
+    final metaInfo = RoleplayStateService.instance.user?.metaInfo;
+    int initialRate = 100;
+    if (metaInfo != null) {
+      for (final item in metaInfo) {
+        if (item.key == 'RP_SPEED_RATE') {
+          final parsed = int.tryParse(item.value);
+          if (parsed != null) {
+            initialRate = parsed;
+          }
+          break;
+        }
+      }
+    }
+    _speedIndex = _speedRateIndexForValue(initialRate);
+    _committedSpeedIndex = _speedIndex;
+  }
+
+  int _speedRateIndexForValue(int value) {
+    final index = _speedRateSteps.indexOf(value);
+    if (index >= 0) return index;
+    final defaultIndex = _speedRateSteps.indexOf(100);
+    return defaultIndex >= 0 ? defaultIndex : 0;
+  }
+
+  int _speedRateValueForIndex(int index) {
+    final clamped = index.clamp(0, _speedRateSteps.length - 1);
+    return _speedRateSteps[clamped];
+  }
+
+  void _toggleSpeedPanel() {
+    setState(() {
+      _isSpeedPanelVisible = !_isSpeedPanelVisible;
+    });
+  }
+
+  void _setSpeedIndexFromOffset({
+    required double dy,
+    required double railHeight,
+    required bool commit,
+  }) {
+    final stepGap = railHeight / (_speedRateSteps.length - 1);
+    final nextIndex = (dy / stepGap).round().clamp(0, _speedRateSteps.length - 1);
+    if (_speedIndex != nextIndex) {
+      setState(() {
+        _speedIndex = nextIndex;
+      });
+    }
+    if (commit) {
+      _commitSpeedIndex();
+    }
+  }
+
+  void _commitSpeedIndex() {
+    if (_committedSpeedIndex == _speedIndex) return;
+    _committedSpeedIndex = _speedIndex;
+    _updateSpeedRate(_speedRateValueForIndex(_speedIndex));
+  }
+
+  Future<void> _updateSpeedRate(int speedRate) async {
+    final accessToken = await TokenStorage.loadAccessToken();
+    if (accessToken == null) return;
+    try {
+      await SudaApiClient.updateRoleplaySpeedRate(
+        accessToken: accessToken,
+        speedRate: speedRate.toString(),
+      );
+    } catch (_) {
+      // ignore errors per requirement
     }
   }
 
@@ -436,6 +517,103 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     );
   }
 
+  Widget _buildSpeedPanel(BuildContext context) {
+    final topInset = MediaQuery.of(context).padding.top;
+    return AnimatedPositioned(
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeOut,
+      top: topInset + 56,
+      right: _isSpeedPanelVisible ? 24 : -62,
+      width: 62,
+      height: 250,
+      child: IgnorePointer(
+        ignoring: !_isSpeedPanelVisible,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(31),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+            child: Container(
+              color: const Color(0x598C8C8C),
+              child: Column(
+                children: [
+                  const SizedBox(height: 24),
+                  Text(
+                    '1.5x',
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodySmall
+                        ?.copyWith(color: Colors.white),
+                  ),
+                  const SizedBox(height: 2),
+                  Expanded(
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        const handleRadius = 12.0;
+                        final railHeight = constraints.maxHeight - (handleRadius * 2);
+                        final stepGap =
+                            railHeight / (_speedRateSteps.length - 1);
+                        final handleCenterY =
+                            handleRadius + (stepGap * _speedIndex);
+                        final handleTop = handleCenterY - handleRadius;
+                        return GestureDetector(
+                          behavior: HitTestBehavior.translucent,
+                          onTapDown: (details) => _setSpeedIndexFromOffset(
+                            dy: details.localPosition.dy - handleRadius,
+                            railHeight: railHeight,
+                            commit: true,
+                          ),
+                          onVerticalDragUpdate: (details) =>
+                              _setSpeedIndexFromOffset(
+                            dy: details.localPosition.dy - handleRadius,
+                            railHeight: railHeight,
+                            commit: false,
+                          ),
+                          onVerticalDragEnd: (_) => _commitSpeedIndex(),
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              Center(
+                                child: Container(
+                                  width: 4,
+                                height: railHeight,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              Positioned(
+                                top: handleTop,
+                                child: Container(
+                                  width: 24,
+                                  height: 24,
+                                  decoration: const BoxDecoration(
+                                    color: Colors.white,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                const SizedBox(height: 2),
+                Text(
+                    '0.7x',
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodySmall
+                        ?.copyWith(color: Colors.white),
+                  ),
+                const SizedBox(height: 24),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildProgressHeader() {
     return SizedBox(
       height: 18,
@@ -584,6 +762,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
 
     final durationFormatted = _formatRemaining();
     final durationColor = _remainingSeconds <= 10 ? Colors.red : Colors.white;
+    final topInset = MediaQuery.of(context).padding.top;
 
     return PopScope(
       canPop: false,
@@ -592,297 +771,321 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
           await _handleBackButton(context);
         }
       },
-      child: RoleplayScaffold(
-        showCloseButton: widget.showCloseButton,
-        onClose: () => _handleBackButton(context),
-        title: titleEn,
-        duration: durationFormatted,
-        durationColor: durationColor,
-        headerExtra: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 14),
-            _buildProgressHeader(),
-            const SizedBox(height: 14),
-          ],
-        ),
-        headerTopSpacing: 108,
-        body: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 8),
-            Text(
-              'Temp Controls',
-              style: Theme.of(context)
-                  .textTheme
-                  .headlineSmall
-                  ?.copyWith(color: Colors.white),
-            ),
-            const SizedBox(height: 16),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Set Progress Step',
-                style: Theme.of(context)
-                    .textTheme
-                    .bodySmall
-                    ?.copyWith(color: Colors.white),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
+      child: Stack(
+        children: [
+          RoleplayScaffold(
+            showCloseButton: widget.showCloseButton,
+            onClose: () => _handleBackButton(context),
+            title: titleEn,
+            duration: durationFormatted,
+            durationColor: durationColor,
+            headerExtra: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                for (int i = 0; i <= _maxStepIndex; i++)
-                  TextButton(
-                    onPressed: () => _setProgressToStep(i),
-                    child: Text('Go $i'),
-                  ),
+                const SizedBox(height: 14),
+                _buildProgressHeader(),
+                const SizedBox(height: 14),
               ],
             ),
-            const SizedBox(height: 16),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Set Mission Result',
-                style: Theme.of(context)
-                    .textTheme
-                    .bodySmall
-                    ?.copyWith(color: Colors.white),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Column(
-              children: _missionStatuses.keys.map((index) {
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          'Mission $index',
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall
-                              ?.copyWith(color: Colors.white),
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: () => _setMissionSuccess(index),
-                        child: const Text('Success'),
-                      ),
-                      TextButton(
-                        onPressed: () => _setMissionFailed(index),
-                        child: const Text('Failed'),
-                      ),
-                    ],
-                  ),
-                );
-              }).toList(),
-            ),
-          ],
-        ),
-        footer: SafeArea(
-          top: false,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(
-                height: 24,
-                child: Center(
+            headerTopSpacing: _headerTopSpacing,
+            body: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 8),
+                Text(
+                  'Temp Controls',
+                  style: Theme.of(context)
+                      .textTheme
+                      .headlineSmall
+                      ?.copyWith(color: Colors.white),
+                ),
+                const SizedBox(height: 16),
+                Align(
+                  alignment: Alignment.centerLeft,
                   child: Text(
-                    'service message area',
+                    'Set Progress Step',
                     style: Theme.of(context)
                         .textTheme
-                        .bodyMedium
+                        .bodySmall
                         ?.copyWith(color: Colors.white),
                   ),
                 ),
-              ),
-              if (_inputMode == _InputMode.recording)
-                SizedBox(
-                  height: 120,
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      final areaWidth = constraints.maxWidth;
-                      final centerX = areaWidth / 2;
-                      final cancelStyle = _cancelTextStyle(context);
-                      final cancelWidth =
-                          _measureTextWidth('Cancel', cancelStyle);
-                      final cancelRight = cancelWidth;
-                      final cancelCenter = cancelWidth / 2;
-                      final maxLeftOffset = (_micPressedSize / 2) - centerX;
-                      final effectiveOffset = _micState == _MicButtonState.pressed
-                          ? _dragOffsetX
-                          : 0.0;
-                      final showArrows = _micState == _MicButtonState.pressed;
-                      final shouldShowCancel = _micState == _MicButtonState.pressed;
-
-                      return Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: AnimatedOpacity(
-                              duration: const Duration(milliseconds: 150),
-                              opacity: shouldShowCancel ? 1 : 0,
-                              child: Text(
-                                'Cancel',
-                                style: cancelStyle,
-                              ),
-                            ),
-                          ),
-                          if (showArrows)
-                            _buildDragArrows(
-                              cancelRightX: cancelRight,
-                              areaHeight: 120,
-                              anchorLeftX: centerX - (_micPressedSize / 2),
-                            ),
-                          Center(
-                            child: Transform.translate(
-                              offset: Offset(effectiveOffset, 0),
-                              child: IgnorePointer(
-                                ignoring: !_isMicInteractive,
-                                child: GestureDetector(
-                                  onTapDown: _handleMicTapDown,
-                                  onTapUp: (_) => _handleMicTapUp(),
-                                  onTapCancel: _handleMicTapCancel,
-                                  onPanStart: _handleMicPanStart,
-                                  onPanUpdate: (details) => _handleMicPanUpdate(
-                                    deltaX: details.delta.dx,
-                                    maxLeftOffset: maxLeftOffset,
-                                    cancelRightX: cancelRight,
-                                    cancelCenterX: cancelCenter,
-                                    centerX: centerX,
-                                  ),
-                                  onPanEnd: (_) => _handleMicTapUp(),
-                                  child: _buildMicButton(),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                )
-              else
-                Column(
-                  mainAxisSize: MainAxisSize.min,
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
                   children: [
-                    const SizedBox(height: 10),
-                    SizedBox(
-                      height: 44,
+                    for (int i = 0; i <= _maxStepIndex; i++)
+                      TextButton(
+                        onPressed: () => _setProgressToStep(i),
+                        child: Text('Go $i'),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Set Mission Result',
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodySmall
+                        ?.copyWith(color: Colors.white),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Column(
+                  children: _missionStatuses.keys.map((index) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
                       child: Row(
                         children: [
                           Expanded(
-                            child: Container(
-                              height: 44,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF353535),
-                                borderRadius: BorderRadius.circular(22),
+                            child: Text(
+                              'Mission $index',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(color: Colors.white),
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () => _setMissionSuccess(index),
+                            child: const Text('Success'),
+                          ),
+                          TextButton(
+                            onPressed: () => _setMissionFailed(index),
+                            child: const Text('Failed'),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
+            ),
+            footer: SafeArea(
+              top: false,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    height: 24,
+                    child: Center(
+                      child: Text(
+                        'service message area',
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyMedium
+                            ?.copyWith(color: Colors.white),
+                      ),
+                    ),
+                  ),
+                  if (_inputMode == _InputMode.recording)
+                    SizedBox(
+                      height: 120,
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          final areaWidth = constraints.maxWidth;
+                          final centerX = areaWidth / 2;
+                          final cancelStyle = _cancelTextStyle(context);
+                          final cancelWidth =
+                              _measureTextWidth('Cancel', cancelStyle);
+                          final cancelRight = cancelWidth;
+                          final cancelCenter = cancelWidth / 2;
+                          final maxLeftOffset = (_micPressedSize / 2) - centerX;
+                          final effectiveOffset = _micState == _MicButtonState.pressed
+                              ? _dragOffsetX
+                              : 0.0;
+                          final showArrows = _micState == _MicButtonState.pressed;
+                          final shouldShowCancel = _micState == _MicButtonState.pressed;
+
+                          return Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: AnimatedOpacity(
+                                  duration: const Duration(milliseconds: 150),
+                                  opacity: shouldShowCancel ? 1 : 0,
+                                  child: Text(
+                                    'Cancel',
+                                    style: cancelStyle,
+                                  ),
+                                ),
                               ),
-                              alignment: Alignment.centerLeft,
-                              child: TextField(
-                                controller: _typingController,
-                                enabled: _isTypingEnabled,
-                                textInputAction: TextInputAction.send,
-                                onSubmitted: (_) => _handleSend(),
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyMedium
-                                    ?.copyWith(color: Colors.white),
-                                decoration: InputDecoration(
-                                  isDense: true,
-                                  border: InputBorder.none,
-                                  hintText: _isTypingEnabled
-                                      ? 'Type your message ...'
-                                      : 'Wait for your turn ...',
-                                  hintStyle: Theme.of(context)
-                                      .textTheme
-                                      .bodyMedium
-                                      ?.copyWith(color: const Color(0xFF9B9B9B)),
-                                  contentPadding:
-                                      const EdgeInsets.symmetric(horizontal: 16),
+                              if (showArrows)
+                                _buildDragArrows(
+                                  cancelRightX: cancelRight,
+                                  areaHeight: 120,
+                                  anchorLeftX: centerX - (_micPressedSize / 2),
+                                ),
+                              Center(
+                                child: Transform.translate(
+                                  offset: Offset(effectiveOffset, 0),
+                                  child: IgnorePointer(
+                                    ignoring: !_isMicInteractive,
+                                    child: GestureDetector(
+                                      onTapDown: _handleMicTapDown,
+                                      onTapUp: (_) => _handleMicTapUp(),
+                                      onTapCancel: _handleMicTapCancel,
+                                      onPanStart: _handleMicPanStart,
+                                      onPanUpdate: (details) => _handleMicPanUpdate(
+                                        deltaX: details.delta.dx,
+                                        maxLeftOffset: maxLeftOffset,
+                                        cancelRightX: cancelRight,
+                                        cancelCenterX: cancelCenter,
+                                        centerX: centerX,
+                                      ),
+                                      onPanEnd: (_) => _handleMicTapUp(),
+                                      child: _buildMicButton(),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                    )
+                  else
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const SizedBox(height: 10),
+                        SizedBox(
+                          height: 44,
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  height: 44,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF353535),
+                                    borderRadius: BorderRadius.circular(22),
+                                  ),
+                                  alignment: Alignment.centerLeft,
+                                  child: TextField(
+                                    controller: _typingController,
+                                    enabled: _isTypingEnabled,
+                                    textInputAction: TextInputAction.send,
+                                    onSubmitted: (_) => _handleSend(),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(color: Colors.white),
+                                    decoration: InputDecoration(
+                                      isDense: true,
+                                      border: InputBorder.none,
+                                      hintText: _isTypingEnabled
+                                          ? 'Type your message ...'
+                                          : 'Wait for your turn ...',
+                                      hintStyle: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.copyWith(color: const Color(0xFF9B9B9B)),
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(horizontal: 16),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              GestureDetector(
+                                onTap: _isTypingEnabled ? _handleSend : null,
+                                child: Container(
+                                  width: 44,
+                                  height: 44,
+                                  decoration: const BoxDecoration(
+                                    color: Color(0xFF353535),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Center(
+                                    child: Image.asset(
+                                      'assets/images/icons/send.png',
+                                      width: 24,
+                                      height: 24,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                      ],
+                    ),
+                  SizedBox(
+                    height: 40,
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 16, right: 16),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _inputMode = _inputMode == _InputMode.typing
+                                    ? _InputMode.recording
+                                    : _InputMode.typing;
+                              });
+                            },
+                            child: SizedBox(
+                              width: 40,
+                              height: 40,
+                              child: Center(
+                                child: Image.asset(
+                                  _inputMode == _InputMode.typing
+                                      ? 'assets/images/icons/mic.png'
+                                      : 'assets/images/icons/keyboard.png',
+                                  height: 30,
+                                  width: 30,
                                 ),
                               ),
                             ),
                           ),
-                          const SizedBox(width: 10),
-                          GestureDetector(
-                            onTap: _isTypingEnabled ? _handleSend : null,
-                            child: Container(
-                              width: 44,
-                              height: 44,
-                              decoration: const BoxDecoration(
-                                color: Color(0xFF353535),
-                                shape: BoxShape.circle,
-                              ),
-                              child: Center(
-                                child: Image.asset(
-                                  'assets/images/icons/send.png',
-                                  width: 24,
-                                  height: 24,
-                                  color: Colors.white,
-                                ),
+                          const Spacer(),
+                          SizedBox(
+                            width: 40,
+                            height: 40,
+                            child: Center(
+                              child: Image.asset(
+                                'assets/images/icons/lightball.png',
+                                height: 24,
+                                width: 24,
                               ),
                             ),
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(height: 10),
-                  ],
-                ),
-              SizedBox(
-                height: 40,
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 16, right: 16),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            _inputMode = _inputMode == _InputMode.typing
-                                ? _InputMode.recording
-                                : _InputMode.typing;
-                          });
-                        },
-                        child: SizedBox(
-                          width: 40,
-                          height: 40,
-                          child: Center(
-                            child: Image.asset(
-                              _inputMode == _InputMode.typing
-                                  ? 'assets/images/icons/mic.png'
-                                  : 'assets/images/icons/keyboard.png',
-                              height: 30,
-                              width: 30,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const Spacer(),
-                      SizedBox(
-                        width: 40,
-                        height: 40,
-                        child: Center(
-                          child: Image.asset(
-                            'assets/images/icons/lightball.png',
-                            height: 24,
-                            width: 24,
-                          ),
-                        ),
-                      ),
-                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (widget.showCloseButton)
+            Positioned(
+              top: topInset + 16,
+              right: 16,
+              child: GestureDetector(
+                onTap: _toggleSpeedPanel,
+                child: SizedBox(
+                  width: 40,
+                  height: 40,
+                  child: Center(
+                    child: Image.asset(
+                      'assets/images/icons/kebab.png',
+                      width: 24,
+                      height: 24,
+                    ),
                   ),
                 ),
               ),
-            ],
-          ),
-        ),
+            ),
+          if (widget.showCloseButton) _buildSpeedPanel(context),
+        ],
       ),
     );
   }

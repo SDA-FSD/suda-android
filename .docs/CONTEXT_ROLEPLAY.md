@@ -187,6 +187,20 @@
   - 녹음 상태 전환: `_setMicState(_MicButtonState next)` 및 `_handleMicTapDown/_handleMicTapUp`.
   - 타이핑 전송: `_handleSend()` (전송 시 입력 초기화 후 2초 비활성 → 활성).
 
+## 6-8. Playing 헤더 우측 속도 슬라이더 (임시)
+- 닫기(X) 버튼이 있는 경우 우측 상단에 kebab 아이콘(`icons/kebab.png`)을 배치한다.
+  - 아이콘 24x24, 터치 영역 40x40, top/right 16.
+- kebab 토글 시 우측에서 슬라이더 패널이 슬라이드 인/아웃 된다.
+  - 패널 크기: 56x230, 배경 `#8C8C8C` 50% 투명, 상/하단 반원형 radius.
+  - 패널 상단은 헤더 바로 아래(본문 상단 마진 기준)에 맞춘다.
+- 슬라이더 구성:
+  - 레일: 흰색 width 4, 상단 `1.5x`, 하단 `0.7x` (body-caption, 흰색).
+  - 핸들: 흰색 원 24x24.
+  - 4단 스텝 고정(상단→하단): 150 / 120 / 100 / 70.
+  - 사용자가 손을 떼면 가장 가까운 스텝으로 스냅.
+- 초기값: `userDto.metaInfo` 중 `RP_SPEED_RATE` 값을 사용하며, 실패 시 100.
+- 변경 즉시 API 호출: `PUT /v1/users/speed-rate?speedRate=...` (에러 무시).
+
 ## 6-5. 나레이션 resultId 기반 종료/분기 규칙
 - narration 응답에 `resultId`가 포함되면 **roleplay 중단**으로 처리한다.
 - `resultId == 0`: roleplay 진행 실패(결과지 없음). 안내 메시지 후 Failed 스크린으로 이동.
