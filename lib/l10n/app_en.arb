@@ -58,5 +58,6 @@
   "feedbackPlaceholder": "Please share your thoughts, suggestions, or any issues you've encountered...",
   "feedbackSend": "Send",
   "feedbackSuccess": "Thank you for your feedback.",
-  "microphonePermissionDenied": "Cannot start without microphone permission."
+  "microphonePermissionDenied": "Cannot start without microphone permission.",
+  "holdMicrophoneToSpeak": "Hold microphone to speak"
 }

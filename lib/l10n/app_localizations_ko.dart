@@ -119,4 +119,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get microphonePermissionDenied => '마이크 권한이 없어서 시작할 수 없습니다.';
+
+  @override
+  String get holdMicrophoneToSpeak => '마이크를 길게 누르고 말하세요';
 }

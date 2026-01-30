@@ -42,21 +42,9 @@ class RoleplayScaffold extends StatelessWidget {
               children: [
                 SizedBox(height: headerTopSpacing),
                 Expanded(
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      return SingleChildScrollView(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        padding: const EdgeInsets.symmetric(horizontal: 24),
-                        child: ConstrainedBox(
-                          constraints: BoxConstraints(
-                            minHeight: constraints.maxHeight,
-                          ),
-                          child: IntrinsicHeight(
-                            child: body,
-                          ),
-                        ),
-                      );
-                    },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: body,
                   ),
                 ),
                 // 2. 하단 가변 푸터 영역 (좌우 24 마진)

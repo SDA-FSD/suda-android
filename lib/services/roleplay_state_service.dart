@@ -11,6 +11,7 @@ class RoleplayStateService {
   int? _roleplayId;
   int? _roleId;
   String? _sessionId;
+  RoleplaySessionDto? _session;
   String? _isUserTurnYn;
   UserDto? _user;
 
@@ -18,6 +19,7 @@ class RoleplayStateService {
   int? get roleplayId => _roleplayId;
   int? get roleId => _roleId;
   String? get sessionId => _sessionId;
+  RoleplaySessionDto? get session => _session;
   String? get isUserTurnYn => _isUserTurnYn;
   UserDto? get user => _user;
 
@@ -37,6 +39,10 @@ class RoleplayStateService {
     _sessionId = sessionId;
   }
 
+  void setSession(RoleplaySessionDto session) {
+    _session = session;
+  }
+
   void setIsUserTurnYn(String isUserTurnYn) {
     _isUserTurnYn = isUserTurnYn;
   }
@@ -50,6 +56,7 @@ class RoleplayStateService {
     _overview = null;
     _roleId = null;
     _sessionId = null;
+    _session = null;
     _isUserTurnYn = null;
     _user = null;
   }

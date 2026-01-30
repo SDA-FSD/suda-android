@@ -30,42 +30,49 @@ class AppTheme {
           fontSize: 32,
           fontWeight: FontWeight.w700,
           letterSpacing: -0.4,
+          height: 1.2,
         ),
         // heading2: default font, fontsize 24, w600
         headlineMedium: TextStyle(
           fontSize: 24,
           fontWeight: FontWeight.w600,
           letterSpacing: -0.4,
+          height: 1.2,
         ),
         // heading3: default font, fontsize 20, w700
         headlineSmall: TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.w700,
           letterSpacing: -0.4,
+          height: 1.2,
         ),
         // body-default: default font, fontsize 18, w400
         bodyLarge: TextStyle(
           fontSize: 18,
           fontWeight: FontWeight.w400,
           letterSpacing: -0.4,
+          height: 1.2,
         ),
         // body-secondary: default font, fontsize 16, w400
         bodyMedium: TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w400,
           letterSpacing: -0.4,
+          height: 1.2,
         ),
         // body-caption: default font, fontsize 14, w400
         bodySmall: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w400,
           letterSpacing: -0.4,
+          height: 1.2,
         ),
         // body-tiny: default font, fontsize 12, w600
         labelSmall: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w600,
           letterSpacing: -0.4,
+          height: 1.2,
         ),
       ),
 

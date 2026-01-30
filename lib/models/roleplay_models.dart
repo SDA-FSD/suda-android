@@ -129,6 +129,7 @@ class RoleplayAiMessageDto {
   final String? text;
   final String? cdnYn;
   final String? cdnPath;
+  /// Byte[] 음원. CDN 미사용(cdnYn == 'N')이거나 미제공 시 null.
   final Uint8List? sound;
 
   const RoleplayAiMessageDto({
@@ -165,10 +166,17 @@ class RoleplayNarrationDto {
     return RoleplayNarrationDto(
       text: json['text'] as String?,
       missionActiveYn: json['missionActiveYn'] as String?,
-      currentStep: json['currentStep'] as int?,
-      resultId: json['resultId'] as int?,
+      currentStep: _optionalInt(json['currentStep']),
+      resultId: _optionalInt(json['resultId']),
     );
   }
+}
+
+int? _optionalInt(dynamic value) {
+  if (value == null) return null;
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  return int.tryParse(value.toString());
 }
 
 Uint8List? _parseBytes(dynamic value) {
@@ -307,34 +315,41 @@ class RoleplayRoleDto {
 
 class RoleplayEndingDto {
   final int id;
-  final int? roleId;
-  final List<SudaJson>? name;
-  final List<SudaJson>? description;
-  final String? endingType;
+  final int roleplayRoleId;
+  final List<SudaJson>? buttonText;
+  final List<SudaJson> title;
+  final List<SudaJson> content;
+  final String? imgPath;
 
   const RoleplayEndingDto({
     required this.id,
-    this.roleId,
-    this.name,
-    this.description,
-    this.endingType,
+    required this.roleplayRoleId,
+    this.buttonText,
+    required this.title,
+    required this.content,
+    this.imgPath,
   });
 
   factory RoleplayEndingDto.fromJson(Map<String, dynamic> json) {
     return RoleplayEndingDto(
-      id: json['id'] as int? ?? 0,
-      roleId: json['roleId'] as int?,
-      name: json['name'] == null
+      id: _optionalInt(json['id']) ?? 0,
+      roleplayRoleId: _optionalInt(json['roleplayRoleId']) ?? 0,
+      buttonText: json['buttonText'] == null
           ? null
-          : (json['name'] as List<dynamic>)
+          : (json['buttonText'] as List<dynamic>)
               .map((item) => SudaJson.fromJson(item as Map<String, dynamic>))
               .toList(),
-      description: json['description'] == null
-          ? null
-          : (json['description'] as List<dynamic>)
+      title: json['title'] == null
+          ? <SudaJson>[]
+          : (json['title'] as List<dynamic>)
               .map((item) => SudaJson.fromJson(item as Map<String, dynamic>))
               .toList(),
-      endingType: json['endingType'] as String?,
+      content: json['content'] == null
+          ? <SudaJson>[]
+          : (json['content'] as List<dynamic>)
+              .map((item) => SudaJson.fromJson(item as Map<String, dynamic>))
+              .toList(),
+      imgPath: json['imgPath'] as String?,
     );
   }
 }
@@ -344,27 +359,24 @@ class RoleplayMissionDto {
   final int? roleId;
   final int? scenarioFlowIndex;
   final List<SudaJson>? mission;
-  final int? score;
 
   const RoleplayMissionDto({
     required this.id,
     this.roleId,
     this.scenarioFlowIndex,
     this.mission,
-    this.score,
   });
 
   factory RoleplayMissionDto.fromJson(Map<String, dynamic> json) {
     return RoleplayMissionDto(
-      id: json['id'] as int? ?? 0,
-      roleId: json['roleId'] as int?,
-      scenarioFlowIndex: json['scenarioFlowIndex'] as int?,
+      id: _optionalInt(json['id']) ?? 0,
+      roleId: _optionalInt(json['roleId']),
+      scenarioFlowIndex: _optionalInt(json['scenarioFlowIndex']),
       mission: json['mission'] == null
           ? null
           : (json['mission'] as List<dynamic>)
               .map((item) => SudaJson.fromJson(item as Map<String, dynamic>))
               .toList(),
-      score: json['score'] as int?,
     );
   }
 }

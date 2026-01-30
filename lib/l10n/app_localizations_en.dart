@@ -124,4 +124,7 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get microphonePermissionDenied =>
       'Cannot start without microphone permission.';
+
+  @override
+  String get holdMicrophoneToSpeak => 'Hold microphone to speak';
 }

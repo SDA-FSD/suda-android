@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import '../../models/roleplay_models.dart';
@@ -289,18 +290,27 @@ class RoleplayApi {
       rethrow;
     }
 
-    if (response.statusCode == 401) {
+    final statusCode = response.statusCode;
+    debugPrint('[DEBUG] AI response HTTP statusCode=$statusCode');
+
+    if (statusCode == 401) {
       throw UnauthorizedException('Access token expired');
     }
 
-    if (response.statusCode >= 200 && response.statusCode < 300) {
+    if (statusCode == 202) {
+      throw Exception(
+        'GET /v1/roleplay-sessions/$rpSessionId/ai-message not ready: HTTP 202',
+      );
+    }
+
+    if (statusCode >= 200 && statusCode < 300) {
       final Map<String, dynamic> data =
           jsonDecode(response.body) as Map<String, dynamic>;
       return RoleplayAiMessageDto.fromJson(data);
     }
 
     throw Exception(
-      'GET /v1/roleplay-sessions/$rpSessionId/ai-message failed: HTTP ${response.statusCode} ${response.body}',
+      'GET /v1/roleplay-sessions/$rpSessionId/ai-message failed: HTTP $statusCode ${response.body}',
     );
   }
 
@@ -325,18 +335,26 @@ class RoleplayApi {
       rethrow;
     }
 
-    if (response.statusCode == 401) {
+    final statusCode = response.statusCode;
+
+    if (statusCode == 401) {
       throw UnauthorizedException('Access token expired');
     }
 
-    if (response.statusCode >= 200 && response.statusCode < 300) {
+    if (statusCode == 202) {
+      throw Exception(
+        'GET /v1/roleplay-sessions/$rpSessionId/narration not ready: HTTP 202',
+      );
+    }
+
+    if (statusCode >= 200 && statusCode < 300) {
       final Map<String, dynamic> data =
           jsonDecode(response.body) as Map<String, dynamic>;
       return RoleplayNarrationDto.fromJson(data);
     }
 
     throw Exception(
-      'GET /v1/roleplay-sessions/$rpSessionId/narration failed: HTTP ${response.statusCode} ${response.body}',
+      'GET /v1/roleplay-sessions/$rpSessionId/narration failed: HTTP $statusCode ${response.body}',
     );
   }
 

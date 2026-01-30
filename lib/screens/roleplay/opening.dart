@@ -55,6 +55,7 @@ class RoleplayOpeningScreen extends StatelessWidget {
           return;
         }
         RoleplayStateService.instance.setSessionId(sessionId);
+        RoleplayStateService.instance.setSession(session);
         RoleplayRouter.replaceWithPlaying(context);
       } catch (e) {
         if (!context.mounted) return;

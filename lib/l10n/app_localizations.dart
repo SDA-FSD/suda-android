@@ -309,6 +309,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cannot start without microphone permission.'**
   String get microphonePermissionDenied;
+
+  /// No description provided for @holdMicrophoneToSpeak.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold microphone to speak'**
+  String get holdMicrophoneToSpeak;
 }
 
 class _AppLocalizationsDelegate

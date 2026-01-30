@@ -1,7 +1,15 @@
 import 'dart:async';
 import 'dart:ui';
+import 'dart:typed_data';
+import 'dart:io';
+import 'dart:math' as math;
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:just_audio/just_audio.dart';
+import 'package:record/record.dart';
+import '../../config/app_config.dart';
+import '../../l10n/app_localizations.dart';
 import '../../widgets/roleplay_scaffold.dart';
 import '../../routes/roleplay_router.dart';
 import '../../services/roleplay_state_service.dart';
@@ -25,22 +33,36 @@ class RoleplayPlayingScreen extends StatefulWidget {
 }
 
 class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   Timer? _timer;
   int _remainingSeconds = 0;
   int _totalSteps = 0;
   int _currentStep = 0;
+  bool _isUserTurn = false;
+  final AudioPlayer _audioPlayer = AudioPlayer();
+  final AudioRecorder _recorder = AudioRecorder();
+  DateTime? _recordingStartedAt;
+  bool _isRecording = false;
+  Timer? _typingTimer;
+  bool _hasHandledInitialTurn = false;
+  Future<RoleplayNarrationDto?>? _pendingNarration;
+  bool _isHintEnabled = false;
+  final List<_ConversationEntry> _conversationEntries = [];
+  _ConversationEntry? _recordingEntry;
+  Timer? _serviceMessageTimer;
+  bool _isServiceMessageVisible = false;
+  String? _serviceMessageText;
+  int _nextConversationIndex = 0;
+  bool _wasMissionActive = false;
   final Map<int, _MissionStatus> _missionStatuses = {};
   final Map<int, _MissionStatus> _animatingSteps = {};
-  Timer? _hoverTimer;
-  int _cycleToken = 0;
   double _dragOffsetX = 0;
   bool _isCancelHovered = false;
   bool _isPointerDown = false;
   _MicButtonState _micState = _MicButtonState.defaultState;
   _InputMode _inputMode = _InputMode.recording;
+  final FocusNode _typingFocusNode = FocusNode();
   final TextEditingController _typingController = TextEditingController();
-  int _typingToken = 0;
   bool _isTypingEnabled = true;
   bool _isSpeedPanelVisible = false;
   int _speedIndex = 0;
@@ -64,13 +86,20 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
       vsync: this,
       duration: const Duration(milliseconds: 900),
     )..repeat();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _handleInitialTurn();
+    });
   }
 
   @override
   void dispose() {
     _timer?.cancel();
     _timer = null;
-    _hoverTimer?.cancel();
+    _typingTimer?.cancel();
+    _serviceMessageTimer?.cancel();
+    _audioPlayer.dispose();
+    _recorder.dispose();
+    _typingFocusNode.dispose();
     _typingController.dispose();
     _loadingRotationController.dispose();
     _arrowPulseController.dispose();
@@ -137,6 +166,232 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     }
     _speedIndex = _speedRateIndexForValue(initialRate);
     _committedSpeedIndex = _speedIndex;
+  }
+
+  void _handleInitialTurn() {
+    if (_hasHandledInitialTurn) return;
+    _hasHandledInitialTurn = true;
+    final isUserTurn = RoleplayStateService.instance.isUserTurnYn == 'Y';
+    if (isUserTurn) {
+      _handleUserStart();
+    } else {
+      _handleAiStart();
+    }
+  }
+
+  void _handleUserStart() {
+    // TODO: show user-start guide popup before enabling recording input.
+    _activateUserTurn();
+  }
+
+  Future<void> _handleAiStart() async {
+    _setUserTurn(false);
+    _setMicState(_MicButtonState.disabled, resetDrag: true);
+    final starterText = _getStarterText();
+    if (starterText == null || starterText.isEmpty) return;
+    final session = RoleplayStateService.instance.session;
+    await _showAiMessage(
+      text: starterText,
+      cdnYn: session?.aiSoundCdnYn,
+      cdnPath: session?.aiSoundCdnPath,
+      soundBytes: session?.aiSoundFile,
+    );
+  }
+
+  String? _getStarterText() {
+    return RoleplayStateService.instance.overview?.roleplay?.starter?.value;
+  }
+
+  RoleplayRoleDto? _getSelectedRole() {
+    final roleplay = RoleplayStateService.instance.overview?.roleplay;
+    final roles = roleplay?.roleList;
+    final roleId = RoleplayStateService.instance.roleId;
+    if (roles == null || roles.isEmpty) return null;
+    return roles.firstWhere(
+      (role) => role.id == roleId,
+      orElse: () => roles.first,
+    );
+  }
+
+  String? _getUserRoleAvatarUrl() {
+    final avatarPath = _getSelectedRole()?.avatarImgPath;
+    if (avatarPath == null || avatarPath.isEmpty) return null;
+    return '${AppConfig.cdnBaseUrl}$avatarPath';
+  }
+
+  Future<void> _showAiMessage({
+    required String text,
+    String? cdnYn,
+    String? cdnPath,
+    Uint8List? soundBytes,
+  }) async {
+    final entry = _ConversationEntry.ai(text: text);
+    entry.visibleText = text;
+    _setHintEnabled(false);
+    _prepareNarrationAfterAiStart();
+    final audioSource = await _prepareAiVoice(
+      cdnYn: cdnYn,
+      cdnPath: cdnPath,
+      soundBytes: soundBytes,
+    );
+    if (!mounted) return;
+    debugPrint('[DEBUG] AI message start: ${DateTime.now().toIso8601String()}');
+    _addEntry(entry, revealImmediately: true);
+    debugPrint(
+      '[DEBUG] AI bubble visible: ${DateTime.now().toIso8601String()}',
+    );
+    final voiceDuration = _audioPlayer.duration;
+    final fallbackMs = (text.length * 70).clamp(500, 15000);
+    final delayMs = voiceDuration?.inMilliseconds ?? fallbackMs;
+    _typingTimer?.cancel();
+    if (audioSource != null) {
+      unawaited(_playPreparedAiVoice(audioSource));
+    }
+    _typingTimer = Timer(
+      Duration(milliseconds: delayMs),
+      () {
+        if (!mounted) return;
+        _showNarrationAfterTyping();
+      },
+    );
+  }
+
+  void _prepareNarrationAfterAiStart() {
+    final sessionId = RoleplayStateService.instance.sessionId;
+    if (sessionId == null || sessionId.isEmpty) {
+      _pendingNarration = Future.value(null);
+      return;
+    }
+    _pendingNarration = _fetchNarrationWithRetry(sessionId);
+  }
+
+  Future<RoleplayNarrationDto?> _fetchNarrationWithRetry(
+    String sessionId,
+  ) async {
+    final accessToken = await TokenStorage.loadAccessToken();
+    if (accessToken == null) return null;
+    const delayMs = 150;
+    const maxRetries = 20;
+    final delays = List.generate(
+      maxRetries,
+      (_) => const Duration(milliseconds: delayMs),
+    );
+    int attempt = 0;
+    while (true) {
+      try {
+        final result = await SudaApiClient.getRoleplayNarration(
+          accessToken: accessToken,
+          rpSessionId: sessionId,
+        );
+        if (attempt == 0) {
+          debugPrint('[DEBUG] Narration received: 대기 없이 최초 호출');
+        } else {
+          debugPrint(
+            '[DEBUG] Narration received: ${attempt}번째 대기(${delayMs}ms) 후',
+          );
+        }
+        return result;
+      } catch (e) {
+        final message = e.toString();
+        final shouldRetry =
+            message.contains('HTTP 202') || message.contains('HTTP 500');
+        if (!shouldRetry || attempt >= delays.length) {
+          if (attempt >= delays.length) {
+            debugPrint(
+              '[DEBUG] Narration: ${maxRetries}회 재시도 소진 후 실패 (last: $e)',
+            );
+          }
+          return null;
+        }
+        await Future.delayed(delays[attempt]);
+        attempt += 1;
+      }
+    }
+  }
+
+  Future<void> _showNarrationAfterTyping() async {
+    final narration = await _pendingNarration;
+    if (!mounted) return;
+    if (narration == null) return;
+    if (narration.text == null || narration.text!.isEmpty) return;
+    final step = narration.currentStep;
+    if (step != null) {
+      _setProgressToStep(step);
+    }
+    _wasMissionActive = narration.missionActiveYn == 'Y';
+    final entry = _ConversationEntry.narration(narration: narration);
+    await _addEntry(entry);
+    if (narration.resultId != null) {
+      _showServiceMessage('Roleplay finish detected.');
+      return;
+    }
+    _activateUserTurn();
+  }
+
+  void _activateUserTurn() {
+    _setUserTurn(true);
+    _setMicState(_MicButtonState.defaultState, resetDrag: true);
+    _setHintEnabled(true);
+    _setTypingEnabled(true);
+    if (_inputMode == _InputMode.typing) {
+      _typingFocusNode.requestFocus();
+    }
+  }
+
+  void _setUserTurn(bool isUserTurn) {
+    RoleplayStateService.instance.setIsUserTurnYn(isUserTurn ? 'Y' : 'N');
+    if (!mounted) return;
+    setState(() {
+      _isUserTurn = isUserTurn;
+      if (!isUserTurn) {
+        _isTypingEnabled = false;
+      }
+    });
+  }
+
+  void _setHintEnabled(bool isEnabled) {
+    if (!mounted) return;
+    setState(() {
+      _isHintEnabled = isEnabled;
+    });
+  }
+
+  void _setTypingEnabled(bool isEnabled) {
+    if (!mounted) return;
+    setState(() {
+      _isTypingEnabled = isEnabled;
+    });
+  }
+
+  Future<AudioSource?> _prepareAiVoice({
+    required String? cdnYn,
+    required String? cdnPath,
+    required Uint8List? soundBytes,
+  }) async {
+    final bytes = soundBytes;
+    await _audioPlayer.stop();
+    if (cdnYn == 'Y' && cdnPath != null && cdnPath.isNotEmpty) {
+      final url = '${AppConfig.cdnBaseUrl}$cdnPath';
+      final source = AudioSource.uri(Uri.parse(url));
+      await _audioPlayer.setAudioSource(source);
+      return source;
+    }
+    if (bytes != null && bytes.isNotEmpty) {
+      final source =
+          AudioSource.uri(Uri.dataFromBytes(bytes, mimeType: 'audio/mpeg'));
+      await _audioPlayer.setAudioSource(source);
+      return source;
+    }
+    return null;
+  }
+
+  Future<Duration?> _playPreparedAiVoice(AudioSource? source) async {
+    if (source == null) return null;
+    await _audioPlayer.play();
+    debugPrint(
+      '[DEBUG] AI voice play: ${DateTime.now().toIso8601String()}',
+    );
+    return _audioPlayer.duration;
   }
 
   int _speedRateIndexForValue(int value) {
@@ -243,9 +498,9 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
   }
 
   bool get _isMicInteractive =>
-      _micState == _MicButtonState.defaultState ||
-      _micState == _MicButtonState.hover ||
-      _micState == _MicButtonState.pressed;
+      (_micState == _MicButtonState.defaultState ||
+          _micState == _MicButtonState.pressed) &&
+      _isUserTurn;
 
   void _setMicState(_MicButtonState next, {bool resetDrag = false}) {
     if (_micState == next) return;
@@ -257,6 +512,9 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
       }
     });
     _syncLoadingAnimation();
+    if (next == _MicButtonState.pressed) {
+      _beginRecording();
+    }
   }
 
   void _syncLoadingAnimation() {
@@ -273,28 +531,21 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
   }
 
   void _handleMicTapDown(TapDownDetails details) {
-    if (_micState != _MicButtonState.defaultState) return;
-    _cycleToken += 1;
+    if (_micState != _MicButtonState.defaultState || !_isUserTurn) return;
+    debugPrint('[DEBUG] Mic TapDown');
     _isPointerDown = true;
-    _hoverTimer?.cancel();
-    _setMicState(_MicButtonState.hover, resetDrag: true);
-    _hoverTimer = Timer(const Duration(milliseconds: 80), () {
-      if (!mounted) return;
-      if (_isPointerDown && _micState == _MicButtonState.hover) {
-        _setMicState(_MicButtonState.pressed);
-      }
-    });
+    _setMicState(_MicButtonState.pressed, resetDrag: true);
   }
 
   void _handleMicPanStart(DragStartDetails details) {
+    if (!_isUserTurn) return;
     if (_micState == _MicButtonState.loading ||
         _micState == _MicButtonState.disabled) {
       return;
     }
+    debugPrint('[DEBUG] Mic PanStart state=$_micState');
     _isPointerDown = true;
-    _hoverTimer?.cancel();
-    if (_micState == _MicButtonState.hover ||
-        _micState == _MicButtonState.defaultState) {
+    if (_micState == _MicButtonState.defaultState) {
       _setMicState(_MicButtonState.pressed, resetDrag: true);
     }
   }
@@ -310,6 +561,9 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     final nextOffset = (_dragOffsetX + deltaX).clamp(maxLeftOffset, 0.0);
     final buttonLeft = centerX + nextOffset - (_micPressedSize / 2);
     final cancelHovered = buttonLeft <= cancelCenterX;
+    final offsetChanged = nextOffset != _dragOffsetX;
+    final cancelChanged = cancelHovered != _isCancelHovered;
+    if (!offsetChanged && !cancelChanged) return;
     setState(() {
       _dragOffsetX = nextOffset;
       _isCancelHovered = cancelHovered;
@@ -318,57 +572,122 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
 
   void _handleMicTapCancel() {
     _isPointerDown = false;
-    _hoverTimer?.cancel();
-    if (_micState == _MicButtonState.hover ||
-        _micState == _MicButtonState.pressed) {
+    debugPrint(
+      '[DEBUG] Mic TapCancel state=$_micState -> '
+      '${_micState == _MicButtonState.pressed ? "cancelRecording+default" : "default"}',
+    );
+    if (_micState == _MicButtonState.pressed) {
+      _cancelRecording();
       _setMicState(_MicButtonState.defaultState, resetDrag: true);
     }
   }
 
   void _handleMicTapUp() {
     _isPointerDown = false;
-    _hoverTimer?.cancel();
-    if (_micState == _MicButtonState.hover) {
-      _setMicState(_MicButtonState.defaultState, resetDrag: true);
-      return;
-    }
-    if (_micState != _MicButtonState.pressed) return;
-    if (_isCancelHovered) {
+    final wasPressed = _micState == _MicButtonState.pressed;
+    final cancelHovered = _isCancelHovered;
+    final path = !wasPressed
+        ? 'return(notPressed)'
+        : cancelHovered
+            ? 'cancel'
+            : 'finish';
+    debugPrint(
+      '[DEBUG] Mic TapUp state=$_micState isCancelHovered=$cancelHovered -> $path',
+    );
+    if (!wasPressed) return;
+    if (cancelHovered) {
       _cancelRecording();
       _setMicState(_MicButtonState.defaultState, resetDrag: true);
       return;
     }
-    _startLoadingCycle();
-  }
-
-  void _startLoadingCycle() async {
-    final token = ++_cycleToken;
-    _setMicState(_MicButtonState.loading, resetDrag: true);
-    await Future.delayed(const Duration(seconds: 2));
-    if (!mounted || token != _cycleToken) return;
-    _setMicState(_MicButtonState.disabled, resetDrag: true);
-    await Future.delayed(const Duration(seconds: 2));
-    if (!mounted || token != _cycleToken) return;
-    _setMicState(_MicButtonState.defaultState, resetDrag: true);
+    _finishRecording();
   }
 
   void _handleSend() {
-    if (!_isTypingEnabled) return;
-    setState(() {
-      _isTypingEnabled = false;
-      _typingController.clear();
-    });
-    final token = ++_typingToken;
-    Future.delayed(const Duration(seconds: 2), () {
-      if (!mounted || token != _typingToken) return;
-      setState(() {
-        _isTypingEnabled = true;
-      });
-    });
+    if (!_isTypingEnabled || !_isUserTurn) return;
+    final text = _typingController.text.trim();
+    if (text.isEmpty) return;
+    _typingController.clear();
+    _setTypingEnabled(false);
+    _setUserTurn(false);
+    _setHintEnabled(false);
+    _sendUserMessageText(text);
   }
 
   void _cancelRecording() {
-    // placeholder for cancel flow; keep state reset in caller
+    debugPrint('[DEBUG] Recording cancelled');
+    _stopRecording(discard: true);
+    _removeRecordingEntry();
+  }
+
+  Future<void> _beginRecording() async {
+    if (_isRecording) return;
+    final hasPermission = await _recorder.hasPermission();
+    if (!hasPermission) return;
+    final path =
+        '${Directory.systemTemp.path}/rp_record_${DateTime.now().millisecondsSinceEpoch}.m4a';
+    _recordingStartedAt = DateTime.now();
+    await _recorder.start(
+      const RecordConfig(encoder: AudioEncoder.aacLc),
+      path: path,
+    );
+    _isRecording = true;
+    _showRecordingEntry();
+  }
+
+  Future<void> _finishRecording() async {
+    if (!_isRecording) {
+      _setMicState(_MicButtonState.defaultState, resetDrag: true);
+      _showHoldToSpeakMessage();
+      return;
+    }
+    final startedAt = _recordingStartedAt;
+    _recordingStartedAt = null;
+    final durationMs = startedAt == null
+        ? 0
+        : DateTime.now().difference(startedAt).inMilliseconds;
+    final path = await _stopRecording();
+    _removeRecordingEntry();
+    debugPrint(
+      '[DEBUG] Recording finish start durationMs=$durationMs hasPath=${path != null}',
+    );
+    if (durationMs < 500) {
+      _deleteRecordingFile(path);
+      _setMicState(_MicButtonState.defaultState, resetDrag: true);
+      _showHoldToSpeakMessage();
+      debugPrint('[DEBUG] Recording finish -> short(duration<500)');
+      return;
+    }
+    if (path == null) {
+      _setMicState(_MicButtonState.defaultState, resetDrag: true);
+      debugPrint('[DEBUG] Recording finish -> no path');
+      return;
+    }
+    final bytes = await File(path).readAsBytes();
+    _deleteRecordingFile(path);
+    _setMicState(_MicButtonState.loading, resetDrag: true);
+    _setUserTurn(false);
+    _setHintEnabled(false);
+    debugPrint('[DEBUG] Recording finish -> sending audio');
+    await _sendUserMessageAudio(bytes);
+  }
+
+  Future<String?> _stopRecording({bool discard = false}) async {
+    if (!_isRecording) return null;
+    _isRecording = false;
+    if (discard) {
+      await _recorder.cancel();
+      return null;
+    }
+    return _recorder.stop();
+  }
+
+  void _deleteRecordingFile(String? path) {
+    if (path == null || path.isEmpty) return;
+    final file = File(path);
+    if (file.existsSync()) {
+      file.deleteSync();
+    }
   }
 
   TextStyle _cancelTextStyle(BuildContext context) {
@@ -387,17 +706,498 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     return painter.size.width;
   }
 
+  Widget _buildAiMessage(
+    BuildContext context,
+    double bodyWidth,
+    _ConversationEntry entry,
+  ) {
+    final messageText = entry.text ?? '';
+    if (messageText.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    final bubbleWidth = bodyWidth * 0.7;
+    final textStyle = Theme.of(context).textTheme.bodyLarge?.copyWith(
+          color: Colors.white,
+        );
+    final translationText = entry.translationText;
+    final translationStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
+          color: Colors.white,
+        );
+    return AnimatedOpacity(
+      opacity: entry.isVisible ? 1 : 0,
+      duration: const Duration(milliseconds: 150),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: bubbleWidth,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      _buildAiAvatar(),
+                      const SizedBox(width: 5),
+                      Expanded(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 10,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF0CABA8),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Stack(
+                            children: [
+                              Opacity(
+                                opacity: 0,
+                                child: Text(
+                                  messageText,
+                                  style: textStyle,
+                                ),
+                              ),
+                              Text(
+                                entry.visibleText ?? '',
+                                style: textStyle,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 5),
+                GestureDetector(
+                  onTap: () => _toggleTranslation(entry),
+                  child: Image.asset(
+                    'assets/images/icons/translation_grey.png',
+                    width: 24,
+                    height: 24,
+                  ),
+                ),
+              ],
+            ),
+            if (entry.isTranslationExpanded && translationText != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 6, left: 45),
+                child: Text(
+                  translationText,
+                  style: translationStyle,
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAiAvatar() {
+    final url = _getUserRoleAvatarUrl();
+    if (url == null) {
+      return Container(
+        width: 40,
+        height: 40,
+        decoration: const BoxDecoration(
+          color: Color(0xFF2A2A2A),
+          shape: BoxShape.circle,
+        ),
+      );
+    }
+    return ClipOval(
+      child: Image(
+        image: CachedNetworkImageProvider(url),
+        width: 40,
+        height: 40,
+        fit: BoxFit.cover,
+      ),
+    );
+  }
+
+  Widget _buildNarration(
+    BuildContext context,
+    _ConversationEntry entry,
+  ) {
+    final narration = entry.narration;
+    if (narration == null || narration.text == null) {
+      return const SizedBox.shrink();
+    }
+    final isMission = narration.missionActiveYn == 'Y';
+    final baseStyle = Theme.of(context).textTheme.bodyMedium?.copyWith(
+          fontStyle: FontStyle.italic,
+        );
+    final missionColor = const Color(0xFFFF00A6);
+    return AnimatedOpacity(
+      opacity: entry.isVisible ? 1 : 0,
+      duration: const Duration(milliseconds: 500),
+      child: Center(
+        child: isMission
+            ? Wrap(
+                alignment: WrapAlignment.center,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: missionColor,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      'Mission',
+                      style: baseStyle?.copyWith(color: Colors.white),
+                    ),
+                  ),
+                  Text(
+                    narration.text ?? '',
+                    textAlign: TextAlign.center,
+                    style: baseStyle?.copyWith(color: missionColor),
+                  ),
+                ],
+              )
+            : Text(
+                narration.text ?? '',
+                textAlign: TextAlign.center,
+                style: baseStyle?.copyWith(color: Colors.white),
+              ),
+      ),
+    );
+  }
+
+  Widget _buildUserMessage(
+    BuildContext context,
+    double bodyWidth,
+    _ConversationEntry entry,
+  ) {
+    final text = entry.text ?? '';
+    if (text.isEmpty) return const SizedBox.shrink();
+    final textStyle = Theme.of(context).textTheme.bodyLarge?.copyWith(
+          color: Colors.black,
+        );
+    final maxBubbleWidth = bodyWidth * 0.7;
+    return AnimatedOpacity(
+      opacity: entry.isVisible ? 1 : 0,
+      duration: const Duration(milliseconds: 150),
+      child: Align(
+        alignment: Alignment.centerRight,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: maxBubbleWidth),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              text,
+              style: textStyle,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRecordingBubble(
+    BuildContext context,
+    _ConversationEntry entry,
+  ) {
+    return AnimatedOpacity(
+      opacity: entry.isVisible ? 1 : 0,
+      duration: const Duration(milliseconds: 150),
+      child: Align(
+        alignment: Alignment.centerRight,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: _WaveDots(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildConversationEntry(
+    BuildContext context,
+    double bodyWidth,
+    _ConversationEntry entry,
+  ) {
+    return KeyedSubtree(
+      key: entry.key,
+      child: switch (entry.type) {
+        _ConversationEntryType.ai =>
+          _buildAiMessage(context, bodyWidth, entry),
+        _ConversationEntryType.narration => _buildNarration(context, entry),
+        _ConversationEntryType.user =>
+          _buildUserMessage(context, bodyWidth, entry),
+        _ConversationEntryType.recording => _buildRecordingBubble(context, entry),
+      },
+    );
+  }
+
   String _micAssetForState(_MicButtonState state, bool cancelHover) {
     if (state == _MicButtonState.pressed && cancelHover) {
       return 'assets/images/buttons/mic_btn_default.png';
     }
     return switch (state) {
       _MicButtonState.defaultState => 'assets/images/buttons/mic_btn_default.png',
-      _MicButtonState.hover => 'assets/images/buttons/mic_btn_hover.png',
       _MicButtonState.pressed => 'assets/images/buttons/mic_btn_pressed.png',
       _MicButtonState.loading => 'assets/images/buttons/mic_btn_loading.png',
       _MicButtonState.disabled => 'assets/images/buttons/mic_btn_disabled.png',
     };
+  }
+
+  void _showRecordingEntry() {
+    if (_recordingEntry != null) return;
+    final entry = _ConversationEntry.recording();
+    _recordingEntry = entry;
+    _addEntry(entry);
+  }
+
+  void _removeRecordingEntry() {
+    final entry = _recordingEntry;
+    if (entry == null) return;
+    setState(() {
+      _conversationEntries.remove(entry);
+    });
+    _recordingEntry = null;
+  }
+
+  void _showHoldToSpeakMessage() {
+    final l10n = AppLocalizations.of(context)!;
+    _showServiceMessage(l10n.holdMicrophoneToSpeak);
+  }
+
+  void _showServiceMessage(String message) {
+    _serviceMessageTimer?.cancel();
+    setState(() {
+      _serviceMessageText = message;
+      _isServiceMessageVisible = true;
+    });
+    _serviceMessageTimer = Timer(const Duration(seconds: 2), () {
+      if (!mounted) return;
+      setState(() {
+        _isServiceMessageVisible = false;
+      });
+      _serviceMessageTimer = Timer(const Duration(milliseconds: 500), () {
+        if (!mounted) return;
+        setState(() {
+          _serviceMessageText = null;
+        });
+      });
+    });
+  }
+
+  Future<void> _sendUserMessageAudio(Uint8List audioData) async {
+    final accessToken = await TokenStorage.loadAccessToken();
+    final sessionId = RoleplayStateService.instance.sessionId;
+    if (accessToken == null || sessionId == null) return;
+    debugPrint('[DEBUG] Send user audio start');
+    try {
+      final response = await SudaApiClient.sendRoleplayUserMessageAudio(
+        accessToken: accessToken,
+        rpSessionId: sessionId,
+        audioData: audioData,
+      );
+      await _handleUserMessageResponse(response);
+      if (mounted) debugPrint('[DEBUG] Send user audio done');
+    } catch (e) {
+      debugPrint('[DEBUG] Send user audio error: $e');
+      if (!mounted) return;
+      _setMicState(_MicButtonState.defaultState, resetDrag: true);
+      _setUserTurn(true);
+      _setHintEnabled(true);
+    }
+  }
+
+  Future<void> _sendUserMessageText(String text) async {
+    final accessToken = await TokenStorage.loadAccessToken();
+    final sessionId = RoleplayStateService.instance.sessionId;
+    if (accessToken == null || sessionId == null) return;
+    final response = await SudaApiClient.sendRoleplayUserMessageText(
+      accessToken: accessToken,
+      rpSessionId: sessionId,
+      text: text,
+    );
+    await _handleUserMessageResponse(response);
+  }
+
+  Future<void> _handleUserMessageResponse(
+    RoleplayUserMessageResponseDto response,
+  ) async {
+    final text = response.text ?? '';
+    if (text.isNotEmpty) {
+      final entry = _ConversationEntry.user(text: text);
+      await _addEntry(entry);
+      _setMicState(_MicButtonState.disabled, resetDrag: true);
+      debugPrint('[DEBUG] User bubble shown, requesting AI response');
+    }
+    if (_wasMissionActive) {
+      if (response.missionCompleteYn == 'Y') {
+        _setMissionSuccess(_currentStep);
+      } else if (response.missionCompleteYn == 'N') {
+        _setMissionFailed(_currentStep);
+      }
+    }
+    await _requestAiResponse();
+  }
+
+  Future<void> _requestAiResponse() async {
+    final accessToken = await TokenStorage.loadAccessToken();
+    final sessionId = RoleplayStateService.instance.sessionId;
+    if (accessToken == null || sessionId == null) return;
+    debugPrint('[DEBUG] AI response request start');
+    final aiMessage = await _fetchAiMessageWithRetry(
+      accessToken: accessToken,
+      sessionId: sessionId,
+    );
+    if (aiMessage == null || aiMessage.text == null) {
+      debugPrint('[DEBUG] AI response skip: null or empty text');
+      return;
+    }
+    debugPrint('[DEBUG] AI response received, showing AI message');
+    await _showAiMessage(
+      text: aiMessage.text ?? '',
+      cdnYn: aiMessage.cdnYn,
+      cdnPath: aiMessage.cdnPath,
+      soundBytes: aiMessage.sound,
+    );
+  }
+
+  Future<void> _toggleTranslation(_ConversationEntry entry) async {
+    if (entry.type != _ConversationEntryType.ai) return;
+    if (entry.conversationIndex == null) return;
+    if (entry.translationText != null) {
+      setState(() {
+        entry.isTranslationExpanded = !entry.isTranslationExpanded;
+      });
+      return;
+    }
+    if (entry.isTranslationLoading) return;
+    entry.isTranslationLoading = true;
+    final accessToken = await TokenStorage.loadAccessToken();
+    final sessionId = RoleplayStateService.instance.sessionId;
+    if (accessToken == null || sessionId == null) {
+      entry.isTranslationLoading = false;
+      return;
+    }
+    try {
+      final translated = await SudaApiClient.getRoleplayTranslation(
+        accessToken: accessToken,
+        rpSessionId: sessionId,
+        index: entry.conversationIndex!,
+      );
+      if (!mounted) return;
+      setState(() {
+        entry.translationText = translated;
+        entry.isTranslationExpanded = true;
+      });
+    } catch (_) {
+      // ignore translation errors
+    } finally {
+      entry.isTranslationLoading = false;
+    }
+  }
+
+  Future<RoleplayAiMessageDto?> _fetchAiMessageWithRetry({
+    required String accessToken,
+    required String sessionId,
+  }) async {
+    const delayMs = 100;
+    const maxRetries = 20;
+    final delays = List.generate(
+      maxRetries,
+      (_) => const Duration(milliseconds: delayMs),
+    );
+    int attempt = 0;
+    while (true) {
+      try {
+        final result = await SudaApiClient.getRoleplayAiMessage(
+          accessToken: accessToken,
+          rpSessionId: sessionId,
+        );
+        if (attempt == 0) {
+          debugPrint('[DEBUG] AI response received: 대기 없이 최초 호출');
+        } else {
+          debugPrint(
+            '[DEBUG] AI response received: ${attempt}번째 대기(${delayMs}ms) 후',
+          );
+        }
+        return result;
+      } catch (e) {
+        final message = e.toString();
+        final shouldRetry =
+            message.contains('HTTP 202') || message.contains('HTTP 500');
+        if (!shouldRetry || attempt >= delays.length) {
+          if (attempt >= delays.length) {
+            debugPrint(
+              '[DEBUG] AI response: ${maxRetries}회 재시도 소진 후 실패 (last: $e)',
+            );
+          }
+          return null;
+        }
+        await Future.delayed(delays[attempt]);
+        attempt += 1;
+      }
+    }
+  }
+
+  Future<void> _addEntry(
+    _ConversationEntry entry, {
+    VoidCallback? onRevealed,
+    bool revealImmediately = false,
+  }) async {
+    if (entry.consumesIndex && entry.conversationIndex == null) {
+      entry.conversationIndex = _nextConversationIndex;
+      _nextConversationIndex += 1;
+    }
+    setState(() {
+      _conversationEntries.add(entry);
+      if (revealImmediately) {
+        entry.isVisible = true;
+      }
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final context = entry.key.currentContext;
+      if (context != null) {
+        await Scrollable.ensureVisible(
+          context,
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeOut,
+        );
+      }
+      if (!mounted) return;
+      setState(() {
+        entry.isVisible = true;
+      });
+      onRevealed?.call();
+    });
+  }
+
+  void _scrollToLastEntry() {
+    if (_conversationEntries.isEmpty) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final lastEntry = _conversationEntries.last;
+      final context = lastEntry.key.currentContext;
+      if (context != null) {
+        Scrollable.ensureVisible(
+          context,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+        );
+      }
+    });
   }
 
   double _micSizeForState(_MicButtonState state, bool cancelHover) {
@@ -406,7 +1206,6 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     }
     return switch (state) {
       _MicButtonState.defaultState => _micDefaultSize,
-      _MicButtonState.hover => _micHoverSize,
       _MicButtonState.pressed => _micPressedSize,
       _MicButtonState.loading => _micDefaultSize,
       _MicButtonState.disabled => _micDefaultSize,
@@ -430,7 +1229,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
         : image;
 
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 80),
+      duration: Duration.zero,
       curve: Curves.easeOut,
       width: size,
       height: size,
@@ -789,79 +1588,35 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
             ),
             headerTopSpacing: _headerTopSpacing,
             body: Column(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisSize: MainAxisSize.max,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 8),
-                Text(
-                  'Temp Controls',
-                  style: Theme.of(context)
-                      .textTheme
-                      .headlineSmall
-                      ?.copyWith(color: Colors.white),
-                ),
-                const SizedBox(height: 16),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Set Progress Step',
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodySmall
-                        ?.copyWith(color: Colors.white),
+                Expanded(
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      return SingleChildScrollView(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            for (var i = 0;
+                                i < _conversationEntries.length;
+                                i++) ...[
+                              if (i > 0) const SizedBox(height: 14),
+                              _buildConversationEntry(
+                                context,
+                                constraints.maxWidth,
+                                _conversationEntries[i],
+                              ),
+                            ],
+                          ],
+                        ),
+                      );
+                    },
                   ),
                 ),
                 const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    for (int i = 0; i <= _maxStepIndex; i++)
-                      TextButton(
-                        onPressed: () => _setProgressToStep(i),
-                        child: Text('Go $i'),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Set Mission Result',
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodySmall
-                        ?.copyWith(color: Colors.white),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Column(
-                  children: _missionStatuses.keys.map((index) {
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              'Mission $index',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
-                                  ?.copyWith(color: Colors.white),
-                            ),
-                          ),
-                          TextButton(
-                            onPressed: () => _setMissionSuccess(index),
-                            child: const Text('Success'),
-                          ),
-                          TextButton(
-                            onPressed: () => _setMissionFailed(index),
-                            child: const Text('Failed'),
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                ),
               ],
             ),
             footer: SafeArea(
@@ -872,12 +1627,16 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
                   SizedBox(
                     height: 24,
                     child: Center(
-                      child: Text(
-                        'service message area',
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodyMedium
-                            ?.copyWith(color: Colors.white),
+                      child: AnimatedOpacity(
+                        opacity: _isServiceMessageVisible ? 1 : 0,
+                        duration: const Duration(milliseconds: 500),
+                        child: Text(
+                          _serviceMessageText ?? '',
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(color: Colors.white),
+                        ),
                       ),
                     ),
                   ),
@@ -937,7 +1696,10 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
                                         cancelCenterX: cancelCenter,
                                         centerX: centerX,
                                       ),
-                                      onPanEnd: (_) => _handleMicTapUp(),
+                                      onPanEnd: (_) {
+                                        debugPrint('[DEBUG] Mic PanEnd');
+                                        _handleMicTapUp();
+                                      },
                                       child: _buildMicButton(),
                                     ),
                                   ),
@@ -967,7 +1729,8 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
                                   alignment: Alignment.centerLeft,
                                   child: TextField(
                                     controller: _typingController,
-                                    enabled: _isTypingEnabled,
+                                    focusNode: _typingFocusNode,
+                                    enabled: _isTypingEnabled && _isUserTurn,
                                     textInputAction: TextInputAction.send,
                                     onSubmitted: (_) => _handleSend(),
                                     style: Theme.of(context)
@@ -992,7 +1755,8 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
                               ),
                               const SizedBox(width: 10),
                               GestureDetector(
-                                onTap: _isTypingEnabled ? _handleSend : null,
+                                onTap:
+                                    _isTypingEnabled && _isUserTurn ? _handleSend : null,
                                 child: Container(
                                   width: 44,
                                   height: 44,
@@ -1025,11 +1789,15 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
                         children: [
                           GestureDetector(
                             onTap: () {
+                              final toRecording = _inputMode == _InputMode.typing;
                               setState(() {
-                                _inputMode = _inputMode == _InputMode.typing
+                                _inputMode = toRecording
                                     ? _InputMode.recording
                                     : _InputMode.typing;
                               });
+                              if (toRecording) {
+                                _scrollToLastEntry();
+                              }
                             },
                             child: SizedBox(
                               width: 40,
@@ -1046,14 +1814,23 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
                             ),
                           ),
                           const Spacer(),
-                          SizedBox(
-                            width: 40,
-                            height: 40,
-                            child: Center(
-                              child: Image.asset(
-                                'assets/images/icons/lightball.png',
-                                height: 24,
-                                width: 24,
+                          IgnorePointer(
+                            ignoring: !_isHintEnabled,
+                            child: Opacity(
+                              opacity: _isHintEnabled ? 1 : 0.4,
+                              child: GestureDetector(
+                                onTap: _isHintEnabled ? () {} : null,
+                                child: SizedBox(
+                                  width: 40,
+                                  height: 40,
+                                  child: Center(
+                                    child: Image.asset(
+                                      'assets/images/icons/lightball.png',
+                                      height: 24,
+                                      width: 24,
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
                           ),
@@ -1104,14 +1881,71 @@ enum _InputMode {
 
 enum _MicButtonState {
   defaultState,
-  hover,
   pressed,
   loading,
   disabled,
 }
 
+enum _ConversationEntryType {
+  ai,
+  narration,
+  user,
+  recording,
+}
+
+class _ConversationEntry {
+  final _ConversationEntryType type;
+  final String? text;
+  final RoleplayNarrationDto? narration;
+  final GlobalKey key = GlobalKey();
+  int? conversationIndex;
+  bool isVisible = false;
+  String? visibleText;
+  String? translationText;
+  bool isTranslationExpanded = false;
+  bool isTranslationLoading = false;
+
+  _ConversationEntry._({
+    required this.type,
+    this.text,
+    this.narration,
+    this.visibleText,
+  });
+
+  factory _ConversationEntry.ai({required String text}) {
+    return _ConversationEntry._(
+      type: _ConversationEntryType.ai,
+      text: text,
+      visibleText: '',
+    );
+  }
+
+  factory _ConversationEntry.narration({
+    required RoleplayNarrationDto narration,
+  }) {
+    return _ConversationEntry._(
+      type: _ConversationEntryType.narration,
+      narration: narration,
+    );
+  }
+
+  factory _ConversationEntry.user({required String text}) {
+    return _ConversationEntry._(
+      type: _ConversationEntryType.user,
+      text: text,
+    );
+  }
+
+  factory _ConversationEntry.recording() {
+    return _ConversationEntry._(
+      type: _ConversationEntryType.recording,
+    );
+  }
+
+  bool get consumesIndex => type != _ConversationEntryType.recording;
+}
+
 const double _micDefaultSize = 100;
-const double _micHoverSize = 110;
 const double _micPressedSize = 115;
 
 class _SlidingGradientTransform extends GradientTransform {
@@ -1200,6 +2034,66 @@ class _MissionIconScaleState extends State<_MissionIconScale>
         width: widget.size,
         height: widget.size,
       ),
+    );
+  }
+}
+
+class _WaveDots extends StatefulWidget {
+  @override
+  State<_WaveDots> createState() => _WaveDotsState();
+}
+
+class _WaveDotsState extends State<_WaveDots>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  double _opacityFor(int index, double t) {
+    final phase = (t * 2 * math.pi) + (index * 0.8);
+    final value = (1 + math.sin(phase)) / 2;
+    return 0.3 + (0.7 * value);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: List.generate(3, (index) {
+            final opacity = _opacityFor(index, _controller.value);
+            return Padding(
+              padding: EdgeInsets.only(right: index == 2 ? 0 : 4),
+              child: Opacity(
+                opacity: opacity,
+                child: Container(
+                  width: 6,
+                  height: 6,
+                  decoration: const BoxDecoration(
+                    color: Colors.black,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+            );
+          }),
+        );
+      },
     );
   }
 }
