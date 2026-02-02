@@ -327,6 +327,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Say the line below to start.'**
   String get sayLineBelowToStart;
+
+  /// No description provided for @roleplayExitWait.
+  ///
+  /// In en, this message translates to:
+  /// **'Wait!'**
+  String get roleplayExitWait;
+
+  /// No description provided for @roleplayExitMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'If you leave now, you\'ll miss your reward. Are you sure you want to leave?'**
+  String get roleplayExitMessage;
+
+  /// No description provided for @roleplayExitKeepPlaying.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep Playing'**
+  String get roleplayExitKeepPlaying;
+
+  /// No description provided for @roleplayExitExit.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit'**
+  String get roleplayExitExit;
 }
 
 class _AppLocalizationsDelegate

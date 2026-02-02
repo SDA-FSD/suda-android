@@ -61,5 +61,9 @@
   "microphonePermissionDenied": "마이크 권한이 없어서 시작할 수 없습니다.",
   "holdMicrophoneToSpeak": "마이크를 길게 누르고 말하세요",
   "yourTurnFirst": "먼저 시작해주세요!",
-  "sayLineBelowToStart": "아래 문장을 말해서 시작하세요."
+  "sayLineBelowToStart": "아래 문장을 말해서 시작하세요.",
+  "roleplayExitWait": "잠깐!",
+  "roleplayExitMessage": "지금 나가면 보상을 놓치게 됩니다. 정말 나가시겠습니까?",
+  "roleplayExitKeepPlaying": "계속 플레이",
+  "roleplayExitExit": "나가기"
 }

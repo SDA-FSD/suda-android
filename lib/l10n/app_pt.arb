@@ -61,5 +61,9 @@
   "microphonePermissionDenied": "Não é possível iniciar sem permissão do microfone.",
   "holdMicrophoneToSpeak": "Segure o microfone para falar",
   "yourTurnFirst": "É sua vez primeiro!",
-  "sayLineBelowToStart": "Diga a frase abaixo para começar."
+  "sayLineBelowToStart": "Diga a frase abaixo para começar.",
+  "roleplayExitWait": "Segura aí!",
+  "roleplayExitMessage": "Se sair agora, perderá sua recompensa. Tem certeza de que deseja sair?",
+  "roleplayExitKeepPlaying": "Continuar Jogando",
+  "roleplayExitExit": "Sair"
 }

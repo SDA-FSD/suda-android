@@ -133,4 +133,17 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get sayLineBelowToStart => 'Diga a frase abaixo para começar.';
+
+  @override
+  String get roleplayExitWait => 'Segura aí!';
+
+  @override
+  String get roleplayExitMessage =>
+      'Se sair agora, perderá sua recompensa. Tem certeza de que deseja sair?';
+
+  @override
+  String get roleplayExitKeepPlaying => 'Continuar Jogando';
+
+  @override
+  String get roleplayExitExit => 'Sair';
 }

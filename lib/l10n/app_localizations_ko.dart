@@ -128,4 +128,16 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get sayLineBelowToStart => '아래 문장을 말해서 시작하세요.';
+
+  @override
+  String get roleplayExitWait => '잠깐!';
+
+  @override
+  String get roleplayExitMessage => '지금 나가면 보상을 놓치게 됩니다. 정말 나가시겠습니까?';
+
+  @override
+  String get roleplayExitKeepPlaying => '계속 플레이';
+
+  @override
+  String get roleplayExitExit => '나가기';
 }

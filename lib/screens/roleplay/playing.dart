@@ -69,6 +69,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
   int _committedSpeedIndex = 0;
   late final AnimationController _loadingRotationController;
   bool _showUserStartGuide = false;
+  bool _showExitLayer = false;
   static const double _headerTopSpacing = 108;
   static const List<int> _speedRateSteps = [150, 120, 100, 70];
 
@@ -1509,33 +1510,17 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     RoleplayRouter.replaceWithFailed(context);
   }
 
-  Future<bool> _handleBackButton(BuildContext context) async {
-    // 뒤로가기 시 얼럿 표시
-    final shouldPop = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Notification'),
-        content: const Text('Exit from page'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
+  void _handleBackButton(BuildContext context) {
+    setState(() => _showExitLayer = true);
+  }
 
-    if (shouldPop == true && context.mounted) {
-      // playing screen 삭제하고 overview로 돌아감
-      // overview는 Sub Screen이므로 Navigator.popUntil으로 overview까지 pop
-      RoleplayRouter.popToOverview(context);
-    }
+  void _dismissExitLayer() {
+    if (mounted) setState(() => _showExitLayer = false);
+  }
 
-    return false; // PopScope가 자동으로 pop하지 않도록
+  void _confirmExit(BuildContext context) {
+    _dismissExitLayer();
+    if (context.mounted) RoleplayRouter.popToOverview(context);
   }
 
   @override
@@ -1555,10 +1540,8 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
 
     return PopScope(
       canPop: false,
-      onPopInvoked: (didPop) async {
-        if (!didPop) {
-          await _handleBackButton(context);
-        }
+      onPopInvoked: (didPop) {
+        if (!didPop) _handleBackButton(context);
       },
       child: Stack(
         children: [
@@ -1825,7 +1808,79 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
               ),
             ),
           if (widget.showCloseButton) _buildSpeedPanel(context),
+          if (_showExitLayer) Positioned.fill(child: _buildExitLayer(context)),
         ],
+      ),
+    );
+  }
+
+  Widget _buildExitLayer(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context).textTheme;
+    const guideColor = Color(0xFF0CABA8);
+    final padding = MediaQuery.of(context).padding;
+
+    return Material(
+      color: Colors.transparent,
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+        child: Container(
+          color: const Color(0x595A5A5A),
+          padding: EdgeInsets.only(
+            top: padding.top,
+            bottom: padding.bottom,
+            left: padding.left + 24,
+            right: padding.right + 24,
+          ),
+          child: SafeArea(
+            top: false,
+            bottom: false,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const SizedBox.shrink(),
+                Text(
+                  l10n.roleplayExitWait,
+                  style: theme.headlineMedium?.copyWith(color: guideColor),
+                  textAlign: TextAlign.center,
+                ),
+                Text(
+                  l10n.roleplayExitMessage,
+                  style: theme.bodyLarge?.copyWith(color: Colors.white),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.4,
+                  child: ElevatedButton(
+                    onPressed: _dismissExitLayer,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: guideColor,
+                      foregroundColor: Colors.white,
+                      shape: const StadiumBorder(),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 30,
+                        vertical: 18,
+                      ),
+                      elevation: 0,
+                    ),
+                    child: Text(l10n.roleplayExitKeepPlaying),
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () => _confirmExit(context),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: Text(
+                      l10n.roleplayExitExit,
+                      style: theme.bodyLarge?.copyWith(color: Colors.white),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

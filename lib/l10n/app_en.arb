@@ -61,5 +61,9 @@
   "microphonePermissionDenied": "Cannot start without microphone permission.",
   "holdMicrophoneToSpeak": "Hold microphone to speak",
   "yourTurnFirst": "Your turn first!",
-  "sayLineBelowToStart": "Say the line below to start."
+  "sayLineBelowToStart": "Say the line below to start.",
+  "roleplayExitWait": "Wait!",
+  "roleplayExitMessage": "If you leave now, you'll miss your reward. Are you sure you want to leave?",
+  "roleplayExitKeepPlaying": "Keep Playing",
+  "roleplayExitExit": "Exit"
 }

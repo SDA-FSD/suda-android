@@ -119,7 +119,7 @@
 ## 6-4. Playing UX 흐름/턴 전환 규칙
 - **말풍선/나레이션 영역**
   - AI 말풍선: 좌측, AI 아바타 아이콘과 함께 노출.
-  - 나레이션: 중앙 영역 노출. 미션 여부에 따라 디자인 변경(추후 구체화).
+  - 나레이션: 중앙 영역 노출. 미션 여부에 따라 디자인 변경(구현 완료: 미션 시 Mission 배지·강조 색상).
   - 사용자 말풍선: 우측, 텍스트 박스만 노출(이미지 없음).
   - 사용자 말풍선은 서버 응답 수신 즉시 노출(타이핑 효과 없음).
   - 신규 요소가 푸터에 가려질 수 있는 경우, 노출 직전에 해당 요소만큼 부드럽게 스크롤 이동 후 표시.
@@ -139,7 +139,7 @@
   - AI 시작 보이스 처리: `aiSoundCdnYn == "Y"`이면 CDN host를 prepend해 재생, 아니면 `aiSoundFile`(byte[]) 재생.
 - **나레이션/미션 표기**
   - 나레이션 텍스트가 미션 안내인 경우 `missionActiveYn == "Y"`로 판단.
-  - 미션 활성 시 강조 색상/태그(원형 마크 등) 추가(추후 구체화).
+  - 미션 활성 시 강조 색상/태그(구현 완료: Mission 배지·핑크 강조).
 - **번역 index 규칙**
   - AI/사용자/나레이션 모두 “요소(element)”로 보고 0부터 순서대로 index 부여.
   - 녹음 중 mock 말풍선은 index 부여 대상이 아님.
@@ -159,14 +159,14 @@
   - 타이핑 모드: 마이크 아이콘 표시.
 - **입력 UI 활성화**
   - 비활성화된 힌트 버튼, 마이크 버튼, 텍스트 입력창은 나레이션 노출 후 다시 활성화.
-  - 사용자 안내 메시지는 추후 결정(현재 미구현).
+  - 사용자 안내 메시지(구현 완료: holdMicrophoneToSpeak, 500ms 미만 녹음 안내 등).
   - 사용자 턴에서 500ms 미만 녹음 시 처리하지 않고 안내 문구를 2초 노출 후 500ms fade-out 처리.
   - 미션 성공/실패 처리: 직전 나레이션이 미션 활성(`missionActiveYn == "Y"`)인 경우에만 user-message 응답의 `missionCompleteYn`으로 success/fail 판정.
 - **타이머/백그라운드 처리**
-  - 사용자의 첫 말풍선 노출 시점부터 duration 타이머 시작(1초 단위 감소).
+  - 사용자의 첫 말풍선 노출 시점부터 duration 타이머 시작(1초 단위 감소, 클라이언트 구현 완료).
   - 앱이 백그라운드로 이동했다가 복귀 시, 시작 시각과 복귀 시각 차이가 너무 크면 롤플레이 중단.
   - 실제 시작시간 대비 현재 시간이 1시간을 넘으면 무효 처리(백그라운드 체크 로직).
-  - 중단 시 서버 종료 처리 API 호출(TBD), 사용자 안내 후 Overview 복귀.
+  - 중단 시 서버 종료 처리 API 미구현(서버 타이머에 의존). 사용자 안내 후 Overview 복귀.
 - **오디오 재생 실패**
   - 기존 웹서비스에서 실패 사례가 없어 별도 대응 없음.
 
@@ -181,7 +181,7 @@
   - 미션 성공: `_setMissionSuccess(int stepIndex)` 호출
   - 미션 실패: `_setMissionFailed(int stepIndex)` 호출
 
-## 6-7. Playing 하단 푸터 영역 (임시)
+## 6-7. Playing 하단 푸터 영역
 - footer 구조: **서비스메시지 영역(높이 24)** + **입력 영역(녹음/타이핑 전환)** + **하단 아이콘 영역(높이 40)**.
 - 서비스메시지 영역은 `body-secondary`(bodyMedium) 텍스트를 공통으로 노출한다.
 - 하단 아이콘 영역:
@@ -197,11 +197,11 @@
   - 서비스메시지 영역 아래에 gap 10, 입력 영역(높이 44), 하단 gap 10 구성.
   - 입력 영역: 배경 `#353535`, 좌우 반원형 radius, placeholder `"Type your message ..."` 또는 비활성 시 `"Wait for your turn ..."`.
   - Send 버튼: 44x44 원형 배경(`#353535`)에 `icons/send.png` 24x24 중앙 배치.
-- **임시 제어 함수(PlayingScreen 내부)**:
-  - 녹음 상태 전환: `_setMicState(_MicButtonState next)` 및 `_handleMicTapDown/_handleMicTapUp`.
+- **제어 함수(PlayingScreen 내부)**:
+  - 녹음 상태 전환: `_setMicState(_MicButtonState next)` 및 `onPressStart/onPressEnd/onPressCancel`.
   - 타이핑 전송: `_handleSend()` (전송 시 입력 초기화 후 2초 비활성 → 활성).
 
-## 6-8. Playing 헤더 우측 속도 슬라이더 (임시)
+## 6-8. Playing 헤더 우측 속도 슬라이더
 - 닫기(X) 버튼이 있는 경우 우측 상단에 kebab 아이콘(`icons/kebab.png`)을 배치한다.
   - 아이콘 24x24, 터치 영역 40x40, top/right 16.
 - kebab 토글 시 우측에서 슬라이더 패널이 슬라이드 인/아웃 된다.
@@ -230,7 +230,7 @@
 - `sessionId`는 Roleplay 생명주기 동안 공통 상태로 보관하고 종료 시 삭제한다.
 - `isUserTurnYn`는 Playing 상태에서 사용자의 입력 가능 여부를 나타내며(`Y`/`N`),
   Roleplay 생명주기 동안 공통 상태로 보관한다.
-- 흐름/수명은 향후 지침에 따라 보완 예정
+- 흐름/수명 현행 구현 완료(필요 시 보완)
 
 ## 8. Overview UI 구성 (요약)
 - 상단 배경 이미지: `RoleplayDto.overviewImgPath`를 너비 100%로 고정 배치
