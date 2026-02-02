@@ -127,4 +127,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get holdMicrophoneToSpeak => 'Hold microphone to speak';
+
+  @override
+  String get yourTurnFirst => 'Your turn first!';
+
+  @override
+  String get sayLineBelowToStart => 'Say the line below to start.';
 }

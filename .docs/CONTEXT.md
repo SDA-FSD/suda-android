@@ -252,6 +252,7 @@
 - Roleplay Playing 나레이션 fade-in 노출 및 사용자 턴 활성화 처리 추가
 - Roleplay Playing 사용자 턴 입력 처리(녹음/타이핑, 말풍선 누적, 짧은 녹음 안내) 추가
 - Roleplay Playing 번역 인덱스/번역 토글 및 미션 실패 처리 추가
+- Roleplay Playing 힌트 아이콘 동작 개선: 힌트 탭 시 API 호출·힌트 말풍선(점선 테두리·투명·흰글씨), 턴당 1회·중복 비활성화, 3초 유휴 시 500ms 깜빡임, user-message 생성 시 힌트 말풍선 제거
 
 ## 13. 리팩토링 계획 문서
 - 롤플레이 기능 준비를 위한 리팩토링 작업 분해 문서는 `REFACTOR.md`에 기록

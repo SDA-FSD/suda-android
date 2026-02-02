@@ -315,6 +315,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Hold microphone to speak'**
   String get holdMicrophoneToSpeak;
+
+  /// No description provided for @yourTurnFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Your turn first!'**
+  String get yourTurnFirst;
+
+  /// No description provided for @sayLineBelowToStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Say the line below to start.'**
+  String get sayLineBelowToStart;
 }
 
 class _AppLocalizationsDelegate

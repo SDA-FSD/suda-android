@@ -146,3 +146,22 @@
   - **(1)+(4)**: 녹음 버튼 + 제스처를 **별도 위젯**으로 분리하고, 그 위젯이 “pressed / 드래그 / 취소 영역” 상태를 가짐.
   - **(3)**: 위 버튼 위젯 **내부**에서만 `ValueNotifier`(예: `offset`, `isCancelZone`) + `ValueListenableBuilder`로 UI 갱신. “녹음 시작/종료/에러”는 콜백으로 `RoleplayPlayingScreen`에 전달해, **필요할 때만** 상위 setState(대화 목록·로딩·서비스 메시지 등).
   - **(2)**: **LongPress 대신 Listener** 사용 권장. `onPointerDown` → pressed + 녹음 시작, `onPointerMove` → offset/취소 영역 갱신(ValueNotifier만 변경), `onPointerUp`/`onPointerCancel` → 녹음 종료/취소 처리. Tap/Pan 경합이 없어서 “살짝 움직였을 때 끊김”을 줄이기 좋음.
+
+---
+
+## 8. 위젯화 이후 드래그 끊김 원인
+
+### 원인 1: Transform.translate offset 미갱신
+- `ValueListenableBuilder`가 `_isPressed`만 구독
+- `effectiveOffset = isPressed ? _dragOffset.value : 0.0`인데, `_dragOffset` 변경 시 rebuild 없음
+- 드래그 중 버튼 위치가 갱신되지 않을 수 있음
+
+### 원인 2: _dragOffset 구독 시 과도한 rebuild
+- `Listenable.merge([_isPressed, _dragOffset])`로 두 값 모두 구독하면, pointer move마다 **전체 Stack rebuild**
+- `_buildDragArrows`(AnimatedBuilder, ShaderMask, SvgPicture)가 매번 다시 빌드됨 → 무거움
+- `_buildButton` 3단계 nested builder도 매번 함께 rebuild
+
+### 해결: Transform.translate만 _dragOffset으로 구독
+- `_isPressed` builder: Cancel 텍스트, 화살표 등 구조만
+- `_dragOffset` builder: **Transform.translate와 그 자식만** 감싸서 offset만 갱신
+- 드래그 중 Cancel·화살표는 rebuild하지 않음

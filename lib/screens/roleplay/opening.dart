@@ -13,13 +13,24 @@ import '../../utils/suda_json_util.dart';
 /// Roleplay Opening Screen (Full Screen)
 /// 
 /// Roleplay 시작 전 오프닝 화면
-class RoleplayOpeningScreen extends StatelessWidget {
+class RoleplayOpeningScreen extends StatefulWidget {
   final bool showCloseButton;
 
   const RoleplayOpeningScreen({
     super.key,
     this.showCloseButton = true,
   });
+
+  @override
+  State<RoleplayOpeningScreen> createState() => _RoleplayOpeningScreenState();
+}
+
+class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen> {
+  bool _isLoading = false;
+
+  void _restoreButton() {
+    if (mounted) setState(() => _isLoading = false);
+  }
 
   Future<void> _navigateToPlaying(BuildContext context) async {
     await TokenRefreshService.instance.refreshIfNeeded();
@@ -32,6 +43,7 @@ class RoleplayOpeningScreen extends StatelessWidget {
       if (!context.mounted) return;
       if (accessToken == null) {
         AppToast.show(context, 'Authentication required.');
+        _restoreButton();
         return;
       }
 
@@ -39,6 +51,7 @@ class RoleplayOpeningScreen extends StatelessWidget {
       final roleId = RoleplayStateService.instance.roleId;
       if (roleplayId == null || roleId == null) {
         AppToast.show(context, 'Cannot start roleplay');
+        _restoreButton();
         return;
       }
 
@@ -52,6 +65,7 @@ class RoleplayOpeningScreen extends StatelessWidget {
         final sessionId = session.sessionId;
         if (sessionId == null || sessionId.isEmpty) {
           AppToast.show(context, 'Cannot start roleplay');
+          _restoreButton();
           return;
         }
         RoleplayStateService.instance.setSessionId(sessionId);
@@ -61,16 +75,18 @@ class RoleplayOpeningScreen extends StatelessWidget {
         if (!context.mounted) return;
         if (e.toString().contains('HTTP 500')) {
           AppToast.show(context, 'Cannot start roleplay');
+          _restoreButton();
           return;
         }
         AppToast.show(context, 'Cannot start roleplay');
+        _restoreButton();
       }
     } else {
       // 권한 거부 시 안내
       if (!context.mounted) return;
-      
       final l10n = AppLocalizations.of(context)!;
       AppToast.show(context, l10n.microphonePermissionDenied);
+      _restoreButton();
     }
   }
 
@@ -107,7 +123,7 @@ class RoleplayOpeningScreen extends StatelessWidget {
         // Navigator.pop()이 자동으로 처리함
       },
       child: RoleplayScaffold(
-        showCloseButton: showCloseButton,
+        showCloseButton: widget.showCloseButton,
         title: titleEn,
         duration: durationFormatted,
         body: Center(
@@ -147,16 +163,35 @@ class RoleplayOpeningScreen extends StatelessWidget {
         footer: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            ElevatedButton(
-              onPressed: () => _navigateToPlaying(context),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF0CABA8),
-                foregroundColor: Colors.white,
-                shape: const StadiumBorder(),
-                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 18),
-                elevation: 0,
+            SizedBox(
+              width: MediaQuery.of(context).size.width * 0.4,
+              child: ElevatedButton(
+                onPressed: _isLoading
+                    ? null
+                    : () async {
+                        setState(() => _isLoading = true);
+                        await _navigateToPlaying(context);
+                      },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF0CABA8),
+                  foregroundColor: Colors.white,
+                  disabledBackgroundColor: const Color(0xFF0CABA8),
+                  disabledForegroundColor: Colors.white,
+                  shape: const StadiumBorder(),
+                  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 18),
+                  elevation: 0,
+                ),
+                child: _isLoading
+                    ? const SizedBox(
+                        height: 24,
+                        width: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
+                    : const Text("Let's Start"),
               ),
-              child: const Text("Let's Start"),
             ),
             const SizedBox(height: 50),
           ],

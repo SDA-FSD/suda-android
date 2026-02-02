@@ -127,4 +127,10 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get holdMicrophoneToSpeak => 'Segure o microfone para falar';
+
+  @override
+  String get yourTurnFirst => 'É sua vez primeiro!';
+
+  @override
+  String get sayLineBelowToStart => 'Diga a frase abaixo para começar.';
 }

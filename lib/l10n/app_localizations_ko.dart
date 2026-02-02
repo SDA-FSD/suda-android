@@ -122,4 +122,10 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get holdMicrophoneToSpeak => '마이크를 길게 누르고 말하세요';
+
+  @override
+  String get yourTurnFirst => '먼저 시작해주세요!';
+
+  @override
+  String get sayLineBelowToStart => '아래 문장을 말해서 시작하세요.';
 }

@@ -59,5 +59,7 @@
   "feedbackSend": "Enviar",
   "feedbackSuccess": "Obrigado pelo seu feedback.",
   "microphonePermissionDenied": "Não é possível iniciar sem permissão do microfone.",
-  "holdMicrophoneToSpeak": "Segure o microfone para falar"
+  "holdMicrophoneToSpeak": "Segure o microfone para falar",
+  "yourTurnFirst": "É sua vez primeiro!",
+  "sayLineBelowToStart": "Diga a frase abaixo para começar."
 }

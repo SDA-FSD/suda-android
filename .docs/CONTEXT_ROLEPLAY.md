@@ -133,7 +133,7 @@
   - 나레이션 응답의 `currentStep`이 존재하면 진행바 단계 업데이트에 반영한다.
 - **starter 처리**
   - `RoleplayDto.starter`는 `SudaJson`이며, `key = roleplayRoleId`, `value = 시작 대사`.
-  - 사용자 시작: 선택한 role의 id가 `starter.key`와 같으면 사용자 시작으로 판단. 첫 대사를 말하라는 1회성 안내 레이어 노출(추후 구현).
+  - 사용자 시작: 선택한 role의 id가 `starter.key`와 같으면 사용자 시작으로 판단. 첫 대사를 말하라는 1회성 안내 레이어 노출(본문 중앙 rgb(53,53,53) 배경, h2/body-secondary/흰박스+starter.value, l10n yourTurnFirst/sayLineBelowToStart, 사용자 말풍선 노출 시 해제).
   - AI 시작: 세션 초기화 응답으로 받은 AI 시작 보이스를 사용. Playing 진입 후 500ms 대기 → AI 말풍선 노출 시작 → 즉시 나레이션 호출.
   - AI 시작 메시지 노출: Playing 본문에 AI 말풍선 표시(본문 width 70%). 아바타는 `userRoleDto.avatarImgPath`에 CDN host를 prepend, 텍스트는 `starter.value` 사용. 음성 길이에 맞춰 타이핑 속도 조절.
   - AI 시작 보이스 처리: `aiSoundCdnYn == "Y"`이면 CDN host를 prepend해 재생, 아니면 `aiSoundFile`(byte[]) 재생.
@@ -146,8 +146,13 @@
 - **번역 캐시 범위**
   - 하나의 롤플레이 상태값 생명주기와 동일한 범위로 캐시 유지.
 - **힌트 버튼 활성 조건**
-  - 나레이션이 마지막 요소인 사용자 턴에만 활성화.
+  - 사용자 턴이기만 하면 활성화.
   - user-message 관련 API 호출 시작 시점부터 그 외 모든 상태는 비활성화.
+- **힌트 버튼 동작**
+  - 탭 시 `GET /v1/roleplay-sessions/{sessionId}/hint` 호출 후 응답 텍스트를 힌트 말풍선으로 표시(우측 정렬, 흰색 점선 테두리·투명 배경·흰색 글씨).
+  - 한 사용자 턴에서 한 번만 사용 가능(탭 즉시 비활성화, 해당 턴 종료까지 유지).
+  - 힌트 말풍선은 실제 user-message(텍스트/음성) 전송 후 사용자 말풍선이 추가되는 시점에 제거.
+  - 사용자 턴 활성화 후 녹음 모드에서 3초 동안 녹음 버튼을 누르지 않으면 힌트 아이콘에 500ms fade-in/out 깜빡임 효과 표시. 녹음 시작·입력 전송·타이핑 모드 전환 시 깜빡임 해제.
 - **입력 모드 전환**
   - 녹음 모드 기본. 좌측 하단 아이콘으로 전환.
   - 녹음 모드: 키보드 아이콘 표시.
