@@ -10,6 +10,7 @@ import 'package:just_audio/just_audio.dart';
 import 'package:record/record.dart';
 import '../../config/app_config.dart';
 import '../../l10n/app_localizations.dart';
+import '../../models/roleplay_models.dart';
 import '../../widgets/roleplay_scaffold.dart';
 import '../../routes/roleplay_router.dart';
 import '../../services/roleplay_state_service.dart';
@@ -55,6 +56,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
   Timer? _serviceMessageTimer;
   bool _isServiceMessageVisible = false;
   String? _serviceMessageText;
+  Color? _serviceMessageColor;
   int _nextConversationIndex = 0;
   bool _wasMissionActive = false;
   final Map<int, _MissionStatus> _missionStatuses = {};
@@ -69,6 +71,9 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
   int _committedSpeedIndex = 0;
   late final AnimationController _loadingRotationController;
   bool _showUserStartGuide = false;
+  bool _showExitLayer = false;
+  int _kebabTapCount = 0;
+  Timer? _kebabTapResetTimer;
   static const double _headerTopSpacing = 108;
   static const List<int> _speedRateSteps = [150, 120, 100, 70];
 
@@ -104,6 +109,8 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     _loadingRotationController.dispose();
     _hintIdleTimer?.cancel();
     _hintIdleTimer = null;
+    _kebabTapResetTimer?.cancel();
+    _kebabTapResetTimer = null;
     _hintBlinkController.dispose();
     super.dispose();
   }
@@ -341,7 +348,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
       return;
     }
     if (narration.resultId != null) {
-      _showServiceMessage('Roleplay finish detected.', persistent: true);
+      _handleResultIdEnding(narration);
       return;
     }
     if (narration.text == null || narration.text!.isEmpty) {
@@ -495,6 +502,83 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     setState(() {
       _isSpeedPanelVisible = !_isSpeedPanelVisible;
     });
+  }
+
+  /// (임시조치) 케밥 아이콘 연속 5회 터치 시 resultId=541 기반 ending 플로우 트리거. Playing 이후 흐름(Ending→Result) 테스트용.
+  void _onKebabTap() {
+    _kebabTapResetTimer?.cancel();
+    _kebabTapResetTimer = null;
+    _kebabTapCount += 1;
+    if (_kebabTapCount >= 5) {
+      _kebabTapCount = 0;
+      _triggerTempEndingFlow();
+      return;
+    }
+    _kebabTapResetTimer = Timer(const Duration(seconds: 2), () {
+      if (mounted) {
+        setState(() => _kebabTapCount = 0);
+      }
+      _kebabTapResetTimer = null;
+    });
+    _toggleSpeedPanel();
+  }
+
+  void _triggerTempEndingFlow() async {
+    const resultId = 541;
+    final l10n = AppLocalizations.of(context)!;
+    _showEndedServiceMessage(l10n.roleplayEndedEnding);
+    _serviceMessageTimer?.cancel();
+
+    final accessToken = await TokenStorage.loadAccessToken();
+    final Future<RoleplayResultDto?> resultFuture = accessToken != null
+        ? SudaApiClient.getRoleplayResult(
+            accessToken: accessToken,
+            resultId: resultId,
+          ).then<RoleplayResultDto?>((r) => r)
+        : Future<RoleplayResultDto?>.value(null);
+
+    final futures = <Future<dynamic>>[
+      Future<void>.delayed(const Duration(seconds: 3)),
+      resultFuture,
+    ];
+    if (mounted) {
+      RoleplayRoleDto? role;
+      final roleList = RoleplayStateService.instance.overview?.roleplay?.roleList;
+      final roleId = RoleplayStateService.instance.roleId;
+      if (roleList != null && roleId != null) {
+        for (final r in roleList) {
+          if (r.id == roleId) {
+            role = r;
+            break;
+          }
+        }
+      }
+      final imgPath = role?.endingList?.isNotEmpty == true
+          ? role!.endingList!.first.imgPath
+          : null;
+      if (imgPath != null && imgPath.isNotEmpty) {
+        final imageUrl = '${AppConfig.cdnBaseUrl}$imgPath';
+        futures.add(
+          precacheImage(
+            CachedNetworkImageProvider(imageUrl),
+            context,
+          ).then((_) => null),
+        );
+      }
+    }
+
+    try {
+      await Future.wait(futures);
+      if (!mounted) return;
+      final result = await resultFuture;
+      RoleplayStateService.instance.setCachedResult(result);
+    } catch (e) {
+      debugPrint('[DEBUG] getRoleplayResult error: $e');
+      if (!mounted) return;
+      RoleplayStateService.instance.setCachedResult(null);
+    }
+    if (!mounted) return;
+    RoleplayRouter.replaceWithEnding(context);
   }
 
   void _setSpeedIndexFromOffset({
@@ -1067,6 +1151,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     _serviceMessageTimer?.cancel();
     setState(() {
       _serviceMessageText = message;
+      _serviceMessageColor = null;
       _isServiceMessageVisible = true;
     });
     if (persistent) return;
@@ -1082,6 +1167,105 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
         });
       });
     });
+  }
+
+  static const Color _endedMessageColor = Color(0xFF0CABA8);
+
+  void _showEndedServiceMessage(String message) {
+    _serviceMessageTimer?.cancel();
+    setState(() {
+      _serviceMessageText = message;
+      _serviceMessageColor = _endedMessageColor;
+      _isServiceMessageVisible = true;
+    });
+  }
+
+  int get _totalMissionCount => _missionStatuses.length;
+
+  int get _completedMissionCount =>
+      _missionStatuses.values
+          .where((s) => s == _MissionStatus.success)
+          .length;
+
+  bool get _allMissionsCompleted =>
+      _totalMissionCount > 0 && _completedMissionCount == _totalMissionCount;
+
+  Future<void> _handleResultIdEnding(RoleplayNarrationDto narration) async {
+    final resultId = narration.resultId!;
+    final l10n = AppLocalizations.of(context)!;
+
+    if (resultId == 0) {
+      _showEndedServiceMessage(l10n.roleplayEndedFailed);
+      _serviceMessageTimer?.cancel();
+      _serviceMessageTimer = Timer(const Duration(seconds: 3), () {
+        if (!mounted) return;
+        RoleplayRouter.replaceWithFailed(context);
+      });
+      return;
+    }
+
+    final allCompleted = _allMissionsCompleted;
+    final String endedMessage = allCompleted
+        ? l10n.roleplayEndedEnding
+        : (_remainingSeconds == 0
+            ? l10n.roleplayEndedTimesup
+            : l10n.roleplayEndedComplete);
+    _showEndedServiceMessage(endedMessage);
+
+    final accessToken = await TokenStorage.loadAccessToken();
+    final Future<RoleplayResultDto?> resultFuture = accessToken != null
+        ? SudaApiClient.getRoleplayResult(
+            accessToken: accessToken,
+            resultId: resultId,
+          ).then<RoleplayResultDto?>((r) => r)
+        : Future<RoleplayResultDto?>.value(null);
+
+    final futures = <Future<dynamic>>[
+      Future<void>.delayed(const Duration(seconds: 3)),
+      resultFuture,
+    ];
+    if (allCompleted && mounted) {
+      RoleplayRoleDto? role;
+      final roleList = RoleplayStateService.instance.overview?.roleplay?.roleList;
+      final roleId = RoleplayStateService.instance.roleId;
+      if (roleList != null && roleId != null) {
+        for (final r in roleList) {
+          if (r.id == roleId) {
+            role = r;
+            break;
+          }
+        }
+      }
+      final imgPath = role?.endingList?.isNotEmpty == true
+          ? role!.endingList!.first.imgPath
+          : null;
+      if (imgPath != null && imgPath.isNotEmpty) {
+        final imageUrl = '${AppConfig.cdnBaseUrl}$imgPath';
+        futures.add(
+          precacheImage(
+            CachedNetworkImageProvider(imageUrl),
+            context,
+          ).then((_) => null),
+        );
+      }
+    }
+
+    try {
+      await Future.wait(futures);
+      if (!mounted) return;
+      final result = await resultFuture;
+      RoleplayStateService.instance.setCachedResult(result);
+    } catch (e) {
+      debugPrint('[DEBUG] getRoleplayResult error: $e');
+      if (!mounted) return;
+      RoleplayStateService.instance.setCachedResult(null);
+    }
+    if (!mounted) return;
+    if (allCompleted) {
+      RoleplayRouter.replaceWithEnding(context);
+    } else {
+      RoleplayRouter.replaceWithResult(context);
+    }
   }
 
   Future<void> _sendUserMessageAudio(Uint8List audioData) async {
@@ -1509,33 +1693,17 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     RoleplayRouter.replaceWithFailed(context);
   }
 
-  Future<bool> _handleBackButton(BuildContext context) async {
-    // 뒤로가기 시 얼럿 표시
-    final shouldPop = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Notification'),
-        content: const Text('Exit from page'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
+  void _handleBackButton(BuildContext context) {
+    setState(() => _showExitLayer = true);
+  }
 
-    if (shouldPop == true && context.mounted) {
-      // playing screen 삭제하고 overview로 돌아감
-      // overview는 Sub Screen이므로 Navigator.popUntil으로 overview까지 pop
-      RoleplayRouter.popToOverview(context);
-    }
+  void _dismissExitLayer() {
+    if (mounted) setState(() => _showExitLayer = false);
+  }
 
-    return false; // PopScope가 자동으로 pop하지 않도록
+  void _confirmExit(BuildContext context) {
+    _dismissExitLayer();
+    if (context.mounted) RoleplayRouter.popToOverview(context);
   }
 
   @override
@@ -1555,10 +1723,8 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
 
     return PopScope(
       canPop: false,
-      onPopInvoked: (didPop) async {
-        if (!didPop) {
-          await _handleBackButton(context);
-        }
+      onPopInvoked: (didPop) {
+        if (!didPop) _handleBackButton(context);
       },
       child: Stack(
         children: [
@@ -1640,7 +1806,8 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
                           style: Theme.of(context)
                               .textTheme
                               .bodyMedium
-                              ?.copyWith(color: Colors.white),
+                              ?.copyWith(
+                                  color: _serviceMessageColor ?? Colors.white),
                         ),
                       ),
                     ),
@@ -1810,7 +1977,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
               top: topInset + 16,
               right: 16,
               child: GestureDetector(
-                onTap: _toggleSpeedPanel,
+                onTap: _onKebabTap,
                 child: SizedBox(
                   width: 40,
                   height: 40,
@@ -1825,7 +1992,79 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
               ),
             ),
           if (widget.showCloseButton) _buildSpeedPanel(context),
+          if (_showExitLayer) Positioned.fill(child: _buildExitLayer(context)),
         ],
+      ),
+    );
+  }
+
+  Widget _buildExitLayer(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context).textTheme;
+    const guideColor = Color(0xFF0CABA8);
+    final padding = MediaQuery.of(context).padding;
+
+    return Material(
+      color: Colors.transparent,
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+        child: Container(
+          color: const Color(0xB25A5A5A),
+          padding: EdgeInsets.only(
+            top: padding.top,
+            bottom: padding.bottom,
+            left: padding.left + 24,
+            right: padding.right + 24,
+          ),
+          child: SafeArea(
+            top: false,
+            bottom: false,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const SizedBox.shrink(),
+                Text(
+                  l10n.roleplayExitWait,
+                  style: theme.headlineMedium?.copyWith(color: guideColor),
+                  textAlign: TextAlign.center,
+                ),
+                Text(
+                  l10n.roleplayExitMessage,
+                  style: theme.bodyLarge?.copyWith(color: Colors.white),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.4,
+                  child: ElevatedButton(
+                    onPressed: _dismissExitLayer,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: guideColor,
+                      foregroundColor: Colors.white,
+                      shape: const StadiumBorder(),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 30,
+                        vertical: 18,
+                      ),
+                      elevation: 0,
+                    ),
+                    child: Text(l10n.roleplayExitKeepPlaying),
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () => _confirmExit(context),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: Text(
+                      l10n.roleplayExitExit,
+                      style: theme.bodyLarge?.copyWith(color: Colors.white),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

@@ -1,3 +1,4 @@
+import '../models/roleplay_models.dart';
 import 'suda_api_client.dart';
 
 /// In-memory storage for the current roleplay overview context.
@@ -14,6 +15,7 @@ class RoleplayStateService {
   RoleplaySessionDto? _session;
   String? _isUserTurnYn;
   UserDto? _user;
+  RoleplayResultDto? _cachedResult;
 
   RoleplayOverviewDto? get overview => _overview;
   int? get roleplayId => _roleplayId;
@@ -22,6 +24,7 @@ class RoleplayStateService {
   RoleplaySessionDto? get session => _session;
   String? get isUserTurnYn => _isUserTurnYn;
   UserDto? get user => _user;
+  RoleplayResultDto? get cachedResult => _cachedResult;
 
   void setOverview({
     required int roleplayId,
@@ -51,6 +54,10 @@ class RoleplayStateService {
     _user = user;
   }
 
+  void setCachedResult(RoleplayResultDto? result) {
+    _cachedResult = result;
+  }
+
   void clear() {
     _roleplayId = null;
     _overview = null;
@@ -59,5 +66,6 @@ class RoleplayStateService {
     _session = null;
     _isUserTurnYn = null;
     _user = null;
+    _cachedResult = null;
   }
 }

@@ -128,4 +128,46 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get sayLineBelowToStart => '아래 문장을 말해서 시작하세요.';
+
+  @override
+  String get roleplayExitWait => '잠깐!';
+
+  @override
+  String get roleplayExitMessage => '지금 나가면 보상을 놓치게 됩니다. 정말 나가시겠습니까?';
+
+  @override
+  String get roleplayExitKeepPlaying => '계속 플레이';
+
+  @override
+  String get roleplayExitExit => '나가기';
+
+  @override
+  String get roleplayEndedFailed => '미션을 실패했습니다...';
+
+  @override
+  String get roleplayEndedTimesup => '시간이 소진되었습니다...';
+
+  @override
+  String get roleplayEndedComplete => '롤플레이를 완료했습니다';
+
+  @override
+  String get roleplayEndedEnding => '엔딩으로 이동합니다...';
+
+  @override
+  String get endingFailTitle => '모든 미션을 완수하지 못했습니다!';
+
+  @override
+  String get endingFailSubtitle => '다시 시도하여 전체 스토리를 발견하세요.';
+
+  @override
+  String get endingReport => '리포트';
+
+  @override
+  String get endingHowWas => '롤플레이는 어떠셨나요?';
+
+  @override
+  String get endingNext => '다음';
+
+  @override
+  String get reportTitle => '문제 신고';
 }

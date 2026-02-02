@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:marquee/marquee.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../config/app_config.dart';
+import '../../models/user_models.dart';
 import '../../services/roleplay_state_service.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
@@ -18,10 +19,12 @@ import '../../routes/roleplay_router.dart';
 /// Roleplay 목록 및 개요를 표시하는 화면
 class RoleplayOverviewScreen extends StatefulWidget {
   final int roleplayId;
+  final UserDto? user;
 
   const RoleplayOverviewScreen({
     super.key,
     required this.roleplayId,
+    this.user,
   });
 
   static const String routeName = '/roleplay/overview';
@@ -75,6 +78,9 @@ class _RoleplayOverviewScreenState extends State<RoleplayOverviewScreen> {
         _overview = null;
       });
       RoleplayStateService.instance.clear();
+      if (widget.user != null) {
+        RoleplayStateService.instance.setUser(widget.user);
+      }
       final overview = await SudaApiClient.getRoleplayOverview(
         accessToken: accessToken,
         roleplayId: roleplayId,

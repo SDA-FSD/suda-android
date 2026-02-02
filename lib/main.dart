@@ -15,6 +15,7 @@ import 'services/token_refresh_service.dart';
 import 'screens/login.dart';
 import 'screens/home.dart';
 import 'screens/profile.dart';
+import 'screens/alarm_message.dart';
 import 'screens/agreement.dart';
 import 'config/app_config.dart';
 import 'utils/language_util.dart';
@@ -51,7 +52,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   String? _accessToken;
   UserDto? _user;
   bool _isLoading = true;
-  String _currentMainScreen = 'home'; // 'home' or 'profile'
+  String _currentMainScreen = 'home'; // 'alarm' | 'home' | 'profile'
   bool _hasCheckedVersion = false; // 버전 체크 실행 여부
   bool _needsAgreement = false; // 서비스 이용 동의 필요 여부
 
@@ -262,6 +263,13 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   }
 
   /// GNB를 통한 화면 전환
+  void _navigateToAlarm() {
+    setState(() {
+      _currentMainScreen = 'alarm';
+    });
+  }
+
+  /// GNB를 통한 화면 전환
   void _navigateToProfile() {
     setState(() {
       _currentMainScreen = 'profile';
@@ -315,14 +323,27 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   onAgreementComplete: _onAgreementComplete,
                 )
               : IndexedStack(
-                  index: _currentMainScreen == 'home' ? 0 : 1,
+                  index: _currentMainScreen == 'alarm'
+                      ? 0
+                      : _currentMainScreen == 'home'
+                          ? 1
+                          : 2,
                   children: [
+                    AlarmMessageScreen(
+                      onNavigateToHome: _navigateToHome,
+                      onNavigateToProfile: _navigateToProfile,
+                      onNavigateToAlarm: _navigateToAlarm,
+                      isActive: _currentMainScreen == 'alarm',
+                      user: _user,
+                    ),
                     HomeScreen(
+                      onNavigateToAlarm: _navigateToAlarm,
                       onNavigateToProfile: _navigateToProfile,
                       user: _user,
                     ),
                     ProfileScreen(
                       onNavigateToHome: _navigateToHome,
+                      onNavigateToAlarm: _navigateToAlarm,
                       onSignOut: _onSignOut,
                       user: _user,
                       onUserUpdated: (user) {

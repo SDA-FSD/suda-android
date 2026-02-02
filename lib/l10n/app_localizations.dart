@@ -327,6 +327,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Say the line below to start.'**
   String get sayLineBelowToStart;
+
+  /// No description provided for @roleplayExitWait.
+  ///
+  /// In en, this message translates to:
+  /// **'Wait!'**
+  String get roleplayExitWait;
+
+  /// No description provided for @roleplayExitMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'If you leave now, you\'ll miss your reward. Are you sure you want to leave?'**
+  String get roleplayExitMessage;
+
+  /// No description provided for @roleplayExitKeepPlaying.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep Playing'**
+  String get roleplayExitKeepPlaying;
+
+  /// No description provided for @roleplayExitExit.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit'**
+  String get roleplayExitExit;
+
+  /// No description provided for @roleplayEndedFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Mission Failed...'**
+  String get roleplayEndedFailed;
+
+  /// No description provided for @roleplayEndedTimesup.
+  ///
+  /// In en, this message translates to:
+  /// **'Time has run out...'**
+  String get roleplayEndedTimesup;
+
+  /// No description provided for @roleplayEndedComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Roleplay Completed'**
+  String get roleplayEndedComplete;
+
+  /// No description provided for @roleplayEndedEnding.
+  ///
+  /// In en, this message translates to:
+  /// **'Moving to ending...'**
+  String get roleplayEndedEnding;
+
+  /// No description provided for @endingFailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You didn\'t complete all the missions!'**
+  String get endingFailTitle;
+
+  /// No description provided for @endingFailSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again and uncover the full story.'**
+  String get endingFailSubtitle;
+
+  /// No description provided for @endingReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Report'**
+  String get endingReport;
+
+  /// No description provided for @endingHowWas.
+  ///
+  /// In en, this message translates to:
+  /// **'How was the Roleplay?'**
+  String get endingHowWas;
+
+  /// No description provided for @endingNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get endingNext;
+
+  /// No description provided for @reportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Report Issue'**
+  String get reportTitle;
 }
 
 class _AppLocalizationsDelegate

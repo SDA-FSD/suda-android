@@ -61,5 +61,19 @@
   "microphonePermissionDenied": "Cannot start without microphone permission.",
   "holdMicrophoneToSpeak": "Hold microphone to speak",
   "yourTurnFirst": "Your turn first!",
-  "sayLineBelowToStart": "Say the line below to start."
+  "sayLineBelowToStart": "Say the line below to start.",
+  "roleplayExitWait": "Wait!",
+  "roleplayExitMessage": "If you leave now, you'll miss your reward. Are you sure you want to leave?",
+  "roleplayExitKeepPlaying": "Keep Playing",
+  "roleplayExitExit": "Exit",
+  "roleplayEndedFailed": "Mission Failed...",
+  "roleplayEndedTimesup": "Time has run out...",
+  "roleplayEndedComplete": "Roleplay Completed",
+  "roleplayEndedEnding": "Moving to ending...",
+  "endingFailTitle": "You didn't complete all the missions!",
+  "endingFailSubtitle": "Try again and uncover the full story.",
+  "endingReport": "Report",
+  "endingHowWas": "How was the Roleplay?",
+  "endingNext": "Next",
+  "reportTitle": "Report Issue"
 }

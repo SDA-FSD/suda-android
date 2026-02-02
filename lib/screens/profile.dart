@@ -1,4 +1,4 @@
-import 'dart:ui';
+import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -7,10 +7,12 @@ import '../services/token_storage.dart';
 import '../services/suda_api_client.dart';
 import '../utils/sub_screen_route.dart';
 import '../widgets/app_scaffold.dart';
+import '../widgets/gnb_bar.dart';
 import 'setting/setting.dart';
 
 class ProfileScreen extends StatefulWidget {
   final VoidCallback? onNavigateToHome;
+  final VoidCallback? onNavigateToAlarm;
   final VoidCallback? onSignOut;
   final UserDto? user;
   final ValueChanged<UserDto>? onUserUpdated;
@@ -19,6 +21,7 @@ class ProfileScreen extends StatefulWidget {
   const ProfileScreen({
     super.key,
     this.onNavigateToHome,
+    this.onNavigateToAlarm,
     this.onSignOut,
     this.user,
     this.onUserUpdated,
@@ -150,7 +153,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       ],
       usePadding: false, // 풀-폭 그라데이션을 위해 본문 패딩 제거
-      bottomNavigationBar: _buildGNB(context),
+      bottomNavigationBar: GnbBar(
+        isAlarmActive: false,
+        isHomeActive: false,
+        isProfileActive: true,
+        onAlarmTap: widget.onNavigateToAlarm,
+        onHomeTap: widget.onNavigateToHome,
+        onProfileTap: () {},
+        user: widget.user,
+      ),
       body: Stack(
         children: [
           // 1) 프로필 박스 배경 그라데이션 (상단 80 지점부터 시작)
@@ -269,58 +280,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildGNB(BuildContext context) {
-    return Container(
-      color: const Color(0xFF121212),
-      child: SafeArea(
-        top: false,
-        bottom: true,
-        child: Container(
-          height: 56,
-          decoration: BoxDecoration(
-            color: const Color(0xFF121212),
-            border: Border(
-              top: BorderSide(
-                color: Colors.grey[800]!,
-                width: 0.5,
-              ),
-            ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              // Home 버튼 (왼쪽)
-              Expanded(
-                child: InkWell(
-                  onTap: widget.onNavigateToHome,
-                  child: Container(
-                    alignment: Alignment.center,
-                    child: Text(
-                      'Home',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey[400]),
-                    ),
-                  ),
-                ),
-              ),
-              // Profile 버튼 (오른쪽)
-              Expanded(
-                child: InkWell(
-                  onTap: () {},
-                  child: Container(
-                    alignment: Alignment.center,
-                    child: Text(
-                      'Profile',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: Colors.white),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 class _ProfileAvatar extends StatelessWidget {

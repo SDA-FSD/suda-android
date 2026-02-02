@@ -133,4 +133,48 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get sayLineBelowToStart => 'Diga a frase abaixo para começar.';
+
+  @override
+  String get roleplayExitWait => 'Segura aí!';
+
+  @override
+  String get roleplayExitMessage =>
+      'Se sair agora, perderá sua recompensa. Tem certeza de que deseja sair?';
+
+  @override
+  String get roleplayExitKeepPlaying => 'Continuar Jogando';
+
+  @override
+  String get roleplayExitExit => 'Sair';
+
+  @override
+  String get roleplayEndedFailed => 'Missão falhou...';
+
+  @override
+  String get roleplayEndedTimesup => 'O tempo acabou...';
+
+  @override
+  String get roleplayEndedComplete => 'Roleplay concluído';
+
+  @override
+  String get roleplayEndedEnding => 'Indo para o final em breve...';
+
+  @override
+  String get endingFailTitle => 'Você não completou todas as missões!';
+
+  @override
+  String get endingFailSubtitle =>
+      'Tente novamente para descobrir a história completa.';
+
+  @override
+  String get endingReport => 'Relatório';
+
+  @override
+  String get endingHowWas => 'Como foi o Roleplay?';
+
+  @override
+  String get endingNext => 'Próximo';
+
+  @override
+  String get reportTitle => 'Relatar Problema';
 }

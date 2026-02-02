@@ -1,16 +1,42 @@
 import 'package:flutter/material.dart';
+
+import '../models/user_models.dart';
 import '../widgets/app_scaffold.dart';
+import '../widgets/gnb_bar.dart';
 
 class AlarmMessageScreen extends StatelessWidget {
-  const AlarmMessageScreen({super.key});
+  const AlarmMessageScreen({
+    super.key,
+    this.onNavigateToHome,
+    this.onNavigateToProfile,
+    this.onNavigateToAlarm,
+    this.isActive = false,
+    this.user,
+  });
+
+  final VoidCallback? onNavigateToHome;
+  final VoidCallback? onNavigateToProfile;
+  final VoidCallback? onNavigateToAlarm;
+  final bool isActive;
+  final UserDto? user;
 
   static const String routeName = '/alarm_message';
 
   @override
   Widget build(BuildContext context) {
-    return const AppScaffold(
+    return AppScaffold(
+      showBackButton: false,
       centerTitle: 'Alarm Message',
-      body: Center(
+      bottomNavigationBar: GnbBar(
+        isAlarmActive: true,
+        isHomeActive: false,
+        isProfileActive: false,
+        onAlarmTap: () {},
+        onHomeTap: onNavigateToHome,
+        onProfileTap: onNavigateToProfile,
+        user: user,
+      ),
+      body: const Center(
         child: Text(
           'No messages yet.',
           style: TextStyle(color: Colors.white),

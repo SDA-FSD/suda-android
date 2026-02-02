@@ -41,11 +41,12 @@
 - 시스템 뒤로가기 버튼 클릭 시: 이전 화면으로 이동 (일반적인 네비게이션 스택 동작)
 
 **GNB 구성**:
-- 현재: Home 버튼, Profile 버튼 (2개)
+- 현재: Alarm 버튼, Home 버튼, Profile 버튼 (3개)
 - 향후: Profile 버튼 영역을 사용자 이미지 아이콘으로 대체 예정
 
 **사용 예시**:
-- HomeScreen (홈 화면) - Main Screen으로 전환 예정
+- AlarmMessageScreen (알림 메시지 화면) - Main Screen
+- HomeScreen (홈 화면) - Main Screen
 - ProfileScreen (프로필 화면) - Main Screen 속성
 
 **구현 규칙**:
@@ -90,9 +91,9 @@
 | GNB | ❌ 없음 | ✅ 있음 (하단) | ❌ 없음 |
 | 독립적 표시 | ✅ 예 | ✅ 예 | ❌ 아니오 (덮어서 표시) |
 | 진입 애니메이션 | 일반 전환 | 일반 전환 | 우측→좌측 슬라이드 |
-| 뒤로가기 버튼 | ❌ 없음 | ❌ 없음 | ✅ 있음 (좌측 상단 화살표) |
+| 뒤로가기 버튼 | ❌ 없음 | ❌ 없음 | ✅ 있음 (우측 상단 X) |
 | 시스템 뒤로가기 | 앱 종료 | 이전 화면 | 슬라이드 아웃 |
-| 사용 예시 | LoginScreen | HomeScreen, ProfileScreen | 상세 화면, 설정 화면 |
+| 사용 예시 | LoginScreen | AlarmMessageScreen, HomeScreen, ProfileScreen | 상세 화면, 설정 화면 |
 
 ---
 
@@ -220,27 +221,27 @@
 ### 이전 스크린 정보 (진입점)
 - **네이티브 스플래시**: 저장된 JWT 토큰이 유효하고 사용자 정보 조회 성공 시 (스플래시 제거 후 표시)
 - **LoginScreen**: Google 로그인 성공 및 JWT 토큰 발급 성공 시
+- **AlarmMessageScreen**: GNB의 Home 버튼 클릭 시
 - **ProfileScreen**: GNB의 Home 버튼 클릭 시
 - **조건**: `_MyAppState`의 `_accessToken != null`이고 `_currentMainScreen == 'home'`일 때 표시
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
+- **AlarmMessageScreen**: GNB의 Alarm 버튼 클릭 시
+  - `onNavigateToAlarm` 콜백 호출 → `_MyAppState._navigateToAlarm()` 실행 → 상태 업데이트로 전환
 - **ProfileScreen**: GNB의 Profile 버튼 클릭 시
   - `onNavigateToProfile` 콜백 호출 → `_MyAppState._navigateToProfile()` 실행 → 상태 업데이트로 전환
-- **AlarmMessageScreen** (Sub Screen): 우측 상단 Info 아이콘 클릭 시
-  - `Navigator.push()`로 iOS 스타일 슬라이드 애니메이션으로 표시
 - **RoleplayOverviewScreen** (Sub Screen): (현재는 명시적 버튼 없음, 향후 추가 예정)
   - 향후 n개의 롤플레이가 Home Screen에 게시될 예정
 
 ### 스크린 내부 구현 특이사항
 - **스크린 타입 특성**: Main Screen
   - **GNB 포함**: 하단 네비게이션 바 필수 포함 (AppScaffold의 `bottomNavigationBar` 사용)
-  - GNB 구성: 왼쪽 "Home" (현재 화면, 흰색), 오른쪽 "Profile" (회색)
+  - GNB 구성: 왼쪽 "Alarm" (회색), 중앙 "Home" (현재 화면, 흰색), 오른쪽 "Profile" (회색)
   - GNB 색상: 검정 (`Colors.black`) - 시스템 네비게이션 바와 색상 통일
 - **UI 구성**: `AppScaffold`를 사용하여 표준 레이아웃 적용
   - **상단 여백**: 70 (표준)
   - **헤더**:
     - 좌측: "Hi, {userName}!" 인사말 (`AppScaffold.title` 사용)
-    - 우측: Info 아이콘 (`AppScaffold.actions` 사용)
   - **메인 콘텐츠**:
     - **홈 배너**: 
       - 위치: 상단 여백 70 바로 아래
@@ -261,6 +262,7 @@
 - **초기화 작업**: `initState()`에서 `_performInitialization()` 호출 (한 번만 실행)
   - `_isInitialized` 플래그로 중복 실행 방지
 - **Props**:
+  - `onNavigateToAlarm`: Alarm 화면으로 이동 시 호출되는 콜백
   - `onNavigateToProfile`: Profile 화면으로 이동 시 호출되는 콜백
   - `user`: 앱 메모리에 저장된 사용자 정보 (UserDto)
 
@@ -282,9 +284,13 @@
 ### 이전 스크린 정보 (진입점)
 - **HomeScreen**: GNB의 Profile 버튼 클릭 시
   - `onNavigateToProfile` 콜백 호출 → `_MyAppState._navigateToProfile()` 실행 → 상태 업데이트로 전환
+- **AlarmMessageScreen**: GNB의 Profile 버튼 클릭 시
+  - `onNavigateToProfile` 콜백 호출 → 상태 업데이트로 전환
 - **조건**: `_MyAppState`의 `_accessToken != null`이고 `_currentMainScreen == 'profile'`일 때 표시
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
+- **AlarmMessageScreen**: GNB의 Alarm 버튼 클릭 시
+  - `onNavigateToAlarm` 콜백 호출 → 상태 업데이트로 전환
 - **HomeScreen**: GNB의 Home 버튼 클릭 시
   - `onNavigateToHome` 콜백 호출 → `_MyAppState._navigateToHome()` 실행 → 상태 업데이트로 전환
 - **SettingScreen** (Sub Screen): 우측 상단 원형 버튼 클릭 시
@@ -293,7 +299,7 @@
 ### 스크린 내부 구현 특이사항
 - **스크린 타입 특성**: Main Screen
   - **GNB 포함**: 하단 네비게이션 바 필수 포함 (AppScaffold의 `bottomNavigationBar` 사용)
-  - GNB 구성: 왼쪽 "Home" (회색), 오른쪽 "Profile" (현재 화면, 흰색)
+  - GNB 구성: 왼쪽 "Alarm" (회색), 중앙 "Home" (회색), 오른쪽 "Profile" (현재 화면, 흰색)
   - GNB 색상: 검정 (`Colors.black`) - 시스템 네비게이션 바와 색상 통일
 - **UI 구성**: `AppScaffold`를 사용하여 표준 레이아웃 적용
   - **상단 여백**: 70 (표준)
@@ -310,6 +316,7 @@
     - Progress Box 아래 gap 50 이후, 남은 하단 영역은 추후 히스토리 영역 예정 (현재는 빈 상태)
 - **Props**:
   - `onNavigateToHome`: Home 화면으로 이동 시 호출되는 콜백 (VoidCallback?)
+  - `onNavigateToAlarm`: Alarm 화면으로 이동 시 호출되는 콜백 (VoidCallback?)
   - `onSignOut`: 로그아웃 시 호출되는 콜백 (VoidCallback?)
   - `user`: 앱 메모리에 저장된 사용자 정보 (UserDto?)
 
@@ -459,22 +466,31 @@
 ### 스크린 관련 정의 파일
 - **파일 경로**: `lib/screens/alarm_message.dart`
 - **클래스명**: `AlarmMessageScreen` (StatelessWidget)
-- **스크린 타입**: **Sub Screen**
+- **스크린 타입**: **Main Screen**
 
 ### 스크린 용도
 - 사용자 알림 메시지 목록을 표시하는 화면
+- GNB를 통한 진입/전환 (Alarm / Home / Profile 3탭)
 
 ### 이전 스크린 정보 (진입점)
-- **HomeScreen**: 우측 상단 Info 아이콘 클릭 시
-  - `Navigator.push()`로 iOS 스타일 슬라이드 애니메이션으로 표시
+- **HomeScreen**: GNB의 Alarm 버튼 클릭 시
+  - `onNavigateToAlarm` 콜백 호출 → `_MyAppState._navigateToAlarm()` 실행 → 상태 업데이트로 전환
+- **ProfileScreen**: GNB의 Alarm 버튼 클릭 시
+  - `onNavigateToAlarm` 콜백 호출 → 상태 업데이트로 전환
+- **조건**: `_MyAppState`의 `_currentMainScreen == 'alarm'`일 때 표시
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
-- 없음 (닫기 시 Home으로 복귀)
+- **HomeScreen**: GNB의 Home 버튼 클릭 시
+  - `onNavigateToHome` 콜백 호출 → 상태 업데이트로 전환
+- **ProfileScreen**: GNB의 Profile 버튼 클릭 시
+  - `onNavigateToProfile` 콜백 호출 → 상태 업데이트로 전환
 
 ### 스크린 내부 구현 특이사항
-- 배경색: RGB(26, 26, 26) - Main Screen 대비 10% 밝기 증가 (AppScaffold 기본 적용)
-- 좌측 상단 뒤로가기 버튼 제공 (AppScaffold 기본 적용)
-- Route name: `/alarm_message`
+- **스크린 타입 특성**: Main Screen
+  - **GNB 포함**: 하단 네비게이션 바 필수 포함 (Alarm 현재 화면, 흰색 / Home·Profile 회색)
+  - GNB 색상: 검정 - 시스템 네비게이션 바와 색상 통일
+- 뒤로가기 버튼 없음 (`showBackButton: false`)
+- Route name: `/alarm_message` (참조용)
 
 ---
 
@@ -534,24 +550,25 @@
 
 ### 스크린 관련 정의 파일
 - **파일 경로**: `lib/screens/roleplay/ending.dart`
-- **클래스명**: `RoleplayEndingScreen` (StatelessWidget)
+- **클래스명**: `RoleplayEndingScreen` (StatefulWidget)
 - **스크린 타입**: **Full Screen**
 
 ### 스크린 용도
-- Roleplay 성공 종료 화면
+- Roleplay 성공 종료 화면 (미션 전부 완수 후 진입)
 
 ### 이전 스크린 정보 (진입점)
-- **RoleplayPlayingScreen**: 중앙 "Ending" 텍스트 클릭 시
-  - `Navigator.pushReplacement()`로 전환 (playing screen 삭제)
+- **RoleplayPlayingScreen**: resultId 기반 종료 시 미션 전부 완수 분기에서 `roleplayEndedEnding` 3초 노출 후 `Navigator.pushReplacement()`로 전환 (playing screen 삭제)
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
-- **RoleplayResultScreen** (Full Screen): 중앙 "Result" 텍스트 클릭 시
-  - `Navigator.pushReplacement()`로 전환 (ending screen 삭제, 돌아올 일 없음)
+- **RoleplayResultScreen** (Full Screen): 하단 "Next" 버튼 클릭 시
+  - `PUT /v1/roleplays/results/{rpResultId}?star={star}` 호출(응답 무시), 이후 `RoleplayRouter.replaceWithResult()`로 전환 (ending screen 삭제, 돌아올 일 없음)
 
 ### 스크린 내부 구현 특이사항
-- 시스템 뒤로가기 버튼 클릭 시: "Result에서 밖으로 나갑니다" 얼럿 노출, 확인 시 ending screen 삭제, 이전 overview 노출
-- 별도 X 버튼 제공 안 함
-- 중앙에 "Result" 텍스트 (임시, 향후 성공 결과 UI로 대체 예정)
+- 닫기(X) 버튼 없음. 시스템 뒤로가기 시 "Exit from ending screen" 얼럿, 확인 시 ending screen 삭제 후 Overview 노출.
+- 엔딩 데이터: 사용자 role(`RoleplayStateService.overview`·`roleId`)의 `endingList` 첫 번째 요소(`RoleplayEndingDto`) 사용. 이미지 없을 경우 바로 80% 검정 레이어·콘텐츠 노출.
+- 이미지 있을 경우: 디바이스 높이 100% 비율 유지 표시(기본). 중앙 기준 1.5배→1배 약 2초 축소 애니메이션 후, 80% 투명도 검정 레이어 fade-in, 이어서 콘텐츠 fade-in.
+- 레이아웃: 상단 50% = 상상단(h2 흰색, `RoleplayEndingDto.title` 사용자 언어) + 상하단(body-secondary 흰색, `RoleplayEndingDto.content` 사용자 언어). 하단 50% = 하상단(h2 흰색, l10n `endingHowWas` + 별 5개 40×40 gap 5, star_empty/star_filled) + 하하단(ElevatedButton Opening Let's start 스타일, l10n `endingNext`). 별점은 선택 시 해당 별 및 좌측 star_filled, 우측 star_empty. star=0 허용.
+- Playing에서 ending 전환 확정 시점에 role.endingList 첫 요소의 `imgPath`에 CDN host prepend하여 이미지 preload.
 
 ---
 
@@ -570,17 +587,42 @@
   - `Navigator.pushReplacement()`로 전환 (playing screen 삭제)
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
-- **RoleplayResultScreen** (Full Screen): 중앙 "Result" 텍스트 클릭 시
-  - `Navigator.pushReplacement()`로 전환 (failed screen 삭제, 돌아올 일 없음)
+- **RoleplayReportScreen** (Sub Screen): "Report" 텍스트 클릭 시
+  - `RoleplayRouter.pushReport()` → SubScreenRoute로 진입 (Failed 위에 쌓임)
+- **RoleplayResultScreen** (Full Screen): "Retry" 버튼 클릭 시 Overview로 복귀. Result로의 전환은 Playing에서 resultId 분기로 진행.
 
 ### 스크린 내부 구현 특이사항
-- 시스템 뒤로가기 버튼 클릭 시: "Result에서 밖으로 나갑니다" 얼럿 노출, 확인 시 failed screen 삭제, 이전 overview 노출
-- 별도 X 버튼 제공 안 함
-- 중앙에 "Result" 텍스트 (임시, 향후 실패 결과 UI로 대체 예정)
+- 닫기(X)/시스템 뒤로가기: 확인 다이얼로그 없이 Overview로 복귀 (Opening과 동일).
+- 푸터 없음. 본문 5요소: Failed 타이틀, 하트 애니메이션, ending.fail 문구, Retry 버튼, Report 텍스트(탭 시 Report Sub Screen 진입).
 
 ---
 
-## 16. RoleplayResultScreen
+## 16. RoleplayReportScreen
+
+### 스크린 관련 정의 파일
+- **파일 경로**: `lib/screens/roleplay/report.dart`
+- **클래스명**: `RoleplayReportScreen` (StatelessWidget)
+- **스크린 타입**: **Sub Screen**
+
+### 스크린 용도
+- 사용자가 느낀 불편함을 수집하는 용도 (Failed 화면에서 진입).
+
+### 이전 스크린 정보 (진입점)
+- **RoleplayFailedScreen**: "Report" 텍스트 클릭 시
+  - `RoleplayRouter.pushReport()` → SubScreenRoute로 우측에서 슬라이드 인
+
+### 이후 스크린 정보 (이동 가능한 다른 스크린)
+- **RoleplayFailedScreen**: X 버튼 또는 Android 백버튼 시 `Navigator.pop()`으로 Failed로 복귀
+
+### 스크린 내부 구현 특이사항
+- 롤플레이 스캐폴드(RoleplayScaffold) 적용.
+- Route name: `RoleplayReportScreen.routeName` (`/roleplay/report`).
+- Android 디바이스 백버튼: Failed로 복귀 (pop).
+- 본문/푸터: 초기화 상태(플레이스홀더). 추후 불편 사항 수집 UI 확장 예정.
+
+---
+
+## 17. RoleplayResultScreen
 
 ### 스크린 관련 정의 파일
 - **파일 경로**: `lib/screens/roleplay/result.dart`
@@ -591,10 +633,9 @@
 - Roleplay 결과 화면
 
 ### 이전 스크린 정보 (진입점)
-- **RoleplayEndingScreen**: 중앙 "Result" 텍스트 클릭 시
-  - `Navigator.pushReplacement()`로 전환 (ending screen 삭제)
-- **RoleplayFailedScreen**: 중앙 "Result" 텍스트 클릭 시
-  - `Navigator.pushReplacement()`로 전환 (failed screen 삭제)
+- **RoleplayEndingScreen**: 하단 "Next" 버튼 클릭 시
+  - `PUT /v1/roleplays/results/{rpResultId}?star={star}` 호출(응답 무시), 이후 `RoleplayRouter.replaceWithResult()`로 전환 (ending screen 삭제)
+- **RoleplayPlayingScreen**: resultId 기반 종료 시 (미션 전부 완수 아님) 분기에서 `roleplayEndedTimesup` 또는 `roleplayEndedComplete` 3초 노출 후 `Navigator.pushReplacement()`로 전환 (playing screen 삭제)
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
 - 없음 (최종 결과 화면)
@@ -619,14 +660,14 @@
   ├─ 로그인 성공 → [HomeScreen]
   └─ 로그인 취소/실패 → [LoginScreen] (유지)
 
-[HomeScreen] ←→ [ProfileScreen] (GNB를 통한 전환)
+[AlarmMessageScreen] ←→ [HomeScreen] ←→ [ProfileScreen] (GNB Alarm/Home/Profile 3탭 전환)
   ├─ [HomeScreen] → [RoleplayOverviewScreen] (중앙 "Roleplay" 텍스트)
   │   └─ [RoleplayOpeningScreen] (중앙 "Play" 텍스트)
   │       └─ [RoleplayPlayingScreen] (중앙 "Start" 텍스트)
   │           ├─ [RoleplayEndingScreen] (중앙 "Ending" 텍스트)
   │           │   └─ [RoleplayResultScreen] (중앙 "Result" 텍스트)
-  │           └─ [RoleplayFailedScreen] (중앙 "Failed" 텍스트)
-  │               └─ [RoleplayResultScreen] (중앙 "Result" 텍스트)
+  │           └─ [RoleplayFailedScreen]
+  │               └─ [RoleplayReportScreen] (Report 텍스트 탭 시, 백버튼/X → Failed 복귀)
   └─ [ProfileScreen] → [SettingScreen] (우측 상단 원형 버튼)
       ├─ [AccountScreen]
       ├─ [LanguageLevelScreen]
@@ -653,9 +694,9 @@
    - 로그인 성공 시 HomeScreen으로 전환
    - 로그아웃 시 (ProfileScreen에서) LoginScreen으로 전환
 
-4. **HomeScreen ↔ ProfileScreen**
-   - GNB의 Home/Profile 버튼 클릭으로 전환
-   - `_MyAppState`의 `_currentMainScreen` 상태로 관리
+4. **AlarmMessageScreen ↔ HomeScreen ↔ ProfileScreen**
+   - GNB의 Alarm/Home/Profile 3탭 클릭으로 전환
+   - `_MyAppState`의 `_currentMainScreen` ('alarm'|'home'|'profile') 상태로 관리
    - 화면 전환 시 애니메이션 없이 즉시 전환
 
 ---

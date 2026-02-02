@@ -8,22 +8,22 @@ import 'package:marquee/marquee.dart';
 import '../services/auth_service.dart';
 import '../services/token_storage.dart';
 import '../services/suda_api_client.dart';
-import '../services/roleplay_state_service.dart';
 import '../config/app_config.dart';
-import '../utils/sub_screen_route.dart';
 import '../routes/roleplay_router.dart';
 import '../utils/language_util.dart';
 import '../utils/suda_json_util.dart';
 import '../widgets/app_scaffold.dart';
+import '../widgets/gnb_bar.dart';
 import 'roleplay/overview.dart';
-import 'alarm_message.dart';
 
 class HomeScreen extends StatefulWidget {
+  final VoidCallback? onNavigateToAlarm;
   final VoidCallback? onNavigateToProfile;
   final UserDto? user;
   
   const HomeScreen({
     super.key,
+    this.onNavigateToAlarm,
     this.onNavigateToProfile,
     this.user,
   });
@@ -208,8 +208,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _navigateToRoleplayOverview(int roleplayId) {
-    RoleplayStateService.instance.setUser(widget.user);
-    RoleplayRouter.pushOverview(context, roleplayId);
+    RoleplayRouter.pushOverview(context, roleplayId, user: widget.user);
   }
 
   @override
@@ -218,32 +217,16 @@ class _HomeScreenState extends State<HomeScreen> {
       showBackButton: false,
       title: 'Hi, ${widget.user?.name ?? 'User'}!',
       titleStyle: Theme.of(context).textTheme.headlineSmall?.copyWith(color: Colors.white),
-      actions: [
-        GestureDetector(
-          onTap: () {
-            Navigator.push(
-              context,
-              SubScreenRoute(
-                page: const AlarmMessageScreen(),
-                settings: const RouteSettings(name: AlarmMessageScreen.routeName),
-              ),
-            );
-          },
-          child: SizedBox(
-            width: 40,
-            height: 40,
-            child: Center(
-              child: SvgPicture.asset(
-                'assets/images/icons/Info.svg',
-                width: 24,
-                height: 24,
-              ),
-            ),
-          ),
-        ),
-      ],
       usePadding: false, // 배너 풀-폭 유지를 위해 본문 패딩 제거
-      bottomNavigationBar: _buildGNB(context),
+      bottomNavigationBar: GnbBar(
+        isAlarmActive: false,
+        isHomeActive: true,
+        isProfileActive: false,
+        onAlarmTap: widget.onNavigateToAlarm,
+        onHomeTap: () {},
+        onProfileTap: widget.onNavigateToProfile,
+        user: widget.user,
+      ),
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -253,59 +236,6 @@ class _HomeScreenState extends State<HomeScreen> {
             _buildRoleplayGroupsSection(),
             const SizedBox(height: 40), // 하단 여백
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildGNB(BuildContext context) {
-    return Container(
-      color: const Color(0xFF121212),
-      child: SafeArea(
-        top: false,
-        bottom: true,
-        child: Container(
-          height: 56,
-          decoration: BoxDecoration(
-            color: const Color(0xFF121212),
-            border: Border(
-              top: BorderSide(
-                color: Colors.grey[800]!,
-                width: 0.5,
-              ),
-            ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              // Home 버튼 (왼쪽)
-              Expanded(
-                child: InkWell(
-                  onTap: () {},
-                  child: Container(
-                    alignment: Alignment.center,
-                    child: Text(
-                      'Home',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: Colors.white),
-                    ),
-                  ),
-                ),
-              ),
-              // Profile 버튼 (오른쪽)
-              Expanded(
-                child: InkWell(
-                  onTap: widget.onNavigateToProfile,
-                  child: Container(
-                    alignment: Alignment.center,
-                    child: Text(
-                      'Profile',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey[400]),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
         ),
       ),
     );

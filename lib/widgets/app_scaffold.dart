@@ -45,12 +45,12 @@ class AppScaffold extends StatelessWidget {
     return Scaffold(
       backgroundColor: backgroundColor,
       resizeToAvoidBottomInset: resizeToAvoidBottomInset,
-      bottomNavigationBar: bottomNavigationBar,
+      // GNB는 body 위에 오버레이로 배치하므로 Scaffold의 bottomNavigationBar는 사용하지 않음
       body: SafeArea(
         child: Stack(
           fit: StackFit.expand,
           children: [
-            // 1. 본문 영역 (상단 70, 좌우 24 마진 적용)
+            // 1. 본문 영역 (상단 70, 좌우 24 마진 적용) — GNB 아래까지 확장(본문이 GNB 위를 덮는 구조)
             Padding(
               padding: EdgeInsets.only(
                 top: 70,
@@ -102,6 +102,15 @@ class AppScaffold extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: actions!,
                 ),
+              ),
+
+            // 6. GNB — 본문 위에 덮는 형태 (playing 슬라이더와 동일한 투명+블러는 각 화면 _buildGNB에서 적용)
+            if (bottomNavigationBar != null)
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: bottomNavigationBar!,
               ),
           ],
         ),

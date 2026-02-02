@@ -137,6 +137,28 @@ class SudaApiClient {
     );
   }
 
+  static Future<RoleplayResultDto> getRoleplayResult({
+    required String accessToken,
+    required int resultId,
+  }) {
+    return RoleplayApi.getRoleplayResult(
+      accessToken: accessToken,
+      resultId: resultId,
+    );
+  }
+
+  static Future<void> updateRoleplayResultStar({
+    required String accessToken,
+    required int resultId,
+    required int star,
+  }) {
+    return RoleplayApi.updateRoleplayResultStar(
+      accessToken: accessToken,
+      resultId: resultId,
+      star: star,
+    );
+  }
+
   static Future<VersionDto> getLatestVersion() {
     return VersionApi.getLatestVersion();
   }

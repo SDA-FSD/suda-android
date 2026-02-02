@@ -380,3 +380,73 @@ class RoleplayMissionDto {
     );
   }
 }
+
+class RoleplayResultDto {
+  final int? id;
+  final int? userId;
+  final int? roleplayId;
+  final int? roleplayRoleId;
+  final int? endingId;
+  final List<SudaJson>? chatHistory;
+  final String? completeYn;
+  final List<int>? completedMissionIds;
+  final String? missionResult;
+  final int? starResult;
+  final int? words;
+  final String? goodFeedback;
+  final String? improvementFeedback;
+  final int? likePoint;
+  final String? likePointReceivedYn;
+  final int? star;
+  final String? createdAt;
+
+  const RoleplayResultDto({
+    this.id,
+    this.userId,
+    this.roleplayId,
+    this.roleplayRoleId,
+    this.endingId,
+    this.chatHistory,
+    this.completeYn,
+    this.completedMissionIds,
+    this.missionResult,
+    this.starResult,
+    this.words,
+    this.goodFeedback,
+    this.improvementFeedback,
+    this.likePoint,
+    this.likePointReceivedYn,
+    this.star,
+    this.createdAt,
+  });
+
+  factory RoleplayResultDto.fromJson(Map<String, dynamic> json) {
+    return RoleplayResultDto(
+      id: _optionalInt(json['id']),
+      userId: _optionalInt(json['userId']),
+      roleplayId: _optionalInt(json['roleplayId']),
+      roleplayRoleId: _optionalInt(json['roleplayRoleId']),
+      endingId: _optionalInt(json['endingId']),
+      chatHistory: json['chatHistory'] == null
+          ? null
+          : (json['chatHistory'] as List<dynamic>)
+              .map((item) => SudaJson.fromJson(item as Map<String, dynamic>))
+              .toList(),
+      completeYn: json['completeYn'] as String?,
+      completedMissionIds: json['completedMissionIds'] == null
+          ? null
+          : (json['completedMissionIds'] as List<dynamic>)
+              .map((e) => _optionalInt(e) ?? 0)
+              .toList(),
+      missionResult: json['missionResult'] as String?,
+      starResult: _optionalInt(json['starResult']),
+      words: _optionalInt(json['words']),
+      goodFeedback: json['goodFeedback'] as String?,
+      improvementFeedback: json['improvementFeedback'] as String?,
+      likePoint: _optionalInt(json['likePoint']),
+      likePointReceivedYn: json['likePointReceivedYn'] as String?,
+      star: _optionalInt(json['star']),
+      createdAt: json['createdAt'] as String?,
+    );
+  }
+}
