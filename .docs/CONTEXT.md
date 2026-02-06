@@ -262,6 +262,7 @@
 - **GNB 아이콘화**: GNB 메뉴 3종을 텍스트에서 아이콘으로 전환. 공통 위젯 `lib/widgets/gnb_bar.dart`(GnbBar). Alarm: gnb_alarm.png / gnb_alarm_pressed.png, 높이 24, 좌측 33. Home: gnb_home.png / gnb_home_pressed.png, 너비 24, 정중앙. Profile: userDto.profileImgUrl 원형 28x28(비활성)·24x24+흰 테두리 2(활성), 우측 33. 탭 영역: 좌 30% / 중앙 30% / 우 30%.
 - **Roleplay Ending 스크린 개선**: 닫기 버튼 없음. role.endingList 첫 요소(RoleplayEndingDto) 기반 title/content/이미지. Playing에서 ending 전환 확정 시 imgPath+CDN으로 이미지 preload. 이미지 있으면 1.5x→1x 2초 축소 후 80% 검정 레이어·콘텐츠 fade-in; 없으면 바로 레이어·콘텐츠. 상단 50% title+content, 하단 50% endingHowWas+별 5개(40×40 gap 5)+Next 버튼. Next 탭 시 버튼 텍스트 fade-out과 동시에 버튼에서 #0CABA8 풍선 확장(2s) 후 Result 전환. `PUT /v1/roleplays/results/{rpResultId}?star={star}` 호출(응답 무시). Result 진입 시 박스레이어에 별점·mainTitle·subTitle 순차 노출(각 300ms 후) 후 박스 축소. 본문레이어 추후 지침. `.docs/CONTEXT_SCREEN.md` 14·17, `.docs/CONTEXT_ROLEPLAY.md` 참조.
 - **RoleplayResultDto·Result 스크린 박스레이어**: DTO에 mainTitle·subTitle 필드 추가(서버 non-null). Result 박스레이어: 별점·mainTitle·subTitle 순차 노출 후 박스 축소. **Result 본문레이어**: like_at_result·likePoint(그라데이션)·Mission(missionResult 아이콘)·Words·Lv 프로그레스바(getUserProfile)·Good Points·To Improve·Got it! 버튼(Overview). `.docs/CONTEXT_SCREEN.md` §17 참조.
+- **Main Screen 물리 뒤로가기**: Home 탭에서만 앱 종료, Alarm/Profile 탭에서는 Home으로 이동. `lib/main.dart`에서 IndexedStack을 `PopScope`(canPop: home일 때만 true)로 감싸 처리. `.docs/CONTEXT_SCREEN.md` Main Screen·비교표 반영.
 
 ## 13. 리팩토링 계획 문서
 - 롤플레이 기능 준비를 위한 리팩토링 작업 분해 문서는 `REFACTOR.md`에 기록

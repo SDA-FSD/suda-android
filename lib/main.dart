@@ -330,38 +330,46 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   accessToken: _accessToken!,
                   onAgreementComplete: _onAgreementComplete,
                 )
-              : IndexedStack(
-                  index: _currentMainScreen == 'alarm'
-                      ? 0
-                      : _currentMainScreen == 'home'
-                          ? 1
-                          : 2,
-                  children: [
-                    AlarmMessageScreen(
-                      onNavigateToHome: _navigateToHome,
-                      onNavigateToProfile: _navigateToProfile,
-                      onNavigateToAlarm: _navigateToAlarm,
-                      isActive: _currentMainScreen == 'alarm',
-                      user: _user,
-                    ),
-                    HomeScreen(
-                      onNavigateToAlarm: _navigateToAlarm,
-                      onNavigateToProfile: _navigateToProfile,
-                      user: _user,
-                    ),
-                    ProfileScreen(
-                      onNavigateToHome: _navigateToHome,
-                      onNavigateToAlarm: _navigateToAlarm,
-                      onSignOut: _onSignOut,
-                      user: _user,
-                      onUserUpdated: (user) {
-                        setState(() {
-                          _user = user;
-                        });
-                      },
-                      isActive: _currentMainScreen == 'profile',
-                    ),
-                  ],
+              : PopScope(
+                  canPop: _currentMainScreen == 'home',
+                  onPopInvokedWithResult: (bool didPop, _) {
+                    if (!didPop && _currentMainScreen != 'home') {
+                      setState(() => _currentMainScreen = 'home');
+                    }
+                  },
+                  child: IndexedStack(
+                    index: _currentMainScreen == 'alarm'
+                        ? 0
+                        : _currentMainScreen == 'home'
+                            ? 1
+                            : 2,
+                    children: [
+                      AlarmMessageScreen(
+                        onNavigateToHome: _navigateToHome,
+                        onNavigateToProfile: _navigateToProfile,
+                        onNavigateToAlarm: _navigateToAlarm,
+                        isActive: _currentMainScreen == 'alarm',
+                        user: _user,
+                      ),
+                      HomeScreen(
+                        onNavigateToAlarm: _navigateToAlarm,
+                        onNavigateToProfile: _navigateToProfile,
+                        user: _user,
+                      ),
+                      ProfileScreen(
+                        onNavigateToHome: _navigateToHome,
+                        onNavigateToAlarm: _navigateToAlarm,
+                        onSignOut: _onSignOut,
+                        user: _user,
+                        onUserUpdated: (user) {
+                          setState(() {
+                            _user = user;
+                          });
+                        },
+                        isActive: _currentMainScreen == 'profile',
+                      ),
+                    ],
+                  ),
                 ),
     );
   }
