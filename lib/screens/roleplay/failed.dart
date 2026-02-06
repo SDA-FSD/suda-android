@@ -25,7 +25,7 @@ class _RoleplayFailedScreenState extends State<RoleplayFailedScreen>
   late final AnimationController _fadeInController;
   late final AnimationController _heartWipeController;
   late final Animation<double> _fadeIn;
-  /// Report 스크린에서 정상 전송 완료 후 돌아온 경우에만 true. 이때만 Report 텍스트 숨김.
+  /// Failed Report 스크린에서 정상 전송 완료 후 돌아온 경우에만 true. 이때만 Report 텍스트 숨김.
   bool _reportSubmitted = false;
 
   @override
@@ -155,7 +155,7 @@ class _RoleplayFailedScreenState extends State<RoleplayFailedScreen>
                 ),
               ),
 
-              // 5th: Report 텍스트. 처음엔 보이고 탭 시 Report 스크린 진입. Report에서 정상 전송 완료 후 돌아오면 숨김(레이아웃 유지용 플레이스홀더만)
+              // 5th: Report 텍스트. 처음엔 보이고 탭 시 Failed Report 스크린 진입. Failed Report에서 정상 전송 완료 후 돌아오면 숨김(레이아웃 유지용 플레이스홀더만)
               _reportSubmitted
                   ? IgnorePointer(
                       child: Opacity(
@@ -168,7 +168,7 @@ class _RoleplayFailedScreenState extends State<RoleplayFailedScreen>
                     )
                   : GestureDetector(
                       onTap: () async {
-                        final result = await RoleplayRouter.pushReport<bool>(context);
+                        final result = await RoleplayRouter.pushFailedReport<bool>(context);
                         if (result == true && mounted) {
                           setState(() => _reportSubmitted = true);
                         }

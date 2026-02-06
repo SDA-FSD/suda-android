@@ -28,7 +28,15 @@ void main() async {
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
   ]);
-  
+
+  // 시스템 네비게이션 바 색상을 앱 기본 배경(#121212)과 통일
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      systemNavigationBarColor: Color(0xFF121212),
+      systemNavigationBarIconBrightness: Brightness.light,
+    ),
+  );
+
   // Firebase 초기화 (FlutterNativeSplash 이전에 실행)
   await Firebase.initializeApp();
   

@@ -5,21 +5,21 @@ import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
 import '../../utils/app_toast.dart';
 
-/// Roleplay Report Screen (Sub Screen)
+/// Roleplay Failed Report Screen (Sub Screen)
 ///
-/// Failed 화면에서 진입. 사용자가 느낀 불편함을 수집하는 용도.
+/// Failed 화면에서만 진입. 사용자가 느낀 불편함을 수집하는 용도.
 /// Feedback 스크린과 동일한 본문 구조(입력창 + 제출 버튼). sendFeedback API 사용.
 /// 성공 시 토스트 없이 스크린만 닫음. Android 백버튼 또는 X 버튼 시 Failed로 복귀.
-class RoleplayReportScreen extends StatefulWidget {
-  static const String routeName = '/roleplay/report';
+class RoleplayFailedReportScreen extends StatefulWidget {
+  static const String routeName = '/roleplay/failed_report';
 
-  const RoleplayReportScreen({super.key});
+  const RoleplayFailedReportScreen({super.key});
 
   @override
-  State<RoleplayReportScreen> createState() => _RoleplayReportScreenState();
+  State<RoleplayFailedReportScreen> createState() => _RoleplayFailedReportScreenState();
 }
 
-class _RoleplayReportScreenState extends State<RoleplayReportScreen> {
+class _RoleplayFailedReportScreenState extends State<RoleplayFailedReportScreen> {
   final TextEditingController _controller = TextEditingController();
   bool _isSubmitting = false;
   bool _canSubmit = false;

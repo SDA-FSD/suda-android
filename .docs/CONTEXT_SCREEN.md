@@ -561,7 +561,8 @@
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
 - **RoleplayResultScreen** (Full Screen): 하단 "Next" 버튼 클릭 시
-  - `PUT /v1/roleplays/results/{rpResultId}?star={star}` 호출(응답 무시), 이후 `RoleplayRouter.replaceWithResult()`로 전환 (ending screen 삭제, 돌아올 일 없음)
+  - Next 버튼 텍스트 fade-out과 동시에 버튼에서 #0CABA8 풍선이 부푸는 모양으로 전체 화면 덮는 애니메이션(2s) 후 `RoleplayRouter.replaceWithResult()`로 전환 (ending screen 삭제, 돌아올 일 없음)
+  - `PUT /v1/roleplays/results/{rpResultId}?star={star}` 호출(응답 무시)은 전환 전에 수행
 
 ### 스크린 내부 구현 특이사항
 - 닫기(X) 버튼 없음. 시스템 뒤로가기 시 "Exit from ending screen" 얼럿, 확인 시 ending screen 삭제 후 Overview 노출.
@@ -587,38 +588,38 @@
   - `Navigator.pushReplacement()`로 전환 (playing screen 삭제)
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
-- **RoleplayReportScreen** (Sub Screen): "Report" 텍스트 클릭 시
-  - `RoleplayRouter.pushReport()` → SubScreenRoute로 진입 (Failed 위에 쌓임)
+- **RoleplayFailedReportScreen** (Sub Screen): "Report" 텍스트 클릭 시
+  - `RoleplayRouter.pushFailedReport()` → SubScreenRoute로 진입 (Failed 위에 쌓임)
 - **RoleplayResultScreen** (Full Screen): "Retry" 버튼 클릭 시 Overview로 복귀. Result로의 전환은 Playing에서 resultId 분기로 진행.
 
 ### 스크린 내부 구현 특이사항
 - 닫기(X)/시스템 뒤로가기: 확인 다이얼로그 없이 Overview로 복귀 (Opening과 동일).
-- 푸터 없음. 본문 5요소: Failed 타이틀, 하트 애니메이션, ending.fail 문구, Retry 버튼, Report 텍스트(탭 시 Report Sub Screen 진입).
+- 푸터 없음. 본문 5요소: Failed 타이틀, 하트 애니메이션, ending.fail 문구, Retry 버튼, Report 텍스트(탭 시 Failed Report Sub Screen 진입).
 
 ---
 
-## 16. RoleplayReportScreen
+## 16. RoleplayFailedReportScreen
 
 ### 스크린 관련 정의 파일
-- **파일 경로**: `lib/screens/roleplay/report.dart`
-- **클래스명**: `RoleplayReportScreen` (StatelessWidget)
+- **파일 경로**: `lib/screens/roleplay/failed_report.dart`
+- **클래스명**: `RoleplayFailedReportScreen` (StatefulWidget)
 - **스크린 타입**: **Sub Screen**
 
 ### 스크린 용도
-- 사용자가 느낀 불편함을 수집하는 용도 (Failed 화면에서 진입).
+- Failed 화면에서만 진입. 사용자가 느낀 불편함을 수집하는 용도.
 
 ### 이전 스크린 정보 (진입점)
 - **RoleplayFailedScreen**: "Report" 텍스트 클릭 시
-  - `RoleplayRouter.pushReport()` → SubScreenRoute로 우측에서 슬라이드 인
+  - `RoleplayRouter.pushFailedReport()` → SubScreenRoute로 우측에서 슬라이드 인
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
 - **RoleplayFailedScreen**: X 버튼 또는 Android 백버튼 시 `Navigator.pop()`으로 Failed로 복귀
 
 ### 스크린 내부 구현 특이사항
 - 롤플레이 스캐폴드(RoleplayScaffold) 적용.
-- Route name: `RoleplayReportScreen.routeName` (`/roleplay/report`).
+- Route name: `RoleplayFailedReportScreen.routeName` (`/roleplay/failed_report`).
 - Android 디바이스 백버튼: Failed로 복귀 (pop).
-- 본문/푸터: 초기화 상태(플레이스홀더). 추후 불편 사항 수집 UI 확장 예정.
+- 본문: 입력창 + 제출 버튼(sendFeedback API). 성공 시 pop(true).
 
 ---
 
@@ -626,23 +627,50 @@
 
 ### 스크린 관련 정의 파일
 - **파일 경로**: `lib/screens/roleplay/result.dart`
-- **클래스명**: `RoleplayResultScreen` (StatelessWidget)
+- **클래스명**: `RoleplayResultScreen` (StatefulWidget)
 - **스크린 타입**: **Full Screen**
 
 ### 스크린 용도
 - Roleplay 결과 화면
 
 ### 이전 스크린 정보 (진입점)
-- **RoleplayEndingScreen**: 하단 "Next" 버튼 클릭 시
-  - `PUT /v1/roleplays/results/{rpResultId}?star={star}` 호출(응답 무시), 이후 `RoleplayRouter.replaceWithResult()`로 전환 (ending screen 삭제)
+- **RoleplayEndingScreen**: 하단 "Next" 버튼 클릭 후 풍선 확장 애니메이션(2s) 완료 시 `RoleplayRouter.replaceWithResult()`로 전환 (ending screen 삭제)
 - **RoleplayPlayingScreen**: resultId 기반 종료 시 (미션 전부 완수 아님) 분기에서 `roleplayEndedTimesup` 또는 `roleplayEndedComplete` 3초 노출 후 `Navigator.pushReplacement()`로 전환 (playing screen 삭제)
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
-- 없음 (최종 결과 화면)
+- **RoleplayResultReportScreen** (Sub Screen): 본문 "Report" 문구 탭 시
+  - `RoleplayRouter.pushResultReport()` → SubScreenRoute로 진입 (Result 위에 쌓임)
+- 그 외: 최종 결과 화면(Overview 이동은 Got it! 버튼)
 
 ### 스크린 내부 구현 특이사항
-- 중앙에 "Result" 텍스트 (임시, 향후 결과 상세 UI로 대체 예정)
+- **박스레이어/본문레이어**: 줄어드는 영역을 박스레이어, 그 뒤쪽을 본문레이어로 칭함.
+- **진입(박스레이어)**: 전체 화면 #0CABA8 박스 → 로딩 300ms 후 별점 3개(70×70 -10°/80×80/70×70 +10°, starResult 1~3이면 star_gold else star_silver) 노출·진동 → 300ms 후 mainTitle(h1 흰색)·진동 → 300ms 후 subTitle(h3 검정)·진동 → 300ms 후 박스 축소 트리거. 박스 축소 시 내부 요소는 가로세로 중앙에 쫀쫀하게 유지. 박스 최종 높이 210, easeOutQuint 1.5s.
+- **본문레이어**: gap 35 → like_at_result 75×75 + likePoint(h1, 그라데이션 #80D7CF→#CFFFFB, 없으면 00) → gap 35 → 좌 50% Mission(body-default w600 Chiron GoRound TC #80D7CF) + missionResult별 아이콘(mission_succeeded/mission_failed, 높이 20, gap 없음) / 우 50% Words + words(없으면 00) → gap 25 → Lv.x 프로그레스바(Profile 동일, getUserProfile로 currentLevel·progressPercentage) → gap 25 → Good Points(h3 Chiron GoRound TC #80D7CF) → gap 20 → goodFeedback(body-caption 흰색) → gap 25 → To Improve(h3 동일) → gap 20 → improvementFeedback(body-caption 흰색) → gap 25 → Got it! 버튼(Opening Let's Start 스타일, 탭 시 Overview) → gap 35 → Report 문구(다국어 l10n.endingReport, 중앙 정렬, 탭 시 Result Report 스크린 진입, 전송 성공 후 돌아오면 숨김). SingleChildScrollView로 스크롤.
 - 시스템 뒤로가기 동작: 향후 구현 예정
+
+---
+
+## 18. RoleplayResultReportScreen
+
+### 스크린 관련 정의 파일
+- **파일 경로**: `lib/screens/roleplay/result_report.dart`
+- **클래스명**: `RoleplayResultReportScreen` (StatefulWidget)
+- **스크린 타입**: **Sub Screen**
+
+### 스크린 용도
+- Result 화면에서만 진입. 사용자가 느낀 불편함을 수집하는 용도. Send 시 `POST /v1/roleplays/results/{roleplayResultId}/report` (body: `{"content": "<string>"}`).
+
+### 이전 스크린 정보 (진입점)
+- **RoleplayResultScreen**: 본문 "Report" 문구 탭 시
+  - `RoleplayRouter.pushResultReport()` → SubScreenRoute로 우측에서 슬라이드 인
+
+### 이후 스크린 정보 (이동 가능한 다른 스크린)
+- **RoleplayResultScreen**: X 버튼 또는 Android 백버튼 시 `Navigator.pop()`으로 Result로 복귀. 전송 성공(200) 시 `pop(context, true)`로 Result에서 Report 문구 숨김.
+
+### 스크린 내부 구현 특이사항
+- 내부 표현·구성은 Failed Report와 동일 (RoleplayScaffold, reportTitle, 입력창, feedbackSend 버튼). Send 시 신규 엔드포인트만 사용.
+- Route name: `RoleplayResultReportScreen.routeName` (`/roleplay/result_report`).
+- 다국어: failed_report 참고 (l10n.reportTitle, endingReport, feedbackPlaceholder, feedbackSend).
 
 ---
 
@@ -665,9 +693,10 @@
   │   └─ [RoleplayOpeningScreen] (중앙 "Play" 텍스트)
   │       └─ [RoleplayPlayingScreen] (중앙 "Start" 텍스트)
   │           ├─ [RoleplayEndingScreen] (중앙 "Ending" 텍스트)
-  │           │   └─ [RoleplayResultScreen] (중앙 "Result" 텍스트)
+  │           │   └─ [RoleplayResultScreen]
+  │           │       └─ [RoleplayResultReportScreen] (Report 문구 탭 시, 백버튼/X → Result 복귀)
   │           └─ [RoleplayFailedScreen]
-  │               └─ [RoleplayReportScreen] (Report 텍스트 탭 시, 백버튼/X → Failed 복귀)
+  │               └─ [RoleplayFailedReportScreen] (Report 텍스트 탭 시, 백버튼/X → Failed 복귀)
   └─ [ProfileScreen] → [SettingScreen] (우측 상단 원형 버튼)
       ├─ [AccountScreen]
       ├─ [LanguageLevelScreen]

@@ -159,6 +159,19 @@ class SudaApiClient {
     );
   }
 
+  /// POST /v1/roleplays/results/{roleplayResultId}/report, body: { "content": content }
+  static Future<void> sendResultReport({
+    required String accessToken,
+    required int roleplayResultId,
+    required String content,
+  }) {
+    return RoleplayApi.sendResultReport(
+      accessToken: accessToken,
+      roleplayResultId: roleplayResultId,
+      content: content,
+    );
+  }
+
   static Future<VersionDto> getLatestVersion() {
     return VersionApi.getLatestVersion();
   }

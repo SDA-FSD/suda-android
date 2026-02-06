@@ -135,6 +135,20 @@ class RoleplayApi {
     );
   }
 
+  /// POST /v1/roleplays/results/{roleplayResultId}/report
+  /// Request body: { "content": "<string>" }
+  static Future<void> sendResultReport({
+    required String accessToken,
+    required int roleplayResultId,
+    required String content,
+  }) async {
+    return await SudaHttpClient.executeWithRefresh(
+      () => _sendResultReportInternal(accessToken, roleplayResultId, content),
+      retryWithNewToken: (newToken) =>
+          _sendResultReportInternal(newToken, roleplayResultId, content),
+    );
+  }
+
   static Future<RoleplayOverviewDto> _getRoleplayOverviewInternal(
     String accessToken,
     int roleplayId,
@@ -558,6 +572,43 @@ class RoleplayApi {
 
     throw Exception(
       'PUT /v1/roleplays/results/$resultId?star=$star failed: HTTP ${response.statusCode} ${response.body}',
+    );
+  }
+
+  static Future<void> _sendResultReportInternal(
+    String accessToken,
+    int roleplayResultId,
+    String content,
+  ) async {
+    final uri = SudaHttpClient.buildUri(
+      '/v1/roleplays/results/$roleplayResultId/report',
+    );
+    late final http.Response response;
+    try {
+      response = await SudaHttpClient.client
+          .post(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+              'Content-Type': 'application/json',
+            },
+            body: jsonEncode({'content': content}),
+          )
+          .timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      rethrow;
+    }
+
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return;
+    }
+
+    throw Exception(
+      'POST /v1/roleplays/results/$roleplayResultId/report failed: HTTP ${response.statusCode} ${response.body}',
     );
   }
 

@@ -20,23 +20,29 @@
 - Failed (Full Screen)
   - 파일: `lib/screens/roleplay/failed.dart`
   - 클래스: `RoleplayFailedScreen`
-- Report (Sub Screen)
-  - 파일: `lib/screens/roleplay/report.dart`
-  - 클래스: `RoleplayReportScreen`
+- Failed Report (Sub Screen)
+  - 파일: `lib/screens/roleplay/failed_report.dart`
+  - 클래스: `RoleplayFailedReportScreen`
   - 용도: 사용자가 느낀 불편함 수집. Failed에서 진입, 백버튼/X 시 Failed로 복귀.
 - Result (Full Screen)
   - 파일: `lib/screens/roleplay/result.dart`
   - 클래스: `RoleplayResultScreen`
+- Result Report (Sub Screen)
+  - 파일: `lib/screens/roleplay/result_report.dart`
+  - 클래스: `RoleplayResultReportScreen`
+  - 용도: Result에서만 진입, 불편함 수집. Send 시 POST /v1/roleplays/results/{roleplayResultId}/report.
 
 ## 3. 기본 네비게이션 흐름 (현행 코드 기준)
 - Home -> Overview -> Opening -> Playing -> Ending/Failed -> Result -> Overview
-- Failed -> Report (Sub Screen, push). Report에서 백버튼/X -> Failed 복귀.
+- Failed -> Failed Report (Sub Screen, push). Failed Report에서 백버튼/X -> Failed 복귀.
+- Result -> Result Report (Sub Screen, push). Result Report에서 백버튼/X -> Result 복귀. 전송 성공 시 pop(true)로 Result에서 Report 문구 숨김.
 - Playing/Ending/Failed에서 뒤로가기는 확인 다이얼로그 후 Overview로 복귀 (Failed는 확인 없이 Overview 복귀).
 
 ## 4. 라우팅 중앙화 규칙
 - Roleplay 화면 전환 규칙은 `lib/routes/roleplay_router.dart`에서 관리한다.
 - Overview 진입은 Sub Screen 정책에 맞춰 `SubScreenRoute`를 사용한다.
-- Report 진입: Failed에서 `RoleplayRouter.pushReport()` → `SubScreenRoute` 사용 (백버튼 시 Failed 복귀).
+- Failed Report 진입: Failed에서 `RoleplayRouter.pushFailedReport()` → `SubScreenRoute` 사용 (백버튼 시 Failed 복귀).
+- Result Report 진입: Result에서 `RoleplayRouter.pushResultReport()` → `SubScreenRoute` 사용 (백버튼 시 Result 복귀).
 - Opening/Playing/Ending/Failed/Result 전환은 기존과 동일하게 `MaterialPageRoute` 기반이다.
 
 ## 5. Roleplay 데이터 정책 (요구 사항)
@@ -247,7 +253,7 @@
 ## 6-9. Result 조회 API 및 캐시
 - **엔드포인트**: `GET /v1/roleplays/results/{resultId}` (path param만 사용)
 - **클라이언트**: `SudaApiClient.getRoleplayResult(accessToken, resultId)` → `RoleplayApi.getRoleplayResult`
-- **응답**: `RoleplayResultDto` (id, userId, roleplayId, roleplayRoleId, endingId, chatHistory, completeYn, completedMissionIds, missionResult, starResult, words, goodFeedback, improvementFeedback, likePoint, likePointReceivedYn, star, createdAt 등)
+- **응답**: `RoleplayResultDto` (id, userId, roleplayId, roleplayRoleId, endingId, chatHistory, completeYn, completedMissionIds, missionResult, starResult, words, goodFeedback, improvementFeedback, likePoint, likePointReceivedYn, star, createdAt, mainTitle, subTitle 등)
 - **캐시**: Result/Ending 스크린에서 즉시 노출하기 위해, resultId를 인지한 직후 Playing에서 선조회하여 `RoleplayStateService.setCachedResult(dto)`로 저장. 이후 스크린 전환 시 `RoleplayStateService.instance.cachedResult`로 조회. 캐시가 늦으면 3초가 지나도 캐시 완료까지 대기한 뒤 전환.
 - DTO: `lib/models/roleplay_models.dart`의 `RoleplayResultDto`
 
@@ -284,9 +290,9 @@
   - **유연성**: `showCloseButton` 옵션을 통해 X 아이콘 노출 여부를 제어할 수 있음.
 
 ## 10. 최근 Roleplay 작업 메모
-- **Report 스크린 신설**:
-  - `lib/screens/roleplay/report.dart` (RoleplayReportScreen, Sub Screen). 롤플레이 스캐폴드 적용.
-  - 용도: 사용자가 느낀 불편함 수집. Failed 화면 "Report" 텍스트 탭 시 `RoleplayRouter.pushReport()`로 진입 (SubScreenRoute).
+- **Failed Report 스크린**:
+  - `lib/screens/roleplay/failed_report.dart` (RoleplayFailedReportScreen, Sub Screen). 롤플레이 스캐폴드 적용.
+  - 용도: Failed 화면에서만 진입, 사용자가 느낀 불편함 수집. Failed 화면 "Report" 텍스트 탭 시 `RoleplayRouter.pushFailedReport()`로 진입 (SubScreenRoute).
   - Android 백버튼 또는 X 버튼 시 Failed로 복귀 (pop). 본문/푸터는 초기화 상태(플레이스홀더).
 - **resultId 기반 종료 분기 및 Result API·캐시**:
   - Playing에서 narration `resultId` 수신 시 3분기 처리: resultId==0 → Failed, resultId>0·미션 일부 완수 → Result, resultId>0·미션 전부 완수 → Ending.
@@ -295,7 +301,8 @@
   - Ending 전환 확정 시(미션 전부 완수) Playing에서 role.endingList 첫 요소의 `imgPath`에 CDN host prepend하여 이미지 preload.
   - l10n: `roleplayEndedFailed`, `roleplayEndedTimesup`, `roleplayEndedComplete`, `roleplayEndedEnding` (en/ko/pt) 추가.
 - **Ending 스크린 및 Result 별점 API**:
-  - Ending 스크린: 닫기 버튼 없음. RoleplayEndingDto(role.endingList 첫 요소) 기반 title/content/이미지. 이미지 있으면 1.5x→1x 2초 축소 후 80% 검정 레이어·콘텐츠 fade-in; 없으면 바로 레이어·콘텐츠. 상단 50% title+content, 하단 50% endingHowWas+별 5개(40×40 gap 5)+Next 버튼. Next 탭 시 `PUT /v1/roleplays/results/{rpResultId}?star={star}` 호출(응답 무시), star=선택 별 개수(0~5), 즉시 Result 스크린 전환.
+  - Ending 스크린: 닫기 버튼 없음. RoleplayEndingDto(role.endingList 첫 요소) 기반 title/content/이미지. 이미지 있으면 1.5x→1x 2초 축소 후 80% 검정 레이어·콘텐츠 fade-in; 없으면 바로 레이어·콘텐츠. 상단 50% title+content, 하단 50% endingHowWas+별 5개(40×40 gap 5)+Next 버튼. Next 탭 시 Next 버튼 텍스트 fade-out과 동시에 버튼에서 #0CABA8 풍선이 부푸는 모양으로 전체 화면 덮는 애니메이션(2s) 후 Result 스크린 전환. `PUT /v1/roleplays/results/{rpResultId}?star={star}` 호출(응답 무시), star=선택 별 개수(0~5).
+- Result 스크린: 박스레이어에 별점·mainTitle·subTitle 순차 노출 후 박스 축소. 본문레이어: like_at_result·likePoint·Mission(missionResult 아이콘)·Words·Lv 프로그레스바(getUserProfile)·Good Points·To Improve·Got it! 버튼(Overview 이동). `.docs/CONTEXT_SCREEN.md` §17 참조.
   - `PUT /v1/roleplays/results/{resultId}?star={star}`: RoleplayApi.updateRoleplayResultStar, SudaApiClient.updateRoleplayResultStar. 응답 무시.
   - l10n: `endingHowWas`, `endingNext` (en/ko/pt) 추가.
 - **홈 화면 카테고리별 롤플레이 목록 추가**:

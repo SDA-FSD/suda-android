@@ -7,19 +7,33 @@ import '../screens/roleplay/playing.dart';
 import '../screens/roleplay/ending.dart';
 import '../screens/roleplay/failed.dart';
 import '../screens/roleplay/result.dart';
-import '../screens/roleplay/report.dart';
+import '../screens/roleplay/failed_report.dart';
+import '../screens/roleplay/result_report.dart';
 
 class RoleplayRouter {
   static const String openingRouteName = '/roleplay/opening';
 
-  /// Report 스크린을 push. pop 시 결과값(전송 성공 시 true)을 반환.
-  static Future<T?> pushReport<T>(BuildContext context) {
+  /// Failed Report 스크린을 push (Failed 화면에서만 진입). pop 시 결과값(전송 성공 시 true)을 반환.
+  static Future<T?> pushFailedReport<T>(BuildContext context) {
     return Navigator.push<T>(
       context,
       SubScreenRoute(
-        page: const RoleplayReportScreen(),
+        page: const RoleplayFailedReportScreen(),
         settings: const RouteSettings(
-          name: RoleplayReportScreen.routeName,
+          name: RoleplayFailedReportScreen.routeName,
+        ),
+      ),
+    );
+  }
+
+  /// Result Report 스크린을 push (Result 화면에서만 진입). pop 시 결과값(전송 성공 시 true)을 반환.
+  static Future<T?> pushResultReport<T>(BuildContext context) {
+    return Navigator.push<T>(
+      context,
+      SubScreenRoute(
+        page: const RoleplayResultReportScreen(),
+        settings: const RouteSettings(
+          name: RoleplayResultReportScreen.routeName,
         ),
       ),
     );
@@ -75,11 +89,18 @@ class RoleplayRouter {
     );
   }
 
+  /// Ending → Result 전환 시 흰 화면 방지: Material 대신 라우트 최상위를 #0CABA8로 그림.
   static void replaceWithResult(BuildContext context) {
+    const teal = Color(0xFF0CABA8);
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(
-        builder: (context) => const RoleplayResultScreen(),
+      PageRouteBuilder(
+        opaque: true,
+        pageBuilder: (context, _, __) => Container(
+          color: teal,
+          child: const RoleplayResultScreen(),
+        ),
+        settings: const RouteSettings(name: '/roleplay/result'),
       ),
     );
   }

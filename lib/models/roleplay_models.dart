@@ -399,6 +399,8 @@ class RoleplayResultDto {
   final String? likePointReceivedYn;
   final int? star;
   final String? createdAt;
+  final String? mainTitle; // non-null on server
+  final String? subTitle; // non-null on server
 
   const RoleplayResultDto({
     this.id,
@@ -418,6 +420,8 @@ class RoleplayResultDto {
     this.likePointReceivedYn,
     this.star,
     this.createdAt,
+    this.mainTitle,
+    this.subTitle,
   });
 
   factory RoleplayResultDto.fromJson(Map<String, dynamic> json) {
@@ -447,6 +451,8 @@ class RoleplayResultDto {
       likePointReceivedYn: json['likePointReceivedYn'] as String?,
       star: _optionalInt(json['star']),
       createdAt: json['createdAt'] as String?,
+      mainTitle: json['mainTitle'] as String?,
+      subTitle: json['subTitle'] as String?,
     );
   }
 }

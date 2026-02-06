@@ -7,7 +7,11 @@ class AppTheme {
   /// 기본 테마 데이터
   static ThemeData get themeData {
     return ThemeData(
-      colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: Colors.deepPurple,
+        brightness: Brightness.dark,
+      ),
+      canvasColor: const Color(0xFF121212),
       useMaterial3: true,
       scaffoldBackgroundColor: const Color(0xFF121212), // 기본 배경색 설정
 
