@@ -177,4 +177,10 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get reportTitle => 'Relatar Problema';
+
+  @override
+  String get profileHistory => 'Histórico';
+
+  @override
+  String get profileHistoryEmpty => 'Ainda sem histórico';
 }

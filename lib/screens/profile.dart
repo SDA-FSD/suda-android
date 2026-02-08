@@ -1,7 +1,11 @@
 import 'dart:ui' show ImageFilter;
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:shimmer/shimmer.dart';
+import '../config/app_config.dart';
+import '../l10n/app_localizations.dart';
 import '../services/auth_service.dart';
 import '../services/token_storage.dart';
 import '../services/suda_api_client.dart';
@@ -34,17 +38,85 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   UserDto? _user;
-  int? _currentLevel; // 이번 단계에서는 UI에 노출하지 않음
-  double? _progressPercentage; // 이번 단계에서는 UI에 노출하지 않음
+  int? _currentLevel;
+  double? _progressPercentage;
   bool _isRefreshing = false;
+
+  // 롤플레이 히스토리 페이징
+  final List<RpSimpleResultDto> _historyList = [];
+  int _historyNextPageNum = 0;
+  bool _isHistoryLastPage = false;
+  bool _isLoadingHistory = false;
+  bool _isLoadingMoreHistory = false;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     _user = widget.user;
+    _scrollController.addListener(_onHistoryScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _refreshProfile();
+      _fetchHistoryPage(0);
     });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onHistoryScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onHistoryScroll() {
+    final pos = _scrollController.position;
+    if (pos.pixels >= pos.maxScrollExtent - 200 &&
+        !_isLoadingMoreHistory &&
+        !_isHistoryLastPage &&
+        _historyList.isNotEmpty) {
+      _fetchHistoryPage(_historyNextPageNum);
+    }
+  }
+
+  Future<void> _fetchHistoryPage(int pageNum) async {
+    if (pageNum == 0) {
+      if (_isLoadingHistory) return;
+      setState(() => _isLoadingHistory = true);
+    } else {
+      if (_isLoadingMoreHistory) return;
+      setState(() => _isLoadingMoreHistory = true);
+    }
+    try {
+      final token = await TokenStorage.loadAccessToken();
+      if (token == null) {
+        if (mounted) setState(() => _isLoadingHistory = false);
+        return;
+      }
+      final page = await SudaApiClient.getRoleplayResults(
+        accessToken: token,
+        pageNum: pageNum,
+      );
+      if (!mounted) return;
+      setState(() {
+        if (pageNum == 0) {
+          _historyList.clear();
+          _historyList.addAll(page.content);
+        } else {
+          _historyList.addAll(page.content);
+        }
+        _historyNextPageNum = page.number + 1;
+        _isHistoryLastPage = page.last;
+        _isLoadingHistory = false;
+        _isLoadingMoreHistory = false;
+      });
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _isLoadingHistory = false;
+          _isLoadingMoreHistory = false;
+        });
+      }
+    }
   }
 
   @override
@@ -124,6 +196,117 @@ class _ProfileScreenState extends State<ProfileScreen> {
     await _refreshProfile();
   }
 
+  /// 롤플레이 히스토리: 3열·썸네일 간격 10·행 간격 10·CDN·캐시·shimmer
+  static const double _historyThumbGap = 10;
+  static const double _historyRowGap = 10;
+  static const double _historyHPadding = 24;
+
+  Widget _buildHistorySection(BuildContext context) {
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final contentWidth = screenWidth - 2 * _historyHPadding - 2 * _historyThumbGap;
+    final itemWidth = contentWidth / 3;
+    final itemHeight = itemWidth * 1.5;
+
+    Widget rowOfThree(List<Widget> children) {
+      assert(children.length <= 3);
+      final list = <Widget>[];
+      for (var i = 0; i < 3; i++) {
+        if (i > 0) list.add(const SizedBox(width: _historyThumbGap));
+        list.add(i < children.length
+            ? children[i]
+            : SizedBox(width: itemWidth, height: itemHeight));
+      }
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: list,
+      );
+    }
+
+    if (_isLoadingHistory && _historyList.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: _historyHPadding),
+        child: Column(
+          children: [
+            rowOfThree(
+              List.generate(3, (_) => _historyShimmer(itemWidth, itemHeight)),
+            ),
+            const SizedBox(height: _historyRowGap),
+            rowOfThree(
+              List.generate(3, (_) => _historyShimmer(itemWidth, itemHeight)),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (!_isLoadingHistory && _historyList.isEmpty) {
+      return SizedBox(
+        height: 120,
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Text(
+              AppLocalizations.of(context)!.profileHistoryEmpty,
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: Colors.white,
+                  ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      );
+    }
+
+    final rows = <Widget>[];
+    for (var i = 0; i < _historyList.length; i += 3) {
+      final rowItems = <Widget>[];
+      for (var j = 0; j < 3; j++) {
+        final index = i + j;
+        if (index < _historyList.length) {
+          rowItems.add(_HistoryThumbnail(
+            item: _historyList[index],
+            width: itemWidth,
+            height: itemHeight,
+          ));
+        }
+      }
+      rows.add(rowOfThree(rowItems));
+      if (i + 3 < _historyList.length) {
+        rows.add(const SizedBox(height: _historyRowGap));
+      }
+    }
+
+    if (_isLoadingMoreHistory) {
+      rows.add(const SizedBox(height: _historyRowGap));
+      rows.add(rowOfThree(
+        List.generate(3, (_) => _historyShimmer(itemWidth, itemHeight)),
+      ));
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: _historyHPadding),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: rows,
+      ),
+    );
+  }
+
+  Widget _historyShimmer(double width, double height) {
+    return Shimmer.fromColors(
+      baseColor: const Color(0xFF2A2A2A),
+      highlightColor: const Color(0xFF3F3F3F),
+      child: Container(
+        width: width,
+        height: height,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context).textTheme;
@@ -191,6 +374,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
           // 2) 실제 콘텐츠
           SingleChildScrollView(
+            controller: _scrollController,
             child: Column(
               children: [
                 const SizedBox(height: 0), // AppScaffold의 top 80 패딩 이후 바로 시작
@@ -272,6 +456,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
 
                 const SizedBox(height: 35),
+
+                // History 라벨 (body-default 흰색·왼쪽 정렬·상단 gap 14·하단 gap 20)
+                const SizedBox(height: 14),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Text(
+                      AppLocalizations.of(context)!.profileHistory,
+                      style: theme.bodyLarge?.copyWith(color: Colors.white),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // 롤플레이 히스토리 (3열·썸네일 간격 10·행 간격 10)
+                _buildHistorySection(context),
               ],
             ),
           ),
@@ -410,6 +611,150 @@ class _ProgressBar extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// 프로필 히스토리 썸네일 (CDN·캐시·shimmer·상단 별·하단 날짜)
+class _HistoryThumbnail extends StatelessWidget {
+  static const String _starGold = 'assets/images/star_gold.png';
+  static const String _starSilver = 'assets/images/star_silver.png';
+
+  final RpSimpleResultDto item;
+  final double width;
+  final double height;
+
+  const _HistoryThumbnail({
+    required this.item,
+    required this.width,
+    required this.height,
+  });
+
+  /// createdAt (ISO-8601) → dd/mm
+  static String _formatDate(String? createdAt) {
+    if (createdAt == null || createdAt.isEmpty) return '';
+    final dt = DateTime.tryParse(createdAt);
+    if (dt == null) return '';
+    final d = dt.day.toString().padLeft(2, '0');
+    final m = dt.month.toString().padLeft(2, '0');
+    return '$d/$m';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context).textTheme;
+    final imageUrl = item.imgPath != null && item.imgPath!.isNotEmpty
+        ? '${AppConfig.cdnBaseUrl}${item.imgPath}'
+        : null;
+    final starResult = item.starResult ?? 0;
+    final goldCount = starResult.clamp(0, 3);
+    final starSize = (width * 0.4) / 3;
+    final dateText = _formatDate(item.createdAt);
+
+    final imageWidget = ClipRRect(
+      borderRadius: BorderRadius.circular(10),
+      child: imageUrl != null
+          ? CachedNetworkImage(
+              imageUrl: imageUrl,
+              width: width,
+              height: height,
+              fit: BoxFit.cover,
+              placeholder: (context, url) => Shimmer.fromColors(
+                baseColor: const Color(0xFF2A2A2A),
+                highlightColor: const Color(0xFF3F3F3F),
+                child: Container(
+                  width: width,
+                  height: height,
+                  color: Colors.white,
+                ),
+              ),
+              errorWidget: (context, url, error) => Container(
+                width: width,
+                height: height,
+                color: Colors.grey[900],
+                child: const Icon(Icons.broken_image, color: Colors.grey),
+              ),
+            )
+          : Container(
+              width: width,
+              height: height,
+              color: Colors.grey[900],
+              child: const Icon(Icons.image_not_supported, color: Colors.grey),
+            ),
+    );
+
+    return SizedBox(
+      width: width,
+      height: height,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          imageWidget,
+          // 상단 20% 그라데이션 (검정 → 투명): 별 아이콘 가독용
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: height * 0.2,
+            child: IgnorePointer(
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(10),
+                    topRight: Radius.circular(10),
+                  ),
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: const [Colors.black, Color(0x00000000)],
+                    stops: const [0.0, 1.0],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          // 상단 별 3개: gap 2, width 40% 오른쪽 정렬, starResult만큼 gold
+          Positioned(
+            top: 2,
+            right: 0,
+            child: SizedBox(
+              width: width * 0.4,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: List.generate(3, (i) {
+                  final isGold = i < goldCount;
+                  return Image.asset(
+                    isGold ? _starGold : _starSilver,
+                    width: starSize,
+                    height: starSize,
+                    fit: BoxFit.contain,
+                  );
+                }),
+              ),
+            ),
+          ),
+          // 하단 날짜: 텍스트 길이만큼만 차지, 오른쪽 하단에 검정 60%
+          if (dateText.isNotEmpty)
+            Positioned(
+              bottom: 0,
+              right: 0,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.6),
+                  borderRadius: const BorderRadius.only(
+                    bottomRight: Radius.circular(10),
+                  ),
+                ),
+                child: Text(
+                  dateText,
+                  style: theme.bodySmall?.copyWith(color: Colors.white),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

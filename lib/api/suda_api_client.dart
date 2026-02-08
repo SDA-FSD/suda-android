@@ -137,6 +137,17 @@ class SudaApiClient {
     );
   }
 
+  /// GET /v1/roleplays/results?pageNum=0 (0-based, 9 per page)
+  static Future<SudaAppPage<RpSimpleResultDto>> getRoleplayResults({
+    required String accessToken,
+    required int pageNum,
+  }) {
+    return RoleplayApi.getResults(
+      accessToken: accessToken,
+      pageNum: pageNum,
+    );
+  }
+
   static Future<RoleplayResultDto> getRoleplayResult({
     required String accessToken,
     required int resultId,

@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
+import '../../models/pagination.dart';
 import '../../models/roleplay_models.dart';
 import '../client/suda_http_client.dart';
 
@@ -109,6 +110,18 @@ class RoleplayApi {
       () => _updateSpeedRateInternal(accessToken, speedRate),
       retryWithNewToken: (newToken) =>
           _updateSpeedRateInternal(newToken, speedRate),
+    );
+  }
+
+  /// GET /v1/roleplays/results?pageNum=0 (0-based, 9 items per page)
+  static Future<SudaAppPage<RpSimpleResultDto>> getResults({
+    required String accessToken,
+    required int pageNum,
+  }) async {
+    return await SudaHttpClient.executeWithRefresh(
+      () => _getResultsInternal(accessToken, pageNum),
+      retryWithNewToken: (newToken) =>
+          _getResultsInternal(newToken, pageNum),
     );
   }
 
@@ -500,6 +513,46 @@ class RoleplayApi {
 
     throw Exception(
       'PUT /v1/users/speed-rate failed: HTTP ${response.statusCode} ${response.body}',
+    );
+  }
+
+  static Future<SudaAppPage<RpSimpleResultDto>> _getResultsInternal(
+    String accessToken,
+    int pageNum,
+  ) async {
+    final uri = SudaHttpClient.buildUri('/v1/roleplays/results', {
+      'pageNum': pageNum.toString(),
+    });
+    late final http.Response response;
+    try {
+      response = await SudaHttpClient.client
+          .get(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+              'Content-Type': 'application/json',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      rethrow;
+    }
+
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final Map<String, dynamic> data =
+          jsonDecode(response.body) as Map<String, dynamic>;
+      return SudaAppPage<RpSimpleResultDto>.fromJson(
+        data,
+        (json) => RpSimpleResultDto.fromJson(Map<String, dynamic>.from(json)),
+      );
+    }
+
+    throw Exception(
+      'GET /v1/roleplays/results failed: HTTP ${response.statusCode} ${response.body}',
     );
   }
 

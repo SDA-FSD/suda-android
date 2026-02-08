@@ -411,6 +411,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Report Issue'**
   String get reportTitle;
+
+  /// No description provided for @profileHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get profileHistory;
+
+  /// No description provided for @profileHistoryEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No history yet'**
+  String get profileHistoryEmpty;
 }
 
 class _AppLocalizationsDelegate

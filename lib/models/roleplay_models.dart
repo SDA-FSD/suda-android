@@ -456,3 +456,27 @@ class RoleplayResultDto {
     );
   }
 }
+
+/// GET /v1/roleplays/results 페이징 응답의 content 항목
+class RpSimpleResultDto {
+  final int? resultId;
+  final String? imgPath;
+  final int? starResult;
+  final String? createdAt;
+
+  const RpSimpleResultDto({
+    this.resultId,
+    this.imgPath,
+    this.starResult,
+    this.createdAt,
+  });
+
+  factory RpSimpleResultDto.fromJson(Map<String, dynamic> json) {
+    return RpSimpleResultDto(
+      resultId: _optionalInt(json['resultId']),
+      imgPath: json['imgPath'] as String?,
+      starResult: _optionalInt(json['starResult']),
+      createdAt: json['createdAt'] as String?,
+    );
+  }
+}

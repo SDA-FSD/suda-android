@@ -75,5 +75,7 @@
   "endingReport": "Report",
   "endingHowWas": "How was the Roleplay?",
   "endingNext": "Next",
-  "reportTitle": "Report Issue"
+  "reportTitle": "Report Issue",
+  "profileHistory": "History",
+  "profileHistoryEmpty": "No history yet"
 }

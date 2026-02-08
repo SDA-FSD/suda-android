@@ -176,4 +176,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reportTitle => 'Report Issue';
+
+  @override
+  String get profileHistory => 'History';
+
+  @override
+  String get profileHistoryEmpty => 'No history yet';
 }

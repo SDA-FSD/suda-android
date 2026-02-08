@@ -170,4 +170,10 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get reportTitle => '문제 신고';
+
+  @override
+  String get profileHistory => '히스토리';
+
+  @override
+  String get profileHistoryEmpty => '아직 롤플레이 결과가 없습니다';
 }

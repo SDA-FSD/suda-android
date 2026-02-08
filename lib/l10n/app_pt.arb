@@ -75,5 +75,7 @@
   "endingReport": "Relatório",
   "endingHowWas": "Como foi o Roleplay?",
   "endingNext": "Próximo",
-  "reportTitle": "Relatar Problema"
+  "reportTitle": "Relatar Problema",
+  "profileHistory": "Histórico",
+  "profileHistoryEmpty": "Ainda sem histórico"
 }

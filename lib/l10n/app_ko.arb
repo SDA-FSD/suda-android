@@ -75,5 +75,7 @@
   "endingReport": "리포트",
   "endingHowWas": "롤플레이는 어떠셨나요?",
   "endingNext": "다음",
-  "reportTitle": "문제 신고"
+  "reportTitle": "문제 신고",
+  "profileHistory": "히스토리",
+  "profileHistoryEmpty": "아직 롤플레이 결과가 없습니다"
 }
