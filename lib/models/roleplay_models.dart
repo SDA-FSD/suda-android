@@ -401,6 +401,7 @@ class RoleplayResultDto {
   final String? createdAt;
   final String? mainTitle; // non-null on server
   final String? subTitle; // non-null on server
+  final String? avatarImgPath;
 
   const RoleplayResultDto({
     this.id,
@@ -422,6 +423,7 @@ class RoleplayResultDto {
     this.createdAt,
     this.mainTitle,
     this.subTitle,
+    this.avatarImgPath,
   });
 
   factory RoleplayResultDto.fromJson(Map<String, dynamic> json) {
@@ -453,6 +455,7 @@ class RoleplayResultDto {
       createdAt: json['createdAt'] as String?,
       mainTitle: json['mainTitle'] as String?,
       subTitle: json['subTitle'] as String?,
+      avatarImgPath: json['avatarImgPath'] as String?,
     );
   }
 }

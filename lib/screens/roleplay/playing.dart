@@ -72,8 +72,6 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
   late final AnimationController _loadingRotationController;
   bool _showUserStartGuide = false;
   bool _showExitLayer = false;
-  int _kebabTapCount = 0;
-  Timer? _kebabTapResetTimer;
   static const double _headerTopSpacing = 108;
   static const List<int> _speedRateSteps = [150, 120, 100, 70];
 
@@ -109,8 +107,6 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     _loadingRotationController.dispose();
     _hintIdleTimer?.cancel();
     _hintIdleTimer = null;
-    _kebabTapResetTimer?.cancel();
-    _kebabTapResetTimer = null;
     _hintBlinkController.dispose();
     super.dispose();
   }
@@ -502,83 +498,6 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     setState(() {
       _isSpeedPanelVisible = !_isSpeedPanelVisible;
     });
-  }
-
-  /// (임시조치) 케밥 아이콘 연속 5회 터치 시 resultId=541 기반 ending 플로우 트리거. Playing 이후 흐름(Ending→Result) 테스트용.
-  void _onKebabTap() {
-    _kebabTapResetTimer?.cancel();
-    _kebabTapResetTimer = null;
-    _kebabTapCount += 1;
-    if (_kebabTapCount >= 5) {
-      _kebabTapCount = 0;
-      _triggerTempEndingFlow();
-      return;
-    }
-    _kebabTapResetTimer = Timer(const Duration(seconds: 2), () {
-      if (mounted) {
-        setState(() => _kebabTapCount = 0);
-      }
-      _kebabTapResetTimer = null;
-    });
-    _toggleSpeedPanel();
-  }
-
-  void _triggerTempEndingFlow() async {
-    const resultId = 541;
-    final l10n = AppLocalizations.of(context)!;
-    _showEndedServiceMessage(l10n.roleplayEndedEnding);
-    _serviceMessageTimer?.cancel();
-
-    final accessToken = await TokenStorage.loadAccessToken();
-    final Future<RoleplayResultDto?> resultFuture = accessToken != null
-        ? SudaApiClient.getRoleplayResult(
-            accessToken: accessToken,
-            resultId: resultId,
-          ).then<RoleplayResultDto?>((r) => r)
-        : Future<RoleplayResultDto?>.value(null);
-
-    final futures = <Future<dynamic>>[
-      Future<void>.delayed(const Duration(seconds: 3)),
-      resultFuture,
-    ];
-    if (mounted) {
-      RoleplayRoleDto? role;
-      final roleList = RoleplayStateService.instance.overview?.roleplay?.roleList;
-      final roleId = RoleplayStateService.instance.roleId;
-      if (roleList != null && roleId != null) {
-        for (final r in roleList) {
-          if (r.id == roleId) {
-            role = r;
-            break;
-          }
-        }
-      }
-      final imgPath = role?.endingList?.isNotEmpty == true
-          ? role!.endingList!.first.imgPath
-          : null;
-      if (imgPath != null && imgPath.isNotEmpty) {
-        final imageUrl = '${AppConfig.cdnBaseUrl}$imgPath';
-        futures.add(
-          precacheImage(
-            CachedNetworkImageProvider(imageUrl),
-            context,
-          ).then((_) => null),
-        );
-      }
-    }
-
-    try {
-      await Future.wait(futures);
-      if (!mounted) return;
-      final result = await resultFuture;
-      RoleplayStateService.instance.setCachedResult(result);
-    } catch (e) {
-      debugPrint('[DEBUG] getRoleplayResult error: $e');
-      if (!mounted) return;
-      RoleplayStateService.instance.setCachedResult(null);
-    }
-    if (!mounted) return;
-    RoleplayRouter.replaceWithEnding(context);
   }
 
   void _setSpeedIndexFromOffset({
@@ -1977,7 +1896,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
               top: topInset + 16,
               right: 16,
               child: GestureDetector(
-                onTap: _onKebabTap,
+                onTap: _toggleSpeedPanel,
                 child: SizedBox(
                   width: 40,
                   height: 40,

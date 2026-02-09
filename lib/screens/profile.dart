@@ -12,6 +12,7 @@ import '../services/suda_api_client.dart';
 import '../utils/sub_screen_route.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/gnb_bar.dart';
+import 'roleplay/history.dart';
 import 'setting/setting.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -97,6 +98,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
         pageNum: pageNum,
       );
       if (!mounted) return;
+      final sameFirstAsCurrent = pageNum == 0 &&
+          _historyList.isNotEmpty &&
+          page.content.isNotEmpty &&
+          _historyList.first.resultId == page.content.first.resultId;
+      if (sameFirstAsCurrent) {
+        setState(() => _isLoadingHistory = false);
+        return;
+      }
       setState(() {
         if (pageNum == 0) {
           _historyList.clear();
@@ -122,9 +131,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void didUpdateWidget(ProfileScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // 활성 상태로 전환될 때마다 프로필 갱신
+    // 활성 상태로 전환될 때마다 프로필 갱신 + 롤플레이 목록 0페이지로 새로 호출(첫 요소 같으면 화면 갱신 없이 유지)
     if (!oldWidget.isActive && widget.isActive) {
       _refreshProfile();
+      _fetchHistoryPage(0);
     }
   }
 
@@ -263,10 +273,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
       for (var j = 0; j < 3; j++) {
         final index = i + j;
         if (index < _historyList.length) {
+          final item = _historyList[index];
+          final resultId = item.resultId;
           rowItems.add(_HistoryThumbnail(
-            item: _historyList[index],
+            item: item,
             width: itemWidth,
             height: itemHeight,
+            onTap: resultId != null
+                ? () {
+                    Navigator.push(
+                      context,
+                      SubScreenRoute(
+                        page: HistoryScreen(resultId: resultId),
+                      ),
+                    );
+                  }
+                : null,
           ));
         }
       }
@@ -616,7 +638,7 @@ class _ProgressBar extends StatelessWidget {
   }
 }
 
-/// 프로필 히스토리 썸네일 (CDN·캐시·shimmer·상단 별·하단 날짜)
+/// 프로필 히스토리 썸네일 (CDN·캐시·shimmer·상단 별·하단 날짜). 탭 시 History 스크린 진입.
 class _HistoryThumbnail extends StatelessWidget {
   static const String _starGold = 'assets/images/star_gold.png';
   static const String _starSilver = 'assets/images/star_silver.png';
@@ -624,11 +646,13 @@ class _HistoryThumbnail extends StatelessWidget {
   final RpSimpleResultDto item;
   final double width;
   final double height;
+  final VoidCallback? onTap;
 
   const _HistoryThumbnail({
     required this.item,
     required this.width,
     required this.height,
+    this.onTap,
   });
 
   /// createdAt (ISO-8601) → dd/mm
@@ -684,7 +708,7 @@ class _HistoryThumbnail extends StatelessWidget {
             ),
     );
 
-    return SizedBox(
+    final content = SizedBox(
       width: width,
       height: height,
       child: Stack(
@@ -757,5 +781,13 @@ class _HistoryThumbnail extends StatelessWidget {
         ],
       ),
     );
+    if (onTap != null) {
+      return GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: content,
+      );
+    }
+    return content;
   }
 }

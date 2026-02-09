@@ -158,6 +158,21 @@ class SudaApiClient {
     );
   }
 
+  /// GET /v1/roleplays/{rpId}/roles/{rpRoleId}/endings/{endingId}
+  static Future<RoleplayEndingDto> getRoleplayEnding({
+    required String accessToken,
+    required int rpId,
+    required int rpRoleId,
+    required int endingId,
+  }) {
+    return RoleplayApi.getRoleplayEnding(
+      accessToken: accessToken,
+      rpId: rpId,
+      rpRoleId: rpRoleId,
+      endingId: endingId,
+    );
+  }
+
   static Future<void> updateRoleplayResultStar({
     required String accessToken,
     required int resultId,

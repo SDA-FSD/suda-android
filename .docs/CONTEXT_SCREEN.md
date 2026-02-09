@@ -295,6 +295,8 @@
   - `onNavigateToHome` 콜백 호출 → `_MyAppState._navigateToHome()` 실행 → 상태 업데이트로 전환
 - **SettingScreen** (Sub Screen): 우측 상단 원형 버튼 클릭 시
   - `Navigator.push()`로 iOS 스타일 슬라이드 애니메이션으로 표시
+- **HistoryScreen** (Sub Screen): 롤플레이 히스토리 썸네일 탭 시 (resultId 전달)
+  - `Navigator.push(SubScreenRoute(page: HistoryScreen(resultId: ...)))` 로 진입
 
 ### 스크린 내부 구현 특이사항
 - **스크린 타입 특성**: Main Screen
@@ -674,6 +676,79 @@
 
 ---
 
+## 19. HistoryScreen
+
+### 스크린 관련 정의 파일
+- **파일 경로**: `lib/screens/roleplay/history.dart`
+- **클래스명**: `HistoryScreen` (StatefulWidget)
+- **스크린 타입**: **Sub Screen**
+
+### 스크린 용도
+- Profile에서 진입. 롤플레이 결과 요약. Result Screen과 동일 구조(초기 애니메이션 없음).
+- History ↔ ReviewChat/ReviewEnding 왔다 갔다 하는 동안 하나의 roleplay result 정보를 스크린 상태로 보존. 나갈 때·새로 진입할 때 갱신.
+
+### 이전 스크린 정보 (진입점)
+- **ProfileScreen**: 롤플레이 히스토리 영역의 썸네일 탭 시 (resultId 전달)
+
+### 이후 스크린 정보 (이동 가능한 다른 스크린)
+- **ReviewChatScreen** (Sub Screen): 롤플레이 채팅 내용 열람 진입 (추후 지침)
+- **ReviewEndingScreen** (Sub Screen): 롤플레이 엔딩 내용 열람 진입 (추후 지침)
+- **ProfileScreen**: X 버튼 또는 시스템 뒤로가기 시 `Navigator.pop()`으로 복귀
+
+### 스크린 내부 구현 특이사항
+- **상태**: resultId로 `SudaApiClient.getRoleplayResult()` 조회 후 `RoleplayResultDto` 및 `getUserProfile()`(Lv·progress)를 스크린 상태로 보관. **롤플레이 진행용(RoleplayStateService)과 혼용하지 않음.**
+- **레이아웃**: Result와 동일(박스 210 + 본문). 초기 애니메이션 없이 애니 완료 시점 형태로 노출(별·mainTitle·subTitle·likePoint·Mission·Words·Lv·Good Points·To Improve·Got it 버튼).
+- **Got it 버튼**: 노출만, 동작 없음(추후 지침). Report 문구 없음.
+- 우측 상단 X 버튼 필수.
+
+---
+
+## 20. ReviewChatScreen
+
+### 스크린 관련 정의 파일
+- **파일 경로**: `lib/screens/roleplay/review_chat.dart`
+- **클래스명**: `ReviewChatScreen` (StatelessWidget)
+- **스크린 타입**: **Sub Screen**
+
+### 스크린 용도
+- History Screen에서 진입. 롤플레이 채팅 내용 열람.
+
+### 이전 스크린 정보 (진입점)
+- **HistoryScreen**: "View Chat" 버튼 탭 시 (RoleplayResultDto 전달)
+
+### 이후 스크린 정보 (이동 가능한 다른 스크린)
+- **HistoryScreen**: 좌상단 뒤로가기 또는 시스템 뒤로가기 시 `Navigator.pop()`으로 복귀
+
+### 스크린 내부 구현 특이사항
+- **헤더**: 중앙 "Chat History" (headlineMedium·흰색), Setting 계열 스타일. 좌상단 뒤로가기(header_arrow_back.svg).
+- **배경색**: `#121212`. AppScaffold 사용, showBackButton: true.
+- **본문**: RoleplayResultDto.chatHistory(List\<SudaJson\>)를 순서대로 표시. key로 발화자 구분: USER(사용자 말풍선·우측·흰색), AI_CHARACTER(AI 말풍선·좌측·#0CABA8·avatarImgPath 아바타 40×40), AI_NARRATOR(나레이션·중앙·이탤릭 흰색), SYSTEM_MISSION(미션·중앙·Mission 뱃지+핑크 텍스트). value를 그대로 문구로 표시. Playing 스크린과 동일 말풍선/나레이션/미션 배치·스타일.
+
+---
+
+## 21. ReviewEndingScreen
+
+### 스크린 관련 정의 파일
+- **파일 경로**: `lib/screens/roleplay/review_ending.dart`
+- **클래스명**: `ReviewEndingScreen` (StatefulWidget)
+- **스크린 타입**: **Sub Screen**
+
+### 스크린 용도
+- History Screen에서 진입. 롤플레이 엔딩 내용 열람(단순 조회, 버튼 없음).
+
+### 이전 스크린 정보 (진입점)
+- **HistoryScreen**: "View Ending" 버튼 탭 시. API·이미지 프리로드 완료 후 진입.
+
+### 이후 스크린 정보 (이동 가능한 다른 스크린)
+- **HistoryScreen**: 좌상단 뒤로가기 또는 시스템 뒤로가기 시 `Navigator.pop()`으로 복귀
+
+### 스크린 내부 구현 특이사항
+- **헤더**: 중앙 "View Ending", 좌상단 뒤로가기(View Chat과 동일). 배경색 `#121212`.
+- **본문**: 헤더 아래 전체 영역에 엔딩 이미지(비율 유지·높이 100% 채움, BoxFit.cover·좌우 잘림 가능). **2초 후** 검정 레이어(0xCC000000)·타이틀·콘텐츠 페이드인(300ms). 타이틀 위쪽 25%/콘텐츠 아래 75% 비율. title/content는 SudaJsonUtil.localizedText로 사용자 언어에 맞게 표시. 별점·Next 등 버튼 없음.
+- **진입**: History에서 `GET /v1/roleplays/{rpId}/roles/{rpRoleId}/endings/{endingId}` 호출 후 이미지 프리로드 완료 시 SubScreenRoute로 진입. View Ending 버튼은 Opening과 동일한 24×24 뱅글 로딩 표시.
+
+---
+
 ## 스크린 네비게이션 흐름도
 
 ```
@@ -698,12 +773,15 @@
   │           └─ [RoleplayFailedScreen]
   │               └─ [RoleplayFailedReportScreen] (Report 텍스트 탭 시, 백버튼/X → Failed 복귀)
   └─ [ProfileScreen] → [SettingScreen] (우측 상단 원형 버튼)
-      ├─ [AccountScreen]
-      ├─ [LanguageLevelScreen]
-      ├─ [FeedbackScreen]
-      ├─ [WebViewScreen] (Privacy policy / Terms of Service)
-      ├─ [OpenSourceLicenseScreen]
-      └─ Log out → [LoginScreen] (모든 스크린 pop 후 이동)
+  │       ├─ [AccountScreen]
+  │       ├─ [LanguageLevelScreen]
+  │       ├─ [FeedbackScreen]
+  │       ├─ [WebViewScreen] (Privacy policy / Terms of Service)
+  │       ├─ [OpenSourceLicenseScreen]
+  │       └─ Log out → [LoginScreen] (모든 스크린 pop 후 이동)
+  └─ [ProfileScreen] → [HistoryScreen] (롤플레이 히스토리 썸네일 탭)
+          ├─ [ReviewChatScreen] (채팅 열람)
+          └─ [ReviewEndingScreen] (엔딩 열람)
 ```
 
 ### 네비게이션 흐름 상세 설명

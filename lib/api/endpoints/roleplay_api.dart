@@ -136,6 +136,20 @@ class RoleplayApi {
     );
   }
 
+  /// GET /v1/roleplays/{rpId}/roles/{rpRoleId}/endings/{endingId}
+  static Future<RoleplayEndingDto> getRoleplayEnding({
+    required String accessToken,
+    required int rpId,
+    required int rpRoleId,
+    required int endingId,
+  }) async {
+    return await SudaHttpClient.executeWithRefresh(
+      () => _getRoleplayEndingInternal(accessToken, rpId, rpRoleId, endingId),
+      retryWithNewToken: (newToken) =>
+          _getRoleplayEndingInternal(newToken, rpId, rpRoleId, endingId),
+    );
+  }
+
   static Future<void> updateRoleplayResultStar({
     required String accessToken,
     required int resultId,
@@ -588,6 +602,45 @@ class RoleplayApi {
 
     throw Exception(
       'GET /v1/roleplays/results/$resultId failed: HTTP ${response.statusCode} ${response.body}',
+    );
+  }
+
+  static Future<RoleplayEndingDto> _getRoleplayEndingInternal(
+    String accessToken,
+    int rpId,
+    int rpRoleId,
+    int endingId,
+  ) async {
+    final uri = SudaHttpClient.buildUri(
+      '/v1/roleplays/$rpId/roles/$rpRoleId/endings/$endingId',
+    );
+    late final http.Response response;
+    try {
+      response = await SudaHttpClient.client
+          .get(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+              'Content-Type': 'application/json',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      rethrow;
+    }
+
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final Map<String, dynamic> data =
+          jsonDecode(response.body) as Map<String, dynamic>;
+      return RoleplayEndingDto.fromJson(data);
+    }
+
+    throw Exception(
+      'GET /v1/roleplays/$rpId/roles/$rpRoleId/endings/$endingId failed: HTTP ${response.statusCode} ${response.body}',
     );
   }
 
