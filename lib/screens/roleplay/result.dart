@@ -125,8 +125,13 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
   Widget _buildBoxLayerContent(BuildContext context) {
     final dto = RoleplayStateService.instance.cachedResult;
     final starResult = dto?.starResult ?? 0;
-    final useGold = starResult >= 1 && starResult <= 3;
-    final starAsset = useGold ? _starGold : _starSilver;
+    // 0: 모두 silver. 1: 왼쪽만 gold. 2: 왼쪽·중앙 gold. 3: 셋 다 gold. 4 이상: 0과 동일(모두 silver)
+    final leftGold = starResult >= 1 && starResult <= 3;
+    final centerGold = starResult >= 2 && starResult <= 3;
+    final rightGold = starResult == 3;
+    final leftStar = leftGold ? _starGold : _starSilver;
+    final centerStar = centerGold ? _starGold : _starSilver;
+    final rightStar = rightGold ? _starGold : _starSilver;
     final theme = Theme.of(context).textTheme;
 
     // 70x70을 80x80과 같은 기준선에 맞추기 위해 10 하향
@@ -139,17 +144,17 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
           angle: -10 * math.pi / 180,
           child: Transform.translate(
             offset: const Offset(0, star70Offset),
-            child: Image.asset(starAsset, width: 70, height: 70, fit: BoxFit.contain),
+            child: Image.asset(leftStar, width: 70, height: 70, fit: BoxFit.contain),
           ),
         ),
         const SizedBox(width: 10),
-        Image.asset(starAsset, width: 80, height: 80, fit: BoxFit.contain),
+        Image.asset(centerStar, width: 80, height: 80, fit: BoxFit.contain),
         const SizedBox(width: 10),
         Transform.rotate(
           angle: 10 * math.pi / 180,
           child: Transform.translate(
             offset: const Offset(0, star70Offset),
-            child: Image.asset(starAsset, width: 70, height: 70, fit: BoxFit.contain),
+            child: Image.asset(rightStar, width: 70, height: 70, fit: BoxFit.contain),
           ),
         ),
       ],
