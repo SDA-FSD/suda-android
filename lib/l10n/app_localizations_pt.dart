@@ -183,4 +183,10 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get profileHistoryEmpty => 'Ainda sem histórico';
+
+  @override
+  String get noTicketsTitle => 'Acabou seus Tickets…';
+
+  @override
+  String get noTicketsBody => 'Você atingiu seu limite do dia.\nVolte Amanhã!';
 }

@@ -20,6 +20,7 @@ import 'screens/agreement.dart';
 import 'config/app_config.dart';
 import 'utils/language_util.dart';
 import 'theme/app_theme.dart';
+import 'widgets/main_route_aware_wrapper.dart';
 
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -55,12 +56,15 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   // Navigator를 MaterialApp 빌드 전에도 접근할 수 있도록 GlobalKey 사용
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
+  final RouteObserver<ModalRoute<void>> _routeObserver =
+      RouteObserver<ModalRoute<void>>();
   
   GoogleSignInAccount? _googleUser;
   String? _accessToken;
   UserDto? _user;
   bool _isLoading = true;
   String _currentMainScreen = 'home'; // 'alarm' | 'home' | 'profile'
+  int _homeTabSelectedCounter = 0; // 홈 탭 선택 시 증가 → HomeScreen 티켓 갱신
   bool _hasCheckedVersion = false; // 버전 체크 실행 여부
   bool _needsAgreement = false; // 서비스 이용 동의 필요 여부
 
@@ -267,6 +271,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   void _navigateToHome() {
     setState(() {
       _currentMainScreen = 'home';
+      _homeTabSelectedCounter++;
     });
   }
 
@@ -295,6 +300,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     return MaterialApp(
       navigatorKey: _navigatorKey,
+      navigatorObservers: [_routeObserver],
       title: 'SUDA',
       debugShowCheckedModeBanner: false,
       localizationsDelegates: const [
@@ -330,33 +336,42 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   accessToken: _accessToken!,
                   onAgreementComplete: _onAgreementComplete,
                 )
-              : PopScope(
-                  canPop: _currentMainScreen == 'home',
-                  onPopInvokedWithResult: (bool didPop, _) {
-                    if (!didPop && _currentMainScreen != 'home') {
-                      setState(() => _currentMainScreen = 'home');
-                    }
+              : MainRouteAwareWrapper(
+                  routeObserver: _routeObserver,
+                  onReturnToRoute: () {
+                    setState(() => _homeTabSelectedCounter++);
                   },
-                  child: IndexedStack(
-                    index: _currentMainScreen == 'alarm'
-                        ? 0
-                        : _currentMainScreen == 'home'
-                            ? 1
-                            : 2,
-                    children: [
-                      AlarmMessageScreen(
+                  child: PopScope(
+                    canPop: _currentMainScreen == 'home',
+                    onPopInvokedWithResult: (bool didPop, _) {
+                      if (!didPop && _currentMainScreen != 'home') {
+                        setState(() {
+                          _currentMainScreen = 'home';
+                          _homeTabSelectedCounter++;
+                        });
+                      }
+                    },
+                    child: IndexedStack(
+                      index: _currentMainScreen == 'alarm'
+                          ? 0
+                          : _currentMainScreen == 'home'
+                              ? 1
+                              : 2,
+                      children: [
+                        AlarmMessageScreen(
                         onNavigateToHome: _navigateToHome,
                         onNavigateToProfile: _navigateToProfile,
                         onNavigateToAlarm: _navigateToAlarm,
                         isActive: _currentMainScreen == 'alarm',
                         user: _user,
-                      ),
-                      HomeScreen(
+                        ),
+                        HomeScreen(
                         onNavigateToAlarm: _navigateToAlarm,
                         onNavigateToProfile: _navigateToProfile,
                         user: _user,
-                      ),
-                      ProfileScreen(
+                        homeTabSelectedCounter: _homeTabSelectedCounter,
+                        ),
+                        ProfileScreen(
                         onNavigateToHome: _navigateToHome,
                         onNavigateToAlarm: _navigateToAlarm,
                         onSignOut: _onSignOut,
@@ -367,10 +382,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                           });
                         },
                         isActive: _currentMainScreen == 'profile',
+                        ),
+                      ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
     );
   }
 }

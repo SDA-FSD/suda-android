@@ -235,6 +235,12 @@ class SudaApiClient {
     return UserApi.getUserProfile(accessToken: accessToken);
   }
 
+  static Future<UserTicketDto> getUserTicket({
+    required String accessToken,
+  }) {
+    return UserApi.getUserTicket(accessToken: accessToken);
+  }
+
   static Future<void> updateName({
     required String accessToken,
     required String name,

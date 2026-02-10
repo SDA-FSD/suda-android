@@ -5,6 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:marquee/marquee.dart';
+import 'package:vibration/vibration.dart';
 import '../services/auth_service.dart';
 import '../services/token_storage.dart';
 import '../services/suda_api_client.dart';
@@ -20,12 +21,15 @@ class HomeScreen extends StatefulWidget {
   final VoidCallback? onNavigateToAlarm;
   final VoidCallback? onNavigateToProfile;
   final UserDto? user;
-  
+  /// 홈 탭이 선택될 때마다 증가. didUpdateWidget에서 변경 시 티켓 갱신.
+  final int? homeTabSelectedCounter;
+
   const HomeScreen({
     super.key,
     this.onNavigateToAlarm,
     this.onNavigateToProfile,
     this.user,
+    this.homeTabSelectedCounter,
   });
 
   @override
@@ -45,6 +49,16 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _bannerTimerStarted = false; // 타이머 시작 여부 플래그
   bool _isRoleplayLoadingStarted = false; // 롤플레이 로딩 시작 여부 플래그
   int _visibleCategoryCount = 0; // 현재 렌더링 허용된 카테고리 개수
+  int _displayTicketCount = 0;
+
+  @override
+  void didUpdateWidget(HomeScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.homeTabSelectedCounter != null &&
+        widget.homeTabSelectedCounter != oldWidget.homeTabSelectedCounter) {
+      _fetchTicket();
+    }
+  }
 
   @override
   void initState() {
@@ -74,6 +88,35 @@ class _HomeScreenState extends State<HomeScreen> {
 
     // 3. 배너 정보 조회 (롤플레이는 배너 렌더링 완료 후 호출하도록 분리)
     await _fetchBanners();
+    // 4. 티켓 개수 조회
+    await _fetchTicket();
+  }
+
+  /// 티켓 개수 조회. 감소 시 즉시 치환, 증가 시 500ms 내 단계 증가 + 단계마다 진동
+  Future<void> _fetchTicket() async {
+    if (_accessToken == null) return;
+    try {
+      final dto = await SudaApiClient.getUserTicket(accessToken: _accessToken!);
+      if (!mounted) return;
+      final target = dto.finalTicketCount;
+      if (target <= _displayTicketCount) {
+        setState(() => _displayTicketCount = target);
+        return;
+      }
+      final from = _displayTicketCount;
+      final delta = target - from;
+      final steps = delta > 8 ? 8 : (delta < 1 ? 1 : delta);
+      final stepDurationMs = (500 / steps).round();
+      for (int i = 1; i <= steps; i++) {
+        await Future.delayed(Duration(milliseconds: stepDurationMs));
+        if (!mounted) return;
+        final next = (i == steps) ? target : (from + (delta * i / steps).round());
+        setState(() => _displayTicketCount = next);
+        await Vibration.vibrate(duration: 80);
+      }
+    } catch (_) {
+      // 실패 시 표시값 유지
+    }
   }
 
   /// 배너 정보 조회
@@ -218,6 +261,7 @@ class _HomeScreenState extends State<HomeScreen> {
       title: 'Hi, ${widget.user?.name ?? 'User'}!',
       titleStyle: Theme.of(context).textTheme.headlineSmall?.copyWith(color: Colors.white),
       usePadding: false, // 배너 풀-폭 유지를 위해 본문 패딩 제거
+      actions: [_buildTicketBadge(context)],
       bottomNavigationBar: GnbBar(
         isAlarmActive: false,
         isHomeActive: true,
@@ -470,6 +514,33 @@ class _HomeScreenState extends State<HomeScreen> {
   /// 언어 설정에 맞는 오버레이 텍스트 반환
   String _getOverlayText(MainHomeBannerDto banner) {
     return SudaJsonUtil.localizedText(banner.overlayText);
+  }
+
+  /// 상단 우측 티켓 아이콘 + 개수 (38x20, body-caption 흰색)
+  Widget _buildTicketBadge(BuildContext context) {
+    return SizedBox(
+      width: 38,
+      height: 20,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Image.asset(
+            'assets/images/icons/ticket.png',
+            width: 38,
+            height: 20,
+            fit: BoxFit.cover,
+          ),
+          Center(
+            child: Text(
+              '$_displayTicketCount',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 

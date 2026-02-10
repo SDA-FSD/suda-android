@@ -119,6 +119,7 @@
 - **세션 초기화** (`POST /v1/roleplay-sessions`)
   - 500: Opening -> Playing 전환 금지. 마이크 권한 체크 이후 처리.
   - 현행 UX: "Cannot start roleplay" 토스트 노출 후 Opening에 머무름.
+  - 200이고 응답 body의 `sessionId`가 `'0'`(또는 0)인 경우: 티켓 부족으로 간주. 단순 얼럿 "(임시)no tickets" 노출 후 Opening에 머무름. 버튼 재탭 시 동일 API 재호출·동일 처리.
 - **사용자 텍스트/음성 입력, AI 응답, 나레이션, 힌트, 번역**
   - 404: 서버에서 세션 유실로 판단. "Roleplay Session Not Found" 얼럿 후 Overview 복귀.
 - **사용자 텍스트/음성 입력**

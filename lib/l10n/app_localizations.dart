@@ -423,6 +423,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No history yet'**
   String get profileHistoryEmpty;
+
+  /// No description provided for @noTicketsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No tickets left…'**
+  String get noTicketsTitle;
+
+  /// No description provided for @noTicketsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve reached today\'s limit.\nCome back tomorrow!'**
+  String get noTicketsBody;
 }
 
 class _AppLocalizationsDelegate

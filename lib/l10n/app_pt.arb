@@ -77,5 +77,7 @@
   "endingNext": "Próximo",
   "reportTitle": "Relatar Problema",
   "profileHistory": "Histórico",
-  "profileHistoryEmpty": "Ainda sem histórico"
+  "profileHistoryEmpty": "Ainda sem histórico",
+  "noTicketsTitle": "Acabou seus Tickets…",
+  "noTicketsBody": "Você atingiu seu limite do dia.\nVolte Amanhã!"
 }

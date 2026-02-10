@@ -206,4 +206,45 @@ class UserApi {
       'PUT /v1/users/language-level failed: HTTP ${response.statusCode} ${response.body}',
     );
   }
+
+  static Future<UserTicketDto> getUserTicket({
+    required String accessToken,
+  }) async {
+    return await SudaHttpClient.executeWithRefresh(
+      () => _getUserTicketInternal(accessToken),
+      retryWithNewToken: (newToken) => _getUserTicketInternal(newToken),
+    );
+  }
+
+  static Future<UserTicketDto> _getUserTicketInternal(String accessToken) async {
+    final uri = SudaHttpClient.buildUri('/v1/users/ticket');
+
+    late final http.Response response;
+    try {
+      response = await SudaHttpClient.client
+          .get(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      rethrow;
+    }
+
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final Map<String, dynamic> data =
+          jsonDecode(response.body) as Map<String, dynamic>;
+      return UserTicketDto.fromJson(data);
+    }
+
+    throw Exception(
+      'GET /v1/users/ticket failed: HTTP ${response.statusCode} ${response.body}',
+    );
+  }
 }

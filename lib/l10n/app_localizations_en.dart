@@ -182,4 +182,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileHistoryEmpty => 'No history yet';
+
+  @override
+  String get noTicketsTitle => 'No tickets left…';
+
+  @override
+  String get noTicketsBody =>
+      'You\'ve reached today\'s limit.\nCome back tomorrow!';
 }

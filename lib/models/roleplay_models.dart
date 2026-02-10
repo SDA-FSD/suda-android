@@ -85,8 +85,10 @@ class RoleplaySessionDto {
   });
 
   factory RoleplaySessionDto.fromJson(Map<String, dynamic> json) {
+    final raw = json['sessionId'];
+    final sessionId = raw == null ? null : raw.toString();
     return RoleplaySessionDto(
-      sessionId: json['sessionId'] as String?,
+      sessionId: sessionId,
       aiSoundCdnYn: json['aiSoundCdnYn'] as String?,
       aiSoundCdnPath: json['aiSoundCdnPath'] as String?,
       aiSoundFile: _parseBytes(json['aiSoundFile']),

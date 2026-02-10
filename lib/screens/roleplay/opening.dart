@@ -9,6 +9,7 @@ import '../../l10n/app_localizations.dart';
 import '../../services/token_refresh_service.dart';
 import '../../routes/roleplay_router.dart';
 import '../../utils/suda_json_util.dart';
+import '../../widgets/app_content_dialog.dart';
 
 /// Roleplay Opening Screen (Full Screen)
 /// 
@@ -65,6 +66,44 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen> {
         final sessionId = session.sessionId;
         if (sessionId == null || sessionId.isEmpty) {
           AppToast.show(context, 'Cannot start roleplay');
+          _restoreButton();
+          return;
+        }
+        if (sessionId == '0') {
+          final l10n = AppLocalizations.of(context)!;
+          final theme = Theme.of(context).textTheme;
+          await AppContentDialog.show(
+            context,
+            content: Column(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: Center(
+                    child: Text(
+                      l10n.noTicketsTitle,
+                      style: theme.headlineMedium?.copyWith(
+                        color: Colors.white,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 7,
+                  child: Center(
+                    child: Text(
+                      l10n.noTicketsBody,
+                      style: theme.bodyLarge?.copyWith(
+                        color: Colors.white,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            showOkayButton: true,
+          );
           _restoreButton();
           return;
         }

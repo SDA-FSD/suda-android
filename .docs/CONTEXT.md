@@ -60,6 +60,7 @@
   - `SudaApiClient.logout()`: refreshToken과 deviceId로 서버 로그아웃 통지
   - `SudaApiClient.getCurrentUser()`: JWT를 사용하여 사용자 정보 조회 (`/v1/users`)
   - `SudaApiClient.getUserProfile()`: 프로필 부가 정보 조회 (`GET /v1/users/profile`, 응답: ProfileDto(userDto, currentLevel, progressPercentage))
+  - `SudaApiClient.getUserTicket()`: 티켓 개수 조회 (`GET /v1/users/ticket`, 파라메터 없음, 응답: UserTicketDto(beforeTicketCount, finalTicketCount))
   - `SudaApiClient.getRoleplayResults()`: 롤플레이 결과 목록 페이징 (`GET /v1/roleplays/results?pageNum=0`, 0-based, 9개씩, 응답: SudaAppPage\<RpSimpleResultDto\>, RpSimpleResultDto: resultId, imgPath, starResult, createdAt)
   - `SudaApiClient.updateName()`: 사용자 이름 변경 (`PUT /v1/users?name=...`)
   - `SudaApiClient.registerPushToken()`: 푸시 토큰 등록 (`POST /users/push-token`)
@@ -155,6 +156,11 @@
 - **앱 전역 테마 설정**: `lib/theme/app_theme.dart`
   - MaterialApp에서 사용할 ThemeData를 정의
   - `AppTheme.themeData`를 사용하여 일관된 테마 적용
+
+- **공통 콘텐츠 팝업 (AppContentDialog)**: `lib/widgets/app_content_dialog.dart`
+  - 재사용: `AppContentDialog.show(context, content: Widget, { showOkayButton, onOkayPressed, barrierDismissible })`. 본문은 `content`에 위젯으로 전달(여러 스타일 텍스트·버튼·클릭 가능 텍스트 등).
+  - 배경: 노출 중 하단 화면 터치 불가. 배경 레이어는 GNB와 동일 수치(BackdropFilter sigma 6 + Color 0x598C8C8C).
+  - 팝업 카드: 가로 60%·최소 세로 50% 디스플레이, 테두리 10·#80D7CF·radius 30, 내부 상단 30 패딩·14×14 `close.svg` 우측(탭 시 닫힘), 본문 좌우 30·하단 30 마진. 옵션으로 하단 테두리 아래 30 마진 뒤 "Okay" 버튼(높이 44, 가로 40%, #0CABA8, StadiumBorder, ElevatedButton) 노출 가능.
 
 - **텍스트 언어 규칙**
   - **기본 원칙**: 사용자에게 표시되는 모든 기본 텍스트는 영어로 작성
@@ -271,6 +277,8 @@
 - **ReviewChatScreen 구현**: History에서 RoleplayResultDto 전달받아 채팅 이력 표시. 헤더 중앙 "Chat History"(Setting 계열 스타일), 좌상단 뒤로가기(header_arrow_back). chatHistory는 List\<SudaJson\>이며 key로 발화자 구분(USER / AI_CHARACTER / AI_NARRATOR / SYSTEM_MISSION), value를 그대로 표시. Playing과 동일 말풍선·나레이션·미션 배치 및 스타일(사용자 우측 흰색, AI 좌측 티얼+avatarImgPath 아바타, 나레이션/미션 중앙).
 - **ReviewEndingScreen 구현**: History "View Ending" 탭 시 `GET /v1/roleplays/{rpId}/roles/{rpRoleId}/endings/{endingId}` 호출, 응답 RoleplayEndingDto·이미지 프리로드 후 진입(버튼에 Opening과 동일 뱅글 로딩). Sub Screen. 헤더 "View Ending"+뒤로가기. 본문: 이미지(BoxFit.cover·높이 100%·비율 유지·좌우 잘림 가능) → 2s 후 레이어·타이틀(상단 25%)·콘텐츠(하단 75%) 페이드인. 버튼 없음.
 - **엔딩 API**: `SudaApiClient.getRoleplayEnding(accessToken, rpId, rpRoleId, endingId)` → RoleplayEndingDto.
+- **세션 초기화 티켓 부족**: Opening→Playing 세션 초기화(`POST /v1/roleplay-sessions`) 200 응답에서 `sessionId`가 '0'인 경우 티켓 부족으로 간주, 얼럿 "(임시)no tickets" 후 Opening 유지. `.docs/CONTEXT_ROLEPLAY.md` 6-3 참조.
+- **홈 화면 티켓 배지**: 상단 우측에 티켓 아이콘(`assets/images/icons/ticket.png` 38×20) + finalTicketCount 표시(body-caption 흰색). 앱 구동 후 첫 노출 시·GNB 홈 탭 선택 시·물리 뒤로가기로 홈 복귀 시·**서브 스크린에서 pop으로 복귀 시** `GET /v1/users/ticket` 갱신. 서브 복귀 감지는 `RouteObserver` + `MainRouteAwareWrapper`(lib/widgets/main_route_aware_wrapper.dart)의 `didPopNext`로 처리. 감소 시 즉시 치환, 증가 시 500ms 내 단계 증가 + 단계마다 `Vibration.vibrate(duration: 80)` (Result 스크린과 동일).
 
 ## 13. 리팩토링 계획 문서
 - 롤플레이 기능 준비를 위한 리팩토링 작업 분해 문서는 `REFACTOR.md`에 기록

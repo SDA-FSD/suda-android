@@ -1,5 +1,23 @@
 import 'common_models.dart';
 
+/// GET /v1/users/ticket 응답
+class UserTicketDto {
+  final int beforeTicketCount;
+  final int finalTicketCount;
+
+  const UserTicketDto({
+    required this.beforeTicketCount,
+    required this.finalTicketCount,
+  });
+
+  factory UserTicketDto.fromJson(Map<String, dynamic> json) {
+    return UserTicketDto(
+      beforeTicketCount: json['beforeTicketCount'] as int? ?? 0,
+      finalTicketCount: json['finalTicketCount'] as int? ?? 0,
+    );
+  }
+}
+
 class ProfileDto {
   final UserDto userDto;
   final int currentLevel;

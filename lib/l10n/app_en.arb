@@ -77,5 +77,7 @@
   "endingNext": "Next",
   "reportTitle": "Report Issue",
   "profileHistory": "History",
-  "profileHistoryEmpty": "No history yet"
+  "profileHistoryEmpty": "No history yet",
+  "noTicketsTitle": "No tickets left…",
+  "noTicketsBody": "You've reached today's limit.\nCome back tomorrow!"
 }

@@ -176,4 +176,10 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get profileHistoryEmpty => '아직 롤플레이 결과가 없습니다';
+
+  @override
+  String get noTicketsTitle => '티켓이 없습니다...';
+
+  @override
+  String get noTicketsBody => '오늘의 티켓을 모두 소진했습니다.\n내일 다시 만나요!';
 }
