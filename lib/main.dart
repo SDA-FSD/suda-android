@@ -4,10 +4,12 @@ import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'l10n/app_localizations.dart';
 
 import 'services/auth_service.dart';
+import 'services/pending_app_path_service.dart';
 import 'services/token_storage.dart';
 import 'services/suda_api_client.dart';
 import 'services/version_check_service.dart';
@@ -17,6 +19,10 @@ import 'screens/home.dart';
 import 'screens/profile.dart';
 import 'screens/alarm_message.dart';
 import 'screens/agreement.dart';
+import 'screens/roleplay/history.dart';
+import 'screens/setting/setting.dart';
+import 'routes/roleplay_router.dart';
+import 'utils/sub_screen_route.dart';
 import 'config/app_config.dart';
 import 'utils/language_util.dart';
 import 'theme/app_theme.dart';
@@ -40,9 +46,18 @@ void main() async {
 
   // Firebase 초기화 (FlutterNativeSplash 이전에 실행)
   await Firebase.initializeApp();
-  
+
+  // 푸시 알림으로 앱이 켜진 경우 appPath 보관 (로그인/동의 후 Home 진입 시 적용)
+  final initialMessage = await FirebaseMessaging.instance.getInitialMessage();
+  if (initialMessage?.data != null && initialMessage!.data['appPath'] != null) {
+    final path = initialMessage.data!['appPath'] as String?;
+    if (path != null && path.isNotEmpty) {
+      PendingAppPathService.instance.set(path);
+    }
+  }
+
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
-  
+
   runApp(const MyApp());
 }
 
@@ -72,12 +87,26 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    // 푸시 알림 클릭(백그라운드/포그라운드) 시 appPath 보관
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      final path = message.data['appPath'] as String?;
+      if (path != null && path.isNotEmpty) {
+        PendingAppPathService.instance.set(path);
+      }
+    });
+    // 이미 Main이 보일 때 pending 설정되면 rebuild하여 적용 트리거
+    PendingAppPathService.instance.pendingNotifier.addListener(_onPendingAppPathChanged);
     // initState에서는 버전 체크를 실행하지 않음
     // MaterialApp 빌드 후 builder에서 실행
   }
 
+  void _onPendingAppPathChanged() {
+    if (mounted) setState(() {});
+  }
+
   @override
   void dispose() {
+    PendingAppPathService.instance.pendingNotifier.removeListener(_onPendingAppPathChanged);
     TokenRefreshService.instance.stop();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
@@ -296,6 +325,91 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     });
   }
 
+  /// 푸시로 보관된 appPath를 파싱해 탭 전환 또는 Sub 스크린 push. Main(Home) 진입 후 한 번만 호출.
+  void _applyPendingAppPath(String path) {
+    final nav = _navigatorKey.currentState;
+    final ctx = nav?.context;
+    if (ctx == null || !ctx.mounted) return;
+
+    final segments = path.split('/').where((s) => s.isNotEmpty).toList();
+    if (segments.isEmpty) return;
+
+    if (segments.length == 1) {
+      switch (segments[0]) {
+        case 'home':
+          setState(() => _currentMainScreen = 'home');
+          return;
+        case 'alarm':
+          setState(() => _currentMainScreen = 'alarm');
+          return;
+        case 'profile':
+          setState(() => _currentMainScreen = 'profile');
+          return;
+      }
+    }
+
+    if (segments.length >= 2) {
+      if (segments[0] == 'roleplay' &&
+          segments.length >= 3 &&
+          segments[1] == 'overview') {
+        final id = int.tryParse(segments[2]);
+        if (id != null) {
+          setState(() => _currentMainScreen = 'home');
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            RoleplayRouter.pushOverview(
+              _navigatorKey.currentState!.context,
+              id,
+              user: _user,
+            );
+          });
+          return;
+        }
+      }
+      if (segments[0] == 'profile') {
+        if (segments.length >= 2 && segments[1] == 'history' &&
+            segments.length >= 3) {
+          final resultId = int.tryParse(segments[2]);
+          if (resultId != null) {
+            setState(() => _currentMainScreen = 'profile');
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (!mounted) return;
+              final c = _navigatorKey.currentState?.context;
+              if (c != null && c.mounted) {
+                Navigator.push(
+                  c,
+                  SubScreenRoute(
+                    page: HistoryScreen(resultId: resultId),
+                  ),
+                );
+              }
+            });
+            return;
+          }
+        }
+        if (segments.length >= 2 && segments[1] == 'setting') {
+          setState(() => _currentMainScreen = 'profile');
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            final c = _navigatorKey.currentState?.context;
+            if (c != null && c.mounted) {
+              Navigator.push(
+                c,
+                SubScreenRoute(
+                  page: SettingScreen(
+                    onSignOut: _onSignOut,
+                    user: _user,
+                  ),
+                ),
+              );
+            }
+          });
+          return;
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -336,7 +450,17 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   accessToken: _accessToken!,
                   onAgreementComplete: _onAgreementComplete,
                 )
-              : MainRouteAwareWrapper(
+              : Builder(
+                  builder: (_) {
+                    final pending = PendingAppPathService.instance.get();
+                    if (pending != null) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (!mounted) return;
+                        final path = PendingAppPathService.instance.take();
+                        if (path != null) _applyPendingAppPath(path);
+                      });
+                    }
+                    return MainRouteAwareWrapper(
                   routeObserver: _routeObserver,
                   onReturnToRoute: () {
                     setState(() => _homeTabSelectedCounter++);
@@ -384,9 +508,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                         isActive: _currentMainScreen == 'profile',
                         ),
                       ],
+                        ),
                       ),
                     ),
-                  ),
+                  },
+                ),
     );
   }
 }

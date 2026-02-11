@@ -16,7 +16,9 @@
     - 재설치 명령: `adb -s RF9XB00CX9J install -r build/app/outputs/flutter-apk/app-{flavor}-release.apk`
   - **Q51** (추가 테스트 디바이스): LM-Q510N (Android 11 / SDK 30, 디바이스 ID: LMQ510NDYLFEIQCL76)
     - 재설치 명령: `adb -s LMQ510NDYLFEIQCL76 install -r build/app/outputs/flutter-apk/app-{flavor}-release.apk`
-  - **참고**: 앞으로 이 문서에서 "A30", "A23", "A16", "Q51"이라는 별칭으로 각 기기를 지칭할 수 있습니다.
+  - **S8** (추가 테스트 디바이스): 갤럭시 모델 (SM G955N, Android 9 / SDK 28, 디바이스 ID: ce041714d2f6348e0d)
+    - 재설치 명령: `adb -s ce041714d2f6348e0d install -r build/app/outputs/flutter-apk/app-{flavor}-release.apk`
+  - **참고**: 앞으로 이 문서에서 "A30", "A23", "A16", "Q51", "S8"이라는 별칭으로 각 기기를 지칭할 수 있습니다.
   - **ADB 팁**:
     - `adb`가 인식되지 않으면 `export PATH=$PATH:~/Library/Android/sdk/platform-tools`로 경로 추가
     - 다중 기기 설치 예시:
@@ -24,6 +26,7 @@
       - `adb -s R59T901DRQV install -r build/app/outputs/flutter-apk/app-dev-debug.apk`
       - `adb -s RF9XB00CX9J install -r build/app/outputs/flutter-apk/app-dev-debug.apk`
       - `adb -s LMQ510NDYLFEIQCL76 install -r build/app/outputs/flutter-apk/app-dev-debug.apk`
+      - `adb -s ce041714d2f6348e0d install -r build/app/outputs/flutter-apk/app-dev-debug.apk`
 
 ## 3. 환경별 설정 관리
 - **Android Flavor**: local/dev/stg/prd 환경별로 분리 관리
@@ -196,7 +199,11 @@
   - 경로 1: Splash > Login > Home (로그인 후)
   - 경로 2: Splash > Home (자동 로그인)
 - **확장성**: `_performInitialization()` 메서드는 확장 가능한 구조로 설계
-  - 향후 푸시 클릭을 통한 진입 시 타겟 스크린으로 이동 등 추가 가능
+- **푸시 알림 클릭 시 스크린 이동 (appPath)**:
+  - FCM data payload에 `appPath`(문자열)를 넣으면, 알림 클릭 시 해당 경로의 스크린으로 이동한다.
+  - **비로그인·동의 전**: appPath는 `PendingAppPathService`에 보관되며, 로그인·동의 완료 후 Home 진입 시 한 번 적용된다.
+  - **이미 Main(Home) 진입 후**: 백그라운드에서 알림 클릭 시에도 동일하게 pending에 넣고, 다음 프레임에 적용한다.
+  - 지원 경로·정의·신규 스크린 시 확인 절차는 `.docs/CONTEXT_SCREEN.md`의 **appPath (푸시 딥링크 경로)** 섹션을 따른다.
 
 ## 11. 코드 구조 및 리팩토링
 
@@ -279,6 +286,7 @@
 - **엔딩 API**: `SudaApiClient.getRoleplayEnding(accessToken, rpId, rpRoleId, endingId)` → RoleplayEndingDto.
 - **세션 초기화 티켓 부족**: Opening→Playing 세션 초기화(`POST /v1/roleplay-sessions`) 200 응답에서 `sessionId`가 '0'인 경우 티켓 부족으로 간주, 얼럿 "(임시)no tickets" 후 Opening 유지. `.docs/CONTEXT_ROLEPLAY.md` 6-3 참조.
 - **홈 화면 티켓 배지**: 상단 우측에 티켓 아이콘(`assets/images/icons/ticket.png` 38×20) + finalTicketCount 표시(body-caption 흰색). 앱 구동 후 첫 노출 시·GNB 홈 탭 선택 시·물리 뒤로가기로 홈 복귀 시·**서브 스크린에서 pop으로 복귀 시** `GET /v1/users/ticket` 갱신. 서브 복귀 감지는 `RouteObserver` + `MainRouteAwareWrapper`(lib/widgets/main_route_aware_wrapper.dart)의 `didPopNext`로 처리. 감소 시 즉시 치환, 증가 시 500ms 내 단계 증가 + 단계마다 `Vibration.vibrate(duration: 80)` (Result 스크린과 동일).
+- **푸시 appPath 연동**: FCM data에 `appPath` 포함 시 알림 클릭 후 해당 스크린으로 이동. 비로그인/미동의 시 `PendingAppPathService`에 보관, Home 진입 시 적용. 지원 경로·정의는 `.docs/CONTEXT_SCREEN.md` appPath 섹션. `lib/services/pending_app_path_service.dart`, `main.dart`(getInitialMessage·onMessageOpenedApp·_applyPendingAppPath).
 
 ## 13. 리팩토링 계획 문서
 - 롤플레이 기능 준비를 위한 리팩토링 작업 분해 문서는 `REFACTOR.md`에 기록

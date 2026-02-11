@@ -135,6 +135,7 @@
 - **파일 경로**: `lib/screens/login.dart`
 - **클래스명**: `LoginScreen` (StatefulWidget)
 - **스크린 타입**: **Full Screen**
+- **appPath**: 해당 없음 (인증 플로우)
 
 ---
 
@@ -144,6 +145,7 @@
 - **파일 경로**: `lib/screens/agreement.dart`
 - **클래스명**: `AgreementScreen` (StatefulWidget)
 - **스크린 타입**: **Full Screen**
+- **appPath**: 해당 없음 (동의 플로우)
 
 ### 스크린 용도
 - 서비스 이용을 위한 필수 약관 동의 화면
@@ -211,6 +213,7 @@
 - **파일 경로**: `lib/screens/home.dart`
 - **클래스명**: `HomeScreen` (StatefulWidget)
 - **스크린 타입**: **Main Screen**
+- **appPath**: `/home`
 
 ### 스크린 용도
 - 로그인 후 메인 화면
@@ -274,6 +277,7 @@
 - **파일 경로**: `lib/screens/profile.dart`
 - **클래스명**: `ProfileScreen` (StatefulWidget)
 - **스크린 타입**: **Main Screen**
+- **appPath**: `/profile`
 
 ### 스크린 용도
 - 사용자 프로필 화면
@@ -330,6 +334,7 @@
 - **파일 경로**: `lib/screens/setting/setting.dart`
 - **클래스명**: `SettingScreen` (StatelessWidget)
 - **스크린 타입**: **Sub Screen**
+- **appPath**: `/profile/setting`
 
 ### 스크린 용도
 - 설정 메뉴 화면
@@ -377,6 +382,7 @@
 - **파일 경로**: `lib/screens/setting/account.dart`
 - **클래스명**: `AccountScreen` (StatefulWidget)
 - **스크린 타입**: **Sub Screen**
+- **appPath**: 해당 없음 (Setting 하위)
 
 ### 이전 스크린 정보 (진입점)
 - **SettingScreen**: "Account" 클릭 시
@@ -395,6 +401,7 @@
 - **파일 경로**: `lib/screens/setting/language_level.dart`
 - **클래스명**: `LanguageLevelScreen` (StatelessWidget)
 - **스크린 타입**: **Sub Screen**
+- **appPath**: 해당 없음 (Setting 하위)
 
 ### 이전 스크린 정보 (진입점)
 - **SettingScreen**: "Language Level" 클릭 시
@@ -411,6 +418,7 @@
 - **파일 경로**: `lib/screens/setting/feedback.dart`
 - **클래스명**: `FeedbackScreen` (StatelessWidget)
 - **스크린 타입**: **Sub Screen**
+- **appPath**: 해당 없음 (Setting 하위)
 
 ### 이전 스크린 정보 (진입점)
 - **SettingScreen**: "Feedback" 클릭 시
@@ -427,6 +435,7 @@
 - **파일 경로**: `lib/screens/setting/open_source_license.dart`
 - **클래스명**: `OpenSourceLicenseScreen` (StatelessWidget)
 - **스크린 타입**: **Sub Screen**
+- **appPath**: 해당 없음 (Setting 하위)
 
 ### 이전 스크린 정보 (진입점)
 - **SettingScreen**: "Open source license" 클릭 시
@@ -443,6 +452,7 @@
 - **파일 경로**: `lib/screens/roleplay/overview.dart`
 - **클래스명**: `RoleplayOverviewScreen` (StatelessWidget)
 - **스크린 타입**: **Sub Screen**
+- **appPath**: `/roleplay/overview/{roleplayId}` (예: `/roleplay/overview/12`)
 
 ### 스크린 용도
 - Roleplay 목록 및 개요를 표시하는 화면
@@ -469,6 +479,7 @@
 - **파일 경로**: `lib/screens/alarm_message.dart`
 - **클래스명**: `AlarmMessageScreen` (StatelessWidget)
 - **스크린 타입**: **Main Screen**
+- **appPath**: `/alarm`
 
 ### 스크린 용도
 - 사용자 알림 메시지 목록을 표시하는 화면
@@ -502,6 +513,7 @@
 - **파일 경로**: `lib/screens/roleplay/opening.dart`
 - **클래스명**: `RoleplayOpeningScreen` (StatelessWidget)
 - **스크린 타입**: **Full Screen**
+- **appPath**: 해당 없음 (role 선택 필수)
 
 ### 스크린 용도
 - Roleplay 시작 전 오프닝 화면
@@ -527,6 +539,7 @@
 - **파일 경로**: `lib/screens/roleplay/playing.dart`
 - **클래스명**: `RoleplayPlayingScreen` (StatelessWidget)
 - **스크린 타입**: **Full Screen**
+- **appPath**: 해당 없음 (세션·플로우 의존)
 
 ### 스크린 용도
 - Roleplay 진행 중 화면
@@ -554,6 +567,7 @@
 - **파일 경로**: `lib/screens/roleplay/ending.dart`
 - **클래스명**: `RoleplayEndingScreen` (StatefulWidget)
 - **스크린 타입**: **Full Screen**
+- **appPath**: 해당 없음 (세션·플로우 의존)
 
 ### 스크린 용도
 - Roleplay 성공 종료 화면 (미션 전부 완수 후 진입)
@@ -581,6 +595,7 @@
 - **파일 경로**: `lib/screens/roleplay/failed.dart`
 - **클래스명**: `RoleplayFailedScreen` (StatelessWidget)
 - **스크린 타입**: **Full Screen**
+- **appPath**: 해당 없음 (세션·플로우 의존)
 
 ### 스크린 용도
 - Roleplay 실패 종료 화면
@@ -606,6 +621,7 @@
 - **파일 경로**: `lib/screens/roleplay/failed_report.dart`
 - **클래스명**: `RoleplayFailedReportScreen` (StatefulWidget)
 - **스크린 타입**: **Sub Screen**
+- **appPath**: 해당 없음 (Failed 전용)
 
 ### 스크린 용도
 - Failed 화면에서만 진입. 사용자가 느낀 불편함을 수집하는 용도.
@@ -631,6 +647,7 @@
 - **파일 경로**: `lib/screens/roleplay/result.dart`
 - **클래스명**: `RoleplayResultScreen` (StatefulWidget)
 - **스크린 타입**: **Full Screen**
+- **appPath**: 해당 없음 (세션·플로우 의존)
 
 ### 스크린 용도
 - Roleplay 결과 화면
@@ -658,6 +675,7 @@
 - **파일 경로**: `lib/screens/roleplay/result_report.dart`
 - **클래스명**: `RoleplayResultReportScreen` (StatefulWidget)
 - **스크린 타입**: **Sub Screen**
+- **appPath**: 해당 없음 (Result 전용)
 
 ### 스크린 용도
 - Result 화면에서만 진입. 사용자가 느낀 불편함을 수집하는 용도. Send 시 `POST /v1/roleplays/results/{roleplayResultId}/report` (body: `{"content": "<string>"}`).
@@ -682,6 +700,7 @@
 - **파일 경로**: `lib/screens/roleplay/history.dart`
 - **클래스명**: `HistoryScreen` (StatefulWidget)
 - **스크린 타입**: **Sub Screen**
+- **appPath**: `/profile/history/{resultId}` (예: `/profile/history/456`)
 
 ### 스크린 용도
 - Profile에서 진입. 롤플레이 결과 요약. Result Screen과 동일 구조(초기 애니메이션 없음).
@@ -709,6 +728,7 @@
 - **파일 경로**: `lib/screens/roleplay/review_chat.dart`
 - **클래스명**: `ReviewChatScreen` (StatelessWidget)
 - **스크린 타입**: **Sub Screen**
+- **appPath**: 해당 없음 (History 전용)
 
 ### 스크린 용도
 - History Screen에서 진입. 롤플레이 채팅 내용 열람.
@@ -732,6 +752,7 @@
 - **파일 경로**: `lib/screens/roleplay/review_ending.dart`
 - **클래스명**: `ReviewEndingScreen` (StatefulWidget)
 - **스크린 타입**: **Sub Screen**
+- **appPath**: 해당 없음 (History 전용)
 
 ### 스크린 용도
 - History Screen에서 진입. 롤플레이 엔딩 내용 열람(단순 조회, 버튼 없음).
@@ -808,12 +829,44 @@
 
 ---
 
+## appPath (푸시 딥링크 경로)
+
+푸시 알림의 data payload에 `appPath`를 넣어, 알림 클릭 시 특정 스크린으로 이동할 수 있다.  
+**앱 실행 직후 바로 보여줄 수 있는 스크린**만 appPath로 노출한다. (선행 단계가 필수인 스크린은 제외.)
+
+### appPath 규칙
+- **형식**: `/{영역}/{스크린}/{id?}` — 소문자, 세그먼트 구분, id는 필요 시 마지막에만.
+- **인터넷 URL과 구분**: appPath는 앱 내부 경로만 의미하며, 웹 주소가 아님.
+
+### 승인된 appPath
+
+| appPath | 스크린 | 비고 |
+|---------|--------|------|
+| `/home` | HomeScreen (Main, Home 탭) | GNB Home |
+| `/alarm` | AlarmMessageScreen (Main, Alarm 탭) | GNB Alarm |
+| `/profile` | ProfileScreen (Main, Profile 탭) | GNB Profile |
+| `/roleplay/overview/{roleplayId}` | RoleplayOverviewScreen (Sub) | 예: `/roleplay/overview/12` |
+| `/profile/history/{resultId}` | HistoryScreen (Sub) | 예: `/profile/history/456` |
+| `/profile/setting` | SettingScreen (Sub) | Profile에서 진입 |
+
+- **제외**: Login, Agreement(인증 플로우), RoleplayOpening(role 선택 필수), Playing/Ending/Result/Failed(세션·플로우 의존).
+
+### 신규 스크린 생성 시 appPath 확인 절차
+- **모든 스크린** 추가 시 이 문서에서 다음을 확인·정의한다.
+  1. 해당 스크린이 **앱 실행 후 바로 보여줄 수 있는지** 판단.
+  2. 가능하면 위 표와 동일 형식으로 **appPath 필요 여부 및 값**을 정하고, 이 섹션 표에 반영.
+  3. 불가(선행 단계 필수)면 표에 넣지 않고, 필요 시 "제외 사유"만 주의사항 등에 언급.
+  4. 해당 스크린의 **스크린 관련 정의 파일** 블록에 **appPath** 항목을 반드시 추가한다 (승인 경로 또는 "해당 없음" 및 사유).
+
+---
+
 ## 주의사항
 
 - **스크린 추가/수정 시**: 이 문서를 반드시 업데이트해야 합니다.
 - **스크린 타입 지정**: 새 스크린 추가 시 반드시 3가지 타입(Full Screen, Main Screen, Sub Screen) 중 하나로 분류하고, 해당 타입의 규칙을 준수해야 합니다.
 - **네비게이션 변경 시**: "이전 스크린 정보" 및 "이후 스크린 정보" 섹션을 업데이트해야 합니다.
 - **구현 특이사항 변경 시**: 해당 스크린의 "스크린 내부 구현 특이사항" 섹션을 업데이트해야 합니다.
+- **appPath**: 새 스크린 생성 시 "appPath (푸시 딥링크 경로)" 섹션에서 appPath 필요 여부 확인 및 정의를 거친다.
 - **Main Screen GNB 규칙**: Main Screen은 반드시 하단 네비게이션 바를 포함해야 하며, 안드로이드 시스템 네비게이션 바와 색상을 통일해야 합니다.
 - **Sub Screen X 버튼**: Sub Screen은 반드시 우측 상단에 X 버튼을 포함해야 하며, iOS 스타일 슬라이드 애니메이션을 사용해야 합니다.
 - **Full Screen 뒤로가기**: Full Screen에서 시스템 뒤로가기 버튼 클릭 시 앱이 종료되도록 처리해야 합니다.
