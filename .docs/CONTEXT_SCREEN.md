@@ -45,7 +45,7 @@
 - 향후: Profile 버튼 영역을 사용자 이미지 아이콘으로 대체 예정
 
 **사용 예시**:
-- AlarmMessageScreen (알림 메시지 화면) - Main Screen
+- NotificationBoxScreen (알림함 화면) - Main Screen
 - HomeScreen (홈 화면) - Main Screen
 - ProfileScreen (프로필 화면) - Main Screen 속성
 
@@ -93,7 +93,7 @@
 | 진입 애니메이션 | 일반 전환 | 일반 전환 | 우측→좌측 슬라이드 |
 | 뒤로가기 버튼 | ❌ 없음 | ❌ 없음 | ✅ 있음 (우측 상단 X) |
 | 시스템 뒤로가기 | 앱 종료 | Home: 앱 종료 / Alarm·Profile: Home으로 | 슬라이드 아웃 |
-| 사용 예시 | LoginScreen | AlarmMessageScreen, HomeScreen, ProfileScreen | 상세 화면, 설정 화면 |
+| 사용 예시 | LoginScreen | NotificationBoxScreen, HomeScreen, ProfileScreen | 상세 화면, 설정 화면 |
 
 ---
 
@@ -224,12 +224,12 @@
 ### 이전 스크린 정보 (진입점)
 - **네이티브 스플래시**: 저장된 JWT 토큰이 유효하고 사용자 정보 조회 성공 시 (스플래시 제거 후 표시)
 - **LoginScreen**: Google 로그인 성공 및 JWT 토큰 발급 성공 시
-- **AlarmMessageScreen**: GNB의 Home 버튼 클릭 시
+- **NotificationBoxScreen**: GNB의 Home 버튼 클릭 시
 - **ProfileScreen**: GNB의 Home 버튼 클릭 시
 - **조건**: `_MyAppState`의 `_accessToken != null`이고 `_currentMainScreen == 'home'`일 때 표시
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
-- **AlarmMessageScreen**: GNB의 Alarm 버튼 클릭 시
+- **NotificationBoxScreen**: GNB의 Alarm 버튼 클릭 시
   - `onNavigateToAlarm` 콜백 호출 → `_MyAppState._navigateToAlarm()` 실행 → 상태 업데이트로 전환
 - **ProfileScreen**: GNB의 Profile 버튼 클릭 시
   - `onNavigateToProfile` 콜백 호출 → `_MyAppState._navigateToProfile()` 실행 → 상태 업데이트로 전환
@@ -288,12 +288,12 @@
 ### 이전 스크린 정보 (진입점)
 - **HomeScreen**: GNB의 Profile 버튼 클릭 시
   - `onNavigateToProfile` 콜백 호출 → `_MyAppState._navigateToProfile()` 실행 → 상태 업데이트로 전환
-- **AlarmMessageScreen**: GNB의 Profile 버튼 클릭 시
+- **NotificationBoxScreen**: GNB의 Profile 버튼 클릭 시
   - `onNavigateToProfile` 콜백 호출 → 상태 업데이트로 전환
 - **조건**: `_MyAppState`의 `_accessToken != null`이고 `_currentMainScreen == 'profile'`일 때 표시
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
-- **AlarmMessageScreen**: GNB의 Alarm 버튼 클릭 시
+- **NotificationBoxScreen**: GNB의 Alarm 버튼 클릭 시
   - `onNavigateToAlarm` 콜백 호출 → 상태 업데이트로 전환
 - **HomeScreen**: GNB의 Home 버튼 클릭 시
   - `onNavigateToHome` 콜백 호출 → `_MyAppState._navigateToHome()` 실행 → 상태 업데이트로 전환
@@ -473,16 +473,16 @@
 
 ---
 
-## 11.1 AlarmMessageScreen
+## 11.1 NotificationBoxScreen
 
 ### 스크린 관련 정의 파일
-- **파일 경로**: `lib/screens/alarm_message.dart`
-- **클래스명**: `AlarmMessageScreen` (StatelessWidget)
+- **파일 경로**: `lib/screens/notification_box.dart`
+- **클래스명**: `NotificationBoxScreen` (StatelessWidget)
 - **스크린 타입**: **Main Screen**
-- **appPath**: `/alarm`
+- **appPath**: `/box`
 
 ### 스크린 용도
-- 사용자 알림 메시지 목록을 표시하는 화면
+- 사용자 알림함(알림 메시지) 목록을 표시하는 화면
 - GNB를 통한 진입/전환 (Alarm / Home / Profile 3탭)
 
 ### 이전 스크린 정보 (진입점)
@@ -503,7 +503,7 @@
   - **GNB 포함**: 하단 네비게이션 바 필수 포함 (Alarm 현재 화면, 흰색 / Home·Profile 회색)
   - GNB 색상: 검정 - 시스템 네비게이션 바와 색상 통일
 - 뒤로가기 버튼 없음 (`showBackButton: false`)
-- Route name: `/alarm_message` (참조용)
+- Route name: `/notification_box` (참조용)
 
 ---
 
@@ -784,7 +784,7 @@
   ├─ 로그인 성공 → [HomeScreen]
   └─ 로그인 취소/실패 → [LoginScreen] (유지)
 
-[AlarmMessageScreen] ←→ [HomeScreen] ←→ [ProfileScreen] (GNB Alarm/Home/Profile 3탭 전환)
+[NotificationBoxScreen] ←→ [HomeScreen] ←→ [ProfileScreen] (GNB Alarm/Home/Profile 3탭 전환)
   ├─ [HomeScreen] → [RoleplayOverviewScreen] (중앙 "Roleplay" 텍스트)
   │   └─ [RoleplayOpeningScreen] (중앙 "Play" 텍스트)
   │       └─ [RoleplayPlayingScreen] (중앙 "Start" 텍스트)
@@ -822,8 +822,8 @@
    - 로그인 성공 시 HomeScreen으로 전환
    - 로그아웃 시 (ProfileScreen에서) LoginScreen으로 전환
 
-4. **AlarmMessageScreen ↔ HomeScreen ↔ ProfileScreen**
-   - GNB의 Alarm/Home/Profile 3탭 클릭으로 전환
+4. **NotificationBoxScreen ↔ HomeScreen ↔ ProfileScreen**
+  - GNB의 Alarm/Home/Profile 3탭 클릭으로 전환
    - `_MyAppState`의 `_currentMainScreen` ('alarm'|'home'|'profile') 상태로 관리
    - 화면 전환 시 애니메이션 없이 즉시 전환
 
@@ -843,7 +843,7 @@
 | appPath | 스크린 | 비고 |
 |---------|--------|------|
 | `/home` | HomeScreen (Main, Home 탭) | GNB Home |
-| `/alarm` | AlarmMessageScreen (Main, Alarm 탭) | GNB Alarm |
+| `/box` | NotificationBoxScreen (Main, Alarm 탭) | GNB Alarm |
 | `/profile` | ProfileScreen (Main, Profile 탭) | GNB Profile |
 | `/roleplay/overview/{roleplayId}` | RoleplayOverviewScreen (Sub) | 예: `/roleplay/overview/12` |
 | `/profile/history/{resultId}` | HistoryScreen (Sub) | 예: `/profile/history/456` |

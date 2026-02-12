@@ -271,7 +271,7 @@
 - Roleplay Playing 번역 인덱스/번역 토글 및 미션 실패 처리 추가
 - Roleplay Playing 힌트 아이콘 동작 개선: 힌트 탭 시 API 호출·힌트 말풍선(점선 테두리·투명·흰글씨), 턴당 1회·중복 비활성화, 3초 유휴 시 500ms 깜빡임, user-message 생성 시 힌트 말풍선 제거
 - Roleplay Playing resultId 종료 분기·Result API·캐시·종료 메시지: `.docs/CONTEXT_ROLEPLAY.md` 6-5, 6-9, 7, 10 참조 (상세는 해당 문서에만 정리)
-- **GNB 3탭 전환**: AlarmMessageScreen을 Sub → Main Screen으로 변경, GNB 구성을 Alarm / Home / Profile 3탭으로 확장. HomeScreen 우측 상단 Info 아이콘(Alarm push) 제거, GNB Alarm 탭으로만 Alarm 접근. `.docs/CONTEXT_SCREEN.md` 참조.
+- **GNB 3탭 전환**: NotificationBoxScreen(구 AlarmMessageScreen)을 Sub → Main Screen으로 변경, GNB 구성을 Alarm / Home / Profile 3탭으로 확장. HomeScreen 우측 상단 Info 아이콘(Alarm push) 제거, GNB Alarm 탭으로만 알림함(Notification Box) 접근. `.docs/CONTEXT_SCREEN.md` 참조.
 - **GNB 오버레이·블러**: GNB는 본문 위에 덮는 형태로 배치(AppScaffold Stack 하단 Positioned). 배경은 playing 슬라이더와 동일: BackdropFilter sigma 6 + Color(0x598C8C8C).
 - **GNB 아이콘화**: GNB 메뉴 3종을 텍스트에서 아이콘으로 전환. 공통 위젯 `lib/widgets/gnb_bar.dart`(GnbBar). Alarm: gnb_alarm.png / gnb_alarm_pressed.png, 높이 24, 좌측 33. Home: gnb_home.png / gnb_home_pressed.png, 너비 24, 정중앙. Profile: userDto.profileImgUrl 원형 28x28(비활성)·24x24+흰 테두리 2(활성), 우측 33. 탭 영역: 좌 30% / 중앙 30% / 우 30%.
 - **Roleplay Ending 스크린 개선**: 닫기 버튼 없음. role.endingList 첫 요소(RoleplayEndingDto) 기반 title/content/이미지. Playing에서 ending 전환 확정 시 imgPath+CDN으로 이미지 preload. 이미지 있으면 1.5x→1x 2초 축소 후 80% 검정 레이어·콘텐츠 fade-in; 없으면 바로 레이어·콘텐츠. 상단 50% title+content, 하단 50% endingHowWas+별 5개(40×40 gap 5)+Next 버튼. Next 탭 시 버튼 텍스트 fade-out과 동시에 버튼에서 #0CABA8 풍선 확장(2s) 후 Result 전환. `PUT /v1/roleplays/results/{rpResultId}?star={star}` 호출(응답 무시). Result 진입 시 박스레이어에 별점·mainTitle·subTitle 순차 노출(각 300ms 후) 후 박스 축소. 본문레이어 추후 지침. `.docs/CONTEXT_SCREEN.md` 14·17, `.docs/CONTEXT_ROLEPLAY.md` 참조.
@@ -286,6 +286,7 @@
 - **엔딩 API**: `SudaApiClient.getRoleplayEnding(accessToken, rpId, rpRoleId, endingId)` → RoleplayEndingDto.
 - **세션 초기화 티켓 부족**: Opening→Playing 세션 초기화(`POST /v1/roleplay-sessions`) 200 응답에서 `sessionId`가 '0'인 경우 티켓 부족으로 간주, 얼럿 "(임시)no tickets" 후 Opening 유지. `.docs/CONTEXT_ROLEPLAY.md` 6-3 참조.
 - **홈 화면 티켓 배지**: 상단 우측에 티켓 아이콘(`assets/images/icons/ticket.png` 38×20) + finalTicketCount 표시(body-caption 흰색). 앱 구동 후 첫 노출 시·GNB 홈 탭 선택 시·물리 뒤로가기로 홈 복귀 시·**서브 스크린에서 pop으로 복귀 시** `GET /v1/users/ticket` 갱신. 서브 복귀 감지는 `RouteObserver` + `MainRouteAwareWrapper`(lib/widgets/main_route_aware_wrapper.dart)의 `didPopNext`로 처리. 감소 시 즉시 치환, 증가 시 500ms 내 단계 증가 + 단계마다 `Vibration.vibrate(duration: 80)` (Result 스크린과 동일).
+- **앱 버전 1.0.1**: `pubspec.yaml` 1.0.1+2, `AppConfig.appVersion` 1.0.1. Setting 화면 하단: 개인정보·이용약관·오픈소스 블록 위로 조정, 그 아래 버전 텍스트 `v x.x.x` (fontSize 11, 흰색, 중앙 정렬) 노출.
 - **푸시 appPath 연동**: FCM data에 `appPath` 포함 시 알림 클릭 후 해당 스크린으로 이동. 비로그인/미동의 시 `PendingAppPathService`에 보관, Home 진입 시 적용. 지원 경로·정의는 `.docs/CONTEXT_SCREEN.md` appPath 섹션. `lib/services/pending_app_path_service.dart`, `main.dart`(getInitialMessage·onMessageOpenedApp·_applyPendingAppPath).
 
 ## 13. 리팩토링 계획 문서

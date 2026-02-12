@@ -68,7 +68,7 @@ class AppConfig {
     }
   }
 
-  // 앱 버전 (하드코딩)
-  static const String appVersion = '0.5';
+  // 앱 버전 (하드코딩, pubspec.yaml version과 동기화)
+  static const String appVersion = '1.0.1';
 }
 

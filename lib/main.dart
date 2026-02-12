@@ -17,7 +17,7 @@ import 'services/token_refresh_service.dart';
 import 'screens/login.dart';
 import 'screens/home.dart';
 import 'screens/profile.dart';
-import 'screens/alarm_message.dart';
+import 'screens/notification_box.dart';
 import 'screens/agreement.dart';
 import 'screens/roleplay/history.dart';
 import 'screens/setting/setting.dart';
@@ -339,7 +339,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         case 'home':
           setState(() => _currentMainScreen = 'home');
           return;
-        case 'alarm':
+        case 'box':
           setState(() => _currentMainScreen = 'alarm');
           return;
         case 'profile':
@@ -482,7 +482,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                               ? 1
                               : 2,
                       children: [
-                        AlarmMessageScreen(
+                        NotificationBoxScreen(
                         onNavigateToHome: _navigateToHome,
                         onNavigateToProfile: _navigateToProfile,
                         onNavigateToAlarm: _navigateToAlarm,
@@ -508,9 +508,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                         isActive: _currentMainScreen == 'profile',
                         ),
                       ],
-                        ),
-                      ),
                     ),
+                  ),
+                );
                   },
                 ),
     );

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../config/app_config.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/token_storage.dart';
 import '../../services/auth_service.dart';
@@ -79,14 +80,14 @@ class SettingScreen extends StatelessWidget {
             () => _handleLogout(context),
           ),
           const Spacer(),
-          // 하단 푸터 메뉴 (Privacy, Terms, Open source)
+          // 하단 푸터 메뉴 (Privacy, Terms, Open source) — 위로 올림
           Padding(
-            padding: const EdgeInsets.only(bottom: 44, left: 24, right: 24),
+            padding: const EdgeInsets.only(bottom: 16, left: 24, right: 24),
             child: Center(
               child: Wrap(
                 alignment: WrapAlignment.center,
-                spacing: 16, // 공백 약 3개 정도의 가로 간격
-                runSpacing: 12, // 줄바꿈 시 세로 간격
+                spacing: 16,
+                runSpacing: 12,
                 children: [
                   _buildFooterMenuItem(
                     context,
@@ -120,6 +121,20 @@ class SettingScreen extends StatelessWidget {
                     () => _navigateToSubScreen(context, const OpenSourceLicenseScreen()),
                   ),
                 ],
+              ),
+            ),
+          ),
+          // 버전 정보 (caption보다 작은 크기, 흰색, 중앙 정렬)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 24),
+            child: Center(
+              child: Text(
+                'v ${AppConfig.appVersion}',
+                style: const TextStyle(
+                  fontSize: 11,
+                  color: Colors.white,
+                  fontWeight: FontWeight.w400,
+                ),
               ),
             ),
           ),

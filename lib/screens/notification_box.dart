@@ -4,8 +4,9 @@ import '../models/user_models.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/gnb_bar.dart';
 
-class AlarmMessageScreen extends StatelessWidget {
-  const AlarmMessageScreen({
+/// Notification Box Screen (기존 AlarmMessageScreen)
+class NotificationBoxScreen extends StatelessWidget {
+  const NotificationBoxScreen({
     super.key,
     this.onNavigateToHome,
     this.onNavigateToProfile,
@@ -20,13 +21,13 @@ class AlarmMessageScreen extends StatelessWidget {
   final bool isActive;
   final UserDto? user;
 
-  static const String routeName = '/alarm_message';
+  static const String routeName = '/notification_box';
 
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
       showBackButton: false,
-      centerTitle: 'Alarm Message',
+      centerTitle: 'Notification Box',
       bottomNavigationBar: GnbBar(
         isAlarmActive: true,
         isHomeActive: false,
@@ -45,3 +46,4 @@ class AlarmMessageScreen extends StatelessWidget {
     );
   }
 }
+
