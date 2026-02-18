@@ -399,6 +399,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   page: SettingScreen(
                     onSignOut: _onSignOut,
                     user: _user,
+                    onUserUpdated: (user) {
+                      if (mounted) setState(() => _user = user);
+                    },
+                    getCurrentUser: () => _user,
                   ),
                 ),
               );

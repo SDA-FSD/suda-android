@@ -90,4 +90,69 @@ class UserDto {
               .toList(),
     );
   }
+
+  UserDto copyWith({
+    int? id,
+    String? provider,
+    String? sub,
+    String? name,
+    String? email,
+    String? profileImgUrl,
+    int? roleplayCount,
+    int? wordsSpokenCount,
+    int? likePoint,
+    String? firstLoginYn,
+    String? createdAt,
+    String? updatedAt,
+    List<SudaJson>? metaInfo,
+  }) {
+    return UserDto(
+      id: id ?? this.id,
+      provider: provider ?? this.provider,
+      sub: sub ?? this.sub,
+      name: name ?? this.name,
+      email: email ?? this.email,
+      profileImgUrl: profileImgUrl ?? this.profileImgUrl,
+      roleplayCount: roleplayCount ?? this.roleplayCount,
+      wordsSpokenCount: wordsSpokenCount ?? this.wordsSpokenCount,
+      likePoint: likePoint ?? this.likePoint,
+      firstLoginYn: firstLoginYn ?? this.firstLoginYn,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      metaInfo: metaInfo ?? this.metaInfo,
+    );
+  }
+}
+
+class NotificationDto {
+  final int id;
+  final List<SudaJson>? title;
+  final List<SudaJson>? content;
+  final String? imgPath;
+  final String? appPath;
+  final String? sendFinishedAt;
+
+  const NotificationDto({
+    required this.id,
+    this.title,
+    this.content,
+    this.imgPath,
+    this.appPath,
+    this.sendFinishedAt,
+  });
+
+  factory NotificationDto.fromJson(Map<String, dynamic> json) {
+    return NotificationDto(
+      id: json['id'] as int? ?? 0,
+      title: (json['title'] as List<dynamic>?)
+          ?.map((item) => SudaJson.fromJson(item as Map<String, dynamic>))
+          .toList(),
+      content: (json['content'] as List<dynamic>?)
+          ?.map((item) => SudaJson.fromJson(item as Map<String, dynamic>))
+          .toList(),
+      imgPath: json['imgPath'] as String?,
+      appPath: json['appPath'] as String?,
+      sendFinishedAt: json['sendFinishedAt'] as String?,
+    );
+  }
 }

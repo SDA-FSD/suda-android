@@ -36,10 +36,19 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settingsAccount => '계정';
 
   @override
+  String get settingsNotification => '알림';
+
+  @override
   String get settingsTutorial => '튜토리얼';
 
   @override
   String get settingsLanguageLevel => '언어 레벨';
+
+  @override
+  String get pushNotifications => '푸시알림';
+
+  @override
+  String get pushNotificationsDesc => '중요한 알림과 업데이트를 받아보세요.';
 
   @override
   String get settingsFeedback => '피드백';
@@ -182,4 +191,20 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get noTicketsBody => '오늘의 티켓을 모두 소진했습니다.\n내일 다시 만나요!';
+
+  @override
+  String get notificationPermissionBlockedTitle => '알림이 꺼져 있습니다';
+
+  @override
+  String get notificationPermissionBlockedMessage =>
+      '푸시 알림을 받으려면 기기 설정에서 알림을 켜 주세요.';
+
+  @override
+  String get openSettings => '설정 열기';
+
+  @override
+  String get notificationsTitle => '알림';
+
+  @override
+  String get notificationsEmpty => '아직 알림이 없습니다';
 }

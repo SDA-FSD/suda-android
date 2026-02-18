@@ -37,10 +37,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsAccount => 'Account';
 
   @override
+  String get settingsNotification => 'Notification';
+
+  @override
   String get settingsTutorial => 'Tutorial';
 
   @override
   String get settingsLanguageLevel => 'Language Level';
+
+  @override
+  String get pushNotifications => 'Push Notifications';
+
+  @override
+  String get pushNotificationsDesc =>
+      'Receive reminders and important updates.';
 
   @override
   String get settingsFeedback => 'Feedback';
@@ -189,4 +199,20 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get noTicketsBody =>
       'You\'ve reached today\'s limit.\nCome back tomorrow!';
+
+  @override
+  String get notificationPermissionBlockedTitle => 'Notifications are off';
+
+  @override
+  String get notificationPermissionBlockedMessage =>
+      'Enable notifications in your device settings to receive push notifications.';
+
+  @override
+  String get openSettings => 'Open Settings';
+
+  @override
+  String get notificationsTitle => 'Notifications';
+
+  @override
+  String get notificationsEmpty => 'No notification yet';
 }

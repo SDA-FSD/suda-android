@@ -131,6 +131,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void didUpdateWidget(ProfileScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (widget.user != null && widget.user != oldWidget.user) {
+      setState(() => _user = widget.user);
+    }
     // 활성 상태로 전환될 때마다 프로필 갱신 + 롤플레이 목록 0페이지로 새로 호출(첫 요소 같으면 화면 갱신 없이 유지)
     if (!oldWidget.isActive && widget.isActive) {
       _refreshProfile();
@@ -200,10 +203,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
         page: SettingScreen(
           onSignOut: _handleSignOut,
           user: _user ?? widget.user,
+          onUserUpdated: widget.onUserUpdated,
+          getCurrentUser: () => widget.user,
         ),
       ),
     );
-    await _refreshProfile();
+    // 설정 복귀 시 main에서 갱신된 user(widget.user)로 동기화. 한 프레임 뒤에 읽어
+    // main의 onUserUpdated 리빌드가 반영된 widget.user를 사용하도록 함.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && widget.user != null) {
+        setState(() => _user = widget.user);
+      }
+    });
   }
 
   /// 롤플레이 히스토리: 3열·썸네일 간격 10·행 간격 10·CDN·캐시·shimmer

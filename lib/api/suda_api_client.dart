@@ -282,10 +282,30 @@ class SudaApiClient {
     );
   }
 
+  static Future<void> updatePushAgreement({
+    required String accessToken,
+    required String agreementYn,
+  }) {
+    return UserApi.updatePushAgreement(
+      accessToken: accessToken,
+      agreementYn: agreementYn,
+    );
+  }
+
   static Future<void> sendFeedback({
     required String accessToken,
     required String content,
   }) {
     return FeedbackApi.sendFeedback(accessToken: accessToken, content: content);
+  }
+
+  static Future<List<NotificationDto>> getNotifications({
+    required String accessToken,
+    required int page,
+  }) {
+    return UserApi.getNotifications(
+      accessToken: accessToken,
+      page: page,
+    );
   }
 }

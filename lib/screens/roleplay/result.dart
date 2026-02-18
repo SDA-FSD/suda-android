@@ -12,7 +12,9 @@ import '../../services/suda_api_client.dart';
 /// Roleplay Result Screen (Full Screen)
 ///
 /// 박스레이어: 줄어드는 영역. 본문레이어: 박스 뒤쪽 영역.
-/// 진입 시: 전체 #0CABA8 박스레이어 → 별점·mainTitle·subTitle 순차 노출(각 300ms 후) → subTitle 노출 300ms 후 박스 축소.
+/// 진입 시: 별점/메인타이틀/서브타이틀 즉시 노출(별은 silver 시작) →
+/// starResult 만큼 300ms 간격으로 좌→중→우 gold 전환(+진동) →
+/// 마지막 전환 500ms 후 박스 축소.
 class RoleplayResultScreen extends StatefulWidget {
   final bool showCloseButton;
 
@@ -28,9 +30,10 @@ class RoleplayResultScreen extends StatefulWidget {
 class _RoleplayResultScreenState extends State<RoleplayResultScreen>
     with TickerProviderStateMixin {
   late final AnimationController _boxShrinkController;
-  bool _showStars = false;
-  bool _showMainTitle = false;
-  bool _showSubTitle = false;
+  bool _showStars = true;
+  bool _showMainTitle = true;
+  bool _showSubTitle = true;
+  int _revealedGoldStars = 0;
   bool _shrinkScheduled = false;
   bool _shrinkStarted = false;
   double _shrinkFromHeight = 0;
@@ -68,36 +71,34 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
     }
   }
 
-  void _scheduleBoxLayerSequence() {
-    // 300ms: 별점 노출 + 진동
-    Future.delayed(const Duration(milliseconds: 300), () {
-      if (!mounted) return;
-      setState(() => _showStars = true);
-      Vibration.vibrate(duration: 80);
-      // 600ms: mainTitle 노출 + 진동
-      Future.delayed(const Duration(milliseconds: 300), () {
-        if (!mounted) return;
-        setState(() => _showMainTitle = true);
-        Vibration.vibrate(duration: 80);
-        // 900ms: subTitle 노출 + 진동
-        Future.delayed(const Duration(milliseconds: 300), () {
-          if (!mounted) return;
-          setState(() => _showSubTitle = true);
-          Vibration.vibrate(duration: 80);
-          // 1200ms: 박스 축소 트리거
-          Future.delayed(const Duration(milliseconds: 300), () {
-            if (!mounted) return;
-            final h = MediaQuery.sizeOf(context).height;
-            setState(() {
-              _shrinkScheduled = true;
-              _shrinkFromHeight = h;
-              _shrinkStarted = true;
-            });
-            _boxShrinkController.forward();
-          });
-        });
-      });
+  void _startBoxShrink() {
+    if (!mounted || _shrinkStarted) return;
+    final h = MediaQuery.sizeOf(context).height;
+    setState(() {
+      _shrinkScheduled = true;
+      _shrinkFromHeight = h;
+      _shrinkStarted = true;
     });
+    _boxShrinkController.forward();
+  }
+
+  Future<void> _scheduleBoxLayerSequence() async {
+    final dto = RoleplayStateService.instance.cachedResult;
+    final rawStarResult = dto?.starResult ?? 0;
+    final targetGoldStars = (rawStarResult >= 1 && rawStarResult <= 3)
+        ? rawStarResult
+        : 0;
+
+    for (var i = 1; i <= targetGoldStars; i++) {
+      await Future.delayed(const Duration(milliseconds: 300));
+      if (!mounted) return;
+      setState(() => _revealedGoldStars = i);
+      Vibration.vibrate(duration: 80);
+    }
+
+    await Future.delayed(const Duration(milliseconds: 500));
+    if (!mounted) return;
+    _startBoxShrink();
   }
 
   @override
@@ -124,11 +125,9 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
 
   Widget _buildBoxLayerContent(BuildContext context) {
     final dto = RoleplayStateService.instance.cachedResult;
-    final starResult = dto?.starResult ?? 0;
-    // 0: 모두 silver. 1: 왼쪽만 gold. 2: 왼쪽·중앙 gold. 3: 셋 다 gold. 4 이상: 0과 동일(모두 silver)
-    final leftGold = starResult >= 1 && starResult <= 3;
-    final centerGold = starResult >= 2 && starResult <= 3;
-    final rightGold = starResult == 3;
+    final leftGold = _revealedGoldStars >= 1;
+    final centerGold = _revealedGoldStars >= 2;
+    final rightGold = _revealedGoldStars >= 3;
     final leftStar = leftGold ? _starGold : _starSilver;
     final centerStar = centerGold ? _starGold : _starSilver;
     final rightStar = rightGold ? _starGold : _starSilver;

@@ -9,8 +9,11 @@
   "agreementButtonConfirm": "Confirm and continue",
   "settingsTitle": "Settings",
   "settingsAccount": "Account",
+  "settingsNotification": "Notification",
   "settingsTutorial": "Tutorial",
   "settingsLanguageLevel": "Language Level",
+  "pushNotifications": "Push Notifications",
+  "pushNotificationsDesc": "Receive reminders and important updates.",
   "settingsFeedback": "Feedback",
   "settingsSignOut": "Sign Out",
   "settingsPrivacy": "Privacy Policy",
@@ -79,5 +82,10 @@
   "profileHistory": "History",
   "profileHistoryEmpty": "No history yet",
   "noTicketsTitle": "No tickets left…",
-  "noTicketsBody": "You've reached today's limit.\nCome back tomorrow!"
+  "noTicketsBody": "You've reached today's limit.\nCome back tomorrow!",
+  "notificationPermissionBlockedTitle": "Notifications are off",
+  "notificationPermissionBlockedMessage": "Enable notifications in your device settings to receive push notifications.",
+  "openSettings": "Open Settings",
+  "notificationsTitle": "Notifications",
+  "notificationsEmpty": "No notification yet"
 }

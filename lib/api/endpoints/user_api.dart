@@ -247,4 +247,89 @@ class UserApi {
       'GET /v1/users/ticket failed: HTTP ${response.statusCode} ${response.body}',
     );
   }
+
+  static Future<void> updatePushAgreement({
+    required String accessToken,
+    required String agreementYn,
+  }) async {
+    final uri = SudaHttpClient.buildUri(
+      '/v1/users/push-agreement',
+      {'agreementYn': agreementYn},
+    );
+
+    late final http.Response response;
+    try {
+      response = await SudaHttpClient.client
+          .put(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      rethrow;
+    }
+
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return;
+    }
+
+    throw Exception(
+      'PUT /v1/users/push-agreement failed: HTTP ${response.statusCode} ${response.body}',
+    );
+  }
+
+  static Future<List<NotificationDto>> getNotifications({
+    required String accessToken,
+    required int page,
+  }) async {
+    return await SudaHttpClient.executeWithRefresh(
+      () => _getNotificationsInternal(accessToken, page),
+      retryWithNewToken: (newToken) => _getNotificationsInternal(newToken, page),
+    );
+  }
+
+  static Future<List<NotificationDto>> _getNotificationsInternal(
+    String accessToken,
+    int page,
+  ) async {
+    final uri = SudaHttpClient.buildUri(
+      '/v1/users/notification',
+      {'page': page.toString()},
+    );
+
+    late final http.Response response;
+    try {
+      response = await SudaHttpClient.client
+          .get(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      rethrow;
+    }
+
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final List<dynamic> data = jsonDecode(response.body) as List<dynamic>;
+      return data
+          .map((item) => NotificationDto.fromJson(item as Map<String, dynamic>))
+          .toList();
+    }
+
+    throw Exception(
+      'GET /v1/users/notification failed: HTTP ${response.statusCode} ${response.body}',
+    );
+  }
 }

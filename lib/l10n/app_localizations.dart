@@ -154,6 +154,12 @@ abstract class AppLocalizations {
   /// **'Account'**
   String get settingsAccount;
 
+  /// No description provided for @settingsNotification.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification'**
+  String get settingsNotification;
+
   /// No description provided for @settingsTutorial.
   ///
   /// In en, this message translates to:
@@ -165,6 +171,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Language Level'**
   String get settingsLanguageLevel;
+
+  /// No description provided for @pushNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Push Notifications'**
+  String get pushNotifications;
+
+  /// No description provided for @pushNotificationsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Receive reminders and important updates.'**
+  String get pushNotificationsDesc;
 
   /// No description provided for @settingsFeedback.
   ///
@@ -435,6 +453,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You\'ve reached today\'s limit.\nCome back tomorrow!'**
   String get noTicketsBody;
+
+  /// No description provided for @notificationPermissionBlockedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications are off'**
+  String get notificationPermissionBlockedTitle;
+
+  /// No description provided for @notificationPermissionBlockedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable notifications in your device settings to receive push notifications.'**
+  String get notificationPermissionBlockedMessage;
+
+  /// No description provided for @openSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Settings'**
+  String get openSettings;
+
+  /// No description provided for @notificationsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get notificationsTitle;
+
+  /// No description provided for @notificationsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No notification yet'**
+  String get notificationsEmpty;
 }
 
 class _AppLocalizationsDelegate

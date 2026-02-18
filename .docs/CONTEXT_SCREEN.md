@@ -347,6 +347,7 @@
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
 - **AccountScreen** (Sub Screen): "Account" 클릭 시
+- **PushAgreementScreen** (Sub Screen): "Notification" 클릭 시
 - **LanguageLevelScreen** (Sub Screen): "Language Level" 클릭 시
 - **FeedbackScreen** (Sub Screen): "Feedback" 클릭 시
 - **WebViewScreen** (Sub Screen): "Privacy policy" 또는 "Terms of Service" 클릭 시
@@ -364,6 +365,7 @@
   - iOS 스타일 슬라이드 애니메이션
 - **메뉴 항목**: 세로로 나열된 텍스트 항목들
   - Account
+  - Notification (l10n: Notification / 알림 / Notificações)
   - Language Level
   - Feedback
   - Tutorial (클릭 시 반응 없음, 추후 구현)
@@ -390,8 +392,37 @@
 ### 스크린 내부 구현 특이사항
 - 배경색: RGB(51, 51, 51) - SettingScreen 대비 10% 밝기 증가
 - 우측 상단 X 버튼 필수
+- 콘텐츠 구성: 서버 공시 페이지와 유사한 섹션형 레이아웃
+  - 상단 안내문: "This page provides information on some of the open-source libraries and their licenses used in the SUDA app."
+  - 라이선스별 섹션 + 라이선스 URL + 패키지/버전 목록 표시
+  - 현재 공시 범위는 앱 코드(Flutter 앱 직접 의존성) 기준
 - 키보드 활성화 시 `AccountScreen`은 `resizeToAvoidBottomInset: false`로 유지  
   (하단 "계정 삭제" 텍스트 버튼이 키보드와 함께 따라 올라오는 현상 방지)
+
+---
+
+## 5.1 PushAgreementScreen
+
+### 스크린 관련 정의 파일
+- **파일 경로**: `lib/screens/setting/push_agreement.dart`
+- **클래스명**: `PushAgreementScreen` (StatefulWidget)
+- **스크린 타입**: **Sub Screen**
+- **appPath**: 해당 없음 (Setting 하위)
+
+### 스크린 용도
+- 푸시 알림 수신 동의 ON/OFF 설정
+
+### 이전 스크린 정보 (진입점)
+- **SettingScreen**: "Notification" 클릭 시
+
+### 이후 스크린 정보 (이동 가능한 다른 스크린)
+- **SettingScreen**: 좌상단 뒤로가기 또는 시스템 뒤로가기 시 `Navigator.pop()`으로 복귀
+
+### 스크린 내부 구현 특이사항
+- 좌상단 뒤로가기: 같은 레벨(Account, Feedback 등)과 동일
+- 헤더 타이틀: 메뉴명 그대로(l10n.settingsNotification)
+- 본문: width 100%, 배경 #353535, 모서리 둥근 박스. 좌측 설명(pushNotifications 흰색, pushNotificationsDesc caption·#80D7CF), 우측 토글(56×24 트랙, 20×20 흰 원). OFF: 원 좌측, 트랙 #8C8C8C. ON: 원 우측, 트랙 #80D7CF. 200 응답 후 전환 애니메이션.
+- API: ON 시 `PUT /v1/users/push-agreement?agreementYn=Y`, OFF 시 `PUT /v1/users/push-agreement?agreementYn=N` (응답 바디 없음 200)
 
 ---
 
@@ -477,7 +508,7 @@
 
 ### 스크린 관련 정의 파일
 - **파일 경로**: `lib/screens/notification_box.dart`
-- **클래스명**: `NotificationBoxScreen` (StatelessWidget)
+- **클래스명**: `NotificationBoxScreen` (StatefulWidget)
 - **스크린 타입**: **Main Screen**
 - **appPath**: `/box`
 
@@ -502,6 +533,21 @@
 - **스크린 타입 특성**: Main Screen
   - **GNB 포함**: 하단 네비게이션 바 필수 포함 (Alarm 현재 화면, 흰색 / Home·Profile 회색)
   - GNB 색상: 검정 - 시스템 네비게이션 바와 색상 통일
+- 헤더 중앙 타이틀은 l10n `notificationsTitle` 사용  
+  - en: "Notifications", ko: "알림", pt: "Notificações"
+- 알림 목록은 서버에서 페이징 조회
+  - API: `GET /v1/users/notification?page={page}` (`SudaApiClient.getNotifications()`)
+  - 응답: `List<NotificationDto>` (id, title(List<SudaJson>), content(List<SudaJson>), imgPath, appPath, sendFinishedAt)
+  - `page=0`부터 시작, 스크롤을 아래로 내릴 때 1, 2, 3... 순차 호출
+  - 호출 결과가 빈 리스트이면 더 이상 호출하지 않음
+- 화면 진입 또는 Alarm 탭이 다시 활성화될 때(page 0) 목록을 새로 조회
+- **빈 상태**: 조회 결과가 없을 때는 본문 영역 정중앙에  
+  - `No notification yet` 문구를 body-default 스타일·흰색으로 가로/세로 중앙 정렬하여 노출 (l10n `notificationsEmpty`)
+- **목록 상태**: 조회 결과가 있을 때는 각 요소를 아래로 append
+  - 요소별 레이아웃: width 100% 짜리 흰색 둥근 테두리를 가진 투명 박스 안에  
+    - 첫 줄: title 한 줄 (SudaJsonUtil.localizedText, maxLines:1, ellipsis)  
+    - 둘째 줄: content 한 줄 (동일 규칙)
+- ScrollController를 사용하여 `maxScrollExtent - 200` 지점에서 다음 페이지 로딩 트리거
 - 뒤로가기 버튼 없음 (`showBackButton: false`)
 - Route name: `/notification_box` (참조용)
 

@@ -8,6 +8,7 @@ import '../../utils/sub_screen_route.dart';
 import '../../widgets/app_scaffold.dart';
 import 'account.dart';
 import 'language_level.dart';
+import 'push_agreement.dart';
 import 'feedback.dart';
 import '../webview_screen.dart';
 import 'open_source_license.dart';
@@ -15,11 +16,16 @@ import 'open_source_license.dart';
 class SettingScreen extends StatelessWidget {
   final VoidCallback? onSignOut;
   final UserDto? user;
-  
+  final ValueChanged<UserDto>? onUserUpdated;
+  /// PushAgreement 등에서 열 때 항상 최신 user를 쓰기 위한 콜백 (없으면 user 사용)
+  final UserDto? Function()? getCurrentUser;
+
   const SettingScreen({
     super.key,
     this.onSignOut,
     this.user,
+    this.onUserUpdated,
+    this.getCurrentUser,
   });
 
   void _navigateToSubScreen(BuildContext context, Widget screen) {
@@ -63,6 +69,17 @@ class SettingScreen extends StatelessWidget {
             context,
             l10n.settingsAccount,
             () => _navigateToSubScreen(context, AccountScreen(onSignOut: onSignOut)),
+          ),
+          _buildMenuItem(
+            context,
+            l10n.settingsNotification,
+            () => _navigateToSubScreen(
+              context,
+              PushAgreementScreen(
+                user: getCurrentUser?.call() ?? user,
+                onUserUpdated: onUserUpdated,
+              ),
+            ),
           ),
           _buildMenuItem(
             context,

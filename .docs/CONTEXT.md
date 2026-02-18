@@ -286,8 +286,10 @@
 - **엔딩 API**: `SudaApiClient.getRoleplayEnding(accessToken, rpId, rpRoleId, endingId)` → RoleplayEndingDto.
 - **세션 초기화 티켓 부족**: Opening→Playing 세션 초기화(`POST /v1/roleplay-sessions`) 200 응답에서 `sessionId`가 '0'인 경우 티켓 부족으로 간주, 얼럿 "(임시)no tickets" 후 Opening 유지. `.docs/CONTEXT_ROLEPLAY.md` 6-3 참조.
 - **홈 화면 티켓 배지**: 상단 우측에 티켓 아이콘(`assets/images/icons/ticket.png` 38×20) + finalTicketCount 표시(body-caption 흰색). 앱 구동 후 첫 노출 시·GNB 홈 탭 선택 시·물리 뒤로가기로 홈 복귀 시·**서브 스크린에서 pop으로 복귀 시** `GET /v1/users/ticket` 갱신. 서브 복귀 감지는 `RouteObserver` + `MainRouteAwareWrapper`(lib/widgets/main_route_aware_wrapper.dart)의 `didPopNext`로 처리. 감소 시 즉시 치환, 증가 시 500ms 내 단계 증가 + 단계마다 `Vibration.vibrate(duration: 80)` (Result 스크린과 동일).
+- **PushAgreementScreen**: 설정 > Notification 진입. 푸시 알림 ON/OFF 토글. `PUT /v1/users/push-agreement?agreementYn=Y|N` (SudaApiClient.updatePushAgreement). `.docs/CONTEXT_SCREEN.md` §5.1.
 - **앱 버전 1.0.1**: `pubspec.yaml` 1.0.1+2, `AppConfig.appVersion` 1.0.1. Setting 화면 하단: 개인정보·이용약관·오픈소스 블록 위로 조정, 그 아래 버전 텍스트 `v x.x.x` (fontSize 11, 흰색, 중앙 정렬) 노출.
 - **푸시 appPath 연동**: FCM data에 `appPath` 포함 시 알림 클릭 후 해당 스크린으로 이동. 비로그인/미동의 시 `PendingAppPathService`에 보관, Home 진입 시 적용. 지원 경로·정의는 `.docs/CONTEXT_SCREEN.md` appPath 섹션. `lib/services/pending_app_path_service.dart`, `main.dart`(getInitialMessage·onMessageOpenedApp·_applyPendingAppPath).
+- **NotificationBoxScreen 알림 페이징**: Alarm 탭(Main Screen) 진입 시 `/v1/users/notification?page=0`으로 알림 목록 조회, 스크롤 하단 도달 시 1, 2, 3... 순차 호출. 응답이 빈 리스트이면 더 이상 호출하지 않음. 응답 DTO는 `NotificationDto(id, title(List<SudaJson>), content(List<SudaJson>), imgPath, appPath, sendFinishedAt)`이며, title/content는 `SudaJsonUtil.localizedText`로 사용자 언어에 맞게 표시. 결과가 없을 때는 본문 중앙에 "No notification yet"(l10n.notificationsEmpty)을 body-default 흰색 텍스트로 노출.
 
 ## 13. 리팩토링 계획 문서
 - 롤플레이 기능 준비를 위한 리팩토링 작업 분해 문서는 `REFACTOR.md`에 기록

@@ -9,8 +9,11 @@
   "agreementButtonConfirm": "Concordar e continuar",
   "settingsTitle": "Configurações",
   "settingsAccount": "Conta",
+  "settingsNotification": "Notificações",
   "settingsTutorial": "Tutorial",
   "settingsLanguageLevel": "Nível de Idioma",
+  "pushNotifications": "Notificações push",
+  "pushNotificationsDesc": "Receba lembretes e atualizações importantes.",
   "settingsFeedback": "Feedback",
   "settingsSignOut": "Sair",
   "settingsPrivacy": "Política de Privacidade",
@@ -79,5 +82,10 @@
   "profileHistory": "Histórico",
   "profileHistoryEmpty": "Ainda sem histórico",
   "noTicketsTitle": "Acabou seus Tickets…",
-  "noTicketsBody": "Você atingiu seu limite do dia.\nVolte Amanhã!"
+  "noTicketsBody": "Você atingiu seu limite do dia.\nVolte Amanhã!",
+  "notificationPermissionBlockedTitle": "Notificações desativadas",
+  "notificationPermissionBlockedMessage": "Ative as notificações nas configurações do dispositivo para receber notificações push.",
+  "openSettings": "Abrir configurações",
+  "notificationsTitle": "Notificações",
+  "notificationsEmpty": "Ainda não há notificações"
 }
