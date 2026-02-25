@@ -76,8 +76,10 @@ SHA-1 지문을 복사하여 Google 콘솔에 등록합니다.
   - 상용 Client ID: `12033207645-tos8um06qs9599iqi1oubibll459889g.apps.googleusercontent.com`
 
 ## 4. 키스토어와 빌드 타입
-- **디버그 빌드**: 항상 디버그 키스토어 사용
-- **릴리스 빌드**: key.properties가 있으면 릴리스 키스토어 사용, 없으면 디버그 키스토어 사용
+- **적용 기준은 buildType이 아니라 flavor**
+- **local/dev/stg flavor**: debug/release 모두 디버그 키스토어 사용
+- **prd flavor**: debug/release 모두 릴리스 키스토어(`android/key.properties`) 사용
+- **중요**: prd 빌드에서 `android/key.properties`가 없으면 빌드가 실패하도록 설정
 
 ## 5. 키스토어 보안
 

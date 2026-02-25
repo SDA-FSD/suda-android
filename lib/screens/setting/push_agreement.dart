@@ -8,7 +8,7 @@ import '../../models/user_models.dart';
 import '../../services/token_storage.dart';
 import '../../services/suda_api_client.dart';
 import '../../widgets/app_scaffold.dart';
-import '../../utils/app_toast.dart';
+import '../../utils/default_toast.dart';
 
 class PushAgreementScreen extends StatefulWidget {
   final UserDto? user;
@@ -162,7 +162,7 @@ class _PushAgreementScreenState extends State<PushAgreementScreen> {
       if (token == null) {
         if (mounted) {
           setState(() => _isUpdating = false);
-          AppToast.show(context, 'Authentication required.');
+          DefaultToast.show(context, 'Authentication required.');
         }
         return;
       }
@@ -181,10 +181,10 @@ class _PushAgreementScreenState extends State<PushAgreementScreen> {
     } catch (e) {
       if (mounted) {
         setState(() => _isUpdating = false);
-        AppToast.show(
+        DefaultToast.show(
           context,
           'Failed to update: $e',
-          backgroundColor: Colors.red,
+          isError: true,
         );
       }
     }

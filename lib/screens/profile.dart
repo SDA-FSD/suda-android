@@ -9,6 +9,7 @@ import '../l10n/app_localizations.dart';
 import '../services/auth_service.dart';
 import '../services/token_storage.dart';
 import '../services/suda_api_client.dart';
+import '../utils/default_toast.dart';
 import '../utils/sub_screen_route.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/gnb_bar.dart';
@@ -186,12 +187,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       }
     } catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Logout failed: $error'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        DefaultToast.show(context, 'Logout failed: $error', isError: true);
       }
     }
   }

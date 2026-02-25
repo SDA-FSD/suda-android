@@ -53,8 +53,8 @@
 - 사용자의 음성 전송은 **byte[](바이너리)** 방식으로 처리한다. (base64 미사용)
 
 ## 6. Roleplay 상세 조회 API
-- 홈 화면 카테고리별 롤플레이 목록 전체 조회: `GET /v1/home/roleplays/all`
-  - 응답: `List<AppHomeRoleplayGroupDto>` (roleplayCategoryDto, list)
+- 홈 화면 카테고리별 롤플레이 목록 전체 조회: `GET /v1/home/contents` (roleplays 필드)
+  - 응답: HomeDto.roleplays → `List<AppHomeRoleplayGroupDto>` (roleplayCategoryDto, list)
 - 카테고리별 롤플레이 목록 페이징 조회: `GET /v1/home/roleplays`
   - 파라미터: `roleplayCategoryId`, `pageNum`
   - 응답: `SudaAppPage<AppHomeRoleplayDto>` (content, number, size, last, first)
@@ -119,7 +119,8 @@
 - **세션 초기화** (`POST /v1/roleplay-sessions`)
   - 500: Opening -> Playing 전환 금지. 마이크 권한 체크 이후 처리.
   - 현행 UX: "Cannot start roleplay" 토스트 노출 후 Opening에 머무름.
-  - 200이고 응답 body의 `sessionId`가 `'0'`(또는 0)인 경우: 티켓 부족으로 간주. 단순 얼럿 "(임시)no tickets" 노출 후 Opening에 머무름. 버튼 재탭 시 동일 API 재호출·동일 처리.
+  - 200이고 응답 body의 `sessionId`가 `'0'`(또는 0)인 경우: 티켓 부족으로 간주. 단순 얼럿 노출 후 Opening에 머무름. 버튼 재탭 시 동일 API 재호출·동일 처리.
+  - 200이고 `sessionId`가 `'-10'`, `'-20'`, `'-30'`, `'-40'`인 경우: 별도 분기(TBD). Opening 유지.
 - **사용자 텍스트/음성 입력, AI 응답, 나레이션, 힌트, 번역**
   - 404: 서버에서 세션 유실로 판단. "Roleplay Session Not Found" 얼럿 후 Overview 복귀.
 - **사용자 텍스트/음성 입력**
@@ -277,7 +278,7 @@
 - 별 아이콘은 PNG로 관리 (광택 효과 유지 목적)
 - 별 아이콘 크기: 16x16, 별 사이 간격 2
 - 역할 선택 버튼 세로 패딩: 18, 좌우 패딩: 30
-- 비활성 안내 토스트는 공통 토스트 헬퍼(`lib/utils/app_toast.dart`) 사용
+- 비활성 안내 토스트는 공통 토스트 헬퍼(`lib/utils/default_toast.dart`) 사용
 - 유사 롤플레이 그리드(3열) 표시 및 제목 오버레이 텍스트 포함
 
 ## 9. 공통 레이아웃 (RoleplayScaffold)

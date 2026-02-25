@@ -15,16 +15,10 @@ import 'endpoints/user_api.dart';
 import 'endpoints/version_api.dart';
 
 class SudaApiClient {
-  static Future<List<MainHomeBannerDto>> getHomeBanners({
+  static Future<HomeDto> getHomeContents({
     required String accessToken,
   }) {
-    return HomeApi.getHomeBanners(accessToken: accessToken);
-  }
-
-  static Future<List<AppHomeRoleplayGroupDto>> getHomeRoleplayGroups({
-    required String accessToken,
-  }) {
-    return HomeApi.getHomeRoleplayGroups(accessToken: accessToken);
+    return HomeApi.getHomeContents(accessToken: accessToken);
   }
 
   static Future<SudaAppPage<AppHomeRoleplayDto>> getRoleplaysByCategory({

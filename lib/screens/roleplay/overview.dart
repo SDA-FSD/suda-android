@@ -8,7 +8,7 @@ import '../../models/user_models.dart';
 import '../../services/roleplay_state_service.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
-import '../../utils/app_toast.dart';
+import '../../utils/default_toast.dart';
 import '../../utils/language_util.dart';
 import '../../utils/suda_json_util.dart';
 import '../../widgets/app_scaffold.dart';
@@ -197,7 +197,7 @@ class _RoleplayOverviewScreenState extends State<RoleplayOverviewScreen> {
             final message = _getRoleLockedMessage(
               isAvailableToUsers: availableToUsersYn == 'Y',
             );
-            AppToast.show(context, message);
+            DefaultToast.show(context, message);
           } else {
             // 활성화된 경우 roleId 저장 후 오프닝으로 이동
             final overview = RoleplayStateService.instance.overview;

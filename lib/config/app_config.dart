@@ -62,13 +62,13 @@ class AppConfig {
       case 'dev':
         return '558349443875-ceevp4cjf86ubp0p066qm5hsujukljg4.apps.googleusercontent.com';
       case 'prd':
-        return '12033207645-hemqk3f2jgbs9h883em7g6u86nilntkt.apps.googleusercontent.com';
+        return '841694444330-g8gn852m4somers2668v46k3mm69p7dg.apps.googleusercontent.com';
       default:
         return null;
     }
   }
 
   // 앱 버전 (하드코딩, pubspec.yaml version과 동기화)
-  static const String appVersion = '1.0.1';
+  static const String appVersion = '1.0.4';
 }
 

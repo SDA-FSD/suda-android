@@ -1,5 +1,61 @@
 import 'common_models.dart';
 
+/// GET /v1/home/contents 응답 DTO
+class HomeDto {
+  final String restYn;
+  final DateTime? restStartsAt;
+  final DateTime? restEndsAt;
+  final List<MainHomeBannerDto> banners;
+  final List<AppHomeRoleplayGroupDto> roleplays;
+
+  const HomeDto({
+    required this.restYn,
+    this.restStartsAt,
+    this.restEndsAt,
+    required this.banners,
+    required this.roleplays,
+  });
+
+  factory HomeDto.fromJson(Map<String, dynamic> json) {
+    final restYnRaw = json['restYn'] as String?;
+    final restYn = restYnRaw ?? 'N';
+
+    DateTime? parseInstant(dynamic v) {
+      if (v == null) return null;
+      if (v is String) {
+        try {
+          return DateTime.parse(v);
+        } catch (_) {
+          return null;
+        }
+      }
+      return null;
+    }
+
+    final bannersRaw = json['banners'];
+    final List<MainHomeBannerDto> banners = bannersRaw == null
+        ? []
+        : (bannersRaw as List<dynamic>)
+            .map((item) => MainHomeBannerDto.fromJson(item as Map<String, dynamic>))
+            .toList();
+
+    final roleplaysRaw = json['roleplays'];
+    final List<AppHomeRoleplayGroupDto> roleplays = roleplaysRaw == null
+        ? []
+        : (roleplaysRaw as List<dynamic>)
+            .map((item) => AppHomeRoleplayGroupDto.fromJson(item as Map<String, dynamic>))
+            .toList();
+
+    return HomeDto(
+      restYn: restYn,
+      restStartsAt: parseInstant(json['restStartsAt']),
+      restEndsAt: parseInstant(json['restEndsAt']),
+      banners: banners,
+      roleplays: roleplays,
+    );
+  }
+}
+
 class MainHomeBannerDto {
   final String imgPath;
   final List<SudaJson> overlayText;

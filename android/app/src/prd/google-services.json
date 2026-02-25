@@ -1,0 +1,113 @@
+{
+  "project_info": {
+    "project_number": "841694444330",
+    "project_id": "suda-f6884",
+    "storage_bucket": "suda-f6884.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:841694444330:android:bd4b8805b32fa655553c53",
+        "android_client_info": {
+          "package_name": "kr.sudatalk.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "841694444330-1ahe1ek5rqms475a6lp1r3cdoe9r23uc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "kr.sudatalk.app",
+            "certificate_hash": "29d3fa6e391bd31ecadb5f794cb155c30f3ef126"
+          }
+        },
+        {
+          "client_id": "841694444330-o3tnpmsc3r4ud8k6q7c78cvq9pmq1ang.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "kr.sudatalk.app",
+            "certificate_hash": "bb0771528de1111c6d05ff095d12cd7047df5fac"
+          }
+        },
+        {
+          "client_id": "841694444330-g8gn852m4somers2668v46k3mm69p7dg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyACp32IAFdM7oNnGHlj2DM5imIxC9syZAQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "841694444330-g8gn852m4somers2668v46k3mm69p7dg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:841694444330:android:ea5f75ef50b68fe0553c53",
+        "android_client_info": {
+          "package_name": "kr.sudatalk.app.dev"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "841694444330-g8gn852m4somers2668v46k3mm69p7dg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyACp32IAFdM7oNnGHlj2DM5imIxC9syZAQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "841694444330-g8gn852m4somers2668v46k3mm69p7dg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:841694444330:android:3c2a18eecf795379553c53",
+        "android_client_info": {
+          "package_name": "kr.sudatalk.app.local"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "841694444330-g8gn852m4somers2668v46k3mm69p7dg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyACp32IAFdM7oNnGHlj2DM5imIxC9syZAQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "841694444330-g8gn852m4somers2668v46k3mm69p7dg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

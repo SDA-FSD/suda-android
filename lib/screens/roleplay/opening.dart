@@ -3,7 +3,7 @@ import '../../widgets/roleplay_scaffold.dart';
 import '../../services/roleplay_state_service.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
-import '../../utils/app_toast.dart';
+import '../../utils/default_toast.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/token_refresh_service.dart';
@@ -43,7 +43,7 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen> {
       final accessToken = await TokenStorage.loadAccessToken();
       if (!context.mounted) return;
       if (accessToken == null) {
-        AppToast.show(context, 'Authentication required.');
+        DefaultToast.show(context, 'Authentication required.');
         _restoreButton();
         return;
       }
@@ -51,7 +51,7 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen> {
       final roleplayId = RoleplayStateService.instance.roleplayId;
       final roleId = RoleplayStateService.instance.roleId;
       if (roleplayId == null || roleId == null) {
-        AppToast.show(context, 'Cannot start roleplay');
+        DefaultToast.show(context, 'Cannot start roleplay');
         _restoreButton();
         return;
       }
@@ -65,7 +65,7 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen> {
         if (!context.mounted) return;
         final sessionId = session.sessionId;
         if (sessionId == null || sessionId.isEmpty) {
-          AppToast.show(context, 'Cannot start roleplay');
+          DefaultToast.show(context, 'Cannot start roleplay');
           _restoreButton();
           return;
         }
@@ -107,24 +107,44 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen> {
           _restoreButton();
           return;
         }
+        if (sessionId == '-10') {
+          // TBD
+          _restoreButton();
+          return;
+        }
+        if (sessionId == '-20') {
+          // TBD
+          _restoreButton();
+          return;
+        }
+        if (sessionId == '-30') {
+          // TBD
+          _restoreButton();
+          return;
+        }
+        if (sessionId == '-40') {
+          // TBD
+          _restoreButton();
+          return;
+        }
         RoleplayStateService.instance.setSessionId(sessionId);
         RoleplayStateService.instance.setSession(session);
         RoleplayRouter.replaceWithPlaying(context);
       } catch (e) {
         if (!context.mounted) return;
         if (e.toString().contains('HTTP 500')) {
-          AppToast.show(context, 'Cannot start roleplay');
+          DefaultToast.show(context, 'Cannot start roleplay');
           _restoreButton();
           return;
         }
-        AppToast.show(context, 'Cannot start roleplay');
+        DefaultToast.show(context, 'Cannot start roleplay');
         _restoreButton();
       }
     } else {
       // 권한 거부 시 안내
       if (!context.mounted) return;
       final l10n = AppLocalizations.of(context)!;
-      AppToast.show(context, l10n.microphonePermissionDenied);
+      DefaultToast.show(context, l10n.microphonePermissionDenied);
       _restoreButton();
     }
   }

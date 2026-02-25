@@ -3,7 +3,7 @@ import '../../widgets/app_scaffold.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
-import '../../utils/app_toast.dart';
+import '../../utils/default_toast.dart';
 
 class FeedbackScreen extends StatefulWidget {
   const FeedbackScreen({super.key});
@@ -54,7 +54,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
 
         if (mounted) {
           final l10n = AppLocalizations.of(context)!;
-          AppToast.show(
+          DefaultToast.show(
             context,
             l10n.feedbackSuccess,
           );
@@ -63,10 +63,10 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
       }
     } catch (e) {
       if (mounted) {
-        AppToast.show(
+        DefaultToast.show(
           context,
           'Failed to send feedback: $e',
-          backgroundColor: Colors.red,
+          isError: true,
         );
       }
     } finally {

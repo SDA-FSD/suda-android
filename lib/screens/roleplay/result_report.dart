@@ -4,7 +4,7 @@ import '../../l10n/app_localizations.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
 import '../../services/roleplay_state_service.dart';
-import '../../utils/app_toast.dart';
+import '../../utils/default_toast.dart';
 
 /// Roleplay Result Report Screen (Sub Screen)
 ///
@@ -51,10 +51,10 @@ class _RoleplayResultReportScreenState extends State<RoleplayResultReportScreen>
     final resultId = RoleplayStateService.instance.cachedResult?.id;
     if (resultId == null) {
       if (mounted) {
-        AppToast.show(
+        DefaultToast.show(
           context,
           'No result id',
-          backgroundColor: Colors.red,
+          isError: true,
         );
       }
       return;
@@ -77,10 +77,10 @@ class _RoleplayResultReportScreenState extends State<RoleplayResultReportScreen>
       }
     } catch (e) {
       if (mounted) {
-        AppToast.show(
+        DefaultToast.show(
           context,
           'Failed to send report: $e',
-          backgroundColor: Colors.red,
+          isError: true,
         );
       }
     } finally {

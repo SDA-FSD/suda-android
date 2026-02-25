@@ -7,6 +7,7 @@ import 'package:shimmer/shimmer.dart';
 import 'package:marquee/marquee.dart';
 import 'package:vibration/vibration.dart';
 import '../services/auth_service.dart';
+import '../services/rest_status_service.dart';
 import '../services/token_storage.dart';
 import '../services/suda_api_client.dart';
 import '../config/app_config.dart';
@@ -47,7 +48,6 @@ class _HomeScreenState extends State<HomeScreen> {
   int _currentPage = 0;
   Timer? _bannerTimer;
   bool _bannerTimerStarted = false; // 타이머 시작 여부 플래그
-  bool _isRoleplayLoadingStarted = false; // 롤플레이 로딩 시작 여부 플래그
   int _visibleCategoryCount = 0; // 현재 렌더링 허용된 카테고리 개수
   int _displayTicketCount = 0;
 
@@ -86,8 +86,8 @@ class _HomeScreenState extends State<HomeScreen> {
     // 2. 푸시 토큰 등록
     await _registerPushToken();
 
-    // 3. 배너 정보 조회 (롤플레이는 배너 렌더링 완료 후 호출하도록 분리)
-    await _fetchBanners();
+    // 3. 홈 콘텐츠 조회 (배너 + 롤플레이 통합 API)
+    await _fetchHomeContents();
     // 4. 티켓 개수 조회
     await _fetchTicket();
   }
@@ -119,40 +119,53 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  /// 배너 정보 조회
-  Future<void> _fetchBanners() async {
+  /// 홈 콘텐츠 조회 (배너 + 롤플레이 통합 API)
+  Future<void> _fetchHomeContents() async {
     if (_accessToken == null) {
-      setState(() => _isLoadingBanners = false);
+      setState(() {
+        _isLoadingBanners = false;
+        _isLoadingGroups = false;
+      });
       return;
     }
 
     try {
-      final banners = await SudaApiClient.getHomeBanners(accessToken: _accessToken!);
-      if (mounted) {
-        setState(() {
-          _banners = banners;
-          _isLoadingBanners = false;
-          if (banners.isNotEmpty) {
-            // 무한 루프를 위해 중간 지점 계산
-            final int initialPage = banners.length * 500;
-            _pageController = PageController(initialPage: initialPage);
-            _currentPage = initialPage % banners.length;
-          }
-        });
+      final home = await SudaApiClient.getHomeContents(accessToken: _accessToken!);
+      if (!mounted) return;
 
-        // 배너가 아예 없을 경우, 렌더링 완료를 기다릴 수 없으므로 즉시 롤플레이 로드 시작
-        if (banners.isEmpty) {
-          _fetchRoleplayGroups();
-        } else {
-          // 모든 배너 이미지를 미리 로드한 후 타이머 시작
-          _preloadAllBanners(banners);
+      RestStatusService.instance.update(
+        restYn: home.restYn,
+        restStartsAt: home.restStartsAt,
+        restEndsAt: home.restEndsAt,
+      );
+
+      final banners = home.banners;
+      final groups = home.roleplays;
+
+      setState(() {
+        _banners = banners;
+        _roleplayGroups = groups;
+        _isLoadingBanners = false;
+        _isLoadingGroups = false;
+        if (banners.isNotEmpty) {
+          final int initialPage = banners.length * 500;
+          _pageController = PageController(initialPage: initialPage);
+          _currentPage = initialPage % banners.length;
         }
+        if (groups.isNotEmpty) {
+          _visibleCategoryCount = 1;
+        }
+      });
+
+      if (banners.isNotEmpty) {
+        _preloadAllBanners(banners);
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _isLoadingBanners = false);
-        // 배너 호출 실패 시에도 롤플레이 로드는 시도
-        _fetchRoleplayGroups();
+        setState(() {
+          _isLoadingBanners = false;
+          _isLoadingGroups = false;
+        });
       }
     }
   }
@@ -181,31 +194,6 @@ class _HomeScreenState extends State<HomeScreen> {
       // 에러 발생 시에도 무한 대기를 방지하기 위해 일단 타이머 시작
       if (mounted) {
         _startBannerTimer();
-      }
-    }
-  }
-
-  /// 롤플레이 그룹 정보 조회
-  Future<void> _fetchRoleplayGroups() async {
-    // 이미 로딩이 시작되었거나 토큰이 없으면 중단
-    if (_isRoleplayLoadingStarted || _accessToken == null) return;
-    _isRoleplayLoadingStarted = true;
-
-    try {
-      final groups = await SudaApiClient.getHomeRoleplayGroups(accessToken: _accessToken!);
-      if (mounted) {
-        setState(() {
-          _roleplayGroups = groups;
-          _isLoadingGroups = false;
-          // 첫 번째 카테고리부터 렌더링 시작 허용
-          if (groups.isNotEmpty) {
-            _visibleCategoryCount = 1;
-          }
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _isLoadingGroups = false);
       }
     }
   }
@@ -319,11 +307,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     CachedNetworkImage(
                       imageUrl: imageUrl,
                       imageBuilder: (context, imageProvider) {
-                        if (index == _pageController.initialPage) {
-                          WidgetsBinding.instance.addPostFrameCallback((_) {
-                            _fetchRoleplayGroups();
-                          });
-                        }
                         return Image(
                           image: imageProvider,
                           width: double.infinity,

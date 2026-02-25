@@ -5,6 +5,7 @@ import '../services/auth_service.dart';
 import '../services/suda_api_client.dart';
 import '../services/token_storage.dart';
 import '../config/app_config.dart';
+import '../utils/default_toast.dart';
 import '../utils/language_util.dart';
 import 'webview_screen.dart';
 
@@ -48,12 +49,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (result.idToken == null) {
         if (mounted) {
           final l10n = AppLocalizations.of(context)!;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(l10n.loginErrorIdToken),
-              backgroundColor: Colors.red,
-            ),
-          );
+          DefaultToast.show(context, l10n.loginErrorIdToken, isError: true);
           setState(() {
             _isLoading = false;
           });
@@ -79,12 +75,7 @@ class _LoginScreenState extends State<LoginScreen> {
     } catch (error, stackTrace) {
       if (mounted) {
         final l10n = AppLocalizations.of(context)!;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.loginErrorFailed(error.toString())),
-            backgroundColor: Colors.red,
-          ),
-        );
+        DefaultToast.show(context, l10n.loginErrorFailed(error.toString()), isError: true);
         setState(() {
           _isLoading = false;
         });

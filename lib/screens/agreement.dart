@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
 import '../services/suda_api_client.dart';
 import 'webview_screen.dart';
+import '../utils/default_toast.dart';
 import '../utils/sub_screen_route.dart';
 
 class AgreementScreen extends StatefulWidget {
@@ -41,9 +42,7 @@ class _AgreementScreenState extends State<AgreementScreen> {
       widget.onAgreementComplete();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        DefaultToast.show(context, 'Error: $e', isError: true);
       }
     } finally {
       if (mounted) setState(() => _isSubmitting = false);

@@ -3,6 +3,7 @@ import '../../widgets/app_scaffold.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
+import '../../utils/default_toast.dart';
 
 class LanguageLevelScreen extends StatefulWidget {
   final UserDto? user;
@@ -100,9 +101,7 @@ class _LanguageLevelScreenState extends State<LanguageLevelScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to update language level: $e'), backgroundColor: Colors.red),
-        );
+        DefaultToast.show(context, 'Failed to update language level: $e', isError: true);
       }
     } finally {
       if (mounted) {

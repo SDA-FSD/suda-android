@@ -3,7 +3,7 @@ import '../../widgets/roleplay_scaffold.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
-import '../../utils/app_toast.dart';
+import '../../utils/default_toast.dart';
 
 /// Roleplay Failed Report Screen (Sub Screen)
 ///
@@ -63,10 +63,10 @@ class _RoleplayFailedReportScreenState extends State<RoleplayFailedReportScreen>
       }
     } catch (e) {
       if (mounted) {
-        AppToast.show(
+        DefaultToast.show(
           context,
           'Failed to send report: $e',
-          backgroundColor: Colors.red,
+          isError: true,
         );
       }
     } finally {

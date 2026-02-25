@@ -257,8 +257,8 @@
         (텍스트가 영역을 초과할 때만 Marquee 적용)
       - 기능: 레이지 로딩(페이징) 지원, 로딩 중 Shimmer 스켈레톤 노출
 - **API 연동**:
-  - **홈 배너 조회**: `GET /v1/home/banners` (`SudaApiClient.getHomeBanners()`)
-  - **롤플레이 그룹 조회**: `GET /v1/home/roleplays/all` (`SudaApiClient.getHomeRoleplayGroups()`)
+  - **홈 콘텐츠 통합 조회**: `GET /v1/home/contents` (`SudaApiClient.getHomeContents()`)
+    - 응답: HomeDto (banners, roleplays, restYn, restStartsAt, restEndsAt)
   - **롤플레이 페이징 조회**: `GET /v1/home/roleplays` (`SudaApiClient.getRoleplaysByCategory()`)
   - **푸시 토큰 등록**: `_registerPushToken()` 메서드로 처리
     - Firebase Messaging 토큰 획득 후 서버에 전송 (`POST /users/push-token`)
@@ -630,7 +630,7 @@
 - 닫기(X) 버튼 없음. 시스템 뒤로가기 시 "Exit from ending screen" 얼럿, 확인 시 ending screen 삭제 후 Overview 노출.
 - 엔딩 데이터: 사용자 role(`RoleplayStateService.overview`·`roleId`)의 `endingList` 첫 번째 요소(`RoleplayEndingDto`) 사용. 이미지 없을 경우 바로 80% 검정 레이어·콘텐츠 노출.
 - 이미지 있을 경우: 디바이스 높이 100% 비율 유지 표시(기본). 중앙 기준 1.5배→1배 약 2초 축소 애니메이션 후, 80% 투명도 검정 레이어 fade-in, 이어서 콘텐츠 fade-in.
-- 레이아웃: 상단 50% = 상상단(h2 흰색, `RoleplayEndingDto.title` 사용자 언어) + 상하단(body-secondary 흰색, `RoleplayEndingDto.content` 사용자 언어). 하단 50% = 하상단(h2 흰색, l10n `endingHowWas` + 별 5개 40×40 gap 5, star_empty/star_filled) + 하하단(ElevatedButton Opening Let's start 스타일, l10n `endingNext`). 별점은 선택 시 해당 별 및 좌측 star_filled, 우측 star_empty. star=0 허용.
+- 레이아웃: 상단 75% = SingleChildScrollView(gap 50 / 타이틀 / gap 50 / 콘텐츠 / gap 50 / 평가문구 / gap 15 / 별 5개 40×40 gap 5). 콘텐츠 양이 많으면 이 영역 내 스크롤. 하단 25% = Next 버튼(Opening Let's start 스타일, l10n `endingNext`). 별점은 선택 시 해당 별 및 좌측 star_filled, 우측 star_empty. star=0 허용.
 - Playing에서 ending 전환 확정 시점에 role.endingList 첫 요소의 `imgPath`에 CDN host prepend하여 이미지 preload.
 
 ---

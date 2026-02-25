@@ -46,7 +46,7 @@
   - 환경별 Google Server Client ID (idToken 발급용)
     - local: `558349443875-ceevp4cjf86ubp0p066qm5hsujukljg4.apps.googleusercontent.com`
     - dev  : `558349443875-ceevp4cjf86ubp0p066qm5hsujukljg4.apps.googleusercontent.com`
-    - prd  : `12033207645-hemqk3f2jgbs9h883em7g6u86nilntkt.apps.googleusercontent.com`
+  - prd  : `841694444330-g8gn852m4somers2668v46k3mm69p7dg.apps.googleusercontent.com`
 
 ## 4. 인증 및 API 통신
 - **Google 로그인 연동**: `lib/services/auth_service.dart`
@@ -69,12 +69,28 @@
   - `SudaApiClient.registerPushToken()`: 푸시 토큰 등록 (`POST /users/push-token`)
     - Request body: `{ "deviceType": "ANDROID", "pushToken": "<토큰값>", "languageCode": "en|ko|pt" }`
     - 응답 처리하지 않음 (에러 발생 시에도 무시)
-  - `SudaApiClient.getHomeBanners()`: 홈 화면 배너 목록 조회 (`GET /v1/home/banners`)
-    - 응답: `List<MainHomeBannerDto>` (imgPath, overlayText)
+  - `SudaApiClient.getHomeContents()`: 홈 화면 콘텐츠 통합 조회 (`GET /v1/home/contents`)
+    - 응답: `HomeDto` (restYn, restStartsAt, restEndsAt, banners, roleplays)
+    - banners: `List<MainHomeBannerDto>` (imgPath, overlayText)
+    - roleplays: `List<AppHomeRoleplayGroupDto>` (roleplayCategoryDto, list)
+    - restYn/restStartsAt/restEndsAt은 `RestStatusService.instance`에 저장 (어떤 스크린에서도 접근 가능)
   - `SudaApiClient.getLatestVersion()`: 최신 버전 정보 조회 (`GET /v1/latest-version`)
     - 응답: `VersionDto` (latestVersion, forceUpdateYn, androidMarketLink?, appleMarketLink?)
     - 최신 버전 정보는 `TokenStorage.saveLatestVersion()`으로 영구 저장
     - 저장된 버전 정보는 `TokenStorage.loadLatestVersion()`으로 조회 가능
+- **RestStatusService**: `lib/services/rest_status_service.dart`
+  - 서비스 점검 대응용 restYn, restStartsAt, restEndsAt 전역 보관
+  - `GET /v1/home/contents` 응답 시 `RestStatusService.instance.update()`로 초기화/업데이트
+  - 어떤 스크린에서도 `RestStatusService.instance.restYn` 등으로 접근 가능
+  - `shouldShowRestOverlay()`: Overview 진입 전 휴식 레이어 노출 여부 (restYn=='Y' 또는 N이면서 UTC now가 restStartsAt~restEndsAt 사이)
+- **휴식 안내 레이어 (RestOverlay)**: `lib/widgets/rest_overlay.dart`
+  - Overview 진입 시 `RoleplayRouter.pushOverview`에서 restYn 확인 후, 필요 시 레이어 노출·스크린 이동 중단
+  - 배경: BackdropFilter sigma 6 + Color 0x598C8C8C (playing 슬라이더와 동일)
+  - 닫기: close.svg 24×24, 좌상 30,30, 40×40 탭 영역
+  - 콘텐츠 영역: width 80%, height width×1.2+60, 중앙
+  - 이미지: rest_full_layer_pt.png (pt) / rest_full_layer_en.png, radius 50, border 12 #80D7CF, 외곽 40px 그라데이션
+  - 타이틀: "THE REST DAY" h1 검정, 80D7CF 배경, 높이 60, 반원
+  - 타이머: restEndsAt 있을 때만, 0CABA8 배경, HH:MM:SS 카운트다운, 매 초 갱신
 - JWT 토큰 저장: `lib/services/token_storage.dart` (flutter_secure_storage 사용)
 - deviceId 저장: `TokenStorage.getDeviceId()`로 최초 1회 생성 후 secure storage에 영구 보관
 - **버전 체크 및 강제 업데이트**: `lib/services/version_check_service.dart`
@@ -216,7 +232,8 @@
   - `lib/theme/app_theme.dart`: 앱 전역 테마 설정
   - `lib/services/token_refresh_service.dart`: Access Token 선제 갱신 타이머 및 동시 refresh 단일화
 - **공통 UI 유틸**:
-  - `lib/utils/app_toast.dart`: SnackBar 기반 토스트 공통 처리
+  - `lib/utils/default_toast.dart`: Overlay 기반 토스트 공통 처리 (배경 #353535/경고 #E4382A 85% 투명도, body-default 흰색, min height 48, 하단 60px, 좌우 반원)
+  - 토스트 전체 목록 및 테스트 가이드: `.docs/TOAST_CATALOG.md`
 - **리팩토링 원칙**: 
   - 단일 책임 원칙: 각 서비스는 하나의 책임만 담당
   - 재사용성: 공통 기능은 서비스로 분리하여 재사용
@@ -255,13 +272,13 @@
   - `Stack` 내 배경 그라데이션 영역 확대(100 -> 120)
 - **홈 화면 배너 시스템 구축**:
   - `shimmer` 패키지 도입으로 로딩 스켈레톤 UI 구현
-  - `GET /v1/home/banners` API 연동 및 무한 루프 `PageView` 배너 구현
+  - `GET /v1/home/contents` 통합 API 연동 (배너+롤플레이) 및 무한 루프 `PageView` 배너 구현
   - 100% 너비 정사각형 형태, `BorderRadius: 20` 적용
   - 디바이스 언어 설정을 고려한 다국어 텍스트 오버레이 로직 적용
 - **메인스크린 상태 보존 및 성능 최적화**:
   - `IndexedStack` 도입으로 Home과 Profile 화면 이동 시 기존 스크롤 위치 및 상태 유지
   - Profile 화면 진입 시마다 사용자 정보를 배경에서 최신화하는 Silent Refresh 로직 구현
-  - 배너 및 롤플레이 리스트의 렌더링 우선순위 최적화 (배너 완료 후 롤플레이 로드)
+  - 홈 콘텐츠 통합 API (`GET /v1/home/contents`)로 배너·롤플레이 동시 로드
 - 로그인 UX 개선: 로그인 성공 플로우에서는 스피너 유지, 실패 확정 시에만 로딩 종료
 - Roleplay Playing 헤더 우측 속도 슬라이더 UI 및 speed-rate API 연동 추가
 - Roleplay Playing 하단 녹음 영역 UI 정비: 서비스메시지(20) + 녹음버튼(120) 구조 및 상태 테스트 플로우 추가
@@ -284,12 +301,13 @@
 - **ReviewChatScreen 구현**: History에서 RoleplayResultDto 전달받아 채팅 이력 표시. 헤더 중앙 "Chat History"(Setting 계열 스타일), 좌상단 뒤로가기(header_arrow_back). chatHistory는 List\<SudaJson\>이며 key로 발화자 구분(USER / AI_CHARACTER / AI_NARRATOR / SYSTEM_MISSION), value를 그대로 표시. Playing과 동일 말풍선·나레이션·미션 배치 및 스타일(사용자 우측 흰색, AI 좌측 티얼+avatarImgPath 아바타, 나레이션/미션 중앙).
 - **ReviewEndingScreen 구현**: History "View Ending" 탭 시 `GET /v1/roleplays/{rpId}/roles/{rpRoleId}/endings/{endingId}` 호출, 응답 RoleplayEndingDto·이미지 프리로드 후 진입(버튼에 Opening과 동일 뱅글 로딩). Sub Screen. 헤더 "View Ending"+뒤로가기. 본문: 이미지(BoxFit.cover·높이 100%·비율 유지·좌우 잘림 가능) → 2s 후 레이어·타이틀(상단 25%)·콘텐츠(하단 75%) 페이드인. 버튼 없음.
 - **엔딩 API**: `SudaApiClient.getRoleplayEnding(accessToken, rpId, rpRoleId, endingId)` → RoleplayEndingDto.
-- **세션 초기화 티켓 부족**: Opening→Playing 세션 초기화(`POST /v1/roleplay-sessions`) 200 응답에서 `sessionId`가 '0'인 경우 티켓 부족으로 간주, 얼럿 "(임시)no tickets" 후 Opening 유지. `.docs/CONTEXT_ROLEPLAY.md` 6-3 참조.
+- **세션 초기화 응답 분기**: Opening→Playing 세션 초기화(`POST /v1/roleplay-sessions`) 200 응답의 `sessionId` 기준: '0'=티켓 부족(팝업 후 Opening 유지), '-10', '-20', '-30', '-40'=별도 분기(TBD), 그 외=Playing 진입. `.docs/CONTEXT_ROLEPLAY.md` 6-3 참조.
 - **홈 화면 티켓 배지**: 상단 우측에 티켓 아이콘(`assets/images/icons/ticket.png` 38×20) + finalTicketCount 표시(body-caption 흰색). 앱 구동 후 첫 노출 시·GNB 홈 탭 선택 시·물리 뒤로가기로 홈 복귀 시·**서브 스크린에서 pop으로 복귀 시** `GET /v1/users/ticket` 갱신. 서브 복귀 감지는 `RouteObserver` + `MainRouteAwareWrapper`(lib/widgets/main_route_aware_wrapper.dart)의 `didPopNext`로 처리. 감소 시 즉시 치환, 증가 시 500ms 내 단계 증가 + 단계마다 `Vibration.vibrate(duration: 80)` (Result 스크린과 동일).
 - **PushAgreementScreen**: 설정 > Notification 진입. 푸시 알림 ON/OFF 토글. `PUT /v1/users/push-agreement?agreementYn=Y|N` (SudaApiClient.updatePushAgreement). `.docs/CONTEXT_SCREEN.md` §5.1.
-- **앱 버전 1.0.1**: `pubspec.yaml` 1.0.1+2, `AppConfig.appVersion` 1.0.1. Setting 화면 하단: 개인정보·이용약관·오픈소스 블록 위로 조정, 그 아래 버전 텍스트 `v x.x.x` (fontSize 11, 흰색, 중앙 정렬) 노출.
+- **앱 버전 1.0.4**: `pubspec.yaml` 1.0.4+5, `AppConfig.appVersion` 1.0.4. Setting 화면 하단: 개인정보·이용약관·오픈소스 블록 위로 조정, 그 아래 버전 텍스트 `v x.x.x` (fontSize 11, 흰색, 중앙 정렬) 노출.
 - **푸시 appPath 연동**: FCM data에 `appPath` 포함 시 알림 클릭 후 해당 스크린으로 이동. 비로그인/미동의 시 `PendingAppPathService`에 보관, Home 진입 시 적용. 지원 경로·정의는 `.docs/CONTEXT_SCREEN.md` appPath 섹션. `lib/services/pending_app_path_service.dart`, `main.dart`(getInitialMessage·onMessageOpenedApp·_applyPendingAppPath).
 - **NotificationBoxScreen 알림 페이징**: Alarm 탭(Main Screen) 진입 시 `/v1/users/notification?page=0`으로 알림 목록 조회, 스크롤 하단 도달 시 1, 2, 3... 순차 호출. 응답이 빈 리스트이면 더 이상 호출하지 않음. 응답 DTO는 `NotificationDto(id, title(List<SudaJson>), content(List<SudaJson>), imgPath, appPath, sendFinishedAt)`이며, title/content는 `SudaJsonUtil.localizedText`로 사용자 언어에 맞게 표시. 결과가 없을 때는 본문 중앙에 "No notification yet"(l10n.notificationsEmpty)을 body-default 흰색 텍스트로 노출.
+- **Android 서명 정책 변경(Flavor 기준)**: `android/app/build.gradle.kts`에서 local/dev/stg는 debug/release 모두 디버그 키스토어 사용, prd는 debug/release 모두 `android/key.properties`의 릴리스 키스토어 사용. prd 빌드에서 `key.properties`가 없으면 빌드 실패.
 
 ## 13. 리팩토링 계획 문서
 - 롤플레이 기능 준비를 위한 리팩토링 작업 분해 문서는 `REFACTOR.md`에 기록

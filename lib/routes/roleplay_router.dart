@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../models/user_models.dart';
+import '../services/rest_status_service.dart';
 import '../utils/sub_screen_route.dart';
+import '../widgets/rest_overlay.dart';
 import '../screens/roleplay/overview.dart';
 import '../screens/roleplay/opening.dart';
 import '../screens/roleplay/playing.dart';
@@ -40,6 +42,17 @@ class RoleplayRouter {
   }
 
   static void pushOverview(BuildContext context, int roleplayId, {UserDto? user}) {
+    if (RestStatusService.instance.shouldShowRestOverlay()) {
+      Navigator.push(
+        context,
+        PageRouteBuilder(
+          opaque: false,
+          barrierColor: Colors.transparent,
+          pageBuilder: (_, __, ___) => const RestOverlay(),
+        ),
+      );
+      return;
+    }
     Navigator.push(
       context,
       SubScreenRoute(

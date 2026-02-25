@@ -232,133 +232,110 @@ class _RoleplayEndingScreenState extends State<RoleplayEndingScreen>
                 child: Column(
                   children: [
                     Expanded(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Expanded(
-                            child: Center(
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 24),
-                                child: Text(
-                                  title,
-                                  style: theme.headlineMedium?.copyWith(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
+                      flex: 3,
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            const SizedBox(height: 50),
+                            Text(
+                              title,
+                              style: theme.headlineMedium?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
                               ),
+                              textAlign: TextAlign.center,
                             ),
-                          ),
-                          Expanded(
-                            child: Center(
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 24),
-                                child: Text(
-                                  content,
-                                  style: theme.bodyMedium?.copyWith(
-                                    color: Colors.white,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
+                            const SizedBox(height: 50),
+                            Text(
+                              content,
+                              style: theme.bodyMedium?.copyWith(
+                                color: Colors.white,
                               ),
+                              textAlign: TextAlign.center,
                             ),
-                          ),
-                        ],
+                            const SizedBox(height: 50),
+                            Text(
+                              l10n.endingHowWas,
+                              style: theme.headlineMedium?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 15),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: List.generate(5, (i) {
+                                final filled = (i + 1) <= _selectedStars;
+                                return Padding(
+                                  padding: EdgeInsets.only(
+                                    right: i < 4 ? 5 : 0,
+                                  ),
+                                  child: GestureDetector(
+                                    onTap: () => setState(
+                                      () => _selectedStars = i + 1,
+                                    ),
+                                    child: Image.asset(
+                                      filled
+                                          ? 'assets/images/icons/star_filled.png'
+                                          : 'assets/images/icons/star_empty.png',
+                                      width: 40,
+                                      height: 40,
+                                      fit: BoxFit.contain,
+                                    ),
+                                  ),
+                                );
+                              }),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                     Expanded(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Expanded(
-                            child: Center(
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    l10n.endingHowWas,
-                                    style: theme.headlineMedium?.copyWith(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                  const SizedBox(height: 12),
-                                  Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: List.generate(5, (i) {
-                                      final filled = (i + 1) <= _selectedStars;
-                                      return Padding(
-                                        padding: EdgeInsets.only(
-                                          right: i < 4 ? 5 : 0,
-                                        ),
-                                        child: GestureDetector(
-                                          onTap: () => setState(
-                                            () => _selectedStars = i + 1,
-                                          ),
-                                          child: Image.asset(
-                                            filled
-                                                ? 'assets/images/icons/star_filled.png'
-                                                : 'assets/images/icons/star_empty.png',
-                                            width: 40,
-                                            height: 40,
-                                            fit: BoxFit.contain,
-                                          ),
-                                        ),
-                                      );
-                                    }),
-                                  ),
-                                ],
+                      flex: 1,
+                      child: Center(
+                        child: Stack(
+                          key: _nextButtonKey,
+                          alignment: Alignment.center,
+                          children: [
+                            SizedBox(
+                              width: MediaQuery.sizeOf(context).width * 0.4,
+                              height: 54,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF0CABA8),
+                                  borderRadius: BorderRadius.circular(27),
+                                ),
                               ),
                             ),
-                          ),
-                          Expanded(
-                            child: Center(
-                              child: Stack(
-                                key: _nextButtonKey,
-                                alignment: Alignment.center,
-                                children: [
-                                  // 그림자 객체: 버튼과 동일한 형태·크기, 텍스트 없음 (전환 시 확대용)
-                                  SizedBox(
-                                    width: MediaQuery.sizeOf(context).width * 0.4,
-                                    height: 54,
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFF0CABA8),
-                                        borderRadius: BorderRadius.circular(27),
-                                      ),
+                            FadeTransition(
+                              opacity: Tween<double>(begin: 1, end: 0)
+                                  .animate(_buttonFadeController),
+                              child: SizedBox(
+                                width: MediaQuery.sizeOf(context).width * 0.4,
+                                height: 54,
+                                child: ElevatedButton(
+                                  onPressed: _isTransitioning
+                                      ? null
+                                      : () => _navigateToResult(context),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFF0CABA8),
+                                    foregroundColor: Colors.white,
+                                    shape: const StadiumBorder(),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 30,
+                                      vertical: 18,
                                     ),
+                                    elevation: 0,
                                   ),
-                                  FadeTransition(
-                                    opacity: Tween<double>(begin: 1, end: 0)
-                                        .animate(_buttonFadeController),
-                                    child: SizedBox(
-                                      width: MediaQuery.sizeOf(context).width * 0.4,
-                                      height: 54,
-                                      child: ElevatedButton(
-                                        onPressed: _isTransitioning
-                                            ? null
-                                            : () => _navigateToResult(context),
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: const Color(0xFF0CABA8),
-                                          foregroundColor: Colors.white,
-                                          shape: const StadiumBorder(),
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 30,
-                                            vertical: 18,
-                                          ),
-                                          elevation: 0,
-                                        ),
-                                        child: Text(l10n.endingNext),
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                                  child: Text(l10n.endingNext),
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ],

@@ -6,6 +6,7 @@ import '../../widgets/app_scaffold.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
 import '../../services/auth_service.dart';
+import '../../utils/default_toast.dart';
 
 class AccountScreen extends StatefulWidget {
   final VoidCallback? onSignOut;
@@ -120,9 +121,7 @@ class _AccountScreenState extends State<AccountScreen> with SingleTickerProvider
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to update name: $e'), backgroundColor: Colors.red),
-        );
+        DefaultToast.show(context, 'Failed to update name: $e', isError: true);
       }
     }
   }

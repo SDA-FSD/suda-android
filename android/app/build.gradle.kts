@@ -1,4 +1,5 @@
 import java.util.Properties
+import org.gradle.api.GradleException
 
 plugins {
     id("com.android.application")
@@ -8,11 +9,20 @@ plugins {
     id("com.google.gms.google-services")
 }
 
-// 릴리스 키스토어 설정 (key.properties 파일이 있으면 사용, 없으면 디버그 키스토어 사용)
+// 릴리스 키스토어 설정 (prd flavor에서 사용)
 val keystorePropertiesFile = rootProject.file("key.properties")
 val keystoreProperties = Properties()
 if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(keystorePropertiesFile.inputStream())
+}
+val isPrdTaskRequested = gradle.startParameter.taskNames.any {
+    it.contains("prd", ignoreCase = true)
+}
+
+if (isPrdTaskRequested && !keystorePropertiesFile.exists()) {
+    throw GradleException(
+        "prd 빌드에는 android/key.properties가 필요합니다. (release keystore 설정 필수)"
+    )
 }
 
 android {
@@ -40,30 +50,6 @@ android {
         versionName = flutter.versionName
     }
 
-    flavorDimensions += "environment"
-    productFlavors {
-        create("local") {
-            dimension = "environment"
-            applicationIdSuffix = ".local"
-            resValue("string", "app_name", "SUDA Local")
-        }
-        create("dev") {
-            dimension = "environment"
-            applicationIdSuffix = ".dev"
-            resValue("string", "app_name", "SUDA Dev")
-        }
-        create("stg") {
-            dimension = "environment"
-            applicationIdSuffix = ".stg"
-            resValue("string", "app_name", "SUDA Stg")
-        }
-        create("prd") {
-            dimension = "environment"
-            // production은 suffix 없음 (kr.sudatalk.app)
-            resValue("string", "app_name", "SUDA")
-        }
-    }
-
     signingConfigs {
         if (keystorePropertiesFile.exists()) {
             create("release") {
@@ -75,15 +61,41 @@ android {
         }
     }
 
-    buildTypes {
-        release {
-            if (keystorePropertiesFile.exists()) {
-                signingConfig = signingConfigs.getByName("release")
+    flavorDimensions += "environment"
+    productFlavors {
+        create("local") {
+            dimension = "environment"
+            applicationIdSuffix = ".local"
+            resValue("string", "app_name", "SUDA Local")
+            signingConfig = signingConfigs.getByName("debug")
+        }
+        create("dev") {
+            dimension = "environment"
+            applicationIdSuffix = ".dev"
+            resValue("string", "app_name", "SUDA Dev")
+            signingConfig = signingConfigs.getByName("debug")
+        }
+        create("stg") {
+            dimension = "environment"
+            applicationIdSuffix = ".stg"
+            resValue("string", "app_name", "SUDA Stg")
+            signingConfig = signingConfigs.getByName("debug")
+        }
+        create("prd") {
+            dimension = "environment"
+            // production은 suffix 없음 (kr.sudatalk.app)
+            resValue("string", "app_name", "SUDA")
+            signingConfig = if (keystorePropertiesFile.exists()) {
+                signingConfigs.getByName("release")
             } else {
-                // key.properties가 없으면 디버그 키스토어 사용 (개발용)
-                signingConfig = signingConfigs.getByName("debug")
+                // task가 prd가 아니면 sync 편의를 위해 debug로 둔다.
+                signingConfigs.getByName("debug")
             }
         }
+    }
+
+    buildTypes {
+        release {}
     }
 }
 
