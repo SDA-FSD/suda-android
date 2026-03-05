@@ -201,6 +201,71 @@ class AppLocalizationsEn extends AppLocalizations {
       'You\'ve reached today\'s limit.\nCome back tomorrow!';
 
   @override
+  String get surveyPromptLine1 => 'You\'ve reached today\'s limit.';
+
+  @override
+  String get surveyPromptLine2 =>
+      'Answer a quick question to earn 1 extra ticket!';
+
+  @override
+  String get pushTicketPromptLine2 =>
+      'Turn on notifications and get 1 extra ticket!';
+
+  @override
+  String get surveyAnswerNowButton => 'Answer now ✅';
+
+  @override
+  String get pushTicketTurnOnButton => 'Turn on 🔔';
+
+  @override
+  String get shareTicketPromptLine2 =>
+      'Share the app link with a friend to get 1 extra ticket!';
+
+  @override
+  String get shareTicketButton => 'Share link 💬';
+
+  @override
+  String get reviewTicketPromptLine2 =>
+      'Leave a store review to get 1 extra ticket!';
+
+  @override
+  String get reviewTicketButton => 'Leave Stars ⭐';
+
+  @override
+  String get surveyMaybeLater => 'Maybe later';
+
+  @override
+  String get surveyStep1Title => 'Which age group are you in?';
+
+  @override
+  String get surveyStep2Title => 'What is your gender?';
+
+  @override
+  String get surveyStep3Title => 'How did you find SUDA?';
+
+  @override
+  String get surveyGenderFemale => 'Female';
+
+  @override
+  String get surveyGenderMale => 'Male';
+
+  @override
+  String get surveyGenderPreferNotToSay => 'Prefer not to say';
+
+  @override
+  String get surveySuccessToast => '1 Ticket added! 🎉';
+
+  @override
+  String get dailyTicketTitle => 'Thanks for Checking In!';
+
+  @override
+  String get dailyTicketContent =>
+      'Claim your daily free ticket!\nIt expires if you don\'t use it today.';
+
+  @override
+  String get dailyTicketButton => 'Claim Ticket 🎟️';
+
+  @override
   String get notificationPermissionBlockedTitle => 'Notifications are off';
 
   @override
@@ -215,4 +280,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notificationsEmpty => 'No notification yet';
+
+  @override
+  String get reregistrationRestrictedMessage =>
+      'You can sign up again 2 days after deleting your account. Please try again later.';
 }

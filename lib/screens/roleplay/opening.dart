@@ -5,11 +5,15 @@ import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
 import '../../utils/default_toast.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:in_app_review/in_app_review.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/token_refresh_service.dart';
 import '../../routes/roleplay_router.dart';
 import '../../utils/suda_json_util.dart';
 import '../../widgets/app_content_dialog.dart';
+import '../../utils/sub_screen_route.dart';
+import '../setting/push_agreement.dart';
 
 /// Roleplay Opening Screen (Full Screen)
 /// 
@@ -28,9 +32,81 @@ class RoleplayOpeningScreen extends StatefulWidget {
 
 class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen> {
   bool _isLoading = false;
+  static const String _playStoreUrl =
+      'https://play.google.com/store/apps/details?id=kr.sudatalk.app';
 
   void _restoreButton() {
     if (mounted) setState(() => _isLoading = false);
+  }
+
+  Future<void> _shareAppLinkAndSubmitQuest({
+    required BuildContext context,
+    required String questId,
+  }) async {
+    try {
+      await SharePlus.instance.share(
+        ShareParams(text: _playStoreUrl),
+      );
+
+      final accessToken = await TokenStorage.loadAccessToken();
+      if (!context.mounted || accessToken == null) return;
+
+      final result = await SudaApiClient.postUserQuest(
+        accessToken: accessToken,
+        questId: questId,
+      );
+      if (!context.mounted) return;
+      if (result.completeYn == 'Y') {
+        final l10n = AppLocalizations.of(context)!;
+        DefaultToast.show(context, l10n.surveySuccessToast);
+      }
+    } catch (_) {
+      // 공유시트/퀘스트 API 실패는 별도 노출 없이 무시한다.
+    }
+  }
+
+  Future<void> _requestInAppReviewAndSubmitQuest({
+    required BuildContext context,
+    required String questId,
+  }) async {
+    try {
+      final review = InAppReview.instance;
+      final canReview = await review.isAvailable();
+      if (!canReview) return;
+
+      await review.requestReview();
+
+      final accessToken = await TokenStorage.loadAccessToken();
+      if (!context.mounted || accessToken == null) return;
+
+      final result = await SudaApiClient.postUserQuest(
+        accessToken: accessToken,
+        questId: questId,
+      );
+      if (!context.mounted) return;
+      if (result.completeYn == 'Y') {
+        final l10n = AppLocalizations.of(context)!;
+        DefaultToast.show(context, l10n.surveySuccessToast);
+      }
+    } catch (_) {
+      // 인앱리뷰/퀘스트 API 실패는 별도 노출 없이 무시한다.
+    }
+  }
+
+  Future<void> _claimDailyTicket(
+      BuildContext context, String accessToken) async {
+    try {
+      final result = await SudaApiClient.claimDailyTicket(
+        accessToken: accessToken,
+      );
+      if (!context.mounted) return;
+      if (result.completeYn == 'Y') {
+        final l10n = AppLocalizations.of(context)!;
+        DefaultToast.show(context, l10n.surveySuccessToast);
+      }
+    } catch (_) {
+      // 실패 시 별도 처리 없음
+    }
   }
 
   Future<void> _navigateToPlaying(BuildContext context) async {
@@ -66,6 +142,46 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen> {
         final sessionId = session.sessionId;
         if (sessionId == null || sessionId.isEmpty) {
           DefaultToast.show(context, 'Cannot start roleplay');
+          _restoreButton();
+          return;
+        }
+        if (sessionId == '-99') {
+          final l10n = AppLocalizations.of(context)!;
+          final theme = Theme.of(context).textTheme;
+          await AppContentDialog.show(
+            context,
+            content: Column(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: Center(
+                    child: Text(
+                      l10n.dailyTicketTitle,
+                      style: theme.headlineMedium?.copyWith(
+                        color: Colors.white,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 7,
+                  child: Center(
+                    child: Text(
+                      l10n.dailyTicketContent,
+                      style: theme.bodyLarge?.copyWith(
+                        color: Colors.white,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            showOkayButton: true,
+            okayButtonLabel: l10n.dailyTicketButton,
+            onOkayPressed: () => _claimDailyTicket(context, accessToken),
+          );
           _restoreButton();
           return;
         }
@@ -108,22 +224,373 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen> {
           return;
         }
         if (sessionId == '-10') {
-          // TBD
+          final l10n = AppLocalizations.of(context)!;
+          final theme = Theme.of(context).textTheme;
+          await AppContentDialog.show(
+            context,
+            content: Column(
+              children: [
+                Expanded(
+                  child: Center(
+                    child: Text(
+                      l10n.noTicketsTitle,
+                      style: theme.headlineMedium?.copyWith(
+                        color: Colors.white,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          l10n.surveyPromptLine1,
+                          style: theme.bodyLarge?.copyWith(
+                            color: Colors.white,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        Text(
+                          l10n.surveyPromptLine2,
+                          style: theme.bodyLarge?.copyWith(
+                            color: const Color(0xFF0CABA8),
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxWidth: MediaQuery.of(context).size.width * 0.64,
+                          ),
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              RoleplayRouter.pushSurvey(context);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF0CABA8),
+                              foregroundColor: Colors.white,
+                              shape: const StadiumBorder(),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 30,
+                                vertical: 18,
+                              ),
+                              elevation: 0,
+                            ),
+                            child: Text(l10n.surveyAnswerNowButton),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        GestureDetector(
+                          onTap: () => Navigator.of(context).pop(),
+                          child: Text(
+                            l10n.surveyMaybeLater,
+                            style: theme.bodySmall?.copyWith(
+                              color: Colors.white,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            showOkayButton: false,
+          );
           _restoreButton();
           return;
         }
         if (sessionId == '-20') {
-          // TBD
+          final l10n = AppLocalizations.of(context)!;
+          final theme = Theme.of(context).textTheme;
+          await AppContentDialog.show(
+            context,
+            content: Column(
+              children: [
+                Expanded(
+                  child: Center(
+                    child: Text(
+                      l10n.noTicketsTitle,
+                      style: theme.headlineMedium?.copyWith(
+                        color: Colors.white,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          l10n.surveyPromptLine1,
+                          style: theme.bodyLarge?.copyWith(
+                            color: Colors.white,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        Text(
+                          l10n.pushTicketPromptLine2,
+                          style: theme.bodyLarge?.copyWith(
+                            color: const Color(0xFF0CABA8),
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxWidth: MediaQuery.of(context).size.width * 0.64,
+                          ),
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              Navigator.push(
+                                context,
+                                SubScreenRoute(
+                                  page: const PushAgreementScreen(),
+                                ),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF0CABA8),
+                              foregroundColor: Colors.white,
+                              shape: const StadiumBorder(),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 30,
+                                vertical: 18,
+                              ),
+                              elevation: 0,
+                            ),
+                            child: Text(l10n.pushTicketTurnOnButton),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        GestureDetector(
+                          onTap: () => Navigator.of(context).pop(),
+                          child: Text(
+                            l10n.surveyMaybeLater,
+                            style: theme.bodySmall?.copyWith(
+                              color: Colors.white,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            showOkayButton: false,
+          );
           _restoreButton();
           return;
         }
         if (sessionId == '-30') {
-          // TBD
+          final l10n = AppLocalizations.of(context)!;
+          final theme = Theme.of(context).textTheme;
+          await AppContentDialog.show(
+            context,
+            content: Column(
+              children: [
+                Expanded(
+                  child: Center(
+                    child: Text(
+                      l10n.noTicketsTitle,
+                      style: theme.headlineMedium?.copyWith(
+                        color: Colors.white,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          l10n.surveyPromptLine1,
+                          style: theme.bodyLarge?.copyWith(
+                            color: Colors.white,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        Text(
+                          l10n.shareTicketPromptLine2,
+                          style: theme.bodyLarge?.copyWith(
+                            color: const Color(0xFF0CABA8),
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxWidth: MediaQuery.of(context).size.width * 0.64,
+                          ),
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              Navigator.of(context).pop();
+                              await _shareAppLinkAndSubmitQuest(
+                                context: context,
+                                questId: sessionId,
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF0CABA8),
+                              foregroundColor: Colors.white,
+                              shape: const StadiumBorder(),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 30,
+                                vertical: 18,
+                              ),
+                              elevation: 0,
+                            ),
+                            child: Text(l10n.shareTicketButton),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        GestureDetector(
+                          onTap: () => Navigator.of(context).pop(),
+                          child: Text(
+                            l10n.surveyMaybeLater,
+                            style: theme.bodySmall?.copyWith(
+                              color: Colors.white,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            showOkayButton: false,
+          );
           _restoreButton();
           return;
         }
         if (sessionId == '-40') {
-          // TBD
+          final l10n = AppLocalizations.of(context)!;
+          final theme = Theme.of(context).textTheme;
+          await AppContentDialog.show(
+            context,
+            content: Column(
+              children: [
+                Expanded(
+                  child: Center(
+                    child: Text(
+                      l10n.noTicketsTitle,
+                      style: theme.headlineMedium?.copyWith(
+                        color: Colors.white,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          l10n.surveyPromptLine1,
+                          style: theme.bodyLarge?.copyWith(
+                            color: Colors.white,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        Text(
+                          l10n.reviewTicketPromptLine2,
+                          style: theme.bodyLarge?.copyWith(
+                            color: const Color(0xFF0CABA8),
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxWidth: MediaQuery.of(context).size.width * 0.64,
+                          ),
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              Navigator.of(context).pop();
+                              await _requestInAppReviewAndSubmitQuest(
+                                context: context,
+                                questId: sessionId,
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF0CABA8),
+                              foregroundColor: Colors.white,
+                              shape: const StadiumBorder(),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 30,
+                                vertical: 18,
+                              ),
+                              elevation: 0,
+                            ),
+                            child: Text(l10n.reviewTicketButton),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        GestureDetector(
+                          onTap: () => Navigator.of(context).pop(),
+                          child: Text(
+                            l10n.surveyMaybeLater,
+                            style: theme.bodySmall?.copyWith(
+                              color: Colors.white,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            showOkayButton: false,
+          );
           _restoreButton();
           return;
         }

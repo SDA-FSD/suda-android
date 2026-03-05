@@ -63,7 +63,8 @@
   - `SudaApiClient.logout()`: refreshToken과 deviceId로 서버 로그아웃 통지
   - `SudaApiClient.getCurrentUser()`: JWT를 사용하여 사용자 정보 조회 (`/v1/users`)
   - `SudaApiClient.getUserProfile()`: 프로필 부가 정보 조회 (`GET /v1/users/profile`, 응답: ProfileDto(userDto, currentLevel, progressPercentage))
-  - `SudaApiClient.getUserTicket()`: 티켓 개수 조회 (`GET /v1/users/ticket`, 파라메터 없음, 응답: UserTicketDto(beforeTicketCount, finalTicketCount))
+  - `SudaApiClient.getUserTicket()`: 티켓 개수 조회 (`GET /v1/users/ticket`, 파라메터 없음, 응답: UserTicketDto(beforeTicketCount, finalTicketCount, dailyTicketGrantYn?)). `dailyTicketGrantYn == 'Y'`이면 HomeScreen에서 출석 보상 팝업 노출.
+  - `SudaApiClient.claimDailyTicket()`: 데일리 티켓 수령 (`PUT /v1/users/tickets/daily`, 응답: QuestResultDto). `completeYn == 'Y'`이면 `surveySuccessToast` 노출 + 티켓 재조회.
   - `SudaApiClient.getRoleplayResults()`: 롤플레이 결과 목록 페이징 (`GET /v1/roleplays/results?pageNum=0`, 0-based, 9개씩, 응답: SudaAppPage\<RpSimpleResultDto\>, RpSimpleResultDto: resultId, imgPath, starResult, createdAt)
   - `SudaApiClient.updateName()`: 사용자 이름 변경 (`PUT /v1/users?name=...`)
   - `SudaApiClient.registerPushToken()`: 푸시 토큰 등록 (`POST /users/push-token`)
@@ -177,7 +178,7 @@
   - `AppTheme.themeData`를 사용하여 일관된 테마 적용
 
 - **공통 콘텐츠 팝업 (AppContentDialog)**: `lib/widgets/app_content_dialog.dart`
-  - 재사용: `AppContentDialog.show(context, content: Widget, { showOkayButton, onOkayPressed, barrierDismissible })`. 본문은 `content`에 위젯으로 전달(여러 스타일 텍스트·버튼·클릭 가능 텍스트 등).
+  - 재사용: `AppContentDialog.show(context, content: Widget, { showOkayButton, okayButtonLabel, onOkayPressed, barrierDismissible })`. 본문은 `content`에 위젯으로 전달(여러 스타일 텍스트·버튼·클릭 가능 텍스트 등). `okayButtonLabel` 기본값은 `'Okay'`.
   - 배경: 노출 중 하단 화면 터치 불가. 배경 레이어는 GNB와 동일 수치(BackdropFilter sigma 6 + Color 0x598C8C8C).
   - 팝업 카드: 가로 60%·최소 세로 50% 디스플레이, 테두리 10·#80D7CF·radius 30, 내부 상단 30 패딩·14×14 `close.svg` 우측(탭 시 닫힘), 본문 좌우 30·하단 30 마진. 옵션으로 하단 테두리 아래 30 마진 뒤 "Okay" 버튼(높이 44, 가로 40%, #0CABA8, StadiumBorder, ElevatedButton) 노출 가능.
 
@@ -191,16 +192,17 @@
     - 에러 메시지, 알림 메시지 등
   - **주의사항**: 사용자 이름이나 동적 데이터가 포함된 메시지도 기본 언어는 영어로 작성
 
-## 9. 앱 시작 화면 (네이티브 스플래시)
-- **패키지**: `flutter_native_splash` (버전 2.3.10 이상) 사용
-- **설정**: `pubspec.yaml`의 `flutter_native_splash` 섹션에서 관리
-- **디자인 사양**: 로고 미표시, 어두운 배경색(`#121212`)만 노출 (Android 12+ 대응 포함)
-- **생성 명령**: `dart run flutter_native_splash:create`
-- **동작 방식**:
-  - 앱 실행 시 네이티브 스플래시 자동 표시 (배경색만 노출)
-  - `FlutterNativeSplash.preserve()`로 Flutter 엔진 초기화 후에도 유지
-  - JWT 토큰 확인 및 서버 검증 완료 후 `FlutterNativeSplash.remove()` 호출
-  - 네이티브 스플래시 제거 후 LoginScreen 또는 HomeScreen으로 직접 전환
+## 9. 앱 시작 화면 (네이티브 스플래시 · 커스텀 스플래시)
+- **네이티브 스플래시**
+  - **패키지**: `flutter_native_splash` (버전 2.3.10 이상) 사용
+  - **설정**: `pubspec.yaml`의 `flutter_native_splash` 섹션에서 관리
+  - **디자인 사양**: 이미지 없음, 어두운 단색 배경(`#121212`)만 노출 (Android 12+ 대응 포함)
+  - **생성 명령**: `dart run flutter_native_splash:create`
+  - **동작**: 앱 실행 시 자동 표시, `FlutterNativeSplash.preserve()`로 유지, JWT 확인 후 `FlutterNativeSplash.remove()` 호출
+- **진입 흐름**
+  - **앱 실행 시**: 네이티브 스플래시(배경색만) → **CustomSplashScreen** → LoginScreen 또는 (토큰 유효 시) HomeScreen
+  - **로그아웃 시**: 곧바로 LoginScreen (CustomSplashScreen 미표시)
+- **커스텀 스플래시**: `lib/screens/custom_splash.dart` (CustomSplashScreen). 토큰 없음인 앱 실행 시에만 노출되며, `onComplete` 콜백 후 LoginScreen으로 전환. 애니메이션·로고 노출 등은 추후 정의.
 - **LoadingScreen 제거**: 네이티브 스플래시가 로딩 역할을 대체하므로 Flutter LoadingScreen은 제거됨
 
 ## 10. 푸시 알림
@@ -301,10 +303,27 @@
 - **ReviewChatScreen 구현**: History에서 RoleplayResultDto 전달받아 채팅 이력 표시. 헤더 중앙 "Chat History"(Setting 계열 스타일), 좌상단 뒤로가기(header_arrow_back). chatHistory는 List\<SudaJson\>이며 key로 발화자 구분(USER / AI_CHARACTER / AI_NARRATOR / SYSTEM_MISSION), value를 그대로 표시. Playing과 동일 말풍선·나레이션·미션 배치 및 스타일(사용자 우측 흰색, AI 좌측 티얼+avatarImgPath 아바타, 나레이션/미션 중앙).
 - **ReviewEndingScreen 구현**: History "View Ending" 탭 시 `GET /v1/roleplays/{rpId}/roles/{rpRoleId}/endings/{endingId}` 호출, 응답 RoleplayEndingDto·이미지 프리로드 후 진입(버튼에 Opening과 동일 뱅글 로딩). Sub Screen. 헤더 "View Ending"+뒤로가기. 본문: 이미지(BoxFit.cover·높이 100%·비율 유지·좌우 잘림 가능) → 2s 후 레이어·타이틀(상단 25%)·콘텐츠(하단 75%) 페이드인. 버튼 없음.
 - **엔딩 API**: `SudaApiClient.getRoleplayEnding(accessToken, rpId, rpRoleId, endingId)` → RoleplayEndingDto.
-- **세션 초기화 응답 분기**: Opening→Playing 세션 초기화(`POST /v1/roleplay-sessions`) 200 응답의 `sessionId` 기준: '0'=티켓 부족(팝업 후 Opening 유지), '-10', '-20', '-30', '-40'=별도 분기(TBD), 그 외=Playing 진입. `.docs/CONTEXT_ROLEPLAY.md` 6-3 참조.
-- **홈 화면 티켓 배지**: 상단 우측에 티켓 아이콘(`assets/images/icons/ticket.png` 38×20) + finalTicketCount 표시(body-caption 흰색). 앱 구동 후 첫 노출 시·GNB 홈 탭 선택 시·물리 뒤로가기로 홈 복귀 시·**서브 스크린에서 pop으로 복귀 시** `GET /v1/users/ticket` 갱신. 서브 복귀 감지는 `RouteObserver` + `MainRouteAwareWrapper`(lib/widgets/main_route_aware_wrapper.dart)의 `didPopNext`로 처리. 감소 시 즉시 치환, 증가 시 500ms 내 단계 증가 + 단계마다 `Vibration.vibrate(duration: 80)` (Result 스크린과 동일).
-- **PushAgreementScreen**: 설정 > Notification 진입. 푸시 알림 ON/OFF 토글. `PUT /v1/users/push-agreement?agreementYn=Y|N` (SudaApiClient.updatePushAgreement). `.docs/CONTEXT_SCREEN.md` §5.1.
-- **앱 버전 1.0.4**: `pubspec.yaml` 1.0.4+5, `AppConfig.appVersion` 1.0.4. Setting 화면 하단: 개인정보·이용약관·오픈소스 블록 위로 조정, 그 아래 버전 텍스트 `v x.x.x` (fontSize 11, 흰색, 중앙 정렬) 노출.
+- **세션 초기화 응답 분기**: Opening→Playing 세션 초기화(`POST /v1/roleplay-sessions`) 200 응답의 `sessionId` 기준: '0'=티켓 부족(기존 공통 팝업+외부 Okay 버튼, Opening 유지), '-10'=추가 티켓 설문 유도 팝업(내부 버튼형, Opening 유지), '-20'=푸시 동의 유도 팝업, '-30'=앱 링크 공유 유도 팝업(공유시트 닫힘 후 `POST /v1/users/quests/{questId}`), '-40'=스토어 리뷰 유도 팝업(인앱리뷰 성공 반환 후 `POST /v1/users/quests/{questId}`), 그 외=Playing 진입. `.docs/CONTEXT_ROLEPLAY.md` 6-3 참조.
+- **-10 분기 Survey 진입**: Opening의 `sessionId == '-10'` 팝업에서 "Answer now ✅" 탭 시 `RoleplayRouter.pushSurvey()`로 Sub Screen `RoleplaySurveyScreen`(`lib/screens/roleplay/survey.dart`) 진입. "Maybe later" 탭 시 팝업만 닫음.
+- **Survey 3단계 구현**:
+  - 헤더는 타이틀 없이 닫기(X)만 사용. 진입 시 1단계부터 시작.
+  - 진행바: 3분할(각 32%, h8, radius4), 활성 바 그라데이션 `#076766 -> #0CABA8`, 비활성 `#353535`.
+  - 단계/값 매핑: 1단계 연령(1~5), 2단계 성별(1~3), 3단계 유입경로(1~5).
+  - 3단계 선택 시 `POST /v1/users/survey` 호출(body: age/gender/source 문자열 숫자).
+  - 응답 `200 + 'Y'`면 성공 토스트(l10n), 그 외(200의 N 포함·4xx·5xx·timeout) `"Survey Failed"` 경고 토스트 후 화면 닫기.
+  - 제출 중 선택지 버튼 비활성화.
+- **홈 화면 티켓 배지**: 상단 우측에 티켓 아이콘(`assets/images/icons/ticket.png` 38×20) + finalTicketCount 표시(body-caption 흰색). 앱 구동 후 첫 노출 시·GNB 홈 탭 선택 시·물리 뒤로가기로 홈 복귀 시·**서브 스크린에서 pop으로 복귀 시** `GET /v1/users/ticket` 갱신. 서브 복귀 감지는 `RouteObserver` + `MainRouteAwareWrapper`(lib/widgets/main_route_aware_wrapper.dart)의 `didPopNext`로 처리. 응답 `finalTicketCount`를 티켓 수치에 바로 반영.
+- **PushAgreementScreen**: 설정 > Notification 진입. 푸시 알림 ON/OFF 토글. `PUT /v1/users/push-agreement?agreementYn=Y|N` 호출 후 `QuestResultDto(completeYn)` 응답 처리.
+  - `completeYn == 'Y'`: 티켓 보상 지급으로 간주, `surveySuccessToast` 토스트 노출 후 PushAgreementScreen 자동 닫기.
+  - 그 외(`N` 포함): 기존처럼 토글 상태만 반영(추가 토스트/자동 닫기 없음).
+  - Opening `sessionId == '-20'` 분기에서 PushAgreementScreen으로 진입할 수 있음. `.docs/CONTEXT_SCREEN.md` §5.1.
+- **-30 분기 공유 퀘스트**: Opening의 `sessionId == '-30'` 팝업에서 "Share link 💬" 탭 시 Play Store 링크(`https://play.google.com/store/apps/details?id=kr.sudatalk.app`) 공유시트를 노출.
+  - 공유시트 닫힘 감지 후 `POST /v1/users/quests/{questId}` 호출 (`questId = sessionId`)
+  - 응답 `QuestResultDto.completeYn == 'Y'`인 경우에만 `surveySuccessToast` 토스트 노출, 그 외 별도 처리 없음.
+- **-40 분기 리뷰 퀘스트**: Opening의 `sessionId == '-40'` 팝업에서 "Leave Stars ⭐" 탭 시 OS 인앱리뷰 API를 호출.
+  - 인앱리뷰 호출 성공 반환 시 `POST /v1/users/quests/{questId}` 호출 (`questId = sessionId`)
+  - 응답 `QuestResultDto.completeYn == 'Y'`인 경우에만 `surveySuccessToast` 토스트 노출, 그 외 별도 처리 없음.
+- **앱 버전 1.0.5**: `pubspec.yaml` 1.0.5+6, `AppConfig.appVersion` 1.0.5. Setting 화면 하단: 개인정보·이용약관·오픈소스 블록 위로 조정, 그 아래 버전 텍스트 `v x.x.x` (fontSize 11, 흰색, 중앙 정렬) 노출.
 - **푸시 appPath 연동**: FCM data에 `appPath` 포함 시 알림 클릭 후 해당 스크린으로 이동. 비로그인/미동의 시 `PendingAppPathService`에 보관, Home 진입 시 적용. 지원 경로·정의는 `.docs/CONTEXT_SCREEN.md` appPath 섹션. `lib/services/pending_app_path_service.dart`, `main.dart`(getInitialMessage·onMessageOpenedApp·_applyPendingAppPath).
 - **NotificationBoxScreen 알림 페이징**: Alarm 탭(Main Screen) 진입 시 `/v1/users/notification?page=0`으로 알림 목록 조회, 스크롤 하단 도달 시 1, 2, 3... 순차 호출. 응답이 빈 리스트이면 더 이상 호출하지 않음. 응답 DTO는 `NotificationDto(id, title(List<SudaJson>), content(List<SudaJson>), imgPath, appPath, sendFinishedAt)`이며, title/content는 `SudaJsonUtil.localizedText`로 사용자 언어에 맞게 표시. 결과가 없을 때는 본문 중앙에 "No notification yet"(l10n.notificationsEmpty)을 body-default 흰색 텍스트로 노출.
 - **Android 서명 정책 변경(Flavor 기준)**: `android/app/build.gradle.kts`에서 local/dev/stg는 debug/release 모두 디버그 키스토어 사용, prd는 debug/release 모두 `android/key.properties`의 릴리스 키스토어 사용. prd 빌드에서 `key.properties`가 없으면 빌드 실패.

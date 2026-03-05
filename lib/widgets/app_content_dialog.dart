@@ -10,6 +10,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 class AppContentDialog extends StatelessWidget {
   final Widget content;
   final bool showOkayButton;
+  final String okayButtonLabel;
   final VoidCallback? onOkayPressed;
   final bool barrierDismissible;
 
@@ -17,6 +18,7 @@ class AppContentDialog extends StatelessWidget {
     super.key,
     required this.content,
     this.showOkayButton = false,
+    this.okayButtonLabel = 'Okay',
     this.onOkayPressed,
     this.barrierDismissible = false,
   });
@@ -24,11 +26,13 @@ class AppContentDialog extends StatelessWidget {
   /// [context]에 팝업을 띄우고, 사용자가 닫을 때까지 대기한다.
   ///
   /// [content]: 팝업 본문(여러 스타일 텍스트·버튼·클릭 가능 텍스트 등 위젯으로 구성).
-  /// [showOkayButton]: true면 하단에 "Okay" 버튼 노출(탭 시 팝업 닫힘).
+  /// [showOkayButton]: true면 하단에 버튼 노출(탭 시 팝업 닫힘).
+  /// [okayButtonLabel]: 버튼 문구. 기본값 'Okay'.
   static Future<void> show(
     BuildContext context, {
     required Widget content,
     bool showOkayButton = false,
+    String okayButtonLabel = 'Okay',
     VoidCallback? onOkayPressed,
     bool barrierDismissible = false,
   }) {
@@ -39,6 +43,7 @@ class AppContentDialog extends StatelessWidget {
       builder: (ctx) => AppContentDialog(
         content: content,
         showOkayButton: showOkayButton,
+        okayButtonLabel: okayButtonLabel,
         onOkayPressed: onOkayPressed,
         barrierDismissible: barrierDismissible,
       ),
@@ -139,7 +144,7 @@ class AppContentDialog extends StatelessWidget {
                           shape: const StadiumBorder(),
                           elevation: 0,
                         ),
-                        child: const Text('Okay'),
+                        child: Text(okayButtonLabel),
                       ),
                     ),
                 ],

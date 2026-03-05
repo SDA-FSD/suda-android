@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 12+ 스플래시에서 앱 아이콘 미노출용. 투명 drawable -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="#00000000"/>
+    <size android:width="288dp" android:height="288dp"/>
+</shape>

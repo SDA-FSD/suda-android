@@ -166,7 +166,7 @@ class _PushAgreementScreenState extends State<PushAgreementScreen> {
         }
         return;
       }
-      await SudaApiClient.updatePushAgreement(
+      final result = await SudaApiClient.updatePushAgreement(
         accessToken: token,
         agreementYn: nextOn ? 'Y' : 'N',
       );
@@ -177,6 +177,11 @@ class _PushAgreementScreenState extends State<PushAgreementScreen> {
           _isUpdating = false;
         });
         _updateAppUserMetaInfo(nextOn);
+        if (result.completeYn == 'Y') {
+          final l10n = AppLocalizations.of(context)!;
+          DefaultToast.show(context, l10n.surveySuccessToast);
+          Navigator.of(context).pop();
+        }
       }
     } catch (e) {
       if (mounted) {

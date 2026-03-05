@@ -201,6 +201,71 @@ class AppLocalizationsPt extends AppLocalizations {
   String get noTicketsBody => 'Você atingiu seu limite do dia.\nVolte Amanhã!';
 
   @override
+  String get surveyPromptLine1 => 'Você atingiu seu limite do dia.';
+
+  @override
+  String get surveyPromptLine2 =>
+      'Responda uma pergunta rapidamente para ganhar um Ticket!';
+
+  @override
+  String get pushTicketPromptLine2 =>
+      'Ative as notificações e ganhe 1 ticket extra!';
+
+  @override
+  String get surveyAnswerNowButton => 'Responder agora!✅';
+
+  @override
+  String get pushTicketTurnOnButton => 'Ativar 🔔';
+
+  @override
+  String get shareTicketPromptLine2 =>
+      'Compartilhe o Aplicativo com um amigo e receba 1 Ticket extra!';
+
+  @override
+  String get shareTicketButton => 'Compartilhar link';
+
+  @override
+  String get reviewTicketPromptLine2 =>
+      'Deixe sua avaliação e receba 1 Ticket extra!';
+
+  @override
+  String get reviewTicketButton => 'Avaliar';
+
+  @override
+  String get surveyMaybeLater => 'Talvez depois';
+
+  @override
+  String get surveyStep1Title => 'Selecione sua faixa etária.';
+
+  @override
+  String get surveyStep2Title => 'Qual é o seu gênero?';
+
+  @override
+  String get surveyStep3Title => 'Como você conheceu a SUDA?';
+
+  @override
+  String get surveyGenderFemale => 'Feminino';
+
+  @override
+  String get surveyGenderMale => 'Masculino';
+
+  @override
+  String get surveyGenderPreferNotToSay => 'Prefiro não informar';
+
+  @override
+  String get surveySuccessToast => 'Ganhou um Ticket! 🎉';
+
+  @override
+  String get dailyTicketTitle => 'Obrigado por fazer check-in!';
+
+  @override
+  String get dailyTicketContent =>
+      'Resgate seu ingresso grátis diário!\nEle desaparecerá se você não usar hoje.';
+
+  @override
+  String get dailyTicketButton => 'Resgatar ingresso 🎟️';
+
+  @override
   String get notificationPermissionBlockedTitle => 'Notificações desativadas';
 
   @override
@@ -215,4 +280,8 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get notificationsEmpty => 'Ainda não há notificações';
+
+  @override
+  String get reregistrationRestrictedMessage =>
+      'Você poderá se cadastrar novamente 2 dias após excluir sua conta. Tente novamente mais tarde.';
 }

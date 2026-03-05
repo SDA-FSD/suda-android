@@ -5,7 +5,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:marquee/marquee.dart';
-import 'package:vibration/vibration.dart';
 import '../services/auth_service.dart';
 import '../services/rest_status_service.dart';
 import '../services/token_storage.dart';
@@ -14,6 +13,9 @@ import '../config/app_config.dart';
 import '../routes/roleplay_router.dart';
 import '../utils/language_util.dart';
 import '../utils/suda_json_util.dart';
+import '../l10n/app_localizations.dart';
+import '../utils/default_toast.dart';
+import '../widgets/app_content_dialog.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/gnb_bar.dart';
 import 'roleplay/overview.dart';
@@ -39,6 +41,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   bool _isInitialized = false; // 초기화 작업 한 번만 실행 플래그
+  bool _dailyTicketPopupShown = false; // 세션 당 1회만 팝업 노출
   List<MainHomeBannerDto>? _banners;
   bool _isLoadingBanners = true;
   List<AppHomeRoleplayGroupDto>? _roleplayGroups;
@@ -92,30 +95,71 @@ class _HomeScreenState extends State<HomeScreen> {
     await _fetchTicket();
   }
 
-  /// 티켓 개수 조회. 감소 시 즉시 치환, 증가 시 500ms 내 단계 증가 + 단계마다 진동
   Future<void> _fetchTicket() async {
     if (_accessToken == null) return;
     try {
       final dto = await SudaApiClient.getUserTicket(accessToken: _accessToken!);
       if (!mounted) return;
-      final target = dto.finalTicketCount;
-      if (target <= _displayTicketCount) {
-        setState(() => _displayTicketCount = target);
-        return;
-      }
-      final from = _displayTicketCount;
-      final delta = target - from;
-      final steps = delta > 8 ? 8 : (delta < 1 ? 1 : delta);
-      final stepDurationMs = (500 / steps).round();
-      for (int i = 1; i <= steps; i++) {
-        await Future.delayed(Duration(milliseconds: stepDurationMs));
-        if (!mounted) return;
-        final next = (i == steps) ? target : (from + (delta * i / steps).round());
-        setState(() => _displayTicketCount = next);
-        await Vibration.vibrate(duration: 80);
+      setState(() => _displayTicketCount = dto.finalTicketCount);
+      if (dto.dailyTicketGrantYn == 'Y') {
+        await _showDailyTicketPopup();
       }
     } catch (_) {
       // 실패 시 표시값 유지
+    }
+  }
+
+  Future<void> _showDailyTicketPopup() async {
+    if (_dailyTicketPopupShown) return;
+    _dailyTicketPopupShown = true;
+    if (!mounted) return;
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context).textTheme;
+    await AppContentDialog.show(
+      context,
+      content: Column(
+        children: [
+          Expanded(
+            flex: 3,
+            child: Center(
+              child: Text(
+                l10n.dailyTicketTitle,
+                style: theme.headlineMedium?.copyWith(color: Colors.white),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 7,
+            child: Center(
+              child: Text(
+                l10n.dailyTicketContent,
+                style: theme.bodyLarge?.copyWith(color: Colors.white),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+        ],
+      ),
+      showOkayButton: true,
+      okayButtonLabel: l10n.dailyTicketButton,
+      onOkayPressed: () => _claimDailyTicket(),
+    );
+  }
+
+  Future<void> _claimDailyTicket() async {
+    if (_accessToken == null || !mounted) return;
+    try {
+      final result =
+          await SudaApiClient.claimDailyTicket(accessToken: _accessToken!);
+      if (!mounted) return;
+      if (result.completeYn == 'Y') {
+        final l10n = AppLocalizations.of(context)!;
+        DefaultToast.show(context, l10n.surveySuccessToast);
+        await _fetchTicket();
+      }
+    } catch (_) {
+      // 실패 시 별도 처리 없음
     }
   }
 

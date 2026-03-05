@@ -11,6 +11,7 @@ import '../screens/roleplay/failed.dart';
 import '../screens/roleplay/result.dart';
 import '../screens/roleplay/failed_report.dart';
 import '../screens/roleplay/result_report.dart';
+import '../screens/roleplay/survey.dart';
 
 class RoleplayRouter {
   static const String openingRouteName = '/roleplay/opening';
@@ -37,6 +38,17 @@ class RoleplayRouter {
         settings: const RouteSettings(
           name: RoleplayResultReportScreen.routeName,
         ),
+      ),
+    );
+  }
+
+  /// Survey 스크린을 push (Opening -10 분기에서 진입).
+  static Future<T?> pushSurvey<T>(BuildContext context) {
+    return Navigator.push<T>(
+      context,
+      SubScreenRoute(
+        page: const RoleplaySurveyScreen(),
+        settings: const RouteSettings(name: RoleplaySurveyScreen.routeName),
       ),
     );
   }

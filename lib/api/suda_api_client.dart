@@ -235,6 +235,12 @@ class SudaApiClient {
     return UserApi.getUserTicket(accessToken: accessToken);
   }
 
+  static Future<QuestResultDto> claimDailyTicket({
+    required String accessToken,
+  }) {
+    return UserApi.claimDailyTicket(accessToken: accessToken);
+  }
+
   static Future<void> updateName({
     required String accessToken,
     required String name,
@@ -276,13 +282,37 @@ class SudaApiClient {
     );
   }
 
-  static Future<void> updatePushAgreement({
+  static Future<QuestResultDto> updatePushAgreement({
     required String accessToken,
     required String agreementYn,
   }) {
     return UserApi.updatePushAgreement(
       accessToken: accessToken,
       agreementYn: agreementYn,
+    );
+  }
+
+  static Future<QuestResultDto> postUserQuest({
+    required String accessToken,
+    required String questId,
+  }) {
+    return UserApi.postUserQuest(
+      accessToken: accessToken,
+      questId: questId,
+    );
+  }
+
+  static Future<String> submitSurvey({
+    required String accessToken,
+    required int age,
+    required int gender,
+    required int source,
+  }) {
+    return UserApi.submitSurvey(
+      accessToken: accessToken,
+      age: age,
+      gender: gender,
+      source: source,
     );
   }
 

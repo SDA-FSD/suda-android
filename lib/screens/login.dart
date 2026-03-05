@@ -21,8 +21,33 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin {
   bool _isLoading = false;
+  late AnimationController _animController;
+  late Animation<double> _logoSlideAnim;
+  late Animation<double> _textLogoOpacityAnim;
+  late Animation<double> _gradientOpacityAnim;
+  late Animation<double> _bottomOpacityAnim;
+
+  @override
+  void initState() {
+    super.initState();
+    _animController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+    _logoSlideAnim = CurvedAnimation(parent: _animController, curve: Curves.easeOut);
+    _textLogoOpacityAnim = Tween<double>(begin: 0, end: 1).animate(_animController);
+    _gradientOpacityAnim = Tween<double>(begin: 0, end: 1).animate(_animController);
+    _bottomOpacityAnim = Tween<double>(begin: 0, end: 1).animate(_animController);
+    _animController.forward();
+  }
+
+  @override
+  void dispose() {
+    _animController.dispose();
+    super.dispose();
+  }
 
   Future<void> _handleGoogleSignIn() async {
     setState(() {
@@ -72,6 +97,13 @@ class _LoginScreenState extends State<LoginScreen> {
 
       // 5) 상위로 Google 로그인 결과 전달 (UI/상태 전환용)
       widget.onSignIn?.call(result);
+
+      // 6) 이 시점 이후에도 LoginScreen에 머무르는 경우(에러/차단 등)를 대비해 로딩 상태 해제
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     } catch (error, stackTrace) {
       if (mounted) {
         final l10n = AppLocalizations.of(context)!;
@@ -162,74 +194,130 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  Widget _buildLoginButton(double screenWidth) {
+    final buttonWidth = screenWidth * 0.4;
+    return _isLoading
+        ? SizedBox(
+            width: buttonWidth,
+            height: 50,
+            child: const Center(
+              child: SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              ),
+            ),
+          )
+        : GestureDetector(
+            onTap: _handleGoogleSignIn,
+            child: SizedBox(
+              width: buttonWidth,
+              height: 50,
+              child: Image.asset(
+                'assets/images/android_dark_rd_SI.png',
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) {
+                  return const Center(
+                    child: Icon(
+                      Icons.login,
+                      size: 24,
+                      color: Colors.white,
+                    ),
+                  );
+                },
+              ),
+            ),
+          );
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final buttonWidth = screenWidth * 0.4; // 디바이스 너비의 40%
+    final screenHeight = MediaQuery.of(context).size.height;
+    const backgroundColor = Color(0xFF121212);
 
     return Scaffold(
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // 상단 여백 (로고를 중앙에 배치하기 위한 공간)
-          const Spacer(),
-          const Spacer(),
-          const Spacer(),
-          // 로고 (디바이스 가로 크기의 50%, 비율 유지)
-          Image.asset(
-            'assets/images/logo_3d.png',
-            width: screenWidth * 0.5,
-            fit: BoxFit.contain,
-          ),
-          // 하단 여백의 1/3
-          const Spacer(),
-          // 로그인 버튼 (첫 번째 구분지점)
-          _isLoading
-              ? SizedBox(
-                  width: buttonWidth,
-                  height: 50,
-                  child: const Center(
-                    child: SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      ),
-                    ),
-                  ),
-                )
-              : GestureDetector(
-                  onTap: _handleGoogleSignIn,
-                  child: SizedBox(
-                    width: buttonWidth,
-                    height: 50,
+      backgroundColor: backgroundColor,
+      body: AnimatedBuilder(
+        animation: _animController,
+        builder: (context, _) {
+          return Stack(
+            children: [
+              // 2-1: logo_splash 가로 중앙, 위로 300 이동 (빠른가속>늦은가속 = easeOut)
+              Center(
+                child: Transform.translate(
+                  offset: Offset(0, -150 * _logoSlideAnim.value),
+                  child: Transform.scale(
+                    scale: 0.8,
                     child: Image.asset(
-                      'assets/images/android_dark_rd_SI.png',
+                      'assets/images/logo_splash.png',
                       fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) {
-                        return const Center(
-                          child: Icon(
-                            Icons.login,
-                            size: 24,
-                            color: Colors.white,
-                          ),
-                        );
-                      },
                     ),
                   ),
                 ),
-          // 하단 여백의 1/3
-          const Spacer(),
-          // 약관 문구 (두 번째 구분지점, 중앙 정렬, 흰색 글씨, 좌우 20% 마진)
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.2),
-            child: _buildTermsText(context),
-          ),
-          // 하단 여백의 1/3
-          const Spacer(),
-        ],
+              ),
+              // 2-2: logo_suda_text 가로·세로 정중앙에 fade-in
+              Center(
+                child: Opacity(
+                  opacity: _textLogoOpacityAnim.value,
+                  child: Transform.scale(
+                    scale: 0.8,
+                    child: Image.asset(
+                      'assets/images/logo_suda_text.png',
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ),
+              ),
+              // 2-3: 하단→중앙 그라데이션 fade-in
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                height: screenHeight * 0.5,
+                child: Opacity(
+                  opacity: _gradientOpacityAnim.value,
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.bottomCenter,
+                        end: Alignment.topCenter,
+                        colors: [
+                          Color(0xFF0CABA8),
+                          Colors.transparent,
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              // 2-4: 구글 로그인 버튼·약관 영역 fade-in (4:2:1:1 → 4:2:1버튼:1약관)
+              Positioned.fill(
+                child: Opacity(
+                  opacity: _bottomOpacityAnim.value,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const Spacer(flex: 4),
+                      const Spacer(flex: 2),
+                      _buildLoginButton(screenWidth),
+                      const Spacer(flex: 1),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.2),
+                        child: _buildTermsText(context),
+                      ),
+                      const Spacer(flex: 1),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

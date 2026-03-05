@@ -454,6 +454,126 @@ abstract class AppLocalizations {
   /// **'You\'ve reached today\'s limit.\nCome back tomorrow!'**
   String get noTicketsBody;
 
+  /// No description provided for @surveyPromptLine1.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve reached today\'s limit.'**
+  String get surveyPromptLine1;
+
+  /// No description provided for @surveyPromptLine2.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer a quick question to earn 1 extra ticket!'**
+  String get surveyPromptLine2;
+
+  /// No description provided for @pushTicketPromptLine2.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on notifications and get 1 extra ticket!'**
+  String get pushTicketPromptLine2;
+
+  /// No description provided for @surveyAnswerNowButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer now ✅'**
+  String get surveyAnswerNowButton;
+
+  /// No description provided for @pushTicketTurnOnButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on 🔔'**
+  String get pushTicketTurnOnButton;
+
+  /// No description provided for @shareTicketPromptLine2.
+  ///
+  /// In en, this message translates to:
+  /// **'Share the app link with a friend to get 1 extra ticket!'**
+  String get shareTicketPromptLine2;
+
+  /// No description provided for @shareTicketButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Share link 💬'**
+  String get shareTicketButton;
+
+  /// No description provided for @reviewTicketPromptLine2.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave a store review to get 1 extra ticket!'**
+  String get reviewTicketPromptLine2;
+
+  /// No description provided for @reviewTicketButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave Stars ⭐'**
+  String get reviewTicketButton;
+
+  /// No description provided for @surveyMaybeLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Maybe later'**
+  String get surveyMaybeLater;
+
+  /// No description provided for @surveyStep1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Which age group are you in?'**
+  String get surveyStep1Title;
+
+  /// No description provided for @surveyStep2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'What is your gender?'**
+  String get surveyStep2Title;
+
+  /// No description provided for @surveyStep3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'How did you find SUDA?'**
+  String get surveyStep3Title;
+
+  /// No description provided for @surveyGenderFemale.
+  ///
+  /// In en, this message translates to:
+  /// **'Female'**
+  String get surveyGenderFemale;
+
+  /// No description provided for @surveyGenderMale.
+  ///
+  /// In en, this message translates to:
+  /// **'Male'**
+  String get surveyGenderMale;
+
+  /// No description provided for @surveyGenderPreferNotToSay.
+  ///
+  /// In en, this message translates to:
+  /// **'Prefer not to say'**
+  String get surveyGenderPreferNotToSay;
+
+  /// No description provided for @surveySuccessToast.
+  ///
+  /// In en, this message translates to:
+  /// **'1 Ticket added! 🎉'**
+  String get surveySuccessToast;
+
+  /// No description provided for @dailyTicketTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Thanks for Checking In!'**
+  String get dailyTicketTitle;
+
+  /// No description provided for @dailyTicketContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Claim your daily free ticket!\nIt expires if you don\'t use it today.'**
+  String get dailyTicketContent;
+
+  /// No description provided for @dailyTicketButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Claim Ticket 🎟️'**
+  String get dailyTicketButton;
+
   /// No description provided for @notificationPermissionBlockedTitle.
   ///
   /// In en, this message translates to:
@@ -483,6 +603,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No notification yet'**
   String get notificationsEmpty;
+
+  /// No description provided for @reregistrationRestrictedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You can sign up again 2 days after deleting your account. Please try again later.'**
+  String get reregistrationRestrictedMessage;
 }
 
 class _AppLocalizationsDelegate

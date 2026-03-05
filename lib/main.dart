@@ -14,6 +14,7 @@ import 'services/token_storage.dart';
 import 'services/suda_api_client.dart';
 import 'services/version_check_service.dart';
 import 'services/token_refresh_service.dart';
+import 'screens/custom_splash.dart';
 import 'screens/login.dart';
 import 'screens/home.dart';
 import 'screens/profile.dart';
@@ -26,6 +27,7 @@ import 'utils/sub_screen_route.dart';
 import 'config/app_config.dart';
 import 'utils/language_util.dart';
 import 'theme/app_theme.dart';
+import 'widgets/app_content_dialog.dart';
 import 'widgets/main_route_aware_wrapper.dart';
 
 void main() async {
@@ -82,6 +84,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   int _homeTabSelectedCounter = 0; // 홈 탭 선택 시 증가 → HomeScreen 티켓 갱신
   bool _hasCheckedVersion = false; // 버전 체크 실행 여부
   bool _needsAgreement = false; // 서비스 이용 동의 필요 여부
+  /// 앱 실행(토큰 없음) 시에만 true. CustomSplashScreen 표시 후 onComplete에서 false. 로그아웃 시에는 false로 곧바로 LoginScreen.
+  bool _showCustomSplash = false;
 
   @override
   void initState() {
@@ -104,6 +108,29 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     if (mounted) setState(() {});
   }
 
+  bool _shouldShowReregistrationBlockedPopup(UserDto user) {
+    final meta = user.metaInfo;
+    if (meta == null || meta.isEmpty) return false;
+
+    final rejected = meta.firstWhere(
+      (m) => m.key == 'APPLY_REJECTED',
+      orElse: () => const SudaJson(key: '', value: ''),
+    );
+    if (rejected.key != 'APPLY_REJECTED' || rejected.value.isEmpty) {
+      return false;
+    }
+
+    try {
+      final rejectedAt = DateTime.parse(rejected.value).toUtc();
+      final now = DateTime.now().toUtc();
+      final diff = now.difference(rejectedAt);
+      return diff.inHours >= 0 && diff.inHours < 48;
+    } catch (_) {
+      // 파싱 실패 시 팝업 노출하지 않음
+      return false;
+    }
+  }
+
   @override
   void dispose() {
     PendingAppPathService.instance.pendingNotifier.removeListener(_onPendingAppPathChanged);
@@ -114,18 +141,14 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    debugPrint('[DEBUG] lifecycle: $state');
     if (state == AppLifecycleState.resumed) {
       if (_accessToken != null) {
-        debugPrint('[DEBUG] lifecycle: resumed -> refresh start');
         TokenRefreshService.instance.start();
-        debugPrint('[DEBUG] lifecycle: resumed -> onAppResumed');
         TokenRefreshService.instance.onAppResumed();
       }
     } else if (state == AppLifecycleState.inactive ||
         state == AppLifecycleState.paused ||
         state == AppLifecycleState.detached) {
-      debugPrint('[DEBUG] lifecycle: stop refresh');
       TokenRefreshService.instance.stop();
     }
   }
@@ -155,13 +178,14 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
     if (storedAccessToken == null) {
       TokenRefreshService.instance.stop();
-      // 저장된 토큰이 없으면 네이티브 스플래시 제거 후 로그아웃 상태로 진입
+      // 저장된 토큰이 없으면 네이티브 스플래시 제거 후 커스텀 스플래시 → 로그인 화면
       FlutterNativeSplash.remove();
       setState(() {
         _accessToken = null;
         _googleUser = null;
         _user = null;
         _isLoading = false;
+        _showCustomSplash = true; // 앱 실행 시에만 커스텀 스플래시 표시
       });
       return;
     }
@@ -172,7 +196,42 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         accessToken: storedAccessToken,
       );
 
-      // 3) 서비스 이용 동의 여부 확인 (SUDA_AGREEMENT == 'Y')
+      // 3) 재가입 제한 여부 확인 (APPLY_REJECTED 48시간 이내)
+      if (_shouldShowReregistrationBlockedPopup(user)) {
+        FlutterNativeSplash.remove();
+        if (!mounted) return;
+
+        final popupContext = _navigatorKey.currentContext;
+        if (popupContext != null && popupContext.mounted) {
+          final l10n = AppLocalizations.of(popupContext);
+          final message = l10n != null
+              ? l10n.reregistrationRestrictedMessage
+              : 'You can sign up again 2 days after deleting your account. Please try again later.';
+          final theme = Theme.of(popupContext).textTheme;
+          await AppContentDialog.show(
+            popupContext,
+            content: Center(
+              child: Text(
+                message,
+                style: theme.bodyLarge?.copyWith(color: Colors.white),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            showOkayButton: true,
+          );
+        }
+        await TokenStorage.clearTokens();
+        if (!mounted) return;
+        setState(() {
+          _accessToken = null;
+          _user = null;
+          _isLoading = false;
+          _showCustomSplash = true;
+        });
+        return;
+      }
+
+      // 4) 서비스 이용 동의 여부 확인 (SUDA_AGREEMENT == 'Y')
       bool needsAgreement = true;
       if (user.metaInfo != null) {
         for (var meta in user.metaInfo!) {
@@ -183,7 +242,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         }
       }
 
-      // 4) Google 계정 정보는 UI 표시용 부가 정보 (실패해도 JWT 기반 로그인 상태는 유지)
+      // 5) Google 계정 정보는 UI 표시용 부가 정보 (실패해도 JWT 기반 로그인 상태는 유지)
       final account = await AuthService.signInSilently();
 
       // 프로필 이미지 프리캐시
@@ -204,7 +263,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         _isLoading = false;
       });
     } catch (_) {
-      // 4) 401/403/기타 에러 발생 시 토큰 삭제 후 네이티브 스플래시 제거 및 로그아웃 상태로 전환
       await TokenStorage.clearTokens();
       TokenRefreshService.instance.stop();
       FlutterNativeSplash.remove();
@@ -213,6 +271,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         _googleUser = null;
         _user = null;
         _isLoading = false;
+        _showCustomSplash = true;
       });
     }
   }
@@ -247,7 +306,40 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       final user = await SudaApiClient.getCurrentUser(accessToken: token);
       if (!mounted) return;
       
-      // 4) 서비스 이용 동의 여부 확인
+      // 4) 재가입 제한 여부 확인 (APPLY_REJECTED 48시간 이내)
+      if (_shouldShowReregistrationBlockedPopup(user)) {
+        if (!mounted) return;
+
+        final popupContext = _navigatorKey.currentContext;
+        if (popupContext != null && popupContext.mounted) {
+          final l10n = AppLocalizations.of(popupContext);
+          final message = l10n != null
+              ? l10n.reregistrationRestrictedMessage
+              : 'You can sign up again 2 days after deleting your account. Please try again later.';
+          final theme = Theme.of(popupContext).textTheme;
+          await AppContentDialog.show(
+            popupContext,
+            content: Center(
+              child: Text(
+                message,
+                style: theme.bodyLarge?.copyWith(color: Colors.white),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            showOkayButton: true,
+          );
+        }
+        await TokenStorage.clearTokens();
+        TokenRefreshService.instance.stop();
+        if (!mounted) return;
+        setState(() {
+          _accessToken = null;
+          _user = null;
+        });
+        return;
+      }
+
+      // 5) 서비스 이용 동의 여부 확인
       bool needsAgreement = true;
       if (user.metaInfo != null) {
         for (var meta in user.metaInfo!) {
@@ -265,15 +357,14 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         }
       }
 
-      // 5) 상태 업데이트 (화면 전환 트리거)
+      // 6) 상태 업데이트 (화면 전환 트리거)
       TokenRefreshService.instance.start();
       setState(() {
         _accessToken = token;
-        _user = user;
-        _needsAgreement = needsAgreement;
+      _user = user;
+      _needsAgreement = needsAgreement;
       });
-    } catch (error) {
-      // 5) 실패 시 토큰 삭제 및 로그인 상태 초기화
+    } catch (_) {
       await TokenStorage.clearTokens();
       TokenRefreshService.instance.stop();
       if (!mounted) return;
@@ -293,6 +384,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       _googleUser = null;
       _accessToken = null;
       _currentMainScreen = 'home'; // 로그아웃 후 다시 로그인 시 Home 화면으로
+      _showCustomSplash = false; // 로그아웃 시 커스텀 스플래시 없이 곧바로 LoginScreen
     });
   }
 
@@ -448,7 +540,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       },
       theme: AppTheme.themeData,
       home: _accessToken == null
-          ? LoginScreen(onSignIn: _onSignIn)
+          ? (_showCustomSplash
+              ? CustomSplashScreen(
+                  onComplete: () => setState(() => _showCustomSplash = false),
+                )
+              : LoginScreen(onSignIn: _onSignIn))
           : _needsAgreement
               ? AgreementScreen(
                   accessToken: _accessToken!,

@@ -107,7 +107,7 @@
 
 ### 스플래시 용도
 - 앱 실행 직후 Flutter 엔진 초기화 및 JWT 인증 상태 확인 중 표시
-- 검정 배경 + 중앙 로고 이미지로 구성
+- **이미지 없음**, 어두운 단색 배경(`#121212`)만 노출
 - JWT 토큰 확인 및 서버 검증 완료 후 자동 제거
 
 ### 표시 조건
@@ -115,17 +115,45 @@
 - `FlutterNativeSplash.preserve()`로 Flutter 엔진 초기화 후에도 유지
 - `FlutterNativeSplash.remove()` 호출 시 제거
 
-### 제거 시점
-- JWT 토큰이 없을 때: `_checkAuthStatus()`에서 즉시 제거 → LoginScreen 표시
-- JWT 토큰이 유효할 때: 서버 검증 완료 후 제거 → HomeScreen 표시
-- JWT 토큰이 유효하지 않을 때: 에러 처리 후 제거 → LoginScreen 표시
+### 제거 시점 및 이후 화면
+- JWT 토큰이 없을 때: `_checkAuthStatus()`에서 제거 → **CustomSplashScreen** → LoginScreen
+- JWT 토큰이 유효할 때: 서버 검증 완료 후 제거 → HomeScreen(또는 AgreementScreen)
+- JWT 토큰이 유효하지 않을 때: 에러 처리 후 제거 → CustomSplashScreen → LoginScreen
 
 ### 스플래시 내부 구현 특이사항
-- **배경색**: 검정 (`#000000`)
-- **로고 이미지**: `assets/images/logo_3d.png` (중앙 배치)
+- **배경색**: `#121212` (이미지 없음)
 - **생성 방법**: `dart run flutter_native_splash:create` 명령으로 자동 생성
-- **Android 12+ 지원**: 별도 설정으로 Android 12 이상 기기 지원
+- **Android 12+ 지원**: `android_12.color` 설정
 - **제어 방법**: `lib/main.dart`에서 `FlutterNativeSplash.preserve()` 및 `FlutterNativeSplash.remove()` 사용
+
+---
+
+## 0. CustomSplashScreen (커스텀 스플래시)
+
+### 스크린 관련 정의 파일
+- **파일 경로**: `lib/screens/custom_splash.dart`
+- **클래스명**: `CustomSplashScreen` (StatefulWidget)
+- **스크린 타입**: **Full Screen** (GNB 없음, 인증 플로우 전 단계)
+- **appPath**: 해당 없음
+
+### 스크린 용도
+- 앱 실행 시 네이티브 스플래시 제거 후, LoginScreen 전에만 표시되는 Flutter 스플래시
+- 네이티브 스플래시(배경색만)와 LoginScreen 사이의 전환·애니메이션을 담당 (애니메이션 상세는 추후 정의)
+- **로그아웃 시에는 표시하지 않음** → 곧바로 LoginScreen으로 이동
+
+### 이전 스크린 정보 (진입점)
+- **네이티브 스플래시**: 앱 실행 후 JWT 토큰이 없거나 유효하지 않을 때 (`FlutterNativeSplash.remove()` 직후)
+
+### 이후 스크린 정보 (이동 가능한 다른 스크린)
+- **LoginScreen**: `onComplete` 콜백 호출 시 `_MyAppState`에서 `_showCustomSplash = false`로 전환하여 표시
+
+### 표시 조건
+- `_MyAppState._accessToken == null` 이면서 `_showCustomSplash == true`일 때만 표시
+- 로그아웃 시에는 `_onSignOut()`에서 `_showCustomSplash = false`로 설정하므로 CustomSplashScreen을 거치지 않고 LoginScreen으로 전환
+
+### 스크린 내부 구현 특이사항
+- **배경색**: `#121212` (네이티브 스플래시와 동일)
+- **완료 시점**: 현재는 `initState`에서 1.5초 후 `onComplete()` 호출. 추후 커스텀 스플래시 → Login 연계 애니메이션 정의 시 해당 시점으로 변경 가능
 
 ---
 
@@ -173,9 +201,9 @@
 - Google Sign-In을 통해 idToken 획득 후 SUDA 서버에 JWT 발급 요청
 
 ### 이전 스크린 정보 (진입점)
-- **네이티브 스플래시**: 저장된 JWT 토큰이 없거나 유효하지 않을 때 (스플래시 제거 후 표시)
-- **HomeScreen**: 로그아웃 시 (`onSignOut` 콜백 호출)
-- **조건**: `_MyAppState`의 `_accessToken == null`일 때 표시
+- **CustomSplashScreen**: 앱 실행 후 토큰이 없거나 유효하지 않을 때 (커스텀 스플래시 `onComplete` 후 표시)
+- **HomeScreen**: 로그아웃 시 (`onSignOut` 콜백 호출) → CustomSplashScreen 없이 곧바로 LoginScreen 표시
+- **조건**: `_MyAppState`의 `_accessToken == null`이고 `_showCustomSplash == false`일 때 표시
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
 - **HomeScreen**: Google 로그인 성공 및 JWT 토큰 발급 성공 시
@@ -422,7 +450,10 @@
 - 좌상단 뒤로가기: 같은 레벨(Account, Feedback 등)과 동일
 - 헤더 타이틀: 메뉴명 그대로(l10n.settingsNotification)
 - 본문: width 100%, 배경 #353535, 모서리 둥근 박스. 좌측 설명(pushNotifications 흰색, pushNotificationsDesc caption·#80D7CF), 우측 토글(56×24 트랙, 20×20 흰 원). OFF: 원 좌측, 트랙 #8C8C8C. ON: 원 우측, 트랙 #80D7CF. 200 응답 후 전환 애니메이션.
-- API: ON 시 `PUT /v1/users/push-agreement?agreementYn=Y`, OFF 시 `PUT /v1/users/push-agreement?agreementYn=N` (응답 바디 없음 200)
+- API: ON 시 `PUT /v1/users/push-agreement?agreementYn=Y`, OFF 시 `PUT /v1/users/push-agreement?agreementYn=N`
+- 응답: `QuestResultDto { completeYn }`
+  - `completeYn == 'Y'`: 티켓 보상 지급으로 간주, `surveySuccessToast` 노출 후 `Navigator.pop()`으로 자동 복귀
+  - `completeYn != 'Y'`(N 포함): 추가 토스트 없이 기존처럼 토글 상태만 반영
 
 ---
 
@@ -571,11 +602,59 @@
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
 - **RoleplayPlayingScreen** (Full Screen): 중앙 "Start" 텍스트 클릭 시
   - `Navigator.pushReplacement()`로 전환 (opening screen 삭제, 돌아올 일 없음)
+- **RoleplaySurveyScreen** (Sub Screen): `sessionId == '-10'` 분기 팝업의 "Answer now ✅" 버튼 클릭 시
+  - `RoleplayRouter.pushSurvey()` → SubScreenRoute로 우측에서 슬라이드 인
+- **PushAgreementScreen** (Sub Screen): `sessionId == '-20'` 분기 팝업의 "Turn on 🔔" 버튼 클릭 시
+  - 팝업 닫힘 후 SubScreenRoute로 우측에서 슬라이드 인
 
 ### 스크린 내부 구현 특이사항
 - 시스템 뒤로가기 버튼 클릭 시: opening screen 삭제, 이전 overview 노출
 - 별도 X 버튼 제공 안 함
 - 중앙에 "Start" 텍스트 (임시, 향후 오프닝 콘텐츠로 대체 예정)
+- 세션 초기화 응답 분기:
+  - `sessionId == '-20'`: 3단 팝업(타이틀 + `surveyPromptLine1` + `pushTicketPromptLine2` + `pushTicketTurnOnButton`)
+  - `sessionId == '-30'`: 3단 팝업(타이틀 + `surveyPromptLine1` + `shareTicketPromptLine2` + `shareTicketButton`)
+    - "Share link 💬" 탭 시 팝업 닫고 OS 공유시트 노출(Play Store 링크 공유)
+    - 공유시트 닫힘 감지 후 `POST /v1/users/quests/{questId}` 호출 (`questId = sessionId`)
+    - 응답 `QuestResultDto.completeYn == 'Y'`일 때만 `surveySuccessToast` 토스트 노출
+  - `sessionId == '-40'`: 3단 팝업(타이틀 + `surveyPromptLine1` + `reviewTicketPromptLine2` + `reviewTicketButton`)
+    - "Leave Stars ⭐" 탭 시 팝업 닫고 OS 인앱리뷰 API 호출
+    - 인앱리뷰 호출 성공 반환 시 `POST /v1/users/quests/{questId}` 호출 (`questId = sessionId`)
+    - 응답 `QuestResultDto.completeYn == 'Y'`일 때만 `surveySuccessToast` 토스트 노출
+
+---
+
+## 12.1 RoleplaySurveyScreen
+
+### 스크린 관련 정의 파일
+- **파일 경로**: `lib/screens/roleplay/survey.dart`
+- **클래스명**: `RoleplaySurveyScreen` (StatefulWidget)
+- **스크린 타입**: **Sub Screen**
+- **appPath**: 해당 없음 (Opening -10 분기 전용)
+
+### 스크린 용도
+- Opening에서 세션 초기화 응답 `sessionId == '-10'`인 경우 진입하는 3단계 선택형 설문 화면.
+
+### 이전 스크린 정보 (진입점)
+- **RoleplayOpeningScreen**: `sessionId == '-10'` 팝업의 "Answer now ✅" 버튼 클릭 시
+
+### 이후 스크린 정보 (이동 가능한 다른 스크린)
+- **RoleplayOpeningScreen**: X 버튼 또는 시스템 뒤로가기 시 `Navigator.pop()`으로 복귀
+
+### 스크린 내부 구현 특이사항
+- 헤더: 타이틀 없이 닫기(X) 버튼만 노출.
+- 상단 진행바: width 100% 기준 3분할(각 32%, height 8, radius 4). 단계 활성 바는 좌→우 그라데이션(`#076766`→`#0CABA8`), 비활성은 `#353535`.
+- 단계 진행:
+  - 1단계(연령): `Under 18`, `18-24`, `25-34`, `35-44`, `45+` (값 1~5)
+  - 2단계(성별): `Female`, `Male`, `Prefer not to say` (l10n, 값 1~3)
+  - 3단계(유입경로): `Facebook`, `Instagram`, `TikTok`, `Friends`, `Others` (값 1~5)
+- 레이아웃: 진행바 아래 `gap 50` → title(h2, 흰색, 중앙) → `gap 50` → 선택지 세로 나열(gap 10).
+- 선택지 버튼: `width=디스플레이 40%`, `height=60`, `radius=30`, 배경 투명, 테두리 `#635F5F`(1), 텍스트는 ElevatedButton 스타일(흰색).
+- 3단계 선택 시 `POST /v1/users/survey` 호출:
+  - body: `{ "age": "<1~5>", "gender": "<1~3>", "source": "<1~5>" }` (문자열 숫자)
+  - 응답 `200 + body == 'Y'`: 성공 토스트(`surveySuccessToast`) 후 `pop`
+  - 그 외 응답/예외(4xx/5xx/timeout 포함): 경고 토스트 `"Survey Failed"` 후 `pop`
+- 제출 중에는 모든 선택지 버튼 비활성화.
 
 ---
 
@@ -821,10 +900,13 @@
 ```
 앱 실행
   ↓
-[네이티브 스플래시] (검정 배경 + 로고)
+[네이티브 스플래시] (어두운 단색 배경 #121212, 이미지 없음)
   ↓ (Flutter 엔진 초기화 + JWT 처리)
-  ├─ 토큰 없음/유효하지 않음 → [LoginScreen]
-  └─ 토큰 유효 → [HomeScreen]
+  ├─ 토큰 없음/유효하지 않음 → [CustomSplashScreen] → [LoginScreen]
+  └─ 토큰 유효 → [HomeScreen] (또는 AgreementScreen)
+
+[CustomSplashScreen] (앱 실행 후 로그인 플로우에서만 표시)
+  └─ onComplete → [LoginScreen]
 
 [LoginScreen]
   ├─ 로그인 성공 → [HomeScreen]
@@ -833,6 +915,7 @@
 [NotificationBoxScreen] ←→ [HomeScreen] ←→ [ProfileScreen] (GNB Alarm/Home/Profile 3탭 전환)
   ├─ [HomeScreen] → [RoleplayOverviewScreen] (중앙 "Roleplay" 텍스트)
   │   └─ [RoleplayOpeningScreen] (중앙 "Play" 텍스트)
+  │       ├─ [RoleplaySurveyScreen] (sessionId == '-10' 팝업의 "Answer now ✅")
   │       └─ [RoleplayPlayingScreen] (중앙 "Start" 텍스트)
   │           ├─ [RoleplayEndingScreen] (중앙 "Ending" 텍스트)
   │           │   └─ [RoleplayResultScreen]
@@ -845,7 +928,7 @@
   │       ├─ [FeedbackScreen]
   │       ├─ [WebViewScreen] (Privacy policy / Terms of Service)
   │       ├─ [OpenSourceLicenseScreen]
-  │       └─ Log out → [LoginScreen] (모든 스크린 pop 후 이동)
+  │       └─ Log out → [LoginScreen] (커스텀 스플래시 없이 곧바로 이동)
   └─ [ProfileScreen] → [HistoryScreen] (롤플레이 히스토리 썸네일 탭)
           ├─ [ReviewChatScreen] (채팅 열람)
           └─ [ReviewEndingScreen] (엔딩 열람)
@@ -854,21 +937,24 @@
 ### 네비게이션 흐름 상세 설명
 
 1. **앱 실행 → 네이티브 스플래시**
-   - 네이티브 스플래시가 자동으로 표시됨 (검정 배경 + 로고 이미지)
+   - 네이티브 스플래시가 자동으로 표시됨 (어두운 단색 배경 #121212, 이미지 없음)
    - `FlutterNativeSplash.preserve()`로 Flutter 엔진 초기화 후에도 유지
 
-2. **네이티브 스플래시 → LoginScreen/HomeScreen**
+2. **네이티브 스플래시 → CustomSplashScreen 또는 HomeScreen**
    - Flutter 엔진 초기화 완료 후 `_checkAuthStatus()` 실행
    - JWT 토큰 확인 및 서버 검증 (네이티브 스플래시 유지 중)
    - 처리 완료 후 `FlutterNativeSplash.remove()` 호출
-   - 토큰 없음/유효하지 않음 → LoginScreen 표시
-   - 토큰 유효 → HomeScreen 표시
+   - 토큰 없음/유효하지 않음 → CustomSplashScreen 표시 → onComplete 후 LoginScreen
+   - 토큰 유효 → HomeScreen(또는 AgreementScreen) 표시
 
-3. **LoginScreen ↔ HomeScreen/ProfileScreen**
+3. **로그아웃 시**
+   - `_onSignOut()`에서 `_showCustomSplash = false` 설정 → CustomSplashScreen 없이 곧바로 LoginScreen 표시
+
+4. **LoginScreen ↔ HomeScreen/ProfileScreen**
    - 로그인 성공 시 HomeScreen으로 전환
    - 로그아웃 시 (ProfileScreen에서) LoginScreen으로 전환
 
-4. **NotificationBoxScreen ↔ HomeScreen ↔ ProfileScreen**
+5. **NotificationBoxScreen ↔ HomeScreen ↔ ProfileScreen**
   - GNB의 Alarm/Home/Profile 3탭 클릭으로 전환
    - `_MyAppState`의 `_currentMainScreen` ('alarm'|'home'|'profile') 상태로 관리
    - 화면 전환 시 애니메이션 없이 즉시 전환

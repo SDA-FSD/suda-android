@@ -11,6 +11,9 @@
 - Opening (Full Screen)
   - 파일: `lib/screens/roleplay/opening.dart`
   - 클래스: `RoleplayOpeningScreen`
+- Survey (Sub Screen)
+  - 파일: `lib/screens/roleplay/survey.dart`
+  - 클래스: `RoleplaySurveyScreen`
 - Playing (Full Screen)
   - 파일: `lib/screens/roleplay/playing.dart`
   - 클래스: `RoleplayPlayingScreen`
@@ -34,6 +37,7 @@
 
 ## 3. 기본 네비게이션 흐름 (현행 코드 기준)
 - Home -> Overview -> Opening -> Playing -> Ending/Failed -> Result -> Overview
+- Home -> Overview -> Opening -> Survey(-10 분기, 선택형 3단계) -> Opening
 - Failed -> Failed Report (Sub Screen, push). Failed Report에서 백버튼/X -> Failed 복귀.
 - Result -> Result Report (Sub Screen, push). Result Report에서 백버튼/X -> Result 복귀. 전송 성공 시 pop(true)로 Result에서 Report 문구 숨김.
 - Playing/Ending/Failed에서 뒤로가기는 확인 다이얼로그 후 Overview로 복귀 (Failed는 확인 없이 Overview 복귀).
@@ -119,8 +123,40 @@
 - **세션 초기화** (`POST /v1/roleplay-sessions`)
   - 500: Opening -> Playing 전환 금지. 마이크 권한 체크 이후 처리.
   - 현행 UX: "Cannot start roleplay" 토스트 노출 후 Opening에 머무름.
-  - 200이고 응답 body의 `sessionId`가 `'0'`(또는 0)인 경우: 티켓 부족으로 간주. 단순 얼럿 노출 후 Opening에 머무름. 버튼 재탭 시 동일 API 재호출·동일 처리.
-  - 200이고 `sessionId`가 `'-10'`, `'-20'`, `'-30'`, `'-40'`인 경우: 별도 분기(TBD). Opening 유지.
+  - 200이고 응답 body의 `sessionId`가 `'0'`(또는 0)인 경우: 티켓 부족으로 간주. 기존 공통 팝업(외부 Okay 버튼) 노출 후 Opening에 머무름. 버튼 재탭 시 동일 API 재호출·동일 처리.
+  - 200이고 응답 body의 `sessionId`가 `'-10'`인 경우: 설문 유도 팝업(내부 버튼형) 노출 후 Opening에 머무름.
+    - 상단: `noTicketsTitle` (기존과 동일 스타일)
+    - 중단: `surveyPromptLine1`(흰색), `surveyPromptLine2`(#0CABA8)
+    - 하단: `surveyAnswerNowButton` 탭 시 Survey Sub Screen 진입, `surveyMaybeLater` 탭 시 팝업 닫기
+    - Survey Sub Screen 상세:
+      - 헤더: 타이틀 없이 X 버튼만 노출
+      - 스텝: 총 3단계, 단계별 선택지 탭 시 다음 단계로 진행
+      - 스텝바: 본문 상단 3분할(각 32%, height 8, radius 4), 활성은 그라데이션(#076766→#0CABA8), 비활성은 #353535
+      - 1단계(연령): Under 18 / 18-24 / 25-34 / 35-44 / 45+ → 값 1~5
+      - 2단계(성별): Female / Male / Prefer not to say (l10n) → 값 1~3
+      - 3단계(유입경로): Facebook / Instagram / TikTok / Friends / Others → 값 1~5
+      - 3단계 선택 즉시 `POST /v1/users/survey` 호출, body `{age, gender, source}`는 문자열 숫자("1"~)로 전송
+      - 응답이 200 + body `'Y'`면 성공 토스트(l10n `surveySuccessToast`) 후 스크린 닫기
+      - 그 외 응답/에러(4xx, 5xx, timeout 포함)는 경고 토스트 `"Survey Failed"` 후 스크린 닫기
+      - 제출 중에는 선택지 버튼 비활성화
+  - 200이고 응답 body의 `sessionId`가 `'-20'`인 경우: 푸시 동의 유도 팝업(내부 버튼형) 노출 후 Opening에 머무름.
+    - 상단: `noTicketsTitle` (기존과 동일 스타일)
+    - 중단: `surveyPromptLine1`(흰색), `pushTicketPromptLine2`(#0CABA8)
+    - 하단: `pushTicketTurnOnButton` 탭 시 PushAgreement Sub Screen 진입, `surveyMaybeLater` 탭 시 팝업 닫기
+  - 200이고 응답 body의 `sessionId`가 `'-30'`인 경우: 공유 유도 팝업(내부 버튼형) 노출 후 Opening에 머무름.
+    - 상단: `noTicketsTitle` (기존과 동일 스타일)
+    - 중단: `surveyPromptLine1`(흰색), `shareTicketPromptLine2`(#0CABA8)
+    - 하단: `shareTicketButton` 탭 시 팝업 닫고 OS 공유시트 노출(Play Store 링크 공유)
+    - 공유시트 닫힘 감지 후 `POST /v1/users/quests/{questId}` 호출 (`questId = sessionId`, 하드코딩 금지)
+    - 응답이 200 + `QuestResultDto.completeYn == 'Y'`면 성공 토스트(l10n `surveySuccessToast`) 노출
+    - 그 외 응답/에러는 별도 처리 없음
+  - 200이고 응답 body의 `sessionId`가 `'-40'`인 경우: 스토어 리뷰 유도 팝업(내부 버튼형) 노출 후 Opening에 머무름.
+    - 상단: `noTicketsTitle` (기존과 동일 스타일)
+    - 중단: `surveyPromptLine1`(흰색), `reviewTicketPromptLine2`(#0CABA8)
+    - 하단: `reviewTicketButton` 탭 시 팝업 닫고 OS 인앱리뷰 API 호출
+    - 인앱리뷰 호출 성공 반환 시 `POST /v1/users/quests/{questId}` 호출 (`questId = sessionId`, 하드코딩 금지)
+    - 응답이 200 + `QuestResultDto.completeYn == 'Y'`면 성공 토스트(l10n `surveySuccessToast`) 노출
+    - 그 외 응답/에러는 별도 처리 없음
 - **사용자 텍스트/음성 입력, AI 응답, 나레이션, 힌트, 번역**
   - 404: 서버에서 세션 유실로 판단. "Roleplay Session Not Found" 얼럿 후 Overview 복귀.
 - **사용자 텍스트/음성 입력**
