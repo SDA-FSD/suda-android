@@ -66,7 +66,6 @@ class UserDto {
   final int? roleplayCount;
   final int? wordsSpokenCount;
   final int? likePoint;
-  final String? firstLoginYn;
   final String? createdAt;
   final String? updatedAt;
   final List<SudaJson>? metaInfo;
@@ -81,7 +80,6 @@ class UserDto {
     this.roleplayCount,
     this.wordsSpokenCount,
     this.likePoint,
-    this.firstLoginYn,
     this.createdAt,
     this.updatedAt,
     this.metaInfo,
@@ -98,7 +96,6 @@ class UserDto {
       roleplayCount: json['roleplayCount'] as int?,
       wordsSpokenCount: json['wordsSpokenCount'] as int?,
       likePoint: json['likePoint'] as int?,
-      firstLoginYn: json['firstLoginYn'] as String?,
       createdAt: json['createdAt'] as String?,
       updatedAt: json['updatedAt'] as String?,
       metaInfo: json['metaInfo'] == null
@@ -119,7 +116,6 @@ class UserDto {
     int? roleplayCount,
     int? wordsSpokenCount,
     int? likePoint,
-    String? firstLoginYn,
     String? createdAt,
     String? updatedAt,
     List<SudaJson>? metaInfo,
@@ -134,7 +130,6 @@ class UserDto {
       roleplayCount: roleplayCount ?? this.roleplayCount,
       wordsSpokenCount: wordsSpokenCount ?? this.wordsSpokenCount,
       likePoint: likePoint ?? this.likePoint,
-      firstLoginYn: firstLoginYn ?? this.firstLoginYn,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       metaInfo: metaInfo ?? this.metaInfo,

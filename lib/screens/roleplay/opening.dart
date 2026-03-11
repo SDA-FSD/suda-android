@@ -11,6 +11,7 @@ import '../../l10n/app_localizations.dart';
 import '../../services/token_refresh_service.dart';
 import '../../routes/roleplay_router.dart';
 import '../../utils/suda_json_util.dart';
+import '../../utils/default_markdown.dart';
 import '../../widgets/app_content_dialog.dart';
 import '../../utils/sub_screen_route.dart';
 import '../setting/push_agreement.dart';
@@ -641,6 +642,10 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen> {
     }
 
     final theme = Theme.of(context).textTheme;
+    final scenarioStyle = theme.headlineSmall?.copyWith(
+      fontWeight: FontWeight.w400,
+      color: Colors.white,
+    ) ?? TextStyle(fontWeight: FontWeight.w400, color: Colors.white);
 
     return PopScope(
       canPop: true,
@@ -675,11 +680,13 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen> {
                 style: theme.headlineSmall?.copyWith(color: Colors.white),
               ),
               const SizedBox(height: 20),
-              Text(
-                SudaJsonUtil.localizedText(selectedRole?.scenario),
-                style: theme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w400,
-                  color: Colors.white,
+              Text.rich(
+                TextSpan(
+                  style: scenarioStyle,
+                  children: DefaultMarkdown.buildSpans(
+                    SudaJsonUtil.localizedText(selectedRole?.scenario),
+                    scenarioStyle,
+                  ),
                 ),
                 textAlign: TextAlign.center,
               ),

@@ -55,7 +55,7 @@ class AppContentDialog extends StatelessWidget {
     final size = MediaQuery.sizeOf(context);
     final screenWidth = size.width;
     final screenHeight = size.height;
-    const overlayColor = Color(0x598C8C8C); // GNB와 동일
+    const overlayColor = Color(0x59000000);
 
     return PopScope(
       canPop: barrierDismissible,

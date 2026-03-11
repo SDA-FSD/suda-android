@@ -53,7 +53,7 @@ class _RestOverlayState extends State<RestOverlay> {
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
               child: Container(
-                color: const Color(0x598C8C8C),
+                color: const Color(0x59000000),
               ),
             ),
           ),

@@ -404,6 +404,10 @@ class RoleplayResultDto {
   final String? mainTitle; // non-null on server
   final String? subTitle; // non-null on server
   final String? avatarImgPath;
+  final int? beforeLevel;
+  final int? beforeProgressPercentage;
+  final int? afterLevel;
+  final int? afterProgressPercentage;
 
   const RoleplayResultDto({
     this.id,
@@ -426,6 +430,10 @@ class RoleplayResultDto {
     this.mainTitle,
     this.subTitle,
     this.avatarImgPath,
+    this.beforeLevel,
+    this.beforeProgressPercentage,
+    this.afterLevel,
+    this.afterProgressPercentage,
   });
 
   factory RoleplayResultDto.fromJson(Map<String, dynamic> json) {
@@ -458,6 +466,10 @@ class RoleplayResultDto {
       mainTitle: json['mainTitle'] as String?,
       subTitle: json['subTitle'] as String?,
       avatarImgPath: json['avatarImgPath'] as String?,
+      beforeLevel: _optionalInt(json['beforeLevel']),
+      beforeProgressPercentage: _optionalInt(json['beforeProgressPercentage']),
+      afterLevel: _optionalInt(json['afterLevel']),
+      afterProgressPercentage: _optionalInt(json['afterProgressPercentage']),
     );
   }
 }

@@ -1425,7 +1425,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
             child: Container(
-              color: const Color(0x598C8C8C),
+              color: const Color(0x59000000),
               child: Column(
                 children: [
                   const SizedBox(height: 24),
@@ -1928,7 +1928,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
         child: Container(
-          color: const Color(0xB25A5A5A),
+          color: const Color(0x59000000),
           padding: EdgeInsets.only(
             top: padding.top,
             bottom: padding.bottom,
@@ -1944,30 +1944,33 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
                 const SizedBox.shrink(),
                 Text(
                   l10n.roleplayExitWait,
-                  style: theme.headlineMedium?.copyWith(color: guideColor),
                   textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontFamily: 'ChironHeiHK',
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFFFFFFFF),
+                    fontSize: 70,
+                    letterSpacing: -0.49, // -0.7% of 70
+                  ),
                 ),
                 Text(
                   l10n.roleplayExitMessage,
                   style: theme.bodyLarge?.copyWith(color: Colors.white),
                   textAlign: TextAlign.center,
                 ),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.4,
-                  child: ElevatedButton(
-                    onPressed: _dismissExitLayer,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: guideColor,
-                      foregroundColor: Colors.white,
-                      shape: const StadiumBorder(),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 30,
-                        vertical: 18,
-                      ),
-                      elevation: 0,
+                ElevatedButton(
+                  onPressed: _dismissExitLayer,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: guideColor,
+                    foregroundColor: Colors.white,
+                    shape: const StadiumBorder(),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 30,
+                      vertical: 18,
                     ),
-                    child: Text(l10n.roleplayExitKeepPlaying),
+                    elevation: 0,
                   ),
+                  child: Text(l10n.roleplayExitKeepPlaying),
                 ),
                 GestureDetector(
                   onTap: () => _confirmExit(context),

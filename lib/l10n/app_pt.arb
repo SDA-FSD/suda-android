@@ -54,6 +54,8 @@
   "accountDelete": "Excluir Conta",
   "accountDeleteTitle": "Excluir conta?",
   "accountDeleteConfirmText": "Todos os seus progressos e dados serão perdidos permanentemente. Tem certeza?",
+  "accountDeleteProfileImageTitle": "Excluir imagem de perfil?",
+  "accountDeleteProfileImageContent": "Depois de excluída, sua imagem de perfil não poderá ser recuperada.",
   "accountGoBack": "Voltar",
   "accountDeleteAction": "Excluir",
   "languageLevelTitle": "Escolha seu nível de inglês",

@@ -109,6 +109,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'All your progress and data will be permanently lost. Are you sure?';
 
   @override
+  String get accountDeleteProfileImageTitle => 'Delete profile image?';
+
+  @override
+  String get accountDeleteProfileImageContent =>
+      'Once deleted, your profile image cannot be recovered.';
+
+  @override
   String get accountGoBack => 'Go Back';
 
   @override

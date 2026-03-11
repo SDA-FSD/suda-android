@@ -37,6 +37,18 @@ class SettingScreen extends StatelessWidget {
   }
 
   Future<void> _handleLogout(BuildContext context) async {
+    // 서버 로그아웃은 best-effort로 시도하고, 실패해도 무시한다.
+    try {
+      final refreshToken = await TokenStorage.loadRefreshToken();
+      if (refreshToken != null && refreshToken.isNotEmpty) {
+        final deviceId = await TokenStorage.getDeviceId();
+        await SudaApiClient.logout(
+          refreshToken: refreshToken,
+          deviceId: deviceId,
+        );
+      }
+    } catch (_) {}
+
     try {
       await AuthService.signOut();
       await TokenStorage.clearTokens();

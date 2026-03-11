@@ -54,6 +54,8 @@
   "accountDelete": "Delete Account",
   "accountDeleteTitle": "Delete Account?",
   "accountDeleteConfirmText": "All your progress and data will be permanently lost. Are you sure?",
+  "accountDeleteProfileImageTitle": "Delete profile image?",
+  "accountDeleteProfileImageContent": "Once deleted, your profile image cannot be recovered.",
   "accountGoBack": "Go Back",
   "accountDeleteAction": "Delete",
   "languageLevelTitle": "Choose your English level",

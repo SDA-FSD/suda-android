@@ -66,6 +66,7 @@
   - `SudaApiClient.getUserTicket()`: 티켓 개수 조회 (`GET /v1/users/ticket`, 파라메터 없음, 응답: UserTicketDto(beforeTicketCount, finalTicketCount, dailyTicketGrantYn?)). `dailyTicketGrantYn == 'Y'`이면 HomeScreen에서 출석 보상 팝업 노출.
   - `SudaApiClient.claimDailyTicket()`: 데일리 티켓 수령 (`PUT /v1/users/tickets/daily`, 응답: QuestResultDto). `completeYn == 'Y'`이면 `surveySuccessToast` 노출 + 티켓 재조회.
   - `SudaApiClient.getRoleplayResults()`: 롤플레이 결과 목록 페이징 (`GET /v1/roleplays/results?pageNum=0`, 0-based, 9개씩, 응답: SudaAppPage\<RpSimpleResultDto\>, RpSimpleResultDto: resultId, imgPath, starResult, createdAt)
+  - `SudaApiClient.getRoleplayResultReload()`: 운영자용 리프레시 테스트 (`GET /v1/roleplays/results-reload/{resultId}`, 2xx 시 RoleplayResultDto 반환, 그 외 null. History 상단 별 탭 시 호출)
   - `SudaApiClient.updateName()`: 사용자 이름 변경 (`PUT /v1/users?name=...`)
   - `SudaApiClient.registerPushToken()`: 푸시 토큰 등록 (`POST /users/push-token`)
     - Request body: `{ "deviceType": "ANDROID", "pushToken": "<토큰값>", "languageCode": "en|ko|pt" }`
@@ -86,7 +87,7 @@
   - `shouldShowRestOverlay()`: Overview 진입 전 휴식 레이어 노출 여부 (restYn=='Y' 또는 N이면서 UTC now가 restStartsAt~restEndsAt 사이)
 - **휴식 안내 레이어 (RestOverlay)**: `lib/widgets/rest_overlay.dart`
   - Overview 진입 시 `RoleplayRouter.pushOverview`에서 restYn 확인 후, 필요 시 레이어 노출·스크린 이동 중단
-  - 배경: BackdropFilter sigma 6 + Color 0x598C8C8C (playing 슬라이더와 동일)
+  - 배경: BackdropFilter sigma 6 + Color(0x59000000) (오버레이 공통)
   - 닫기: close.svg 24×24, 좌상 30,30, 40×40 탭 영역
   - 콘텐츠 영역: width 80%, height width×1.2+60, 중앙
   - 이미지: rest_full_layer_pt.png (pt) / rest_full_layer_en.png, radius 50, border 12 #80D7CF, 외곽 40px 그라데이션
@@ -114,7 +115,6 @@
 - **사용자 정보 모델**: `UserDto` 클래스
   - 주요 필드: `provider`, `sub`, `name`, `email`, `profileImgUrl`
   - 통계 필드: `roleplayCount`, `wordsSpokenCount`, `likePoint`
-  - `firstLoginYn` 필드는 최초 로그인 여부 표기
   - `metaInfo` 필드는 `List<SudaJson>` 타입
   - `SudaJson`: `key`, `value` 필드를 가진 구조체
 
@@ -179,7 +179,7 @@
 
 - **공통 콘텐츠 팝업 (AppContentDialog)**: `lib/widgets/app_content_dialog.dart`
   - 재사용: `AppContentDialog.show(context, content: Widget, { showOkayButton, okayButtonLabel, onOkayPressed, barrierDismissible })`. 본문은 `content`에 위젯으로 전달(여러 스타일 텍스트·버튼·클릭 가능 텍스트 등). `okayButtonLabel` 기본값은 `'Okay'`.
-  - 배경: 노출 중 하단 화면 터치 불가. 배경 레이어는 GNB와 동일 수치(BackdropFilter sigma 6 + Color 0x598C8C8C).
+  - 배경: 노출 중 하단 화면 터치 불가. 배경 레이어는 오버레이 공통: BackdropFilter sigma 6 + Color(0x59000000).
   - 팝업 카드: 가로 60%·최소 세로 50% 디스플레이, 테두리 10·#80D7CF·radius 30, 내부 상단 30 패딩·14×14 `close.svg` 우측(탭 시 닫힘), 본문 좌우 30·하단 30 마진. 옵션으로 하단 테두리 아래 30 마진 뒤 "Okay" 버튼(높이 44, 가로 40%, #0CABA8, StadiumBorder, ElevatedButton) 노출 가능.
 
 - **텍스트 언어 규칙**
@@ -236,6 +236,7 @@
 - **공통 UI 유틸**:
   - `lib/utils/default_toast.dart`: Overlay 기반 토스트 공통 처리 (배경 #353535/경고 #E4382A 85% 투명도, body-default 흰색, min height 48, 하단 60px, 좌우 반원)
   - 토스트 전체 목록 및 테스트 가이드: `.docs/TOAST_CATALOG.md`
+  - **Default Markdown** (`lib/utils/default_markdown.dart`): 서버 텍스트의 `*`(이탤릭), `**`(볼드)만 파싱해 `TextSpan` 리스트로 변환하는 공통 로직. `**`를 `*`보다 먼저 처리하며 중첩 미지원. 줄바꿈은 기존 그대로 유지. 적용 구역: **Opening** 시나리오 영역(`RoleplayOpeningScreen`의 scenario), **Ending** 콘텐츠 영역(`RoleplayEndingScreen`·`ReviewEndingScreen`의 content).
 - **리팩토링 원칙**: 
   - 단일 책임 원칙: 각 서비스는 하나의 책임만 담당
   - 재사용성: 공통 기능은 서비스로 분리하여 재사용
@@ -291,14 +292,15 @@
 - Roleplay Playing 힌트 아이콘 동작 개선: 힌트 탭 시 API 호출·힌트 말풍선(점선 테두리·투명·흰글씨), 턴당 1회·중복 비활성화, 3초 유휴 시 500ms 깜빡임, user-message 생성 시 힌트 말풍선 제거
 - Roleplay Playing resultId 종료 분기·Result API·캐시·종료 메시지: `.docs/CONTEXT_ROLEPLAY.md` 6-5, 6-9, 7, 10 참조 (상세는 해당 문서에만 정리)
 - **GNB 3탭 전환**: NotificationBoxScreen(구 AlarmMessageScreen)을 Sub → Main Screen으로 변경, GNB 구성을 Alarm / Home / Profile 3탭으로 확장. HomeScreen 우측 상단 Info 아이콘(Alarm push) 제거, GNB Alarm 탭으로만 알림함(Notification Box) 접근. `.docs/CONTEXT_SCREEN.md` 참조.
-- **GNB 오버레이·블러**: GNB는 본문 위에 덮는 형태로 배치(AppScaffold Stack 하단 Positioned). 배경은 playing 슬라이더와 동일: BackdropFilter sigma 6 + Color(0x598C8C8C).
-- **GNB 아이콘화**: GNB 메뉴 3종을 텍스트에서 아이콘으로 전환. 공통 위젯 `lib/widgets/gnb_bar.dart`(GnbBar). Alarm: gnb_alarm.png / gnb_alarm_pressed.png, 높이 24, 좌측 33. Home: gnb_home.png / gnb_home_pressed.png, 너비 24, 정중앙. Profile: userDto.profileImgUrl 원형 28x28(비활성)·24x24+흰 테두리 2(활성), 우측 33. 탭 영역: 좌 30% / 중앙 30% / 우 30%.
+- **GNB 오버레이·블러**: GNB는 본문 위에 덮는 형태로 배치(AppScaffold Stack 하단 Positioned). 배경은 오버레이 공통: BackdropFilter sigma 6 + Color(0x59000000).
+- **GNB 아이콘화**: GNB 메뉴 3종을 텍스트에서 아이콘으로 전환. 공통 위젯 `lib/widgets/gnb_bar.dart`(GnbBar). Alarm: gnb_alarm.png / gnb_alarm_pressed.png, 높이 24, 좌측 33. Home: gnb_home.png / gnb_home_pressed.png, 너비 24, 정중앙. Profile: userDto.profileImgUrl 원형 28x28(비활성)·24x24+흰 테두리 2(활성), 우측 33. profileImgUrl이 null/empty면 `assets/images/icons/default_profile_image.png` 사용. 탭 영역: 좌 30% / 중앙 30% / 우 30%.
 - **Roleplay Ending 스크린 개선**: 닫기 버튼 없음. role.endingList 첫 요소(RoleplayEndingDto) 기반 title/content/이미지. Playing에서 ending 전환 확정 시 imgPath+CDN으로 이미지 preload. 이미지 있으면 1.5x→1x 2초 축소 후 80% 검정 레이어·콘텐츠 fade-in; 없으면 바로 레이어·콘텐츠. 상단 50% title+content, 하단 50% endingHowWas+별 5개(40×40 gap 5)+Next 버튼. Next 탭 시 버튼 텍스트 fade-out과 동시에 버튼에서 #0CABA8 풍선 확장(2s) 후 Result 전환. `PUT /v1/roleplays/results/{rpResultId}?star={star}` 호출(응답 무시). Result 진입 시 박스레이어에 별점·mainTitle·subTitle 순차 노출(각 300ms 후) 후 박스 축소. 본문레이어 추후 지침. `.docs/CONTEXT_SCREEN.md` 14·17, `.docs/CONTEXT_ROLEPLAY.md` 참조.
 - **RoleplayResultDto·Result 스크린 박스레이어**: DTO에 mainTitle·subTitle 필드 추가(서버 non-null). Result 박스레이어: 별점·mainTitle·subTitle 순차 노출 후 박스 축소. **Result 본문레이어**: like_at_result·likePoint(그라데이션)·Mission(missionResult 아이콘)·Words·Lv 프로그레스바(getUserProfile)·Good Points·To Improve·Got it! 버튼(Overview). `.docs/CONTEXT_SCREEN.md` §17 참조.
+- **Result 본문 애니메이션 5~8단계**: 박스 축소(4단계) 완료 후 300ms 대기 → 5·7·8 동시 시작. 5: Mission 아이콘 N*n→missionResult 한 번에 전환(Y 있으면 진동). 7: likePoint 0→결과 500ms. 8: beforeLevel/beforeProgress→afterLevel/afterProgress 500ms(레벨업 시 surveySuccessToast). 5 후 300ms → 6: words 0→결과 300ms(words>0이면 진동). 초기값: Mission N*n, words 0, likePoint 0, Lv/진행률 before*.
 - **Main Screen 물리 뒤로가기**: Home 탭에서만 앱 종료, Alarm/Profile 탭에서는 Home으로 이동. `lib/main.dart`에서 IndexedStack을 `PopScope`(canPop: home일 때만 true)로 감싸 처리. `.docs/CONTEXT_SCREEN.md` Main Screen·비교표 반영.
 - **Profile 롤플레이 히스토리**: Progress box 아래 세로 스크롤 영역에 롤플레이 결과 썸네일 그리드. `GET /v1/roleplays/results?pageNum=0` 페이징(0부터 9개씩), 3열 32%·CDN prepend·캐시·shimmer 로딩·스크롤 시 append. 썸네일 탭 시 HistoryScreen(Sub) 진입(resultId 전달). History에서 ReviewChatScreen/ReviewEndingScreen 진입. 상세는 `.docs/CONTEXT_SCREEN.md` §19·20·21.
 - **신규 스크린 (History·Review)**: HistoryScreen(Profile 진입, 롤플레이 결과 요약·Result 유사), ReviewChatScreen(History 진입, 채팅 열람), ReviewEndingScreen(History 진입, 엔딩 열람·Ending 유사). 파일: `lib/screens/roleplay/history.dart`, `review_chat.dart`, `review_ending.dart`.
-- **HistoryScreen 구현**: resultId로 `getRoleplayResult`·`getUserProfile` 조회 후 스크린 상태로만 보관(RoleplayStateService 미사용). History↔ReviewChat/ReviewEnding 구간 동안 동일 result 유지, 나갈 때·새 진입 시 갱신. Result와 동일 레이아웃(박스 210·본문), 초기 애니메이션 없음. Got it 버튼 노출만(동작 없음), Report 문구 없음. View Chat 탭 시 ReviewChatScreen에 RoleplayResultDto 전달하여 진입.
+- **HistoryScreen 구현**: resultId로 `getRoleplayResult`만 조회 후 스크린 상태로만 보관(RoleplayStateService 미사용). GET /v1/users/profile 미호출, 레벨·프로그레스바 영역 미노출. History↔ReviewChat/ReviewEnding 구간 동안 동일 result 유지, 나갈 때·새 진입 시 갱신. Result와 유사 레이아웃(박스 210·본문, Lv/프로그레스바 제외), 초기 애니메이션 없음. Got it 버튼 노출만(동작 없음), Report 문구 없음. View Chat 탭 시 ReviewChatScreen에 RoleplayResultDto 전달하여 진입. **상단 별 3개 탭**: `GET /v1/roleplays/results-reload/{resultId}` 호출(운영자용 리프레시 테스트). 2xx 응답 시에만 화면을 새 RoleplayResultDto로 갱신, 그 외·에러 시 아무 동작 없음. 요청 진행 중에는 중복 탭 무시(화면상 인터랙션 없음).
 - **RoleplayResultDto**: 응답에 `avatarImgPath` 포함(Review Chat에서 AI 아바타 표시용). 내부 모델은 subTitle 다음에 avatarImgPath 필드.
 - **ReviewChatScreen 구현**: History에서 RoleplayResultDto 전달받아 채팅 이력 표시. 헤더 중앙 "Chat History"(Setting 계열 스타일), 좌상단 뒤로가기(header_arrow_back). chatHistory는 List\<SudaJson\>이며 key로 발화자 구분(USER / AI_CHARACTER / AI_NARRATOR / SYSTEM_MISSION), value를 그대로 표시. Playing과 동일 말풍선·나레이션·미션 배치 및 스타일(사용자 우측 흰색, AI 좌측 티얼+avatarImgPath 아바타, 나레이션/미션 중앙).
 - **ReviewEndingScreen 구현**: History "View Ending" 탭 시 `GET /v1/roleplays/{rpId}/roles/{rpRoleId}/endings/{endingId}` 호출, 응답 RoleplayEndingDto·이미지 프리로드 후 진입(버튼에 Opening과 동일 뱅글 로딩). Sub Screen. 헤더 "View Ending"+뒤로가기. 본문: 이미지(BoxFit.cover·높이 100%·비율 유지·좌우 잘림 가능) → 2s 후 레이어·타이틀(상단 25%)·콘텐츠(하단 75%) 페이드인. 버튼 없음.
@@ -323,7 +325,8 @@
 - **-40 분기 리뷰 퀘스트**: Opening의 `sessionId == '-40'` 팝업에서 "Leave Stars ⭐" 탭 시 OS 인앱리뷰 API를 호출.
   - 인앱리뷰 호출 성공 반환 시 `POST /v1/users/quests/{questId}` 호출 (`questId = sessionId`)
   - 응답 `QuestResultDto.completeYn == 'Y'`인 경우에만 `surveySuccessToast` 토스트 노출, 그 외 별도 처리 없음.
-- **앱 버전 1.0.5**: `pubspec.yaml` 1.0.5+6, `AppConfig.appVersion` 1.0.5. Setting 화면 하단: 개인정보·이용약관·오픈소스 블록 위로 조정, 그 아래 버전 텍스트 `v x.x.x` (fontSize 11, 흰색, 중앙 정렬) 노출.
+- **앱 버전 1.0.6**: `pubspec.yaml` 1.0.6+7, `AppConfig.appVersion` 1.0.6. Setting 화면 하단: 개인정보·이용약관·오픈소스 블록 위로 조정, 그 아래 버전 텍스트 `v x.x.x` (fontSize 11, 흰색, 중앙 정렬) 노출.
+- 앱 버전 1.0.5 → 1.0.6 상향 (이후 변경사항은 1.0.6 기준으로 처리).
 - **푸시 appPath 연동**: FCM data에 `appPath` 포함 시 알림 클릭 후 해당 스크린으로 이동. 비로그인/미동의 시 `PendingAppPathService`에 보관, Home 진입 시 적용. 지원 경로·정의는 `.docs/CONTEXT_SCREEN.md` appPath 섹션. `lib/services/pending_app_path_service.dart`, `main.dart`(getInitialMessage·onMessageOpenedApp·_applyPendingAppPath).
 - **NotificationBoxScreen 알림 페이징**: Alarm 탭(Main Screen) 진입 시 `/v1/users/notification?page=0`으로 알림 목록 조회, 스크롤 하단 도달 시 1, 2, 3... 순차 호출. 응답이 빈 리스트이면 더 이상 호출하지 않음. 응답 DTO는 `NotificationDto(id, title(List<SudaJson>), content(List<SudaJson>), imgPath, appPath, sendFinishedAt)`이며, title/content는 `SudaJsonUtil.localizedText`로 사용자 언어에 맞게 표시. 결과가 없을 때는 본문 중앙에 "No notification yet"(l10n.notificationsEmpty)을 body-default 흰색 텍스트로 노출.
 - **Android 서명 정책 변경(Flavor 기준)**: `android/app/build.gradle.kts`에서 local/dev/stg는 debug/release 모두 디버그 키스토어 사용, prd는 debug/release 모두 `android/key.properties`의 릴리스 키스토어 사용. prd 빌드에서 `key.properties`가 없으면 빌드 실패.

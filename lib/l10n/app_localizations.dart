@@ -280,6 +280,18 @@ abstract class AppLocalizations {
   /// **'All your progress and data will be permanently lost. Are you sure?'**
   String get accountDeleteConfirmText;
 
+  /// No description provided for @accountDeleteProfileImageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete profile image?'**
+  String get accountDeleteProfileImageTitle;
+
+  /// No description provided for @accountDeleteProfileImageContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Once deleted, your profile image cannot be recovered.'**
+  String get accountDeleteProfileImageContent;
+
   /// No description provided for @accountGoBack.
   ///
   /// In en, this message translates to:

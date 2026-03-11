@@ -109,6 +109,13 @@ class AppLocalizationsPt extends AppLocalizations {
       'Todos os seus progressos e dados serão perdidos permanentemente. Tem certeza?';
 
   @override
+  String get accountDeleteProfileImageTitle => 'Excluir imagem de perfil?';
+
+  @override
+  String get accountDeleteProfileImageContent =>
+      'Depois de excluída, sua imagem de perfil não poderá ser recuperada.';
+
+  @override
   String get accountGoBack => 'Voltar';
 
   @override

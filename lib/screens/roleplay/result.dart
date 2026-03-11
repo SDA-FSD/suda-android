@@ -6,8 +6,7 @@ import 'package:vibration/vibration.dart';
 import '../../l10n/app_localizations.dart';
 import '../../routes/roleplay_router.dart';
 import '../../services/roleplay_state_service.dart';
-import '../../services/token_storage.dart';
-import '../../services/suda_api_client.dart';
+import '../../utils/default_toast.dart';
 
 /// Roleplay Result Screen (Full Screen)
 ///
@@ -41,6 +40,17 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
   double? _progressPercentage;
   bool _reportSubmitted = false;
 
+  // 5~8단계 애니메이션: 초기값(기존값)으로 세팅 후 단계별 전환
+  bool _missionRevealed = false;
+  int _displayWords = 0;
+  double _displayLikePoint = 0;
+  int? _displayLevel;
+  double _displayProgress = 0;
+  AnimationController? _likePointController;
+  AnimationController? _wordsController;
+  AnimationController? _levelProgressController;
+  bool _levelUpToastShown = false;
+
   @override
   void initState() {
     super.initState();
@@ -51,24 +61,159 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
     _boxShrinkController.addListener(() {
       if (mounted) setState(() {});
     });
+    _boxShrinkController.addStatusListener(_onBoxShrinkStatusChanged);
+    final dto = RoleplayStateService.instance.cachedResult;
+    _currentLevel = dto?.afterLevel;
+    _progressPercentage = dto?.afterProgressPercentage?.toDouble();
+    _displayLevel = dto?.beforeLevel;
+    _displayProgress = (dto?.beforeProgressPercentage ?? 0).toDouble();
     _scheduleBoxLayerSequence();
-    _fetchProfile();
   }
 
-  Future<void> _fetchProfile() async {
-    final token = await TokenStorage.loadAccessToken();
-    if (token == null || !mounted) return;
-    try {
-      final profile = await SudaApiClient.getUserProfile(accessToken: token);
-      if (mounted) {
-        setState(() {
-          _currentLevel = profile.currentLevel;
-          _progressPercentage = profile.progressPercentage;
-        });
-      }
-    } catch (_) {
-      // ignore; progress bar will show 0
+  void _onBoxShrinkStatusChanged(AnimationStatus status) {
+    if (status == AnimationStatus.completed) {
+      _boxShrinkController.removeStatusListener(_onBoxShrinkStatusChanged);
+      _scheduleContentAnimations();
     }
+  }
+
+  Future<void> _scheduleContentAnimations() async {
+    if (!mounted) return;
+    await Future.delayed(const Duration(milliseconds: 300));
+    if (!mounted) return;
+    _startPhase5_7_8();
+    await Future.delayed(const Duration(milliseconds: 300));
+    if (!mounted) return;
+    _startPhase6();
+  }
+
+  void _startPhase5_7_8() {
+    final dto = RoleplayStateService.instance.cachedResult;
+    if (dto == null || !mounted) return;
+
+    final missionResultStr = dto.missionResult ?? '';
+    final hasAnyY = missionResultStr.toUpperCase().contains('Y');
+    if (hasAnyY) {
+      Vibration.vibrate(duration: 80);
+    }
+    setState(() => _missionRevealed = true);
+
+    final likePointTarget = (dto.likePoint ?? 0).toDouble();
+    _likePointController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+    _likePointController!.addListener(() {
+      if (mounted && _likePointController != null) setState(() {
+        _displayLikePoint = likePointTarget * _likePointController!.value;
+      });
+    });
+    final lpCtrl = _likePointController!;
+    lpCtrl.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        lpCtrl.dispose();
+        _likePointController = null;
+      }
+    });
+    lpCtrl.forward();
+
+    final beforeLevel = dto.beforeLevel ?? 0;
+    final afterLevel = dto.afterLevel ?? 0;
+    final beforeProgress = (dto.beforeProgressPercentage ?? 0).toDouble();
+    final afterProgress = (dto.afterProgressPercentage ?? 0).toDouble();
+
+    _levelProgressController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+    _levelProgressController!.addListener(() {
+      if (!mounted || _levelProgressController == null) return;
+      final t = _levelProgressController!.value;
+      final levelProgress = _computeLevelProgress(
+        t: t,
+        beforeLevel: beforeLevel,
+        afterLevel: afterLevel,
+        beforeProgress: beforeProgress,
+        afterProgress: afterProgress,
+      );
+      setState(() {
+        _displayLevel = levelProgress.$1;
+        _displayProgress = levelProgress.$2;
+      });
+    });
+    final lvCtrl = _levelProgressController!;
+    lvCtrl.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        if (afterLevel > beforeLevel && mounted && !_levelUpToastShown) {
+          _levelUpToastShown = true;
+          final ctx = context;
+          final l10n = AppLocalizations.of(ctx);
+          if (l10n != null) {
+            DefaultToast.show(ctx, l10n.surveySuccessToast);
+          }
+        }
+        lvCtrl.dispose();
+        _levelProgressController = null;
+      }
+    });
+    lvCtrl.forward();
+  }
+
+  (int, double) _computeLevelProgress({
+    required double t,
+    required int beforeLevel,
+    required int afterLevel,
+    required double beforeProgress,
+    required double afterProgress,
+  }) {
+    if (beforeLevel == afterLevel) {
+      final p = beforeProgress + t * (afterProgress - beforeProgress);
+      return (beforeLevel, p.clamp(0, 100));
+    }
+    final levelDiff = afterLevel - beforeLevel;
+    final segment1 = 100 - beforeProgress;
+    final segmentLast = afterProgress;
+    final total = segment1 + 100.0 * (levelDiff - 1) + segmentLast;
+    final amount = (t * total).clamp(0.0, total);
+
+    if (amount <= segment1) {
+      final p = beforeProgress + (amount / segment1) * (100 - beforeProgress);
+      return (beforeLevel, p);
+    }
+    final remaining = amount - segment1;
+    final fullBars = (remaining / 100).floor().clamp(0, levelDiff - 1);
+    if (fullBars < levelDiff - 1) {
+      final progress = remaining - 100 * fullBars;
+      return (beforeLevel + 1 + fullBars, progress.clamp(0, 100));
+    }
+    final p = (remaining - 100 * (levelDiff - 1)) / segmentLast * afterProgress;
+    return (afterLevel, p.clamp(0, 100));
+  }
+
+  void _startPhase6() {
+    final dto = RoleplayStateService.instance.cachedResult;
+    if (dto == null || !mounted) return;
+    final wordsTarget = dto.words ?? 0;
+    if (wordsTarget > 0) {
+      Vibration.vibrate(duration: 80);
+    }
+    _wordsController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+    final wCtrl = _wordsController!;
+    wCtrl.addListener(() {
+      if (mounted) setState(() {
+        _displayWords = (wordsTarget * wCtrl.value).round();
+      });
+    });
+    wCtrl.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        wCtrl.dispose();
+        _wordsController = null;
+      }
+    });
+    wCtrl.forward();
   }
 
   void _startBoxShrink() {
@@ -103,7 +248,11 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
 
   @override
   void dispose() {
+    _boxShrinkController.removeStatusListener(_onBoxShrinkStatusChanged);
     _boxShrinkController.dispose();
+    _likePointController?.dispose();
+    _wordsController?.dispose();
+    _levelProgressController?.dispose();
     super.dispose();
   }
 
@@ -195,8 +344,8 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
     final l10n = AppLocalizations.of(context)!;
     final screenWidth = MediaQuery.sizeOf(context).width;
 
-    // likePoint 그라데이션 텍스트 (h1, #80D7CF -> #CFFFFB)
-    final likePointValue = dto?.likePoint != null ? '${dto!.likePoint}' : '00';
+    // likePoint: 5~8단계에서 _displayLikePoint 사용 (0 → 결과값 500ms)
+    final likePointDisplay = '${_displayLikePoint.round()}'.padLeft(2, '0');
     final likePointText = ShaderMask(
       shaderCallback: (bounds) => const LinearGradient(
         begin: Alignment.topCenter,
@@ -204,33 +353,45 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
         colors: [_mint, _mintLight],
       ).createShader(bounds),
       blendMode: BlendMode.srcIn,
-      child: Text(
-        likePointValue,
-        style: theme.headlineLarge?.copyWith(color: Colors.white),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 2),
+        child: Text(
+          likePointDisplay,
+          style: theme.headlineLarge?.copyWith(color: Colors.white),
+        ),
       ),
     );
 
-    // missionResult: "YYNN" -> Y=succeeded, N=failed, 아이콘 높이 20, gap 없음
+    // Mission: 초기 N*n → 5단계에서 missionResult 아이콘으로 전환 (_missionRevealed)
     final missionResultStr = dto?.missionResult ?? '';
+    final missionLen = missionResultStr.isEmpty
+        ? (dto?.completedMissionIds?.length ?? 0)
+        : missionResultStr.length;
     final missionIcons = <Widget>[];
-    if (missionResultStr.isEmpty) {
-      final missionCount = dto?.completedMissionIds?.length ?? 0;
-      for (var i = 0; i < missionCount; i++) {
-        missionIcons.add(Image.asset(_missionFailed, height: 20, width: 20, fit: BoxFit.contain));
+    if (_missionRevealed) {
+      if (missionResultStr.isEmpty) {
+        for (var i = 0; i < missionLen; i++) {
+          missionIcons.add(Image.asset(_missionFailed, height: 20, width: 20, fit: BoxFit.contain));
+        }
+      } else {
+        for (var i = 0; i < missionResultStr.length; i++) {
+          final isSuccess = missionResultStr[i].toUpperCase() == 'Y';
+          missionIcons.add(Image.asset(
+            isSuccess ? _missionSucceeded : _missionFailed,
+            height: 20,
+            width: 20,
+            fit: BoxFit.contain,
+          ));
+        }
       }
     } else {
-      for (var i = 0; i < missionResultStr.length; i++) {
-        final isSuccess = missionResultStr[i].toUpperCase() == 'Y';
-        missionIcons.add(Image.asset(
-          isSuccess ? _missionSucceeded : _missionFailed,
-          height: 20,
-          width: 20,
-          fit: BoxFit.contain,
-        ));
+      for (var i = 0; i < missionLen; i++) {
+        missionIcons.add(Image.asset(_missionFailed, height: 20, width: 20, fit: BoxFit.contain));
       }
     }
 
-    final wordsValue = dto?.words != null ? '${dto!.words}' : '00';
+    // Words: 6단계에서 _displayWords 사용 (0 → 결과값 300ms)
+    final wordsDisplay = '$_displayWords'.padLeft(2, '0');
 
     final bodyDefaultMint = theme.bodyLarge?.copyWith(
       fontWeight: FontWeight.w600,
@@ -294,7 +455,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
                   children: [
                     Text('Words', style: bodyDefaultMint),
                     const SizedBox(height: 4),
-                    Text(wordsValue, style: theme.bodyLarge?.copyWith(color: Colors.white)),
+                    Text(wordsDisplay, style: theme.bodyLarge?.copyWith(color: Colors.white)),
                   ],
                 ),
               ),
@@ -310,12 +471,12 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
-                'Lv. ${_currentLevel ?? 0}',
+                'Lv. ${_displayLevel ?? 0}',
                 style: theme.labelSmall?.copyWith(color: Colors.white),
               ),
               const SizedBox(width: 10),
               Expanded(
-                child: _ResultProgressBar(progressPercentage: _progressPercentage ?? 0.0),
+                child: _ResultProgressBar(progressPercentage: _displayProgress),
               ),
             ],
           ),

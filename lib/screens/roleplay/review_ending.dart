@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../config/app_config.dart';
 import '../../models/roleplay_models.dart';
 import '../../utils/suda_json_util.dart';
+import '../../utils/default_markdown.dart';
 import '../../widgets/app_scaffold.dart';
 
 /// Review Ending Screen (Sub Screen)
@@ -49,6 +50,8 @@ class _ReviewEndingScreenState extends State<ReviewEndingScreen> {
     final theme = Theme.of(context).textTheme;
     final title = SudaJsonUtil.localizedText(widget.ending.title);
     final content = SudaJsonUtil.localizedText(widget.ending.content);
+    final contentStyle = theme.bodyMedium?.copyWith(color: Colors.white)
+        ?? TextStyle(color: Colors.white);
 
     return AppScaffold(
       centerTitle: 'View Ending',
@@ -114,10 +117,13 @@ class _ReviewEndingScreenState extends State<ReviewEndingScreen> {
                             padding: const EdgeInsets.symmetric(
                               horizontal: 24,
                             ),
-                            child: Text(
-                              content,
-                              style: theme.bodyMedium?.copyWith(
-                                color: Colors.white,
+                            child: Text.rich(
+                              TextSpan(
+                                style: contentStyle,
+                                children: DefaultMarkdown.buildSpans(
+                                  content,
+                                  contentStyle,
+                                ),
                               ),
                               textAlign: TextAlign.center,
                             ),

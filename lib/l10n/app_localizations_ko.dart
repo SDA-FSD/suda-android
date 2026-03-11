@@ -106,6 +106,12 @@ class AppLocalizationsKo extends AppLocalizations {
       '모든 진행 상황과 데이터가 영구적으로 손실됩니다. 정말로 계속하시겠습니까?';
 
   @override
+  String get accountDeleteProfileImageTitle => '프로필 이미지를 삭제하시겠어요?';
+
+  @override
+  String get accountDeleteProfileImageContent => '삭제하면 프로필 이미지는 복구할 수 없습니다.';
+
+  @override
   String get accountGoBack => '이전으로';
 
   @override

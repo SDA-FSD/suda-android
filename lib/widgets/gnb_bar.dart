@@ -28,7 +28,7 @@ class GnbBar extends StatelessWidget {
   final VoidCallback? onProfileTap;
   final UserDto? user;
 
-  /// playing 슬라이더와 동일: BackdropFilter sigma 6 + Color(0x598C8C8C)
+  /// 오버레이 공통: BackdropFilter sigma 6 + Color(0x59000000)
   /// GNB 상단(본문과 맞닿는 쪽) 좌·우 radius 10 둥근 처리
   static const BorderRadius _topCornerRadius = BorderRadius.only(
     topLeft: Radius.circular(10),
@@ -43,7 +43,7 @@ class GnbBar extends StatelessWidget {
         filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
         child: Container(
           decoration: BoxDecoration(
-            color: const Color(0x598C8C8C),
+            color: const Color(0x59000000),
             borderRadius: _topCornerRadius,
             border: Border(
               top: BorderSide(
@@ -165,6 +165,9 @@ class _GnbProfileAvatar extends StatelessWidget {
     required this.isActive,
   });
 
+  static const String _defaultProfileImage =
+      'assets/images/icons/default_profile_image.png';
+
   final String? profileImgUrl;
   final bool isActive;
 
@@ -214,11 +217,11 @@ class _GnbProfileAvatar extends StatelessWidget {
   }
 
   Widget _placeholder(double size) {
-    return Container(
+    return Image.asset(
+      _defaultProfileImage,
       width: size,
       height: size,
-      color: const Color(0xFF1E1E1E),
-      child: const Icon(Icons.person, color: Colors.white, size: 20),
+      fit: BoxFit.cover,
     );
   }
 }

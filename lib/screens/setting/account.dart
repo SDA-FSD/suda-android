@@ -21,6 +21,7 @@ class _AccountScreenState extends State<AccountScreen> with SingleTickerProvider
   UserDto? _user;
   bool _isLoading = true;
   bool _showDeleteConfirm = false;
+  bool _showDeleteProfileImgConfirm = false;
   
   // 애니메이션 관련
   late AnimationController _animationController;
@@ -149,6 +150,34 @@ class _AccountScreenState extends State<AccountScreen> with SingleTickerProvider
     });
   }
 
+  void _openDeleteProfileImgConfirm() {
+    setState(() => _showDeleteProfileImgConfirm = true);
+    _animationController.forward();
+  }
+
+  void _closeDeleteProfileImgConfirm() {
+    _animationController.reverse().then((_) {
+      if (mounted) {
+        setState(() => _showDeleteProfileImgConfirm = false);
+      }
+    });
+  }
+
+  Future<void> _handleDeleteProfileImage() async {
+    try {
+      final token = await TokenStorage.loadAccessToken();
+      if (token == null) return;
+
+      await SudaApiClient.deleteProfileImage(accessToken: token);
+      await _loadUserInfo();
+      if (mounted) _closeDeleteProfileImgConfirm();
+    } catch (e) {
+      if (mounted) {
+        DefaultToast.show(context, 'Failed to delete profile image: $e', isError: true);
+      }
+    }
+  }
+
   Future<void> _handleDeleteAccount() async {
     try {
       final token = await TokenStorage.loadAccessToken();
@@ -219,22 +248,54 @@ class _AccountScreenState extends State<AccountScreen> with SingleTickerProvider
                         children: [
                           const SizedBox(height: 24),
                           Center(
-                            child: Container(
-                              width: 100,
-                              height: 100,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.grey[800],
-                                image: _user?.profileImgUrl != null && _user!.profileImgUrl!.isNotEmpty
-                                    ? DecorationImage(
-                                        image: NetworkImage(_user!.profileImgUrl!),
-                                        fit: BoxFit.cover,
-                                      )
-                                    : null,
+                            child: GestureDetector(
+                              onTap: () {
+                                final hasImage = _user?.profileImgUrl != null &&
+                                    _user!.profileImgUrl!.isNotEmpty;
+                                if (!hasImage) return;
+                                _openDeleteProfileImgConfirm();
+                              },
+                              child: ClipOval(
+                                child: Container(
+                                  width: 100,
+                                  height: 100,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Colors.grey[800],
+                                    image: (_user?.profileImgUrl != null &&
+                                            _user!.profileImgUrl!.isNotEmpty)
+                                        ? DecorationImage(
+                                            image: NetworkImage(_user!.profileImgUrl!),
+                                            fit: BoxFit.cover,
+                                          )
+                                        : const DecorationImage(
+                                            image: AssetImage(
+                                              'assets/images/icons/default_profile_image.png',
+                                            ),
+                                            fit: BoxFit.cover,
+                                          ),
+                                  ),
+                                  child: (_user?.profileImgUrl != null &&
+                                          _user!.profileImgUrl!.isNotEmpty)
+                                      ? Stack(
+                                          fit: StackFit.expand,
+                                          children: [
+                                            Container(
+                                              color: const Color(0x80121212), // #121212 @ 50%
+                                            ),
+                                            Center(
+                                              child: Image.asset(
+                                                'assets/images/icons/square_x.png',
+                                                width: 32,
+                                                height: 32,
+                                                fit: BoxFit.contain,
+                                              ),
+                                            ),
+                                          ],
+                                        )
+                                      : null,
+                                ),
                               ),
-                              child: _user?.profileImgUrl == null || _user!.profileImgUrl!.isEmpty
-                                  ? const Icon(Icons.person, size: 60, color: Colors.white54)
-                                  : null,
                             ),
                           ),
                           const SizedBox(height: 24),
@@ -378,6 +439,82 @@ class _AccountScreenState extends State<AccountScreen> with SingleTickerProvider
             ),
             ),
           ],
+
+        // 프로필 이미지 삭제 확인 레이어 (계정 삭제 레이어와 동일 형태, 문구/동작만 변경)
+        if (_showDeleteProfileImgConfirm) ...[
+          Positioned.fill(
+            child: FadeTransition(
+              opacity: _fadeAnimation,
+              child: GestureDetector(
+                onTap: _closeDeleteProfileImgConfirm,
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                  child: Container(
+                    color: Colors.black.withOpacity(0.4),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: SlideTransition(
+              position: _slideAnimation,
+              child: Container(
+                width: double.infinity,
+                decoration: const BoxDecoration(
+                  color: Color(0xFF1E1E1E),
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                ),
+                child: SafeArea(
+                  top: false,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const SizedBox(height: 60),
+                      Text(
+                        l10n.accountDeleteProfileImageTitle,
+                        style: theme.headlineMedium?.copyWith(color: Colors.white),
+                      ),
+                      const SizedBox(height: 30),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: Text(
+                          l10n.accountDeleteProfileImageContent,
+                          textAlign: TextAlign.center,
+                          style: theme.bodyLarge?.copyWith(color: Colors.white),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: _closeDeleteProfileImgConfirm,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF0CABA8),
+                          shape: const StadiumBorder(),
+                          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                          elevation: 0,
+                        ),
+                        child: Text(
+                          l10n.accountGoBack,
+                          style: theme.bodyLarge?.copyWith(color: Colors.white),
+                        ),
+                      ),
+                      const SizedBox(height: 60),
+                      GestureDetector(
+                        onTap: _handleDeleteProfileImage,
+                        child: Text(
+                          l10n.accountDeleteAction,
+                          style: theme.bodySmall?.copyWith(color: const Color(0xFFFF0000)),
+                        ),
+                      ),
+                      const SizedBox(height: 60),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }

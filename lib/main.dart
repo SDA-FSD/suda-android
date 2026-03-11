@@ -82,6 +82,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   bool _isLoading = true;
   String _currentMainScreen = 'home'; // 'alarm' | 'home' | 'profile'
   int _homeTabSelectedCounter = 0; // 홈 탭 선택 시 증가 → HomeScreen 티켓 갱신
+  int _profileReturnCounter = 0; // Profile 탭 활성 상태에서 서브 스크린 pop 복귀 시 증가 → ProfileScreen 프로필 재조회
   bool _hasCheckedVersion = false; // 버전 체크 실행 여부
   bool _needsAgreement = false; // 서비스 이용 동의 필요 여부
   /// 앱 실행(토큰 없음) 시에만 true. CustomSplashScreen 표시 후 onComplete에서 false. 로그아웃 시에는 false로 곧바로 LoginScreen.
@@ -129,6 +130,31 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       // 파싱 실패 시 팝업 노출하지 않음
       return false;
     }
+  }
+
+  Future<void> _bestEffortLogoutSideEffects() async {
+    // 서버 로그아웃은 best-effort로 시도하고, 실패해도 무시한다.
+    try {
+      final refreshToken = await TokenStorage.loadRefreshToken();
+      if (refreshToken != null && refreshToken.isNotEmpty) {
+        final deviceId = await TokenStorage.getDeviceId();
+        await SudaApiClient.logout(
+          refreshToken: refreshToken,
+          deviceId: deviceId,
+        );
+      }
+    } catch (_) {}
+
+    // Google 로그아웃 및 로컬 토큰 삭제도 best-effort로 처리한다.
+    try {
+      await AuthService.signOut();
+    } catch (_) {}
+
+    try {
+      await TokenStorage.clearTokens();
+    } catch (_) {}
+
+    TokenRefreshService.instance.stop();
   }
 
   @override
@@ -220,9 +246,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             showOkayButton: true,
           );
         }
-        await TokenStorage.clearTokens();
+        await _bestEffortLogoutSideEffects();
         if (!mounted) return;
         setState(() {
+          _googleUser = null;
           _accessToken = null;
           _user = null;
           _isLoading = false;
@@ -329,12 +356,14 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             showOkayButton: true,
           );
         }
-        await TokenStorage.clearTokens();
-        TokenRefreshService.instance.stop();
+        await _bestEffortLogoutSideEffects();
         if (!mounted) return;
         setState(() {
+          _googleUser = null;
           _accessToken = null;
           _user = null;
+          _needsAgreement = false;
+          _showCustomSplash = false;
         });
         return;
       }
@@ -563,7 +592,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                     return MainRouteAwareWrapper(
                   routeObserver: _routeObserver,
                   onReturnToRoute: () {
-                    setState(() => _homeTabSelectedCounter++);
+                    setState(() {
+                      _homeTabSelectedCounter++;
+                      if (_currentMainScreen == 'profile') {
+                        _profileReturnCounter++;
+                      }
+                    });
                   },
                   child: PopScope(
                     canPop: _currentMainScreen == 'home',
@@ -606,6 +640,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                           });
                         },
                         isActive: _currentMainScreen == 'profile',
+                        profileReturnCounter: _profileReturnCounter,
                         ),
                       ],
                     ),

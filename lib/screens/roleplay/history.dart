@@ -33,11 +33,10 @@ class HistoryScreen extends StatefulWidget {
 
 class _HistoryScreenState extends State<HistoryScreen> {
   RoleplayResultDto? _resultDto;
-  int? _currentLevel;
-  double? _progressPercentage;
   bool _loading = true;
   String? _error;
   bool _endingLoading = false;
+  bool _reloadInProgress = false;
 
   static const double _finalBoxHeight = 210;
   static const Color _teal = Color(0xFF0CABA8);
@@ -71,18 +70,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
       _error = null;
     });
     try {
-      final resultFuture = SudaApiClient.getRoleplayResult(
+      final result = await SudaApiClient.getRoleplayResult(
         accessToken: token,
         resultId: widget.resultId,
       );
-      final profileFuture = SudaApiClient.getUserProfile(accessToken: token);
-      final result = await resultFuture;
-      final profile = await profileFuture;
       if (!mounted) return;
       setState(() {
         _resultDto = result;
-        _currentLevel = profile.currentLevel;
-        _progressPercentage = profile.progressPercentage;
         _loading = false;
         _error = null;
       });
@@ -93,6 +87,24 @@ class _HistoryScreenState extends State<HistoryScreen> {
           _error = e.toString();
         });
       }
+    }
+  }
+
+  /// GET /v1/roleplays/results-reload/{resultId}. 2xx only → update _resultDto. No UI feedback; blocks duplicate taps while in progress.
+  Future<void> _fetchReload() async {
+    if (_reloadInProgress) return;
+    final token = await TokenStorage.loadAccessToken();
+    if (token == null || !mounted) return;
+    setState(() => _reloadInProgress = true);
+    try {
+      final dto = await SudaApiClient.getRoleplayResultReload(
+        accessToken: token,
+        resultId: widget.resultId,
+      );
+      if (!mounted) return;
+      if (dto != null) setState(() => _resultDto = dto);
+    } finally {
+      if (mounted) setState(() => _reloadInProgress = false);
     }
   }
 
@@ -133,13 +145,19 @@ class _HistoryScreenState extends State<HistoryScreen> {
       ],
     );
 
+    final starsTappable = GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: _fetchReload,
+      child: starsRow,
+    );
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         const SizedBox(height: 20),
-        starsRow,
+        starsTappable,
         const SizedBox(height: 5),
         Text(
           dto?.mainTitle ?? '',
@@ -169,9 +187,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
         colors: [_mint, _mintLight],
       ).createShader(bounds),
       blendMode: BlendMode.srcIn,
-      child: Text(
-        likePointValue,
-        style: theme.headlineLarge?.copyWith(color: Colors.white),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 2),
+        child: Text(
+          likePointValue,
+          style: theme.headlineLarge?.copyWith(color: Colors.white),
+        ),
       ),
     );
 
@@ -262,25 +283,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
               ),
             ),
           ],
-        ),
-        const SizedBox(height: 25),
-        Center(
-          child: SizedBox(
-            width: screenWidth * 0.7,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  'Lv. ${_currentLevel ?? 0}',
-                  style: theme.labelSmall?.copyWith(color: Colors.white),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: _HistoryProgressBar(progressPercentage: _progressPercentage ?? 0.0),
-                ),
-              ],
-            ),
-          ),
         ),
         const SizedBox(height: 25),
         Text('Good Points', style: h3Mint, textAlign: TextAlign.center),
@@ -508,41 +510,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _HistoryProgressBar extends StatelessWidget {
-  final double progressPercentage;
-
-  const _HistoryProgressBar({required this.progressPercentage});
-
-  @override
-  Widget build(BuildContext context) {
-    final p = (progressPercentage.clamp(0, 100)) / 100.0;
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(2),
-      child: SizedBox(
-        height: 4,
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return Stack(
-              children: [
-                const Positioned.fill(
-                  child: ColoredBox(color: Color(0xFF635F5F)),
-                ),
-                Positioned(
-                  left: 0,
-                  top: 0,
-                  bottom: 0,
-                  width: constraints.maxWidth * p,
-                  child: const ColoredBox(color: Color(0xFF80D7CF)),
-                ),
-              ],
-            );
-          },
         ),
       ),
     );

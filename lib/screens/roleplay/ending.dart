@@ -9,6 +9,7 @@ import '../../services/roleplay_state_service.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
 import '../../utils/suda_json_util.dart';
+import '../../utils/default_markdown.dart';
 
 /// Roleplay Ending Screen (Full Screen)
 ///
@@ -185,6 +186,8 @@ class _RoleplayEndingScreenState extends State<RoleplayEndingScreen>
     final content = ending != null
         ? SudaJsonUtil.localizedText(ending.content)
         : '';
+    final contentStyle = theme.bodyMedium?.copyWith(color: Colors.white)
+        ?? TextStyle(color: Colors.white);
     final screenHeight = MediaQuery.sizeOf(context).height;
 
     return PopScope(
@@ -248,10 +251,13 @@ class _RoleplayEndingScreenState extends State<RoleplayEndingScreen>
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 50),
-                            Text(
-                              content,
-                              style: theme.bodyMedium?.copyWith(
-                                color: Colors.white,
+                            Text.rich(
+                              TextSpan(
+                                style: contentStyle,
+                                children: DefaultMarkdown.buildSpans(
+                                  content,
+                                  contentStyle,
+                                ),
                               ),
                               textAlign: TextAlign.center,
                             ),

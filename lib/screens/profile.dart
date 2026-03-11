@@ -23,6 +23,8 @@ class ProfileScreen extends StatefulWidget {
   final UserDto? user;
   final ValueChanged<UserDto>? onUserUpdated;
   final bool isActive; // 화면 활성 상태 여부 추가
+  /// Profile 탭이 활성인 상태에서 서브 스크린에서 pop으로 복귀할 때마다 증가
+  final int? profileReturnCounter;
   
   const ProfileScreen({
     super.key,
@@ -32,6 +34,7 @@ class ProfileScreen extends StatefulWidget {
     this.user,
     this.onUserUpdated,
     this.isActive = false,
+    this.profileReturnCounter,
   });
 
   @override
@@ -137,6 +140,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
     // 활성 상태로 전환될 때마다 프로필 갱신 + 롤플레이 목록 0페이지로 새로 호출(첫 요소 같으면 화면 갱신 없이 유지)
     if (!oldWidget.isActive && widget.isActive) {
+      _refreshProfile();
+      _fetchHistoryPage(0);
+    }
+    // Profile 탭이 활성인 상태에서 서브 스크린 pop으로 복귀할 때에도 동일하게 갱신
+    if (widget.isActive &&
+        widget.profileReturnCounter != null &&
+        widget.profileReturnCounter != oldWidget.profileReturnCounter) {
       _refreshProfile();
       _fetchHistoryPage(0);
     }
@@ -518,6 +528,9 @@ class _ProfileAvatar extends StatelessWidget {
 
   const _ProfileAvatar({required this.profileImgUrl});
 
+  static const String _defaultProfileImage =
+      'assets/images/icons/default_profile_image.png';
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -547,19 +560,19 @@ class _ProfileAvatar extends StatelessWidget {
                     height: 92,
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
-                      return const ColoredBox(
-                        color: Color(0xFF1E1E1E),
-                        child: Center(
-                          child: Icon(Icons.person, color: Colors.white),
-                        ),
+                      return Image.asset(
+                        _defaultProfileImage,
+                        width: 92,
+                        height: 92,
+                        fit: BoxFit.cover,
                       );
                     },
                   )
-                : const ColoredBox(
-                    color: Color(0xFF1E1E1E),
-                    child: Center(
-                      child: Icon(Icons.person, color: Colors.white),
-                    ),
+                : Image.asset(
+                    _defaultProfileImage,
+                    width: 92,
+                    height: 92,
+                    fit: BoxFit.cover,
                   ),
           ),
         ),

@@ -152,6 +152,17 @@ class SudaApiClient {
     );
   }
 
+  /// GET /v1/roleplays/results-reload/{resultId} (operator refresh test; 2xx → dto, else null)
+  static Future<RoleplayResultDto?> getRoleplayResultReload({
+    required String accessToken,
+    required int resultId,
+  }) {
+    return RoleplayApi.getRoleplayResultReload(
+      accessToken: accessToken,
+      resultId: resultId,
+    );
+  }
+
   /// GET /v1/roleplays/{rpId}/roles/{rpRoleId}/endings/{endingId}
   static Future<RoleplayEndingDto> getRoleplayEnding({
     required String accessToken,
@@ -252,6 +263,12 @@ class SudaApiClient {
     required String accessToken,
   }) {
     return UserApi.deleteUser(accessToken: accessToken);
+  }
+
+  static Future<void> deleteProfileImage({
+    required String accessToken,
+  }) {
+    return UserApi.deleteProfileImage(accessToken: accessToken);
   }
 
   static Future<void> registerPushToken({

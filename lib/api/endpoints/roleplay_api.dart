@@ -136,6 +136,42 @@ class RoleplayApi {
     );
   }
 
+  /// GET /v1/roleplays/results-reload/{resultId}
+  /// Returns RoleplayResultDto on 2xx, null otherwise (no throw). Operator refresh test.
+  static Future<RoleplayResultDto?> getRoleplayResultReload({
+    required String accessToken,
+    required int resultId,
+  }) async {
+    return _getRoleplayResultReloadInternal(accessToken, resultId);
+  }
+
+  static Future<RoleplayResultDto?> _getRoleplayResultReloadInternal(
+    String accessToken,
+    int resultId,
+  ) async {
+    final uri =
+        SudaHttpClient.buildUri('/v1/roleplays/results-reload/$resultId');
+    try {
+      final response = await SudaHttpClient.client
+          .get(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+              'Content-Type': 'application/json',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        final Map<String, dynamic> data =
+            jsonDecode(response.body) as Map<String, dynamic>;
+        return RoleplayResultDto.fromJson(data);
+      }
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
   /// GET /v1/roleplays/{rpId}/roles/{rpRoleId}/endings/{endingId}
   static Future<RoleplayEndingDto> getRoleplayEnding({
     required String accessToken,
