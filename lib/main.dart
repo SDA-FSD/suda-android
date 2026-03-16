@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -539,7 +540,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     return MaterialApp(
       navigatorKey: _navigatorKey,
-      navigatorObservers: [_routeObserver],
+      navigatorObservers: [
+        _routeObserver,
+        FirebaseAnalyticsObserver(analytics: FirebaseAnalytics.instance),
+      ],
       title: 'SUDA',
       debugShowCheckedModeBanner: false,
       localizationsDelegates: const [

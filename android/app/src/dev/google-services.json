@@ -12,7 +12,12 @@
           "package_name": "kr.sudatalk.app.dev"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "841694444330-g8gn852m4somers2668v46k3mm69p7dg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyACp32IAFdM7oNnGHlj2DM5imIxC9syZAQ"
@@ -20,7 +25,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "841694444330-g8gn852m4somers2668v46k3mm69p7dg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
