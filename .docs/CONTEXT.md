@@ -179,8 +179,8 @@
 
 - **공통 콘텐츠 팝업 (AppContentDialog)**: `lib/widgets/app_content_dialog.dart`
   - 재사용: `AppContentDialog.show(context, content: Widget, { showOkayButton, okayButtonLabel, onOkayPressed, barrierDismissible })`. 본문은 `content`에 위젯으로 전달(여러 스타일 텍스트·버튼·클릭 가능 텍스트 등). `okayButtonLabel` 기본값은 `'Okay'`.
-  - 배경: 노출 중 하단 화면 터치 불가. 배경 레이어는 오버레이 공통: BackdropFilter sigma 6 + Color(0x59000000).
-  - 팝업 카드: 가로 60%·최소 세로 50% 디스플레이, 테두리 10·#80D7CF·radius 30, 내부 상단 30 패딩·14×14 `close.svg` 우측(탭 시 닫힘), 본문 좌우 30·하단 30 마진. 옵션으로 하단 테두리 아래 30 마진 뒤 "Okay" 버튼(높이 44, 가로 40%, #0CABA8, StadiumBorder, ElevatedButton) 노출 가능.
+  - 배경: 노출 중 하단 화면 터치 불가. 배경 레이어는 오버레이 공통: `Color(0x66000000)`(검정 40%).
+  - 팝업 카드: 가로 80%·세로 50% 디스플레이, 테두리 10·#80D7CF·radius 30. 카드 내부 배경은 `#1E1E1E` 60%(`Color(0x991E1E1E)`) 반투명 + BackdropFilter sigma 6 블러를 사용. 내부 상단 20 패딩·`close.svg` 28×28 좌측(탭 시 닫힘), 본문 좌우 30·하단 30 마진(`showOkayButton`일 때 12). 옵션으로 하단 테두리를 덮는 "Okay" 버튼(높이 44, 최대 가로 70%, #0CABA8, StadiumBorder, ElevatedButton) 노출 가능.
 
 - **텍스트 언어 규칙**
   - **기본 원칙**: 사용자에게 표시되는 모든 기본 텍스트는 영어로 작성
@@ -325,8 +325,9 @@
 - **-40 분기 리뷰 퀘스트**: Opening의 `sessionId == '-40'` 팝업에서 "Leave Stars ⭐" 탭 시 OS 인앱리뷰 API를 호출.
   - 인앱리뷰 호출 성공 반환 시 `POST /v1/users/quests/{questId}` 호출 (`questId = sessionId`)
   - 응답 `QuestResultDto.completeYn == 'Y'`인 경우에만 `surveySuccessToast` 토스트 노출, 그 외 별도 처리 없음.
-- **앱 버전 1.0.6**: `pubspec.yaml` 1.0.6+7, `AppConfig.appVersion` 1.0.6. Setting 화면 하단: 개인정보·이용약관·오픈소스 블록 위로 조정, 그 아래 버전 텍스트 `v x.x.x` (fontSize 11, 흰색, 중앙 정렬) 노출.
-- 앱 버전 1.0.5 → 1.0.6 상향 (이후 변경사항은 1.0.6 기준으로 처리).
+**앱 버전 1.0.7**: `pubspec.yaml`의 `version` 값(예: 1.0.7+9)을 단일 사실 기준으로 사용. Setting 화면 하단: 개인정보·이용약관·오픈소스 블록 위로 조정, 그 아래 버전 텍스트 `v x.x.x` (fontSize 11, 흰색, 중앙 정렬) 노출.
+- 버전 비교 및 강제 업데이트 로직은 `VersionCheckService`에서 `AppVersionService.getAppVersion()` 결과와 서버 응답 `latestVersion`를 비교하여 처리.
+**버전 관리 원칙**: 신규 기능 개발 전 버전 상향이 필요할 때는 `pubspec.yaml`의 `version`만 관리(예: 1.0.7+9 → 1.0.8+10). 코드 내 버전 상수는 두지 않고, 런타임에 `AppVersionService`로 조회.
 - **푸시 appPath 연동**: FCM data에 `appPath` 포함 시 알림 클릭 후 해당 스크린으로 이동. 비로그인/미동의 시 `PendingAppPathService`에 보관, Home 진입 시 적용. 지원 경로·정의는 `.docs/CONTEXT_SCREEN.md` appPath 섹션. `lib/services/pending_app_path_service.dart`, `main.dart`(getInitialMessage·onMessageOpenedApp·_applyPendingAppPath).
 - **NotificationBoxScreen 알림 페이징**: Alarm 탭(Main Screen) 진입 시 `/v1/users/notification?page=0`으로 알림 목록 조회, 스크롤 하단 도달 시 1, 2, 3... 순차 호출. 응답이 빈 리스트이면 더 이상 호출하지 않음. 응답 DTO는 `NotificationDto(id, title(List<SudaJson>), content(List<SudaJson>), imgPath, appPath, sendFinishedAt)`이며, title/content는 `SudaJsonUtil.localizedText`로 사용자 언어에 맞게 표시. 결과가 없을 때는 본문 중앙에 "No notification yet"(l10n.notificationsEmpty)을 body-default 흰색 텍스트로 노출.
 - **공지사항 화면**: AnnouncementsScreen (`GET /v1/notice` page/size 페이징), AnnouncementDetailScreen (`GET /v1/notice/{id}`). 카드: 제목·본문 1줄 말줄임, publishedAt YYYY-MM-DD 우하단. 빈 상태 l10n.noticesEmpty. showYn='n' 또는 삭제/404 시: 상세 페이지 대신 AppContentDialog 팝업으로 l10n.postNoLongerAvailable(게시물이 삭제되었거나 존재하지 않습니다) 안내, 버튼 l10n.backToHome(홈으로 가기).

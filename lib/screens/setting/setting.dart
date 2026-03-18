@@ -7,6 +7,7 @@ import '../../services/suda_api_client.dart';
 import '../../utils/default_toast.dart';
 import '../../utils/sub_screen_route.dart';
 import '../../widgets/app_scaffold.dart';
+import '../../services/app_version_service.dart';
 import 'account.dart';
 import 'language_level.dart';
 import 'push_agreement.dart';
@@ -156,18 +157,27 @@ class SettingScreen extends StatelessWidget {
             ),
           ),
           // 버전 정보 (caption보다 작은 크기, 흰색, 중앙 정렬)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 24),
-            child: Center(
-              child: Text(
-                'v ${AppConfig.appVersion}',
-                style: const TextStyle(
-                  fontSize: 11,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w400,
+          FutureBuilder<String>(
+            future: AppVersionService.getAppVersion(),
+            builder: (context, snapshot) {
+              final version = snapshot.data;
+              if (version == null) {
+                return const SizedBox.shrink();
+              }
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 24),
+                child: Center(
+                  child: Text(
+                    'v $version',
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
                 ),
-              ),
-            ),
+              );
+            },
           ),
         ],
       ),
