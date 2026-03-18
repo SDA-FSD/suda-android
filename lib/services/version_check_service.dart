@@ -4,7 +4,7 @@ import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:suda/services/suda_api_client.dart';
 import 'package:suda/services/token_storage.dart';
 import 'package:suda/services/app_dialog_service.dart';
-import 'package:suda/config/app_config.dart';
+import 'package:suda/services/app_version_service.dart';
 
 /// 버전 체크 서비스
 /// 
@@ -28,14 +28,6 @@ class VersionCheckService {
     return 0;
   }
 
-  /// 강제 업데이트 필요 여부 확인
-  /// 
-  /// latestVersion > appVersion && forceUpdateYn == "Y" 인 경우 true 반환
-  static bool shouldForceUpdate(String latestVersion, String forceUpdateYn) {
-    return compareVersions(latestVersion, AppConfig.appVersion) > 0 &&
-        forceUpdateYn.toUpperCase() == 'Y';
-  }
-
   /// 버전 체크 실행
   /// 
   /// 최신 버전 정보를 조회하고 강제 업데이트 여부를 확인
@@ -45,14 +37,18 @@ class VersionCheckService {
   /// 반환값: 버전 체크 통과 여부 (true: 통과, false: 실패 또는 강제 업데이트 필요)
   static Future<bool> checkVersion(GlobalKey<NavigatorState> navigatorKey) async {
     try {
+      // 0) 현재 앱 버전 조회
+      final currentVersion = await AppVersionService.getAppVersion();
       // 1) 버전 체크 API 호출
       final versionInfo = await SudaApiClient.getLatestVersion();
       
       // 최신 버전 정보를 영구 저장 영역에 저장
       await TokenStorage.saveLatestVersion(versionInfo.latestVersion);
       
-      // 버전 비교: latestVersion > appVersion && forceUpdateYn == "Y"
-      final shouldUpdate = shouldForceUpdate(versionInfo.latestVersion, versionInfo.forceUpdateYn);
+      // 버전 비교: latestVersion > currentVersion && forceUpdateYn == "Y"
+      final shouldUpdate =
+          compareVersions(versionInfo.latestVersion, currentVersion) > 0 &&
+          versionInfo.forceUpdateYn.toUpperCase() == 'Y';
       
       if (shouldUpdate) {
         // 강제 업데이트 필요 시 스플래시 제거 후 팝업 표시 및 앱 종료

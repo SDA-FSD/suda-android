@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:just_audio/just_audio.dart';
+import 'package:vibration/vibration.dart';
 import '../../widgets/roleplay_scaffold.dart';
 import '../../services/roleplay_state_service.dart';
 import '../../services/suda_api_client.dart';
@@ -31,13 +33,83 @@ class RoleplayOpeningScreen extends StatefulWidget {
   State<RoleplayOpeningScreen> createState() => _RoleplayOpeningScreenState();
 }
 
-class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen> {
+class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen>
+    with TickerProviderStateMixin {
   bool _isLoading = false;
   static const String _playStoreUrl =
       'https://play.google.com/store/apps/details?id=kr.sudatalk.app';
 
+  final AudioPlayer _ticketPlayer = AudioPlayer();
+  late final AnimationController _ticketFadeIn1Controller;
+  late final AnimationController _ticketFadeIn2Controller;
+  late final Animation<double> _ticketOpacity1;
+  late final Animation<double> _ticketOpacity2;
+  bool _showTicketPhase1 = false;
+  bool _showTicketPhase2 = false;
+
   void _restoreButton() {
     if (mounted) setState(() => _isLoading = false);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _ticketFadeIn1Controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+    _ticketFadeIn2Controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+    _ticketOpacity1 = CurvedAnimation(
+      parent: _ticketFadeIn1Controller,
+      curve: Curves.easeOut,
+    );
+    _ticketOpacity2 = CurvedAnimation(
+      parent: _ticketFadeIn2Controller,
+      curve: Curves.easeOut,
+    );
+  }
+
+  @override
+  void dispose() {
+    _ticketFadeIn1Controller.dispose();
+    _ticketFadeIn2Controller.dispose();
+    _ticketPlayer.dispose();
+    super.dispose();
+  }
+
+  Future<void> _playTicketConsumeEffect() async {
+    try {
+      setState(() {
+        _showTicketPhase1 = true;
+        _showTicketPhase2 = false;
+      });
+
+      await _ticketFadeIn1Controller.forward(from: 0);
+
+      try {
+        await _ticketPlayer.setAsset('assets/sounds/ticket.mp3');
+        await _ticketPlayer.seek(Duration.zero);
+        _ticketPlayer.play();
+      } catch (_) {}
+
+      setState(() {
+        _showTicketPhase2 = true;
+      });
+      await _ticketFadeIn2Controller.forward(from: 0);
+
+      Vibration.vibrate(duration: 80);
+
+      setState(() {
+        _showTicketPhase1 = false;
+      });
+
+      await Future.delayed(const Duration(seconds: 1));
+    } catch (_) {
+      // 이펙트 실패는 조용히 무시하고 다음 단계로 진행
+    }
   }
 
   Future<void> _shareAppLinkAndSubmitQuest({
@@ -595,6 +667,7 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen> {
           _restoreButton();
           return;
         }
+        await _playTicketConsumeEffect();
         RoleplayStateService.instance.setSessionId(sessionId);
         RoleplayStateService.instance.setSession(session);
         RoleplayRouter.replaceWithPlaying(context);
@@ -696,6 +769,34 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen> {
         footer: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            SizedBox(
+              height: 40,
+              child: Center(
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    if (_showTicketPhase1)
+                      FadeTransition(
+                        opacity: _ticketOpacity1,
+                        child: Image.asset(
+                          'assets/images/icons/ticket.png',
+                          width: 40,
+                          height: 20,
+                        ),
+                      ),
+                    if (_showTicketPhase2)
+                      FadeTransition(
+                        opacity: _ticketOpacity2,
+                        child: Image.asset(
+                          'assets/images/icons/ticket_used.png',
+                          width: 44,
+                          height: 22,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
             SizedBox(
               width: MediaQuery.of(context).size.width * 0.4,
               child: ElevatedButton(

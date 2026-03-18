@@ -55,7 +55,7 @@ class AppContentDialog extends StatelessWidget {
     final size = MediaQuery.sizeOf(context);
     final screenWidth = size.width;
     final screenHeight = size.height;
-    const overlayColor = Color(0x59000000);
+    const overlayColor = Color(0x66000000);
 
     return PopScope(
       canPop: barrierDismissible,
@@ -66,10 +66,7 @@ class AppContentDialog extends StatelessWidget {
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: barrierDismissible ? () => Navigator.of(context).pop() : null,
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-                child: Container(color: overlayColor),
-              ),
+              child: Container(color: overlayColor),
             ),
           ),
           // 2) 팝업 카드 (바탕: 가로 80%, 세로 50% 고정). Okay 버튼은 (3) 하단 테두리를 덮는 형태.
@@ -83,68 +80,85 @@ class AppContentDialog extends StatelessWidget {
                   // 3) 실제 팝업 (테두리 박스)
                   Container(
                     decoration: BoxDecoration(
-                      color: Theme.of(context).dialogBackgroundColor,
                       border: Border.all(
                         width: 10,
                         color: const Color(0xFF80D7CF),
                       ),
                       borderRadius: BorderRadius.circular(30),
                     ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(
-                            left: 20,
-                            right: 30,
-                            top: 20,
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(20),
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+                        child: Container(
+                          color: const Color(0x991E1E1E),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              GestureDetector(
-                                onTap: () =>
-                                    Navigator.of(context).pop(),
-                                child: SvgPicture.asset(
-                                  'assets/images/icons/close.svg',
-                                  width: 28,
-                                  height: 28,
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  left: 20,
+                                  right: 30,
+                                  top: 20,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () =>
+                                          Navigator.of(context).pop(),
+                                      child: SvgPicture.asset(
+                                        'assets/images/icons/close.svg',
+                                        width: 28,
+                                        height: 28,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Expanded(
+                                child: Padding(
+                                  padding: EdgeInsets.only(
+                                    left: 30,
+                                    right: 30,
+                                    bottom: showOkayButton ? 12 : 30,
+                                  ),
+                                  child: content,
                                 ),
                               ),
                             ],
                           ),
                         ),
-                        Expanded(
-                          child: Padding(
-                            padding: EdgeInsets.only(
-                              left: 30,
-                              right: 30,
-                              bottom: showOkayButton ? 12 : 30,
-                            ),
-                            child: content,
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                   if (showOkayButton)
                     Positioned(
-                      left: screenWidth * 0.2,
+                      left: 0,
+                      right: 0,
                       bottom: -17,
-                      width: screenWidth * 0.4,
-                      height: 44,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          onOkayPressed?.call();
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF0CABA8),
-                          foregroundColor: Colors.white,
-                          shape: const StadiumBorder(),
-                          elevation: 0,
+                      child: Center(
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxWidth: screenWidth * 0.7,
+                          ),
+                          child: SizedBox(
+                            height: 44,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                onOkayPressed?.call();
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF0CABA8),
+                                foregroundColor: Colors.white,
+                                shape: const StadiumBorder(),
+                                elevation: 0,
+                              ),
+                              child: Text(okayButtonLabel),
+                            ),
+                          ),
                         ),
-                        child: Text(okayButtonLabel),
                       ),
                     ),
                 ],
