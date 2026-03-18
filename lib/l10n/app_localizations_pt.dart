@@ -56,6 +56,25 @@ class AppLocalizationsPt extends AppLocalizations {
   String get settingsFeedback => 'Feedback';
 
   @override
+  String get settingsAnnouncements => 'Avisos';
+
+  @override
+  String get announcementsEmpty => 'Nenhum aviso ainda';
+
+  @override
+  String get noticesEmpty => 'Ainda não há publicações.';
+
+  @override
+  String get deletedPost => 'Esta publicação foi excluída.';
+
+  @override
+  String get postNoLongerAvailable =>
+      'Esta publicação não está mais disponível.';
+
+  @override
+  String get backToHome => 'Ir para o Início';
+
+  @override
   String get settingsSignOut => 'Sair';
 
   @override

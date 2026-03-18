@@ -190,6 +190,42 @@ abstract class AppLocalizations {
   /// **'Feedback'**
   String get settingsFeedback;
 
+  /// No description provided for @settingsAnnouncements.
+  ///
+  /// In en, this message translates to:
+  /// **'Announcements'**
+  String get settingsAnnouncements;
+
+  /// No description provided for @announcementsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No announcements yet'**
+  String get announcementsEmpty;
+
+  /// No description provided for @noticesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No posts yet'**
+  String get noticesEmpty;
+
+  /// No description provided for @deletedPost.
+  ///
+  /// In en, this message translates to:
+  /// **'This post has been deleted.'**
+  String get deletedPost;
+
+  /// No description provided for @postNoLongerAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'This post is no longer available.'**
+  String get postNoLongerAvailable;
+
+  /// No description provided for @backToHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Home'**
+  String get backToHome;
+
   /// No description provided for @settingsSignOut.
   ///
   /// In en, this message translates to:

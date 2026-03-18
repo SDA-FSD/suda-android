@@ -11,6 +11,7 @@ import 'account.dart';
 import 'language_level.dart';
 import 'push_agreement.dart';
 import 'feedback.dart';
+import 'announcements.dart';
 import '../webview_screen.dart';
 import 'open_source_license.dart';
 
@@ -98,6 +99,11 @@ class SettingScreen extends StatelessWidget {
             context,
             l10n.settingsFeedback,
             () => _navigateToSubScreen(context, const FeedbackScreen()),
+          ),
+          _buildMenuItem(
+            context,
+            l10n.settingsAnnouncements,
+            () => _navigateToSubScreen(context, const AnnouncementsScreen()),
           ),
           _buildMenuItem(
             context,

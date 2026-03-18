@@ -329,6 +329,7 @@
 - 앱 버전 1.0.5 → 1.0.6 상향 (이후 변경사항은 1.0.6 기준으로 처리).
 - **푸시 appPath 연동**: FCM data에 `appPath` 포함 시 알림 클릭 후 해당 스크린으로 이동. 비로그인/미동의 시 `PendingAppPathService`에 보관, Home 진입 시 적용. 지원 경로·정의는 `.docs/CONTEXT_SCREEN.md` appPath 섹션. `lib/services/pending_app_path_service.dart`, `main.dart`(getInitialMessage·onMessageOpenedApp·_applyPendingAppPath).
 - **NotificationBoxScreen 알림 페이징**: Alarm 탭(Main Screen) 진입 시 `/v1/users/notification?page=0`으로 알림 목록 조회, 스크롤 하단 도달 시 1, 2, 3... 순차 호출. 응답이 빈 리스트이면 더 이상 호출하지 않음. 응답 DTO는 `NotificationDto(id, title(List<SudaJson>), content(List<SudaJson>), imgPath, appPath, sendFinishedAt)`이며, title/content는 `SudaJsonUtil.localizedText`로 사용자 언어에 맞게 표시. 결과가 없을 때는 본문 중앙에 "No notification yet"(l10n.notificationsEmpty)을 body-default 흰색 텍스트로 노출.
+- **공지사항 화면**: AnnouncementsScreen (`GET /v1/notice` page/size 페이징), AnnouncementDetailScreen (`GET /v1/notice/{id}`). 카드: 제목·본문 1줄 말줄임, publishedAt YYYY-MM-DD 우하단. 빈 상태 l10n.noticesEmpty. showYn='n' 또는 삭제/404 시: 상세 페이지 대신 AppContentDialog 팝업으로 l10n.postNoLongerAvailable(게시물이 삭제되었거나 존재하지 않습니다) 안내, 버튼 l10n.backToHome(홈으로 가기).
 - **Android 서명 정책 변경(Flavor 기준)**: `android/app/build.gradle.kts`에서 local/dev/stg는 debug/release 모두 디버그 키스토어 사용, prd는 debug/release 모두 `android/key.properties`의 릴리스 키스토어 사용. prd 빌드에서 `key.properties`가 없으면 빌드 실패.
 
 ## 13. 리팩토링 계획 문서

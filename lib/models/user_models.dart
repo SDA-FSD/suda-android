@@ -169,3 +169,44 @@ class NotificationDto {
     );
   }
 }
+
+/// GET /v1/notice, GET /v1/notice/{noticeId} 응답
+class AppNoticeDto {
+  final int id;
+  final String? type;
+  final List<SudaJson>? title;
+  final List<SudaJson>? content;
+  final String? publishedAt;
+  final String? createdAt;
+  final String? updatedAt;
+
+  const AppNoticeDto({
+    required this.id,
+    this.type,
+    this.title,
+    this.content,
+    this.publishedAt,
+    this.createdAt,
+    this.updatedAt,
+  });
+
+  factory AppNoticeDto.fromJson(Map<String, dynamic> json) {
+    final idValue = json['id'];
+    final id = idValue is int
+        ? idValue
+        : (idValue is num ? idValue.toInt() : 0);
+    return AppNoticeDto(
+      id: id,
+      type: json['type'] as String?,
+      title: (json['title'] as List<dynamic>?)
+          ?.map((item) => SudaJson.fromJson(item as Map<String, dynamic>))
+          .toList(),
+      content: (json['content'] as List<dynamic>?)
+          ?.map((item) => SudaJson.fromJson(item as Map<String, dynamic>))
+          .toList(),
+      publishedAt: json['publishedAt'] as String?,
+      createdAt: json['createdAt'] as String?,
+      updatedAt: json['updatedAt'] as String?,
+    );
+  }
+}

@@ -378,6 +378,7 @@
 - **PushAgreementScreen** (Sub Screen): "Notification" 클릭 시
 - **LanguageLevelScreen** (Sub Screen): "Language Level" 클릭 시
 - **FeedbackScreen** (Sub Screen): "Feedback" 클릭 시
+- **AnnouncementsScreen** (Sub Screen): "Announcements" 클릭 시
 - **WebViewScreen** (Sub Screen): "Privacy policy" 또는 "Terms of Service" 클릭 시
   - "Privacy policy": `https://sudatalk.kr/public/app/privacy` 웹뷰 표시
   - "Terms of Service": `https://sudatalk.kr/public/app/terms` 웹뷰 표시
@@ -396,6 +397,7 @@
   - Notification (l10n: Notification / 알림 / Notificações)
   - Language Level
   - Feedback
+  - Announcements (l10n: Announcements / 공지사항 / Avisos)
   - Tutorial (클릭 시 반응 없음, 추후 구현)
   - Log out
   - Privacy policy
@@ -488,6 +490,44 @@
 ### 스크린 내부 구현 특이사항
 - 배경색: RGB(51, 51, 51) - SettingScreen 대비 10% 밝기 증가
 - 우측 상단 X 버튼 필수
+
+---
+
+## 7-1. AnnouncementsScreen
+
+### 스크린 관련 정의 파일
+- **파일 경로**: `lib/screens/setting/announcements.dart`
+- **클래스명**: `AnnouncementsScreen` (StatelessWidget)
+- **스크린 타입**: **Sub Screen**
+- **appPath**: 해당 없음 (Setting 하위)
+
+### 이전 스크린 정보 (진입점)
+- **SettingScreen**: "Announcements" 클릭 시
+
+### 이후 스크린 정보 (이동 가능한 다른 스크린)
+- **AnnouncementDetailScreen** (Sub Screen): 카드 탭 시 `GET /v1/notice/{id}` 선조회, 정상 응답이면 상세 진입
+- **팝업 (AppContentDialog)**: showYn='n' 또는 404 시 상세 진입 대신 팝업. 본문 l10n.postNoLongerAvailable, 버튼 l10n.backToHome
+
+### 스크린 내부 구현 특이사항
+- 배경색: `#353535`
+- 세로 스크롤 목록, 최신순 정렬 (`GET /v1/notice` page/size 페이징)
+- 카드: 제목·본문 각 1줄 말줄임, 공지 게시일 YYYY-MM-DD 우하단
+- 빈 상태: l10n `noticesEmpty` (en: No posts yet, ko: 아직 게시글이 없습니다, pt: Ainda não há publicações.)
+
+---
+
+## 7-2. AnnouncementDetailScreen
+
+### 스크린 관련 정의 파일
+- **파일 경로**: `lib/screens/setting/announcement_detail.dart`
+- **클래스명**: `AnnouncementDetailScreen` (StatefulWidget)
+- **스크린 타입**: **Sub Screen**
+
+### 이전 스크린 정보 (진입점)
+- **AnnouncementsScreen**: 공지 카드 탭 시 (`noticeId` 전달)
+
+### 스크린 내부 구현 특이사항
+- `GET /v1/notice/{noticeId}` 조회. (404는 목록에서 선조회로 대부분 차단되어 진입 전 팝업 처리, 진입 후 404 시 l10n `deletedPost` 표시)
 
 ---
 

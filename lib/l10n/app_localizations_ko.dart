@@ -54,6 +54,24 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settingsFeedback => '피드백';
 
   @override
+  String get settingsAnnouncements => '공지사항';
+
+  @override
+  String get announcementsEmpty => '아직 공지사항이 없습니다';
+
+  @override
+  String get noticesEmpty => '아직 게시글이 없습니다';
+
+  @override
+  String get deletedPost => '삭제된 게시물입니다.';
+
+  @override
+  String get postNoLongerAvailable => '게시물이 삭제되었거나 존재하지 않습니다.';
+
+  @override
+  String get backToHome => '홈으로 가기';
+
+  @override
   String get settingsSignOut => '로그아웃';
 
   @override

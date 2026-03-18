@@ -9,6 +9,7 @@ import '../models/version_models.dart';
 import 'endpoints/auth_api.dart';
 import 'endpoints/feedback_api.dart';
 import 'endpoints/home_api.dart';
+import 'endpoints/notice_api.dart';
 import 'endpoints/push_api.dart';
 import 'endpoints/roleplay_api.dart';
 import 'endpoints/user_api.dart';
@@ -347,6 +348,30 @@ class SudaApiClient {
     return UserApi.getNotifications(
       accessToken: accessToken,
       page: page,
+    );
+  }
+
+  /// GET /v1/notice?page=0&size=10
+  static Future<SudaAppPage<AppNoticeDto>> getNotices({
+    required String accessToken,
+    required int page,
+    int size = 10,
+  }) {
+    return NoticeApi.getNotices(
+      accessToken: accessToken,
+      page: page,
+      size: size,
+    );
+  }
+
+  /// GET /v1/notice/{noticeId}. Returns null on 404.
+  static Future<AppNoticeDto?> getNotice({
+    required String accessToken,
+    required int noticeId,
+  }) {
+    return NoticeApi.getNotice(
+      accessToken: accessToken,
+      noticeId: noticeId,
     );
   }
 }
