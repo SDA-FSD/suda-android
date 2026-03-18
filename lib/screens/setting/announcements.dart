@@ -113,7 +113,12 @@ class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
 
   String _formatDate(String? publishedAt) {
     if (publishedAt == null || publishedAt.isEmpty) return '';
-    return publishedAt.length >= 10 ? publishedAt.substring(0, 10) : publishedAt;
+    final dt = DateTime.tryParse(publishedAt);
+    if (dt == null) return publishedAt.length >= 10 ? publishedAt.substring(0, 10) : publishedAt;
+    final d = dt.day.toString().padLeft(2, '0');
+    final m = dt.month.toString().padLeft(2, '0');
+    final y = dt.year.toString();
+    return '$d/$m/$y';
   }
 
   Future<void> _onItemTap(BuildContext context, AppNoticeDto item) async {

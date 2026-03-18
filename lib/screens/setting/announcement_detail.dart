@@ -72,12 +72,12 @@ class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen> {
 
   String? _formatDate(String? isoDate) {
     if (isoDate == null || isoDate.isEmpty) return null;
-    try {
-      final dt = DateTime.parse(isoDate);
-      return '${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')}';
-    } catch (_) {
-      return isoDate.length >= 10 ? isoDate.substring(0, 10) : isoDate;
-    }
+    final dt = DateTime.tryParse(isoDate);
+    if (dt == null) return isoDate.length >= 10 ? isoDate.substring(0, 10) : isoDate;
+    final d = dt.day.toString().padLeft(2, '0');
+    final m = dt.month.toString().padLeft(2, '0');
+    final y = dt.year.toString();
+    return '$d/$m/$y';
   }
 
   @override
