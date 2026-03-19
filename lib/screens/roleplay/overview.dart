@@ -104,7 +104,7 @@ class _RoleplayOverviewScreenState extends State<RoleplayOverviewScreen> {
   }
 
   void _navigateToOpening(BuildContext context) {
-    RoleplayRouter.pushOpening(context);
+    RoleplayRouter.pushTutorial(context);
   }
 
   String _getLocalizedText(List<SudaJson>? values) {

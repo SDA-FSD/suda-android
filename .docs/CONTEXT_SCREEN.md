@@ -565,13 +565,45 @@
   - `Navigator.push()`로 iOS 스타일 슬라이드 애니메이션으로 표시
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
-- **RoleplayOpeningScreen** (Full Screen): 중앙 "Play" 텍스트 클릭 시
+- **RoleplayTutorialScreen** (Full Screen): 역할 버튼 탭 시 항상 먼저 진입 (Tutorial 완료 여부에 따라 자동 분기)
   - `Navigator.push()`로 Full Screen 형태로 전환
 
 ### 스크린 내부 구현 특이사항
 - 우측 상단 X 버튼 필수
 - 중앙에 "Play" 텍스트 (임시, 향후 롤플레이 목록으로 대체 예정)
 - Route name: `/roleplay/overview` (뒤로가기 시 overview로 돌아가기 위해 사용)
+- 역할 버튼 탭 시 `RoleplayRouter.pushTutorial()`로 Tutorial 스크린 경유 후 Opening 진입
+
+---
+
+## 11.2 RoleplayTutorialScreen
+
+### 스크린 관련 정의 파일
+- **파일 경로**: `lib/screens/roleplay/tutorial.dart`
+- **클래스명**: `RoleplayTutorialScreen` (StatefulWidget)
+- **스크린 타입**: **Full Screen**
+- **appPath**: 해당 없음
+
+### 스크린 용도
+- 앱 튜토리얼 슬라이드 화면 (5페이지 스와이프)
+- `userDto.metaInfo`의 `TUTORIAL` 값이 없거나 `'Y'`가 아닌 경우에만 노출
+- 완료 조건 충족 시 `POST /v1/users/tutorial` 호출 후 Opening으로 진입
+
+### 이전 스크린 정보 (진입점)
+- **RoleplayOverviewScreen**: 역할 버튼 탭 시 항상 거치며, 내부에서 조건 판단
+
+### 이후 스크린 정보 (이동 가능한 다른 스크린)
+- **RoleplayOpeningScreen**: 튜토리얼 완료(마지막 이미지에서 탭) 또는 이미 완료된 경우 즉시 replace
+  - `Navigator.pushReplacement()`로 Tutorial 스크린을 스택에서 제거하며 전환
+
+### 스크린 내부 구현 특이사항
+- **진입 시 조건 체크**: `RoleplayStateService.instance.user` 없으면 `GET /v1/users` 호출. `TUTORIAL == 'Y'`이면 즉시 `replaceWithOpeningFromTutorial()`로 스킵
+- **이미지**: `assets/images/tutorials/{lang}/tutorial-{1~5}.png` (lang: ko/pt/en, 기본 en)
+- **인디케이터**: 상단 5개 dot, 활성 `#0CABA8`·비활성 `#4A4A4A`
+- **완료 처리**: 마지막(5번째) 페이지에서 화면 탭 시 `SudaApiClient.completeTutorial()` 호출 → `replaceWithOpeningFromTutorial()`
+- **뒤로가기**: `PopScope(canPop: true)` — Overview로 복귀 가능
+- **API**: `POST /v1/users/tutorial` (request body 없음, 200 응답 시 성공)
+- Route name: `/roleplay/tutorial`
 
 ---
 

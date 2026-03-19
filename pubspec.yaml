@@ -89,6 +89,9 @@ flutter:
     - assets/images/
     - assets/images/icons/
     - assets/images/buttons/
+    - assets/images/tutorials/en/
+    - assets/images/tutorials/ko/
+    - assets/images/tutorials/pt/
     - assets/fonts/
     - assets/sounds/
 

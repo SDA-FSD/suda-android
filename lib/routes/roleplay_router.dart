@@ -12,6 +12,7 @@ import '../screens/roleplay/result.dart';
 import '../screens/roleplay/failed_report.dart';
 import '../screens/roleplay/result_report.dart';
 import '../screens/roleplay/survey.dart';
+import '../screens/roleplay/tutorial.dart';
 
 class RoleplayRouter {
   static const String openingRouteName = '/roleplay/opening';
@@ -73,6 +74,28 @@ class RoleplayRouter {
           name: RoleplayOverviewScreen.routeName,
           arguments: roleplayId,
         ),
+      ),
+    );
+  }
+
+  /// Tutorial 스크린을 push (Overview에서 Opening 전환 전 조건 분기용).
+  static void pushTutorial(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const RoleplayTutorialScreen(),
+        settings: const RouteSettings(name: RoleplayTutorialScreen.routeName),
+      ),
+    );
+  }
+
+  /// Tutorial 완료 후 Opening으로 교체 (Tutorial 스크린을 스택에서 제거).
+  static void replaceWithOpeningFromTutorial(BuildContext context) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const RoleplayOpeningScreen(),
+        settings: const RouteSettings(name: openingRouteName),
       ),
     );
   }
