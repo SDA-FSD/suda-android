@@ -15,6 +15,7 @@ import 'services/token_storage.dart';
 import 'services/suda_api_client.dart';
 import 'services/version_check_service.dart';
 import 'services/token_refresh_service.dart';
+import 'services/appsflyer_service.dart';
 import 'screens/custom_splash.dart';
 import 'screens/login.dart';
 import 'screens/home.dart';
@@ -49,6 +50,7 @@ void main() async {
 
   // Firebase 초기화 (FlutterNativeSplash 이전에 실행)
   await Firebase.initializeApp();
+  await AppsflyerService.initialize();
 
   // 푸시 알림으로 앱이 켜진 경우 appPath 보관 (로그인/동의 후 Home 진입 시 적용)
   final initialMessage = await FirebaseMessaging.instance.getInitialMessage();

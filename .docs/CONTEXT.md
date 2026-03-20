@@ -248,6 +248,9 @@
   - 디버그 로그는 `[DEBUG]` 접두사를 사용하여 구분
 
 ## 12. 최근 작업 메모
+- **AppsFlyer 커스텀 이벤트 연동**: Agreement 완료(서버 200 성공 직후, Home 이동 전) 시 `terms_agreed`, Roleplay Playing 최초 노출 시 `rp_started` 전송하도록 반영.
+- **AppsFlyer SDK 연동(prd 기준)**: `lib/services/appsflyer_service.dart` 추가, `main()`에서 앱 시작 시 초기화. `AppConfig.isPrd`일 때만 SDK init/start 수행하도록 제한.
+- **광고 ID 권한 정합성 반영**: `android/app/src/main/AndroidManifest.xml`에 `com.google.android.gms.permission.AD_ID` 권한 추가(Play Console 광고 ID 선언과 실제 아티팩트 권한 일치 목적).
 - Firebase Messaging 설치 및 dev용 `google-services.json` 위치: `android/app/src/dev/google-services.json`
 - 홈 화면 복구: `lib/screens/main_home.dart` 추가 (`HomeScreen` 사용)
 - 빌드/설치: `flutter build apk --flavor dev --debug -t lib/main.dart --dart-define=ENV=dev` 후  

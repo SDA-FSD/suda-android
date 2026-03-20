@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
 import '../services/suda_api_client.dart';
+import '../services/appsflyer_service.dart';
 import 'webview_screen.dart';
 import '../utils/default_toast.dart';
 import '../utils/sub_screen_route.dart';
@@ -39,6 +40,7 @@ class _AgreementScreenState extends State<AgreementScreen> {
     setState(() => _isSubmitting = true);
     try {
       await SudaApiClient.updateAgreement(accessToken: widget.accessToken);
+      await AppsflyerService.logEvent('terms_agreed');
       widget.onAgreementComplete();
     } catch (e) {
       if (mounted) {

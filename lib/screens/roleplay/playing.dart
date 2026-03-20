@@ -14,6 +14,7 @@ import '../../models/roleplay_models.dart';
 import '../../widgets/roleplay_scaffold.dart';
 import '../../routes/roleplay_router.dart';
 import '../../services/roleplay_state_service.dart';
+import '../../services/appsflyer_service.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
 import '../../utils/suda_json_util.dart';
@@ -90,6 +91,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
       duration: const Duration(milliseconds: 500),
     );
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(AppsflyerService.logEvent('rp_started'));
       _handleInitialTurn();
     });
   }
