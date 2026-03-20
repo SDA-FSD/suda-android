@@ -248,6 +248,7 @@
   - 디버그 로그는 `[DEBUG]` 접두사를 사용하여 구분
 
 ## 12. 최근 작업 메모
+- **스토어 업로드용 빌드번호 상향**: `pubspec.yaml` 버전을 `1.0.7+9`에서 `1.0.7+10`으로 변경(버전명 1.0.7 유지).
 - **AppsFlyer 커스텀 이벤트 연동**: Agreement 완료(서버 200 성공 직후, Home 이동 전) 시 `terms_agreed`, Roleplay Playing 최초 노출 시 `rp_started` 전송하도록 반영.
 - **AppsFlyer SDK 연동(prd 기준)**: `lib/services/appsflyer_service.dart` 추가, `main()`에서 앱 시작 시 초기화. `AppConfig.isPrd`일 때만 SDK init/start 수행하도록 제한.
 - **광고 ID 권한 정합성 반영**: `android/app/src/main/AndroidManifest.xml`에 `com.google.android.gms.permission.AD_ID` 권한 추가(Play Console 광고 ID 선언과 실제 아티팩트 권한 일치 목적).
