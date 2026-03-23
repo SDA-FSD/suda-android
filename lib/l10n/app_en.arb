@@ -116,5 +116,15 @@
   "openSettings": "Open Settings",
   "notificationsTitle": "Notifications",
   "notificationsEmpty": "No notification yet",
+  "notificationSendToday": "Today",
+  "notificationSendOneDayAgo": "1 day ago",
+  "notificationSendDaysAgo": "{count} days ago",
+  "@notificationSendDaysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "reregistrationRestrictedMessage": "You can sign up again 2 days after deleting your account. Please try again later."
 }

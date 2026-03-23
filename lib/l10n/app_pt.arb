@@ -116,5 +116,15 @@
   "openSettings": "Abrir configurações",
   "notificationsTitle": "Notificações",
   "notificationsEmpty": "Ainda não há notificações",
+  "notificationSendToday": "Hoje",
+  "notificationSendOneDayAgo": "há 1 dia",
+  "notificationSendDaysAgo": "há {count} dias",
+  "@notificationSendDaysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "reregistrationRestrictedMessage": "Você poderá se cadastrar novamente 2 dias após excluir sua conta. Tente novamente mais tarde."
 }

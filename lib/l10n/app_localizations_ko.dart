@@ -293,6 +293,17 @@ class AppLocalizationsKo extends AppLocalizations {
   String get notificationsEmpty => '아직 알림이 없습니다';
 
   @override
+  String get notificationSendToday => '오늘';
+
+  @override
+  String get notificationSendOneDayAgo => '1일 전';
+
+  @override
+  String notificationSendDaysAgo(int count) {
+    return '$count일 전';
+  }
+
+  @override
   String get reregistrationRestrictedMessage =>
       '회원 탈퇴 후 2일 동안 재가입이 제한됩니다. 잠시 후 다시 시도해주세요.';
 }

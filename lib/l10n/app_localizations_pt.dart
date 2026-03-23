@@ -308,6 +308,17 @@ class AppLocalizationsPt extends AppLocalizations {
   String get notificationsEmpty => 'Ainda não há notificações';
 
   @override
+  String get notificationSendToday => 'Hoje';
+
+  @override
+  String get notificationSendOneDayAgo => 'há 1 dia';
+
+  @override
+  String notificationSendDaysAgo(int count) {
+    return 'há $count dias';
+  }
+
+  @override
   String get reregistrationRestrictedMessage =>
       'Você poderá se cadastrar novamente 2 dias após excluir sua conta. Tente novamente mais tarde.';
 }

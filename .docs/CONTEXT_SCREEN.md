@@ -639,17 +639,25 @@
 - 헤더 중앙 타이틀은 l10n `notificationsTitle` 사용  
   - en: "Notifications", ko: "알림", pt: "Notificações"
 - 알림 목록은 서버에서 페이징 조회
-  - API: `GET /v1/users/notification?page={page}` (`SudaApiClient.getNotifications()`)
+  - API: `GET /v1/users/notification?pageNum={pageNum}` (`SudaApiClient.getNotifications()`, `pageNum` 인자 0-based)
   - 응답: `List<NotificationDto>` (id, title(List<SudaJson>), content(List<SudaJson>), imgPath, appPath, sendFinishedAt)
-  - `page=0`부터 시작, 스크롤을 아래로 내릴 때 1, 2, 3... 순차 호출
+  - 첫 조회 `pageNum=0`, 스크롤 append 시 `pageNum=1`, `2`, `3`… 순차 호출
   - 호출 결과가 빈 리스트이면 더 이상 호출하지 않음
+  - GNB가 본문 위 오버레이이므로 목록 `ListView` 하단 패딩: `MediaQuery.padding.bottom + GnbBar.contentHeight`
 - 화면 진입 또는 Alarm 탭이 다시 활성화될 때(page 0) 목록을 새로 조회
 - **빈 상태**: 조회 결과가 없을 때는 본문 영역 정중앙에  
   - `No notification yet` 문구를 body-default 스타일·흰색으로 가로/세로 중앙 정렬하여 노출 (l10n `notificationsEmpty`)
 - **목록 상태**: 조회 결과가 있을 때는 각 요소를 아래로 append
-  - 요소별 레이아웃: width 100% 짜리 흰색 둥근 테두리를 가진 투명 박스 안에  
-    - 첫 줄: title 한 줄 (SudaJsonUtil.localizedText, maxLines:1, ellipsis)  
-    - 둘째 줄: content 한 줄 (동일 규칙)
+  - 요소별 레이아웃: width 100% 짜리 #353535 둥근 테두리(1px)를 가진 투명 박스 안에, 요소 간 세로 간격 24  
+    - **접힌 상태(기본)**: 카드 탭으로 **펼침** 전환. title·content는 각각 접힌 한 줄 규칙(`_singleLineForNotification` + 가로 `ellipsis`).  
+    - **펼침 상태**: 동일 카드 재탭 시 **접힘**으로 복귀. title·content는 원문 전체(줄바꿈 포함) 노출. 상단 title → 하단 `sendFinishedAt` 순서 유지.  
+    - title 행(아이콘 포함): 위·아래 `Padding` 14, 텍스트는 좌측(`TextAlign.start` + `AnimatedSwitcher` Stack `topLeft`).  
+    - title 행 우측 상단(또는 title 없이 content만 있을 때 첫 줄 우측): 24×24 `click_to_expand.png` / `click_to_fold.png` 시각 힌트(탭은 카드 전체에만 적용, `ExcludeSemantics`).  
+    - 전환: 높이는 `AnimatedSize`(300ms·`easeInOutCubic`), title/content 텍스트는 `AnimatedSwitcher` + `FadeTransition`(150ms)로 교차.  
+    - 펼침 여부는 `NotificationDto.id` 기준 `Set`으로 보관, 목록 첫 페이지 재조회 시 초기화.  
+    - 접힌 때 첫 줄: title (`textTheme.headlineSmall`·흰색)  
+    - 접힌 때 둘째 줄: content (`textTheme.bodyMedium`·흰색)  
+    - 그 아래(텍스트가 있으면 상단 8 gap): `sendFinishedAt`(UTC+0; 타임존 없는 ISO는 UTC로 간주) → 로컬 날짜 기준 달력 일 수 차이 → l10n `notificationSendToday` / `notificationSendOneDayAgo` / `notificationSendDaysAgo` (`textTheme.bodySmall`·#635F5F·우측 정렬)
 - ScrollController를 사용하여 `maxScrollExtent - 200` 지점에서 다음 페이지 로딩 트리거
 - 뒤로가기 버튼 없음 (`showBackButton: false`)
 - Route name: `/notification_box` (참조용)

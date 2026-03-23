@@ -494,23 +494,25 @@ class UserApi {
     );
   }
 
+  /// [pageNum]은 0부터 시작(첫 페이지 = 0).
   static Future<List<NotificationDto>> getNotifications({
     required String accessToken,
-    required int page,
+    required int pageNum,
   }) async {
     return await SudaHttpClient.executeWithRefresh(
-      () => _getNotificationsInternal(accessToken, page),
-      retryWithNewToken: (newToken) => _getNotificationsInternal(newToken, page),
+      () => _getNotificationsInternal(accessToken, pageNum),
+      retryWithNewToken: (newToken) =>
+          _getNotificationsInternal(newToken, pageNum),
     );
   }
 
   static Future<List<NotificationDto>> _getNotificationsInternal(
     String accessToken,
-    int page,
+    int pageNum,
   ) async {
     final uri = SudaHttpClient.buildUri(
       '/v1/users/notification',
-      {'page': page.toString()},
+      {'pageNum': pageNum.toString()},
     );
 
     late final http.Response response;

@@ -116,5 +116,15 @@
   "openSettings": "설정 열기",
   "notificationsTitle": "알림",
   "notificationsEmpty": "아직 알림이 없습니다",
+  "notificationSendToday": "오늘",
+  "notificationSendOneDayAgo": "1일 전",
+  "notificationSendDaysAgo": "{count}일 전",
+  "@notificationSendDaysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "reregistrationRestrictedMessage": "회원 탈퇴 후 2일 동안 재가입이 제한됩니다. 잠시 후 다시 시도해주세요."
 }

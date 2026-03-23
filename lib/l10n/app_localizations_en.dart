@@ -307,6 +307,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notificationsEmpty => 'No notification yet';
 
   @override
+  String get notificationSendToday => 'Today';
+
+  @override
+  String get notificationSendOneDayAgo => '1 day ago';
+
+  @override
+  String notificationSendDaysAgo(int count) {
+    return '$count days ago';
+  }
+
+  @override
   String get reregistrationRestrictedMessage =>
       'You can sign up again 2 days after deleting your account. Please try again later.';
 }

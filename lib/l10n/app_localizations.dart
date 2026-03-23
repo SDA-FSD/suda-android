@@ -652,6 +652,24 @@ abstract class AppLocalizations {
   /// **'No notification yet'**
   String get notificationsEmpty;
 
+  /// No description provided for @notificationSendToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get notificationSendToday;
+
+  /// No description provided for @notificationSendOneDayAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'1 day ago'**
+  String get notificationSendOneDayAgo;
+
+  /// No description provided for @notificationSendDaysAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} days ago'**
+  String notificationSendDaysAgo(int count);
+
   /// No description provided for @reregistrationRestrictedMessage.
   ///
   /// In en, this message translates to:

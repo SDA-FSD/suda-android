@@ -347,13 +347,14 @@ class SudaApiClient {
     return FeedbackApi.sendFeedback(accessToken: accessToken, content: content);
   }
 
+  /// GET /v1/users/notification?pageNum=… (pageNum은 0부터)
   static Future<List<NotificationDto>> getNotifications({
     required String accessToken,
-    required int page,
+    required int pageNum,
   }) {
     return UserApi.getNotifications(
       accessToken: accessToken,
-      page: page,
+      pageNum: pageNum,
     );
   }
 

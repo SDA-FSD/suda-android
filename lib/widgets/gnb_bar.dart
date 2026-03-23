@@ -28,6 +28,9 @@ class GnbBar extends StatelessWidget {
   final VoidCallback? onProfileTap;
   final UserDto? user;
 
+  /// 본문 아이콘 영역 고정 높이 (GNB가 본문을 덮을 때 리스트 하단 inset 등에 사용).
+  static const double contentHeight = 56;
+
   /// 오버레이 공통: BackdropFilter sigma 6 + Color(0x59000000)
   /// GNB 상단(본문과 맞닿는 쪽) 좌·우 radius 10 둥근 처리
   static const BorderRadius _topCornerRadius = BorderRadius.only(
@@ -56,7 +59,7 @@ class GnbBar extends StatelessWidget {
             top: false,
             bottom: true,
             child: SizedBox(
-              height: 56,
+              height: contentHeight,
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   final w = constraints.maxWidth;
