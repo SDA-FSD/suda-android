@@ -46,6 +46,7 @@
   },
   "loginTermsTitle": "Terms of Use",
   "loginPrivacyTitle": "Privacy Policy",
+  "loginCatchphrase": "Start talking. That's how you learn.",
   "loginErrorIdToken": "Failed to get Google ID Token. Please try again.",
   "loginErrorFailed": "Login failed: {error}",
   "@loginErrorFailed": {

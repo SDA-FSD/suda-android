@@ -46,6 +46,7 @@
   },
   "loginTermsTitle": "Termos de Uso",
   "loginPrivacyTitle": "Política de Privacidade",
+  "loginCatchphrase": "É conversando que se aprende.",
   "loginErrorIdToken": "Falha ao obter o Token de ID do Google. Por favor, tente novamente.",
   "loginErrorFailed": "Falha no login: {error}",
   "@loginErrorFailed": {

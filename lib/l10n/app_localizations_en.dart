@@ -102,6 +102,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginPrivacyTitle => 'Privacy Policy';
 
   @override
+  String get loginCatchphrase => 'Start talking. That\'s how you learn.';
+
+  @override
   String get loginErrorIdToken =>
       'Failed to get Google ID Token. Please try again.';
 

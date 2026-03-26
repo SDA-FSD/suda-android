@@ -164,6 +164,7 @@
 - **클래스명**: `LoginScreen` (StatefulWidget)
 - **스크린 타입**: **Full Screen**
 - **appPath**: 해당 없음 (인증 플로우)
+- **캐치프레이즈·약관**: 좌우 패딩 각 `screenWidth * 0.1`(가용 너비 약 80%). 캐치프레이즈는 Google 로그인 버튼 직상단. 하단 `Column`의 `Spacer` 비율 9·(문구)·1·버튼·1·약관·1(총 12). `loginCatchphrase`(l10n: en/pt/ko), 중앙 정렬, 흰색, `bodyLarge`(body-default) + bold(w700).
 
 ---
 

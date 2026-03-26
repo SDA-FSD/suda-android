@@ -100,6 +100,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get loginPrivacyTitle => '개인정보처리방침';
 
   @override
+  String get loginCatchphrase => '수다 떨면서 외국어 배우기';
+
+  @override
   String get loginErrorIdToken => 'Google ID 토큰을 가져오지 못했습니다. 다시 시도해 주세요.';
 
   @override

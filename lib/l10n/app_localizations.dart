@@ -274,6 +274,12 @@ abstract class AppLocalizations {
   /// **'Privacy Policy'**
   String get loginPrivacyTitle;
 
+  /// No description provided for @loginCatchphrase.
+  ///
+  /// In en, this message translates to:
+  /// **'Start talking. That\'s how you learn.'**
+  String get loginCatchphrase;
+
   /// No description provided for @loginErrorIdToken.
   ///
   /// In en, this message translates to:

@@ -46,6 +46,7 @@
   },
   "loginTermsTitle": "이용약관",
   "loginPrivacyTitle": "개인정보처리방침",
+  "loginCatchphrase": "수다 떨면서 외국어 배우기",
   "loginErrorIdToken": "Google ID 토큰을 가져오지 못했습니다. 다시 시도해 주세요.",
   "loginErrorFailed": "로그인 실패: {error}",
   "@loginErrorFailed": {

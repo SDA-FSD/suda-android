@@ -294,7 +294,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                   ),
                 ),
               ),
-              // 2-4: 구글 로그인 버튼·약관 영역 fade-in (4:2:1:1 → 4:2:1버튼:1약관)
+              // 2-4: 캐치프레이즈·구글 로그인·약관 fade-in (Spacer 9:문구:1:버튼:1:약관:1, 총 비율 12)
               Positioned.fill(
                 child: Opacity(
                   opacity: _bottomOpacityAnim.value,
@@ -302,12 +302,29 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      const Spacer(flex: 4),
-                      const Spacer(flex: 2),
+                      const Spacer(flex: 9),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.1),
+                        child: Text(
+                          AppLocalizations.of(context)!.loginCatchphrase,
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700,
+                              ) ??
+                              const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
+                                height: 1.2,
+                              ),
+                        ),
+                      ),
+                      const Spacer(flex: 1),
                       _buildLoginButton(screenWidth),
                       const Spacer(flex: 1),
                       Padding(
-                        padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.2),
+                        padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.1),
                         child: _buildTermsText(context),
                       ),
                       const Spacer(flex: 1),

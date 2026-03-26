@@ -248,6 +248,7 @@
   - 디버그 로그는 `[DEBUG]` 접두사를 사용하여 구분
 
 ## 12. 최근 작업 메모
+- **LoginScreen 캐치프레이즈·약관**: 좌우 패딩 각 `screenWidth * 0.1`(본문 가로 약 80%). `loginCatchphrase` l10n, 하단 `Spacer` 9·문구·1·버튼·1·약관·1(총 12).
 - **앱 버전 1.0.8 배포**: `pubspec.yaml` 버전을 `1.0.7+10`에서 `1.0.8+11`으로 변경.
 - **스토어 업로드용 빌드번호 상향**: `pubspec.yaml` 버전을 `1.0.7+9`에서 `1.0.7+10`으로 변경(버전명 1.0.7 유지).
 - **AppsFlyer 커스텀 이벤트 연동**: Agreement 완료(서버 200 성공 직후, Home 이동 전) 시 `terms_agreed`, Roleplay Playing 최초 노출 시 `rp_started` 전송하도록 반영.
