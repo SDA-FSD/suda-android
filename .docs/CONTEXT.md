@@ -342,6 +342,8 @@
   - 조건: `userDto.metaInfo`의 `TUTORIAL != 'Y'`인 경우 노출, 이미 완료 시 즉시 Opening으로 skip
   - 언어별 이미지: `assets/images/tutorials/{ko|pt|en}/tutorial-{1~5}.png` (pubspec에 3개 경로 추가)
   - API: `POST /v1/users/tutorial` (`SudaApiClient.completeTutorial()`)
+  - 완료 직후 `getCurrentUser`로 사용자 재조회 → `RoleplayStateService.setUser` 및 `MainUserSync.notifyUserUpdated`로 Main/Home의 `UserDto`(metaInfo `TUTORIAL` 포함) 동기화. `getCurrentUser` 실패 시 로컬 meta 패치(`_updateLocalUserTutorialDone`) 후 동일 notify.
+  - `MainUserSync`: `lib/services/main_user_sync.dart` — Main `_MyAppState`가 `register`/`unregister`로 리스너 연결
   - `RoleplayRouter.pushTutorial()`, `RoleplayRouter.replaceWithOpeningFromTutorial()` 추가
   - Overview `_navigateToOpening()` → `pushTutorial()` 로 변경
 - **Android 서명 정책 변경(Flavor 기준)**: `android/app/build.gradle.kts`에서 local/dev/stg는 debug/release 모두 디버그 키스토어 사용, prd는 debug/release 모두 `android/key.properties`의 릴리스 키스토어 사용. prd 빌드에서 `key.properties`가 없으면 빌드 실패.

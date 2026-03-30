@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:vibration/vibration.dart';
 import '../../routes/roleplay_router.dart';
+import '../../services/main_user_sync.dart';
 import '../../services/roleplay_state_service.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
@@ -126,7 +127,17 @@ class _RoleplayTutorialScreenState extends State<RoleplayTutorialScreen> {
     try {
       await SudaApiClient.completeTutorial(accessToken: accessToken);
       if (!mounted) return;
-      _updateLocalUserTutorialDone();
+      try {
+        final fresh = await SudaApiClient.getCurrentUser(accessToken: accessToken);
+        if (!mounted) return;
+        RoleplayStateService.instance.setUser(fresh);
+        MainUserSync.instance.notifyUserUpdated(fresh);
+      } catch (_) {
+        _updateLocalUserTutorialDone();
+        final u = RoleplayStateService.instance.user;
+        if (u != null) MainUserSync.instance.notifyUserUpdated(u);
+      }
+      if (!mounted) return;
       RoleplayRouter.replaceWithOpeningFromTutorial(context);
     } catch (e) {
       if (!mounted) return;

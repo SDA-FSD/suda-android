@@ -16,6 +16,7 @@ import 'services/suda_api_client.dart';
 import 'services/version_check_service.dart';
 import 'services/token_refresh_service.dart';
 import 'services/appsflyer_service.dart';
+import 'services/main_user_sync.dart';
 import 'screens/custom_splash.dart';
 import 'screens/login.dart';
 import 'screens/home.dart';
@@ -94,6 +95,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+    MainUserSync.instance.register(_onMainUserUpdatedFromSubflow);
     WidgetsBinding.instance.addObserver(this);
     // 푸시 알림 클릭(백그라운드/포그라운드) 시 appPath 보관
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
@@ -160,8 +162,17 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     TokenRefreshService.instance.stop();
   }
 
+  void _onMainUserUpdatedFromSubflow(UserDto user) {
+    if (!mounted) return;
+    if (user.profileImgUrl != null && user.profileImgUrl!.isNotEmpty) {
+      precacheImage(NetworkImage(user.profileImgUrl!), context);
+    }
+    setState(() => _user = user);
+  }
+
   @override
   void dispose() {
+    MainUserSync.instance.unregister();
     PendingAppPathService.instance.pendingNotifier.removeListener(_onPendingAppPathChanged);
     TokenRefreshService.instance.stop();
     WidgetsBinding.instance.removeObserver(this);
