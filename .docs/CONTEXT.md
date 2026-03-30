@@ -248,6 +248,7 @@
   - 디버그 로그는 `[DEBUG]` 접두사를 사용하여 구분
 
 ## 12. 최근 작업 메모
+- **앱 버전 1.0.9**: `pubspec.yaml` 버전을 `1.0.8+11`에서 `1.0.9+12`으로 변경.
 - **LoginScreen 캐치프레이즈·약관**: 좌우 패딩 각 `screenWidth * 0.1`(본문 가로 약 80%). `loginCatchphrase` l10n, 하단 `Spacer` 9·문구·1·버튼·1·약관·1(총 12).
 - **앱 버전 1.0.8 배포**: `pubspec.yaml` 버전을 `1.0.7+10`에서 `1.0.8+11`으로 변경.
 - **스토어 업로드용 빌드번호 상향**: `pubspec.yaml` 버전을 `1.0.7+9`에서 `1.0.7+10`으로 변경(버전명 1.0.7 유지).
@@ -331,9 +332,9 @@
 - **-40 분기 리뷰 퀘스트**: Opening의 `sessionId == '-40'` 팝업에서 "Leave Stars ⭐" 탭 시 OS 인앱리뷰 API를 호출.
   - 인앱리뷰 호출 성공 반환 시 `POST /v1/users/quests/{questId}` 호출 (`questId = sessionId`)
   - 응답 `QuestResultDto.completeYn == 'Y'`인 경우에만 `surveySuccessToast` 토스트 노출, 그 외 별도 처리 없음.
-**앱 버전 1.0.8**: `pubspec.yaml`의 `version` 값(예: 1.0.8+11)을 단일 사실 기준으로 사용. Setting 화면 하단: 개인정보·이용약관·오픈소스 블록 위로 조정, 그 아래 버전 텍스트 `v x.x.x` (fontSize 11, 흰색, 중앙 정렬) 노출.
+**앱 버전 1.0.9**: `pubspec.yaml`의 `version` 값(예: 1.0.9+12)을 단일 사실 기준으로 사용. Setting 화면 하단: 개인정보·이용약관·오픈소스 블록 위로 조정, 그 아래 버전 텍스트 `v x.x.x` (fontSize 11, 흰색, 중앙 정렬) 노출.
 - 버전 비교 및 강제 업데이트 로직은 `VersionCheckService`에서 `AppVersionService.getAppVersion()` 결과와 서버 응답 `latestVersion`를 비교하여 처리.
-**버전 관리 원칙**: 신규 기능 개발 전 버전 상향이 필요할 때는 `pubspec.yaml`의 `version`만 관리(예: 1.0.8+11 → 1.0.9+12). 코드 내 버전 상수는 두지 않고, 런타임에 `AppVersionService`로 조회.
+**버전 관리 원칙**: 신규 기능 개발 전 버전 상향이 필요할 때는 `pubspec.yaml`의 `version`만 관리(예: 1.0.9+12 → 1.0.10+13). 코드 내 버전 상수는 두지 않고, 런타임에 `AppVersionService`로 조회.
 - **푸시 appPath 연동**: FCM data에 `appPath` 포함 시 알림 클릭 후 해당 스크린으로 이동. 비로그인/미동의 시 `PendingAppPathService`에 보관, Home 진입 시 적용. 지원 경로·정의는 `.docs/CONTEXT_SCREEN.md` appPath 섹션. `lib/services/pending_app_path_service.dart`, `main.dart`(getInitialMessage·onMessageOpenedApp·_applyPendingAppPath).
 - **NotificationBoxScreen 알림 페이징**: Alarm 탭(Main Screen) 진입 시 `/v1/users/notification?pageNum=0`으로 알림 목록 조회, 스크롤 하단 도달 시 `pageNum=1`, `2`, `3`… 순차 호출(전부 0-based). 응답이 빈 리스트이면 더 이상 호출하지 않음. 목록은 GNB 오버레이에 가리지 않도록 `ListView` 하단에 `MediaQuery.padding.bottom + GnbBar.contentHeight`만큼 패딩. 응답 DTO는 `NotificationDto(id, title(List<SudaJson>), content(List<SudaJson>), imgPath, appPath, sendFinishedAt)`이며, title/content는 `SudaJsonUtil.localizedText`로 사용자 언어에 맞게 표시. `sendFinishedAt`은 서버 UTC+0 시각; ISO에 타임존이 없으면 UTC로 간주해 파싱 후 로컬 날짜 기준 상대 표시(l10n Today / n일 전 등, bodySmall·#635F5F·우측). 결과가 없을 때는 본문 중앙에 "No notification yet"(l10n.notificationsEmpty)을 body-default 흰색 텍스트로 노출.
 - **공지사항 화면**: AnnouncementsScreen (`GET /v1/notice` page/size 페이징), AnnouncementDetailScreen (`GET /v1/notice/{id}`). 카드: 제목·본문 1줄 말줄임, publishedAt YYYY-MM-DD 우하단. 빈 상태 l10n.noticesEmpty. showYn='n' 또는 삭제/404 시: 상세 페이지 대신 AppContentDialog 팝업으로 l10n.postNoLongerAvailable(게시물이 삭제되었거나 존재하지 않습니다) 안내, 버튼 l10n.backToHome(홈으로 가기).
