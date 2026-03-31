@@ -728,7 +728,17 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     if (messageText.isEmpty) {
       return const SizedBox.shrink();
     }
-    final bubbleWidth = bodyWidth * 0.7;
+    const double aiTranslationIconSize = 24;
+    const double gapBeforeAiTranslationIcon = 5;
+    const double aiAvatarRowWidth = 40;
+    const double gapAvatarToBubble = 5;
+    final maxRowWidthBeforeTranslation = bodyWidth -
+        gapBeforeAiTranslationIcon -
+        aiTranslationIconSize;
+    final maxAiBubbleWidth = math.max(
+      0.0,
+      maxRowWidthBeforeTranslation - aiAvatarRowWidth - gapAvatarToBubble,
+    );
     final textStyle = Theme.of(context).textTheme.bodyLarge?.copyWith(
           color: Colors.white,
         );
@@ -747,50 +757,43 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                SizedBox(
-                  width: bubbleWidth,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      _buildAiAvatar(),
-                      const SizedBox(width: 5),
-                      Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 10,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF0CABA8),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Stack(
-                            children: [
-                              Opacity(
-                                opacity: 0,
-                                child: Text(
-                                  messageText,
-                                  style: textStyle,
-                                ),
-                              ),
-                              Text(
-                                entry.visibleText ?? '',
-                                style: textStyle,
-                              ),
-                            ],
+                _buildAiAvatar(),
+                const SizedBox(width: gapAvatarToBubble),
+                ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: maxAiBubbleWidth),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0CABA8),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Stack(
+                      children: [
+                        Opacity(
+                          opacity: 0,
+                          child: Text(
+                            messageText,
+                            style: textStyle,
                           ),
                         ),
-                      ),
-                    ],
+                        Text(
+                          entry.visibleText ?? '',
+                          style: textStyle,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                const SizedBox(width: 5),
+                const SizedBox(width: gapBeforeAiTranslationIcon),
                 GestureDetector(
                   onTap: () => _toggleTranslation(entry),
                   child: Image.asset(
                     'assets/images/icons/translation_grey.png',
-                    width: 24,
-                    height: 24,
+                    width: aiTranslationIconSize,
+                    height: aiTranslationIconSize,
                   ),
                 ),
               ],

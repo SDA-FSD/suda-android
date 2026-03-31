@@ -186,7 +186,7 @@
   - `RoleplayDto.starter`는 `SudaJson`이며, `key = roleplayRoleId`, `value = 시작 대사`.
   - 사용자 시작: 선택한 role의 id가 `starter.key`와 같으면 사용자 시작으로 판단. 첫 대사를 말하라는 1회성 안내 레이어 노출(본문 중앙 rgb(53,53,53) 배경, h2/body-secondary/흰박스+starter.value, l10n yourTurnFirst/sayLineBelowToStart, 사용자 말풍선 노출 시 해제).
   - AI 시작: 세션 초기화 응답으로 받은 AI 시작 보이스를 사용. Playing 진입 후 500ms 대기 → AI 말풍선 노출 시작 → 즉시 나레이션 호출.
-  - AI 시작 메시지 노출: Playing 본문에 AI 말풍선 표시(본문 width 70%). 아바타는 `userRoleDto.avatarImgPath`에 CDN host를 prepend, 텍스트는 `starter.value` 사용. 음성 길이에 맞춰 타이핑 속도 조절.
+  - AI 시작 메시지 노출: Playing 본문에 AI 말풍선 표시. AI 말풍선 너비는 내용에 맞추되 최대 너비는 본문 `bodyWidth`에서 번역 아이콘(24)·번역 아이콘 앞 간격(5)·아바타(40)·아바타-말풍선 간격(5)을 뺀 값(`playing.dart` `_buildAiMessage`). 아바타는 `userRoleDto.avatarImgPath`에 CDN host를 prepend, 텍스트는 `starter.value` 사용. 음성 길이에 맞춰 타이핑 속도 조절.
   - AI 시작 보이스 처리: `aiSoundCdnYn == "Y"`이면 CDN host를 prepend해 재생, 아니면 `aiSoundFile`(byte[]) 재생.
 - **나레이션/미션 표기**
   - 나레이션 텍스트가 미션 안내인 경우 `missionActiveYn == "Y"`로 판단.

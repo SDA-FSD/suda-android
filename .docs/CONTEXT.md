@@ -248,6 +248,7 @@
   - 디버그 로그는 `[DEBUG]` 접두사를 사용하여 구분
 
 ## 12. 최근 작업 메모
+- **Playing AI 말풍선 너비**: 고정 `bodyWidth * 0.7` 제거. `ConstrainedBox(maxWidth: …)`로 내용 높이에 맞춘 최소 너비·최대는 `bodyWidth`에서 번역 아이콘(24)·아이콘 앞 간격(5)·아바타(40)·아바타-말풍선 간격(5) 제외(`lib/screens/roleplay/playing.dart` `_buildAiMessage`). 사용자/힌트 말풍선·나레이션은 변경 없음.
 - **앱 버전 1.0.9**: `pubspec.yaml` 버전을 `1.0.8+11`에서 `1.0.9+12`으로 변경.
 - **LoginScreen 캐치프레이즈·약관**: 좌우 패딩 각 `screenWidth * 0.1`(본문 가로 약 80%). `loginCatchphrase` l10n, 하단 `Spacer` 9·문구·1·버튼·1·약관·1(총 12).
 - **앱 버전 1.0.8 배포**: `pubspec.yaml` 버전을 `1.0.7+10`에서 `1.0.8+11`으로 변경.
