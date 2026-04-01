@@ -97,10 +97,18 @@
   - res: `{ text, missionActiveYn, currentStep, resultId }`
   - 설명: AI 말풍선 이후 노출되는 나레이션. 미션 활성 시 안내 텍스트 포함 가능.
   - 비고: `resultId`는 종료 판정 시 생성되는 결과 식별자.
-- **힌트 조회**: `GET /{rpSessionId}/hint`
+- **힌트 텍스트 조회**: `GET /{rpSessionId}/hint`
   - req: path param만 사용
-  - res: `String`
-  - 설명: 사용자 차례에 힌트 버튼 클릭 시 호출.
+  - res: `String` (힌트 말풍선 본문)
+  - 설명: 힌트 라이트볼 탭 후 말풍선에 표시할 문장.
+- **힌트 전체 발음**: `GET /{rpSessionId}/hint/sound`
+  - req: path param만 사용
+  - res: `{ cdnYn, cdnPath, sound }` — AI 메시지(`RoleplayAiMessageDto`)와 동일 규칙
+  - 설명: 메가폰 탭 시 호출. 텍스트 조회(`.../hint`)와 경로가 다름. 클라이언트는 말풍선 생명주기 내 캐시.
+- **힌트 단어 발음**: `GET /{rpSessionId}/hint/sound/{index}`
+  - req: path param `index` = 문장을 공백 기준으로 나눈 단어 인덱스(0부터)
+  - res: `{ cdnYn, cdnPath, sound }` (동일)
+  - 설명: 본문 단어 탭 시 호출.
 - **번역 조회**: `GET /{rpSessionId}/translation?index=3`
   - req: path param + query param(`index`)
   - res: `String`
@@ -200,9 +208,10 @@
   - 사용자 턴이기만 하면 활성화.
   - user-message 관련 API 호출 시작 시점부터 그 외 모든 상태는 비활성화.
 - **힌트 버튼 동작**
-  - 탭 시 `GET /v1/roleplay-sessions/{sessionId}/hint` 호출 후 응답 텍스트를 힌트 말풍선으로 표시(우측 정렬, 흰색 점선 테두리·투명 배경·흰색 글씨).
+  - 탭 시 로딩 말풍선(회색 메가폰·스피너) 후 `GET .../hint`로 **텍스트** 수신·표시. 실패·빈 응답 시 행 제거.
+  - 말풍선 스타일: 중앙 정렬, 가로 `bodyWidth`, 배경 `#194847` 70%, 좌측 열(세로 중앙) 메가폰·우측 본문 `Wrap`, 본문 `headlineSmall`·기본 흰색·재생 중 강조 `#0CABA8`, 점선 밑줄 `#0CABA8`, 텍스트 수신 후 스크롤 최하단. 단어 탭 시 `GET .../hint/sound/{index}`, 메가폰 탭 시 `GET .../hint/sound`(AI 말풍선과 동일 `cdnYn`/`cdnPath`/`sound`·단일 `AudioPlayer`).
   - 한 사용자 턴에서 한 번만 사용 가능(탭 즉시 비활성화, 해당 턴 종료까지 유지).
-  - 힌트 말풍선은 실제 user-message(텍스트/음성) 전송 후 사용자 말풍선이 추가되는 시점에 제거.
+  - 힌트 말풍선은 실제 user-message(텍스트/음성) 전송 후 사용자 말풍선이 추가되는 시점에 제거(제거 시 진행 중 힌트 발음 정지).
   - 사용자 턴 활성화 후 녹음 모드에서 3초 동안 녹음 버튼을 누르지 않으면 힌트 아이콘에 500ms fade-in/out 깜빡임 효과 표시. 녹음 시작·입력 전송·타이핑 모드 전환 시 깜빡임 해제.
 - **입력 모드 전환**
   - 녹음 모드 기본. 좌측 하단 아이콘으로 전환.

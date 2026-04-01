@@ -110,6 +110,28 @@ class SudaApiClient {
     );
   }
 
+  static Future<RoleplayAiMessageDto> getRoleplayHintAudio({
+    required String accessToken,
+    required String rpSessionId,
+  }) {
+    return RoleplayApi.getHintAudio(
+      accessToken: accessToken,
+      rpSessionId: rpSessionId,
+    );
+  }
+
+  static Future<RoleplayAiMessageDto> getRoleplayHintWordAudio({
+    required String accessToken,
+    required String rpSessionId,
+    required int wordIndex,
+  }) {
+    return RoleplayApi.getHintWordAudio(
+      accessToken: accessToken,
+      rpSessionId: rpSessionId,
+      wordIndex: wordIndex,
+    );
+  }
+
   static Future<String> getRoleplayTranslation({
     required String accessToken,
     required String rpSessionId,

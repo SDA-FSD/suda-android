@@ -248,6 +248,7 @@
   - 디버그 로그는 `[DEBUG]` 접두사를 사용하여 구분
 
 ## 12. 최근 작업 메모
+- **Playing 힌트 말풍선**: 힌트 텍스트 `GET /v1/roleplay-sessions/{sessionId}/hint`(문자열). 전체 발음 `GET .../hint/sound`, 단어 발음 `GET .../hint/sound/{index}`(JSON·`cdnYn`/`cdnPath`/`sound`). 라이트볼 탭 직후 로딩 플레이스홀더(회색 메가폰·스피너) 노출, 실패·빈 응답 시 행 제거. 성공 시 배경 `#194847` 70%·가로 `bodyWidth`·좌측 열(세로 중앙) 메가폰·우측 `Wrap` 본문 `headlineSmall`·기본 흰색·단어/메가폰 탭 시 재생 중 `#0CABA8`·점선 밑줄 `#0CABA8`·텍스트 로드 후 스크롤 최하단 정렬. 말풍선 생명주기 안 발음 캐시(`full`, `w0`…); user-message 직전 힌트 행 제거 시 재생 구독 해제·`_audioPlayer.stop()`. 구현: `lib/api/endpoints/roleplay_api.dart` `getHintAudio`·`getHintWordAudio`, `lib/screens/roleplay/playing.dart`.
 - **Playing AI 말풍선 너비**: 고정 `bodyWidth * 0.7` 제거. `ConstrainedBox(maxWidth: …)`로 내용 높이에 맞춘 최소 너비·최대는 `bodyWidth`에서 번역 아이콘(24)·아이콘 앞 간격(5)·아바타(40)·아바타-말풍선 간격(5) 제외(`lib/screens/roleplay/playing.dart` `_buildAiMessage`). 사용자/힌트 말풍선·나레이션은 변경 없음.
 - **앱 버전 1.0.9**: `pubspec.yaml` 버전을 `1.0.8+11`에서 `1.0.9+12`으로 변경.
 - **LoginScreen 캐치프레이즈·약관**: 좌우 패딩 각 `screenWidth * 0.1`(본문 가로 약 80%). `loginCatchphrase` l10n, 하단 `Spacer` 9·문구·1·버튼·1·약관·1(총 12).

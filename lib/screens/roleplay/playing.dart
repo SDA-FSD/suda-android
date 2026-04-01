@@ -52,6 +52,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
   bool _hintUsedThisTurn = false;
   Timer? _hintIdleTimer;
   late final AnimationController _hintBlinkController;
+  StreamSubscription<PlayerState>? _hintPlaybackSub;
   final List<_ConversationEntry> _conversationEntries = [];
   _ConversationEntry? _recordingEntry;
   Timer? _serviceMessageTimer;
@@ -110,6 +111,8 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     _hintIdleTimer?.cancel();
     _hintIdleTimer = null;
     _hintBlinkController.dispose();
+    _hintPlaybackSub?.cancel();
+    _hintPlaybackSub = null;
     super.dispose();
   }
 
@@ -243,6 +246,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
   }) async {
     final entry = _ConversationEntry.ai(text: text);
     entry.visibleText = text;
+    _resetHintPlaybackHighlight();
     _setHintEnabled(false);
     _cancelHintIdleAndBlink();
     _prepareNarrationAfterAiStart();
@@ -430,6 +434,10 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     final accessToken = await TokenStorage.loadAccessToken();
     final sessionId = RoleplayStateService.instance.sessionId;
     if (accessToken == null || sessionId == null || sessionId.isEmpty) return;
+
+    final entry = _ConversationEntry.hintLoading();
+    await _addEntry(entry);
+
     try {
       final text = await SudaApiClient.getRoleplayHint(
         accessToken: accessToken,
@@ -437,13 +445,164 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
       );
       if (!mounted) return;
       final trimmed = text.trim();
-      if (trimmed.isNotEmpty) {
-        final entry = _ConversationEntry.hint(text: trimmed);
-        await _addEntry(entry);
+      if (trimmed.isEmpty) {
+        _removeConversationEntry(entry);
+        return;
       }
+      setState(() {
+        entry.hintIsLoading = false;
+        entry.text = trimmed;
+      });
+      _scrollHintEntryToBottom(entry);
     } catch (e) {
       debugPrint('[DEBUG] Hint API error: $e');
+      if (!mounted) return;
+      _removeConversationEntry(entry);
     }
+  }
+
+  void _removeConversationEntry(_ConversationEntry entry) {
+    if (!mounted) return;
+    setState(() {
+      _conversationEntries.remove(entry);
+    });
+  }
+
+  void _resetHintPlaybackHighlight() {
+    _hintPlaybackSub?.cancel();
+    _hintPlaybackSub = null;
+    var changed = false;
+    for (final e in _conversationEntries) {
+      if (e.type == _ConversationEntryType.hint &&
+          (e.hintSentenceHighlightActive || e.hintWordHighlightIndex != null)) {
+        e.hintSentenceHighlightActive = false;
+        e.hintWordHighlightIndex = null;
+        changed = true;
+      }
+    }
+    if (changed && mounted) {
+      setState(() {});
+    }
+  }
+
+  void _scrollHintEntryToBottom(_ConversationEntry entry) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final ctx = entry.key.currentContext;
+      if (ctx == null) return;
+      Scrollable.ensureVisible(
+        ctx,
+        alignment: 1.0,
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOut,
+      );
+    });
+  }
+
+  Future<void> _onHintMegaphoneTap(_ConversationEntry entry) async {
+    if (entry.type != _ConversationEntryType.hint || entry.hintIsLoading) {
+      return;
+    }
+    setState(() {
+      entry.hintSentenceHighlightActive = true;
+      entry.hintWordHighlightIndex = null;
+    });
+    final accessToken = await TokenStorage.loadAccessToken();
+    final sessionId = RoleplayStateService.instance.sessionId;
+    if (accessToken == null || sessionId == null || sessionId.isEmpty) return;
+    await _playHintAudio(
+      entry,
+      'full',
+      () => SudaApiClient.getRoleplayHintAudio(
+        accessToken: accessToken,
+        rpSessionId: sessionId,
+      ),
+    );
+  }
+
+  Future<void> _onHintWordTap(_ConversationEntry entry, int wordIndex) async {
+    if (entry.type != _ConversationEntryType.hint || entry.hintIsLoading) {
+      return;
+    }
+    setState(() {
+      entry.hintSentenceHighlightActive = false;
+      entry.hintWordHighlightIndex = wordIndex;
+    });
+    final accessToken = await TokenStorage.loadAccessToken();
+    final sessionId = RoleplayStateService.instance.sessionId;
+    if (accessToken == null || sessionId == null || sessionId.isEmpty) return;
+    await _playHintAudio(
+      entry,
+      'w$wordIndex',
+      () => SudaApiClient.getRoleplayHintWordAudio(
+        accessToken: accessToken,
+        rpSessionId: sessionId,
+        wordIndex: wordIndex,
+      ),
+    );
+  }
+
+  Future<void> _playHintAudio(
+    _ConversationEntry entry,
+    String cacheKey,
+    Future<RoleplayAiMessageDto> Function() fetch,
+  ) async {
+    final sessionId = RoleplayStateService.instance.sessionId;
+    if (sessionId == null || sessionId.isEmpty) return;
+    final cache = entry.hintAudioCache;
+    if (cache == null) return;
+
+    _hintPlaybackSub?.cancel();
+    _hintPlaybackSub = null;
+    await _audioPlayer.stop();
+
+    late RoleplayAiMessageDto dto;
+    try {
+      if (cache.containsKey(cacheKey)) {
+        dto = cache[cacheKey]!;
+      } else {
+        dto = await fetch();
+        cache[cacheKey] = dto;
+      }
+    } catch (e) {
+      debugPrint('[DEBUG] Hint audio error: $e');
+      if (mounted) {
+        setState(() {
+          entry.hintSentenceHighlightActive = false;
+          entry.hintWordHighlightIndex = null;
+        });
+      }
+      return;
+    }
+    if (!mounted) return;
+
+    final source = await _prepareAiVoice(
+      cdnYn: dto.cdnYn,
+      cdnPath: dto.cdnPath,
+      soundBytes: dto.sound,
+    );
+    if (source == null) {
+      if (mounted) {
+        setState(() {
+          entry.hintSentenceHighlightActive = false;
+          entry.hintWordHighlightIndex = null;
+        });
+      }
+      return;
+    }
+
+    _hintPlaybackSub = _audioPlayer.playerStateStream.listen((state) {
+      if (state.processingState == ProcessingState.completed) {
+        _hintPlaybackSub?.cancel();
+        _hintPlaybackSub = null;
+        if (!mounted) return;
+        setState(() {
+          entry.hintSentenceHighlightActive = false;
+          entry.hintWordHighlightIndex = null;
+        });
+      }
+    });
+    await _playPreparedAiVoice(source);
   }
 
   void _setTypingEnabled(bool isEnabled) {
@@ -922,42 +1081,199 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     );
   }
 
+  static const Color _hintBubbleBg = Color(0xFF194847);
+  static const Color _hintPlaybackTeal = Color(0xFF0CABA8);
+  /// 단어 텍스트와 점선 밑줄 사이 (논리 픽셀).
+  static const double _hintWordUnderlineGap = 2;
+
+  Color _hintMegaphoneTint(_ConversationEntry entry) {
+    if (entry.hintSentenceHighlightActive) return _hintPlaybackTeal;
+    return Colors.white;
+  }
+
+  Color _hintWordTextColor(_ConversationEntry entry, int wordIndex) {
+    if (entry.hintSentenceHighlightActive) return _hintPlaybackTeal;
+    if (entry.hintWordHighlightIndex == wordIndex) return _hintPlaybackTeal;
+    return Colors.white;
+  }
+
+  double _measureHintWordWidth(String word, TextStyle? style) {
+    final tp = TextPainter(
+      text: TextSpan(text: word, style: style),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    return tp.width;
+  }
+
+  Widget _buildHintWordWithDottedUnderline({
+    required _ConversationEntry entry,
+    required int wordIndex,
+    required String word,
+    required TextStyle? headline,
+  }) {
+    final wordStyle = headline?.copyWith(
+      color: _hintWordTextColor(entry, wordIndex),
+      height: 1.35,
+    );
+    final underlineWidth = _measureHintWordWidth(word, wordStyle);
+    return GestureDetector(
+      onTap: () => unawaited(_onHintWordTap(entry, wordIndex)),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(word, style: wordStyle),
+          SizedBox(height: _hintWordUnderlineGap),
+          SizedBox(
+            width: underlineWidth,
+            height: 3,
+            child: CustomPaint(
+              painter: _HintDottedUnderlinePainter(
+                color: _hintPlaybackTeal,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildHintBubble(
     BuildContext context,
     double bodyWidth,
     _ConversationEntry entry,
   ) {
+    if (entry.hintIsLoading) {
+      return _buildHintBubbleLoading(context, bodyWidth, entry);
+    }
     final text = entry.text ?? '';
     if (text.isEmpty) return const SizedBox.shrink();
-    const borderColor = Colors.white;
-    const radius = 12.0;
-    const dashLength = 6.0;
-    const dashGap = 4.0;
-    final textStyle = Theme.of(context).textTheme.bodyLarge?.copyWith(
-          color: borderColor,
-        );
-    final maxBubbleWidth = bodyWidth * 0.7;
+    final words = text
+        .trim()
+        .split(RegExp(r'\s+'))
+        .where((w) => w.isNotEmpty)
+        .toList();
+    final theme = Theme.of(context).textTheme;
+    final headline = theme.headlineSmall ?? theme.bodyLarge;
+
     return AnimatedOpacity(
       opacity: entry.isVisible ? 1 : 0,
       duration: const Duration(milliseconds: 150),
       child: Align(
-        alignment: Alignment.centerRight,
+        alignment: Alignment.center,
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: maxBubbleWidth),
-          child: CustomPaint(
-            painter: _DashedBorderPainter(
-              color: borderColor,
-              strokeWidth: 1.5,
-              borderRadius: radius,
-              dashLength: dashLength,
-              dashGap: dashGap,
+          constraints: BoxConstraints(maxWidth: bodyWidth),
+          child: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: _hintBubbleBg.withValues(alpha: 0.7),
+              borderRadius: BorderRadius.circular(12),
             ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              child: Text(
-                text,
-                style: textStyle,
-              ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: 40,
+                  child: Center(
+                    child: GestureDetector(
+                      onTap: () => unawaited(_onHintMegaphoneTap(entry)),
+                      behavior: HitTestBehavior.opaque,
+                      child: ColorFiltered(
+                        colorFilter: ColorFilter.mode(
+                          _hintMegaphoneTint(entry),
+                          BlendMode.srcIn,
+                        ),
+                        child: Image.asset(
+                          'assets/images/icons/megaphone.png',
+                          width: 24,
+                          height: 24,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 8),
+                    child: Wrap(
+                      alignment: WrapAlignment.start,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      runSpacing: 4,
+                      children: [
+                        for (var i = 0; i < words.length; i++) ...[
+                          if (i > 0) Text(' ', style: headline),
+                          _buildHintWordWithDottedUnderline(
+                            entry: entry,
+                            wordIndex: i,
+                            word: words[i],
+                            headline: headline,
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHintBubbleLoading(
+    BuildContext context,
+    double bodyWidth,
+    _ConversationEntry entry,
+  ) {
+    return AnimatedOpacity(
+      opacity: entry.isVisible ? 1 : 0,
+      duration: const Duration(milliseconds: 150),
+      child: Align(
+        alignment: Alignment.center,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: bodyWidth),
+          child: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: _hintBubbleBg.withValues(alpha: 0.7),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: 40,
+                  child: Center(
+                    child: ColorFiltered(
+                      colorFilter: const ColorFilter.mode(
+                        Color(0xFF9B9B9B),
+                        BlendMode.srcIn,
+                      ),
+                      child: Image.asset(
+                        'assets/images/icons/megaphone.png',
+                        width: 24,
+                        height: 24,
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 8),
+                    child: const Center(
+                      child: SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -1043,8 +1359,10 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
         _ConversationEntryType.narration => _buildNarration(context, entry),
         _ConversationEntryType.user =>
           _buildUserMessage(context, bodyWidth, entry),
-        _ConversationEntryType.hint =>
-          _buildHintBubble(context, bodyWidth, entry),
+        _ConversationEntryType.hint => Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            child: _buildHintBubble(context, bodyWidth, entry),
+          ),
         _ConversationEntryType.recording => _buildRecordingBubble(context, entry),
       },
     );
@@ -1230,6 +1548,14 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     RoleplayUserMessageResponseDto response,
   ) async {
     if (mounted) {
+      final hadHint = _conversationEntries.any(
+        (e) => e.type == _ConversationEntryType.hint,
+      );
+      if (hadHint) {
+        _hintPlaybackSub?.cancel();
+        _hintPlaybackSub = null;
+        unawaited(_audioPlayer.stop());
+      }
       setState(() {
         _showUserStartGuide = false;
         _conversationEntries.removeWhere(
@@ -1997,6 +2323,40 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
   }
 }
 
+/// 힌트 단어 아래 고정 색 점선 (텍스트 장식과 분리).
+class _HintDottedUnderlinePainter extends CustomPainter {
+  static const double _strokeWidth = 1.2;
+  static const double _dashLength = 5;
+  static const double _dashGap = 3;
+
+  final Color color;
+
+  _HintDottedUnderlinePainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = _strokeWidth
+      ..strokeCap = StrokeCap.round
+      ..style = PaintingStyle.stroke;
+
+    final y = size.height / 2;
+    var x = 0.0;
+    while (x < size.width) {
+      final segmentEnd = math.min(x + _dashLength, size.width);
+      if (segmentEnd > x) {
+        canvas.drawLine(Offset(x, y), Offset(segmentEnd, y), paint);
+      }
+      x += _dashLength + _dashGap;
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _HintDottedUnderlinePainter oldDelegate) =>
+      color != oldDelegate.color;
+}
+
 enum _MissionStatus {
   ready,
   success,
@@ -2024,7 +2384,7 @@ enum _ConversationEntryType {
 
 class _ConversationEntry {
   final _ConversationEntryType type;
-  final String? text;
+  String? text;
   final RoleplayNarrationDto? narration;
   final GlobalKey key = GlobalKey();
   int? conversationIndex;
@@ -2033,12 +2393,18 @@ class _ConversationEntry {
   String? translationText;
   bool isTranslationExpanded = false;
   bool isTranslationLoading = false;
+  bool hintIsLoading;
+  bool hintSentenceHighlightActive = false;
+  int? hintWordHighlightIndex;
+  Map<String, RoleplayAiMessageDto>? hintAudioCache;
 
   _ConversationEntry._({
     required this.type,
     this.text,
     this.narration,
     this.visibleText,
+    this.hintIsLoading = false,
+    this.hintAudioCache,
   });
 
   factory _ConversationEntry.ai({required String text}) {
@@ -2065,10 +2431,12 @@ class _ConversationEntry {
     );
   }
 
-  factory _ConversationEntry.hint({required String text}) {
+  factory _ConversationEntry.hintLoading() {
     return _ConversationEntry._(
       type: _ConversationEntryType.hint,
-      text: text,
+      text: null,
+      hintIsLoading: true,
+      hintAudioCache: <String, RoleplayAiMessageDto>{},
     );
   }
 
@@ -2081,55 +2449,6 @@ class _ConversationEntry {
   bool get consumesIndex =>
       type != _ConversationEntryType.recording &&
       type != _ConversationEntryType.hint;
-}
-
-class _DashedBorderPainter extends CustomPainter {
-  final Color color;
-  final double strokeWidth;
-  final double borderRadius;
-  final double dashLength;
-  final double dashGap;
-
-  _DashedBorderPainter({
-    required this.color,
-    required this.strokeWidth,
-    required this.borderRadius,
-    required this.dashLength,
-    required this.dashGap,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final rect = Rect.fromLTWH(0, 0, size.width, size.height);
-    final rrect = RRect.fromRectAndRadius(
-      rect,
-      Radius.circular(borderRadius),
-    );
-    final path = Path()..addRRect(rrect);
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth;
-    for (final metric in path.computeMetrics()) {
-      double distance = 0;
-      while (distance < metric.length) {
-        final segmentLength = (distance + dashLength > metric.length)
-            ? metric.length - distance
-            : dashLength;
-        final segmentPath = metric.extractPath(distance, distance + segmentLength);
-        canvas.drawPath(segmentPath, paint);
-        distance += segmentLength + dashGap;
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _DashedBorderPainter oldDelegate) =>
-      color != oldDelegate.color ||
-      strokeWidth != oldDelegate.strokeWidth ||
-      borderRadius != oldDelegate.borderRadius ||
-      dashLength != oldDelegate.dashLength ||
-      dashGap != oldDelegate.dashGap;
 }
 
 const double _micDefaultSize = 100;
