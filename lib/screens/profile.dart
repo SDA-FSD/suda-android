@@ -83,6 +83,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  static const double _historyRefetchBottomThreshold = 200;
+
+  /// 탭 재진입·복귀 시 히스토리를 0페이지부터 다시 받을지.
+  /// 서버에 더 불러올 페이지가 남아 있거나(`!_isHistoryLastPage`), 스크롤이 목록 끝이 아니면
+  /// 기존에 불러온 페이지·스크롤 위치를 유지한다.
+  /// (마지막 페이지까지 로드한 뒤 하단 근처를 보고 있을 때만 새 항목 반영을 위해 전체 재조회)
+  bool _shouldRefetchHistoryFromStart() {
+    if (_historyList.isEmpty) return true;
+    if (!_isHistoryLastPage) return false;
+    if (!_scrollController.hasClients) return false;
+    final pos = _scrollController.position;
+    return pos.pixels >= pos.maxScrollExtent - _historyRefetchBottomThreshold;
+  }
+
   Future<void> _fetchHistoryPage(int pageNum) async {
     if (pageNum == 0) {
       if (_isLoadingHistory) return;
@@ -138,17 +152,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (widget.user != null && widget.user != oldWidget.user) {
       setState(() => _user = widget.user);
     }
-    // 활성 상태로 전환될 때마다 프로필 갱신 + 롤플레이 목록 0페이지로 새로 호출(첫 요소 같으면 화면 갱신 없이 유지)
+    // 활성 상태로 전환될 때마다 프로필 갱신. 히스토리는 끝까지 본 경우에만 0페이지 재조회.
     if (!oldWidget.isActive && widget.isActive) {
       _refreshProfile();
-      _fetchHistoryPage(0);
+      if (_shouldRefetchHistoryFromStart()) {
+        _fetchHistoryPage(0);
+      }
     }
-    // Profile 탭이 활성인 상태에서 서브 스크린 pop으로 복귀할 때에도 동일하게 갱신
+    // Profile 탭이 활성인 상태에서 서브 스크린 pop으로 복귀할 때도 동일
     if (widget.isActive &&
         widget.profileReturnCounter != null &&
         widget.profileReturnCounter != oldWidget.profileReturnCounter) {
       _refreshProfile();
-      _fetchHistoryPage(0);
+      if (_shouldRefetchHistoryFromStart()) {
+        _fetchHistoryPage(0);
+      }
     }
   }
 
@@ -214,13 +232,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       ),
     );
-    // 설정 복귀 시 main에서 갱신된 user(widget.user)로 동기화. 한 프레임 뒤에 읽어
-    // main의 onUserUpdated 리빌드가 반영된 widget.user를 사용하도록 함.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && widget.user != null) {
-        setState(() => _user = widget.user);
-      }
-    });
   }
 
   /// 롤플레이 히스토리: 3열·썸네일 간격 10·행 간격 10·CDN·캐시·shimmer

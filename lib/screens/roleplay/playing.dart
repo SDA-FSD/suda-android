@@ -2325,8 +2325,8 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
 
 /// 힌트 단어 아래 고정 색 점선 (텍스트 장식과 분리).
 class _HintDottedUnderlinePainter extends CustomPainter {
-  static const double _strokeWidth = 1.2;
-  static const double _dashLength = 5;
+  static const double _strokeWidth = 1.5;
+  static const double _dashLength = 3;
   static const double _dashGap = 3;
 
   final Color color;

@@ -1,4 +1,5 @@
-import 'package:flutter/foundation.dart';
+import 'dart:async' show unawaited;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -168,6 +169,23 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       precacheImage(NetworkImage(user.profileImgUrl!), context);
     }
     setState(() => _user = user);
+  }
+
+  /// 서브 스크린에서 메인 라우트로 pop 복귀 시 `GET /v1/users`로 전역 `UserDto` 동기화.
+  /// 프로필 표면의 레벨·진행률은 `ProfileScreen`의 `getUserProfile`이 담당(역할 분리).
+  Future<void> _syncUserOnMainRouteReturn() async {
+    try {
+      final token = await TokenStorage.loadAccessToken();
+      if (token == null || !mounted) return;
+      final user = await SudaApiClient.getCurrentUser(accessToken: token);
+      if (!mounted) return;
+      if (user.profileImgUrl != null && user.profileImgUrl!.isNotEmpty) {
+        precacheImage(NetworkImage(user.profileImgUrl!), context);
+      }
+      setState(() => _user = user);
+    } catch (_) {
+      // best-effort: 복귀 직후 동기화 실패 시 기존 메모리 상태 유지
+    }
   }
 
   @override
@@ -615,6 +633,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                         _profileReturnCounter++;
                       }
                     });
+                    unawaited(_syncUserOnMainRouteReturn());
                   },
                   child: PopScope(
                     canPop: _currentMainScreen == 'home',
