@@ -40,7 +40,7 @@ class _AgreementScreenState extends State<AgreementScreen> {
     setState(() => _isSubmitting = true);
     try {
       await SudaApiClient.updateAgreement(accessToken: widget.accessToken);
-      await AppsflyerService.logEvent('terms_agreed');
+      await AppsflyerService.logEvent('af_complete_registration');
       widget.onAgreementComplete();
     } catch (e) {
       if (mounted) {
