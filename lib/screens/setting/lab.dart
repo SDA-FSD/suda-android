@@ -18,6 +18,7 @@ class _LabScreenState extends State<LabScreen> {
   bool _guarded = false;
   bool _showOkayButton = false;
   bool _toastIsWarning = false;
+  static const _stylePreviewLines = ['말해요!?', 'Talk', 'E sua vez primeiro!'];
 
   @override
   void didChangeDependencies() {
@@ -45,11 +46,7 @@ class _LabScreenState extends State<LabScreen> {
     await AppContentDialog.show(
       context,
       content: Center(
-        child: Text(
-          message,
-          style: textStyle,
-          textAlign: TextAlign.center,
-        ),
+        child: Text(message, style: textStyle, textAlign: TextAlign.center),
       ),
       showOkayButton: _showOkayButton,
       barrierDismissible: true,
@@ -58,10 +55,40 @@ class _LabScreenState extends State<LabScreen> {
 
   void _showTestToast() {
     final message = 'Test Popup, Test Toast';
-    DefaultToast.show(
-      context,
-      message,
-      isError: _toastIsWarning,
+    DefaultToast.show(context, message, isError: _toastIsWarning);
+  }
+
+  Widget _buildSectionDivider() {
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: 24),
+      child: Divider(height: 1, thickness: 1, color: Color(0xFF353535)),
+    );
+  }
+
+  Widget _buildStylePreview(
+    BuildContext context, {
+    required String label,
+    required TextStyle? style,
+  }) {
+    final theme = Theme.of(context).textTheme;
+    final previewStyle = style?.copyWith(color: Colors.white);
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: theme.labelSmall?.copyWith(color: const Color(0xFF80D7CF)),
+          ),
+          const SizedBox(height: 8),
+          for (final line in _stylePreviewLines) ...[
+            Text(line, style: previewStyle),
+            const SizedBox(height: 6),
+          ],
+        ],
+      ),
     );
   }
 
@@ -110,7 +137,7 @@ class _LabScreenState extends State<LabScreen> {
                 child: const Text('Show Popup'),
               ),
             ),
-            const SizedBox(height: 32),
+            _buildSectionDivider(),
             Text(
               'Default Toast Test',
               style: theme.headlineSmall?.copyWith(color: Colors.white),
@@ -145,7 +172,7 @@ class _LabScreenState extends State<LabScreen> {
                 child: const Text('Show Toast'),
               ),
             ),
-            const SizedBox(height: 32),
+            _buildSectionDivider(),
             Text(
               'Like Effect Test',
               style: theme.headlineSmall?.copyWith(color: Colors.white),
@@ -202,6 +229,47 @@ class _LabScreenState extends State<LabScreen> {
                 child: const Text('Levelup Like Effect'),
               ),
             ),
+            _buildSectionDivider(),
+            Text(
+              'Style',
+              style: theme.headlineSmall?.copyWith(color: Colors.white),
+            ),
+            const SizedBox(height: 16),
+            _buildStylePreview(
+              context,
+              label: 'headlineLarge',
+              style: theme.headlineLarge,
+            ),
+            _buildStylePreview(
+              context,
+              label: 'headlineMedium',
+              style: theme.headlineMedium,
+            ),
+            _buildStylePreview(
+              context,
+              label: 'headlineSmall',
+              style: theme.headlineSmall,
+            ),
+            _buildStylePreview(
+              context,
+              label: 'bodyLarge',
+              style: theme.bodyLarge,
+            ),
+            _buildStylePreview(
+              context,
+              label: 'bodyMedium',
+              style: theme.bodyMedium,
+            ),
+            _buildStylePreview(
+              context,
+              label: 'bodySmall',
+              style: theme.bodySmall,
+            ),
+            _buildStylePreview(
+              context,
+              label: 'labelSmall',
+              style: theme.labelSmall,
+            ),
             const SizedBox(height: 24),
           ],
         ),
@@ -213,4 +281,3 @@ class _LabScreenState extends State<LabScreen> {
     await LikeProgressEffect.play(context, params: params);
   }
 }
-

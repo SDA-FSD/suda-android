@@ -250,6 +250,7 @@
 
 ## 12. 최근 작업 메모
 - **스토어/테스트 배포용 빌드번호 상향**: `pubspec.yaml` 버전을 `1.0.9+12`에서 `1.0.9+13`으로 변경(버전명 1.0.9 유지).
+- **앱 버전 1.0.10**: `pubspec.yaml` 버전을 `1.0.9+13`에서 `1.0.10+14`으로 변경.
 - **Main 복귀 시 `UserDto` 동기화 + 프로필 역할 분리**: 메인 라우트(첫 화면)가 서브 스크린 pop으로 다시 보일 때 `MainRouteAwareWrapper.onReturnToRoute`에서 `homeTabSelectedCounter`·`profileReturnCounter` 갱신 직후 `SudaApiClient.getCurrentUser`(`GET /v1/users`)를 비동기 호출해 `_MyAppState._user`를 best-effort 갱신. 구현: `lib/main.dart` `_syncUserOnMainRouteReturn`. GNB·Home·Profile에 전달되는 `user`가 롤플레이·설정 등 서브 종료 직후 맞춰짐. **레벨·진행률·ProfileDto**는 기존처럼 프로필 표면에서 `getUserProfile`(`GET /v1/users/profile`, `ProfileScreen._refreshProfile`) 한 번. `profileReturnCounter`는 프로필 탭이 계속 활성인 채 서브만 닫을 때 `didUpdateWidget` 갱신 트리거 유지(대체 설계 전까지 보수적 유지). 설정에서 프로필로 돌아올 때 쓰던 `ProfileScreen._openSettings`의 `addPostFrameCallback`으로 `widget.user`를 로컬 `_user`에 복사하던 보완은 제거(전역 동기화에 위임).
 - **Playing 힌트 말풍선**: 힌트 텍스트 `GET /v1/roleplay-sessions/{sessionId}/hint`(문자열). 전체 발음 `GET .../hint/sound`, 단어 발음 `GET .../hint/sound/{index}`(JSON·`cdnYn`/`cdnPath`/`sound`). 라이트볼 탭 직후 로딩 플레이스홀더(회색 메가폰·스피너) 노출, 실패·빈 응답 시 행 제거. 성공 시 배경 `#194847` 70%·가로 `bodyWidth`·좌측 열(세로 중앙) 메가폰·우측 `Wrap` 본문 `headlineSmall`·기본 흰색·단어/메가폰 탭 시 재생 중 `#0CABA8`·점선 밑줄 `#0CABA8`(대시 길이 3·간격 3·선 두께 1.5, 상세 `.docs/CONTEXT_ROLEPLAY.md`)·텍스트 로드 후 스크롤 최하단 정렬. 말풍선 생명주기 안 발음 캐시(`full`, `w0`…); user-message 직전 힌트 행 제거 시 재생 구독 해제·`_audioPlayer.stop()`. 구현: `lib/api/endpoints/roleplay_api.dart` `getHintAudio`·`getHintWordAudio`, `lib/screens/roleplay/playing.dart`.
 - **Playing AI 말풍선 너비**: 고정 `bodyWidth * 0.7` 제거. `ConstrainedBox(maxWidth: …)`로 내용 높이에 맞춘 최소 너비·최대는 `bodyWidth`에서 번역 아이콘(24)·아이콘 앞 간격(5)·아바타(40)·아바타-말풍선 간격(5) 제외(`lib/screens/roleplay/playing.dart` `_buildAiMessage`). 사용자/힌트 말풍선·나레이션은 변경 없음.
@@ -338,7 +339,7 @@
 - **-40 분기 리뷰 퀘스트**: Opening의 `sessionId == '-40'` 팝업에서 "Leave Stars ⭐" 탭 시 OS 인앱리뷰 API를 호출.
   - 인앱리뷰 호출 성공 반환 시 `POST /v1/users/quests/{questId}` 호출 (`questId = sessionId`)
   - 응답 `QuestResultDto.completeYn == 'Y'`인 경우에만 `surveySuccessToast` 토스트 노출, 그 외 별도 처리 없음.
-**앱 버전 1.0.9**: `pubspec.yaml`의 `version` 값(예: 1.0.9+13)을 단일 사실 기준으로 사용. Setting 화면 하단: 개인정보·이용약관·오픈소스 블록 위로 조정, 그 아래 버전 텍스트 `v x.x.x` (fontSize 11, 흰색, 중앙 정렬) 노출.
+**앱 버전 1.0.10**: `pubspec.yaml`의 `version` 값(예: 1.0.10+14)을 단일 사실 기준으로 사용. Setting 화면 하단: 개인정보·이용약관·오픈소스 블록 위로 조정, 그 아래 버전 텍스트 `v x.x.x` (fontSize 11, 흰색, 중앙 정렬) 노출.
 - 버전 비교 및 강제 업데이트 로직은 `VersionCheckService`에서 `AppVersionService.getAppVersion()` 결과와 서버 응답 `latestVersion`를 비교하여 처리.
 **버전 관리 원칙**: 신규 기능 개발 전 버전 상향이 필요할 때는 `pubspec.yaml`의 `version`만 관리(예: 1.0.9+13 → 1.0.10+14). 코드 내 버전 상수는 두지 않고, 런타임에 `AppVersionService`로 조회.
 - **푸시 appPath 연동**: FCM data에 `appPath` 포함 시 알림 클릭 후 해당 스크린으로 이동. 비로그인/미동의 시 `PendingAppPathService`에 보관, Home 진입 시 적용. 지원 경로·정의는 `.docs/CONTEXT_SCREEN.md` appPath 섹션. `lib/services/pending_app_path_service.dart`, `main.dart`(getInitialMessage·onMessageOpenedApp·_applyPendingAppPath).
