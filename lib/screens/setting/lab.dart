@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../config/app_config.dart';
+import '../../effects/like_progress_effect.dart';
 import '../../l10n/app_localizations.dart';
 import '../../utils/default_toast.dart';
 import '../../widgets/app_content_dialog.dart';
@@ -144,11 +145,72 @@ class _LabScreenState extends State<LabScreen> {
                 child: const Text('Show Toast'),
               ),
             ),
+            const SizedBox(height: 32),
+            Text(
+              'Like Effect Test',
+              style: theme.headlineSmall?.copyWith(color: Colors.white),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: ElevatedButton(
+                onPressed: () => _playLikeEffect(
+                  const LikeProgressEffectParams(
+                    asIsLikePoint: 36,
+                    toBeLikePoint: 72,
+                    asIsLevel: 36,
+                    toBeLevel: 36,
+                    asIsProgress: 25,
+                    toBeProgress: 75,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF0CABA8),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  elevation: 0,
+                ),
+                child: const Text('Simple Like Effect'),
+              ),
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: ElevatedButton(
+                onPressed: () => _playLikeEffect(
+                  const LikeProgressEffectParams(
+                    asIsLikePoint: 36,
+                    toBeLikePoint: 172,
+                    asIsLevel: 36,
+                    toBeLevel: 38,
+                    asIsProgress: 25,
+                    toBeProgress: 75,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF0CABA8),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  elevation: 0,
+                ),
+                child: const Text('Levelup Like Effect'),
+              ),
+            ),
             const SizedBox(height: 24),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _playLikeEffect(LikeProgressEffectParams params) async {
+    await LikeProgressEffect.play(context, params: params);
   }
 }
 

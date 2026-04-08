@@ -355,5 +355,21 @@
   - Overview `_navigateToOpening()` → `pushTutorial()` 로 변경
 - **Android 서명 정책 변경(Flavor 기준)**: `android/app/build.gradle.kts`에서 local/dev/stg는 debug/release 모두 디버그 키스토어 사용, prd는 debug/release 모두 `android/key.properties`의 릴리스 키스토어 사용. prd 빌드에서 `key.properties`가 없으면 빌드 실패.
 
+## 14. 공통 오버레이 이펙트(Effect Overlay) 구조
+- **목적**: 특정 스크린의 UI 위에 “레이어처럼 나타났다 사라지는” 공통 애니메이션을 재생하고, 스크린은 **효과 종료 시점**을 감지해 다음 UI를 그릴 수 있도록 한다.
+- **전역 오버레이 서비스**: `lib/services/effect_overlay_service.dart`
+  - `EffectOverlayService.show(...)`: 필요 시에만 `OverlayEntry`를 삽입해 효과를 재생한다.
+  - 효과가 끝나면 `EffectOverlayService.complete()`로 `OverlayEntry`를 제거하고 `Future`를 resolve한다.
+  - 기본 정책은 **동시 재생 1개(새 호출 시 replace)** 로 단순하게 유지한다.
+- **앵커(목표 좌표) 레지스트리**: `lib/services/effect_anchor_registry.dart`
+  - UI 요소의 화면상 좌표(Rect)가 필요할 때(예: 티켓이 “홈 티켓 배지” 위치로 날아감) `GlobalKey` 기반으로 `Rect`를 조회한다.
+  - 현재 앵커: `EffectAnchorId.ticketBadge` → Home 헤더의 티켓 배지 위치(`lib/screens/home.dart`).
+- **개별 효과 API**: `lib/effects/like_progress_effect.dart`
+  - `LikeProgressEffect.play(context, params, onCompleted?)` 형태로 호출한다.
+  - 파라미터/연출은 효과별 위젯(오버레이)에서 구현하며, 종료 콜백은 fade-out 등 정상화까지 완료된 뒤 1회 호출한다.
+  - `LikeProgressOverlay`의 Phase 6 카운터 구간 시작 시 엄지 아이콘 주변에 `like_progress_star.png` 반짝임이 동시 3~5개 생성된다. 각 별은 시작 시점·위치 후보 4곳·크기(width 20~30)·주기를 미세하게 달리하며, 빠른 fade-in 후 soft fade-out(+소폭 scale-up) 1cycle을 반복한다. 활성 반짝임끼리는 최소 거리 검사를 적용해 겹침을 줄인다.
+  - Phase 6 프로그레스바 진행 중에는 `VibrationPreset.rapidTapFeedback`를 반복 재생한다. 레벨업으로 티켓 이미지가 생성될 때의 진동은 앞뒤로 짧게 쉰 뒤 `VibrationPreset.doubleBuzz`로 재생하고, 이후 프로그레스 진동을 다시 이어간다.
+  - 반짝임은 Phase 8 진입 전까지 재생되며, Phase 8에서는 dim, 엄지, 반짝임, 수치 영역이 함께 전체 fade-out 된다. bg 이미지는 Phase 7 종료와 동시에 즉시 화면에서 제거한다.
+
 ## 13. 리팩토링 계획 문서
 - 롤플레이 기능 준비를 위한 리팩토링 작업 분해 문서는 `REFACTOR.md`에 기록

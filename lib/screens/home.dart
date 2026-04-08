@@ -18,6 +18,7 @@ import '../utils/default_toast.dart';
 import '../widgets/app_content_dialog.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/gnb_bar.dart';
+import '../services/effect_anchor_registry.dart';
 import 'roleplay/overview.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -53,6 +54,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _bannerTimerStarted = false; // 타이머 시작 여부 플래그
   int _visibleCategoryCount = 0; // 현재 렌더링 허용된 카테고리 개수
   int _displayTicketCount = 0;
+  final GlobalKey _ticketBadgeKey = GlobalKey();
 
   @override
   void didUpdateWidget(HomeScreen oldWidget) {
@@ -67,6 +69,10 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: 0);
+    EffectAnchorRegistry.instance.registerKey(
+      EffectAnchorId.ticketBadge,
+      _ticketBadgeKey,
+    );
     // 초기화 작업 (한 번만 실행)
     _performInitialization();
   }
@@ -75,6 +81,10 @@ class _HomeScreenState extends State<HomeScreen> {
   void dispose() {
     _bannerTimer?.cancel();
     _pageController.dispose();
+    EffectAnchorRegistry.instance.unregister(
+      EffectAnchorId.ticketBadge,
+      _ticketBadgeKey,
+    );
     super.dispose();
   }
 
@@ -293,7 +303,12 @@ class _HomeScreenState extends State<HomeScreen> {
       title: 'Hi, ${widget.user?.name ?? 'User'}!',
       titleStyle: Theme.of(context).textTheme.headlineSmall?.copyWith(color: Colors.white),
       usePadding: false, // 배너 풀-폭 유지를 위해 본문 패딩 제거
-      actions: [_buildTicketBadge(context)],
+      actions: [
+        KeyedSubtree(
+          key: _ticketBadgeKey,
+          child: _buildTicketBadge(context),
+        ),
+      ],
       bottomNavigationBar: GnbBar(
         isAlarmActive: false,
         isHomeActive: true,
