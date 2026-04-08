@@ -59,6 +59,8 @@ class NotificationBoxScreen extends StatefulWidget {
     this.onNavigateToAlarm,
     this.isActive = false,
     this.user,
+    this.showNotiboxUnreadBadge = false,
+    this.onFirstPageUnreadDetected,
   });
 
   final VoidCallback? onNavigateToHome;
@@ -66,6 +68,9 @@ class NotificationBoxScreen extends StatefulWidget {
   final VoidCallback? onNavigateToAlarm;
   final bool isActive;
   final UserDto? user;
+  final bool showNotiboxUnreadBadge;
+  /// 첫 페이지(0) 조회 직후·펼침 읽음 처리 직후 등, 목록 기준 미읽음 존재 여부.
+  final ValueChanged<bool>? onFirstPageUnreadDetected;
 
   static const String routeName = '/notification_box';
 
@@ -176,11 +181,37 @@ class _NotificationBoxScreenState extends State<NotificationBoxScreen> {
         _isLoading = false;
         _isLoadingMore = false;
       });
+      if (pageNum == 0) {
+        final hasUnread = list.any((n) => n.readYn != 'Y');
+        widget.onFirstPageUnreadDetected?.call(hasUnread);
+      }
     } catch (_) {
       if (!mounted) return;
       setState(() {
         _isLoading = false;
         _isLoadingMore = false;
+      });
+    }
+  }
+
+  Future<void> _markReadOnServer(int notificationId) async {
+    final accessToken = await TokenStorage.loadAccessToken();
+    if (accessToken == null) return;
+    try {
+      await SudaApiClient.markNotificationRead(
+        accessToken: accessToken,
+        notificationId: notificationId,
+      );
+      if (!mounted) return;
+      final hasUnread = _notifications.any((n) => n.readYn != 'Y');
+      widget.onFirstPageUnreadDetected?.call(hasUnread);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        final i = _notifications.indexWhere((e) => e.id == notificationId);
+        if (i >= 0) {
+          _notifications[i] = _notifications[i].copyWith(readYn: 'N');
+        }
       });
     }
   }
@@ -196,6 +227,7 @@ class _NotificationBoxScreenState extends State<NotificationBoxScreen> {
         isAlarmActive: true,
         isHomeActive: false,
         isProfileActive: false,
+        showNotiboxUnreadBadge: widget.showNotiboxUnreadBadge,
         onAlarmTap: widget.onNavigateToAlarm,
         onHomeTap: widget.onNavigateToHome,
         onProfileTap: widget.onNavigateToProfile,
@@ -328,8 +360,10 @@ class _NotificationBoxScreenState extends State<NotificationBoxScreen> {
     final isExpanded = _expandedIds.contains(item.id);
 
     final theme = Theme.of(context);
+    final isUnread = item.readYn != 'Y';
     final titleStyle = theme.textTheme.headlineSmall?.copyWith(
       color: Colors.white,
+      fontWeight: isUnread ? FontWeight.w600 : FontWeight.w500,
     );
     final contentStyle = theme.textTheme.bodyMedium?.copyWith(
       color: Colors.white,
@@ -340,23 +374,40 @@ class _NotificationBoxScreenState extends State<NotificationBoxScreen> {
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () {
-          setState(() {
-            if (_expandedIds.contains(item.id)) {
+          final wasExpanded = _expandedIds.contains(item.id);
+          if (wasExpanded) {
+            setState(() {
               _expandedIds.remove(item.id);
-            } else {
-              _expandedIds.add(item.id);
+            });
+            return;
+          }
+          final stillUnread = item.readYn != 'Y';
+          setState(() {
+            _expandedIds.add(item.id);
+            if (stillUnread) {
+              final i = _notifications.indexWhere((e) => e.id == item.id);
+              if (i >= 0) {
+                _notifications[i] = _notifications[i].copyWith(readYn: 'Y');
+              }
             }
           });
+          if (stillUnread) {
+            _markReadOnServer(item.id);
+          }
         },
         child: Container(
           width: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
-            color: Colors.transparent,
+            color: isUnread
+                ? const Color(0xFF1A2423)
+                : Colors.transparent,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: const Color(0xFF353535),
-              width: 1,
+              color: isUnread
+                  ? const Color(0xFF4A6B66)
+                  : const Color(0xFF353535),
+              width: isUnread ? 1.5 : 1,
             ),
           ),
           child: AnimatedSize(
@@ -373,6 +424,25 @@ class _NotificationBoxScreenState extends State<NotificationBoxScreen> {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        if (isUnread)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 5, right: 10),
+                            child: Container(
+                              width: 10,
+                              height: 10,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFF5252),
+                                shape: BoxShape.circle,
+                                boxShadow: const [
+                                  BoxShadow(
+                                    color: Color(0x66FF5252),
+                                    blurRadius: 4,
+                                    spreadRadius: 0,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
                         Expanded(
                           child: _fadeTextSwitch(
                             itemId: item.id,
@@ -403,6 +473,25 @@ class _NotificationBoxScreenState extends State<NotificationBoxScreen> {
                       : Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            if (isUnread)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 5, right: 10),
+                                child: Container(
+                                  width: 10,
+                                  height: 10,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFFF5252),
+                                    shape: BoxShape.circle,
+                                    boxShadow: const [
+                                      BoxShadow(
+                                        color: Color(0x66FF5252),
+                                        blurRadius: 4,
+                                        spreadRadius: 0,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
                             Expanded(
                               child: _fadeTextSwitch(
                                 itemId: item.id,

@@ -8,6 +8,9 @@ class RestStatusService {
   /// null이면 'N'으로 처리. 서비스 점검 여부.
   String _restYn = 'N';
 
+  /// notibox 미읽음 존재 시 Y (GET /v1/home/contents 동기화)
+  String _notiboxUnreadYn = 'N';
+
   /// 서비스 점검 시작 시각 (향후 지침에 따라 활용)
   DateTime? _restStartsAt;
 
@@ -15,6 +18,7 @@ class RestStatusService {
   DateTime? _restEndsAt;
 
   String get restYn => _restYn;
+  String get notiboxUnreadYn => _notiboxUnreadYn;
   DateTime? get restStartsAt => _restStartsAt;
   DateTime? get restEndsAt => _restEndsAt;
 
@@ -23,10 +27,14 @@ class RestStatusService {
     required String restYn,
     DateTime? restStartsAt,
     DateTime? restEndsAt,
+    String? notiboxUnreadYn,
   }) {
     _restYn = restYn;
     _restStartsAt = restStartsAt;
     _restEndsAt = restEndsAt;
+    if (notiboxUnreadYn != null) {
+      _notiboxUnreadYn = notiboxUnreadYn;
+    }
   }
 
   /// Overview 진입 전 휴식 안내 레이어 노출 여부 판단.

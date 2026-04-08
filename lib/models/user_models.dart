@@ -144,6 +144,7 @@ class NotificationDto {
   final String? imgPath;
   final String? appPath;
   final String? sendFinishedAt;
+  final String readYn;
 
   const NotificationDto({
     required this.id,
@@ -152,11 +153,23 @@ class NotificationDto {
     this.imgPath,
     this.appPath,
     this.sendFinishedAt,
+    this.readYn = 'N',
   });
 
   factory NotificationDto.fromJson(Map<String, dynamic> json) {
+    final idRaw = json['id'];
+    int id;
+    if (idRaw is int) {
+      id = idRaw;
+    } else if (idRaw is num) {
+      id = idRaw.toInt();
+    } else if (idRaw is String) {
+      id = int.tryParse(idRaw.trim()) ?? 0;
+    } else {
+      id = 0;
+    }
     return NotificationDto(
-      id: json['id'] as int? ?? 0,
+      id: id,
       title: (json['title'] as List<dynamic>?)
           ?.map((item) => SudaJson.fromJson(item as Map<String, dynamic>))
           .toList(),
@@ -166,6 +179,32 @@ class NotificationDto {
       imgPath: json['imgPath'] as String?,
       appPath: json['appPath'] as String?,
       sendFinishedAt: json['sendFinishedAt'] as String?,
+      readYn: sudaYnFromJson(
+        json['readYn'] ??
+            json['read_yn'] ??
+            json['readYN'] ??
+            json['notifReadYn'],
+      ),
+    );
+  }
+
+  NotificationDto copyWith({
+    int? id,
+    List<SudaJson>? title,
+    List<SudaJson>? content,
+    String? imgPath,
+    String? appPath,
+    String? sendFinishedAt,
+    String? readYn,
+  }) {
+    return NotificationDto(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      content: content ?? this.content,
+      imgPath: imgPath ?? this.imgPath,
+      appPath: appPath ?? this.appPath,
+      sendFinishedAt: sendFinishedAt ?? this.sendFinishedAt,
+      readYn: readYn ?? this.readYn,
     );
   }
 }

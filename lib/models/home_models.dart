@@ -5,6 +5,7 @@ class HomeDto {
   final String restYn;
   final DateTime? restStartsAt;
   final DateTime? restEndsAt;
+  final String notiboxUnreadYn;
   final List<MainHomeBannerDto> banners;
   final List<AppHomeRoleplayGroupDto> roleplays;
 
@@ -12,13 +13,16 @@ class HomeDto {
     required this.restYn,
     this.restStartsAt,
     this.restEndsAt,
+    this.notiboxUnreadYn = 'N',
     required this.banners,
     required this.roleplays,
   });
 
   factory HomeDto.fromJson(Map<String, dynamic> json) {
-    final restYnRaw = json['restYn'] as String?;
-    final restYn = restYnRaw ?? 'N';
+    final restYn = sudaYnFromJson(json['restYn']);
+    final notiboxUnreadYn = sudaYnFromJson(
+      json['notiboxUnreadYn'] ?? json['notibox_unread_yn'],
+    );
 
     DateTime? parseInstant(dynamic v) {
       if (v == null) return null;
@@ -50,6 +54,7 @@ class HomeDto {
       restYn: restYn,
       restStartsAt: parseInstant(json['restStartsAt']),
       restEndsAt: parseInstant(json['restEndsAt']),
+      notiboxUnreadYn: notiboxUnreadYn,
       banners: banners,
       roleplays: roleplays,
     );

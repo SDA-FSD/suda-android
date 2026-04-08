@@ -25,7 +25,8 @@ class ProfileScreen extends StatefulWidget {
   final bool isActive; // 화면 활성 상태 여부 추가
   /// Profile 탭이 활성인 상태에서 서브 스크린에서 pop으로 복귀할 때마다 증가
   final int? profileReturnCounter;
-  
+  final bool showNotiboxUnreadBadge;
+
   const ProfileScreen({
     super.key,
     this.onNavigateToHome,
@@ -35,6 +36,7 @@ class ProfileScreen extends StatefulWidget {
     this.onUserUpdated,
     this.isActive = false,
     this.profileReturnCounter,
+    this.showNotiboxUnreadBadge = false,
   });
 
   @override
@@ -390,6 +392,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         isAlarmActive: false,
         isHomeActive: false,
         isProfileActive: true,
+        showNotiboxUnreadBadge: widget.showNotiboxUnreadBadge,
         onAlarmTap: widget.onNavigateToAlarm,
         onHomeTap: widget.onNavigateToHome,
         onProfileTap: () {},
