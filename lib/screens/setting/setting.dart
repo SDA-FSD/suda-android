@@ -13,6 +13,7 @@ import 'language_level.dart';
 import 'push_agreement.dart';
 import 'feedback.dart';
 import 'announcements.dart';
+import 'lab.dart';
 import '../webview_screen.dart';
 import 'open_source_license.dart';
 
@@ -111,6 +112,12 @@ class SettingScreen extends StatelessWidget {
             l10n.settingsSignOut,
             () => _handleLogout(context),
           ),
+          if (AppConfig.isDev)
+            _buildMenuItem(
+              context,
+              l10n.settingsFsdLaboratory,
+              () => _navigateToSubScreen(context, const LabScreen()),
+            ),
           const Spacer(),
           // 하단 푸터 메뉴 (Privacy, Terms, Open source) — 위로 올림
           Padding(

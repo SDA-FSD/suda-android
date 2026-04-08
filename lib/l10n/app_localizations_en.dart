@@ -77,6 +77,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsSignOut => 'Sign Out';
 
   @override
+  String get settingsFsdLaboratory => 'FSD Laboratory';
+
+  @override
   String get settingsPrivacy => 'Privacy Policy';
 
   @override

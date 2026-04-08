@@ -232,6 +232,12 @@ abstract class AppLocalizations {
   /// **'Sign Out'**
   String get settingsSignOut;
 
+  /// No description provided for @settingsFsdLaboratory.
+  ///
+  /// In en, this message translates to:
+  /// **'FSD Laboratory'**
+  String get settingsFsdLaboratory;
+
   /// No description provided for @settingsPrivacy.
   ///
   /// In en, this message translates to:

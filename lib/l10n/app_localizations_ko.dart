@@ -75,6 +75,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settingsSignOut => '로그아웃';
 
   @override
+  String get settingsFsdLaboratory => 'FSD 실험실';
+
+  @override
   String get settingsPrivacy => '개인정보처리방침';
 
   @override

@@ -78,6 +78,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get settingsSignOut => 'Sair';
 
   @override
+  String get settingsFsdLaboratory => 'Laboratório FSD';
+
+  @override
   String get settingsPrivacy => 'Política de Privacidade';
 
   @override
