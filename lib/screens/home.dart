@@ -27,6 +27,8 @@ class HomeScreen extends StatefulWidget {
   final UserDto? user;
   /// 홈 탭이 선택될 때마다 증가. didUpdateWidget에서 변경 시 티켓 갱신.
   final int? homeTabSelectedCounter;
+  final ValueChanged<HomeDto>? onHomeContentsLoaded;
+  final bool showNotiboxUnreadBadge;
 
   const HomeScreen({
     super.key,
@@ -34,6 +36,8 @@ class HomeScreen extends StatefulWidget {
     this.onNavigateToProfile,
     this.user,
     this.homeTabSelectedCounter,
+    this.onHomeContentsLoaded,
+    this.showNotiboxUnreadBadge = false,
   });
 
   @override
@@ -191,7 +195,10 @@ class _HomeScreenState extends State<HomeScreen> {
         restYn: home.restYn,
         restStartsAt: home.restStartsAt,
         restEndsAt: home.restEndsAt,
+        notiboxUnreadYn: home.notiboxUnreadYn,
       );
+
+      widget.onHomeContentsLoaded?.call(home);
 
       final banners = home.banners;
       final groups = home.roleplays;
@@ -313,6 +320,7 @@ class _HomeScreenState extends State<HomeScreen> {
         isAlarmActive: false,
         isHomeActive: true,
         isProfileActive: false,
+        showNotiboxUnreadBadge: widget.showNotiboxUnreadBadge,
         onAlarmTap: widget.onNavigateToAlarm,
         onHomeTap: () {},
         onProfileTap: widget.onNavigateToProfile,

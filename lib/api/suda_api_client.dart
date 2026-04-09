@@ -380,6 +380,17 @@ class SudaApiClient {
     );
   }
 
+  /// POST /v1/users/notification/{notificationId}/read
+  static Future<QuestResultDto> markNotificationRead({
+    required String accessToken,
+    required int notificationId,
+  }) {
+    return UserApi.markNotificationRead(
+      accessToken: accessToken,
+      notificationId: notificationId,
+    );
+  }
+
   /// GET /v1/notice?page=0&size=10
   static Future<SudaAppPage<AppNoticeDto>> getNotices({
     required String accessToken,

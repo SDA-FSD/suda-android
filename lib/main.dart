@@ -1,4 +1,4 @@
-import 'dart:async' show unawaited;
+import 'dart:async' show StreamSubscription, unawaited;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,6 +11,9 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'l10n/app_localizations.dart';
 
 import 'services/auth_service.dart';
+import 'models/common_models.dart';
+import 'models/home_models.dart';
+import 'models/user_models.dart';
 import 'services/pending_app_path_service.dart';
 import 'services/token_storage.dart';
 import 'services/suda_api_client.dart';
@@ -92,6 +95,18 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   bool _needsAgreement = false; // 서비스 이용 동의 필요 여부
   /// 앱 실행(토큰 없음) 시에만 true. CustomSplashScreen 표시 후 onComplete에서 false. 로그아웃 시에는 false로 곧바로 LoginScreen.
   bool _showCustomSplash = false;
+  /// 마지막 홈 `getHomeContents`의 `notiboxUnreadYn` (`onHomeContentsLoaded`만 갱신)
+  String _homeNotiboxUnreadYn = 'N';
+  /// `GET /v1/users/notification?pageNum=0` 기준 미읽음 존재 여부
+  bool _notiboxHasUnreadFromAlarmList = false;
+  DateTime? _lastNotiboxListSyncAttemptAt;
+  StreamSubscription<RemoteMessage>? _fcmOnMessageSub;
+
+  bool get _showNotiboxUnreadBadge =>
+      _homeNotiboxUnreadYn == 'Y' || _notiboxHasUnreadFromAlarmList;
+
+  /// resumed / onMessage / 서브→메인 복귀 등에서 연속 호출 완화
+  static const _notiboxListSyncCooldown = Duration(seconds: 2);
 
   @override
   void initState() {
@@ -104,6 +119,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       if (path != null && path.isNotEmpty) {
         PendingAppPathService.instance.set(path);
       }
+    });
+    _fcmOnMessageSub = FirebaseMessaging.onMessage.listen((_) {
+      unawaited(_syncNotiboxListFirstPage());
     });
     // 이미 Main이 보일 때 pending 설정되면 rebuild하여 적용 트리거
     PendingAppPathService.instance.pendingNotifier.addListener(_onPendingAppPathChanged);
@@ -171,6 +189,60 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     setState(() => _user = user);
   }
 
+  void _onHomeContentsLoadedForBadge(HomeDto home) {
+    if (!mounted) return;
+    setState(() => _homeNotiboxUnreadYn = home.notiboxUnreadYn);
+  }
+
+  void _onNotificationFirstPageUnread(bool hasUnread) {
+    unawaited(_applyNotiboxFirstPageUnreadFromList(hasUnread));
+  }
+
+  /// 알림 0페이지 기준 미읽음 플래그 반영. 미읽음이 없으면 `getHomeContents`로
+  /// `notiboxUnreadYn`을 맞춰 홈만 갱신되지 않아 배지가 남는 경우를 줄인다.
+  Future<void> _applyNotiboxFirstPageUnreadFromList(bool hasUnread) async {
+    if (!mounted) return;
+    setState(() => _notiboxHasUnreadFromAlarmList = hasUnread);
+    if (!hasUnread) {
+      await _syncHomeNotiboxUnreadFromServer();
+    }
+  }
+
+  Future<void> _syncHomeNotiboxUnreadFromServer() async {
+    try {
+      final token = await TokenStorage.loadAccessToken();
+      if (token == null || !mounted) return;
+      final home = await SudaApiClient.getHomeContents(accessToken: token);
+      if (!mounted) return;
+      setState(() => _homeNotiboxUnreadYn = home.notiboxUnreadYn);
+    } catch (_) {}
+  }
+
+  /// 알림 목록 0페이지만 조회해 배지용 미읽음 반영.
+  /// GNB 탭(홈·알림·프로필) 전환 시에는 [force: true]로 항상 맞춤.
+  Future<void> _syncNotiboxListFirstPage({bool force = false}) async {
+    final now = DateTime.now();
+    if (!force &&
+        _lastNotiboxListSyncAttemptAt != null &&
+        now.difference(_lastNotiboxListSyncAttemptAt!) < _notiboxListSyncCooldown) {
+      return;
+    }
+    if (!force) {
+      _lastNotiboxListSyncAttemptAt = now;
+    }
+    try {
+      final token = await TokenStorage.loadAccessToken();
+      if (token == null || !mounted) return;
+      final list = await SudaApiClient.getNotifications(
+        accessToken: token,
+        pageNum: 0,
+      );
+      if (!mounted) return;
+      final hasUnread = list.any((n) => n.readYn != 'Y');
+      await _applyNotiboxFirstPageUnreadFromList(hasUnread);
+    } catch (_) {}
+  }
+
   /// 서브 스크린에서 메인 라우트로 pop 복귀 시 `GET /v1/users`로 전역 `UserDto` 동기화.
   /// 프로필 표면의 레벨·진행률은 `ProfileScreen`의 `getUserProfile`이 담당(역할 분리).
   Future<void> _syncUserOnMainRouteReturn() async {
@@ -190,6 +262,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   @override
   void dispose() {
+    _fcmOnMessageSub?.cancel();
     MainUserSync.instance.unregister();
     PendingAppPathService.instance.pendingNotifier.removeListener(_onPendingAppPathChanged);
     TokenRefreshService.instance.stop();
@@ -203,6 +276,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       if (_accessToken != null) {
         TokenRefreshService.instance.start();
         TokenRefreshService.instance.onAppResumed();
+        unawaited(_syncNotiboxListFirstPage());
       }
     } else if (state == AppLifecycleState.inactive ||
         state == AppLifecycleState.paused ||
@@ -446,6 +520,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       _accessToken = null;
       _currentMainScreen = 'home'; // 로그아웃 후 다시 로그인 시 Home 화면으로
       _showCustomSplash = false; // 로그아웃 시 커스텀 스플래시 없이 곧바로 LoginScreen
+      _homeNotiboxUnreadYn = 'N';
+      _notiboxHasUnreadFromAlarmList = false;
+      _lastNotiboxListSyncAttemptAt = null;
     });
   }
 
@@ -455,6 +532,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       _currentMainScreen = 'home';
       _homeTabSelectedCounter++;
     });
+    unawaited(_syncNotiboxListFirstPage(force: true));
   }
 
   /// GNB를 통한 화면 전환
@@ -469,6 +547,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     setState(() {
       _currentMainScreen = 'profile';
     });
+    unawaited(_syncNotiboxListFirstPage(force: true));
   }
 
   /// 동의 완료 시 호출
@@ -491,12 +570,15 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       switch (segments[0]) {
         case 'home':
           setState(() => _currentMainScreen = 'home');
+          unawaited(_syncNotiboxListFirstPage(force: true));
           return;
         case 'box':
           setState(() => _currentMainScreen = 'alarm');
+          unawaited(_syncNotiboxListFirstPage(force: true));
           return;
         case 'profile':
           setState(() => _currentMainScreen = 'profile');
+          unawaited(_syncNotiboxListFirstPage(force: true));
           return;
       }
     }
@@ -508,6 +590,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         final id = int.tryParse(segments[2]);
         if (id != null) {
           setState(() => _currentMainScreen = 'home');
+          unawaited(_syncNotiboxListFirstPage(force: true));
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (!mounted) return;
             RoleplayRouter.pushOverview(
@@ -525,6 +608,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           final resultId = int.tryParse(segments[2]);
           if (resultId != null) {
             setState(() => _currentMainScreen = 'profile');
+            unawaited(_syncNotiboxListFirstPage(force: true));
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (!mounted) return;
               final c = _navigatorKey.currentState?.context;
@@ -542,6 +626,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         }
         if (segments.length >= 2 && segments[1] == 'setting') {
           setState(() => _currentMainScreen = 'profile');
+          unawaited(_syncNotiboxListFirstPage(force: true));
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (!mounted) return;
             final c = _navigatorKey.currentState?.context;
@@ -634,6 +719,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                       }
                     });
                     unawaited(_syncUserOnMainRouteReturn());
+                    unawaited(_syncNotiboxListFirstPage(force: true));
                   },
                   child: PopScope(
                     canPop: _currentMainScreen == 'home',
@@ -643,6 +729,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                           _currentMainScreen = 'home';
                           _homeTabSelectedCounter++;
                         });
+                        unawaited(_syncNotiboxListFirstPage(force: true));
                       }
                     },
                     child: IndexedStack(
@@ -658,12 +745,16 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                         onNavigateToAlarm: _navigateToAlarm,
                         isActive: _currentMainScreen == 'alarm',
                         user: _user,
+                        showNotiboxUnreadBadge: _showNotiboxUnreadBadge,
+                        onFirstPageUnreadDetected: _onNotificationFirstPageUnread,
                         ),
                         HomeScreen(
                         onNavigateToAlarm: _navigateToAlarm,
                         onNavigateToProfile: _navigateToProfile,
                         user: _user,
                         homeTabSelectedCounter: _homeTabSelectedCounter,
+                        showNotiboxUnreadBadge: _showNotiboxUnreadBadge,
+                        onHomeContentsLoaded: _onHomeContentsLoadedForBadge,
                         ),
                         ProfileScreen(
                         onNavigateToHome: _navigateToHome,
@@ -677,6 +768,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                         },
                         isActive: _currentMainScreen == 'profile',
                         profileReturnCounter: _profileReturnCounter,
+                        showNotiboxUnreadBadge: _showNotiboxUnreadBadge,
                         ),
                       ],
                     ),

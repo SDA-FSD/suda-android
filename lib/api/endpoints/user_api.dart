@@ -494,6 +494,54 @@ class UserApi {
     );
   }
 
+  static Future<QuestResultDto> markNotificationRead({
+    required String accessToken,
+    required int notificationId,
+  }) async {
+    return await SudaHttpClient.executeWithRefresh(
+      () => _markNotificationReadInternal(accessToken, notificationId),
+      retryWithNewToken: (newToken) =>
+          _markNotificationReadInternal(newToken, notificationId),
+    );
+  }
+
+  static Future<QuestResultDto> _markNotificationReadInternal(
+    String accessToken,
+    int notificationId,
+  ) async {
+    final uri = SudaHttpClient.buildUri(
+      '/v1/users/notification/$notificationId/read',
+    );
+
+    late final http.Response response;
+    try {
+      response = await SudaHttpClient.client
+          .post(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      rethrow;
+    }
+
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final Map<String, dynamic> data =
+          jsonDecode(response.body) as Map<String, dynamic>;
+      return QuestResultDto.fromJson(data);
+    }
+
+    throw Exception(
+      'POST /v1/users/notification/$notificationId/read failed: HTTP ${response.statusCode} ${response.body}',
+    );
+  }
+
   /// [pageNum]은 0부터 시작(첫 페이지 = 0).
   static Future<List<NotificationDto>> getNotifications({
     required String accessToken,

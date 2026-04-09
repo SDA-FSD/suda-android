@@ -14,6 +14,7 @@ class GnbBar extends StatelessWidget {
     required this.isAlarmActive,
     required this.isHomeActive,
     required this.isProfileActive,
+    this.showNotiboxUnreadBadge = false,
     this.onAlarmTap,
     this.onHomeTap,
     this.onProfileTap,
@@ -23,6 +24,7 @@ class GnbBar extends StatelessWidget {
   final bool isAlarmActive;
   final bool isHomeActive;
   final bool isProfileActive;
+  final bool showNotiboxUnreadBadge;
   final VoidCallback? onAlarmTap;
   final VoidCallback? onHomeTap;
   final VoidCallback? onProfileTap;
@@ -110,12 +112,36 @@ class GnbBar extends StatelessWidget {
                               top: 0,
                               bottom: 0,
                               child: Center(
-                                child: Image.asset(
-                                  isAlarmActive
-                                      ? 'assets/images/icons/gnb_alarm_pressed.png'
-                                      : 'assets/images/icons/gnb_alarm.png',
-                                  height: alarmIconSize,
-                                  fit: BoxFit.contain,
+                                child: Stack(
+                                  clipBehavior: Clip.none,
+                                  children: [
+                                    Image.asset(
+                                      isAlarmActive
+                                          ? 'assets/images/icons/gnb_alarm_pressed.png'
+                                          : 'assets/images/icons/gnb_alarm.png',
+                                      height: alarmIconSize,
+                                      fit: BoxFit.contain,
+                                    ),
+                                    if (showNotiboxUnreadBadge)
+                                      Positioned(
+                                        right: -2,
+                                        top: -3,
+                                        child: Container(
+                                          width: 9,
+                                          height: 9,
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFFFF5252),
+                                            shape: BoxShape.circle,
+                                            boxShadow: const [
+                                              BoxShadow(
+                                                color: Color(0x66FF5252),
+                                                blurRadius: 3,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                  ],
                                 ),
                               ),
                             ),
