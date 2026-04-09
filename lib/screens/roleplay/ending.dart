@@ -129,7 +129,7 @@ class _RoleplayEndingScreenState extends State<RoleplayEndingScreen>
     _buttonFadeController.forward();
     _balloonController.forward().then((_) {
       if (mounted) {
-        RoleplayRouter.replaceWithResult(context);
+        RoleplayRouter.replaceWithResultV2(context);
       }
     });
   }

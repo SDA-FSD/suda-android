@@ -279,15 +279,15 @@
 - narration 응답에 `resultId`가 포함되면 **roleplay 중단**으로 처리한다.
 - `resultId == 0`: roleplay 진행 실패(결과지 없음). 안내 메시지 후 Failed 스크린으로 이동.
 - `resultId > 0`:
-  - 미션 성공률 100%: Ending 스크린 → Result 스크린
-  - 그 외(사이값): Ending 없이 Result 스크린
+  - 미션 성공률 100%: Ending 스크린 → Result V2 스크린
+  - 그 외(사이값): Ending 없이 Result V2 스크린
   - Result 스크린 연결 시 `resultId` 값을 유지해야 한다.
 - `resultId == null`: roleplay 진행 계속. 사용자 입력 대기 상태로 복귀.
 
 **Playing 화면 구현(UX)**
 - 종료 안내 메시지는 서비스메시지 영역에 **색상 `#0CABA8`**, **fade-in**으로 노출하며 **3초** 노출 후 해당 스크린으로 전환.
 - **1/3) resultId == 0**: l10n `roleplayEndedFailed` 노출 → 3초 후 Failed 스크린으로 전환.
-- **2/3) resultId > 0 이고 n개 미션 전부 완수 아님**: duration이 00:00이면 `roleplayEndedTimesup`, 아니면 `roleplayEndedComplete` 노출. result 선조회·캐시 후(3초와 병렬, 캐시 완료까지 대기) Result 스크린으로 전환.
+- **2/3) resultId > 0 이고 n개 미션 전부 완수 아님**: duration이 00:00이면 `roleplayEndedTimesup`, 아니면 `roleplayEndedComplete` 노출. result 선조회·캐시 후(3초와 병렬, 캐시 완료까지 대기) Result V2 스크린으로 전환.
 - **3/3) resultId > 0 이고 n개 미션 전부 완수**: `roleplayEndedEnding` 노출. result 선조회·캐시 후(동일) Ending 스크린으로 전환.
 - **미션 달성 여부**: Overview 선택 role의 `missionList`로 총 개수, user-message 응답 `missionCompleteYn`으로 단계별 성공/실패 반영. Playing 내부 `_missionStatuses`(success 개수)로 전체 완수 여부 판단.
 
@@ -300,7 +300,7 @@
 ## 6-9. Result 조회 API 및 캐시
 - **엔드포인트**: `GET /v1/roleplays/results/{resultId}` (path param만 사용)
 - **클라이언트**: `SudaApiClient.getRoleplayResult(accessToken, resultId)` → `RoleplayApi.getRoleplayResult`
-- **응답**: `RoleplayResultDto` (id, userId, roleplayId, roleplayRoleId, endingId, chatHistory, completeYn, completedMissionIds, missionResult, starResult, words, goodFeedback, improvementFeedback, likePoint, likePointReceivedYn, star, createdAt, mainTitle, subTitle 등)
+- **응답**: `RoleplayResultDto` (id, userId, roleplayId, roleplayRoleId, endingId, chatHistory, completeYn, completedMissionIds, missionResult, starResult, words, goodFeedback, improvementFeedback, beforeLikePoint, afterLikePoint, likePoint, likePointReceivedYn, star, createdAt, mainTitle, subTitle 등)
 - **캐시**: Result/Ending 스크린에서 즉시 노출하기 위해, resultId를 인지한 직후 Playing에서 선조회하여 `RoleplayStateService.setCachedResult(dto)`로 저장. 이후 스크린 전환 시 `RoleplayStateService.instance.cachedResult`로 조회. 캐시가 늦으면 3초가 지나도 캐시 완료까지 대기한 뒤 전환.
 - DTO: `lib/models/roleplay_models.dart`의 `RoleplayResultDto`
 

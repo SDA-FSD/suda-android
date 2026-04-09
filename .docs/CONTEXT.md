@@ -249,6 +249,10 @@
   - 디버그 로그는 `[DEBUG]` 접두사를 사용하여 구분
 
 ## 12. 최근 작업 메모
+- **Result 기본 플로우를 Result V2로 교체**: `lib/screens/roleplay/result.dart`는 레거시로 유지하고, 실제 종료 플로우의 Result 연결은 `lib/screens/roleplay/result_v2.dart`로 전환. Playing의 resultId>0 비완수 분기와 Ending의 Next 완료 분기에서 모두 `lib/routes/roleplay_router.dart`의 `replaceWithResultV2()`를 사용한다.
+- **RoleplayResultDto likePoint 범위 필드 추가**: Result 렌더링 전 준비되는 `lib/models/roleplay_models.dart`의 `RoleplayResultDto`에 `beforeLikePoint`, `afterLikePoint` 필드 추가. `GET /v1/roleplays/results/{resultId}` 응답 파싱 시 함께 보관한다.
+- **Full Screen optional bottom-up 전환 규칙**: Full Screen은 기존처럼 독립 화면 타입으로 유지하고, 전환 효과만 optional로 확장한다. 기본값은 기존 일반 노출 유지, 필요 시 `lib/utils/full_screen_route.dart`의 `FullScreenRoute` + `FullScreenTransition.bottomUp`으로 아래에서 올라오는 Full Screen 전환을 적용한다. 새 타입을 추가하지 않고 `.docs/CONTEXT_SCREEN.md`의 Full Screen 정의에 포함해 관리한다.
+- **Roleplay Result V2 준비**: `lib/screens/roleplay/result_v2.dart`에 `RoleplayResultScreenV2`를 신규 추가. 기존 `lib/screens/roleplay/result.dart`는 유지하며 수정하지 않는다. 현재 기본 종료 플로우는 `lib/routes/roleplay_router.dart`의 `replaceWithResultV2()`를 사용하고, 기존 Result는 레거시 참고 구현으로 보존한다.
 - **스토어/테스트 배포용 빌드번호 상향**: `pubspec.yaml` 버전을 `1.0.9+12`에서 `1.0.9+13`으로 변경(버전명 1.0.9 유지).
 - **앱 버전 1.0.10**: `pubspec.yaml` 버전을 `1.0.9+13`에서 `1.0.10+14`으로 변경.
 - **Main 복귀 시 `UserDto` 동기화 + 프로필 역할 분리**: 메인 라우트(첫 화면)가 서브 스크린 pop으로 다시 보일 때 `MainRouteAwareWrapper.onReturnToRoute`에서 `homeTabSelectedCounter`·`profileReturnCounter` 갱신 직후 `SudaApiClient.getCurrentUser`(`GET /v1/users`)를 비동기 호출해 `_MyAppState._user`를 best-effort 갱신. 구현: `lib/main.dart` `_syncUserOnMainRouteReturn`. GNB·Home·Profile에 전달되는 `user`가 롤플레이·설정 등 서브 종료 직후 맞춰짐. **레벨·진행률·ProfileDto**는 기존처럼 프로필 표면에서 `getUserProfile`(`GET /v1/users/profile`, `ProfileScreen._refreshProfile`) 한 번. `profileReturnCounter`는 프로필 탭이 계속 활성인 채 서브만 닫을 때 `didUpdateWidget` 갱신 트리거 유지(대체 설계 전까지 보수적 유지). 설정에서 프로필로 돌아올 때 쓰던 `ProfileScreen._openSettings`의 `addPostFrameCallback`으로 `widget.user`를 로컬 `_user`에 복사하던 보완은 제거(전역 동기화에 위임).

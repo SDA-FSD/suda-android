@@ -1506,7 +1506,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     if (allCompleted) {
       RoleplayRouter.replaceWithEnding(context);
     } else {
-      RoleplayRouter.replaceWithResult(context);
+      RoleplayRouter.replaceWithResultV2(context);
     }
   }
 

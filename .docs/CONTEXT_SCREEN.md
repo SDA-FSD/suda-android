@@ -26,6 +26,9 @@
 - `Scaffold` 사용 (GNB 없음)
 - 시스템 뒤로가기 처리: `WillPopScope` 또는 `PopScope`로 앱 종료 처리
 - 전체 화면을 독립적으로 구성
+- 전환 방식은 기본 일반 노출을 유지하고, 필요할 때만 optional transition으로 확장
+- optional transition 예시: `bottom-up` (기존 화면을 아래에서부터 덮으며 올라오는 Full Screen)
+- `bottom-up`은 **새 스크린 타입이 아니라 Full Screen의 선택 가능한 진입 효과**로 취급
 
 ---
 
@@ -90,7 +93,7 @@
 |------|-------------|-------------|------------|
 | GNB | ❌ 없음 | ✅ 있음 (하단) | ❌ 없음 |
 | 독립적 표시 | ✅ 예 | ✅ 예 | ❌ 아니오 (덮어서 표시) |
-| 진입 애니메이션 | 일반 전환 | 일반 전환 | 우측→좌측 슬라이드 |
+| 진입 애니메이션 | 일반 전환 (optional bottom-up 가능) | 일반 전환 | 우측→좌측 슬라이드 |
 | 뒤로가기 버튼 | ❌ 없음 | ❌ 없음 | ✅ 있음 (우측 상단 X) |
 | 시스템 뒤로가기 | 앱 종료 | Home: 앱 종료 / Alarm·Profile: Home으로 | 슬라이드 아웃 |
 | 사용 예시 | LoginScreen | NotificationBoxScreen, HomeScreen, ProfileScreen | 상세 화면, 설정 화면 |
@@ -782,8 +785,8 @@
 - **RoleplayPlayingScreen**: resultId 기반 종료 시 미션 전부 완수 분기에서 `roleplayEndedEnding` 3초 노출 후 `Navigator.pushReplacement()`로 전환 (playing screen 삭제)
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
-- **RoleplayResultScreen** (Full Screen): 하단 "Next" 버튼 클릭 시
-  - Next 버튼 텍스트 fade-out과 동시에 버튼에서 #0CABA8 풍선이 부푸는 모양으로 전체 화면 덮는 애니메이션(2s) 후 `RoleplayRouter.replaceWithResult()`로 전환 (ending screen 삭제, 돌아올 일 없음)
+- **RoleplayResultScreenV2** (Full Screen): 하단 "Next" 버튼 클릭 시
+  - Next 버튼 텍스트 fade-out과 동시에 버튼에서 #0CABA8 풍선이 부푸는 모양으로 전체 화면 덮는 애니메이션(2s) 후 `RoleplayRouter.replaceWithResultV2()`로 전환 (ending screen 삭제, 돌아올 일 없음)
   - `PUT /v1/roleplays/results/{rpResultId}?star={star}` 호출(응답 무시)은 전환 전에 수행
 
 ### 스크린 내부 구현 특이사항
@@ -856,11 +859,12 @@
 - **appPath**: 해당 없음 (세션·플로우 의존)
 
 ### 스크린 용도
-- Roleplay 결과 화면
+- 기존 Roleplay 결과 화면
+- 현재 기본 종료 플로우에서는 직접 사용하지 않고, 레거시 구현 보존용으로 유지
 
 ### 이전 스크린 정보 (진입점)
-- **RoleplayEndingScreen**: 하단 "Next" 버튼 클릭 후 풍선 확장 애니메이션(2s) 완료 시 `RoleplayRouter.replaceWithResult()`로 전환 (ending screen 삭제)
-- **RoleplayPlayingScreen**: resultId 기반 종료 시 (미션 전부 완수 아님) 분기에서 `roleplayEndedTimesup` 또는 `roleplayEndedComplete` 3초 노출 후 `Navigator.pushReplacement()`로 전환 (playing screen 삭제)
+- 현재 기본 플로우에서는 미연결
+- 필요 시 레거시 비교/참고용으로만 직접 연결 가능
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
 - **RoleplayResultReportScreen** (Sub Screen): 본문 "Report" 문구 탭 시
@@ -875,6 +879,35 @@
 
 ---
 
+## 17-1. RoleplayResultScreenV2
+
+### 스크린 관련 정의 파일
+- **파일 경로**: `lib/screens/roleplay/result_v2.dart`
+- **클래스명**: `RoleplayResultScreenV2` (StatefulWidget)
+- **스크린 타입**: **Full Screen**
+- **전환 방식**: **bottom-up Full Screen** (`FullScreenRoute` + `FullScreenTransition.bottomUp`)
+- **appPath**: 해당 없음 (세션·플로우 의존)
+
+### 스크린 용도
+- 기존 Result 화면을 보존한 채 별도 개선 작업을 진행하기 위한 신규 결과 화면
+- 현재 Roleplay 종료 플로우에서 기본 Result 화면으로 사용
+
+### 이전 스크린 정보 (진입점)
+- **RoleplayEndingScreen**: 하단 "Next" 버튼 클릭 후 풍선 확장 애니메이션(2s) 완료 시 `RoleplayRouter.replaceWithResultV2()`로 전환 (ending screen 삭제)
+- **RoleplayPlayingScreen**: resultId 기반 종료 시 (미션 전부 완수 아님) 분기에서 `roleplayEndedTimesup` 또는 `roleplayEndedComplete` 3초 노출 후 `RoleplayRouter.replaceWithResultV2()`로 전환 (playing screen 삭제)
+
+### 이후 스크린 정보 (이동 가능한 다른 스크린)
+- **RoleplayResultReportScreen** (Sub Screen): 본문 "Report" 문구 탭 시
+  - `RoleplayRouter.pushResultReport()` → SubScreenRoute로 진입 (Result V2 위에 쌓임)
+- 그 외: 최종 결과 화면(Overview 이동은 Got it! 버튼)
+
+### 스크린 내부 구현 특이사항
+- 현재 구조와 데이터 의존성은 기존 `RoleplayResultScreen`과 동일하게 유지 (`RoleplayStateService.instance.cachedResult` 사용)
+- Result 렌더링 전 준비되는 `RoleplayResultDto`는 `beforeLikePoint`, `afterLikePoint` 필드를 포함한다
+- 기존 `lib/screens/roleplay/result.dart`는 수정하지 않고, V2 전용 파일에서 독립적으로 개선 작업을 이어가는 것을 원칙으로 함
+
+---
+
 ## 18. RoleplayResultReportScreen
 
 ### 스크린 관련 정의 파일
@@ -884,14 +917,14 @@
 - **appPath**: 해당 없음 (Result 전용)
 
 ### 스크린 용도
-- Result 화면에서만 진입. 사용자가 느낀 불편함을 수집하는 용도. Send 시 `POST /v1/roleplays/results/{roleplayResultId}/report` (body: `{"content": "<string>"}`).
+- Result 화면들(Result / Result V2)에서 진입. 사용자가 느낀 불편함을 수집하는 용도. Send 시 `POST /v1/roleplays/results/{roleplayResultId}/report` (body: `{"content": "<string>"}`).
 
 ### 이전 스크린 정보 (진입점)
-- **RoleplayResultScreen**: 본문 "Report" 문구 탭 시
+- **RoleplayResultScreen** 또는 **RoleplayResultScreenV2**: 본문 "Report" 문구 탭 시
   - `RoleplayRouter.pushResultReport()` → SubScreenRoute로 우측에서 슬라이드 인
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
-- **RoleplayResultScreen**: X 버튼 또는 Android 백버튼 시 `Navigator.pop()`으로 Result로 복귀. 전송 성공(200) 시 `pop(context, true)`로 Result에서 Report 문구 숨김.
+- **RoleplayResultScreen** 또는 **RoleplayResultScreenV2**: X 버튼 또는 Android 백버튼 시 `Navigator.pop()`으로 Result로 복귀. 전송 성공(200) 시 `pop(context, true)`로 Result에서 Report 문구 숨김.
 
 ### 스크린 내부 구현 특이사항
 - 내부 표현·구성은 Failed Report와 동일 (RoleplayScaffold, reportTitle, 입력창, feedbackSend 버튼). Send 시 신규 엔드포인트만 사용.

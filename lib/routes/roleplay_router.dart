@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/user_models.dart';
 import '../services/rest_status_service.dart';
+import '../utils/full_screen_route.dart';
 import '../utils/sub_screen_route.dart';
 import '../widgets/rest_overlay.dart';
 import '../screens/roleplay/overview.dart';
@@ -9,6 +10,7 @@ import '../screens/roleplay/playing.dart';
 import '../screens/roleplay/ending.dart';
 import '../screens/roleplay/failed.dart';
 import '../screens/roleplay/result.dart';
+import '../screens/roleplay/result_v2.dart';
 import '../screens/roleplay/failed_report.dart';
 import '../screens/roleplay/result_report.dart';
 import '../screens/roleplay/survey.dart';
@@ -149,6 +151,22 @@ class RoleplayRouter {
           child: const RoleplayResultScreen(),
         ),
         settings: const RouteSettings(name: '/roleplay/result'),
+      ),
+    );
+  }
+
+  /// Result V2 전용 helper. 현재 기본 Result 종료 플로우에서 사용한다.
+  static void replaceWithResultV2(BuildContext context) {
+    const teal = Color(0xFF0CABA8);
+    Navigator.pushReplacement(
+      context,
+      FullScreenRoute(
+        transition: FullScreenTransition.bottomUp,
+        settings: const RouteSettings(name: RoleplayResultScreenV2.routeName),
+        page: Container(
+          color: teal,
+          child: const RoleplayResultScreenV2(),
+        ),
       ),
     );
   }

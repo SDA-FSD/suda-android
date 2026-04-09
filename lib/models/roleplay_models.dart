@@ -397,6 +397,8 @@ class RoleplayResultDto {
   final int? words;
   final String? goodFeedback;
   final String? improvementFeedback;
+  final int? beforeLikePoint;
+  final int? afterLikePoint;
   final int? likePoint;
   final String? likePointReceivedYn;
   final int? star;
@@ -423,6 +425,8 @@ class RoleplayResultDto {
     this.words,
     this.goodFeedback,
     this.improvementFeedback,
+    this.beforeLikePoint,
+    this.afterLikePoint,
     this.likePoint,
     this.likePointReceivedYn,
     this.star,
@@ -459,6 +463,8 @@ class RoleplayResultDto {
       words: _optionalInt(json['words']),
       goodFeedback: json['goodFeedback'] as String?,
       improvementFeedback: json['improvementFeedback'] as String?,
+      beforeLikePoint: _optionalInt(json['beforeLikePoint']),
+      afterLikePoint: _optionalInt(json['afterLikePoint']),
       likePoint: _optionalInt(json['likePoint']),
       likePointReceivedYn: json['likePointReceivedYn'] as String?,
       star: _optionalInt(json['star']),
