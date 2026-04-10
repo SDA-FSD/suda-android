@@ -8,24 +8,30 @@
 ## 1. 폰트 정의
 
 - **기본 폰트 (default font)**
-  - 파일: `assets/fonts/ChironHeiHK-subset.woff2`
+  - 파일(등록 기준): `assets/fonts/ChironHeiHK-subset-w400.ttf` / `-w600.ttf` / `-w700.ttf`
+  - 원본(작업/교체용): `assets/fonts/ChironHeiHK-subset.woff2`
   - `pubspec.yaml` 상의 패밀리명: `ChironHeiHK`
   - 용도: 앱 내 대부분 텍스트 (heading, body, caption)
 
 - **버튼 폰트 (button font)**
-  - 파일: `assets/fonts/ChironGoRoundTC-subset.woff2`
+  - 파일(등록 기준): `assets/fonts/ChironGoRoundTC-subset-w400.ttf` / `-w600.ttf` / `-w700.ttf`
+  - 원본(작업/교체용): `assets/fonts/ChironGoRoundTC-subset.woff2`
   - `pubspec.yaml` 상의 패밀리명: `ChironGoRoundTC`
   - 용도: 버튼 계열 위젯(TextButton, ElevatedButton 등)의 텍스트
 
+- **가변폰트(weight) 적용 규칙**
+  - 두 폰트 모두 `fvar`의 `wght` 축(200~900)을 가진 **가변폰트**이므로, `fontWeight`만으로는 체감 굵기가 부족할 수 있다.
+  - 전역 `TextTheme`/버튼 `textStyle`에서는 `fontWeight`와 함께 `fontVariations: [FontVariation('wght', <동일값>)]`를 명시한다. (구현: `lib/theme/app_theme.dart`)
+
 폰트 로딩은 `pubspec.yaml`의 `flutter/fonts` 섹션과  
-`lib/main.dart`의 `ThemeData`에서 설정합니다.
+`lib/theme/app_theme.dart`의 `ThemeData`에서 설정합니다.
 
 ---
 
 ## 2. 텍스트 스타일 체계 (CSS h1/h2/body 대응)
 
 Flutter의 `TextTheme`와 매핑하여 전역으로 사용합니다.  
-구체적인 설정은 `lib/main.dart`의 `ThemeData.textTheme`를 참조하세요.
+구체적인 설정은 `lib/theme/app_theme.dart`의 `ThemeData.textTheme`를 참조하세요.
 
 ### 2.1 Heading 계열
 
@@ -144,7 +150,7 @@ Text('아주 작은 라벨', style: theme.labelSmall); // body-tiny
 ## 5. 유지보수 규칙
 
 - 새로운 텍스트 스타일을 추가할 때:
-  1. `lib/main.dart`의 `ThemeData.textTheme`에 먼저 정의
+  1. `lib/theme/app_theme.dart`의 `ThemeData.textTheme`에 먼저 정의
   2. 이 문서(`CONTEXT_STYLE.md`)에 **이름, 용도, 매핑, 예시**를 함께 추가
 - 기존 스타일 변경 시:
   - 실제 코드 변경과 이 문서의 정의를 항상 함께 업데이트

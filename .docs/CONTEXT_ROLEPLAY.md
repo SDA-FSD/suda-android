@@ -300,7 +300,7 @@
 ## 6-9. Result 조회 API 및 캐시
 - **엔드포인트**: `GET /v1/roleplays/results/{resultId}` (path param만 사용)
 - **클라이언트**: `SudaApiClient.getRoleplayResult(accessToken, resultId)` → `RoleplayApi.getRoleplayResult`
-- **응답**: `RoleplayResultDto` (id, userId, roleplayId, roleplayRoleId, endingId, chatHistory, completeYn, completedMissionIds, missionResult, starResult, words, goodFeedback, improvementFeedback, beforeLikePoint, afterLikePoint, likePoint, likePointReceivedYn, star, createdAt, mainTitle, subTitle 등)
+- **응답**: `RoleplayResultDto` (id, version, userId, roleplayId, roleplayRoleId, endingId, chatHistory, completeYn, completedMissionIds, missionResult, starResult, words, goodFeedback, improvementFeedback, overallFeedback, expressionUpgrades, beforeLikePoint, afterLikePoint, likePoint, likePointReceivedYn, star, createdAt, mainTitle, subTitle 등)
 - **캐시**: Result/Ending 스크린에서 즉시 노출하기 위해, resultId를 인지한 직후 Playing에서 선조회하여 `RoleplayStateService.setCachedResult(dto)`로 저장. 이후 스크린 전환 시 `RoleplayStateService.instance.cachedResult`로 조회. 캐시가 늦으면 3초가 지나도 캐시 완료까지 대기한 뒤 전환.
 - DTO: `lib/models/roleplay_models.dart`의 `RoleplayResultDto`
 
@@ -311,6 +311,7 @@
 - `isUserTurnYn`는 Playing 상태에서 사용자의 입력 가능 여부를 나타내며(`Y`/`N`),
   Roleplay 생명주기 동안 공통 상태로 보관한다.
 - **`cachedResult`**: resultId 기반 종료 시 Playing에서 `GET /v1/roleplays/results/{resultId}`로 조회한 `RoleplayResultDto`를 `setCachedResult(dto)`로 저장. Ending/Result 스크린에서 `cachedResult`로 즉시 표시. `clear()` 시 함께 제거.
+- **Profile 히스토리 분기**: `GET /v1/roleplays/results?pageNum=...` 목록 항목(`RpSimpleResultDto`)의 `version`으로 분기한다. `version == 1` 또는 예외값(null/기타)은 기존 `HistoryScreen`, `version == 2`는 `HistoryScreenV2`로 진입한다.
 - 흐름/수명 현행 구현 완료(필요 시 보완)
 
 ## 8. Overview UI 구성 (요약)

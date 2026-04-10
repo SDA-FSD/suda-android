@@ -331,8 +331,10 @@
   - `onNavigateToHome` 콜백 호출 → `_MyAppState._navigateToHome()` 실행 → 상태 업데이트로 전환
 - **SettingScreen** (Sub Screen): 우측 상단 원형 버튼 클릭 시
   - `Navigator.push()`로 iOS 스타일 슬라이드 애니메이션으로 표시
-- **HistoryScreen** (Sub Screen): 롤플레이 히스토리 썸네일 탭 시 (resultId 전달)
+- **HistoryScreen** (Sub Screen): 롤플레이 히스토리 썸네일 탭 시 `version == 1` 또는 예외값(null/기타)인 경우 진입
   - `Navigator.push(SubScreenRoute(page: HistoryScreen(resultId: ...)))` 로 진입
+- **HistoryScreenV2** (Sub Screen): 롤플레이 히스토리 썸네일 탭 시 `version == 2`인 경우 진입
+  - `Navigator.push(SubScreenRoute(page: HistoryScreenV2(resultId: ...)))` 로 진입
 
 ### 스크린 내부 구현 특이사항
 - **스크린 타입 특성**: Main Screen
@@ -902,8 +904,18 @@
 - 그 외: 최종 결과 화면(Overview 이동은 Got it! 버튼)
 
 ### 스크린 내부 구현 특이사항
-- 현재 구조와 데이터 의존성은 기존 `RoleplayResultScreen`과 동일하게 유지 (`RoleplayStateService.instance.cachedResult` 사용)
-- Result 렌더링 전 준비되는 `RoleplayResultDto`는 `beforeLikePoint`, `afterLikePoint` 필드를 포함한다
+- 현재 구조와 데이터 의존성은 `RoleplayStateService.instance.cachedResult` 기반으로 유지한다
+- **배경**: 상단 `#054544` → 하단 `#0CABA8` 세로 그라데이션을 전체 화면에 계속 유지한다. 기존 Result의 상단 단색/하단 검정 분리 구조는 사용하지 않는다.
+- **초기 박스레이어**: 화면 중앙에 별 3개 + mainTitle + subTitle + 3개 요약 카드(Mission / Words / Like)를 배치한다.
+- **별 애니메이션**: 기존 Result와 동일하게 silver 상태에서 `starResult` 개수만큼 왼쪽부터 gold로 바뀌며 진동한다.
+- **subTitle 색상**: 기존 검정 대신 `#80D7CF`.
+- **요약 카드 3종**: `#80D7CF` 50% 배경, 둥근 사각형, 그림자 포함. 각 카드 상단은 `labelPrimary` 흰색 라벨, 하단은 값 영역.
+  - Mission: 기존 Result와 동일한 mission 아이콘 표시 규칙
+  - Words: 기존 Result와 동일한 흰색 숫자 스타일
+  - Like: `assets/images/like_at_result.png` 24×24 + 기존 Result와 동일한 민트 그라데이션 숫자
+- **후속 타이밍**: Result V2 화면이 fully shown 된 뒤 1초 후, 박스레이어가 상단 영역으로 이동한다.
+- **동시 effect**: 박스레이어 상단 이동 시작과 동시에 `LikeProgressEffect.play()`를 호출한다. 파라미터는 `RoleplayResultDto.beforeLikePoint`, `afterLikePoint`, `beforeLevel`, `afterLevel`, `beforeProgressPercentage`, `afterProgressPercentage`를 사용한다.
+- **현재 단계 임시 처리**: effect 완료 콜백을 받으면 화면 중앙에 `done` 텍스트만 표시한다. 본문레이어는 아직 구현하지 않는다.
 - 기존 `lib/screens/roleplay/result.dart`는 수정하지 않고, V2 전용 파일에서 독립적으로 개선 작업을 이어가는 것을 원칙으로 함
 
 ---
@@ -946,7 +958,7 @@
 - History ↔ ReviewChat/ReviewEnding 왔다 갔다 하는 동안 하나의 roleplay result 정보를 스크린 상태로 보존. 나갈 때·새로 진입할 때 갱신.
 
 ### 이전 스크린 정보 (진입점)
-- **ProfileScreen**: 롤플레이 히스토리 영역의 썸네일 탭 시 (resultId 전달)
+- **ProfileScreen**: 롤플레이 히스토리 영역의 썸네일 탭 시 `version == 1` 또는 예외값(null/기타)일 때 진입 (resultId 전달)
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
 - **ReviewChatScreen** (Sub Screen): 롤플레이 채팅 내용 열람 진입 (추후 지침)
@@ -955,9 +967,34 @@
 
 ### 스크린 내부 구현 특이사항
 - **상태**: resultId로 `SudaApiClient.getRoleplayResult()` 조회 후 `RoleplayResultDto` 및 `getUserProfile()`(Lv·progress)를 스크린 상태로 보관. **롤플레이 진행용(RoleplayStateService)과 혼용하지 않음.**
+- **버전 조건**: 구버전 스냅샷 보존용 화면으로, Profile 히스토리 항목의 `version == 1` 데이터만 이 화면을 사용한다.
 - **레이아웃**: Result와 동일(박스 210 + 본문). 초기 애니메이션 없이 애니 완료 시점 형태로 노출(별·mainTitle·subTitle·likePoint·Mission·Words·Lv·Good Points·To Improve·Got it 버튼).
 - **Got it 버튼**: 노출만, 동작 없음(추후 지침). Report 문구 없음.
 - 우측 상단 X 버튼 필수.
+
+---
+
+## 19-1. HistoryScreenV2
+
+### 스크린 관련 정의 파일
+- **파일 경로**: `lib/screens/roleplay/history_v2.dart`
+- **클래스명**: `HistoryScreenV2` (StatelessWidget)
+- **스크린 타입**: **Sub Screen**
+- **appPath**: 해당 없음 (Profile 히스토리 분기 전용)
+
+### 스크린 용도
+- Result V2에 대응하는 신규 히스토리 화면
+- 현재 단계에서는 Profile 히스토리의 `version == 2` 분기용 진입 스켈레톤만 준비되어 있고, 실제 상세 UI는 후속 지침에서 구현 예정
+
+### 이전 스크린 정보 (진입점)
+- **ProfileScreen**: 롤플레이 히스토리 영역의 썸네일 탭 시 `version == 2`일 때 진입 (resultId 전달)
+
+### 이후 스크린 정보 (이동 가능한 다른 스크린)
+- **ProfileScreen**: 좌상단 뒤로가기 또는 시스템 뒤로가기 시 `Navigator.pop()`으로 복귀
+
+### 스크린 내부 구현 특이사항
+- 이번 단계에서는 파일/라우팅 분기만 준비하고, 실제 Result V2 대응 History UI는 구현하지 않음
+- `resultId`는 후속 구현을 위해 생성자 파라미터로만 보관한다
 
 ---
 

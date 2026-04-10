@@ -14,6 +14,7 @@ import '../utils/sub_screen_route.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/gnb_bar.dart';
 import 'roleplay/history.dart';
+import 'roleplay/history_v2.dart';
 import 'setting/setting.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -236,6 +237,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  Future<void> _openHistoryByVersion(int resultId, int? version) async {
+    final page = version == 2
+        ? HistoryScreenV2(resultId: resultId)
+        : HistoryScreen(resultId: resultId);
+    await Navigator.push(
+      context,
+      SubScreenRoute(page: page),
+    );
+  }
+
   /// 롤플레이 히스토리: 3열·썸네일 간격 10·행 간격 10·CDN·캐시·shimmer
   static const double _historyThumbGap = 10;
   static const double _historyRowGap = 10;
@@ -310,14 +321,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             width: itemWidth,
             height: itemHeight,
             onTap: resultId != null
-                ? () {
-                    Navigator.push(
-                      context,
-                      SubScreenRoute(
-                        page: HistoryScreen(resultId: resultId),
-                      ),
-                    );
-                  }
+                ? () => _openHistoryByVersion(resultId, item.version)
                 : null,
           ));
         }

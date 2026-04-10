@@ -2279,6 +2279,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
                   style: const TextStyle(
                     fontFamily: 'ChironHeiHK',
                     fontWeight: FontWeight.w700,
+                    fontVariations: [FontVariation('wght', 700)],
                     color: Color(0xFFFFFFFF),
                     fontSize: 70,
                     letterSpacing: -0.49, // -0.7% of 70

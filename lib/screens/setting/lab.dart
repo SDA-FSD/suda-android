@@ -3,9 +3,14 @@ import 'package:flutter/material.dart';
 import '../../config/app_config.dart';
 import '../../effects/like_progress_effect.dart';
 import '../../l10n/app_localizations.dart';
+import '../../services/roleplay_state_service.dart';
+import '../../services/suda_api_client.dart';
+import '../../services/token_storage.dart';
 import '../../utils/default_toast.dart';
+import '../../utils/full_screen_route.dart';
 import '../../widgets/app_content_dialog.dart';
 import '../../widgets/app_scaffold.dart';
+import '../roleplay/result_v2.dart';
 
 class LabScreen extends StatefulWidget {
   const LabScreen({super.key});
@@ -19,6 +24,14 @@ class _LabScreenState extends State<LabScreen> {
   bool _showOkayButton = false;
   bool _toastIsWarning = false;
   static const _stylePreviewLines = ['말해요!?', 'Talk', 'E sua vez primeiro!'];
+  final TextEditingController _rpResultIdController = TextEditingController();
+  bool _rpResultTestLoading = false;
+
+  @override
+  void dispose() {
+    _rpResultIdController.dispose();
+    super.dispose();
+  }
 
   @override
   void didChangeDependencies() {
@@ -56,6 +69,49 @@ class _LabScreenState extends State<LabScreen> {
   void _showTestToast() {
     final message = 'Test Popup, Test Toast';
     DefaultToast.show(context, message, isError: _toastIsWarning);
+  }
+
+  Future<void> _openRpResultV2FromInput() async {
+    if (_rpResultTestLoading) return;
+    final raw = _rpResultIdController.text.trim();
+    final resultId = int.tryParse(raw);
+    if (resultId == null || resultId <= 0) {
+      DefaultToast.show(context, 'Invalid resultId', isError: true);
+      return;
+    }
+
+    setState(() => _rpResultTestLoading = true);
+    try {
+      final token = await TokenStorage.loadAccessToken();
+      if (token == null) {
+        DefaultToast.show(context, 'Not signed in', isError: true);
+        return;
+      }
+      final dto = await SudaApiClient.getRoleplayResult(
+        accessToken: token,
+        resultId: resultId,
+      );
+      RoleplayStateService.instance.setCachedResult(dto);
+      if (!mounted) return;
+
+      await Navigator.push(
+        context,
+        FullScreenRoute(
+          transition: FullScreenTransition.bottomUp,
+          settings: RouteSettings(name: RoleplayResultScreenV2.routeName),
+          page: Container(
+            color: const Color(0xFF0CABA8), // 전환 중 배경 플리커 완화
+            child: const RoleplayResultScreenV2(),
+          ),
+        ),
+      );
+    } catch (e) {
+      if (mounted) {
+        DefaultToast.show(context, 'RP Result Test failed: $e', isError: true);
+      }
+    } finally {
+      if (mounted) setState(() => _rpResultTestLoading = false);
+    }
   }
 
   Widget _buildSectionDivider() {
@@ -170,6 +226,53 @@ class _LabScreenState extends State<LabScreen> {
                   elevation: 0,
                 ),
                 child: const Text('Show Toast'),
+              ),
+            ),
+            _buildSectionDivider(),
+            Text(
+              'RP Result Test',
+              style: theme.headlineSmall?.copyWith(color: Colors.white),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _rpResultIdController,
+              keyboardType: TextInputType.number,
+              style: theme.bodyLarge?.copyWith(color: Colors.white),
+              decoration: InputDecoration(
+                hintText: 'resultId',
+                hintStyle: theme.bodyMedium?.copyWith(color: const Color(0xFF635F5F)),
+                filled: true,
+                fillColor: const Color(0xFF1E1E1E),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: const BorderSide(color: Color(0xFF353535)),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: const BorderSide(color: Color(0xFF353535)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: const BorderSide(color: Color(0xFF80D7CF)),
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              ),
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: ElevatedButton(
+                onPressed: _rpResultTestLoading ? null : _openRpResultV2FromInput,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF0CABA8),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  elevation: 0,
+                ),
+                child: Text(_rpResultTestLoading ? 'Loading...' : 'RP Result Test'),
               ),
             ),
             _buildSectionDivider(),

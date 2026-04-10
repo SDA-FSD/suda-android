@@ -220,10 +220,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
     final bodyDefaultMint = theme.bodyLarge?.copyWith(
       fontWeight: FontWeight.w600,
       fontFamily: 'ChironGoRoundTC',
+      fontVariations: const [FontVariation('wght', 600)],
       color: _mint,
     );
     final h3Mint = theme.headlineSmall?.copyWith(
       fontFamily: 'ChironGoRoundTC',
+      fontVariations: const [FontVariation('wght', 700)],
       color: _mint,
     );
 

@@ -107,18 +107,22 @@ flutter:
     # 기본 텍스트용 폰트 (default font)
     - family: ChironHeiHK
       fonts:
-        - asset: assets/fonts/ChironHeiHK-subset.woff2
+        - asset: assets/fonts/ChironHeiHK-subset-w400.ttf
           weight: 400
-        - asset: assets/fonts/ChironHeiHK-subset.woff2
+        - asset: assets/fonts/ChironHeiHK-subset-w600.ttf
           weight: 600
-        - asset: assets/fonts/ChironHeiHK-subset.woff2
+        - asset: assets/fonts/ChironHeiHK-subset-w700.ttf
           weight: 700
 
     # 버튼 전용 폰트 (button font)
     - family: ChironGoRoundTC
       fonts:
-        - asset: assets/fonts/ChironGoRoundTC-subset.woff2
+        - asset: assets/fonts/ChironGoRoundTC-subset-w400.ttf
           weight: 400
+        - asset: assets/fonts/ChironGoRoundTC-subset-w600.ttf
+          weight: 600
+        - asset: assets/fonts/ChironGoRoundTC-subset-w700.ttf
+          weight: 700
 
 # Flutter Launcher Icons 설정
 flutter_launcher_icons:

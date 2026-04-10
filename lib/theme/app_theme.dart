@@ -4,6 +4,10 @@ import 'package:flutter/material.dart';
 /// 
 /// MaterialApp에서 사용할 ThemeData를 정의
 class AppTheme {
+  static const List<FontVariation> _wght400 = [FontVariation('wght', 400)];
+  static const List<FontVariation> _wght600 = [FontVariation('wght', 600)];
+  static const List<FontVariation> _wght700 = [FontVariation('wght', 700)];
+
   /// 기본 테마 데이터
   static ThemeData get themeData {
     return ThemeData(
@@ -33,6 +37,7 @@ class AppTheme {
         headlineLarge: TextStyle(
           fontSize: 32,
           fontWeight: FontWeight.w700,
+          fontVariations: _wght700,
           letterSpacing: -0.4,
           height: 1.2,
         ),
@@ -40,6 +45,7 @@ class AppTheme {
         headlineMedium: TextStyle(
           fontSize: 24,
           fontWeight: FontWeight.w600,
+          fontVariations: _wght600,
           letterSpacing: -0.4,
           height: 1.2,
         ),
@@ -47,6 +53,7 @@ class AppTheme {
         headlineSmall: TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.w700,
+          fontVariations: _wght700,
           letterSpacing: -0.4,
           height: 1.2,
         ),
@@ -54,6 +61,7 @@ class AppTheme {
         bodyLarge: TextStyle(
           fontSize: 18,
           fontWeight: FontWeight.w400,
+          fontVariations: _wght400,
           letterSpacing: -0.4,
           height: 1.2,
         ),
@@ -61,6 +69,7 @@ class AppTheme {
         bodyMedium: TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w400,
+          fontVariations: _wght400,
           letterSpacing: -0.4,
           height: 1.2,
         ),
@@ -68,6 +77,7 @@ class AppTheme {
         bodySmall: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w400,
+          fontVariations: _wght400,
           letterSpacing: -0.4,
           height: 1.2,
         ),
@@ -75,6 +85,7 @@ class AppTheme {
         labelSmall: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w600,
+          fontVariations: _wght600,
           letterSpacing: -0.4,
           height: 1.2,
         ),
@@ -87,6 +98,7 @@ class AppTheme {
             fontFamily: 'ChironGoRoundTC',
             fontSize: 18,
             fontWeight: FontWeight.w600,
+            fontVariations: _wght600,
           ),
         ),
       ),
@@ -97,6 +109,7 @@ class AppTheme {
           textStyle: const TextStyle(
             fontFamily: 'ChironGoRoundTC',
             fontWeight: FontWeight.w400,
+            fontVariations: _wght400,
           ),
         ),
       ),
@@ -107,6 +120,7 @@ class AppTheme {
           textStyle: const TextStyle(
             fontFamily: 'ChironGoRoundTC',
             fontWeight: FontWeight.w400,
+            fontVariations: _wght400,
           ),
         ),
       ),

@@ -79,6 +79,7 @@ class _PushAgreementScreenState extends State<PushAgreementScreen> {
                           fontFamily: 'ChironGoRoundTC',
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
+                          fontVariations: [FontVariation('wght', 600)],
                           color: Colors.white,
                         ),
                       ),

@@ -198,6 +198,7 @@ class _RoleplaySurveyScreenState extends State<RoleplaySurveyScreen> {
                             fontFamily: 'ChironGoRoundTC',
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
+                            fontVariations: [FontVariation('wght', 600)],
                           ),
                         ),
                       ),

@@ -35,7 +35,7 @@ class FullScreenRoute<T> extends PageRouteBuilder<T> {
            }
          },
          transitionDuration: transition == FullScreenTransition.bottomUp
-             ? const Duration(milliseconds: 320)
+             ? const Duration(milliseconds: 450)
              : Duration.zero,
          reverseTransitionDuration: transition == FullScreenTransition.bottomUp
              ? const Duration(milliseconds: 280)

@@ -383,8 +383,29 @@ class RoleplayMissionDto {
   }
 }
 
+class ExpressionUpgradeDto {
+  final String? expression;
+  final String? meaningUserLanguage;
+  final String? rephrasedSentence;
+
+  const ExpressionUpgradeDto({
+    this.expression,
+    this.meaningUserLanguage,
+    this.rephrasedSentence,
+  });
+
+  factory ExpressionUpgradeDto.fromJson(Map<String, dynamic> json) {
+    return ExpressionUpgradeDto(
+      expression: json['expression'] as String?,
+      meaningUserLanguage: json['meaningUserLanguage'] as String?,
+      rephrasedSentence: json['rephrasedSentence'] as String?,
+    );
+  }
+}
+
 class RoleplayResultDto {
   final int? id;
+  final int? version;
   final int? userId;
   final int? roleplayId;
   final int? roleplayRoleId;
@@ -397,6 +418,8 @@ class RoleplayResultDto {
   final int? words;
   final String? goodFeedback;
   final String? improvementFeedback;
+  final String? overallFeedback;
+  final List<ExpressionUpgradeDto>? expressionUpgrades;
   final int? beforeLikePoint;
   final int? afterLikePoint;
   final int? likePoint;
@@ -413,6 +436,7 @@ class RoleplayResultDto {
 
   const RoleplayResultDto({
     this.id,
+    this.version,
     this.userId,
     this.roleplayId,
     this.roleplayRoleId,
@@ -425,6 +449,8 @@ class RoleplayResultDto {
     this.words,
     this.goodFeedback,
     this.improvementFeedback,
+    this.overallFeedback,
+    this.expressionUpgrades,
     this.beforeLikePoint,
     this.afterLikePoint,
     this.likePoint,
@@ -443,6 +469,7 @@ class RoleplayResultDto {
   factory RoleplayResultDto.fromJson(Map<String, dynamic> json) {
     return RoleplayResultDto(
       id: _optionalInt(json['id']),
+      version: _optionalInt(json['version']),
       userId: _optionalInt(json['userId']),
       roleplayId: _optionalInt(json['roleplayId']),
       roleplayRoleId: _optionalInt(json['roleplayRoleId']),
@@ -463,6 +490,16 @@ class RoleplayResultDto {
       words: _optionalInt(json['words']),
       goodFeedback: json['goodFeedback'] as String?,
       improvementFeedback: json['improvementFeedback'] as String?,
+      overallFeedback: json['overallFeedback'] as String?,
+      expressionUpgrades: json['expressionUpgrades'] == null
+          ? null
+          : (json['expressionUpgrades'] as List<dynamic>)
+              .map(
+                (item) => ExpressionUpgradeDto.fromJson(
+                  item as Map<String, dynamic>,
+                ),
+              )
+              .toList(),
       beforeLikePoint: _optionalInt(json['beforeLikePoint']),
       afterLikePoint: _optionalInt(json['afterLikePoint']),
       likePoint: _optionalInt(json['likePoint']),
@@ -483,12 +520,14 @@ class RoleplayResultDto {
 /// GET /v1/roleplays/results 페이징 응답의 content 항목
 class RpSimpleResultDto {
   final int? resultId;
+  final int? version;
   final String? imgPath;
   final int? starResult;
   final String? createdAt;
 
   const RpSimpleResultDto({
     this.resultId,
+    this.version,
     this.imgPath,
     this.starResult,
     this.createdAt,
@@ -497,6 +536,7 @@ class RpSimpleResultDto {
   factory RpSimpleResultDto.fromJson(Map<String, dynamic> json) {
     return RpSimpleResultDto(
       resultId: _optionalInt(json['resultId']),
+      version: _optionalInt(json['version']),
       imgPath: json['imgPath'] as String?,
       starResult: _optionalInt(json['starResult']),
       createdAt: json['createdAt'] as String?,
