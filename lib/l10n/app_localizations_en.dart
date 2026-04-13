@@ -222,7 +222,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileHistory => 'History';
 
   @override
+  String get profileSaved => 'Saved';
+
+  @override
   String get profileHistoryEmpty => 'No history yet';
+
+  @override
+  String get profileSavedEmpty => 'No saved expressions yet.';
 
   @override
   String get noTicketsTitle => 'No tickets left…';

@@ -214,7 +214,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get profileHistory => '히스토리';
 
   @override
+  String get profileSaved => '저장된 표현';
+
+  @override
   String get profileHistoryEmpty => '아직 롤플레이 결과가 없습니다';
+
+  @override
+  String get profileSavedEmpty => '아직 저장된 표현이 없습니다.';
 
   @override
   String get noTicketsTitle => '티켓이 없습니다...';

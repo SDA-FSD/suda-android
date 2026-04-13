@@ -1,8 +1,11 @@
+import 'dart:async';
+import 'dart:typed_data';
 import 'dart:ui' show ImageFilter;
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:shimmer/shimmer.dart';
 import '../config/app_config.dart';
 import '../l10n/app_localizations.dart';
@@ -16,6 +19,8 @@ import '../widgets/gnb_bar.dart';
 import 'roleplay/history.dart';
 import 'roleplay/history_v2.dart';
 import 'setting/setting.dart';
+
+enum _ProfileContentTab { history, saved }
 
 class ProfileScreen extends StatefulWidget {
   final VoidCallback? onNavigateToHome;
@@ -45,10 +50,14 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  static const Color _tabInactive = Color(0xFF635F5F);
+
   UserDto? _user;
   int? _currentLevel;
   double? _progressPercentage;
   bool _isRefreshing = false;
+
+  _ProfileContentTab _activeTab = _ProfileContentTab.history;
 
   // 롤플레이 히스토리 페이징
   final List<RpSimpleResultDto> _historyList = [];
@@ -58,11 +67,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _isLoadingMoreHistory = false;
   final ScrollController _scrollController = ScrollController();
 
+  // Saved(표현) 페이징
+  final List<UserExpressionDto> _savedList = [];
+  int _savedNextPageNum = 0;
+  bool _isSavedLastPage = false;
+  bool _isLoadingSaved = false;
+  bool _isLoadingMoreSaved = false;
+  GlobalKey<AnimatedListState> _savedListKey = GlobalKey<AnimatedListState>();
+
+  // Saved 오디오 재생(메가폰)
+  final AudioPlayer _savedAudioPlayer = AudioPlayer();
+  StreamSubscription<PlayerState>? _savedAudioSub;
+  int _savedMegaphoneSeq = 0;
+  int? _savedMegaphoneActiveId;
+
   @override
   void initState() {
     super.initState();
     _user = widget.user;
-    _scrollController.addListener(_onHistoryScroll);
+    _scrollController.addListener(_onContentScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _refreshProfile();
       _fetchHistoryPage(0);
@@ -71,18 +94,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   void dispose() {
-    _scrollController.removeListener(_onHistoryScroll);
+    _savedAudioSub?.cancel();
+    _savedAudioSub = null;
+    unawaited(_savedAudioPlayer.dispose());
+    _scrollController.removeListener(_onContentScroll);
     _scrollController.dispose();
     super.dispose();
   }
 
-  void _onHistoryScroll() {
+  void _onContentScroll() {
     final pos = _scrollController.position;
-    if (pos.pixels >= pos.maxScrollExtent - 200 &&
-        !_isLoadingMoreHistory &&
-        !_isHistoryLastPage &&
-        _historyList.isNotEmpty) {
-      _fetchHistoryPage(_historyNextPageNum);
+    if (pos.pixels < pos.maxScrollExtent - 200) return;
+
+    if (_activeTab == _ProfileContentTab.history) {
+      if (!_isLoadingMoreHistory &&
+          !_isHistoryLastPage &&
+          _historyList.isNotEmpty) {
+        _fetchHistoryPage(_historyNextPageNum);
+      }
+      return;
+    }
+
+    if (_activeTab == _ProfileContentTab.saved) {
+      if (!_isLoadingMoreSaved && !_isSavedLastPage && _savedList.isNotEmpty) {
+        _fetchSavedPage(_savedNextPageNum);
+      }
     }
   }
 
@@ -149,6 +185,78 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  Future<void> _fetchSavedPage(int pageNum) async {
+    if (pageNum == 0) {
+      if (_isLoadingSaved) return;
+      setState(() => _isLoadingSaved = true);
+    } else {
+      if (_isLoadingMoreSaved) return;
+      setState(() => _isLoadingMoreSaved = true);
+    }
+
+    try {
+      final token = await TokenStorage.loadAccessToken();
+      if (token == null) {
+        if (!mounted) return;
+        setState(() {
+          _isLoadingSaved = false;
+          _isLoadingMoreSaved = false;
+        });
+        return;
+      }
+
+      final items = await SudaApiClient.getUserExpressions(
+        accessToken: token,
+        pageNum: pageNum,
+      );
+      if (!mounted) return;
+
+      if (items.isEmpty) {
+        setState(() {
+          _isSavedLastPage = true;
+          _isLoadingSaved = false;
+          _isLoadingMoreSaved = false;
+        });
+        return;
+      }
+
+      if (pageNum == 0) {
+        setState(() {
+          _savedList
+            ..clear()
+            ..addAll(items);
+          _savedNextPageNum = 1;
+          _isSavedLastPage = false;
+          _isLoadingSaved = false;
+          _isLoadingMoreSaved = false;
+        });
+        return;
+      }
+
+      final startIndex = _savedList.length;
+      setState(() {
+        _savedList.addAll(items);
+        _savedNextPageNum = pageNum + 1;
+        _isLoadingSaved = false;
+        _isLoadingMoreSaved = false;
+      });
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final state = _savedListKey.currentState;
+        if (state == null) return;
+        for (var i = 0; i < items.length; i++) {
+          state.insertItem(startIndex + i, duration: const Duration(milliseconds: 220));
+        }
+      });
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _isLoadingSaved = false;
+          _isLoadingMoreSaved = false;
+        });
+      }
+    }
+  }
+
   @override
   void didUpdateWidget(ProfileScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -158,7 +266,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     // 활성 상태로 전환될 때마다 프로필 갱신. 히스토리는 끝까지 본 경우에만 0페이지 재조회.
     if (!oldWidget.isActive && widget.isActive) {
       _refreshProfile();
-      if (_shouldRefetchHistoryFromStart()) {
+      if (_activeTab == _ProfileContentTab.history &&
+          _shouldRefetchHistoryFromStart()) {
         _fetchHistoryPage(0);
       }
     }
@@ -167,7 +276,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         widget.profileReturnCounter != null &&
         widget.profileReturnCounter != oldWidget.profileReturnCounter) {
       _refreshProfile();
-      if (_shouldRefetchHistoryFromStart()) {
+      if (_activeTab == _ProfileContentTab.history &&
+          _shouldRefetchHistoryFromStart()) {
         _fetchHistoryPage(0);
       }
     }
@@ -363,6 +473,328 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  void _setActiveTab(_ProfileContentTab tab) {
+    if (tab == _activeTab) return;
+    if (tab == _ProfileContentTab.saved) {
+      // Saved 탭은 진입할 때마다 0페이지부터 재조회
+      _savedMegaphoneSeq++;
+      _savedAudioSub?.cancel();
+      _savedAudioSub = null;
+      unawaited(_savedAudioPlayer.stop());
+      _savedMegaphoneActiveId = null;
+
+      setState(() {
+        _activeTab = tab;
+        _savedList.clear();
+        _savedNextPageNum = 0;
+        _isSavedLastPage = false;
+        _isLoadingSaved = false;
+        _isLoadingMoreSaved = false;
+        // AnimatedList 상태 리셋을 위해 key 갱신
+        _savedListKey = GlobalKey<AnimatedListState>();
+      });
+      _fetchSavedPage(0);
+      return;
+    }
+
+    setState(() => _activeTab = tab);
+  }
+
+  Widget _buildContentTabs(BuildContext context) {
+    final theme = Theme.of(context).textTheme;
+    final l10n = AppLocalizations.of(context)!;
+    final historySelected = _activeTab == _ProfileContentTab.history;
+    final savedSelected = _activeTab == _ProfileContentTab.saved;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: SizedBox(
+        height: 40,
+        child: Row(
+          children: [
+            Expanded(
+              child: GestureDetector(
+                onTap: () => _setActiveTab(_ProfileContentTab.history),
+                behavior: HitTestBehavior.opaque,
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 20),
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      l10n.profileHistory,
+                      style: theme.bodyLarge?.copyWith(
+                        color: historySelected ? Colors.white : _tabInactive,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Container(
+              width: 2,
+              height: 20,
+              color: _tabInactive,
+            ),
+            Expanded(
+              child: GestureDetector(
+                onTap: () => _setActiveTab(_ProfileContentTab.saved),
+                behavior: HitTestBehavior.opaque,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 20),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      l10n.profileSaved,
+                      style: theme.bodyLarge?.copyWith(
+                        color: savedSelected ? Colors.white : _tabInactive,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<AudioSource?> _prepareSavedAudio({
+    required String? cdnYn,
+    required String? cdnPath,
+    required Uint8List? soundBytes,
+  }) async {
+    await _savedAudioPlayer.stop();
+    if (cdnYn == 'Y' && cdnPath != null && cdnPath.isNotEmpty) {
+      final url = '${AppConfig.cdnBaseUrl}$cdnPath';
+      final source = AudioSource.uri(Uri.parse(url));
+      await _savedAudioPlayer.setAudioSource(source);
+      return source;
+    }
+    if (soundBytes != null && soundBytes.isNotEmpty) {
+      final source = AudioSource.uri(
+        Uri.dataFromBytes(soundBytes, mimeType: 'audio/mpeg'),
+      );
+      await _savedAudioPlayer.setAudioSource(source);
+      return source;
+    }
+    return null;
+  }
+
+  Future<void> _onSavedExpressionTap(UserExpressionDto item) async {
+    final id = item.id;
+    if (id == null) return;
+    _savedMegaphoneSeq++;
+    final seq = _savedMegaphoneSeq;
+
+    _savedAudioSub?.cancel();
+    _savedAudioSub = null;
+    await _savedAudioPlayer.stop();
+
+    if (!mounted || seq != _savedMegaphoneSeq) return;
+    setState(() => _savedMegaphoneActiveId = id);
+
+    final token = await TokenStorage.loadAccessToken();
+    if (!mounted || seq != _savedMegaphoneSeq) return;
+
+    final resultId = item.roleplayResultId;
+    final expressionIndex = item.expressionIndex;
+    if (token == null || resultId == null || expressionIndex == null) {
+      setState(() => _savedMegaphoneActiveId = null);
+      return;
+    }
+
+    try {
+      final tts = await SudaApiClient.getRoleplayResultExpressionSound(
+        accessToken: token,
+        resultId: resultId,
+        expressionIndex: expressionIndex,
+      );
+      if (!mounted || seq != _savedMegaphoneSeq) return;
+
+      final source = await _prepareSavedAudio(
+        cdnYn: tts.cdnYn,
+        cdnPath: tts.cdnPath,
+        soundBytes: tts.sound,
+      );
+      if (!mounted || seq != _savedMegaphoneSeq) return;
+
+      if (source == null) {
+        setState(() => _savedMegaphoneActiveId = null);
+        return;
+      }
+
+      _savedAudioSub = _savedAudioPlayer.playerStateStream.listen((state) {
+        if (state.processingState == ProcessingState.completed) {
+          _savedAudioSub?.cancel();
+          _savedAudioSub = null;
+          if (!mounted || seq != _savedMegaphoneSeq) return;
+          setState(() => _savedMegaphoneActiveId = null);
+        }
+      });
+      await _savedAudioPlayer.play();
+    } catch (_) {
+      _savedAudioSub?.cancel();
+      _savedAudioSub = null;
+      if (!mounted || seq != _savedMegaphoneSeq) return;
+      setState(() => _savedMegaphoneActiveId = null);
+    }
+  }
+
+  Future<void> _deleteSavedExpression(UserExpressionDto item) async {
+    final token = await TokenStorage.loadAccessToken();
+    if (!mounted) return;
+    if (token == null || token.isEmpty) {
+      DefaultToast.show(context, 'HTTP 401 · Request failed', isError: true);
+      return;
+    }
+
+    final resultId = item.roleplayResultId;
+    final expressionIndex = item.expressionIndex;
+    if (resultId == null || expressionIndex == null) {
+      return;
+    }
+
+    try {
+      await SudaApiClient.deleteUserExpression(
+        accessToken: token,
+        rpResultId: resultId,
+        expressionIndex: expressionIndex,
+      );
+      if (!mounted) return;
+      final l10n = AppLocalizations.of(context)!;
+      DefaultToast.show(context, l10n.expressionUnsavedToProfile);
+
+      final index = _savedList.indexWhere((e) => e.id == item.id);
+      if (index < 0) return;
+      final removed = _savedList.removeAt(index);
+      if (_savedMegaphoneActiveId == removed.id) {
+        _savedMegaphoneSeq++;
+        _savedAudioSub?.cancel();
+        _savedAudioSub = null;
+        unawaited(_savedAudioPlayer.stop());
+        _savedMegaphoneActiveId = null;
+      }
+
+      final listState = _savedListKey.currentState;
+      listState?.removeItem(
+        index,
+        (context, animation) {
+          return FadeTransition(
+            opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
+            child: SizeTransition(
+              sizeFactor: CurvedAnimation(parent: animation, curve: Curves.easeInOut),
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 20),
+                child: _SavedExpressionCard(
+                  item: removed,
+                  isActive: false,
+                  onTap: () {},
+                  onDeleteTap: () {},
+                ),
+              ),
+            ),
+          );
+        },
+        duration: const Duration(milliseconds: 260),
+      );
+      setState(() {});
+    } catch (e) {
+      if (!mounted) return;
+      DefaultToast.show(context, e.toString(), isError: true);
+    }
+  }
+
+  Widget _buildSavedShimmer() {
+    Widget box() {
+      return Shimmer.fromColors(
+        baseColor: const Color(0xFF2A2A2A),
+        highlightColor: const Color(0xFF3F3F3F),
+        child: Container(
+          width: double.infinity,
+          height: 130,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(18),
+          ),
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Column(
+        children: [
+          box(),
+          const SizedBox(height: 20),
+          box(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSavedSection(BuildContext context) {
+    if (_isLoadingSaved && _savedList.isEmpty) {
+      return _buildSavedShimmer();
+    }
+
+    if (!_isLoadingSaved && _savedList.isEmpty) {
+      return SizedBox(
+        height: 120,
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Text(
+              AppLocalizations.of(context)!.profileSavedEmpty,
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: Colors.white,
+                  ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          AnimatedList(
+            key: _savedListKey,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            initialItemCount: _savedList.length,
+            itemBuilder: (context, index, animation) {
+              final item = _savedList[index];
+              final isActive = item.id != null && item.id == _savedMegaphoneActiveId;
+              return FadeTransition(
+                opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
+                child: SizeTransition(
+                  sizeFactor: CurvedAnimation(parent: animation, curve: Curves.easeInOut),
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 20),
+                    child: _SavedExpressionCard(
+                      item: item,
+                      isActive: isActive,
+                      onTap: () => _onSavedExpressionTap(item),
+                      onDeleteTap: () => _deleteSavedExpression(item),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+          if (_isLoadingMoreSaved) ...[
+            const SizedBox(height: 10),
+            _buildSavedShimmer(),
+          ],
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context).textTheme;
@@ -514,22 +946,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                 const SizedBox(height: 35),
 
-                // History 라벨 (body-default 흰색·왼쪽 정렬·상단 gap 14·하단 gap 20)
+                // 탭 라벨 (History | Saved)
                 const SizedBox(height: 14),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Text(
-                      AppLocalizations.of(context)!.profileHistory,
-                      style: theme.bodyLarge?.copyWith(color: Colors.white),
-                    ),
-                  ),
-                ),
+                _buildContentTabs(context),
                 const SizedBox(height: 20),
 
-                // 롤플레이 히스토리 (3열·썸네일 간격 10·행 간격 10)
-                _buildHistorySection(context),
+                // 탭 콘텐츠 영역
+                if (_activeTab == _ProfileContentTab.history)
+                  _buildHistorySection(context)
+                else
+                  _buildSavedSection(context),
               ],
             ),
           ),
@@ -538,6 +964,126 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+}
+
+class _SavedExpressionCard extends StatelessWidget {
+  final UserExpressionDto item;
+  final bool isActive;
+  final VoidCallback onTap;
+  final VoidCallback onDeleteTap;
+
+  const _SavedExpressionCard({
+    required this.item,
+    required this.isActive,
+    required this.onTap,
+    required this.onDeleteTap,
+  });
+
+  static const Color _exprTextPrimary = Color(0xFF121212);
+  static const Color _exprTextSecondary = Color(0xFF676767);
+  static const Color _mint = Color(0xFF80D7CF);
+  static const String _checkMintSvg = 'assets/images/icons/check_mint.svg';
+  static const String _megaphonePng = 'assets/images/icons/megaphone.png';
+  static const String _bookmarkOnPng = 'assets/images/icons/bookmark_on.png';
+  static const double _bodyLeftIndent = 30;
+  static const Color _megaphoneTintActive = Color(0xFF0CABA8);
+  static const Color _megaphoneTintLoading = Color(0xFF121212);
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context).textTheme;
+    final expression = item.expression ?? '';
+    final meaning = item.meaningUserLanguage ?? '';
+    final rephrased = item.rephrasedSentence ?? '';
+
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(18),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOut,
+          color: isActive ? Colors.white : _mint,
+          padding: const EdgeInsets.all(16),
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SvgPicture.asset(
+                      _checkMintSvg,
+                      width: 22,
+                      height: 22,
+                      fit: BoxFit.contain,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        expression,
+                        style: theme.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: _exprTextPrimary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: _bodyLeftIndent),
+                  child: Text(
+                    meaning,
+                    style: theme.bodySmall?.copyWith(color: _exprTextSecondary),
+                  ),
+                ),
+                const SizedBox(height: 15),
+                Padding(
+                  padding: const EdgeInsets.only(left: _bodyLeftIndent),
+                  child: Text(
+                    rephrased,
+                    style: theme.bodyMedium?.copyWith(color: _exprTextPrimary),
+                  ),
+                ),
+                const SizedBox(height: 15),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    GestureDetector(
+                      onTap: onTap,
+                      behavior: HitTestBehavior.opaque,
+                      child: Image.asset(
+                        _megaphonePng,
+                        width: 24,
+                        height: 24,
+                        fit: BoxFit.contain,
+                        color:
+                            isActive ? _megaphoneTintLoading : _megaphoneTintActive,
+                        colorBlendMode: BlendMode.srcIn,
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: onDeleteTap,
+                      behavior: HitTestBehavior.opaque,
+                      child: Image.asset(
+                        _bookmarkOnPng,
+                        width: 24,
+                        height: 24,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class _ProfileAvatar extends StatelessWidget {

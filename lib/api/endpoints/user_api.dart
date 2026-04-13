@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../../models/roleplay_models.dart';
 import '../../models/user_models.dart';
 import '../client/suda_http_client.dart';
 
@@ -702,6 +703,56 @@ class UserApi {
 
     throw Exception(
       'DELETE /v1/users/expressions failed: HTTP ${response.statusCode} ${response.body}',
+    );
+  }
+
+  /// `GET /v1/users/expressions?pageNum=...` — 응답: `List<UserExpressionDto>`
+  static Future<List<UserExpressionDto>> getUserExpressions({
+    required String accessToken,
+    int pageNum = 0,
+  }) async {
+    return await SudaHttpClient.executeWithRefresh(
+      () => _getUserExpressionsInternal(accessToken, pageNum),
+      retryWithNewToken: (newToken) => _getUserExpressionsInternal(newToken, pageNum),
+    );
+  }
+
+  static Future<List<UserExpressionDto>> _getUserExpressionsInternal(
+    String accessToken,
+    int pageNum,
+  ) async {
+    final uri = SudaHttpClient.buildUri(
+      '/v1/users/expressions',
+      {'pageNum': pageNum.toString()},
+    );
+
+    late final http.Response response;
+    try {
+      response = await SudaHttpClient.client
+          .get(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      rethrow;
+    }
+
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final List<dynamic> data = jsonDecode(response.body) as List<dynamic>;
+      return data
+          .map((item) => UserExpressionDto.fromJson(item as Map<String, dynamic>))
+          .toList();
+    }
+
+    throw Exception(
+      'GET /v1/users/expressions failed: HTTP ${response.statusCode} ${response.body}',
     );
   }
 

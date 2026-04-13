@@ -224,7 +224,13 @@ class AppLocalizationsPt extends AppLocalizations {
   String get profileHistory => 'Histórico';
 
   @override
+  String get profileSaved => 'Salvos';
+
+  @override
   String get profileHistoryEmpty => 'Ainda sem histórico';
+
+  @override
+  String get profileSavedEmpty => 'Nenhuma expressão salva ainda.';
 
   @override
   String get noTicketsTitle => 'Acabou seus Tickets…';

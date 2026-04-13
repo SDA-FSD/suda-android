@@ -496,11 +496,23 @@ abstract class AppLocalizations {
   /// **'History'**
   String get profileHistory;
 
+  /// No description provided for @profileSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get profileSaved;
+
   /// No description provided for @profileHistoryEmpty.
   ///
   /// In en, this message translates to:
   /// **'No history yet'**
   String get profileHistoryEmpty;
+
+  /// No description provided for @profileSavedEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No saved expressions yet.'**
+  String get profileSavedEmpty;
 
   /// No description provided for @noTicketsTitle.
   ///

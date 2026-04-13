@@ -318,6 +318,13 @@ class SudaApiClient {
     );
   }
 
+  static Future<List<UserExpressionDto>> getUserExpressions({
+    required String accessToken,
+    int pageNum = 0,
+  }) {
+    return UserApi.getUserExpressions(accessToken: accessToken, pageNum: pageNum);
+  }
+
   static Future<void> deleteUser({
     required String accessToken,
   }) {

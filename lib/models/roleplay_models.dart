@@ -403,6 +403,42 @@ class ExpressionUpgradeDto {
   }
 }
 
+/// `GET /v1/users/expressions?pageNum=...` 응답 원소
+class UserExpressionDto {
+  final int? id;
+  final int? userId;
+  final int? roleplayResultId;
+  final int? expressionIndex;
+  final String? expression;
+  final String? meaningUserLanguage;
+  final String? rephrasedSentence;
+  final String? createdAt;
+
+  const UserExpressionDto({
+    this.id,
+    this.userId,
+    this.roleplayResultId,
+    this.expressionIndex,
+    this.expression,
+    this.meaningUserLanguage,
+    this.rephrasedSentence,
+    this.createdAt,
+  });
+
+  factory UserExpressionDto.fromJson(Map<String, dynamic> json) {
+    return UserExpressionDto(
+      id: _optionalInt(json['id']),
+      userId: _optionalInt(json['userId']),
+      roleplayResultId: _optionalInt(json['roleplayResultId']),
+      expressionIndex: _optionalInt(json['expressionIndex']),
+      expression: json['expression'] as String?,
+      meaningUserLanguage: json['meaningUserLanguage'] as String?,
+      rephrasedSentence: json['rephrasedSentence'] as String?,
+      createdAt: json['createdAt'] as String?,
+    );
+  }
+}
+
 class RoleplayResultDto {
   final int? id;
   final int? version;
