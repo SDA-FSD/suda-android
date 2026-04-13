@@ -33,6 +33,9 @@ class _LikeProgressOverlayState extends State<LikeProgressOverlay>
   static const _ticketAsset = 'assets/images/icons/ticket.png';
   static const _sparkleAsset = 'assets/images/like_progress_star.png';
 
+  /// phase1(500ms) 중 이 비율까지 엄지·BG 알파 0→1 (≈300ms)
+  static const double _phase1ThumbBgFadeEndT = 300 / 500;
+
   final GlobalKey _lvLabelKey = GlobalKey();
 
   late final AnimationController _phase1Ctrl;
@@ -120,7 +123,7 @@ class _LikeProgressOverlayState extends State<LikeProgressOverlay>
   }
 
   Future<void> _runSequence() async {
-    // 1: scale 2→0.7 + Y 0→-50 + fade-in (500ms)
+    // 1: scale 2→0.7 + Y 0→-50 (500ms); 엄지·BG는 앞 ~300ms 알파 0→1
     setState(() => _phase5Visible = true);
     await Future.wait([_phase1Ctrl.forward(), _phase5Ctrl.forward()]);
     if (!mounted) return;
@@ -581,10 +584,15 @@ class _LikeProgressOverlayState extends State<LikeProgressOverlay>
             ? (1.0 - _phase8Ctrl.value)
             : 1.0;
 
-        // phase1: scale 2→0.7 + Y 0→-50 + fade-in (500ms)
+        // phase1: scale 2→0.7 + Y 0→-50 (500ms); 엄지·BG 알파는 앞 ~300ms 0→1
         final t = _phase1Ctrl.value;
         final centerScale = 2.0 - 1.3 * t;
         final centerTranslateY = -50.0 * t;
+        final thumbBgIntroOpacity = _phase8FadingOut
+            ? 1.0
+            : Curves.easeOut.transform(
+                (t / _phase1ThumbBgFadeEndT).clamp(0.0, 1.0),
+              );
         // phase6 wobble: 독자적인 500ms 컨트롤러 기준 sin 4사이클
         final wobbleT = _wobbling ? _phase6WobbleCtrl.value : 0.0;
         final thumbWobbleAngle =
@@ -621,14 +629,17 @@ class _LikeProgressOverlayState extends State<LikeProgressOverlay>
               // 2) background image (fit to width, keep aspect)
               if (_bgVisible)
                 Center(
-                  child: Transform.translate(
-                    offset: Offset(0, centerTranslateY),
-                    child: Transform.scale(
-                      scale: centerScale,
-                      child: Image.asset(
-                        _bgAsset,
-                        width: screenWidth * 1.5,
-                        fit: BoxFit.fitWidth,
+                  child: Opacity(
+                    opacity: thumbBgIntroOpacity,
+                    child: Transform.translate(
+                      offset: Offset(0, centerTranslateY),
+                      child: Transform.scale(
+                        scale: centerScale,
+                        child: Image.asset(
+                          _bgAsset,
+                          width: screenWidth * 1.5,
+                          fit: BoxFit.fitWidth,
+                        ),
                       ),
                     ),
                   ),
@@ -637,7 +648,7 @@ class _LikeProgressOverlayState extends State<LikeProgressOverlay>
               // 3) thumb image
               Center(
                 child: Opacity(
-                  opacity: visualLayerOpacity,
+                  opacity: visualLayerOpacity * thumbBgIntroOpacity,
                   child: Transform.translate(
                     offset: Offset(0, centerTranslateY),
                     child: Transform.scale(

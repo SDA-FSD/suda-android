@@ -2,17 +2,23 @@ import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:vibration/vibration.dart';
 
 import '../../effects/like_progress_effect.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/roleplay_models.dart';
 import '../../routes/roleplay_router.dart';
 import '../../services/roleplay_state_service.dart';
 
+const Color _exprTextPrimary = Color(0xFF121212);
+const Color _exprTextSecondary = Color(0xFF676767);
+const Color _expressionUpgradeCardBg = Color(0xFF80D7CF);
+
 /// Roleplay Result V2 Screen (Full Screen)
 ///
-/// 현재 단계에서는 중앙 박스레이어만 먼저 정의하고,
-/// 화면 fully shown 이후 1초 뒤 상단 이동 + like progress effect를 수행한다.
+/// 화면 fully shown 이후 1초 뒤 상단 이동 + LikeProgressEffect(레벨·라이크 진행) 후
+/// Feedback / Expression Upgrade 본문 레이어를 노출한다.
 class RoleplayResultScreenV2 extends StatefulWidget {
   static const String routeName = '/roleplay/result_v2';
 
@@ -31,9 +37,11 @@ class _RoleplayResultScreenV2State extends State<RoleplayResultScreenV2>
     with TickerProviderStateMixin {
   static const Color _topBg = Color(0xFF054544);
   static const Color _bottomBg = Color(0xFF0CABA8);
+  static const Color _teal = Color(0xFF0CABA8);
   static const Color _mint = Color(0xFF80D7CF);
-  static const Color _mintLight = Color(0xFFCFFFFB);
   static const Color _cardBg = Color(0x8080D7CF);
+  static const Color _feedbackBoxFill = Color(0xFF80D7CF);
+  static const Color _reportText = Color(0xFF054544);
   static const String _starGold = 'assets/images/star_gold.png';
   static const String _starSilver = 'assets/images/star_silver.png';
   static const String _likeAtResult = 'assets/images/like_at_result.png';
@@ -43,6 +51,9 @@ class _RoleplayResultScreenV2State extends State<RoleplayResultScreenV2>
       'assets/images/icons/mission_failed.png';
 
   late final AnimationController _panelMoveController;
+  late final AnimationController _feedbackEntranceController;
+  late final AnimationController _expressionEntranceController;
+  late final AnimationController _footerFadeController;
   final GlobalKey _panelKey = GlobalKey();
   double? _panelMeasuredHeight;
   Animation<double>? _routeAnimation;
@@ -50,7 +61,9 @@ class _RoleplayResultScreenV2State extends State<RoleplayResultScreenV2>
   bool _hasScheduledPostEntrance = false;
   bool _hasStartedEffectSequence = false;
   bool _effectDone = false;
+  bool _showFooterActions = false;
   int _revealedGoldStars = 0;
+  bool _reportSubmitted = false;
 
   RoleplayResultDto? get _dto => RoleplayStateService.instance.cachedResult;
 
@@ -61,10 +74,22 @@ class _RoleplayResultScreenV2State extends State<RoleplayResultScreenV2>
       vsync: this,
       duration: const Duration(milliseconds: 700),
     )..addListener(() {
-      if (mounted) {
-        setState(() {});
-      }
-    });
+        if (mounted) {
+          setState(() {});
+        }
+      });
+    _feedbackEntranceController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 450),
+    );
+    _expressionEntranceController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 450),
+    );
+    _footerFadeController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 240),
+    );
     _scheduleStarSequence();
   }
 
@@ -146,9 +171,32 @@ class _RoleplayResultScreenV2State extends State<RoleplayResultScreenV2>
         toBeProgress: dto.afterProgressPercentage ?? 0,
       ),
       onCompleted: () {
-        if (mounted) {
-          setState(() => _effectDone = true);
+        if (!mounted) {
+          return;
         }
+        setState(() {
+          _effectDone = true;
+          _showFooterActions = false;
+        });
+        if (mounted) {
+          _feedbackEntranceController.forward(from: 0);
+        }
+        final hasUpgrades = dto.expressionUpgrades?.isNotEmpty ?? false;
+        if (hasUpgrades) {
+          Future.delayed(const Duration(milliseconds: 500), () {
+            if (mounted) {
+              _expressionEntranceController.forward(from: 0);
+            }
+          });
+        }
+        Future.delayed(const Duration(milliseconds: 1000), () {
+          if (!mounted) {
+            return;
+          }
+          _footerFadeController.reset();
+          setState(() => _showFooterActions = true);
+          _footerFadeController.forward();
+        });
       },
     );
   }
@@ -177,6 +225,9 @@ class _RoleplayResultScreenV2State extends State<RoleplayResultScreenV2>
   void dispose() {
     _routeAnimation?.removeStatusListener(_onRouteAnimationStatusChanged);
     _panelMoveController.dispose();
+    _feedbackEntranceController.dispose();
+    _expressionEntranceController.dispose();
+    _footerFadeController.dispose();
     super.dispose();
   }
 
@@ -329,7 +380,6 @@ class _RoleplayResultScreenV2State extends State<RoleplayResultScreenV2>
               style: labelPrimary,
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 10),
             Expanded(
               child: Center(child: child),
             ),
@@ -350,7 +400,7 @@ class _RoleplayResultScreenV2State extends State<RoleplayResultScreenV2>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const SizedBox(height: 20),
+            const SizedBox(height: 50),
             _buildStarsRow(),
             const SizedBox(height: 5),
             Text(
@@ -391,11 +441,11 @@ class _RoleplayResultScreenV2State extends State<RoleplayResultScreenV2>
                     children: [
                       Image.asset(
                         _likeAtResult,
-                        width: 24,
-                        height: 24,
+                        width: 30,
+                        height: 30,
                         fit: BoxFit.contain,
                       ),
-                      const SizedBox(width: 6),
+                      const SizedBox(width: 2),
                       Flexible(child: _buildLikeText(context)),
                     ],
                   ),
@@ -404,6 +454,201 @@ class _RoleplayResultScreenV2State extends State<RoleplayResultScreenV2>
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildFeedbackLayer(BuildContext context) {
+    final theme = Theme.of(context).textTheme;
+    final feedback = _dto?.overallFeedback ?? '';
+
+    final entrance = CurvedAnimation(
+      parent: _feedbackEntranceController,
+      curve: Curves.easeOutCubic,
+    );
+    return FadeTransition(
+      opacity: Tween<double>(begin: 0, end: 1).animate(entrance),
+      child: SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(0, 1.2),
+          end: Offset.zero,
+        ).animate(entrance),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 24),
+              child: Text(
+                'Feedback',
+                style: theme.headlineSmall?.copyWith(color: Colors.white),
+              ),
+            ),
+            const SizedBox(height: 10),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: _feedbackBoxFill,
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  child: Text(
+                    feedback,
+                    style: theme.bodyMedium?.copyWith(color: Colors.black),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildExpressionCarousel(BuildContext context) {
+    final items = _dto?.expressionUpgrades ?? const <ExpressionUpgradeDto>[];
+    if (items.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final sw = MediaQuery.sizeOf(context).width;
+    final itemW = sw * 0.7;
+    const between = 16.0;
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.only(left: 24, right: 24),
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            for (var i = 0; i < items.length; i++) ...[
+              SizedBox(
+                width: itemW,
+                child: _ExpressionUpgradeCard(item: items[i]),
+              ),
+              if (i < items.length - 1) const SizedBox(width: between),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildExpressionLayer(BuildContext context) {
+    final theme = Theme.of(context).textTheme;
+
+    final entrance = CurvedAnimation(
+      parent: _expressionEntranceController,
+      curve: Curves.easeOutCubic,
+    );
+    return FadeTransition(
+      opacity: Tween<double>(begin: 0, end: 1).animate(entrance),
+      child: SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(0, 1.2),
+          end: Offset.zero,
+        ).animate(entrance),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 24),
+              child: Text(
+                'Expression Upgrade',
+                style: theme.headlineSmall?.copyWith(color: Colors.white),
+              ),
+            ),
+            const SizedBox(height: 10),
+            _buildExpressionCarousel(context),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPostEffectBody(BuildContext context) {
+    final theme = Theme.of(context).textTheme;
+    final l10n = AppLocalizations.of(context)!;
+    final bottomInset = MediaQuery.paddingOf(context).bottom;
+    final hasUpgrades = _dto?.expressionUpgrades?.isNotEmpty ?? false;
+
+    return SingleChildScrollView(
+      padding: EdgeInsets.fromLTRB(0, 32, 0, 16 + bottomInset),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _buildFeedbackLayer(context),
+          if (hasUpgrades) ...[
+            const SizedBox(height: 28),
+            _buildExpressionLayer(context),
+          ],
+          if (_showFooterActions)
+            FadeTransition(
+              opacity: CurvedAnimation(
+                parent: _footerFadeController,
+                curve: Curves.easeOut,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const SizedBox(height: 28),
+                  Center(
+                    child: ElevatedButton(
+                      onPressed: () => _navigateToOverview(context),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _teal,
+                        foregroundColor: Colors.white,
+                        disabledBackgroundColor: _teal,
+                        disabledForegroundColor: Colors.white,
+                        shape: const StadiumBorder(),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 30,
+                          vertical: 18,
+                        ),
+                        elevation: 0,
+                      ),
+                      child: const Text('Got it!'),
+                    ),
+                  ),
+                  const SizedBox(height: 35),
+                  Center(
+                    child: _reportSubmitted
+                        ? IgnorePointer(
+                            child: Opacity(
+                              opacity: 0,
+                              child: Text(
+                                l10n.endingReport,
+                                style: theme.bodySmall
+                                    ?.copyWith(color: _reportText),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          )
+                        : GestureDetector(
+                            onTap: () async {
+                              final result = await RoleplayRouter
+                                  .pushResultReport<bool>(context);
+                              if (result == true && mounted) {
+                                setState(() => _reportSubmitted = true);
+                              }
+                            },
+                            child: Text(
+                              l10n.endingReport,
+                              style: theme.bodySmall
+                                  ?.copyWith(color: _reportText),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                  ),
+                  const SizedBox(height: 24),
+                ],
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -418,7 +663,7 @@ class _RoleplayResultScreenV2State extends State<RoleplayResultScreenV2>
 
     return PopScope(
       canPop: false,
-      onPopInvoked: (didPop) {
+      onPopInvokedWithResult: (didPop, _) {
         if (!didPop) {
           _navigateToOverview(context);
         }
@@ -449,20 +694,121 @@ class _RoleplayResultScreenV2State extends State<RoleplayResultScreenV2>
                       ),
                     ),
                   ),
+                  if (_effectDone)
+                    Expanded(
+                      child: _buildPostEffectBody(context),
+                    ),
                 ],
               ),
-              if (_effectDone)
-                const Center(
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ExpressionUpgradeCard extends StatelessWidget {
+  const _ExpressionUpgradeCard({required this.item});
+
+  final ExpressionUpgradeDto item;
+
+  static const String _checkMintSvg = 'assets/images/icons/check_mint.svg';
+  static const String _megaphonePng = 'assets/images/icons/megaphone.png';
+  static const String _bookmarkOffPng = 'assets/images/icons/bookmark_off.png';
+  /// check(22) + gap(8) — meaning·rephrased 좌측 정렬 공통
+  static const double _bodyLeftIndent = 30;
+  static const Color _megaphoneTint = Color(0xFF0CABA8);
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context).textTheme;
+    final expression = item.expression ?? '';
+    final meaning = item.meaningUserLanguage ?? '';
+    final rephrased = item.rephrasedSentence ?? '';
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(18),
+      child: ColoredBox(
+        color: _expressionUpgradeCardBg,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SvgPicture.asset(
+                      _checkMintSvg,
+                      width: 22,
+                      height: 22,
+                      fit: BoxFit.contain,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        expression,
+                        style: theme.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: _exprTextPrimary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: _bodyLeftIndent),
                   child: Text(
-                    'done',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
+                    meaning,
+                    style: theme.bodySmall?.copyWith(
+                      color: _exprTextSecondary,
                     ),
                   ),
                 ),
-            ],
+                const SizedBox(height: 15),
+                Padding(
+                  padding: const EdgeInsets.only(left: _bodyLeftIndent),
+                  child: Text(
+                    rephrased,
+                    style: theme.bodyMedium?.copyWith(
+                      color: _exprTextPrimary,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 15),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    GestureDetector(
+                      onTap: () {},
+                      behavior: HitTestBehavior.opaque,
+                      child: Image.asset(
+                        _megaphonePng,
+                        width: 24,
+                        height: 24,
+                        fit: BoxFit.contain,
+                        color: _megaphoneTint,
+                        colorBlendMode: BlendMode.srcIn,
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () {},
+                      behavior: HitTestBehavior.opaque,
+                      child: Image.asset(
+                        _bookmarkOffPng,
+                        width: 24,
+                        height: 24,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -909,13 +909,13 @@
 - **초기 박스레이어**: 화면 중앙에 별 3개 + mainTitle + subTitle + 3개 요약 카드(Mission / Words / Like)를 배치한다.
 - **별 애니메이션**: 기존 Result와 동일하게 silver 상태에서 `starResult` 개수만큼 왼쪽부터 gold로 바뀌며 진동한다.
 - **subTitle 색상**: 기존 검정 대신 `#80D7CF`.
-- **요약 카드 3종**: `#80D7CF` 50% 배경, 둥근 사각형, 그림자 포함. 각 카드 상단은 `labelPrimary` 흰색 라벨, 하단은 값 영역.
+- **요약 카드 3종**: `#80D7CF` 50% 배경, 둥근 사각형, 그림자 포함. 각 카드 상단은 `labelPrimary` 흰색 라벨, 하단은 값 영역. 라벨과 값 사이에는 별도 `SizedBox` 세로 간격을 두지 않고 `Column` + `Expanded`(`Center`)로 값을 배치한다.
   - Mission: 기존 Result와 동일한 mission 아이콘 표시 규칙
   - Words: 기존 Result와 동일한 흰색 숫자 스타일
-  - Like: `assets/images/like_at_result.png` 24×24 + 기존 Result와 동일한 민트 그라데이션 숫자
+  - Like: `assets/images/like_at_result.png` 30×30 + 기존 Result와 동일한 민트 그라데이션 숫자
 - **후속 타이밍**: Result V2 화면이 fully shown 된 뒤 1초 후, 박스레이어가 상단 영역으로 이동한다.
-- **동시 effect**: 박스레이어 상단 이동 시작과 동시에 `LikeProgressEffect.play()`를 호출한다. 파라미터는 `RoleplayResultDto.beforeLikePoint`, `afterLikePoint`, `beforeLevel`, `afterLevel`, `beforeProgressPercentage`, `afterProgressPercentage`를 사용한다.
-- **현재 단계 임시 처리**: effect 완료 콜백을 받으면 화면 중앙에 `done` 텍스트만 표시한다. 본문레이어는 아직 구현하지 않는다.
+- **동시 effect**: 박스레이어 상단 이동 시작과 동시에 `LikeProgressEffect.play()`를 호출한다(레거시 Result의 레벨·진행률·라이크 오버레이와 동일 계열). 파라미터는 `RoleplayResultDto.beforeLikePoint`, `afterLikePoint`, `beforeLevel`, `afterLevel`, `beforeProgressPercentage`, `afterProgressPercentage`를 사용한다.
+- **effect 이후 본문 레이어**: effect 완료 후 임시 `done` 문구는 사용하지 않는다. 박스레이어와 본문 스크롤 사이 세로 **gap 20**(스크롤 `padding` 상단 32). effect `onCompleted` **직후** Feedback 슬라이드 시작, **500ms 후** Expression Upgrade 슬라이드 시작, **1s 후** Got it!·Report 영역 동시 삽입 + **`FadeTransition`**(240ms·`Curves.easeOut`) 빠른 fade-in. (1) **Feedback**: **하단**에서 등장(자식 높이 대비 `SlideTransition` 시작 `Offset(0, 1.2)`로 디스플레이 아래쪽 밖에서 올라옴) + 동일 `CurvedAnimation`으로 **`FadeTransition` fade-in**, 제목 `Feedback`(headlineSmall·흰색·좌 24), 본문은 좌우 24 패딩 안쪽 민트(`#80D7CF`) 둥근 박스에 `overallFeedback`(bodyMedium·검정). (2) **Expression Upgrade**: `expressionUpgrades`가 비어 있으면 섹션 전체 미노출. 있으면 Feedback과 동일하게 **하단·fade-in·슬라이드**, 제목 `Expression Upgrade`(동일 스타일·좌 24). 가로 스크롤: 첫 카드 좌측 24, 카드 너비 화면의 70%, 카드 간격 16, `IntrinsicHeight`+`Row`로 모든 카드 높이를 최장 아이템에 맞춤. 카드 배경 Feedback 박스와 동일 `#80D7CF`. 카드 내용: `check_mint.svg`+expression(bodyLarge w700 `#121212`), meaningUserLanguage(bodySmall `#676767`, **좌 30**), gap 15, rephrasedSentence(bodyMedium `#121212`, **동일 좌 30**), gap 15, 하단 행 좌 `megaphone.png`·우 `bookmark_off.png` 각 24×24, 메가폰은 **`#0CABA8`** `color`+`BlendMode.srcIn` 틴트(탭 동작 추후). (3) **Got it!**: 레거시 `result.dart`와 동일 Stadium `ElevatedButton`·Overview 이동. (4) **Report**: `l10n.endingReport`·전송 성공 시 숨김 동작은 동일, 텍스트 색만 `#054544`.
 - 기존 `lib/screens/roleplay/result.dart`는 수정하지 않고, V2 전용 파일에서 독립적으로 개선 작업을 이어가는 것을 원칙으로 함
 
 ---

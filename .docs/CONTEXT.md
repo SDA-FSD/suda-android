@@ -238,7 +238,7 @@
   - `lib/theme/app_theme.dart`: 앱 전역 테마 설정
   - `lib/services/token_refresh_service.dart`: Access Token 선제 갱신 타이머 및 동시 refresh 단일화
 - **공통 UI 유틸**:
-  - `lib/utils/default_toast.dart`: Overlay 기반 토스트 공통 처리 (배경 #353535/경고 #E4382A 85% 투명도, body-default 흰색, min height 48, 하단 60px, 좌우 반원)
+  - `lib/utils/default_toast.dart`: Overlay 기반 토스트 공통 처리 (배경 #353535/경고 #E4382A 85% 투명도, body-default 흰색, min height 48, 하단 60px, 좌우 반원). **토스트 pill 탭** 시 표시 타이머를 끊고 **자동 사라짐과 동일한 fade-out**(동일 1초)으로 닫힘; 배경 UI 히트는 막지 않음.
   - 토스트 전체 목록 및 테스트 가이드: `.docs/TOAST_CATALOG.md`
   - **Default Markdown** (`lib/utils/default_markdown.dart`): 서버 텍스트의 `***`(볼드+이탤릭), `**`(볼드), `*`(이탤릭)만 파싱해 `TextSpan` 리스트로 변환하는 공통 로직. `***` → `**` → `*` 순서로 처리하며 중첩 미지원. 줄바꿈은 기존 그대로 유지. 적용 구역: **Opening** 시나리오 영역(`RoleplayOpeningScreen`의 scenario), **Ending** 콘텐츠 영역(`RoleplayEndingScreen`·`ReviewEndingScreen`의 content).
 - **리팩토링 원칙**: 
@@ -266,6 +266,7 @@
   - 현재 앵커: `EffectAnchorId.ticketBadge` → Home 헤더의 티켓 배지 위치(`lib/screens/home.dart`).
 - **개별 효과 API**: `lib/effects/like_progress_effect.dart`
   - `LikeProgressEffect.play(context, params, onCompleted?)` 형태로 호출한다.
+  - Phase 1(500ms): 딤은 알파 0→1. **BG(`like_progress_bg.png`)·엄지(`like_at_result.png`)** 는 동일 구간에서 스케일 2.0→0.7·Y 0→-50과 함께, **앞쪽 약 300ms(phase1 진행 `t` 0~0.6)** 에 알파 0→1(`Curves.easeOut`) 페이드인하며 **`t=0`(스케일 2.0)에서는 완전 투명**이다.
   - 파라미터/연출은 효과별 위젯(오버레이)에서 구현하며, 종료 콜백은 fade-out 등 정상화까지 완료된 뒤 1회 호출한다.
   - `LikeProgressOverlay`의 Phase 6 카운터 구간 시작 시 엄지 아이콘 주변에 `like_progress_star.png` 반짝임이 동시 3~5개 생성된다. 각 별은 시작 시점·위치 후보 4곳·크기(width 20~30)·주기를 미세하게 달리하며, 빠른 fade-in 후 soft fade-out(+소폭 scale-up) 1cycle을 반복한다. 활성 반짝임끼리는 최소 거리 검사를 적용해 겹침을 줄인다.
   - Phase 6 프로그레스바 진행 중에는 `VibrationPreset.rapidTapFeedback`를 반복 재생한다. 레벨업으로 티켓 이미지가 생성될 때의 진동은 앞뒤로 짧게 쉰 뒤 `VibrationPreset.doubleBuzz`로 재생하고, 이후 프로그레스 진동을 다시 이어간다.

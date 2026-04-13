@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 /// Overlay 기반 토스트 메시지.
@@ -10,6 +12,7 @@ import 'package:flutter/material.dart';
 /// - 모양: 좌우 반원(Stadium)
 /// - duration: 기본 2초 (가시 시간)
 /// - fade-in/out: 각 1초 (토스트 콘텐츠만 적용)
+/// - 토스트 pill 영역 탭: 표시 타이머 취소 후 자동 종료와 동일한 fade-out(동일 1초)
 class DefaultToast {
   static OverlayEntry? _currentEntry;
 
@@ -113,6 +116,8 @@ class _ToastFadeWidgetState extends State<_ToastFadeWidget>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
+  Timer? _displayTimer;
+  bool _completed = false;
 
   @override
   void initState() {
@@ -126,26 +131,55 @@ class _ToastFadeWidgetState extends State<_ToastFadeWidget>
       curve: Curves.easeInOut,
     );
     _controller.forward().then((_) {
-      Future.delayed(widget.displayDuration, () {
-        if (!mounted) return;
-        _controller.reverse().then((_) {
-          if (mounted) widget.onComplete();
-        });
-      });
+      if (!mounted || _completed) {
+        return;
+      }
+      _displayTimer = Timer(widget.displayDuration, _finishWithFadeOut);
+    });
+  }
+
+  void _invokeComplete() {
+    if (_completed || !mounted) {
+      return;
+    }
+    _completed = true;
+    widget.onComplete();
+  }
+
+  void _finishWithFadeOut() {
+    if (_completed || !mounted) {
+      return;
+    }
+    _displayTimer?.cancel();
+    _displayTimer = null;
+    if (_controller.status == AnimationStatus.reverse) {
+      return;
+    }
+    if (_controller.status == AnimationStatus.dismissed) {
+      _invokeComplete();
+      return;
+    }
+    _controller.reverse().then((_) {
+      _invokeComplete();
     });
   }
 
   @override
   void dispose() {
+    _displayTimer?.cancel();
     _controller.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return FadeTransition(
-      opacity: _animation,
-      child: widget.child,
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: _finishWithFadeOut,
+      child: FadeTransition(
+        opacity: _animation,
+        child: widget.child,
+      ),
     );
   }
 }
