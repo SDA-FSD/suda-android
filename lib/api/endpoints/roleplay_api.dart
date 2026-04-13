@@ -57,7 +57,7 @@ class RoleplayApi {
     );
   }
 
-  static Future<RoleplayAiMessageDto> getAiMessage({
+  static Future<TtsResultDto> getAiMessage({
     required String accessToken,
     required String rpSessionId,
   }) async {
@@ -92,7 +92,7 @@ class RoleplayApi {
 
   /// `GET /v1/roleplay-sessions/{rpSessionId}/hint/sound` — 전체 문장 발음 JSON (`cdnYn`, `cdnPath`, `sound`).
   /// 텍스트는 [getHint] (`.../hint`)와 별도 경로.
-  static Future<RoleplayAiMessageDto> getHintAudio({
+  static Future<TtsResultDto> getHintAudio({
     required String accessToken,
     required String rpSessionId,
   }) async {
@@ -104,7 +104,7 @@ class RoleplayApi {
   }
 
   /// `GET /v1/roleplay-sessions/{rpSessionId}/hint/sound/{wordIndex}` — 단어별 발음.
-  static Future<RoleplayAiMessageDto> getHintWordAudio({
+  static Future<TtsResultDto> getHintWordAudio({
     required String accessToken,
     required String rpSessionId,
     required int wordIndex,
@@ -159,6 +159,26 @@ class RoleplayApi {
       () => _getRoleplayResultInternal(accessToken, resultId),
       retryWithNewToken: (newToken) =>
           _getRoleplayResultInternal(newToken, resultId),
+    );
+  }
+
+  /// `GET /v1/roleplays/results/{resultId}/expressions/{expressionIndex}/sound` — TTS (`TtsResultDto`).
+  static Future<TtsResultDto> getResultExpressionSound({
+    required String accessToken,
+    required int resultId,
+    required int expressionIndex,
+  }) async {
+    return await SudaHttpClient.executeWithRefresh(
+      () => _getResultExpressionSoundInternal(
+        accessToken,
+        resultId,
+        expressionIndex,
+      ),
+      retryWithNewToken: (newToken) => _getResultExpressionSoundInternal(
+        newToken,
+        resultId,
+        expressionIndex,
+      ),
     );
   }
 
@@ -395,7 +415,7 @@ class RoleplayApi {
     );
   }
 
-  static Future<RoleplayAiMessageDto> _getAiMessageInternal(
+  static Future<TtsResultDto> _getAiMessageInternal(
     String accessToken,
     String rpSessionId,
   ) async {
@@ -432,7 +452,7 @@ class RoleplayApi {
     if (statusCode >= 200 && statusCode < 300) {
       final Map<String, dynamic> data =
           jsonDecode(response.body) as Map<String, dynamic>;
-      return RoleplayAiMessageDto.fromJson(data);
+      return TtsResultDto.fromJson(data);
     }
 
     throw Exception(
@@ -518,7 +538,7 @@ class RoleplayApi {
     );
   }
 
-  static Future<RoleplayAiMessageDto> _getHintAudioInternal(
+  static Future<TtsResultDto> _getHintAudioInternal(
     String accessToken,
     String rpSessionId,
   ) async {
@@ -548,7 +568,7 @@ class RoleplayApi {
     if (statusCode >= 200 && statusCode < 300) {
       final Map<String, dynamic> data =
           jsonDecode(response.body) as Map<String, dynamic>;
-      return RoleplayAiMessageDto.fromJson(data);
+      return TtsResultDto.fromJson(data);
     }
 
     throw Exception(
@@ -556,7 +576,7 @@ class RoleplayApi {
     );
   }
 
-  static Future<RoleplayAiMessageDto> _getHintWordAudioInternal(
+  static Future<TtsResultDto> _getHintWordAudioInternal(
     String accessToken,
     String rpSessionId,
     int wordIndex,
@@ -587,7 +607,7 @@ class RoleplayApi {
     if (statusCode >= 200 && statusCode < 300) {
       final Map<String, dynamic> data =
           jsonDecode(response.body) as Map<String, dynamic>;
-      return RoleplayAiMessageDto.fromJson(data);
+      return TtsResultDto.fromJson(data);
     }
 
     throw Exception(
@@ -741,6 +761,45 @@ class RoleplayApi {
 
     throw Exception(
       'GET /v1/roleplays/results/$resultId failed: HTTP ${response.statusCode} ${response.body}',
+    );
+  }
+
+  static Future<TtsResultDto> _getResultExpressionSoundInternal(
+    String accessToken,
+    int resultId,
+    int expressionIndex,
+  ) async {
+    final uri = SudaHttpClient.buildUri(
+      '/v1/roleplays/results/$resultId/expressions/$expressionIndex/sound',
+    );
+    late final http.Response response;
+    try {
+      response = await SudaHttpClient.client
+          .get(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+              'Content-Type': 'application/json',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      rethrow;
+    }
+
+    final statusCode = response.statusCode;
+    if (statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+
+    if (statusCode >= 200 && statusCode < 300) {
+      final Map<String, dynamic> data =
+          jsonDecode(response.body) as Map<String, dynamic>;
+      return TtsResultDto.fromJson(data);
+    }
+
+    throw Exception(
+      'GET /v1/roleplays/results/$resultId/expressions/$expressionIndex/sound failed: HTTP $statusCode ${response.body}',
     );
   }
 

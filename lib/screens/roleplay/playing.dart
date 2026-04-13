@@ -545,7 +545,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
   Future<void> _playHintAudio(
     _ConversationEntry entry,
     String cacheKey,
-    Future<RoleplayAiMessageDto> Function() fetch,
+    Future<TtsResultDto> Function() fetch,
   ) async {
     final sessionId = RoleplayStateService.instance.sessionId;
     if (sessionId == null || sessionId.isEmpty) return;
@@ -556,7 +556,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     _hintPlaybackSub = null;
     await _audioPlayer.stop();
 
-    late RoleplayAiMessageDto dto;
+    late TtsResultDto dto;
     try {
       if (cache.containsKey(cacheKey)) {
         dto = cache[cacheKey]!;
@@ -1637,7 +1637,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     }
   }
 
-  Future<RoleplayAiMessageDto?> _fetchAiMessageWithRetry({
+  Future<TtsResultDto?> _fetchAiMessageWithRetry({
     required String accessToken,
     required String sessionId,
   }) async {
@@ -2397,7 +2397,7 @@ class _ConversationEntry {
   bool hintIsLoading;
   bool hintSentenceHighlightActive = false;
   int? hintWordHighlightIndex;
-  Map<String, RoleplayAiMessageDto>? hintAudioCache;
+  Map<String, TtsResultDto>? hintAudioCache;
 
   _ConversationEntry._({
     required this.type,
@@ -2437,7 +2437,7 @@ class _ConversationEntry {
       type: _ConversationEntryType.hint,
       text: null,
       hintIsLoading: true,
-      hintAudioCache: <String, RoleplayAiMessageDto>{},
+      hintAudioCache: <String, TtsResultDto>{},
     );
   }
 

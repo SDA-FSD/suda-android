@@ -327,4 +327,14 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get reregistrationRestrictedMessage =>
       'Você poderá se cadastrar novamente 2 dias após excluir sua conta. Tente novamente mais tarde.';
+
+  @override
+  String get expressionSavedToProfile => 'Salvo no seu Perfil';
+
+  @override
+  String get expressionUnsavedToProfile => 'Desmarcado';
+
+  @override
+  String get roleplayResultFeedbackInsufficientWords =>
+      'Não foi possível fornecer feedback desta vez. Tente falar um pouco mais — procure usar mais de 30 palavras.';
 }

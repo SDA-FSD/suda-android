@@ -103,7 +103,7 @@
   - 설명: 힌트 라이트볼 탭 후 말풍선에 표시할 문장.
 - **힌트 전체 발음**: `GET /{rpSessionId}/hint/sound`
   - req: path param만 사용
-  - res: `{ cdnYn, cdnPath, sound }` — AI 메시지(`RoleplayAiMessageDto`)와 동일 규칙
+  - res: `{ cdnYn, cdnPath, sound }` — AI 메시지(`TtsResultDto`)와 동일 규칙
   - 설명: 메가폰 탭 시 호출. 텍스트 조회(`.../hint`)와 경로가 다름. 클라이언트는 말풍선 생명주기 내 캐시.
 - **힌트 단어 발음**: `GET /{rpSessionId}/hint/sound/{index}`
   - req: path param `index` = 문장을 공백 기준으로 나눈 단어 인덱스(0부터)
@@ -123,7 +123,7 @@
 - DTO (최소 필드, 추후 확장 가능):
   - `RoleplaySessionRequestDto`, `RoleplaySessionDto`
   - `RoleplayUserMessageRequestDto`, `RoleplayUserMessageResponseDto`
-  - `RoleplayAiMessageDto`, `RoleplayNarrationDto`
+  - `TtsResultDto`, `RoleplayNarrationDto`
   - `RoleplayResultDto` (6-9 Result 조회 응답)
 - 응답 모델은 **최소 필드 기준**으로 구성되어 있으며, 기능 진행 중 확장 가능.
 
@@ -300,9 +300,11 @@
 ## 6-9. Result 조회 API 및 캐시
 - **엔드포인트**: `GET /v1/roleplays/results/{resultId}` (path param만 사용)
 - **클라이언트**: `SudaApiClient.getRoleplayResult(accessToken, resultId)` → `RoleplayApi.getRoleplayResult`
-- **응답**: `RoleplayResultDto` (id, version, userId, roleplayId, roleplayRoleId, endingId, chatHistory, completeYn, completedMissionIds, missionResult, starResult, words, goodFeedback, improvementFeedback, overallFeedback, expressionUpgrades, beforeLikePoint, afterLikePoint, likePoint, likePointReceivedYn, star, createdAt, mainTitle, subTitle 등)
+- **응답**: `RoleplayResultDto` (id, version, userId, roleplayId, roleplayRoleId, endingId, chatHistory, completeYn, completedMissionIds, missionResult, starResult, words, goodFeedback, improvementFeedback, overallFeedback, expressionUpgrades, **savedExpressionIndexes**(nullable `List<int>`, 비어 있을 수 있음), beforeLikePoint, afterLikePoint, likePoint, likePointReceivedYn, star, createdAt, mainTitle, subTitle 등)
 - **캐시**: Result/Ending 스크린에서 즉시 노출하기 위해, resultId를 인지한 직후 Playing에서 선조회하여 `RoleplayStateService.setCachedResult(dto)`로 저장. 이후 스크린 전환 시 `RoleplayStateService.instance.cachedResult`로 조회. 캐시가 늦으면 3초가 지나도 캐시 완료까지 대기한 뒤 전환.
 - DTO: `lib/models/roleplay_models.dart`의 `RoleplayResultDto`
+- **Expression 발음(Result V2)**: `GET /v1/roleplays/results/{resultId}/expressions/{expressionIndex}/sound` → `TtsResultDto`. 클라이언트: `SudaApiClient.getRoleplayResultExpressionSound` / `RoleplayApi.getResultExpressionSound`.
+- **Expression 북마크**: `POST /v1/users/expressions`, JSON `{ "roleplayResultId": <int>, "expressionIndex": <int> }`. 클라이언트: `SudaApiClient.saveUserExpression` / `UserApi.saveUserExpression`.
 
 ## 7. 단일 Roleplay 컨텍스트 보관
 - 인메모리 서비스로 단일 Roleplay Overview를 보관한다.
@@ -349,7 +351,7 @@
   - Ending 전환 확정 시(미션 전부 완수) Playing에서 role.endingList 첫 요소의 `imgPath`에 CDN host prepend하여 이미지 preload.
   - l10n: `roleplayEndedFailed`, `roleplayEndedTimesup`, `roleplayEndedComplete`, `roleplayEndedEnding` (en/ko/pt) 추가.
 - **Ending 스크린 및 Result 별점 API**:
-  - Ending 스크린: 닫기 버튼 없음. RoleplayEndingDto(role.endingList 첫 요소) 기반 title/content/이미지. 이미지 있으면 1.5x→1x 2초 축소 후 80% 검정 레이어·콘텐츠 fade-in; 없으면 바로 레이어·콘텐츠. 상단 50% title+content, 하단 50% endingHowWas+별 5개(40×40 gap 5)+Next 버튼. Next 탭 시 Next 버튼 텍스트 fade-out과 동시에 버튼에서 #0CABA8 풍선이 부푸는 모양으로 전체 화면 덮는 애니메이션(2s) 후 Result 스크린 전환. `PUT /v1/roleplays/results/{rpResultId}?star={star}` 호출(응답 무시), star=선택 별 개수(0~5).
+  - Ending 스크린: 닫기 버튼 없음. RoleplayEndingDto(role.endingList 첫 요소) 기반 title/content/이미지. 이미지 있으면 1.5x→1x 2초 축소 후 80% 검정 레이어·콘텐츠 fade-in; 없으면 바로 레이어·콘텐츠. 상단 50% title+content, 하단 50% endingHowWas+별 5개(40×40 gap 5)+Next 버튼. Next 탭 시 `PUT /v1/roleplays/results/{rpResultId}?star={star}` 호출(응답 무시·fire-and-forget) 직후 Result V2로 즉시 전환. star=선택 별 개수(0~5).
 - Result 스크린: 박스레이어에 별점·mainTitle·subTitle 순차 노출 후 박스 축소. 본문레이어: like_at_result·likePoint·Mission(missionResult 아이콘)·Words·Lv 프로그레스바(getUserProfile)·Good Points·To Improve·Got it! 버튼(Overview 이동). `.docs/CONTEXT_SCREEN.md` §17 참조.
   - `PUT /v1/roleplays/results/{resultId}?star={star}`: RoleplayApi.updateRoleplayResultStar, SudaApiClient.updateRoleplayResultStar. 응답 무시.
   - l10n: `endingHowWas`, `endingNext` (en/ko/pt) 추가.

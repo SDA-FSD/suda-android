@@ -593,6 +593,118 @@ class UserApi {
     );
   }
 
+  /// `POST /v1/users/expressions` — body: `{ roleplayResultId, expressionIndex }`.
+  static Future<void> saveUserExpression({
+    required String accessToken,
+    required int roleplayResultId,
+    required int expressionIndex,
+  }) async {
+    return await SudaHttpClient.executeWithRefresh(
+      () => _saveUserExpressionInternal(
+        accessToken,
+        roleplayResultId,
+        expressionIndex,
+      ),
+      retryWithNewToken: (newToken) => _saveUserExpressionInternal(
+        newToken,
+        roleplayResultId,
+        expressionIndex,
+      ),
+    );
+  }
+
+  static Future<void> _saveUserExpressionInternal(
+    String accessToken,
+    int roleplayResultId,
+    int expressionIndex,
+  ) async {
+    final uri = SudaHttpClient.buildUri('/v1/users/expressions');
+
+    late final http.Response response;
+    try {
+      response = await SudaHttpClient.client
+          .post(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+              'Content-Type': 'application/json',
+            },
+            body: jsonEncode({
+              'roleplayResultId': roleplayResultId,
+              'expressionIndex': expressionIndex,
+            }),
+          )
+          .timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      rethrow;
+    }
+
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return;
+    }
+
+    throw Exception(
+      'POST /v1/users/expressions failed: HTTP ${response.statusCode} ${response.body}',
+    );
+  }
+
+  /// `DELETE /v1/users/expressions?rpResultId=...&expressionIndex=...`
+  static Future<void> deleteUserExpression({
+    required String accessToken,
+    required int rpResultId,
+    required int expressionIndex,
+  }) async {
+    return await SudaHttpClient.executeWithRefresh(
+      () => _deleteUserExpressionInternal(accessToken, rpResultId, expressionIndex),
+      retryWithNewToken: (newToken) =>
+          _deleteUserExpressionInternal(newToken, rpResultId, expressionIndex),
+    );
+  }
+
+  static Future<void> _deleteUserExpressionInternal(
+    String accessToken,
+    int rpResultId,
+    int expressionIndex,
+  ) async {
+    final uri = SudaHttpClient.buildUri(
+      '/v1/users/expressions',
+      {
+        'rpResultId': rpResultId.toString(),
+        'expressionIndex': expressionIndex.toString(),
+      },
+    );
+
+    late final http.Response response;
+    try {
+      response = await SudaHttpClient.client
+          .delete(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      rethrow;
+    }
+
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return;
+    }
+
+    throw Exception(
+      'DELETE /v1/users/expressions failed: HTTP ${response.statusCode} ${response.body}',
+    );
+  }
+
   static String _parseStringResponse(String body) {
     try {
       final decoded = jsonDecode(body);

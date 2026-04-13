@@ -28,14 +28,8 @@ class _RoleplayEndingScreenState extends State<RoleplayEndingScreen>
   late final AnimationController _scaleController;
   late final AnimationController _overlayController;
   late final AnimationController _contentController;
-  late final AnimationController _buttonFadeController;
-  late final AnimationController _balloonController;
   late final Animation<double> _scaleAnimation;
   int _selectedStars = 0;
-  bool _isTransitioning = false;
-  Offset? _buttonCenter;
-  Size? _buttonSize;
-  final GlobalKey _nextButtonKey = GlobalKey();
 
   RoleplayEndingDto? get _ending {
     final overview = RoleplayStateService.instance.overview;
@@ -81,14 +75,6 @@ class _RoleplayEndingScreenState extends State<RoleplayEndingScreen>
     _scaleAnimation = Tween<double>(begin: 1.5, end: 1.0).animate(
       CurvedAnimation(parent: _scaleController, curve: Curves.easeOut),
     );
-    _buttonFadeController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 300),
-    );
-    _balloonController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1500),
-    );
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -112,26 +98,7 @@ class _RoleplayEndingScreenState extends State<RoleplayEndingScreen>
     _scaleController.dispose();
     _overlayController.dispose();
     _contentController.dispose();
-    _buttonFadeController.dispose();
-    _balloonController.dispose();
     super.dispose();
-  }
-
-  void _startTransitionToResult(BuildContext context) {
-    final box = _nextButtonKey.currentContext?.findRenderObject() as RenderBox?;
-    if (box == null || !mounted) return;
-    final pos = box.localToGlobal(Offset.zero);
-    final size = box.size;
-    setState(() {
-      _buttonCenter = pos + Offset(size.width / 2, size.height / 2);
-      _buttonSize = size;
-    });
-    _buttonFadeController.forward();
-    _balloonController.forward().then((_) {
-      if (mounted) {
-        RoleplayRouter.replaceWithResultV2(context);
-      }
-    });
   }
 
   Future<void> _handleBackButton(BuildContext context) async {
@@ -169,10 +136,7 @@ class _RoleplayEndingScreenState extends State<RoleplayEndingScreen>
       }
     });
     if (!context.mounted) return;
-    setState(() => _isTransitioning = true);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _startTransitionToResult(context);
-    });
+    RoleplayRouter.replaceWithResultV2(context);
   }
 
   @override
@@ -302,45 +266,23 @@ class _RoleplayEndingScreenState extends State<RoleplayEndingScreen>
                     Expanded(
                       flex: 1,
                       child: Center(
-                        child: Stack(
-                          key: _nextButtonKey,
-                          alignment: Alignment.center,
-                          children: [
-                            SizedBox(
-                              width: MediaQuery.sizeOf(context).width * 0.4,
-                              height: 54,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF0CABA8),
-                                  borderRadius: BorderRadius.circular(27),
-                                ),
+                        child: SizedBox(
+                          width: MediaQuery.sizeOf(context).width * 0.4,
+                          height: 54,
+                          child: ElevatedButton(
+                            onPressed: () => _navigateToResult(context),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF0CABA8),
+                              foregroundColor: Colors.white,
+                              shape: const StadiumBorder(),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 30,
+                                vertical: 18,
                               ),
+                              elevation: 0,
                             ),
-                            FadeTransition(
-                              opacity: Tween<double>(begin: 1, end: 0)
-                                  .animate(_buttonFadeController),
-                              child: SizedBox(
-                                width: MediaQuery.sizeOf(context).width * 0.4,
-                                height: 54,
-                                child: ElevatedButton(
-                                  onPressed: _isTransitioning
-                                      ? null
-                                      : () => _navigateToResult(context),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFF0CABA8),
-                                    foregroundColor: Colors.white,
-                                    shape: const StadiumBorder(),
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 30,
-                                      vertical: 18,
-                                    ),
-                                    elevation: 0,
-                                  ),
-                                  child: Text(l10n.endingNext),
-                                ),
-                              ),
-                            ),
-                          ],
+                            child: Text(l10n.endingNext),
+                          ),
                         ),
                       ),
                     ),
@@ -348,58 +290,8 @@ class _RoleplayEndingScreenState extends State<RoleplayEndingScreen>
                 ),
               ),
             ),
-            if (_isTransitioning && _buttonCenter != null && _buttonSize != null)
-              _buildShadowExpandOverlay(context),
           ],
         ),
-      ),
-    );
-  }
-
-  /// 그림자 객체: 버튼 위치·크기에서 확대, 중심은 디스플레이 중심으로, 좌우 반원(pill) 유지.
-  /// 최종 크기: 가로 w*1.5, 세로 h*1.1. 가속 곡선(easeInQuint) 적용.
-  Widget _buildShadowExpandOverlay(BuildContext context) {
-    final size = MediaQuery.sizeOf(context);
-    final w = size.width;
-    final h = size.height;
-    final center = _buttonCenter!;
-    final btnSize = _buttonSize!;
-    final bw = btnSize.width;
-    final bh = btnSize.height;
-    final targetW = w * 1.5;
-    final targetH = h * 1.1;
-
-    return Positioned.fill(
-      child: AnimatedBuilder(
-        animation: _balloonController,
-        builder: (context, child) {
-          // 가속 곡선: 더 급하게 — 천천히 시작 → 최종 구간에서 더 빠르게
-          final t = Curves.easeInQuint.transform(_balloonController.value);
-          // 보간: 버튼 위치·크기 → 디스플레이 중심, (targetW, targetH). pill 유지 = radius = min(w,h)/2
-          final left = (center.dx - bw / 2) * (1 - t) + (w / 2 - targetW / 2) * t;
-          final top = (center.dy - bh / 2) * (1 - t) + (h / 2 - targetH / 2) * t;
-          final width = bw + (targetW - bw) * t;
-          final height = bh + (targetH - bh) * t;
-          final radius = (width < height ? width : height) / 2;
-
-          return Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Positioned(
-                left: left,
-                top: top,
-                width: width,
-                height: height,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF0CABA8),
-                    borderRadius: BorderRadius.circular(radius),
-                  ),
-                ),
-              ),
-            ],
-          );
-        },
       ),
     );
   }

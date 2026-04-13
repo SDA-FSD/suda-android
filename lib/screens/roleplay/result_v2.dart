@@ -1,15 +1,23 @@
+import 'dart:async';
 import 'dart:math' as math;
+import 'dart:typed_data';
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:vibration/vibration.dart';
 
+import '../../api/suda_api_client.dart';
+import '../../config/app_config.dart';
 import '../../effects/like_progress_effect.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/roleplay_models.dart';
 import '../../routes/roleplay_router.dart';
+import '../../services/main_user_sync.dart';
 import '../../services/roleplay_state_service.dart';
+import '../../services/token_storage.dart';
+import '../../utils/default_toast.dart';
 
 const Color _exprTextPrimary = Color(0xFF121212);
 const Color _exprTextSecondary = Color(0xFF676767);
@@ -64,8 +72,26 @@ class _RoleplayResultScreenV2State extends State<RoleplayResultScreenV2>
   bool _showFooterActions = false;
   int _revealedGoldStars = 0;
   bool _reportSubmitted = false;
+  bool _isLeavingToOverview = false;
+
+  final AudioPlayer _expressionAudioPlayer = AudioPlayer();
+  StreamSubscription<PlayerState>? _expressionAudioSub;
+  int _expressionMegaphoneSeq = 0;
+  int? _expressionMegaphoneActiveIndex;
+  final Set<int> _bookmarkedExpressionIndexes = <int>{};
 
   RoleplayResultDto? get _dto => RoleplayStateService.instance.cachedResult;
+
+  static String _httpErrorBrief(Object error) {
+    final text = error.toString();
+    final match = RegExp(r'HTTP (\d{3})').firstMatch(text);
+    if (match != null) {
+      final code = int.parse(match.group(1)!);
+      final brief = code >= 500 ? 'Server error' : 'Request failed';
+      return 'HTTP $code · $brief';
+    }
+    return 'Request failed';
+  }
 
   @override
   void initState() {
@@ -223,6 +249,9 @@ class _RoleplayResultScreenV2State extends State<RoleplayResultScreenV2>
 
   @override
   void dispose() {
+    _expressionAudioSub?.cancel();
+    _expressionAudioSub = null;
+    unawaited(_expressionAudioPlayer.dispose());
     _routeAnimation?.removeStatusListener(_onRouteAnimationStatusChanged);
     _panelMoveController.dispose();
     _feedbackEntranceController.dispose();
@@ -231,8 +260,164 @@ class _RoleplayResultScreenV2State extends State<RoleplayResultScreenV2>
     super.dispose();
   }
 
-  void _navigateToOverview(BuildContext context) {
-    RoleplayRouter.popToOverview(context);
+  Future<AudioSource?> _prepareExpressionAudio({
+    required String? cdnYn,
+    required String? cdnPath,
+    required Uint8List? soundBytes,
+  }) async {
+    await _expressionAudioPlayer.stop();
+    if (cdnYn == 'Y' && cdnPath != null && cdnPath.isNotEmpty) {
+      final url = '${AppConfig.cdnBaseUrl}$cdnPath';
+      final source = AudioSource.uri(Uri.parse(url));
+      await _expressionAudioPlayer.setAudioSource(source);
+      return source;
+    }
+    if (soundBytes != null && soundBytes.isNotEmpty) {
+      final source = AudioSource.uri(
+        Uri.dataFromBytes(soundBytes, mimeType: 'audio/mpeg'),
+      );
+      await _expressionAudioPlayer.setAudioSource(source);
+      return source;
+    }
+    return null;
+  }
+
+  Future<void> _onExpressionMegaphoneTap(int expressionIndex) async {
+    _expressionMegaphoneSeq++;
+    final seq = _expressionMegaphoneSeq;
+    _expressionAudioSub?.cancel();
+    _expressionAudioSub = null;
+    await _expressionAudioPlayer.stop();
+
+    if (!mounted) {
+      return;
+    }
+    setState(() => _expressionMegaphoneActiveIndex = expressionIndex);
+
+    final resultId = _dto?.id;
+    final token = await TokenStorage.loadAccessToken();
+    if (!mounted || seq != _expressionMegaphoneSeq) {
+      return;
+    }
+
+    if (token == null || resultId == null) {
+      setState(() => _expressionMegaphoneActiveIndex = null);
+      return;
+    }
+
+    try {
+      final tts = await SudaApiClient.getRoleplayResultExpressionSound(
+        accessToken: token,
+        resultId: resultId,
+        expressionIndex: expressionIndex,
+      );
+      if (!mounted || seq != _expressionMegaphoneSeq) {
+        return;
+      }
+
+      final source = await _prepareExpressionAudio(
+        cdnYn: tts.cdnYn,
+        cdnPath: tts.cdnPath,
+        soundBytes: tts.sound,
+      );
+      if (!mounted || seq != _expressionMegaphoneSeq) {
+        return;
+      }
+
+      if (source == null) {
+        setState(() => _expressionMegaphoneActiveIndex = null);
+        return;
+      }
+
+      _expressionAudioSub =
+          _expressionAudioPlayer.playerStateStream.listen((state) {
+        if (state.processingState == ProcessingState.completed) {
+          _expressionAudioSub?.cancel();
+          _expressionAudioSub = null;
+          if (!mounted || seq != _expressionMegaphoneSeq) {
+            return;
+          }
+          setState(() => _expressionMegaphoneActiveIndex = null);
+        }
+      });
+      await _expressionAudioPlayer.play();
+    } catch (_) {
+      _expressionAudioSub?.cancel();
+      _expressionAudioSub = null;
+      if (!mounted || seq != _expressionMegaphoneSeq) {
+        return;
+      }
+      setState(() => _expressionMegaphoneActiveIndex = null);
+    }
+  }
+
+  Future<void> _onExpressionBookmarkTap(int expressionIndex) async {
+    if (_bookmarkedExpressionIndexes.contains(expressionIndex)) {
+      return;
+    }
+    final resultId = _dto?.id;
+    final token = await TokenStorage.loadAccessToken();
+    if (!mounted) {
+      return;
+    }
+    if (token == null || resultId == null) {
+      DefaultToast.show(context, 'HTTP 401 · Request failed', isError: true);
+      return;
+    }
+
+    try {
+      await SudaApiClient.saveUserExpression(
+        accessToken: token,
+        roleplayResultId: resultId,
+        expressionIndex: expressionIndex,
+      );
+      if (!mounted) {
+        return;
+      }
+      setState(() => _bookmarkedExpressionIndexes.add(expressionIndex));
+      final l10n = AppLocalizations.of(context)!;
+      DefaultToast.show(context, l10n.expressionSavedToProfile);
+    } catch (e) {
+      if (!mounted) {
+        return;
+      }
+      DefaultToast.show(context, _httpErrorBrief(e), isError: true);
+    }
+  }
+
+  Future<void> _navigateToOverview(BuildContext context) async {
+    if (_isLeavingToOverview) return;
+    setState(() => _isLeavingToOverview = true);
+    final token = await TokenStorage.loadAccessToken();
+    if (!mounted) return;
+    if (token != null && token.isNotEmpty) {
+      try {
+        final user = await SudaApiClient.getCurrentUser(accessToken: token);
+        if (!mounted) return;
+        MainUserSync.instance.notifyUserUpdated(user);
+        RoleplayStateService.instance.setUser(user);
+      } catch (_) {
+        // best-effort: ignore
+      }
+
+      final roleplayId = RoleplayStateService.instance.roleplayId;
+      if (roleplayId != null) {
+        try {
+          final overview = await SudaApiClient.getRoleplayOverview(
+            accessToken: token,
+            roleplayId: roleplayId,
+          );
+          RoleplayStateService.instance.setOverview(
+            roleplayId: roleplayId,
+            overview: overview,
+          );
+        } catch (_) {
+          // best-effort: ignore
+        }
+      }
+    }
+    if (!mounted) return;
+    RoleplayRouter.popToOverview(this.context);
   }
 
   Widget _buildStarsRow() {
@@ -460,7 +645,11 @@ class _RoleplayResultScreenV2State extends State<RoleplayResultScreenV2>
 
   Widget _buildFeedbackLayer(BuildContext context) {
     final theme = Theme.of(context).textTheme;
-    final feedback = _dto?.overallFeedback ?? '';
+    final l10n = AppLocalizations.of(context)!;
+    final rawFeedback = _dto?.overallFeedback;
+    final feedback = (rawFeedback == null || rawFeedback.trim().isEmpty)
+        ? l10n.roleplayResultFeedbackInsufficientWords
+        : rawFeedback;
 
     final entrance = CurvedAnimation(
       parent: _feedbackEntranceController,
@@ -527,7 +716,13 @@ class _RoleplayResultScreenV2State extends State<RoleplayResultScreenV2>
             for (var i = 0; i < items.length; i++) ...[
               SizedBox(
                 width: itemW,
-                child: _ExpressionUpgradeCard(item: items[i]),
+                child: _ExpressionUpgradeCard(
+                  item: items[i],
+                  megaphoneActive: _expressionMegaphoneActiveIndex == i,
+                  bookmarked: _bookmarkedExpressionIndexes.contains(i),
+                  onMegaphoneTap: () => _onExpressionMegaphoneTap(i),
+                  onBookmarkTap: () => _onExpressionBookmarkTap(i),
+                ),
               ),
               if (i < items.length - 1) const SizedBox(width: between),
             ],
@@ -598,7 +793,9 @@ class _RoleplayResultScreenV2State extends State<RoleplayResultScreenV2>
                   const SizedBox(height: 28),
                   Center(
                     child: ElevatedButton(
-                      onPressed: () => _navigateToOverview(context),
+                      onPressed: _isLeavingToOverview
+                          ? null
+                          : () => _navigateToOverview(context),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: _teal,
                         foregroundColor: Colors.white,
@@ -709,16 +906,28 @@ class _RoleplayResultScreenV2State extends State<RoleplayResultScreenV2>
 }
 
 class _ExpressionUpgradeCard extends StatelessWidget {
-  const _ExpressionUpgradeCard({required this.item});
+  const _ExpressionUpgradeCard({
+    required this.item,
+    required this.megaphoneActive,
+    required this.bookmarked,
+    required this.onMegaphoneTap,
+    required this.onBookmarkTap,
+  });
 
   final ExpressionUpgradeDto item;
+  final bool megaphoneActive;
+  final bool bookmarked;
+  final VoidCallback onMegaphoneTap;
+  final VoidCallback onBookmarkTap;
 
   static const String _checkMintSvg = 'assets/images/icons/check_mint.svg';
   static const String _megaphonePng = 'assets/images/icons/megaphone.png';
   static const String _bookmarkOffPng = 'assets/images/icons/bookmark_off.png';
+  static const String _bookmarkOnPng = 'assets/images/icons/bookmark_on.png';
   /// check(22) + gap(8) — meaning·rephrased 좌측 정렬 공통
   static const double _bodyLeftIndent = 30;
-  static const Color _megaphoneTint = Color(0xFF0CABA8);
+  static const Color _megaphoneTintActive = Color(0xFF0CABA8);
+  static const Color _megaphoneTintLoading = Color(0xFF121212);
 
   @override
   Widget build(BuildContext context) {
@@ -784,22 +993,24 @@ class _ExpressionUpgradeCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     GestureDetector(
-                      onTap: () {},
+                      onTap: onMegaphoneTap,
                       behavior: HitTestBehavior.opaque,
                       child: Image.asset(
                         _megaphonePng,
                         width: 24,
                         height: 24,
                         fit: BoxFit.contain,
-                        color: _megaphoneTint,
+                        color: megaphoneActive
+                            ? _megaphoneTintLoading
+                            : _megaphoneTintActive,
                         colorBlendMode: BlendMode.srcIn,
                       ),
                     ),
                     GestureDetector(
-                      onTap: () {},
+                      onTap: onBookmarkTap,
                       behavior: HitTestBehavior.opaque,
                       child: Image.asset(
-                        _bookmarkOffPng,
+                        bookmarked ? _bookmarkOnPng : _bookmarkOffPng,
                         width: 24,
                         height: 24,
                         fit: BoxFit.contain,

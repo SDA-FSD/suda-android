@@ -687,6 +687,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You can sign up again 2 days after deleting your account. Please try again later.'**
   String get reregistrationRestrictedMessage;
+
+  /// No description provided for @expressionSavedToProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved to your Profile'**
+  String get expressionSavedToProfile;
+
+  /// No description provided for @expressionUnsavedToProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsaved'**
+  String get expressionUnsavedToProfile;
+
+  /// No description provided for @roleplayResultFeedbackInsufficientWords.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn’t provide feedback this time. Try expanding your response to 30 words or more!'**
+  String get roleplayResultFeedbackInsufficientWords;
 }
 
 class _AppLocalizationsDelegate

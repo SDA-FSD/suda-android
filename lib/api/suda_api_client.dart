@@ -80,7 +80,7 @@ class SudaApiClient {
     );
   }
 
-  static Future<RoleplayAiMessageDto> getRoleplayAiMessage({
+  static Future<TtsResultDto> getRoleplayAiMessage({
     required String accessToken,
     required String rpSessionId,
   }) {
@@ -110,7 +110,7 @@ class SudaApiClient {
     );
   }
 
-  static Future<RoleplayAiMessageDto> getRoleplayHintAudio({
+  static Future<TtsResultDto> getRoleplayHintAudio({
     required String accessToken,
     required String rpSessionId,
   }) {
@@ -120,7 +120,7 @@ class SudaApiClient {
     );
   }
 
-  static Future<RoleplayAiMessageDto> getRoleplayHintWordAudio({
+  static Future<TtsResultDto> getRoleplayHintWordAudio({
     required String accessToken,
     required String rpSessionId,
     required int wordIndex,
@@ -172,6 +172,18 @@ class SudaApiClient {
     return RoleplayApi.getRoleplayResult(
       accessToken: accessToken,
       resultId: resultId,
+    );
+  }
+
+  static Future<TtsResultDto> getRoleplayResultExpressionSound({
+    required String accessToken,
+    required int resultId,
+    required int expressionIndex,
+  }) {
+    return RoleplayApi.getResultExpressionSound(
+      accessToken: accessToken,
+      resultId: resultId,
+      expressionIndex: expressionIndex,
     );
   }
 
@@ -280,6 +292,30 @@ class SudaApiClient {
     required String name,
   }) {
     return UserApi.updateName(accessToken: accessToken, name: name);
+  }
+
+  static Future<void> saveUserExpression({
+    required String accessToken,
+    required int roleplayResultId,
+    required int expressionIndex,
+  }) {
+    return UserApi.saveUserExpression(
+      accessToken: accessToken,
+      roleplayResultId: roleplayResultId,
+      expressionIndex: expressionIndex,
+    );
+  }
+
+  static Future<void> deleteUserExpression({
+    required String accessToken,
+    required int rpResultId,
+    required int expressionIndex,
+  }) {
+    return UserApi.deleteUserExpression(
+      accessToken: accessToken,
+      rpResultId: rpResultId,
+      expressionIndex: expressionIndex,
+    );
   }
 
   static Future<void> deleteUser({

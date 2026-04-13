@@ -788,8 +788,7 @@
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
 - **RoleplayResultScreenV2** (Full Screen): 하단 "Next" 버튼 클릭 시
-  - Next 버튼 텍스트 fade-out과 동시에 버튼에서 #0CABA8 풍선이 부푸는 모양으로 전체 화면 덮는 애니메이션(2s) 후 `RoleplayRouter.replaceWithResultV2()`로 전환 (ending screen 삭제, 돌아올 일 없음)
-  - `PUT /v1/roleplays/results/{rpResultId}?star={star}` 호출(응답 무시)은 전환 전에 수행
+  - 별점 `PUT /v1/roleplays/results/{rpResultId}?star={star}` 호출(응답 무시·fire-and-forget) 직후 `RoleplayRouter.replaceWithResultV2()`로 즉시 전환 (ending screen 삭제, 돌아올 일 없음)
 
 ### 스크린 내부 구현 특이사항
 - 닫기(X) 버튼 없음. 시스템 뒤로가기 시 "Exit from ending screen" 얼럿, 확인 시 ending screen 삭제 후 Overview 노출.
@@ -895,7 +894,7 @@
 - 현재 Roleplay 종료 플로우에서 기본 Result 화면으로 사용
 
 ### 이전 스크린 정보 (진입점)
-- **RoleplayEndingScreen**: 하단 "Next" 버튼 클릭 후 풍선 확장 애니메이션(2s) 완료 시 `RoleplayRouter.replaceWithResultV2()`로 전환 (ending screen 삭제)
+- **RoleplayEndingScreen**: 하단 "Next" 버튼 클릭 시 `RoleplayRouter.replaceWithResultV2()`로 즉시 전환 (ending screen 삭제)
 - **RoleplayPlayingScreen**: resultId 기반 종료 시 (미션 전부 완수 아님) 분기에서 `roleplayEndedTimesup` 또는 `roleplayEndedComplete` 3초 노출 후 `RoleplayRouter.replaceWithResultV2()`로 전환 (playing screen 삭제)
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
@@ -915,7 +914,7 @@
   - Like: `assets/images/like_at_result.png` 30×30 + 기존 Result와 동일한 민트 그라데이션 숫자
 - **후속 타이밍**: Result V2 화면이 fully shown 된 뒤 1초 후, 박스레이어가 상단 영역으로 이동한다.
 - **동시 effect**: 박스레이어 상단 이동 시작과 동시에 `LikeProgressEffect.play()`를 호출한다(레거시 Result의 레벨·진행률·라이크 오버레이와 동일 계열). 파라미터는 `RoleplayResultDto.beforeLikePoint`, `afterLikePoint`, `beforeLevel`, `afterLevel`, `beforeProgressPercentage`, `afterProgressPercentage`를 사용한다.
-- **effect 이후 본문 레이어**: effect 완료 후 임시 `done` 문구는 사용하지 않는다. 박스레이어와 본문 스크롤 사이 세로 **gap 20**(스크롤 `padding` 상단 32). effect `onCompleted` **직후** Feedback 슬라이드 시작, **500ms 후** Expression Upgrade 슬라이드 시작, **1s 후** Got it!·Report 영역 동시 삽입 + **`FadeTransition`**(240ms·`Curves.easeOut`) 빠른 fade-in. (1) **Feedback**: **하단**에서 등장(자식 높이 대비 `SlideTransition` 시작 `Offset(0, 1.2)`로 디스플레이 아래쪽 밖에서 올라옴) + 동일 `CurvedAnimation`으로 **`FadeTransition` fade-in**, 제목 `Feedback`(headlineSmall·흰색·좌 24), 본문은 좌우 24 패딩 안쪽 민트(`#80D7CF`) 둥근 박스에 `overallFeedback`(bodyMedium·검정). (2) **Expression Upgrade**: `expressionUpgrades`가 비어 있으면 섹션 전체 미노출. 있으면 Feedback과 동일하게 **하단·fade-in·슬라이드**, 제목 `Expression Upgrade`(동일 스타일·좌 24). 가로 스크롤: 첫 카드 좌측 24, 카드 너비 화면의 70%, 카드 간격 16, `IntrinsicHeight`+`Row`로 모든 카드 높이를 최장 아이템에 맞춤. 카드 배경 Feedback 박스와 동일 `#80D7CF`. 카드 내용: `check_mint.svg`+expression(bodyLarge w700 `#121212`), meaningUserLanguage(bodySmall `#676767`, **좌 30**), gap 15, rephrasedSentence(bodyMedium `#121212`, **동일 좌 30**), gap 15, 하단 행 좌 `megaphone.png`·우 `bookmark_off.png` 각 24×24, 메가폰은 **`#0CABA8`** `color`+`BlendMode.srcIn` 틴트(탭 동작 추후). (3) **Got it!**: 레거시 `result.dart`와 동일 Stadium `ElevatedButton`·Overview 이동. (4) **Report**: `l10n.endingReport`·전송 성공 시 숨김 동작은 동일, 텍스트 색만 `#054544`.
+- **effect 이후 본문 레이어**: effect 완료 후 임시 `done` 문구는 사용하지 않는다. 박스레이어와 본문 스크롤 사이 세로 **gap 20**(스크롤 `padding` 상단 32). effect `onCompleted` **직후** Feedback 슬라이드 시작, **500ms 후** Expression Upgrade 슬라이드 시작, **1s 후** Got it!·Report 영역 동시 삽입 + **`FadeTransition`**(240ms·`Curves.easeOut`) 빠른 fade-in. (1) **Feedback**: **하단**에서 등장(자식 높이 대비 `SlideTransition` 시작 `Offset(0, 1.2)`로 디스플레이 아래쪽 밖에서 올라옴) + 동일 `CurvedAnimation`으로 **`FadeTransition` fade-in**, 제목 `Feedback`(headlineSmall·흰색·좌 24), 본문은 좌우 24 패딩 안쪽 민트(`#80D7CF`) 둥근 박스에 `overallFeedback`(bodyMedium·검정). `overallFeedback`가 null/빈 문자열이면 l10n `roleplayResultFeedbackInsufficientWords`를 대신 노출한다. (2) **Expression Upgrade**: `expressionUpgrades`가 비어 있으면 섹션 전체 미노출. 있으면 Feedback과 동일하게 **하단·fade-in·슬라이드**, 제목 `Expression Upgrade`(동일 스타일·좌 24). 가로 스크롤: 첫 카드 좌측 24, 카드 너비 화면의 70%, 카드 간격 16, `IntrinsicHeight`+`Row`로 모든 카드 높이를 최장 아이템에 맞춤. 카드 배경 Feedback 박스와 동일 `#80D7CF`. 카드 내용: `check_mint.svg`+expression(bodyLarge w700 `#121212`), meaningUserLanguage(bodySmall `#676767`, **좌 30**), gap 15, rephrasedSentence(bodyMedium `#121212`, **동일 좌 30**), gap 15, 하단 행 좌 `megaphone.png`·우 `bookmark_off.png`(저장 성공 시 `bookmark_on.png`) 각 24×24. 메가폰: idle **`#0CABA8`** 틴트, 재생·로딩 중 **`#121212`**. 탭 시 `GET /v1/roleplays/results/{resultId}/expressions/{index}/sound`(index=카드 순번 0…) → `TtsResultDto`, Playing과 동일하게 `cdnYn`/`cdnPath`/`sound` 처리(`AppConfig.cdnBaseUrl` + `just_audio`). 다른 카드 탭 시 이전 재생 중단 후 새 요청. 종료·오류 시 틴트만 복귀(토스트 없음). 북마크: 탭 시 `POST /v1/users/expressions` body `{"roleplayResultId":…,"expressionIndex":…}`, 200이면 아이콘 on + l10n `expressionSavedToProfile`; 이미 on이면 무시; 실패 시 `DefaultToast`로 HTTP 코드·간단 문구(`HTTP xxx · Request failed` / `Server error`). Result V2 진입 직후 북마크는 모두 off에서 시작(다른 스크린에서 해제·동기화는 별도). (3) **Got it!**: 탭 시 Overview로 pop하기 전에 best-effort로 `GET /v1/users`로 `UserDto` 갱신 후 Main에 반영(`MainUserSync.notifyUserUpdated`)하고, `GET /v1/roleplays/{roleplayId}`로 Overview를 재조회해 `RoleplayOverviewDto.starResultMap` 등을 최신화한다. (4) **Report**: `l10n.endingReport`·전송 성공 시 숨김 동작은 동일, 텍스트 색만 `#054544`.
 - 기존 `lib/screens/roleplay/result.dart`는 수정하지 않고, V2 전용 파일에서 독립적으로 개선 작업을 이어가는 것을 원칙으로 함
 
 ---
@@ -978,23 +977,32 @@
 
 ### 스크린 관련 정의 파일
 - **파일 경로**: `lib/screens/roleplay/history_v2.dart`
-- **클래스명**: `HistoryScreenV2` (StatelessWidget)
+- **클래스명**: `HistoryScreenV2` (StatefulWidget)
 - **스크린 타입**: **Sub Screen**
 - **appPath**: 해당 없음 (Profile 히스토리 분기 전용)
 
 ### 스크린 용도
 - Result V2에 대응하는 신규 히스토리 화면
-- 현재 단계에서는 Profile 히스토리의 `version == 2` 분기용 진입 스켈레톤만 준비되어 있고, 실제 상세 UI는 후속 지침에서 구현 예정
+- Profile 히스토리의 `version == 2` 분기에서 진입하며, resultId로 `GET /v1/roleplays/results/{resultId}`를 재조회해 최종 상태를 노출한다(애니메이션 없음).
 
 ### 이전 스크린 정보 (진입점)
 - **ProfileScreen**: 롤플레이 히스토리 영역의 썸네일 탭 시 `version == 2`일 때 진입 (resultId 전달)
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
 - **ProfileScreen**: 좌상단 뒤로가기 또는 시스템 뒤로가기 시 `Navigator.pop()`으로 복귀
+- **ReviewChatScreen** (Sub Screen): 하단 "View Chat" 버튼 탭 시 (RoleplayResultDto 전달)
+- **ReviewEndingScreen** (Sub Screen): `endingId`가 있을 때만 하단 "View Ending" 버튼 노출, 탭 시 (RoleplayEndingDto 조회 후 전달)
 
 ### 스크린 내부 구현 특이사항
-- 이번 단계에서는 파일/라우팅 분기만 준비하고, 실제 Result V2 대응 History UI는 구현하지 않음
-- `resultId`는 후속 구현을 위해 생성자 파라미터로만 보관한다
+- **상태**: resultId로 `SudaApiClient.getRoleplayResult()` 조회 후 `RoleplayResultDto`를 스크린 상태로 보관. Roleplay 진행용(`RoleplayStateService`)과 혼용하지 않음.
+- **레이아웃**: Result V2의 effect 완료 상태를 기준으로, 상단 박스(별·mainTitle·subTitle·Mission/Words/Like 3카드 포함) + 본문(Feedback/Expression Upgrade/하단 버튼)을 애니메이션 없이 노출한다. (현행 구현 상단 박스 높이 340)
+- **배경**: Result V2와 동일하게 상단 `#054544` → 하단 `#0CABA8` 세로 그라데이션을 전체 화면에 유지한다. 상단 박스레이어는 별도 단색 배경을 두지 않는다.
+- 본문 영역도 별도 단색 배경으로 덮지 않고, 동일 그라데이션 위에 카드/텍스트를 그대로 배치한다.
+- **Expression 북마크**:
+  - 초기 상태: `RoleplayResultDto.savedExpressionIndexes`에 포함된 index는 `bookmark_on.png`, 그 외는 `bookmark_off.png`.
+  - 추가(OFF→ON): `POST /v1/users/expressions` body `{ roleplayResultId: <resultId>, expressionIndex: <index> }` (성공 시 l10n `expressionSavedToProfile`).
+  - 제거(ON→OFF): `DELETE /v1/users/expressions?rpResultId=<resultId>&expressionIndex=<index>` (성공 시 l10n `expressionUnsavedToProfile`).
+  - 실패 시: 에러 토스트로 내용 출력.
 
 ---
 

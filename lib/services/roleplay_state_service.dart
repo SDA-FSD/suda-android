@@ -1,5 +1,7 @@
+import 'package:flutter/foundation.dart';
+
 import '../models/roleplay_models.dart';
-import 'suda_api_client.dart';
+import '../models/user_models.dart';
 
 /// In-memory storage for the current roleplay overview context.
 /// Only one roleplay overview can exist at a time.
@@ -16,6 +18,7 @@ class RoleplayStateService {
   String? _isUserTurnYn;
   UserDto? _user;
   RoleplayResultDto? _cachedResult;
+  final ValueNotifier<int> _overviewUpdateTick = ValueNotifier<int>(0);
 
   RoleplayOverviewDto? get overview => _overview;
   int? get roleplayId => _roleplayId;
@@ -25,6 +28,7 @@ class RoleplayStateService {
   String? get isUserTurnYn => _isUserTurnYn;
   UserDto? get user => _user;
   RoleplayResultDto? get cachedResult => _cachedResult;
+  ValueListenable<int> get overviewUpdateTick => _overviewUpdateTick;
 
   void setOverview({
     required int roleplayId,
@@ -32,6 +36,7 @@ class RoleplayStateService {
   }) {
     _roleplayId = roleplayId;
     _overview = overview;
+    _overviewUpdateTick.value++;
   }
 
   void setSelectedRole(int roleId) {
@@ -67,5 +72,6 @@ class RoleplayStateService {
     _isUserTurnYn = null;
     _user = null;
     _cachedResult = null;
+    _overviewUpdateTick.value++;
   }
 }

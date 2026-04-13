@@ -4,7 +4,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:marquee/marquee.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../config/app_config.dart';
-import '../../models/user_models.dart';
 import '../../services/roleplay_state_service.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
@@ -41,6 +40,7 @@ class _RoleplayOverviewScreenState extends State<RoleplayOverviewScreen> {
   final ScrollController _scrollController = ScrollController();
   final GlobalKey _titleKey = GlobalKey();
   bool _isBackButtonVisible = true;
+  int? _lastOverviewUpdateTick;
 
   @override
   void initState() {
@@ -48,6 +48,8 @@ class _RoleplayOverviewScreenState extends State<RoleplayOverviewScreen> {
     _currentRoleplayId = widget.roleplayId;
     _loadOverview(_currentRoleplayId);
     _scrollController.addListener(_handleScroll);
+    RoleplayStateService.instance.overviewUpdateTick.addListener(_onOverviewUpdated);
+    _lastOverviewUpdateTick = RoleplayStateService.instance.overviewUpdateTick.value;
   }
 
   @override
@@ -57,7 +59,23 @@ class _RoleplayOverviewScreenState extends State<RoleplayOverviewScreen> {
     _errorMessage = null;
     _scrollController.removeListener(_handleScroll);
     _scrollController.dispose();
+    RoleplayStateService.instance.overviewUpdateTick.removeListener(_onOverviewUpdated);
     super.dispose();
+  }
+
+  void _onOverviewUpdated() {
+    final tick = RoleplayStateService.instance.overviewUpdateTick.value;
+    if (_lastOverviewUpdateTick == tick) return;
+    _lastOverviewUpdateTick = tick;
+    if (!mounted) return;
+    final overview = RoleplayStateService.instance.overview;
+    final roleplayId = RoleplayStateService.instance.roleplayId;
+    if (overview == null || roleplayId != _currentRoleplayId) return;
+    setState(() {
+      _overview = overview;
+      _isLoading = false;
+      _errorMessage = null;
+    });
   }
 
   Future<void> _loadOverview(int roleplayId) async {

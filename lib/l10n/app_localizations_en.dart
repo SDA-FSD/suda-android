@@ -326,4 +326,14 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get reregistrationRestrictedMessage =>
       'You can sign up again 2 days after deleting your account. Please try again later.';
+
+  @override
+  String get expressionSavedToProfile => 'Saved to your Profile';
+
+  @override
+  String get expressionUnsavedToProfile => 'Unsaved';
+
+  @override
+  String get roleplayResultFeedbackInsufficientWords =>
+      'We couldn’t provide feedback this time. Try expanding your response to 30 words or more!';
 }

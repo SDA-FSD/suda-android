@@ -312,4 +312,14 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get reregistrationRestrictedMessage =>
       '회원 탈퇴 후 2일 동안 재가입이 제한됩니다. 잠시 후 다시 시도해주세요.';
+
+  @override
+  String get expressionSavedToProfile => '프로필에 저장되었습니다';
+
+  @override
+  String get expressionUnsavedToProfile => '저장 해제되었습니다';
+
+  @override
+  String get roleplayResultFeedbackInsufficientWords =>
+      '단어 수가 부족해 피드백을 드리기 어려워요. 30단어 이상으로 더 길게 말해보세요!';
 }

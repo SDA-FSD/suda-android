@@ -127,22 +127,22 @@ class RoleplayUserMessageResponseDto {
   }
 }
 
-class RoleplayAiMessageDto {
+class TtsResultDto {
   final String? text;
   final String? cdnYn;
   final String? cdnPath;
   /// Byte[] 음원. CDN 미사용(cdnYn == 'N')이거나 미제공 시 null.
   final Uint8List? sound;
 
-  const RoleplayAiMessageDto({
+  const TtsResultDto({
     this.text,
     this.cdnYn,
     this.cdnPath,
     this.sound,
   });
 
-  factory RoleplayAiMessageDto.fromJson(Map<String, dynamic> json) {
-    return RoleplayAiMessageDto(
+  factory TtsResultDto.fromJson(Map<String, dynamic> json) {
+    return TtsResultDto(
       text: json['text'] as String?,
       cdnYn: json['cdnYn'] as String?,
       cdnPath: json['cdnPath'] as String?,
@@ -420,6 +420,7 @@ class RoleplayResultDto {
   final String? improvementFeedback;
   final String? overallFeedback;
   final List<ExpressionUpgradeDto>? expressionUpgrades;
+  final List<int>? savedExpressionIndexes;
   final int? beforeLikePoint;
   final int? afterLikePoint;
   final int? likePoint;
@@ -451,6 +452,7 @@ class RoleplayResultDto {
     this.improvementFeedback,
     this.overallFeedback,
     this.expressionUpgrades,
+    this.savedExpressionIndexes,
     this.beforeLikePoint,
     this.afterLikePoint,
     this.likePoint,
@@ -499,6 +501,12 @@ class RoleplayResultDto {
                   item as Map<String, dynamic>,
                 ),
               )
+              .toList(),
+      savedExpressionIndexes: json['savedExpressionIndexes'] == null
+          ? null
+          : (json['savedExpressionIndexes'] as List<dynamic>)
+              .map((e) => _optionalInt(e))
+              .whereType<int>()
               .toList(),
       beforeLikePoint: _optionalInt(json['beforeLikePoint']),
       afterLikePoint: _optionalInt(json['afterLikePoint']),
