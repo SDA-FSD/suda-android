@@ -1,11 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:marquee/marquee.dart';
-import '../services/auth_service.dart';
 import '../services/rest_status_service.dart';
 import '../services/token_storage.dart';
 import '../services/suda_api_client.dart';
@@ -13,14 +11,10 @@ import '../config/app_config.dart';
 import '../routes/roleplay_router.dart';
 import '../utils/language_util.dart';
 import '../utils/suda_json_util.dart';
-import '../l10n/app_localizations.dart';
-import '../utils/default_toast.dart';
-import '../widgets/app_content_dialog.dart';
+import '../widgets/daily_ticket_popup.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/gnb_bar.dart';
 import '../services/effect_anchor_registry.dart';
-import 'roleplay/overview.dart';
-
 class HomeScreen extends StatefulWidget {
   final VoidCallback? onNavigateToAlarm;
   final VoidCallback? onNavigateToProfile;
@@ -127,54 +121,16 @@ class _HomeScreenState extends State<HomeScreen> {
     if (_dailyTicketPopupShown) return;
     _dailyTicketPopupShown = true;
     if (!mounted) return;
-    final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context).textTheme;
-    await AppContentDialog.show(
+    final token = _accessToken;
+    if (token == null) return;
+    await showDailyTicketDefaultPopup(
       context,
-      content: Column(
-        children: [
-          Expanded(
-            flex: 3,
-            child: Center(
-              child: Text(
-                l10n.dailyTicketTitle,
-                style: theme.headlineMedium?.copyWith(color: Colors.white),
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 7,
-            child: Center(
-              child: Text(
-                l10n.dailyTicketContent,
-                style: theme.bodyLarge?.copyWith(color: Colors.white),
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ),
-        ],
-      ),
-      showOkayButton: true,
-      okayButtonLabel: l10n.dailyTicketButton,
-      onOkayPressed: () => _claimDailyTicket(),
-    );
-  }
-
-  Future<void> _claimDailyTicket() async {
-    if (_accessToken == null || !mounted) return;
-    try {
-      final result =
-          await SudaApiClient.claimDailyTicket(accessToken: _accessToken!);
-      if (!mounted) return;
-      if (result.completeYn == 'Y') {
-        final l10n = AppLocalizations.of(context)!;
-        DefaultToast.show(context, l10n.surveySuccessToast);
+      token,
+      onClaimSuccess: () async {
+        if (!mounted) return;
         await _fetchTicket();
-      }
-    } catch (_) {
-      // 실패 시 별도 처리 없음
-    }
+      },
+    );
   }
 
   /// 홈 콘텐츠 조회 (배너 + 롤플레이 통합 API)

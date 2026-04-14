@@ -354,7 +354,7 @@
       - 바탕: `#635F5F`
       - 진행: `#80D7CF` (progressPercentage / 100)
     - Progress Box 아래 gap 50 이후, 남은 하단 영역은 추후 히스토리 영역 예정 (현재는 빈 상태)
-  - **Saved 표현 삭제 확인 팝업**: Saved 탭의 expression 카드에서 `bookmark_on` 탭 시 `AppContentDialog`(Okay 버튼 없음)로 삭제 confirm 팝업을 띄운다. 상단 버튼(삭제/Remove) 탭 시 팝업을 닫고 `DELETE /v1/users/expressions`를 호출해 목록에서 제거, 하단 버튼(Practice more/더 연습할래요) 탭 시 팝업만 닫는다.
+- **Saved 표현 삭제 확인 팝업**: Saved 탭의 expression 카드에서 `bookmark_on` 탭 시 `DefaultPopup`으로 삭제 confirm 팝업을 띄운다. 상단 버튼(삭제/Remove) 탭 시 팝업을 닫고 `DELETE /v1/users/expressions`를 호출해 목록에서 제거, 하단 버튼(Practice more/더 연습할래요) 탭 시 팝업만 닫는다.
 - **Props**:
   - `onNavigateToHome`: Home 화면으로 이동 시 호출되는 콜백 (VoidCallback?)
   - `onNavigateToAlarm`: Alarm 화면으로 이동 시 호출되는 콜백 (VoidCallback?)
@@ -513,7 +513,7 @@
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
 - **AnnouncementDetailScreen** (Sub Screen): 카드 탭 시 `GET /v1/notice/{id}` 선조회, 정상 응답이면 상세 진입
-- **팝업 (AppContentDialog)**: showYn='n' 또는 404 시 상세 진입 대신 팝업. 본문 l10n.postNoLongerAvailable, 버튼 l10n.backToHome
+- **팝업 (DefaultPopup)**: showYn='n' 또는 404 시 상세 진입 대신 팝업. 본문 l10n.postNoLongerAvailable, 버튼 l10n.backToHome
 
 ### 스크린 내부 구현 특이사항
 - 배경색: `#353535`

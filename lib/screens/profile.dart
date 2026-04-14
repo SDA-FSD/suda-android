@@ -14,7 +14,7 @@ import '../services/token_storage.dart';
 import '../services/suda_api_client.dart';
 import '../utils/default_toast.dart';
 import '../utils/sub_screen_route.dart';
-import '../widgets/app_content_dialog.dart';
+import '../widgets/default_popup.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/gnb_bar.dart';
 import 'roleplay/history.dart';
@@ -722,72 +722,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _confirmDeleteSavedExpression(UserExpressionDto item) async {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context).textTheme;
-    await AppContentDialog.show(
+    await DefaultPopup.show(
       context,
-      content: Column(
-        children: [
-          Expanded(
-            flex: 3,
-            child: Center(
-              child: Text(
-                l10n.profileSavedRemoveTitle,
-                style: theme.headlineMedium?.copyWith(color: Colors.white),
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 4,
-            child: Center(
-              child: Text(
-                l10n.profileSavedRemoveContent,
-                style: theme.bodyLarge?.copyWith(color: Colors.white),
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 3,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                SizedBox(
-                  height: 44,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      unawaited(_deleteSavedExpression(item));
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0CABA8),
-                      foregroundColor: Colors.white,
-                      shape: const StadiumBorder(),
-                      elevation: 0,
-                    ),
-                    child: Text(l10n.profileSavedRemoveOk),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                SizedBox(
-                  height: 44,
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0CABA8),
-                      foregroundColor: Colors.white,
-                      shape: const StadiumBorder(),
-                      elevation: 0,
-                    ),
-                    child: Text(l10n.profileSavedRemoveCancel),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+      titleText: l10n.profileSavedRemoveTitle,
+      bodyWidget: Text(
+        l10n.profileSavedRemoveContent,
+        style: theme.bodyLarge?.copyWith(color: Colors.white),
+        textAlign: TextAlign.center,
       ),
-      showOkayButton: false,
+      buttons: [
+        DefaultPopupButton(
+          type: DefaultPopupButtonType.primary,
+          label: l10n.profileSavedRemoveOk,
+          onPressed: () {
+            unawaited(_deleteSavedExpression(item));
+          },
+        ),
+        DefaultPopupButton(
+          type: DefaultPopupButtonType.text,
+          label: l10n.profileSavedRemoveCancel,
+          onPressed: () {},
+        ),
+      ],
     );
   }
 
@@ -1465,4 +1421,36 @@ class _HistoryThumbnail extends StatelessWidget {
     }
     return content;
   }
+}
+
+/// Lab: same copy as delete confirmation; OK does not call the API.
+Future<void> showProfileDeleteSavedExpressionDefaultPopupForLab(
+  BuildContext context,
+) async {
+  final l10n = AppLocalizations.of(context)!;
+  final theme = Theme.of(context).textTheme;
+  await DefaultPopup.show(
+    context,
+    titleText: l10n.profileSavedRemoveTitle,
+    bodyWidget: Text(
+      l10n.profileSavedRemoveContent,
+      style: theme.bodyLarge?.copyWith(color: Colors.white),
+      textAlign: TextAlign.center,
+    ),
+    buttons: [
+      DefaultPopupButton(
+        type: DefaultPopupButtonType.primary,
+        label: l10n.profileSavedRemoveOk,
+        onPressed: () {
+          if (!context.mounted) return;
+          DefaultToast.show(context, 'Lab: delete not executed');
+        },
+      ),
+      DefaultPopupButton(
+        type: DefaultPopupButtonType.text,
+        label: l10n.profileSavedRemoveCancel,
+        onPressed: () {},
+      ),
+    ],
+  );
 }

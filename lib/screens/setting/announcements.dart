@@ -6,7 +6,7 @@ import '../../models/user_models.dart';
 import '../../services/token_storage.dart';
 import '../../utils/suda_json_util.dart';
 import '../../utils/sub_screen_route.dart';
-import '../../widgets/app_content_dialog.dart';
+import '../../widgets/default_popup.dart';
 import '../../widgets/app_scaffold.dart';
 import 'announcement_detail.dart';
 
@@ -122,8 +122,6 @@ class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
   }
 
   Future<void> _onItemTap(BuildContext context, AppNoticeDto item) async {
-    final l10n = AppLocalizations.of(context)!;
-
     showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -150,20 +148,7 @@ class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
     Navigator.of(context).pop();
 
     if (notice == null) {
-      await AppContentDialog.show(
-        context,
-        content: Center(
-          child: Text(
-            l10n.postNoLongerAvailable,
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: Colors.white,
-                ),
-            textAlign: TextAlign.center,
-          ),
-        ),
-        showOkayButton: true,
-        okayButtonLabel: l10n.backToHome,
-      );
+      await showAnnouncementsPostNoLongerAvailableDefaultPopup(context);
     } else {
       Navigator.push(
         context,
@@ -310,3 +295,30 @@ class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
     );
   }
 }
+
+Future<void> showAnnouncementsPostNoLongerAvailableDefaultPopup(
+  BuildContext context,
+) async {
+  final l10n = AppLocalizations.of(context)!;
+  final theme = Theme.of(context).textTheme;
+  await DefaultPopup.show(
+    context,
+    bodyWidget: Text(
+      l10n.postNoLongerAvailable,
+      style: theme.bodyLarge?.copyWith(color: Colors.white),
+      textAlign: TextAlign.center,
+    ),
+    buttons: [
+      DefaultPopupButton(
+        type: DefaultPopupButtonType.primary,
+        label: l10n.backToHome,
+        onPressed: () {},
+      ),
+    ],
+  );
+}
+
+Future<void> showAnnouncementsPostNoLongerAvailableDefaultPopupForLab(
+  BuildContext context,
+) =>
+    showAnnouncementsPostNoLongerAvailableDefaultPopup(context);

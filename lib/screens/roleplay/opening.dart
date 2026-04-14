@@ -1,3 +1,5 @@
+import 'dart:async' show unawaited;
+
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:vibration/vibration.dart';
@@ -14,9 +16,13 @@ import '../../services/token_refresh_service.dart';
 import '../../routes/roleplay_router.dart';
 import '../../utils/suda_json_util.dart';
 import '../../utils/default_markdown.dart';
-import '../../widgets/app_content_dialog.dart';
+import '../../widgets/daily_ticket_popup.dart';
+import '../../widgets/default_popup.dart';
 import '../../utils/sub_screen_route.dart';
 import '../setting/push_agreement.dart';
+
+const String _kOpeningPlayStoreShareUrl =
+    'https://play.google.com/store/apps/details?id=kr.sudatalk.app';
 
 /// Roleplay Opening Screen (Full Screen)
 /// 
@@ -36,8 +42,6 @@ class RoleplayOpeningScreen extends StatefulWidget {
 class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen>
     with TickerProviderStateMixin {
   bool _isLoading = false;
-  static const String _playStoreUrl =
-      'https://play.google.com/store/apps/details?id=kr.sudatalk.app';
 
   final AudioPlayer _ticketPlayer = AudioPlayer();
   late final AnimationController _ticketFadeIn1Controller;
@@ -112,76 +116,6 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen>
     }
   }
 
-  Future<void> _shareAppLinkAndSubmitQuest({
-    required BuildContext context,
-    required String questId,
-  }) async {
-    try {
-      await SharePlus.instance.share(
-        ShareParams(text: _playStoreUrl),
-      );
-
-      final accessToken = await TokenStorage.loadAccessToken();
-      if (!context.mounted || accessToken == null) return;
-
-      final result = await SudaApiClient.postUserQuest(
-        accessToken: accessToken,
-        questId: questId,
-      );
-      if (!context.mounted) return;
-      if (result.completeYn == 'Y') {
-        final l10n = AppLocalizations.of(context)!;
-        DefaultToast.show(context, l10n.surveySuccessToast);
-      }
-    } catch (_) {
-      // 공유시트/퀘스트 API 실패는 별도 노출 없이 무시한다.
-    }
-  }
-
-  Future<void> _requestInAppReviewAndSubmitQuest({
-    required BuildContext context,
-    required String questId,
-  }) async {
-    try {
-      final review = InAppReview.instance;
-      final canReview = await review.isAvailable();
-      if (!canReview) return;
-
-      await review.requestReview();
-
-      final accessToken = await TokenStorage.loadAccessToken();
-      if (!context.mounted || accessToken == null) return;
-
-      final result = await SudaApiClient.postUserQuest(
-        accessToken: accessToken,
-        questId: questId,
-      );
-      if (!context.mounted) return;
-      if (result.completeYn == 'Y') {
-        final l10n = AppLocalizations.of(context)!;
-        DefaultToast.show(context, l10n.surveySuccessToast);
-      }
-    } catch (_) {
-      // 인앱리뷰/퀘스트 API 실패는 별도 노출 없이 무시한다.
-    }
-  }
-
-  Future<void> _claimDailyTicket(
-      BuildContext context, String accessToken) async {
-    try {
-      final result = await SudaApiClient.claimDailyTicket(
-        accessToken: accessToken,
-      );
-      if (!context.mounted) return;
-      if (result.completeYn == 'Y') {
-        final l10n = AppLocalizations.of(context)!;
-        DefaultToast.show(context, l10n.surveySuccessToast);
-      }
-    } catch (_) {
-      // 실패 시 별도 처리 없음
-    }
-  }
-
   Future<void> _navigateToPlaying(BuildContext context) async {
     await TokenRefreshService.instance.refreshIfNeeded();
     // 1. 마이크 권한 확인
@@ -219,450 +153,40 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen>
           return;
         }
         if (sessionId == '-99') {
-          final l10n = AppLocalizations.of(context)!;
-          final theme = Theme.of(context).textTheme;
-          await AppContentDialog.show(
+          await showRoleplayOpeningDailyTicketDefaultPopup(
             context,
-            content: Column(
-              children: [
-                Expanded(
-                  flex: 3,
-                  child: Center(
-                    child: Text(
-                      l10n.dailyTicketTitle,
-                      style: theme.headlineMedium?.copyWith(
-                        color: Colors.white,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  flex: 7,
-                  child: Center(
-                    child: Text(
-                      l10n.dailyTicketContent,
-                      style: theme.bodyLarge?.copyWith(
-                        color: Colors.white,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            showOkayButton: true,
-            okayButtonLabel: l10n.dailyTicketButton,
-            onOkayPressed: () => _claimDailyTicket(context, accessToken),
+            accessToken,
           );
           _restoreButton();
           return;
         }
         if (sessionId == '0') {
-          final l10n = AppLocalizations.of(context)!;
-          final theme = Theme.of(context).textTheme;
-          await AppContentDialog.show(
-            context,
-            content: Column(
-              children: [
-                Expanded(
-                  flex: 3,
-                  child: Center(
-                    child: Text(
-                      l10n.noTicketsTitle,
-                      style: theme.headlineMedium?.copyWith(
-                        color: Colors.white,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  flex: 7,
-                  child: Center(
-                    child: Text(
-                      l10n.noTicketsBody,
-                      style: theme.bodyLarge?.copyWith(
-                        color: Colors.white,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            showOkayButton: true,
-          );
+          await showRoleplayOpeningNoTicketsDefaultPopup(context);
           _restoreButton();
           return;
         }
         if (sessionId == '-10') {
-          final l10n = AppLocalizations.of(context)!;
-          final theme = Theme.of(context).textTheme;
-          await AppContentDialog.show(
-            context,
-            content: Column(
-              children: [
-                Expanded(
-                  child: Center(
-                    child: Text(
-                      l10n.noTicketsTitle,
-                      style: theme.headlineMedium?.copyWith(
-                        color: Colors.white,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          l10n.surveyPromptLine1,
-                          style: theme.bodyLarge?.copyWith(
-                            color: Colors.white,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        Text(
-                          l10n.surveyPromptLine2,
-                          style: theme.bodyLarge?.copyWith(
-                            color: const Color(0xFF0CABA8),
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        ConstrainedBox(
-                          constraints: BoxConstraints(
-                            maxWidth: MediaQuery.of(context).size.width * 0.64,
-                          ),
-                          child: ElevatedButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                              RoleplayRouter.pushSurvey(context);
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF0CABA8),
-                              foregroundColor: Colors.white,
-                              shape: const StadiumBorder(),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 30,
-                                vertical: 18,
-                              ),
-                              elevation: 0,
-                            ),
-                            child: Text(l10n.surveyAnswerNowButton),
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        GestureDetector(
-                          onTap: () => Navigator.of(context).pop(),
-                          child: Text(
-                            l10n.surveyMaybeLater,
-                            style: theme.bodySmall?.copyWith(
-                              color: Colors.white,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            showOkayButton: false,
-          );
+          await showRoleplayOpeningSurveyQuestDefaultPopup(context);
           _restoreButton();
           return;
         }
         if (sessionId == '-20') {
-          final l10n = AppLocalizations.of(context)!;
-          final theme = Theme.of(context).textTheme;
-          await AppContentDialog.show(
-            context,
-            content: Column(
-              children: [
-                Expanded(
-                  child: Center(
-                    child: Text(
-                      l10n.noTicketsTitle,
-                      style: theme.headlineMedium?.copyWith(
-                        color: Colors.white,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          l10n.surveyPromptLine1,
-                          style: theme.bodyLarge?.copyWith(
-                            color: Colors.white,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        Text(
-                          l10n.pushTicketPromptLine2,
-                          style: theme.bodyLarge?.copyWith(
-                            color: const Color(0xFF0CABA8),
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        ConstrainedBox(
-                          constraints: BoxConstraints(
-                            maxWidth: MediaQuery.of(context).size.width * 0.64,
-                          ),
-                          child: ElevatedButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                              Navigator.push(
-                                context,
-                                SubScreenRoute(
-                                  page: const PushAgreementScreen(),
-                                ),
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF0CABA8),
-                              foregroundColor: Colors.white,
-                              shape: const StadiumBorder(),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 30,
-                                vertical: 18,
-                              ),
-                              elevation: 0,
-                            ),
-                            child: Text(l10n.pushTicketTurnOnButton),
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        GestureDetector(
-                          onTap: () => Navigator.of(context).pop(),
-                          child: Text(
-                            l10n.surveyMaybeLater,
-                            style: theme.bodySmall?.copyWith(
-                              color: Colors.white,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            showOkayButton: false,
-          );
+          await showRoleplayOpeningPushNotificationQuestDefaultPopup(context);
           _restoreButton();
           return;
         }
         if (sessionId == '-30') {
-          final l10n = AppLocalizations.of(context)!;
-          final theme = Theme.of(context).textTheme;
-          await AppContentDialog.show(
+          await showRoleplayOpeningShareQuestDefaultPopup(
             context,
-            content: Column(
-              children: [
-                Expanded(
-                  child: Center(
-                    child: Text(
-                      l10n.noTicketsTitle,
-                      style: theme.headlineMedium?.copyWith(
-                        color: Colors.white,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          l10n.surveyPromptLine1,
-                          style: theme.bodyLarge?.copyWith(
-                            color: Colors.white,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        Text(
-                          l10n.shareTicketPromptLine2,
-                          style: theme.bodyLarge?.copyWith(
-                            color: const Color(0xFF0CABA8),
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        ConstrainedBox(
-                          constraints: BoxConstraints(
-                            maxWidth: MediaQuery.of(context).size.width * 0.64,
-                          ),
-                          child: ElevatedButton(
-                            onPressed: () async {
-                              Navigator.of(context).pop();
-                              await _shareAppLinkAndSubmitQuest(
-                                context: context,
-                                questId: sessionId,
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF0CABA8),
-                              foregroundColor: Colors.white,
-                              shape: const StadiumBorder(),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 30,
-                                vertical: 18,
-                              ),
-                              elevation: 0,
-                            ),
-                            child: Text(l10n.shareTicketButton),
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        GestureDetector(
-                          onTap: () => Navigator.of(context).pop(),
-                          child: Text(
-                            l10n.surveyMaybeLater,
-                            style: theme.bodySmall?.copyWith(
-                              color: Colors.white,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            showOkayButton: false,
+            sessionId,
           );
           _restoreButton();
           return;
         }
         if (sessionId == '-40') {
-          final l10n = AppLocalizations.of(context)!;
-          final theme = Theme.of(context).textTheme;
-          await AppContentDialog.show(
+          await showRoleplayOpeningInAppReviewQuestDefaultPopup(
             context,
-            content: Column(
-              children: [
-                Expanded(
-                  child: Center(
-                    child: Text(
-                      l10n.noTicketsTitle,
-                      style: theme.headlineMedium?.copyWith(
-                        color: Colors.white,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          l10n.surveyPromptLine1,
-                          style: theme.bodyLarge?.copyWith(
-                            color: Colors.white,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        Text(
-                          l10n.reviewTicketPromptLine2,
-                          style: theme.bodyLarge?.copyWith(
-                            color: const Color(0xFF0CABA8),
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        ConstrainedBox(
-                          constraints: BoxConstraints(
-                            maxWidth: MediaQuery.of(context).size.width * 0.64,
-                          ),
-                          child: ElevatedButton(
-                            onPressed: () async {
-                              Navigator.of(context).pop();
-                              await _requestInAppReviewAndSubmitQuest(
-                                context: context,
-                                questId: sessionId,
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF0CABA8),
-                              foregroundColor: Colors.white,
-                              shape: const StadiumBorder(),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 30,
-                                vertical: 18,
-                              ),
-                              elevation: 0,
-                            ),
-                            child: Text(l10n.reviewTicketButton),
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        GestureDetector(
-                          onTap: () => Navigator.of(context).pop(),
-                          child: Text(
-                            l10n.surveyMaybeLater,
-                            style: theme.bodySmall?.copyWith(
-                              color: Colors.white,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            showOkayButton: false,
+            sessionId,
           );
           _restoreButton();
           return;
@@ -834,3 +358,311 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen>
     );
   }
 }
+
+/// `sessionId == '-99'` daily ticket popup (`DefaultPopup`).
+Future<void> showRoleplayOpeningDailyTicketDefaultPopup(
+  BuildContext context,
+  String accessToken,
+) =>
+    showDailyTicketDefaultPopup(context, accessToken);
+
+/// `sessionId == '0'` no tickets popup (`DefaultPopup`). Primary uses "Okay".
+Future<void> showRoleplayOpeningNoTicketsDefaultPopup(
+  BuildContext context,
+) async {
+  final l10n = AppLocalizations.of(context)!;
+  final theme = Theme.of(context).textTheme;
+  await DefaultPopup.show(
+    context,
+    titleText: l10n.noTicketsTitle,
+    bodyWidget: Text(
+      l10n.noTicketsBody,
+      style: theme.bodyLarge?.copyWith(color: Colors.white),
+      textAlign: TextAlign.center,
+    ),
+    buttons: [
+      DefaultPopupButton(
+        type: DefaultPopupButtonType.primary,
+        label: 'Okay',
+        onPressed: () {},
+      ),
+    ],
+  );
+}
+
+/// Lab: same as [showRoleplayOpeningNoTicketsDefaultPopup].
+Future<void> showRoleplayOpeningNoTicketsDefaultPopupForLab(
+  BuildContext context,
+) => showRoleplayOpeningNoTicketsDefaultPopup(context);
+
+/// `sessionId == '-10'` survey quest nudge (`DefaultPopup`).
+Future<void> showRoleplayOpeningSurveyQuestDefaultPopup(
+  BuildContext context,
+) async {
+  final l10n = AppLocalizations.of(context)!;
+  final theme = Theme.of(context).textTheme;
+  final outer = context;
+  await DefaultPopup.show(
+    context,
+    titleText: l10n.noTicketsTitle,
+    bodyWidget: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          l10n.surveyPromptLine1,
+          style: theme.bodyLarge?.copyWith(color: Colors.white),
+          textAlign: TextAlign.center,
+        ),
+        Text(
+          l10n.surveyPromptLine2,
+          style: theme.bodyLarge?.copyWith(
+            color: const Color(0xFF0CABA8),
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    ),
+    buttons: [
+      DefaultPopupButton(
+        type: DefaultPopupButtonType.primary,
+        label: l10n.surveyAnswerNowButton,
+        onPressed: () {
+          RoleplayRouter.pushSurvey(outer);
+        },
+      ),
+      DefaultPopupButton(
+        type: DefaultPopupButtonType.text,
+        label: l10n.surveyMaybeLater,
+        onPressed: () {},
+      ),
+    ],
+  );
+}
+
+/// Lab: same as [showRoleplayOpeningSurveyQuestDefaultPopup].
+Future<void> showRoleplayOpeningSurveyQuestDefaultPopupForLab(
+  BuildContext context,
+) => showRoleplayOpeningSurveyQuestDefaultPopup(context);
+
+/// `sessionId == '-20'` push notification quest nudge (`DefaultPopup`).
+Future<void> showRoleplayOpeningPushNotificationQuestDefaultPopup(
+  BuildContext context,
+) async {
+  final l10n = AppLocalizations.of(context)!;
+  final theme = Theme.of(context).textTheme;
+  final outer = context;
+  await DefaultPopup.show(
+    context,
+    titleText: l10n.noTicketsTitle,
+    bodyWidget: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          l10n.surveyPromptLine1,
+          style: theme.bodyLarge?.copyWith(color: Colors.white),
+          textAlign: TextAlign.center,
+        ),
+        Text(
+          l10n.pushTicketPromptLine2,
+          style: theme.bodyLarge?.copyWith(
+            color: const Color(0xFF0CABA8),
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    ),
+    buttons: [
+      DefaultPopupButton(
+        type: DefaultPopupButtonType.primary,
+        label: l10n.pushTicketTurnOnButton,
+        onPressed: () {
+          if (!outer.mounted) return;
+          Navigator.push(
+            outer,
+            SubScreenRoute(
+              page: const PushAgreementScreen(),
+            ),
+          );
+        },
+      ),
+      DefaultPopupButton(
+        type: DefaultPopupButtonType.text,
+        label: l10n.surveyMaybeLater,
+        onPressed: () {},
+      ),
+    ],
+  );
+}
+
+/// Lab: same as [showRoleplayOpeningPushNotificationQuestDefaultPopup].
+Future<void> showRoleplayOpeningPushNotificationQuestDefaultPopupForLab(
+  BuildContext context,
+) => showRoleplayOpeningPushNotificationQuestDefaultPopup(context);
+
+Future<void> shareAppLinkAndSubmitQuestFromOpening({
+  required BuildContext context,
+  required String questId,
+}) async {
+  try {
+    await SharePlus.instance.share(
+      ShareParams(text: _kOpeningPlayStoreShareUrl),
+    );
+
+    final accessToken = await TokenStorage.loadAccessToken();
+    if (!context.mounted || accessToken == null) return;
+
+    final result = await SudaApiClient.postUserQuest(
+      accessToken: accessToken,
+      questId: questId,
+    );
+    if (!context.mounted) return;
+    if (result.completeYn == 'Y') {
+      final l10n = AppLocalizations.of(context)!;
+      DefaultToast.show(context, l10n.surveySuccessToast);
+    }
+  } catch (_) {
+    // 공유시트/퀘스트 API 실패는 별도 노출 없이 무시한다.
+  }
+}
+
+/// `sessionId == '-30'` share quest nudge (`DefaultPopup`).
+Future<void> showRoleplayOpeningShareQuestDefaultPopup(
+  BuildContext context,
+  String questId,
+) async {
+  final l10n = AppLocalizations.of(context)!;
+  final theme = Theme.of(context).textTheme;
+  final outer = context;
+  await DefaultPopup.show(
+    context,
+    titleText: l10n.noTicketsTitle,
+    bodyWidget: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          l10n.surveyPromptLine1,
+          style: theme.bodyLarge?.copyWith(color: Colors.white),
+          textAlign: TextAlign.center,
+        ),
+        Text(
+          l10n.shareTicketPromptLine2,
+          style: theme.bodyLarge?.copyWith(
+            color: const Color(0xFF0CABA8),
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    ),
+    buttons: [
+      DefaultPopupButton(
+        type: DefaultPopupButtonType.primary,
+        label: l10n.shareTicketButton,
+        onPressed: () {
+          unawaited(
+            shareAppLinkAndSubmitQuestFromOpening(
+              context: outer,
+              questId: questId,
+            ),
+          );
+        },
+      ),
+      DefaultPopupButton(
+        type: DefaultPopupButtonType.text,
+        label: l10n.surveyMaybeLater,
+        onPressed: () {},
+      ),
+    ],
+  );
+}
+
+/// Lab: same popup; quest id fixed to `-30`.
+Future<void> showRoleplayOpeningShareQuestDefaultPopupForLab(
+  BuildContext context,
+) => showRoleplayOpeningShareQuestDefaultPopup(context, '-30');
+
+Future<void> requestInAppReviewAndSubmitQuestFromOpening({
+  required BuildContext context,
+  required String questId,
+}) async {
+  try {
+    final review = InAppReview.instance;
+    final canReview = await review.isAvailable();
+    if (!canReview) return;
+
+    await review.requestReview();
+
+    final accessToken = await TokenStorage.loadAccessToken();
+    if (!context.mounted || accessToken == null) return;
+
+    final result = await SudaApiClient.postUserQuest(
+      accessToken: accessToken,
+      questId: questId,
+    );
+    if (!context.mounted) return;
+    if (result.completeYn == 'Y') {
+      final l10n = AppLocalizations.of(context)!;
+      DefaultToast.show(context, l10n.surveySuccessToast);
+    }
+  } catch (_) {
+    // 인앱리뷰/퀘스트 API 실패는 별도 노출 없이 무시한다.
+  }
+}
+
+/// `sessionId == '-40'` in-app review quest nudge (`DefaultPopup`).
+Future<void> showRoleplayOpeningInAppReviewQuestDefaultPopup(
+  BuildContext context,
+  String questId,
+) async {
+  final l10n = AppLocalizations.of(context)!;
+  final theme = Theme.of(context).textTheme;
+  final outer = context;
+  await DefaultPopup.show(
+    context,
+    titleText: l10n.noTicketsTitle,
+    bodyWidget: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          l10n.surveyPromptLine1,
+          style: theme.bodyLarge?.copyWith(color: Colors.white),
+          textAlign: TextAlign.center,
+        ),
+        Text(
+          l10n.reviewTicketPromptLine2,
+          style: theme.bodyLarge?.copyWith(
+            color: const Color(0xFF0CABA8),
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    ),
+    buttons: [
+      DefaultPopupButton(
+        type: DefaultPopupButtonType.primary,
+        label: l10n.reviewTicketButton,
+        onPressed: () {
+          unawaited(
+            requestInAppReviewAndSubmitQuestFromOpening(
+              context: outer,
+              questId: questId,
+            ),
+          );
+        },
+      ),
+      DefaultPopupButton(
+        type: DefaultPopupButtonType.text,
+        label: l10n.surveyMaybeLater,
+        onPressed: () {},
+      ),
+    ],
+  );
+}
+
+/// Lab: same popup; quest id fixed to `-40`.
+Future<void> showRoleplayOpeningInAppReviewQuestDefaultPopupForLab(
+  BuildContext context,
+) => showRoleplayOpeningInAppReviewQuestDefaultPopup(context, '-40');

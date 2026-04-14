@@ -34,7 +34,10 @@ import 'utils/sub_screen_route.dart';
 import 'config/app_config.dart';
 import 'utils/language_util.dart';
 import 'theme/app_theme.dart';
-import 'widgets/app_content_dialog.dart';
+import 'widgets/main_reregistration_restricted_popup.dart'
+    show
+        showMainReregistrationRestrictedAuthCheckDefaultPopup,
+        showMainReregistrationRestrictedSignInDefaultPopup;
 import 'widgets/main_route_aware_wrapper.dart';
 
 void main() async {
@@ -335,21 +338,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
         final popupContext = _navigatorKey.currentContext;
         if (popupContext != null && popupContext.mounted) {
-          final l10n = AppLocalizations.of(popupContext);
-          final message = l10n != null
-              ? l10n.reregistrationRestrictedMessage
-              : 'You can sign up again 2 days after deleting your account. Please try again later.';
-          final theme = Theme.of(popupContext).textTheme;
-          await AppContentDialog.show(
+          await showMainReregistrationRestrictedAuthCheckDefaultPopup(
             popupContext,
-            content: Center(
-              child: Text(
-                message,
-                style: theme.bodyLarge?.copyWith(color: Colors.white),
-                textAlign: TextAlign.center,
-              ),
-            ),
-            showOkayButton: true,
           );
         }
         await _bestEffortLogoutSideEffects();
@@ -445,21 +435,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
         final popupContext = _navigatorKey.currentContext;
         if (popupContext != null && popupContext.mounted) {
-          final l10n = AppLocalizations.of(popupContext);
-          final message = l10n != null
-              ? l10n.reregistrationRestrictedMessage
-              : 'You can sign up again 2 days after deleting your account. Please try again later.';
-          final theme = Theme.of(popupContext).textTheme;
-          await AppContentDialog.show(
+          await showMainReregistrationRestrictedSignInDefaultPopup(
             popupContext,
-            content: Center(
-              child: Text(
-                message,
-                style: theme.bodyLarge?.copyWith(color: Colors.white),
-                textAlign: TextAlign.center,
-              ),
-            ),
-            showOkayButton: true,
           );
         }
         await _bestEffortLogoutSideEffects();
