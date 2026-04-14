@@ -77,7 +77,8 @@ class _RoleplayResultScreenV2State extends State<RoleplayResultScreenV2>
   final AudioPlayer _expressionAudioPlayer = AudioPlayer();
   StreamSubscription<PlayerState>? _expressionAudioSub;
   int _expressionMegaphoneSeq = 0;
-  int? _expressionMegaphoneActiveIndex;
+  int? _expressionHighlightedIndex;
+  int? _expressionPlaybackIndex;
   final Set<int> _bookmarkedExpressionIndexes = <int>{};
 
   RoleplayResultDto? get _dto => RoleplayStateService.instance.cachedResult;
@@ -282,7 +283,7 @@ class _RoleplayResultScreenV2State extends State<RoleplayResultScreenV2>
     return null;
   }
 
-  Future<void> _onExpressionMegaphoneTap(int expressionIndex) async {
+  Future<void> _onExpressionCardTap(int expressionIndex) async {
     _expressionMegaphoneSeq++;
     final seq = _expressionMegaphoneSeq;
     _expressionAudioSub?.cancel();
@@ -292,7 +293,10 @@ class _RoleplayResultScreenV2State extends State<RoleplayResultScreenV2>
     if (!mounted) {
       return;
     }
-    setState(() => _expressionMegaphoneActiveIndex = expressionIndex);
+    setState(() {
+      _expressionHighlightedIndex = expressionIndex;
+      _expressionPlaybackIndex = expressionIndex;
+    });
 
     final resultId = _dto?.id;
     final token = await TokenStorage.loadAccessToken();
@@ -301,7 +305,10 @@ class _RoleplayResultScreenV2State extends State<RoleplayResultScreenV2>
     }
 
     if (token == null || resultId == null) {
-      setState(() => _expressionMegaphoneActiveIndex = null);
+      setState(() {
+        _expressionHighlightedIndex = null;
+        _expressionPlaybackIndex = null;
+      });
       return;
     }
 
@@ -325,7 +332,7 @@ class _RoleplayResultScreenV2State extends State<RoleplayResultScreenV2>
       }
 
       if (source == null) {
-        setState(() => _expressionMegaphoneActiveIndex = null);
+        setState(() => _expressionPlaybackIndex = null);
         return;
       }
 
@@ -337,7 +344,7 @@ class _RoleplayResultScreenV2State extends State<RoleplayResultScreenV2>
           if (!mounted || seq != _expressionMegaphoneSeq) {
             return;
           }
-          setState(() => _expressionMegaphoneActiveIndex = null);
+          setState(() => _expressionPlaybackIndex = null);
         }
       });
       await _expressionAudioPlayer.play();
@@ -347,14 +354,11 @@ class _RoleplayResultScreenV2State extends State<RoleplayResultScreenV2>
       if (!mounted || seq != _expressionMegaphoneSeq) {
         return;
       }
-      setState(() => _expressionMegaphoneActiveIndex = null);
+      setState(() => _expressionPlaybackIndex = null);
     }
   }
 
   Future<void> _onExpressionBookmarkTap(int expressionIndex) async {
-    if (_bookmarkedExpressionIndexes.contains(expressionIndex)) {
-      return;
-    }
     final resultId = _dto?.id;
     final token = await TokenStorage.loadAccessToken();
     if (!mounted) {
@@ -365,18 +369,32 @@ class _RoleplayResultScreenV2State extends State<RoleplayResultScreenV2>
       return;
     }
 
+    final isBookmarked = _bookmarkedExpressionIndexes.contains(expressionIndex);
+
     try {
-      await SudaApiClient.saveUserExpression(
-        accessToken: token,
-        roleplayResultId: resultId,
-        expressionIndex: expressionIndex,
-      );
-      if (!mounted) {
-        return;
+      if (isBookmarked) {
+        await SudaApiClient.deleteUserExpression(
+          accessToken: token,
+          rpResultId: resultId,
+          expressionIndex: expressionIndex,
+        );
+        if (!mounted) {
+          return;
+        }
+        setState(() => _bookmarkedExpressionIndexes.remove(expressionIndex));
+      } else {
+        await SudaApiClient.saveUserExpression(
+          accessToken: token,
+          roleplayResultId: resultId,
+          expressionIndex: expressionIndex,
+        );
+        if (!mounted) {
+          return;
+        }
+        setState(() => _bookmarkedExpressionIndexes.add(expressionIndex));
+        final l10n = AppLocalizations.of(context)!;
+        DefaultToast.show(context, l10n.expressionSavedToProfile);
       }
-      setState(() => _bookmarkedExpressionIndexes.add(expressionIndex));
-      final l10n = AppLocalizations.of(context)!;
-      DefaultToast.show(context, l10n.expressionSavedToProfile);
     } catch (e) {
       if (!mounted) {
         return;
@@ -718,9 +736,10 @@ class _RoleplayResultScreenV2State extends State<RoleplayResultScreenV2>
                 width: itemW,
                 child: _ExpressionUpgradeCard(
                   item: items[i],
-                  megaphoneActive: _expressionMegaphoneActiveIndex == i,
+                  highlighted: _expressionHighlightedIndex == i,
+                  playbackActive: _expressionPlaybackIndex == i,
                   bookmarked: _bookmarkedExpressionIndexes.contains(i),
-                  onMegaphoneTap: () => _onExpressionMegaphoneTap(i),
+                  onCardTap: () => _onExpressionCardTap(i),
                   onBookmarkTap: () => _onExpressionBookmarkTap(i),
                 ),
               ),
@@ -908,23 +927,25 @@ class _RoleplayResultScreenV2State extends State<RoleplayResultScreenV2>
 class _ExpressionUpgradeCard extends StatelessWidget {
   const _ExpressionUpgradeCard({
     required this.item,
-    required this.megaphoneActive,
+    required this.highlighted,
+    required this.playbackActive,
     required this.bookmarked,
-    required this.onMegaphoneTap,
+    required this.onCardTap,
     required this.onBookmarkTap,
   });
 
   final ExpressionUpgradeDto item;
-  final bool megaphoneActive;
+  final bool highlighted;
+  final bool playbackActive;
   final bool bookmarked;
-  final VoidCallback onMegaphoneTap;
+  final VoidCallback onCardTap;
   final VoidCallback onBookmarkTap;
 
   static const String _checkMintSvg = 'assets/images/icons/check_mint.svg';
   static const String _megaphonePng = 'assets/images/icons/megaphone.png';
   static const String _bookmarkOffPng = 'assets/images/icons/bookmark_off.png';
   static const String _bookmarkOnPng = 'assets/images/icons/bookmark_on.png';
-  /// check(22) + gap(8) — meaning·rephrased 좌측 정렬 공통
+  /// check(22) + gap(8) — rephrased·meaning 좌측 정렬 공통
   static const double _bodyLeftIndent = 30;
   static const Color _megaphoneTintActive = Color(0xFF0CABA8);
   static const Color _megaphoneTintLoading = Color(0xFF121212);
@@ -936,16 +957,20 @@ class _ExpressionUpgradeCard extends StatelessWidget {
     final meaning = item.meaningUserLanguage ?? '';
     final rephrased = item.rephrasedSentence ?? '';
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(18),
-      child: ColoredBox(
-        color: _expressionUpgradeCardBg,
-        child: Padding(
+    return GestureDetector(
+      onTap: onCardTap,
+      behavior: HitTestBehavior.opaque,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(18),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOut,
+          color: highlighted ? Colors.white : _expressionUpgradeCardBg,
           padding: const EdgeInsets.all(16),
           child: Align(
             alignment: Alignment.topLeft,
             child: Column(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisSize: MainAxisSize.max,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Row(
@@ -969,15 +994,6 @@ class _ExpressionUpgradeCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(left: _bodyLeftIndent),
-                  child: Text(
-                    meaning,
-                    style: theme.bodySmall?.copyWith(
-                      color: _exprTextSecondary,
-                    ),
-                  ),
-                ),
                 const SizedBox(height: 15),
                 Padding(
                   padding: const EdgeInsets.only(left: _bodyLeftIndent),
@@ -988,23 +1004,30 @@ class _ExpressionUpgradeCard extends StatelessWidget {
                     ),
                   ),
                 ),
+                const SizedBox(height: 8),
+                Padding(
+                  padding: const EdgeInsets.only(left: _bodyLeftIndent),
+                  child: Text(
+                    meaning,
+                    style: theme.bodySmall?.copyWith(
+                      color: _exprTextSecondary,
+                    ),
+                  ),
+                ),
+                const Spacer(),
                 const SizedBox(height: 15),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    GestureDetector(
-                      onTap: onMegaphoneTap,
-                      behavior: HitTestBehavior.opaque,
-                      child: Image.asset(
-                        _megaphonePng,
-                        width: 24,
-                        height: 24,
-                        fit: BoxFit.contain,
-                        color: megaphoneActive
-                            ? _megaphoneTintLoading
-                            : _megaphoneTintActive,
-                        colorBlendMode: BlendMode.srcIn,
-                      ),
+                    Image.asset(
+                      _megaphonePng,
+                      width: 24,
+                      height: 24,
+                      fit: BoxFit.contain,
+                      color: playbackActive
+                          ? _megaphoneTintLoading
+                          : _megaphoneTintActive,
+                      colorBlendMode: BlendMode.srcIn,
                     ),
                     GestureDetector(
                       onTap: onBookmarkTap,

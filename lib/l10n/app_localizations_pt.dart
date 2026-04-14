@@ -233,6 +233,19 @@ class AppLocalizationsPt extends AppLocalizations {
   String get profileSavedEmpty => 'Nenhuma expressão salva ainda.';
 
   @override
+  String get profileSavedRemoveTitle => 'Remover dos Salvos?';
+
+  @override
+  String get profileSavedRemoveContent =>
+      'Você pode encontrá-la novamente no Histórico e salvá-la.';
+
+  @override
+  String get profileSavedRemoveOk => 'Remover';
+
+  @override
+  String get profileSavedRemoveCancel => 'Manter salvo';
+
+  @override
   String get noTicketsTitle => 'Acabou seus Tickets…';
 
   @override

@@ -304,7 +304,7 @@
 - **캐시**: Result/Ending 스크린에서 즉시 노출하기 위해, resultId를 인지한 직후 Playing에서 선조회하여 `RoleplayStateService.setCachedResult(dto)`로 저장. 이후 스크린 전환 시 `RoleplayStateService.instance.cachedResult`로 조회. 캐시가 늦으면 3초가 지나도 캐시 완료까지 대기한 뒤 전환.
 - DTO: `lib/models/roleplay_models.dart`의 `RoleplayResultDto`
 - **Expression 발음(Result V2)**: `GET /v1/roleplays/results/{resultId}/expressions/{expressionIndex}/sound` → `TtsResultDto`. 클라이언트: `SudaApiClient.getRoleplayResultExpressionSound` / `RoleplayApi.getResultExpressionSound`.
-- **Expression 북마크**: `POST /v1/users/expressions`, JSON `{ "roleplayResultId": <int>, "expressionIndex": <int> }`. 클라이언트: `SudaApiClient.saveUserExpression` / `UserApi.saveUserExpression`.
+- **Expression 북마크**: 저장 `POST /v1/users/expressions`, JSON `{ "roleplayResultId": <int>, "expressionIndex": <int> }`. 클라이언트: `SudaApiClient.saveUserExpression` / `UserApi.saveUserExpression`. 해제 `DELETE /v1/users/expressions?rpResultId=…&expressionIndex=…`. 클라이언트: `SudaApiClient.deleteUserExpression` / `UserApi.deleteUserExpression`.
 
 ## 7. 단일 Roleplay 컨텍스트 보관
 - 인메모리 서비스로 단일 Roleplay Overview를 보관한다.

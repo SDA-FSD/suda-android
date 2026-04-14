@@ -14,6 +14,7 @@ import '../services/token_storage.dart';
 import '../services/suda_api_client.dart';
 import '../utils/default_toast.dart';
 import '../utils/sub_screen_route.dart';
+import '../widgets/app_content_dialog.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/gnb_bar.dart';
 import 'roleplay/history.dart';
@@ -79,7 +80,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final AudioPlayer _savedAudioPlayer = AudioPlayer();
   StreamSubscription<PlayerState>? _savedAudioSub;
   int _savedMegaphoneSeq = 0;
-  int? _savedMegaphoneActiveId;
+  /// 가장 최근 탭한 카드(흰 배경 유지, 목록에서 하나만).
+  int? _savedHighlightedExpressionId;
+  /// 페치·재생 중인 카드(메가폰 검정). 재생 종료 후 null.
+  int? _savedPlaybackExpressionId;
 
   @override
   void initState() {
@@ -481,7 +485,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _savedAudioSub?.cancel();
       _savedAudioSub = null;
       unawaited(_savedAudioPlayer.stop());
-      _savedMegaphoneActiveId = null;
+      _savedHighlightedExpressionId = null;
+      _savedPlaybackExpressionId = null;
 
       setState(() {
         _activeTab = tab;
@@ -592,7 +597,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     await _savedAudioPlayer.stop();
 
     if (!mounted || seq != _savedMegaphoneSeq) return;
-    setState(() => _savedMegaphoneActiveId = id);
+    setState(() {
+      _savedHighlightedExpressionId = id;
+      _savedPlaybackExpressionId = id;
+    });
 
     final token = await TokenStorage.loadAccessToken();
     if (!mounted || seq != _savedMegaphoneSeq) return;
@@ -600,7 +608,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final resultId = item.roleplayResultId;
     final expressionIndex = item.expressionIndex;
     if (token == null || resultId == null || expressionIndex == null) {
-      setState(() => _savedMegaphoneActiveId = null);
+      setState(() {
+        _savedPlaybackExpressionId = null;
+        _savedHighlightedExpressionId = null;
+      });
       return;
     }
 
@@ -620,7 +631,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (!mounted || seq != _savedMegaphoneSeq) return;
 
       if (source == null) {
-        setState(() => _savedMegaphoneActiveId = null);
+        setState(() => _savedPlaybackExpressionId = null);
         return;
       }
 
@@ -629,7 +640,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _savedAudioSub?.cancel();
           _savedAudioSub = null;
           if (!mounted || seq != _savedMegaphoneSeq) return;
-          setState(() => _savedMegaphoneActiveId = null);
+          setState(() => _savedPlaybackExpressionId = null);
         }
       });
       await _savedAudioPlayer.play();
@@ -637,7 +648,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _savedAudioSub?.cancel();
       _savedAudioSub = null;
       if (!mounted || seq != _savedMegaphoneSeq) return;
-      setState(() => _savedMegaphoneActiveId = null);
+      setState(() => _savedPlaybackExpressionId = null);
     }
   }
 
@@ -662,18 +673,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
         expressionIndex: expressionIndex,
       );
       if (!mounted) return;
-      final l10n = AppLocalizations.of(context)!;
-      DefaultToast.show(context, l10n.expressionUnsavedToProfile);
 
       final index = _savedList.indexWhere((e) => e.id == item.id);
       if (index < 0) return;
       final removed = _savedList.removeAt(index);
-      if (_savedMegaphoneActiveId == removed.id) {
+      final rid = removed.id;
+      if (rid == _savedPlaybackExpressionId) {
         _savedMegaphoneSeq++;
         _savedAudioSub?.cancel();
         _savedAudioSub = null;
         unawaited(_savedAudioPlayer.stop());
-        _savedMegaphoneActiveId = null;
+        _savedPlaybackExpressionId = null;
+      }
+      if (rid == _savedHighlightedExpressionId) {
+        _savedHighlightedExpressionId = null;
       }
 
       final listState = _savedListKey.currentState;
@@ -688,7 +701,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 padding: const EdgeInsets.only(bottom: 20),
                 child: _SavedExpressionCard(
                   item: removed,
-                  isActive: false,
+                  isHighlighted: false,
+                  isPlaybackActive: false,
                   onTap: () {},
                   onDeleteTap: () {},
                 ),
@@ -703,6 +717,78 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (!mounted) return;
       DefaultToast.show(context, e.toString(), isError: true);
     }
+  }
+
+  Future<void> _confirmDeleteSavedExpression(UserExpressionDto item) async {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context).textTheme;
+    await AppContentDialog.show(
+      context,
+      content: Column(
+        children: [
+          Expanded(
+            flex: 3,
+            child: Center(
+              child: Text(
+                l10n.profileSavedRemoveTitle,
+                style: theme.headlineMedium?.copyWith(color: Colors.white),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 4,
+            child: Center(
+              child: Text(
+                l10n.profileSavedRemoveContent,
+                style: theme.bodyLarge?.copyWith(color: Colors.white),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 3,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SizedBox(
+                  height: 44,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      unawaited(_deleteSavedExpression(item));
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF0CABA8),
+                      foregroundColor: Colors.white,
+                      shape: const StadiumBorder(),
+                      elevation: 0,
+                    ),
+                    child: Text(l10n.profileSavedRemoveOk),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  height: 44,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF0CABA8),
+                      foregroundColor: Colors.white,
+                      shape: const StadiumBorder(),
+                      elevation: 0,
+                    ),
+                    child: Text(l10n.profileSavedRemoveCancel),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+      showOkayButton: false,
+    );
   }
 
   Widget _buildSavedShimmer() {
@@ -768,7 +854,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
             initialItemCount: _savedList.length,
             itemBuilder: (context, index, animation) {
               final item = _savedList[index];
-              final isActive = item.id != null && item.id == _savedMegaphoneActiveId;
+              final itemId = item.id;
+              final isHighlighted =
+                  itemId != null && itemId == _savedHighlightedExpressionId;
+              final isPlaybackActive =
+                  itemId != null && itemId == _savedPlaybackExpressionId;
               return FadeTransition(
                 opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
                 child: SizeTransition(
@@ -777,9 +867,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     padding: const EdgeInsets.only(bottom: 20),
                     child: _SavedExpressionCard(
                       item: item,
-                      isActive: isActive,
+                      isHighlighted: isHighlighted,
+                      isPlaybackActive: isPlaybackActive,
                       onTap: () => _onSavedExpressionTap(item),
-                      onDeleteTap: () => _deleteSavedExpression(item),
+                      onDeleteTap: () => _confirmDeleteSavedExpression(item),
                     ),
                   ),
                 ),
@@ -968,13 +1059,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
 class _SavedExpressionCard extends StatelessWidget {
   final UserExpressionDto item;
-  final bool isActive;
+  final bool isHighlighted;
+  final bool isPlaybackActive;
   final VoidCallback onTap;
   final VoidCallback onDeleteTap;
 
   const _SavedExpressionCard({
     required this.item,
-    required this.isActive,
+    required this.isHighlighted,
+    required this.isPlaybackActive,
     required this.onTap,
     required this.onDeleteTap,
   });
@@ -1004,7 +1097,7 @@ class _SavedExpressionCard extends StatelessWidget {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
           curve: Curves.easeOut,
-          color: isActive ? Colors.white : _mint,
+          color: isHighlighted ? Colors.white : _mint,
           padding: const EdgeInsets.all(16),
           child: Align(
             alignment: Alignment.topLeft,
@@ -1033,13 +1126,6 @@ class _SavedExpressionCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(left: _bodyLeftIndent),
-                  child: Text(
-                    meaning,
-                    style: theme.bodySmall?.copyWith(color: _exprTextSecondary),
-                  ),
-                ),
                 const SizedBox(height: 15),
                 Padding(
                   padding: const EdgeInsets.only(left: _bodyLeftIndent),
@@ -1048,22 +1134,27 @@ class _SavedExpressionCard extends StatelessWidget {
                     style: theme.bodyMedium?.copyWith(color: _exprTextPrimary),
                   ),
                 ),
+                const SizedBox(height: 8),
+                Padding(
+                  padding: const EdgeInsets.only(left: _bodyLeftIndent),
+                  child: Text(
+                    meaning,
+                    style: theme.bodySmall?.copyWith(color: _exprTextSecondary),
+                  ),
+                ),
                 const SizedBox(height: 15),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    GestureDetector(
-                      onTap: onTap,
-                      behavior: HitTestBehavior.opaque,
-                      child: Image.asset(
-                        _megaphonePng,
-                        width: 24,
-                        height: 24,
-                        fit: BoxFit.contain,
-                        color:
-                            isActive ? _megaphoneTintLoading : _megaphoneTintActive,
-                        colorBlendMode: BlendMode.srcIn,
-                      ),
+                    Image.asset(
+                      _megaphonePng,
+                      width: 24,
+                      height: 24,
+                      fit: BoxFit.contain,
+                      color: isPlaybackActive
+                          ? _megaphoneTintLoading
+                          : _megaphoneTintActive,
+                      colorBlendMode: BlendMode.srcIn,
                     ),
                     GestureDetector(
                       onTap: onDeleteTap,

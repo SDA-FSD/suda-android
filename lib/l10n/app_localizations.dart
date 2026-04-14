@@ -514,6 +514,30 @@ abstract class AppLocalizations {
   /// **'No saved expressions yet.'**
   String get profileSavedEmpty;
 
+  /// No description provided for @profileSavedRemoveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from Saved?'**
+  String get profileSavedRemoveTitle;
+
+  /// No description provided for @profileSavedRemoveContent.
+  ///
+  /// In en, this message translates to:
+  /// **'You can find it again in History later.'**
+  String get profileSavedRemoveContent;
+
+  /// No description provided for @profileSavedRemoveOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get profileSavedRemoveOk;
+
+  /// No description provided for @profileSavedRemoveCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Practice more'**
+  String get profileSavedRemoveCancel;
+
   /// No description provided for @noTicketsTitle.
   ///
   /// In en, this message translates to:

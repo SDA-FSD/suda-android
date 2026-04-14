@@ -231,6 +231,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileSavedEmpty => 'No saved expressions yet.';
 
   @override
+  String get profileSavedRemoveTitle => 'Remove from Saved?';
+
+  @override
+  String get profileSavedRemoveContent =>
+      'You can find it again in History later.';
+
+  @override
+  String get profileSavedRemoveOk => 'Remove';
+
+  @override
+  String get profileSavedRemoveCancel => 'Practice more';
+
+  @override
   String get noTicketsTitle => 'No tickets left…';
 
   @override

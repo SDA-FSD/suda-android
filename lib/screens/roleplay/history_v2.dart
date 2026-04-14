@@ -45,7 +45,8 @@ class _HistoryScreenV2State extends State<HistoryScreenV2> {
   final AudioPlayer _expressionAudioPlayer = AudioPlayer();
   StreamSubscription<PlayerState>? _expressionAudioSub;
   int _expressionMegaphoneSeq = 0;
-  int? _expressionMegaphoneActiveIndex;
+  int? _expressionHighlightedIndex;
+  int? _expressionPlaybackIndex;
   late final Set<int> _bookmarkedExpressionIndexes = <int>{};
 
   static const Color _teal = Color(0xFF0CABA8);
@@ -159,7 +160,7 @@ class _HistoryScreenV2State extends State<HistoryScreenV2> {
     return null;
   }
 
-  Future<void> _onExpressionMegaphoneTap(int expressionIndex) async {
+  Future<void> _onExpressionCardTap(int expressionIndex) async {
     _expressionMegaphoneSeq++;
     final seq = _expressionMegaphoneSeq;
     _expressionAudioSub?.cancel();
@@ -167,12 +168,18 @@ class _HistoryScreenV2State extends State<HistoryScreenV2> {
     await _expressionAudioPlayer.stop();
 
     if (!mounted) return;
-    setState(() => _expressionMegaphoneActiveIndex = expressionIndex);
+    setState(() {
+      _expressionHighlightedIndex = expressionIndex;
+      _expressionPlaybackIndex = expressionIndex;
+    });
 
     final token = await TokenStorage.loadAccessToken();
     if (!mounted || seq != _expressionMegaphoneSeq) return;
     if (token == null || token.isEmpty) {
-      setState(() => _expressionMegaphoneActiveIndex = null);
+      setState(() {
+        _expressionHighlightedIndex = null;
+        _expressionPlaybackIndex = null;
+      });
       return;
     }
 
@@ -192,7 +199,7 @@ class _HistoryScreenV2State extends State<HistoryScreenV2> {
       if (!mounted || seq != _expressionMegaphoneSeq) return;
 
       if (source == null) {
-        setState(() => _expressionMegaphoneActiveIndex = null);
+        setState(() => _expressionPlaybackIndex = null);
         return;
       }
 
@@ -202,7 +209,7 @@ class _HistoryScreenV2State extends State<HistoryScreenV2> {
           _expressionAudioSub?.cancel();
           _expressionAudioSub = null;
           if (!mounted || seq != _expressionMegaphoneSeq) return;
-          setState(() => _expressionMegaphoneActiveIndex = null);
+          setState(() => _expressionPlaybackIndex = null);
         }
       });
       await _expressionAudioPlayer.play();
@@ -210,7 +217,7 @@ class _HistoryScreenV2State extends State<HistoryScreenV2> {
       _expressionAudioSub?.cancel();
       _expressionAudioSub = null;
       if (!mounted || seq != _expressionMegaphoneSeq) return;
-      setState(() => _expressionMegaphoneActiveIndex = null);
+      setState(() => _expressionPlaybackIndex = null);
     }
   }
 
@@ -232,8 +239,6 @@ class _HistoryScreenV2State extends State<HistoryScreenV2> {
         );
         if (!mounted) return;
         setState(() => _bookmarkedExpressionIndexes.remove(expressionIndex));
-        final l10n = AppLocalizations.of(context)!;
-        DefaultToast.show(context, l10n.expressionUnsavedToProfile);
       } else {
         await SudaApiClient.saveUserExpression(
           accessToken: token,
@@ -540,9 +545,10 @@ class _HistoryScreenV2State extends State<HistoryScreenV2> {
                     width: itemW,
                     child: _ExpressionUpgradeCard(
                       item: items[i],
-                      megaphoneActive: _expressionMegaphoneActiveIndex == i,
+                      highlighted: _expressionHighlightedIndex == i,
+                      playbackActive: _expressionPlaybackIndex == i,
                       bookmarked: _bookmarkedExpressionIndexes.contains(i),
-                      onMegaphoneTap: () => _onExpressionMegaphoneTap(i),
+                      onCardTap: () => _onExpressionCardTap(i),
                       onBookmarkTap: () => _onExpressionBookmarkTap(i),
                     ),
                   ),
@@ -810,16 +816,18 @@ class _HistoryScreenV2State extends State<HistoryScreenV2> {
 class _ExpressionUpgradeCard extends StatelessWidget {
   const _ExpressionUpgradeCard({
     required this.item,
-    required this.megaphoneActive,
+    required this.highlighted,
+    required this.playbackActive,
     required this.bookmarked,
-    required this.onMegaphoneTap,
+    required this.onCardTap,
     required this.onBookmarkTap,
   });
 
   final ExpressionUpgradeDto item;
-  final bool megaphoneActive;
+  final bool highlighted;
+  final bool playbackActive;
   final bool bookmarked;
-  final VoidCallback onMegaphoneTap;
+  final VoidCallback onCardTap;
   final VoidCallback onBookmarkTap;
 
   static const String _checkMintSvg = 'assets/images/icons/check_mint.svg';
@@ -840,16 +848,20 @@ class _ExpressionUpgradeCard extends StatelessWidget {
     final meaning = item.meaningUserLanguage ?? '';
     final rephrased = item.rephrasedSentence ?? '';
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(18),
-      child: ColoredBox(
-        color: _expressionUpgradeCardBg,
-        child: Padding(
+    return GestureDetector(
+      onTap: onCardTap,
+      behavior: HitTestBehavior.opaque,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(18),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOut,
+          color: highlighted ? Colors.white : _expressionUpgradeCardBg,
           padding: const EdgeInsets.all(16),
           child: Align(
             alignment: Alignment.topLeft,
             child: Column(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisSize: MainAxisSize.max,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Row(
@@ -873,15 +885,6 @@ class _ExpressionUpgradeCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(left: _bodyLeftIndent),
-                  child: Text(
-                    meaning,
-                    style: theme.bodySmall?.copyWith(
-                      color: _exprTextSecondary,
-                    ),
-                  ),
-                ),
                 const SizedBox(height: 15),
                 Padding(
                   padding: const EdgeInsets.only(left: _bodyLeftIndent),
@@ -892,23 +895,30 @@ class _ExpressionUpgradeCard extends StatelessWidget {
                     ),
                   ),
                 ),
+                const SizedBox(height: 8),
+                Padding(
+                  padding: const EdgeInsets.only(left: _bodyLeftIndent),
+                  child: Text(
+                    meaning,
+                    style: theme.bodySmall?.copyWith(
+                      color: _exprTextSecondary,
+                    ),
+                  ),
+                ),
+                const Spacer(),
                 const SizedBox(height: 15),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    GestureDetector(
-                      onTap: onMegaphoneTap,
-                      behavior: HitTestBehavior.opaque,
-                      child: Image.asset(
-                        _megaphonePng,
-                        width: 24,
-                        height: 24,
-                        fit: BoxFit.contain,
-                        color: megaphoneActive
-                            ? _megaphoneTintLoading
-                            : _megaphoneTintActive,
-                        colorBlendMode: BlendMode.srcIn,
-                      ),
+                    Image.asset(
+                      _megaphonePng,
+                      width: 24,
+                      height: 24,
+                      fit: BoxFit.contain,
+                      color: playbackActive
+                          ? _megaphoneTintLoading
+                          : _megaphoneTintActive,
+                      colorBlendMode: BlendMode.srcIn,
                     ),
                     GestureDetector(
                       onTap: onBookmarkTap,

@@ -223,6 +223,18 @@ class AppLocalizationsKo extends AppLocalizations {
   String get profileSavedEmpty => '아직 저장된 표현이 없습니다.';
 
   @override
+  String get profileSavedRemoveTitle => '표현을 삭제할까요?';
+
+  @override
+  String get profileSavedRemoveContent => '이 표현은 히스토리에서 다시 찾아 저장할 수 있어요.';
+
+  @override
+  String get profileSavedRemoveOk => '삭제할래요';
+
+  @override
+  String get profileSavedRemoveCancel => '더 연습할래요';
+
+  @override
   String get noTicketsTitle => '티켓이 없습니다...';
 
   @override
