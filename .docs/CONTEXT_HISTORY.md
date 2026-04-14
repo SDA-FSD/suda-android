@@ -6,6 +6,9 @@
 
 ## 최근 작업 메모
 
+- **DefaultToast 세로 패딩·minHeight 제거**: 세로 패딩 12 복원, `minHeight` 제거로 한 줄은 텍스트+패딩 높이만 사용·두 줄은 위아래 여백 확보. `lib/utils/default_toast.dart`, `.docs/CONTEXT.md`.
+- **DefaultToast 가로 shrink-wrap**: `Center`가 유한 maxWidth에서 전폭으로 확장되던 문제를 피하기 위해 바깥·안쪽 모두 `Align(alignment: Alignment.center, widthFactor: 1, heightFactor: 1)`로 교체해 짧은 문구일 때 pill 가로가 콘텐츠에 맞게 줄어듦. `lib/utils/default_toast.dart`, `.docs/CONTEXT.md`.
+- **DefaultToast 세로 패딩 제거**: pill 내부 세로 패딩(기존 12+12) 제거, `minHeight` 48이 곧 pill 높이. `lib/utils/default_toast.dart`, `.docs/CONTEXT.md` 공통 UI 유틸 항목.
 - **Result V2 Feedback fallback**: `overallFeedback`가 null/빈 문자열이면 l10n `roleplayResultFeedbackInsufficientWords`를 대신 노출.
 - **Result V2 Got it 복귀 전 동기화**: Got it 탭 시 Overview로 pop하기 전에 best-effort로 `GET /v1/users`로 `UserDto`를 최신화해 Main에 반영(`MainUserSync.notifyUserUpdated`)하고, `GET /v1/roleplays/{roleplayId}`로 Overview를 재조회한 뒤 `RoleplayStateService.setOverview`로 반영한다. Overview는 `RoleplayStateService.overviewUpdateTick`을 listen해 pop 복귀 시 별/상태가 갱신된다. 구현: `lib/screens/roleplay/result_v2.dart`, `lib/screens/roleplay/overview.dart`, `lib/services/roleplay_state_service.dart`, 문서: `.docs/CONTEXT_SCREEN.md` §17-1.
 - **Ending → Result V2 전환**: Next 탭 시 풍선 확대·버튼 fade 애니메이션 제거. 별점 `PUT`은 기존처럼 비동기 발사 후 `RoleplayRouter.replaceWithResultV2()` 즉시 호출. 구현 `lib/screens/roleplay/ending.dart`, 문서 `.docs/CONTEXT_SCREEN.md` §14·§17-1, `.docs/CONTEXT_ROLEPLAY.md`.

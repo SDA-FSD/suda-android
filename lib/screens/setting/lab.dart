@@ -23,6 +23,8 @@ class _LabScreenState extends State<LabScreen> {
   bool _guarded = false;
   bool _showOkayButton = false;
   bool _toastIsWarning = false;
+  static const _longToastTestMessage =
+      'Test Popup, Test Toast, 가나다라마바사아자차카타파하';
   static const _stylePreviewLines = ['말해요!?', 'Talk', 'E sua vez primeiro!'];
   final TextEditingController _rpResultIdController = TextEditingController();
   bool _rpResultTestLoading = false;
@@ -69,6 +71,14 @@ class _LabScreenState extends State<LabScreen> {
   void _showTestToast() {
     final message = 'Test Popup, Test Toast';
     DefaultToast.show(context, message, isError: _toastIsWarning);
+  }
+
+  void _showTestToastLong() {
+    DefaultToast.show(
+      context,
+      _longToastTestMessage,
+      isError: _toastIsWarning,
+    );
   }
 
   Future<void> _openRpResultV2FromInput() async {
@@ -226,6 +236,23 @@ class _LabScreenState extends State<LabScreen> {
                   elevation: 0,
                 ),
                 child: const Text('Show Toast'),
+              ),
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: ElevatedButton(
+                onPressed: _showTestToastLong,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF0CABA8),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  elevation: 0,
+                ),
+                child: const Text('Show Toast(Long Text)'),
               ),
             ),
             _buildSectionDivider(),

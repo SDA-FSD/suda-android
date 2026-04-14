@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 /// 스펙:
 /// - 배경: 기본 #353535 85% 투명도 / 경고 #E4382A 85% 투명도
 /// - 텍스트: body-default, 흰색
-/// - 크기: min height 48, max width 90% 디스플레이
+/// - 크기: max width 90% 디스플레이, 가로 패딩 16·세로 패딩 12(minHeight 없음), 가로는 짧은 문구일 때 콘텐츠에 맞춤(Align widthFactor/heightFactor 1)
 /// - 위치: 하단에서 60px
 /// - 모양: 좌우 반원(Stadium)
 /// - duration: 기본 2초 (가시 시간)
@@ -20,7 +20,6 @@ class DefaultToast {
   static const Color _errorBg = Color(0xD9E4382A); // #E4382A @ 85%
   static const double _bottomOffset = 60;
   static const double _maxWidthRatio = 0.9;
-  static const double _minHeight = 48;
   static const double _maxRadius = 34; // 2줄 기준, 3줄 이상은 이 값 유지
   static const double _horizontalPadding = 16;
   static const double _verticalPadding = 12;
@@ -46,7 +45,10 @@ class DefaultToast {
         left: 0,
         right: 0,
         bottom: _bottomOffset,
-        child: Center(
+        child: Align(
+          alignment: Alignment.center,
+          widthFactor: 1,
+          heightFactor: 1,
           child: _ToastFadeWidget(
             fadeDuration: _fadeDuration,
             displayDuration: duration,
@@ -58,7 +60,6 @@ class DefaultToast {
             },
             child: ConstrainedBox(
               constraints: BoxConstraints(
-                minHeight: _minHeight,
                 maxWidth: mediaQuery.size.width * _maxWidthRatio,
               ),
               child: Material(
@@ -70,15 +71,15 @@ class DefaultToast {
                     horizontal: _horizontalPadding,
                     vertical: _verticalPadding,
                   ),
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(minHeight: _minHeight),
-                    child: Center(
-                      child: Text(
-                        message,
-                        style: theme.textTheme.bodyLarge?.copyWith(color: Colors.white),
-                        textAlign: TextAlign.center,
-                        maxLines: null,
-                      ),
+                  child: Align(
+                    alignment: Alignment.center,
+                    widthFactor: 1,
+                    heightFactor: 1,
+                    child: Text(
+                      message,
+                      style: theme.textTheme.bodyLarge?.copyWith(color: Colors.white),
+                      textAlign: TextAlign.center,
+                      maxLines: null,
                     ),
                   ),
                 ),
