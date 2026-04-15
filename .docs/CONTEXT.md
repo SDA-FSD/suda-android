@@ -247,7 +247,7 @@
 - **공통 UI 유틸**:
   - `lib/utils/default_toast.dart`: Overlay 기반 토스트 공통 처리 (배경 #353535/경고 #E4382A 85% 투명도, body-default 흰색, 좌우 패딩 16·세로 패딩 12·minHeight 없음, 하단 60px, 좌우 반원, 가로는 max 90% 디스플레이 내에서 짧은 문구는 콘텐츠 너비에 맞춤·`Align` widthFactor/heightFactor 1). **토스트 pill 탭** 시 표시 타이머를 끊고 **자동 사라짐과 동일한 fade-out**(동일 1초)으로 닫힘; 배경 UI 히트는 막지 않음.
   - 토스트 전체 목록 및 테스트 가이드: `.docs/TOAST_CATALOG.md`
-  - **Default Markdown** (`lib/utils/default_markdown.dart`): 서버 텍스트의 `***`(볼드+이탤릭), `**`(볼드), `*`(이탤릭)만 파싱해 `TextSpan` 리스트로 변환하는 공통 로직. `***` → `**` → `*` 순서로 처리하며 중첩 미지원. 줄바꿈은 기존 그대로 유지. 적용 구역: **Opening** 시나리오 영역(`RoleplayOpeningScreen`의 scenario), **Ending** 콘텐츠 영역(`RoleplayEndingScreen`·`ReviewEndingScreen`의 content).
+  - **Default Markdown** (`lib/utils/default_markdown.dart`): 서버 텍스트의 `***`(볼드+이탤릭), `**`(볼드), `*`(이탤릭)만 파싱해 `TextSpan` 리스트로 변환하는 공통 로직. `***` → `**` → `*` 순서로 처리하며 중첩 미지원. 줄바꿈은 기존 그대로 유지. 적용 구역: **Ending** 콘텐츠 영역(`RoleplayEndingScreen`·`ReviewEndingScreen`의 content). (`RoleplayOpeningScreen` 시나리오는 일반 `Text`·`bodyLarge` 흰색.)
 - **리팩토링 원칙**: 
   - 단일 책임 원칙: 각 서비스는 하나의 책임만 담당
   - 재사용성: 공통 기능은 서비스로 분리하여 재사용

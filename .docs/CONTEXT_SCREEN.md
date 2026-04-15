@@ -696,6 +696,7 @@
 
 ### 스크린 내부 구현 특이사항
 - `RoleplayDto.overviewImgPath`가 있으면 전면 배경: `lib/widgets/roleplay_overview_backdrop.dart`의 `RoleplayOverviewBackdrop`(URL·연출은 Overview 상단과 동일·디스크 캐시 공유). 없으면 `RoleplayScaffold` 기본 배경 `#121212`.
+- 본문: 선택 역할명은 `headlineLarge`·색 `#0CABA8`만(별도 `fontWeight` 없음). 시나리오 문구는 `localizedText`를 `DefaultMarkdown` 없이 단일 `Text`로, `bodyLarge`·흰색·중앙 정렬.
 - 시스템 뒤로가기 버튼 클릭 시: opening screen 삭제, 이전 overview 노출
 - 별도 X 버튼 제공 안 함
 - 중앙에 "Start" 텍스트 (임시, 향후 오프닝 콘텐츠로 대체 예정)
