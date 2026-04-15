@@ -90,9 +90,9 @@ flutter:
     - assets/images/
     - assets/images/icons/
     - assets/images/buttons/
-    - assets/images/tutorials/en/
-    - assets/images/tutorials/ko/
-    - assets/images/tutorials/pt/
+    - assets/images/tutorials2/en/
+    - assets/images/tutorials2/ko/
+    - assets/images/tutorials2/pt/
     - assets/fonts/
     - assets/sounds/
 

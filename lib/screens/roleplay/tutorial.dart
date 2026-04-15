@@ -25,10 +25,11 @@ class _RoleplayTutorialScreenState extends State<RoleplayTutorialScreen> {
   bool _isCheckingUser = true;
   bool _isSubmitting = false;
 
-  static const int _totalPages = 5;
+  static const int _totalPages = 6;
 
   static const List<Color> _pageColors = [
     Color(0xFF0CABA8),
+    Color(0xFFFFB700),
     Color(0xFFFF00A6),
     Color(0xFFFFB700),
     Color(0xFF0CABA8),
@@ -82,7 +83,7 @@ class _RoleplayTutorialScreenState extends State<RoleplayTutorialScreen> {
     final num = pageIndex + 1;
     final lang = LanguageUtil.getCurrentLanguageCode();
     final folder = (lang == 'ko' || lang == 'pt') ? lang : 'en';
-    return 'assets/images/tutorials/$folder/tutorial-$num.png';
+    return 'assets/images/tutorials2/$folder/tutorial-$num.png';
   }
 
   void _updateLocalUserTutorialDone() {

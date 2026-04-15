@@ -592,7 +592,7 @@
 - **appPath**: 해당 없음
 
 ### 스크린 용도
-- 앱 튜토리얼 슬라이드 화면 (5페이지 스와이프)
+- 앱 튜토리얼 슬라이드 화면 (6페이지 스와이프)
 - `userDto.metaInfo`의 `TUTORIAL` 값이 없거나 `'Y'`가 아닌 경우에만 노출
 - 완료 조건 충족 시 `POST /v1/users/tutorial` 호출 후 Opening으로 진입
 
@@ -605,9 +605,9 @@
 
 ### 스크린 내부 구현 특이사항
 - **진입 시 조건 체크**: `RoleplayStateService.instance.user` 없으면 `GET /v1/users` 호출. `TUTORIAL == 'Y'`이면 즉시 `replaceWithOpeningFromTutorial()`로 스킵
-- **이미지**: `assets/images/tutorials/{lang}/tutorial-{1~5}.png` (lang: ko/pt/en, 기본 en)
-- **인디케이터**: 상단 5개 dot, 활성 `#0CABA8`·비활성 `#4A4A4A`
-- **완료 처리**: 마지막(5번째) 페이지에서 화면 탭 시 `SudaApiClient.completeTutorial()` 호출 → `replaceWithOpeningFromTutorial()`
+- **이미지**: `assets/images/tutorials2/{lang}/tutorial-{1~6}.png` (lang: ko/pt/en, 기본 en)
+- **인디케이터**: 상단 6개 dot (활성: 흰색 / 비활성: 흰색 40% 불투명도)
+- **완료 처리**: 마지막(6번째) 페이지에서 화면 탭 시 `SudaApiClient.completeTutorial()` 호출 → `replaceWithOpeningFromTutorial()`
 - **뒤로가기**: `PopScope(canPop: true)` — Overview로 복귀 가능
 - **API**: `POST /v1/users/tutorial` (request body 없음, 200 응답 시 성공)
 - Route name: `/roleplay/tutorial`
