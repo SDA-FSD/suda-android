@@ -11,6 +11,7 @@ import 'package:record/record.dart';
 import '../../config/app_config.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/roleplay_models.dart';
+import '../../widgets/roleplay_overview_backdrop.dart';
 import '../../widgets/roleplay_scaffold.dart';
 import '../../routes/roleplay_router.dart';
 import '../../services/roleplay_state_service.dart';
@@ -20,15 +21,12 @@ import '../../services/token_storage.dart';
 import '../../utils/suda_json_util.dart';
 
 /// Roleplay Playing Screen (Full Screen)
-/// 
+///
 /// Roleplay 진행 중 화면
 class RoleplayPlayingScreen extends StatefulWidget {
   final bool showCloseButton;
 
-  const RoleplayPlayingScreen({
-    super.key,
-    this.showCloseButton = true,
-  });
+  const RoleplayPlayingScreen({super.key, this.showCloseButton = true});
 
   @override
   State<RoleplayPlayingScreen> createState() => _RoleplayPlayingScreenState();
@@ -191,7 +189,8 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
 
   bool get _isUserStarterRoleplay {
     final roleId = RoleplayStateService.instance.roleId;
-    final starterKey = RoleplayStateService.instance.overview?.roleplay?.starter?.key;
+    final starterKey =
+        RoleplayStateService.instance.overview?.roleplay?.starter?.key;
     if (roleId == null || starterKey == null) return false;
     return roleId.toString() == starterKey;
   }
@@ -268,13 +267,10 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     if (audioSource != null) {
       unawaited(_playPreparedAiVoice(audioSource));
     }
-    _typingTimer = Timer(
-      Duration(milliseconds: delayMs),
-      () {
-        if (!mounted) return;
-        _showNarrationAfterTyping();
-      },
-    );
+    _typingTimer = Timer(Duration(milliseconds: delayMs), () {
+      if (!mounted) return;
+      _showNarrationAfterTyping();
+    });
   }
 
   void _prepareNarrationAfterAiStart() {
@@ -330,9 +326,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
             message.contains('HTTP 202') || message.contains('HTTP 500');
         if (!shouldRetry || attempt >= delays.length) {
           if (attempt >= delays.length) {
-            debugPrint(
-              '[DEBUG] Narration: 15회 재시도 소진 후 실패 (last: $e)',
-            );
+            debugPrint('[DEBUG] Narration: 15회 재시도 소진 후 실패 (last: $e)');
           }
           return null;
         }
@@ -626,8 +620,9 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
       return source;
     }
     if (bytes != null && bytes.isNotEmpty) {
-      final source =
-          AudioSource.uri(Uri.dataFromBytes(bytes, mimeType: 'audio/mpeg'));
+      final source = AudioSource.uri(
+        Uri.dataFromBytes(bytes, mimeType: 'audio/mpeg'),
+      );
       await _audioPlayer.setAudioSource(source);
       return source;
     }
@@ -637,9 +632,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
   Future<Duration?> _playPreparedAiVoice(AudioSource? source) async {
     if (source == null) return null;
     await _audioPlayer.play();
-    debugPrint(
-      '[DEBUG] AI voice play: ${DateTime.now().toIso8601String()}',
-    );
+    debugPrint('[DEBUG] AI voice play: ${DateTime.now().toIso8601String()}');
     return _audioPlayer.duration;
   }
 
@@ -667,7 +660,10 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     required bool commit,
   }) {
     final stepGap = railHeight / (_speedRateSteps.length - 1);
-    final nextIndex = (dy / stepGap).round().clamp(0, _speedRateSteps.length - 1);
+    final nextIndex = (dy / stepGap).round().clamp(
+      0,
+      _speedRateSteps.length - 1,
+    );
     if (_speedIndex != nextIndex) {
       setState(() {
         _speedIndex = nextIndex;
@@ -696,7 +692,6 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
       // ignore errors per requirement
     }
   }
-
 
   int _parseDurationSeconds(String? raw) {
     if (raw == null || raw.isEmpty) return 0;
@@ -891,20 +886,19 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     const double gapBeforeAiTranslationIcon = 5;
     const double aiAvatarRowWidth = 40;
     const double gapAvatarToBubble = 5;
-    final maxRowWidthBeforeTranslation = bodyWidth -
-        gapBeforeAiTranslationIcon -
-        aiTranslationIconSize;
+    final maxRowWidthBeforeTranslation =
+        bodyWidth - gapBeforeAiTranslationIcon - aiTranslationIconSize;
     final maxAiBubbleWidth = math.max(
       0.0,
       maxRowWidthBeforeTranslation - aiAvatarRowWidth - gapAvatarToBubble,
     );
-    final textStyle = Theme.of(context).textTheme.bodyLarge?.copyWith(
-          color: Colors.white,
-        );
+    final textStyle = Theme.of(
+      context,
+    ).textTheme.bodyLarge?.copyWith(color: Colors.white);
     final translationText = entry.translationText;
-    final translationStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: Colors.white,
-        );
+    final translationStyle = Theme.of(
+      context,
+    ).textTheme.bodySmall?.copyWith(color: Colors.white);
     return AnimatedOpacity(
       opacity: entry.isVisible ? 1 : 0,
       duration: const Duration(milliseconds: 150),
@@ -933,15 +927,9 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
                       children: [
                         Opacity(
                           opacity: 0,
-                          child: Text(
-                            messageText,
-                            style: textStyle,
-                          ),
+                          child: Text(messageText, style: textStyle),
                         ),
-                        Text(
-                          entry.visibleText ?? '',
-                          style: textStyle,
-                        ),
+                        Text(entry.visibleText ?? '', style: textStyle),
                       ],
                     ),
                   ),
@@ -960,10 +948,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
             if (entry.isTranslationExpanded && translationText != null)
               Padding(
                 padding: const EdgeInsets.only(top: 6, left: 45),
-                child: Text(
-                  translationText,
-                  style: translationStyle,
-                ),
+                child: Text(translationText, style: translationStyle),
               ),
           ],
         ),
@@ -993,18 +978,15 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     );
   }
 
-  Widget _buildNarration(
-    BuildContext context,
-    _ConversationEntry entry,
-  ) {
+  Widget _buildNarration(BuildContext context, _ConversationEntry entry) {
     final narration = entry.narration;
     if (narration == null || narration.text == null) {
       return const SizedBox.shrink();
     }
     final isMission = narration.missionActiveYn == 'Y';
-    final baseStyle = Theme.of(context).textTheme.bodyMedium?.copyWith(
-          fontStyle: FontStyle.italic,
-        );
+    final baseStyle = Theme.of(
+      context,
+    ).textTheme.bodyMedium?.copyWith(fontStyle: FontStyle.italic);
     final missionColor = const Color(0xFFFF00A6);
     return AnimatedOpacity(
       opacity: entry.isVisible ? 1 : 0,
@@ -1054,9 +1036,9 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
   ) {
     final text = entry.text ?? '';
     if (text.isEmpty) return const SizedBox.shrink();
-    final textStyle = Theme.of(context).textTheme.bodyLarge?.copyWith(
-          color: Colors.black,
-        );
+    final textStyle = Theme.of(
+      context,
+    ).textTheme.bodyLarge?.copyWith(color: Colors.black);
     final maxBubbleWidth = bodyWidth * 0.7;
     return AnimatedOpacity(
       opacity: entry.isVisible ? 1 : 0,
@@ -1071,10 +1053,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
               color: Colors.white,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Text(
-              text,
-              style: textStyle,
-            ),
+            child: Text(text, style: textStyle),
           ),
         ),
       ),
@@ -1083,6 +1062,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
 
   static const Color _hintBubbleBg = Color(0xFF194847);
   static const Color _hintPlaybackTeal = Color(0xFF0CABA8);
+
   /// 단어 텍스트와 점선 밑줄 사이 (논리 픽셀).
   static const double _hintWordUnderlineGap = 2;
 
@@ -1128,9 +1108,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
             width: underlineWidth,
             height: 3,
             child: CustomPaint(
-              painter: _HintDottedUnderlinePainter(
-                color: _hintPlaybackTeal,
-              ),
+              painter: _HintDottedUnderlinePainter(color: _hintPlaybackTeal),
             ),
           ),
         ],
@@ -1281,10 +1259,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     );
   }
 
-  Widget _buildRecordingBubble(
-    BuildContext context,
-    _ConversationEntry entry,
-  ) {
+  Widget _buildRecordingBubble(BuildContext context, _ConversationEntry entry) {
     return AnimatedOpacity(
       opacity: entry.isVisible ? 1 : 0,
       duration: const Duration(milliseconds: 150),
@@ -1354,16 +1329,21 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     return KeyedSubtree(
       key: entry.key,
       child: switch (entry.type) {
-        _ConversationEntryType.ai =>
-          _buildAiMessage(context, bodyWidth, entry),
+        _ConversationEntryType.ai => _buildAiMessage(context, bodyWidth, entry),
         _ConversationEntryType.narration => _buildNarration(context, entry),
-        _ConversationEntryType.user =>
-          _buildUserMessage(context, bodyWidth, entry),
+        _ConversationEntryType.user => _buildUserMessage(
+          context,
+          bodyWidth,
+          entry,
+        ),
         _ConversationEntryType.hint => Padding(
-            padding: const EdgeInsets.symmetric(vertical: 20),
-            child: _buildHintBubble(context, bodyWidth, entry),
-          ),
-        _ConversationEntryType.recording => _buildRecordingBubble(context, entry),
+          padding: const EdgeInsets.symmetric(vertical: 20),
+          child: _buildHintBubble(context, bodyWidth, entry),
+        ),
+        _ConversationEntryType.recording => _buildRecordingBubble(
+          context,
+          entry,
+        ),
       },
     );
   }
@@ -1425,9 +1405,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
   int get _totalMissionCount => _missionStatuses.length;
 
   int get _completedMissionCount =>
-      _missionStatuses.values
-          .where((s) => s == _MissionStatus.success)
-          .length;
+      _missionStatuses.values.where((s) => s == _MissionStatus.success).length;
 
   bool get _allMissionsCompleted =>
       _totalMissionCount > 0 && _completedMissionCount == _totalMissionCount;
@@ -1450,8 +1428,8 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     final String endedMessage = allCompleted
         ? l10n.roleplayEndedEnding
         : (_remainingSeconds == 0
-            ? l10n.roleplayEndedTimesup
-            : l10n.roleplayEndedComplete);
+              ? l10n.roleplayEndedTimesup
+              : l10n.roleplayEndedComplete);
     _showEndedServiceMessage(endedMessage);
 
     final accessToken = await TokenStorage.loadAccessToken();
@@ -1468,7 +1446,8 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     ];
     if (allCompleted && mounted) {
       RoleplayRoleDto? role;
-      final roleList = RoleplayStateService.instance.overview?.roleplay?.roleList;
+      final roleList =
+          RoleplayStateService.instance.overview?.roleplay?.roleList;
       final roleId = RoleplayStateService.instance.roleId;
       if (roleList != null && roleId != null) {
         for (final r in roleList) {
@@ -1680,9 +1659,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
             message.contains('HTTP 202') || message.contains('HTTP 500');
         if (!shouldRetry || attempt >= delays.length) {
           if (attempt >= delays.length) {
-            debugPrint(
-              '[DEBUG] AI response: 15회 재시도 소진 후 실패 (last: $e)',
-            );
+            debugPrint('[DEBUG] AI response: 15회 재시도 소진 후 실패 (last: $e)');
           }
           return null;
         }
@@ -1762,17 +1739,17 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
                   const SizedBox(height: 24),
                   Text(
                     '1.5x',
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodySmall
-                        ?.copyWith(color: Colors.white),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(color: Colors.white),
                   ),
                   const SizedBox(height: 2),
                   Expanded(
                     child: LayoutBuilder(
                       builder: (context, constraints) {
                         const handleRadius = 12.0;
-                        final railHeight = constraints.maxHeight - (handleRadius * 2);
+                        final railHeight =
+                            constraints.maxHeight - (handleRadius * 2);
                         final stepGap =
                             railHeight / (_speedRateSteps.length - 1);
                         final handleCenterY =
@@ -1787,10 +1764,10 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
                           ),
                           onVerticalDragUpdate: (details) =>
                               _setSpeedIndexFromOffset(
-                            dy: details.localPosition.dy - handleRadius,
-                            railHeight: railHeight,
-                            commit: false,
-                          ),
+                                dy: details.localPosition.dy - handleRadius,
+                                railHeight: railHeight,
+                                commit: false,
+                              ),
                           onVerticalDragEnd: (_) => _commitSpeedIndex(),
                           child: Stack(
                             alignment: Alignment.center,
@@ -1798,7 +1775,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
                               Center(
                                 child: Container(
                                   width: 4,
-                                height: railHeight,
+                                  height: railHeight,
                                   color: Colors.white,
                                 ),
                               ),
@@ -1819,15 +1796,14 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
                       },
                     ),
                   ),
-                const SizedBox(height: 2),
-                Text(
+                  const SizedBox(height: 2),
+                  Text(
                     '0.7x',
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodySmall
-                        ?.copyWith(color: Colors.white),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(color: Colors.white),
                   ),
-                const SizedBox(height: 24),
+                  const SizedBox(height: 24),
                 ],
               ),
             ),
@@ -1848,8 +1824,9 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
           final barWidth = (width - iconSize).clamp(0.0, width);
           final barLeft = (width - barWidth) / 2;
           final maxIndex = _maxStepIndex;
-          final progressRatio =
-              maxIndex <= 0 ? 0.0 : (_currentStep / maxIndex).clamp(0.0, 1.0);
+          final progressRatio = maxIndex <= 0
+              ? 0.0
+              : (_currentStep / maxIndex).clamp(0.0, 1.0);
           final progressWidth = barWidth * progressRatio;
           const barHeight = 3.0;
           final barTop = (18 - barHeight) / 2;
@@ -1913,7 +1890,8 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
       _MissionStatus.success => 'assets/images/icons/mission_succeeded.png',
       _MissionStatus.failed => 'assets/images/icons/mission_failed.png',
     };
-    final shouldAnimate = _animatingSteps.containsKey(stepIndex) &&
+    final shouldAnimate =
+        _animatingSteps.containsKey(stepIndex) &&
         _animatingSteps[stepIndex] == status;
 
     return Positioned(
@@ -1967,6 +1945,11 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     // Opening과 동일한 헤더 표기 규칙
     final titleEn = SudaJsonUtil.englishText(roleplay?.title);
 
+    final overviewImgPath = roleplay?.overviewImgPath;
+    final backdropUrl = (overviewImgPath != null && overviewImgPath.isNotEmpty)
+        ? '${AppConfig.cdnBaseUrl}$overviewImgPath'
+        : null;
+
     final durationFormatted = _formatRemaining();
     final durationColor = _remainingSeconds <= 10 ? Colors.red : Colors.white;
     final topInset = MediaQuery.of(context).padding.top;
@@ -1977,8 +1960,14 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
         if (!didPop) _handleBackButton(context);
       },
       child: Stack(
+        fit: StackFit.expand,
         children: [
+          if (backdropUrl != null)
+            Positioned.fill(
+              child: RoleplayOverviewBackdrop(imageUrl: backdropUrl),
+            ),
           RoleplayScaffold(
+            backgroundColor: backdropUrl != null ? Colors.transparent : null,
             showCloseButton: widget.showCloseButton,
             onClose: () => _handleBackButton(context),
             title: titleEn,
@@ -2008,9 +1997,11 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
                               mainAxisSize: MainAxisSize.min,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                for (var i = 0;
-                                    i < _conversationEntries.length;
-                                    i++) ...[
+                                for (
+                                  var i = 0;
+                                  i < _conversationEntries.length;
+                                  i++
+                                ) ...[
                                   if (i > 0) const SizedBox(height: 14),
                                   _buildConversationEntry(
                                     context,
@@ -2053,11 +2044,10 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
                         duration: const Duration(milliseconds: 500),
                         child: Text(
                           _serviceMessageText ?? '',
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyMedium
+                          style: Theme.of(context).textTheme.bodyMedium
                               ?.copyWith(
-                                  color: _serviceMessageColor ?? Colors.white),
+                                color: _serviceMessageColor ?? Colors.white,
+                              ),
                         ),
                       ),
                     ),
@@ -2111,17 +2101,22 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
                                       hintStyle: Theme.of(context)
                                           .textTheme
                                           .bodyMedium
-                                          ?.copyWith(color: const Color(0xFF9B9B9B)),
+                                          ?.copyWith(
+                                            color: const Color(0xFF9B9B9B),
+                                          ),
                                       contentPadding:
-                                          const EdgeInsets.symmetric(horizontal: 16),
+                                          const EdgeInsets.symmetric(
+                                            horizontal: 16,
+                                          ),
                                     ),
                                   ),
                                 ),
                               ),
                               const SizedBox(width: 10),
                               GestureDetector(
-                                onTap:
-                                    _isTypingEnabled && _isUserTurn ? _handleSend : null,
+                                onTap: _isTypingEnabled && _isUserTurn
+                                    ? _handleSend
+                                    : null,
                                 child: Container(
                                   width: 44,
                                   height: 44,
@@ -2154,7 +2149,8 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
                         children: [
                           GestureDetector(
                             onTap: () {
-                              final toRecording = _inputMode == _InputMode.typing;
+                              final toRecording =
+                                  _inputMode == _InputMode.typing;
                               if (!toRecording) {
                                 _cancelHintIdleAndBlink();
                               }
@@ -2188,7 +2184,8 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
                               animation: _hintBlinkController,
                               builder: (context, child) {
                                 final baseOpacity = _isHintEnabled ? 1.0 : 0.4;
-                                final blinkOpacity = _hintBlinkController.isAnimating
+                                final blinkOpacity =
+                                    _hintBlinkController.isAnimating
                                     ? _hintBlinkController.value
                                     : baseOpacity;
                                 return Opacity(
@@ -2358,30 +2355,13 @@ class _HintDottedUnderlinePainter extends CustomPainter {
       color != oldDelegate.color;
 }
 
-enum _MissionStatus {
-  ready,
-  success,
-  failed,
-}
+enum _MissionStatus { ready, success, failed }
 
-enum _InputMode {
-  recording,
-  typing,
-}
+enum _InputMode { recording, typing }
 
-enum _MicButtonState {
-  defaultState,
-  loading,
-  disabled,
-}
+enum _MicButtonState { defaultState, loading, disabled }
 
-enum _ConversationEntryType {
-  ai,
-  narration,
-  user,
-  hint,
-  recording,
-}
+enum _ConversationEntryType { ai, narration, user, hint, recording }
 
 class _ConversationEntry {
   final _ConversationEntryType type;
@@ -2426,10 +2406,7 @@ class _ConversationEntry {
   }
 
   factory _ConversationEntry.user({required String text}) {
-    return _ConversationEntry._(
-      type: _ConversationEntryType.user,
-      text: text,
-    );
+    return _ConversationEntry._(type: _ConversationEntryType.user, text: text);
   }
 
   factory _ConversationEntry.hintLoading() {
@@ -2442,9 +2419,7 @@ class _ConversationEntry {
   }
 
   factory _ConversationEntry.recording() {
-    return _ConversationEntry._(
-      type: _ConversationEntryType.recording,
-    );
+    return _ConversationEntry._(type: _ConversationEntryType.recording);
   }
 
   bool get consumesIndex =>
@@ -2550,11 +2525,16 @@ class _MicButtonAreaState extends State<_MicButtonArea>
     final centerX = _lastCenterX;
     final cancelCenter = _lastCancelCenter;
     final maxLeftOffset = _lastMaxLeftOffset;
-    if (centerX == null || cancelCenter == null || maxLeftOffset == null) return;
-    final nextOffset = (_dragOffset.value + event.delta.dx).clamp(maxLeftOffset, 0.0);
+    if (centerX == null || cancelCenter == null || maxLeftOffset == null)
+      return;
+    final nextOffset = (_dragOffset.value + event.delta.dx).clamp(
+      maxLeftOffset,
+      0.0,
+    );
     final buttonLeft = centerX + nextOffset - (_micPressedSize / 2);
     final cancelHovered = buttonLeft <= cancelCenter;
-    if (nextOffset != _dragOffset.value || cancelHovered != _isCancelHovered.value) {
+    if (nextOffset != _dragOffset.value ||
+        cancelHovered != _isCancelHovered.value) {
       _dragOffset.value = nextOffset;
       _isCancelHovered.value = cancelHovered;
     }
@@ -2581,15 +2561,26 @@ class _MicButtonAreaState extends State<_MicButtonArea>
   double? _lastCancelCenter;
   double? _lastMaxLeftOffset;
 
-  static String _assetFor(bool isPressed, bool cancelHover, bool isLoading, bool isDisabled) {
+  static String _assetFor(
+    bool isPressed,
+    bool cancelHover,
+    bool isLoading,
+    bool isDisabled,
+  ) {
     if (isLoading) return 'assets/images/buttons/mic_btn_loading.png';
     if (isDisabled) return 'assets/images/buttons/mic_btn_disabled.png';
-    if (isPressed && cancelHover) return 'assets/images/buttons/mic_btn_default.png';
+    if (isPressed && cancelHover)
+      return 'assets/images/buttons/mic_btn_default.png';
     if (isPressed) return 'assets/images/buttons/mic_btn_pressed.png';
     return 'assets/images/buttons/mic_btn_default.png';
   }
 
-  static double _sizeFor(bool isPressed, bool cancelHover, bool isLoading, bool isDisabled) {
+  static double _sizeFor(
+    bool isPressed,
+    bool cancelHover,
+    bool isLoading,
+    bool isDisabled,
+  ) {
     if (isLoading || isDisabled) return _micDefaultSize;
     if (isPressed && cancelHover) return _micDefaultSize;
     if (isPressed) return _micPressedSize;
@@ -2606,8 +2597,18 @@ class _MicButtonAreaState extends State<_MicButtonArea>
             return ValueListenableBuilder<bool>(
               valueListenable: _isCancelHovered,
               builder: (context, cancelHovered, ___) {
-                final size = _sizeFor(isPressed, cancelHovered, widget.isLoading, widget.isDisabled);
-                final asset = _assetFor(isPressed, cancelHovered, widget.isLoading, widget.isDisabled);
+                final size = _sizeFor(
+                  isPressed,
+                  cancelHovered,
+                  widget.isLoading,
+                  widget.isDisabled,
+                );
+                final asset = _assetFor(
+                  isPressed,
+                  cancelHovered,
+                  widget.isLoading,
+                  widget.isDisabled,
+                );
                 final image = Image.asset(asset, width: size, height: size);
                 final content = widget.isLoading
                     ? RotationTransition(
@@ -2629,7 +2630,11 @@ class _MicButtonAreaState extends State<_MicButtonArea>
     );
   }
 
-  Widget _buildDragArrows(double cancelRightX, double areaHeight, double anchorLeftX) {
+  Widget _buildDragArrows(
+    double cancelRightX,
+    double areaHeight,
+    double anchorLeftX,
+  ) {
     const iconSize = 16.0;
     const gap = 5.0;
     const count = 3;
@@ -2705,9 +2710,11 @@ class _MicButtonAreaState extends State<_MicButtonArea>
       builder: (context, constraints) {
         final areaWidth = constraints.maxWidth;
         final centerX = areaWidth / 2;
-        final cancelStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: const Color(0xFF0CABA8),
-            ) ?? const TextStyle();
+        final cancelStyle =
+            Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: const Color(0xFF0CABA8)) ??
+            const TextStyle();
         final cancelWidth = _measureTextWidth('Cancel', cancelStyle);
         final cancelCenter = cancelWidth / 2;
         final maxLeftOffset = (_micPressedSize / 2) - centerX;
@@ -2733,7 +2740,11 @@ class _MicButtonAreaState extends State<_MicButtonArea>
                   ),
                 ),
                 if (showArrows)
-                  _buildDragArrows(cancelWidth, 120, centerX - (_micPressedSize / 2)),
+                  _buildDragArrows(
+                    cancelWidth,
+                    120,
+                    centerX - (_micPressedSize / 2),
+                  ),
                 Center(
                   child: ValueListenableBuilder<double>(
                     valueListenable: _dragOffset,
@@ -2802,10 +2813,7 @@ class _MissionIconScaleState extends State<_MissionIconScale>
       vsync: this,
       duration: const Duration(milliseconds: 350),
     );
-    _scale = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOutBack,
-    );
+    _scale = CurvedAnimation(parent: _controller, curve: Curves.easeOutBack);
     if (widget.animate) {
       _startAnimation();
     }
@@ -2834,20 +2842,12 @@ class _MissionIconScaleState extends State<_MissionIconScale>
   @override
   Widget build(BuildContext context) {
     if (!widget.animate) {
-      return Image.asset(
-        widget.asset,
-        width: widget.size,
-        height: widget.size,
-      );
+      return Image.asset(widget.asset, width: widget.size, height: widget.size);
     }
 
     return ScaleTransition(
       scale: _scale,
-      child: Image.asset(
-        widget.asset,
-        width: widget.size,
-        height: widget.size,
-      ),
+      child: Image.asset(widget.asset, width: widget.size, height: widget.size),
     );
   }
 }

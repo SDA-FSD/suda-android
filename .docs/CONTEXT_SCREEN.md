@@ -675,7 +675,7 @@
 
 ### 스크린 관련 정의 파일
 - **파일 경로**: `lib/screens/roleplay/opening.dart`
-- **클래스명**: `RoleplayOpeningScreen` (StatelessWidget)
+- **클래스명**: `RoleplayOpeningScreen` (StatefulWidget)
 - **스크린 타입**: **Full Screen**
 - **appPath**: 해당 없음 (role 선택 필수)
 
@@ -695,6 +695,7 @@
   - 팝업 닫힘 후 SubScreenRoute로 우측에서 슬라이드 인
 
 ### 스크린 내부 구현 특이사항
+- `RoleplayDto.overviewImgPath`가 있으면 전면 배경: `lib/widgets/roleplay_overview_backdrop.dart`의 `RoleplayOverviewBackdrop`(URL·연출은 Overview 상단과 동일·디스크 캐시 공유). 없으면 `RoleplayScaffold` 기본 배경 `#121212`.
 - 시스템 뒤로가기 버튼 클릭 시: opening screen 삭제, 이전 overview 노출
 - 별도 X 버튼 제공 안 함
 - 중앙에 "Start" 텍스트 (임시, 향후 오프닝 콘텐츠로 대체 예정)
@@ -767,6 +768,7 @@
   - `Navigator.pushReplacement()`로 전환 (playing screen 삭제, 돌아올 일 없음)
 
 ### 스크린 내부 구현 특이사항
+- Opening과 동일: `overviewImgPath`가 있으면 `RoleplayOverviewBackdrop` 전면 배경(`RoleplayScaffold` 투명). `RoleplayStateService`의 동일 overview 컨텍스트 사용.
 - 시스템 뒤로가기 버튼 클릭 시: "페이지를 나갑니다" 얼럿 노출, 확인 시 playing screen 삭제, 이전 overview 노출
 - 별도 X 버튼 제공 안 함
 - 중앙에 "Ending", "Failed" 텍스트 (임시, 향후 게임 진행 UI로 대체 예정)

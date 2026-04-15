@@ -168,6 +168,7 @@
 
 - Roleplay 관련 스크린 흐름 및 데이터 정책은 `.docs/CONTEXT_ROLEPLAY.md`를 참조합니다.
 - Roleplay 세션 `sessionId`는 인메모리 공통 상태로 보관하고 롤플레이 종료 시 삭제됩니다.
+- **RoleplayOpeningScreen / RoleplayPlayingScreen** 전면 배경: `overviewImgPath`가 있으면 공통 위젯 `RoleplayOverviewBackdrop`(`lib/widgets/roleplay_overview_backdrop.dart`, Overview와 동일 CDN URL·캐시). 상세는 `.docs/CONTEXT_SCREEN.md` §12·§13.
 
 ## 8. 스타일 / 디자인 / 배치 규칙
 

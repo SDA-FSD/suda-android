@@ -3,6 +3,8 @@ import 'dart:async' show unawaited;
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:vibration/vibration.dart';
+import '../../config/app_config.dart';
+import '../../widgets/roleplay_overview_backdrop.dart';
 import '../../widgets/roleplay_scaffold.dart';
 import '../../services/roleplay_state_service.dart';
 import '../../services/suda_api_client.dart';
@@ -25,15 +27,12 @@ const String _kOpeningPlayStoreShareUrl =
     'https://play.google.com/store/apps/details?id=kr.sudatalk.app';
 
 /// Roleplay Opening Screen (Full Screen)
-/// 
+///
 /// Roleplay 시작 전 오프닝 화면
 class RoleplayOpeningScreen extends StatefulWidget {
   final bool showCloseButton;
 
-  const RoleplayOpeningScreen({
-    super.key,
-    this.showCloseButton = true,
-  });
+  const RoleplayOpeningScreen({super.key, this.showCloseButton = true});
 
   @override
   State<RoleplayOpeningScreen> createState() => _RoleplayOpeningScreenState();
@@ -176,10 +175,7 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen>
           return;
         }
         if (sessionId == '-30') {
-          await showRoleplayOpeningShareQuestDefaultPopup(
-            context,
-            sessionId,
-          );
+          await showRoleplayOpeningShareQuestDefaultPopup(context, sessionId);
           _restoreButton();
           return;
         }
@@ -239,10 +235,17 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen>
     }
 
     final theme = Theme.of(context).textTheme;
-    final scenarioStyle = theme.headlineSmall?.copyWith(
-      fontWeight: FontWeight.w400,
-      color: Colors.white,
-    ) ?? TextStyle(fontWeight: FontWeight.w400, color: Colors.white);
+    final scenarioStyle =
+        theme.headlineSmall?.copyWith(
+          fontWeight: FontWeight.w400,
+          color: Colors.white,
+        ) ??
+        TextStyle(fontWeight: FontWeight.w400, color: Colors.white);
+
+    final overviewImgPath = roleplay?.overviewImgPath;
+    final backdropUrl = (overviewImgPath != null && overviewImgPath.isNotEmpty)
+        ? '${AppConfig.cdnBaseUrl}$overviewImgPath'
+        : null;
 
     return PopScope(
       canPop: true,
@@ -250,110 +253,125 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen>
         // opening screen이 이미 pop되었으므로 overview로 자동으로 돌아감
         // Navigator.pop()이 자동으로 처리함
       },
-      child: RoleplayScaffold(
-        showCloseButton: widget.showCloseButton,
-        title: titleEn,
-        duration: durationFormatted,
-        body: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min, // 중앙에 쫀쫀하게 모임
-            children: [
-              Text(
-                'Your Role',
-                style: theme.headlineSmall?.copyWith(color: Colors.white),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          if (backdropUrl != null)
+            Positioned.fill(
+              child: RoleplayOverviewBackdrop(imageUrl: backdropUrl),
+            ),
+          RoleplayScaffold(
+            backgroundColor: backdropUrl != null ? Colors.transparent : null,
+            showCloseButton: widget.showCloseButton,
+            title: titleEn,
+            duration: durationFormatted,
+            body: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min, // 중앙에 쫀쫀하게 모임
+                children: [
+                  Text(
+                    'Your Role',
+                    style: theme.headlineSmall?.copyWith(color: Colors.white),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    SudaJsonUtil.localizedText(selectedRole?.name),
+                    style: theme.headlineLarge?.copyWith(
+                      fontWeight: FontWeight.w300,
+                      color: const Color(0xFF0CABA8),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 40),
+                  Text(
+                    'Scenario',
+                    style: theme.headlineSmall?.copyWith(color: Colors.white),
+                  ),
+                  const SizedBox(height: 20),
+                  Text.rich(
+                    TextSpan(
+                      style: scenarioStyle,
+                      children: DefaultMarkdown.buildSpans(
+                        SudaJsonUtil.localizedText(selectedRole?.scenario),
+                        scenarioStyle,
+                      ),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
-              const SizedBox(height: 20),
-              Text(
-                SudaJsonUtil.localizedText(selectedRole?.name),
-                style: theme.headlineLarge?.copyWith(
-                  fontWeight: FontWeight.w300,
-                  color: const Color(0xFF0CABA8),
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 40),
-              Text(
-                'Scenario',
-                style: theme.headlineSmall?.copyWith(color: Colors.white),
-              ),
-              const SizedBox(height: 20),
-              Text.rich(
-                TextSpan(
-                  style: scenarioStyle,
-                  children: DefaultMarkdown.buildSpans(
-                    SudaJsonUtil.localizedText(selectedRole?.scenario),
-                    scenarioStyle,
+            ),
+            footer: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  height: 40,
+                  child: Center(
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        if (_showTicketPhase1)
+                          FadeTransition(
+                            opacity: _ticketOpacity1,
+                            child: Image.asset(
+                              'assets/images/icons/ticket.png',
+                              width: 40,
+                              height: 20,
+                            ),
+                          ),
+                        if (_showTicketPhase2)
+                          FadeTransition(
+                            opacity: _ticketOpacity2,
+                            child: Image.asset(
+                              'assets/images/icons/ticket_used.png',
+                              width: 44,
+                              height: 22,
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
                 ),
-                textAlign: TextAlign.center,
-              ),
-            ],
+                SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.4,
+                  child: ElevatedButton(
+                    onPressed: _isLoading
+                        ? null
+                        : () async {
+                            setState(() => _isLoading = true);
+                            await _navigateToPlaying(context);
+                          },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF0CABA8),
+                      foregroundColor: Colors.white,
+                      disabledBackgroundColor: const Color(0xFF0CABA8),
+                      disabledForegroundColor: Colors.white,
+                      shape: const StadiumBorder(),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 30,
+                        vertical: 18,
+                      ),
+                      elevation: 0,
+                    ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            height: 24,
+                            width: 24,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
+                            ),
+                          )
+                        : const Text("Let's Start"),
+                  ),
+                ),
+                const SizedBox(height: 50),
+              ],
+            ),
           ),
-        ),
-        footer: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              height: 40,
-              child: Center(
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    if (_showTicketPhase1)
-                      FadeTransition(
-                        opacity: _ticketOpacity1,
-                        child: Image.asset(
-                          'assets/images/icons/ticket.png',
-                          width: 40,
-                          height: 20,
-                        ),
-                      ),
-                    if (_showTicketPhase2)
-                      FadeTransition(
-                        opacity: _ticketOpacity2,
-                        child: Image.asset(
-                          'assets/images/icons/ticket_used.png',
-                          width: 44,
-                          height: 22,
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(
-              width: MediaQuery.of(context).size.width * 0.4,
-              child: ElevatedButton(
-                onPressed: _isLoading
-                    ? null
-                    : () async {
-                        setState(() => _isLoading = true);
-                        await _navigateToPlaying(context);
-                      },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0CABA8),
-                  foregroundColor: Colors.white,
-                  disabledBackgroundColor: const Color(0xFF0CABA8),
-                  disabledForegroundColor: Colors.white,
-                  shape: const StadiumBorder(),
-                  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 18),
-                  elevation: 0,
-                ),
-                child: _isLoading
-                    ? const SizedBox(
-                        height: 24,
-                        width: 24,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                        ),
-                      )
-                    : const Text("Let's Start"),
-              ),
-            ),
-            const SizedBox(height: 50),
-          ],
-        ),
+        ],
       ),
     );
   }
@@ -363,8 +381,7 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen>
 Future<void> showRoleplayOpeningDailyTicketDefaultPopup(
   BuildContext context,
   String accessToken,
-) =>
-    showDailyTicketDefaultPopup(context, accessToken);
+) => showDailyTicketDefaultPopup(context, accessToken);
 
 /// `sessionId == '0'` no tickets popup (`DefaultPopup`). Primary uses "Okay".
 Future<void> showRoleplayOpeningNoTicketsDefaultPopup(
@@ -416,9 +433,7 @@ Future<void> showRoleplayOpeningSurveyQuestDefaultPopup(
         ),
         Text(
           l10n.surveyPromptLine2,
-          style: theme.bodyLarge?.copyWith(
-            color: const Color(0xFF0CABA8),
-          ),
+          style: theme.bodyLarge?.copyWith(color: const Color(0xFF0CABA8)),
           textAlign: TextAlign.center,
         ),
       ],
@@ -466,9 +481,7 @@ Future<void> showRoleplayOpeningPushNotificationQuestDefaultPopup(
         ),
         Text(
           l10n.pushTicketPromptLine2,
-          style: theme.bodyLarge?.copyWith(
-            color: const Color(0xFF0CABA8),
-          ),
+          style: theme.bodyLarge?.copyWith(color: const Color(0xFF0CABA8)),
           textAlign: TextAlign.center,
         ),
       ],
@@ -481,9 +494,7 @@ Future<void> showRoleplayOpeningPushNotificationQuestDefaultPopup(
           if (!outer.mounted) return;
           Navigator.push(
             outer,
-            SubScreenRoute(
-              page: const PushAgreementScreen(),
-            ),
+            SubScreenRoute(page: const PushAgreementScreen()),
           );
         },
       ),
@@ -549,9 +560,7 @@ Future<void> showRoleplayOpeningShareQuestDefaultPopup(
         ),
         Text(
           l10n.shareTicketPromptLine2,
-          style: theme.bodyLarge?.copyWith(
-            color: const Color(0xFF0CABA8),
-          ),
+          style: theme.bodyLarge?.copyWith(color: const Color(0xFF0CABA8)),
           textAlign: TextAlign.center,
         ),
       ],
@@ -633,9 +642,7 @@ Future<void> showRoleplayOpeningInAppReviewQuestDefaultPopup(
         ),
         Text(
           l10n.reviewTicketPromptLine2,
-          style: theme.bodyLarge?.copyWith(
-            color: const Color(0xFF0CABA8),
-          ),
+          style: theme.bodyLarge?.copyWith(color: const Color(0xFF0CABA8)),
           textAlign: TextAlign.center,
         ),
       ],

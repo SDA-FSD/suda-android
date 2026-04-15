@@ -8,11 +8,14 @@ class RoleplayScaffold extends StatelessWidget {
   final Widget footer;
   final bool showCloseButton;
   final VoidCallback? onClose;
-  final String? title;    // 헤더 중앙 타이틀 (English)
+  final String? title; // 헤더 중앙 타이틀 (English)
   final String? duration; // 헤더 중앙 듀레이션 (MM:ss)
   final Color? durationColor;
   final Widget? headerExtra;
   final double headerTopSpacing;
+
+  /// null이면 기본 롤플레이 배경 `#121212` (전면 이미지 등 뒤에 깔 레이어가 있을 때는 `Colors.transparent` 등으로 지정)
+  final Color? backgroundColor;
 
   const RoleplayScaffold({
     super.key,
@@ -25,6 +28,7 @@ class RoleplayScaffold extends StatelessWidget {
     this.durationColor,
     this.headerExtra,
     this.headerTopSpacing = 70,
+    this.backgroundColor,
   });
 
   @override
@@ -32,7 +36,7 @@ class RoleplayScaffold extends StatelessWidget {
     final theme = Theme.of(context).textTheme;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF121212),
+      backgroundColor: backgroundColor ?? const Color(0xFF121212),
       body: SafeArea(
         child: Stack(
           fit: StackFit.expand,
@@ -77,7 +81,9 @@ class RoleplayScaffold extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Text(
                         title!,
-                        style: theme.headlineSmall?.copyWith(color: Colors.white),
+                        style: theme.headlineSmall?.copyWith(
+                          color: Colors.white,
+                        ),
                         textAlign: TextAlign.center,
                       ),
                     ),
