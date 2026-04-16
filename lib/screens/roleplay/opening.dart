@@ -17,6 +17,7 @@ import '../../l10n/app_localizations.dart';
 import '../../services/token_refresh_service.dart';
 import '../../routes/roleplay_router.dart';
 import '../../utils/suda_json_util.dart';
+import '../../utils/default_markdown.dart';
 import '../../widgets/daily_ticket_popup.dart';
 import '../../widgets/default_popup.dart';
 import '../../utils/sub_screen_route.dart';
@@ -280,9 +281,15 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen>
                     style: theme.headlineSmall?.copyWith(color: Colors.white),
                   ),
                   const SizedBox(height: 20),
-                  Text(
-                    SudaJsonUtil.localizedText(selectedRole?.scenario),
-                    style: theme.bodyLarge?.copyWith(color: Colors.white),
+                  Text.rich(
+                    TextSpan(
+                      style: theme.bodyLarge?.copyWith(color: Colors.white),
+                      children: DefaultMarkdown.buildSpans(
+                        SudaJsonUtil.localizedText(selectedRole?.scenario),
+                        theme.bodyLarge?.copyWith(color: Colors.white) ??
+                            const TextStyle(color: Colors.white),
+                      ),
+                    ),
                     textAlign: TextAlign.center,
                   ),
                 ],

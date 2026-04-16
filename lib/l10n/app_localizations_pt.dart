@@ -209,7 +209,7 @@ class AppLocalizationsPt extends AppLocalizations {
       'Tente novamente para descobrir a história completa.';
 
   @override
-  String get endingReport => 'Relatório';
+  String get endingReport => 'Reportar problema';
 
   @override
   String get endingHowWas => 'Como foi o Roleplay?';

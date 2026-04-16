@@ -481,6 +481,7 @@ class _RoleplayOverviewScreenState extends State<RoleplayOverviewScreen> {
                         Text(
                           _getLocalizedText(roleplay?.synopsis),
                           style: theme.bodySmall?.copyWith(color: Colors.white),
+                          textAlign: TextAlign.justify,
                         ),
                         const SizedBox(height: 40),
                         Text(
