@@ -72,7 +72,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
   late final AnimationController _loadingRotationController;
   bool _showUserStartGuide = false;
   bool _showExitLayer = false;
-  static const double _headerTopSpacing = 108;
+  static const double _headerTopSpacingDelta = 38;
   static const List<int> _speedRateSteps = [150, 120, 100, 70];
 
   @override
@@ -651,6 +651,15 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
   void _toggleSpeedPanel() {
     setState(() {
       _isSpeedPanelVisible = !_isSpeedPanelVisible;
+    });
+  }
+
+  void _dismissSpeedPanel() {
+    if (!_isSpeedPanelVisible) return;
+    _commitSpeedIndex();
+    if (!mounted) return;
+    setState(() {
+      _isSpeedPanelVisible = false;
     });
   }
 
@@ -1981,7 +1990,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
                 const SizedBox(height: 14),
               ],
             ),
-            headerTopSpacing: _headerTopSpacing,
+            headerTopSpacingDelta: _headerTopSpacingDelta,
             body: Column(
               mainAxisSize: MainAxisSize.max,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -2219,6 +2228,14 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
               ),
             ),
           ),
+          if (widget.showCloseButton && _isSpeedPanelVisible)
+            Positioned.fill(
+              child: Listener(
+                behavior: HitTestBehavior.opaque,
+                onPointerDown: (_) => _dismissSpeedPanel(),
+                child: const SizedBox.expand(),
+              ),
+            ),
           if (widget.showCloseButton)
             Positioned(
               top: topInset + 16,

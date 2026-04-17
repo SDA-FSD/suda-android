@@ -12,7 +12,8 @@ class RoleplayScaffold extends StatelessWidget {
   final String? duration; // 헤더 중앙 듀레이션 (MM:ss)
   final Color? durationColor;
   final Widget? headerExtra;
-  final double headerTopSpacing;
+  /// 본문 시작 간격 델타 (정책 baseSpacing 70/90에 더해짐)
+  final double headerTopSpacingDelta;
 
   /// null이면 기본 롤플레이 배경 `#121212` (전면 이미지 등 뒤에 깔 레이어가 있을 때는 `Colors.transparent` 등으로 지정)
   final Color? backgroundColor;
@@ -27,13 +28,62 @@ class RoleplayScaffold extends StatelessWidget {
     this.duration,
     this.durationColor,
     this.headerExtra,
-    this.headerTopSpacing = 70,
+    this.headerTopSpacingDelta = 0,
     this.backgroundColor,
   });
+
+  int _computeTitleLineCount({
+    required BuildContext context,
+    required String title,
+    required TextStyle? style,
+    required double maxWidth,
+  }) {
+    final safeWidth = maxWidth.isFinite && maxWidth > 0 ? maxWidth : 0.0;
+    final painter = TextPainter(
+      text: TextSpan(text: title, style: style),
+      textDirection: Directionality.of(context),
+      textAlign: TextAlign.center,
+      maxLines: 2,
+      ellipsis: '…',
+      textScaler: MediaQuery.textScalerOf(context),
+    )..layout(maxWidth: safeWidth);
+
+    final lines = painter.computeLineMetrics().length;
+    return lines.clamp(1, 2);
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context).textTheme;
+
+    // Header layout rules:
+    // - title: max 2 lines with ellipsis
+    // - center header side margin: 30 (was 24)
+    // - body top spacing: base 70, but 90 only when the title actually wraps to 2 lines
+    // - final body top spacing: base + headerTopSpacingDelta
+    const headerSideMargin = 30.0;
+    const titleHorizontalPadding = 20.0;
+
+    final titleText = title;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final maxTitleWidth = (screenWidth -
+            (headerSideMargin * 2) -
+            (titleHorizontalPadding * 2))
+        .clamp(0.0, double.infinity);
+
+    final baseHeaderTopSpacing = (titleText != null &&
+            _computeTitleLineCount(
+                  context: context,
+                  title: titleText,
+                  style: theme.headlineSmall,
+                  maxWidth: maxTitleWidth,
+                ) ==
+                2)
+        ? 90.0
+        : 70.0;
+
+    final effectiveHeaderTopSpacing =
+        baseHeaderTopSpacing + headerTopSpacingDelta;
 
     return Scaffold(
       backgroundColor: backgroundColor ?? const Color(0xFF121212),
@@ -44,7 +94,7 @@ class RoleplayScaffold extends StatelessWidget {
             // 1. 본문 영역 (헤더 공간 확보, 좌우 24 마진)
             Column(
               children: [
-                SizedBox(height: headerTopSpacing),
+                SizedBox(height: effectiveHeaderTopSpacing),
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -71,20 +121,24 @@ class RoleplayScaffold extends StatelessWidget {
             // 4. 헤더 중앙 타이틀 및 듀레이션
             Positioned(
               top: 16,
-              left: 24,
-              right: 24,
+              left: headerSideMargin,
+              right: headerSideMargin,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (title != null)
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: titleHorizontalPadding,
+                      ),
                       child: Text(
                         title!,
                         style: theme.headlineSmall?.copyWith(
                           color: Colors.white,
                         ),
                         textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   if (duration != null)
