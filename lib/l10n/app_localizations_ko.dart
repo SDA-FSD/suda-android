@@ -298,7 +298,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get dailyTicketContent => '데일리 무료 티켓을 받으세요!\n오늘 사용하지 않으면 사라집니다.';
 
   @override
-  String get dailyTicketButton => '티켓 받기 🎟️';
+  String get dailyTicketButton => '티켓 받기';
 
   @override
   String get notificationPermissionBlockedTitle => '알림이 꺼져 있습니다';

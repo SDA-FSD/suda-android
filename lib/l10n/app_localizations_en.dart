@@ -313,7 +313,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Claim your daily free ticket!\nIt expires if you don\'t use it today.';
 
   @override
-  String get dailyTicketButton => 'Claim Ticket 🎟️';
+  String get dailyTicketButton => 'Claim Ticket';
 
   @override
   String get notificationPermissionBlockedTitle => 'Notifications are off';

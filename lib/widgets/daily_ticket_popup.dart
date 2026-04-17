@@ -42,6 +42,14 @@ Future<void> showDailyTicketDefaultPopup(
   final theme = Theme.of(context).textTheme;
   await DefaultPopup.show(
     context,
+    topWidget: Center(
+      child: Image.asset(
+        'assets/images/icons/ticket_with_1.png',
+        width: 56,
+        height: 29,
+        fit: BoxFit.contain,
+      ),
+    ),
     titleText: l10n.dailyTicketTitle,
     bodyWidget: Text(
       l10n.dailyTicketContent,

@@ -150,9 +150,9 @@ Text('아주 작은 라벨', style: theme.labelSmall); // body-tiny
 - **구현 파일**: `lib/widgets/default_popup.dart`
 - **타이틀 타이포**: `textTheme.headlineMedium` + 흰색 (`heading2` 계열)
 - **본문 슬롯(`bodyWidget`)**: 내부 타이포/정렬/추가 위젯 구성은 호출부 책임(자유도 높음)
-- **슬롯 간격 규칙**: `DefaultPopup`은 **title ↔ body ↔ buttons** 사이에만 세로 `20`을 보장한다(`bodyWidget` 내부 간격은 강제하지 않음)
-- **본문 영역 패딩**: 상 `32`, 좌·우·하 `16`
-- **스크롤/최대 높이**: 카드 높이는 내용에 따라 결정되되, **최대 높이는 화면 높이의 `80%`로 캡**되며 초과 시 **`title + body + buttons` 영역만 스크롤**(좌상단 닫기 아이콘은 고정)
+- **슬롯 간격 규칙**: `DefaultPopup`은 **topWidget ↔ title ↔ body ↔ buttons** 사이에만 세로 `20`을 보장한다(`bodyWidget` 내부 간격은 강제하지 않음)
+- **본문 영역 패딩**: 상 `20`, 좌·우·하 `16`
+- **스크롤/최대 높이**: 카드 높이는 내용에 따라 결정되되, **최대 높이는 화면 높이의 `80%`로 캡**되며 초과 시 **`topWidget + title + body + buttons` 영역만 스크롤**(좌상단 닫기 아이콘은 고정)
 
 ---
 

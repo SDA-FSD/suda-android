@@ -118,7 +118,7 @@
   "surveySuccessToast": "티켓 1장이 추가되었습니다! 🎉",
   "dailyTicketTitle": "출석 보상 도착!",
   "dailyTicketContent": "데일리 무료 티켓을 받으세요!\n오늘 사용하지 않으면 사라집니다.",
-  "dailyTicketButton": "티켓 받기 🎟️",
+  "dailyTicketButton": "티켓 받기",
   "notificationPermissionBlockedTitle": "알림이 꺼져 있습니다",
   "notificationPermissionBlockedMessage": "푸시 알림을 받으려면 기기 설정에서 알림을 켜 주세요.",
   "openSettings": "설정 열기",

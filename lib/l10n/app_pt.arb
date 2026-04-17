@@ -118,7 +118,7 @@
   "surveySuccessToast": "Ganhou um Ticket! 🎉",
   "dailyTicketTitle": "Obrigado por fazer check-in!",
   "dailyTicketContent": "Resgate seu ingresso grátis diário!\nEle desaparecerá se você não usar hoje.",
-  "dailyTicketButton": "Resgatar ingresso 🎟️",
+  "dailyTicketButton": "Resgatar ingresso",
   "notificationPermissionBlockedTitle": "Notificações desativadas",
   "notificationPermissionBlockedMessage": "Ative as notificações nas configurações do dispositivo para receber notificações push.",
   "openSettings": "Abrir configurações",

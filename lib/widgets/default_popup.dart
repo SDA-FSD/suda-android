@@ -24,12 +24,13 @@ class DefaultPopupButton {
   });
 }
 
-/// 표준 팝업 프레임(배경/카드/닫기) + 선택적 title/body/buttons 슬롯.
+/// 표준 팝업 프레임(배경/카드/닫기) + 선택적 top/title/body/buttons 슬롯.
 ///
 /// - `bodyWidget` 내부 레이아웃은 호출부 자율.
-/// - `DefaultPopup`은 **title ↔ body ↔ buttons** 사이에만 세로 20 간격을 보장한다.
+/// - `DefaultPopup`은 **topWidget ↔ title ↔ body ↔ buttons** 사이에만 세로 20 간격을 보장한다.
 /// - 버튼 탭 시: **항상 팝업을 닫은 뒤** `onPressed`를 호출한다.
 class DefaultPopup extends StatelessWidget {
+  final Widget? topWidget;
   final String? titleText;
   final Widget? bodyWidget;
   final List<DefaultPopupButton> buttons;
@@ -37,6 +38,7 @@ class DefaultPopup extends StatelessWidget {
 
   const DefaultPopup({
     super.key,
+    this.topWidget,
     this.titleText,
     this.bodyWidget,
     this.buttons = const [],
@@ -45,6 +47,7 @@ class DefaultPopup extends StatelessWidget {
 
   static Future<void> show(
     BuildContext context, {
+    Widget? topWidget,
     String? titleText,
     Widget? bodyWidget,
     List<DefaultPopupButton> buttons = const [],
@@ -55,6 +58,7 @@ class DefaultPopup extends StatelessWidget {
       barrierDismissible: barrierDismissible,
       barrierColor: Colors.transparent,
       builder: (ctx) => DefaultPopup(
+        topWidget: topWidget,
         titleText: titleText,
         bodyWidget: bodyWidget,
         buttons: buttons,
@@ -71,6 +75,50 @@ class DefaultPopup extends StatelessWidget {
     SchedulerBinding.instance.addPostFrameCallback((_) => cb());
   }
 
+  List<Widget> _buildMainContentSlots(
+    BuildContext context, {
+    required bool hasTop,
+    required Widget? top,
+    required bool hasTitle,
+    required String title,
+    required bool hasBody,
+    required Widget? body,
+    required bool hasButtons,
+  }) {
+    final slots = <Widget>[];
+
+    void addSpacingIfNeeded() {
+      if (slots.isEmpty) return;
+      slots.add(const SizedBox(height: 20));
+    }
+
+    if (hasTop) {
+      slots.add(top!);
+    }
+    if (hasTitle) {
+      addSpacingIfNeeded();
+      slots.add(
+        Text(
+          title,
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                color: Colors.white,
+              ),
+        ),
+      );
+    }
+    if (hasBody) {
+      addSpacingIfNeeded();
+      slots.add(body!);
+    }
+    if (hasButtons) {
+      addSpacingIfNeeded();
+      slots.addAll(_buildButtons(context));
+    }
+
+    return slots;
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
@@ -80,8 +128,11 @@ class DefaultPopup extends StatelessWidget {
     const overlayColor = Color(0x66000000); // black 40%
 
     final trimmedTitle = titleText?.trim();
-    final title = trimmedTitle;
-    final hasTitle = title != null && title.isNotEmpty;
+    final title = trimmedTitle ?? '';
+    final hasTitle = title.isNotEmpty;
+
+    final top = topWidget;
+    final hasTop = top != null;
 
     final body = bodyWidget;
     final hasBody = body != null;
@@ -146,25 +197,16 @@ class DefaultPopup extends StatelessWidget {
                                               MainAxisAlignment.start,
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            if (hasTitle) ...[
-                                              Text(
-                                                title,
-                                                textAlign: TextAlign.center,
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .headlineMedium
-                                                    ?.copyWith(
-                                                      color: Colors.white,
-                                                    ),
-                                              ),
-                                            ],
-                                            if (hasTitle && (hasBody || hasButtons))
-                                              const SizedBox(height: 20),
-                                            if (hasBody) body,
-                                            if ((hasTitle || hasBody) && hasButtons)
-                                              const SizedBox(height: 20),
-                                            if (hasButtons)
-                                              ..._buildButtons(context),
+                                            ..._buildMainContentSlots(
+                                              context,
+                                              hasTop: hasTop,
+                                              top: top,
+                                              hasTitle: hasTitle,
+                                              title: title,
+                                              hasBody: hasBody,
+                                              body: body,
+                                              hasButtons: hasButtons,
+                                            ),
                                           ],
                                         ),
                                       ),

@@ -314,7 +314,7 @@ class AppLocalizationsPt extends AppLocalizations {
       'Resgate seu ingresso grátis diário!\nEle desaparecerá se você não usar hoje.';
 
   @override
-  String get dailyTicketButton => 'Resgatar ingresso 🎟️';
+  String get dailyTicketButton => 'Resgatar ingresso';
 
   @override
   String get notificationPermissionBlockedTitle => 'Notificações desativadas';

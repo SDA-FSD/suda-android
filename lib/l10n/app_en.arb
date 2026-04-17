@@ -118,7 +118,7 @@
   "surveySuccessToast": "1 Ticket added! 🎉",
   "dailyTicketTitle": "Thanks for Checking In!",
   "dailyTicketContent": "Claim your daily free ticket!\nIt expires if you don't use it today.",
-  "dailyTicketButton": "Claim Ticket 🎟️",
+  "dailyTicketButton": "Claim Ticket",
   "notificationPermissionBlockedTitle": "Notifications are off",
   "notificationPermissionBlockedMessage": "Enable notifications in your device settings to receive push notifications.",
   "openSettings": "Open Settings",

@@ -667,7 +667,7 @@ abstract class AppLocalizations {
   /// No description provided for @dailyTicketButton.
   ///
   /// In en, this message translates to:
-  /// **'Claim Ticket 🎟️'**
+  /// **'Claim Ticket'**
   String get dailyTicketButton;
 
   /// No description provided for @notificationPermissionBlockedTitle.
