@@ -436,12 +436,6 @@ abstract class AppLocalizations {
   /// **'Mission Failed...'**
   String get roleplayEndedFailed;
 
-  /// No description provided for @roleplayEndedTimesup.
-  ///
-  /// In en, this message translates to:
-  /// **'Time has run out...'**
-  String get roleplayEndedTimesup;
-
   /// No description provided for @roleplayEndedComplete.
   ///
   /// In en, this message translates to:
@@ -453,6 +447,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Moving to ending...'**
   String get roleplayEndedEnding;
+
+  /// No description provided for @roleplayAnalyzing.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyzing your roleplay...'**
+  String get roleplayAnalyzing;
 
   /// No description provided for @endingFailTitle.
   ///

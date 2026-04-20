@@ -97,6 +97,11 @@
   - res: `{ text, missionActiveYn, currentStep, resultId }`
   - 설명: AI 말풍선 이후 노출되는 나레이션. 미션 활성 시 안내 텍스트 포함 가능.
   - 비고: `resultId`는 종료 판정 시 생성되는 결과 식별자.
+- **세션 상태 조회**: `GET /v1/roleplay-sessions/{rpSessionId}`
+  - req: path param만 사용
+  - res: `{ completedYn: 'Y'|'N', resultId: number }` (`RoleplaySessionStatusDto`)
+  - 설명: 타임아웃(00:00) 종료 분석 플로우에서 서버 종료 판정 여부를 확인. `completedYn == 'Y'`이면 `resultId`로 기존 종료 분기(0 → Failed, 전부 완수 → Ending, 그 외 → ResultV2) 진입.
+  - 비고: 클라이언트는 `SudaApiClient.getRoleplaySessionStatus(...)` / `RoleplayApi.getRoleplaySessionStatus(...)`.
 - **힌트 텍스트 조회**: `GET /{rpSessionId}/hint`
   - req: path param만 사용
   - res: `String` (힌트 말풍선 본문)
@@ -165,8 +170,12 @@
     - 인앱리뷰 호출 성공 반환 시 `POST /v1/users/quests/{questId}` 호출 (`questId = sessionId`, 하드코딩 금지)
     - 응답이 200 + `QuestResultDto.completeYn == 'Y'`면 성공 토스트(l10n `surveySuccessToast`) 노출
     - 그 외 응답/에러는 별도 처리 없음
-- **사용자 텍스트/음성 입력, AI 응답, 나레이션, 힌트, 번역**
+- **사용자 텍스트/음성 입력, AI 응답, 나레이션, 힌트, 번역, 세션 상태**
   - 404: 서버에서 세션 유실로 판단. "Roleplay Session Not Found" 얼럿 후 Overview 복귀.
+- **세션 상태 조회** (`GET /v1/roleplay-sessions/{rpSessionId}`)
+  - 200 + `completedYn == 'N'`: 500ms 대기 후 한 번만 재시도. 재시도도 `N`이면 Network Error(흰색 persistent).
+  - 기타 예외(timeout/4xx 중 404 제외/5xx 등): 동일하게 500ms 후 한 번 재시도 → 실패 시 Network Error.
+  - 404: 위 공통 정책(세션 유실) 적용.
 - **사용자 텍스트/음성 입력**
   - 400: 유의미한 입력 없음. AI 말풍선 단계로 진행하지 않고 사용자 입력 재대기.
 - **AI 응답, 나레이션**
@@ -287,15 +296,29 @@
 **Playing 화면 구현(UX)**
 - 종료 안내 메시지는 서비스메시지 영역에 **색상 `#0CABA8`**, **fade-in**으로 노출하며 **3초** 노출 후 해당 스크린으로 전환.
 - **1/3) resultId == 0**: l10n `roleplayEndedFailed` 노출 → 3초 후 Failed 스크린으로 전환.
-- **2/3) resultId > 0 이고 n개 미션 전부 완수 아님**: duration이 00:00이면 `roleplayEndedTimesup`, 아니면 `roleplayEndedComplete` 노출. result 선조회·캐시 후(3초와 병렬, 캐시 완료까지 대기) Result V2 스크린으로 전환.
+- **2/3) resultId > 0 이고 n개 미션 전부 완수 아님**: `roleplayEndedComplete` 노출. result 선조회·캐시 후(3초와 병렬, 캐시 완료까지 대기) Result V2 스크린으로 전환.
 - **3/3) resultId > 0 이고 n개 미션 전부 완수**: `roleplayEndedEnding` 노출. result 선조회·캐시 후(동일) Ending 스크린으로 전환.
 - **미션 달성 여부**: Overview 선택 role의 `missionList`로 총 개수, user-message 응답 `missionCompleteYn`으로 단계별 성공/실패 반영. Playing 내부 `_missionStatuses`(success 개수)로 전체 완수 여부 판단.
 
 **l10n 키 (en/ko/pt)**
 - `roleplayEndedFailed`: Mission Failed... / 미션을 실패했습니다... / Missão falhou...
-- `roleplayEndedTimesup`: Time has run out... / 시간이 소진되었습니다... / O tempo acabou...
 - `roleplayEndedComplete`: Roleplay Completed / 롤플레이를 완료했습니다 / Roleplay concluído
 - `roleplayEndedEnding`: Moving to ending... / 엔딩으로 이동합니다... / Indo para o final em breve...
+- `roleplayAnalyzing`: Analyzing your roleplay... / 롤플레이를 분석 중입니다… / Analisando seu roleplay...
+
+## 6-5-1. 타임아웃(00:00) 분석 플로우
+- **트리거**: Playing 헤더 duration 타이머가 00:00 도달 시점.
+  - 00:00 시점에 마이크 **비눌림** 상태 → 즉시(`immediate`) 분석 플로우 시작.
+  - 00:00 시점에 마이크 **눌림** 상태 → 플래그만 세워두고, **release 시점**(취소/정상/짧은 녹음·path 없음 등 early-return 포함)에 분석 플로우 시작.
+    - 정상 finish(≥500ms + path) → `afterFinish` (세션 상태 API 미호출. 기존 녹음 전송→AI→narration 흐름이 narration `resultId`로 자연 치환)
+    - 그 외 release(cancel, 짧음, no-path) → `afterCancel` (세션 상태 API 호출)
+- **메시지**: `roleplayAnalyzing` (흰색, body-medium) 서비스메시지 영역 노출. 1초 주기 블링크(500ms fade-in + 500ms fade-out 반복, `AnimationController` `repeat(reverse: true)`).
+- **비활성 대상**: 마이크 / 힌트 / 입력 모드 전환 / 전송 버튼 / TextField 본체. TextField placeholder는 빈 문자열. `immediate`/`afterCancel` 경로에서는 `_MicButtonState.disabled` 강제.
+- **세션 상태 폴링** (`immediate`/`afterCancel`에만 적용)
+  - 1차 호출 → 200이고 `Y`면 `resultId`로 기존 종료 분기 재사용(`_handleResultIdEnding`), 종료 안내 메시지로 자동 치환.
+  - 1차 `N` 또는 예외(404 제외) → 500ms 대기 후 1회 재시도. 재시도도 `N`/예외면 `_showServiceMessage('Network Error', persistent: true)` (흰색, 블링크 중지).
+  - 404 → 공통 §6-3 정책: "Roleplay Session Not Found" 토스트 후 `RoleplayRouter.popToOverview`.
+- **ended 메시지 치환 시점**: `_handleResultIdEnding`(→`_showEndedServiceMessage`) 호출 시점에 블링크가 중지되고 `#0CABA8` solid로 전환된다.
 
 ## 6-9. Result 조회 API 및 캐시
 - **엔드포인트**: `GET /v1/roleplays/results/{resultId}` (path param만 사용)
@@ -349,7 +372,12 @@
   - 서비스메시지 영역에 종료 안내 메시지 색상 `#0CABA8`, fade-in, 3초 노출 후 해당 스크린 전환.
   - `GET /v1/roleplays/results/{resultId}` API 추가, `RoleplayResultDto` 및 `RoleplayStateService.setCachedResult/cachedResult`로 Result/Ending 진입 전 캐시. 3초와 캐시 완료를 함께 대기 후 전환.
   - Ending 전환 확정 시(미션 전부 완수) Playing에서 role.endingList 첫 요소의 `imgPath`에 CDN host prepend하여 이미지 preload.
-  - l10n: `roleplayEndedFailed`, `roleplayEndedTimesup`, `roleplayEndedComplete`, `roleplayEndedEnding` (en/ko/pt) 추가.
+  - l10n: `roleplayEndedFailed`, `roleplayEndedComplete`, `roleplayEndedEnding` (en/ko/pt) 추가.
+- **타임아웃(00:00) 분석 플로우**:
+  - Playing duration 타이머 00:00 도달 시 서비스메시지 영역에 `roleplayAnalyzing`(흰색, 1s 블링크) 노출 + 마이크/힌트/모드 전환/전송/TextField 전면 비활성(placeholder 빈 문자열).
+  - 마이크 비눌림 상태면 즉시 `GET /v1/roleplay-sessions/{rpSessionId}` 호출, `completedYn == 'Y'`이면 `resultId`로 기존 종료 분기. `N`/예외는 500ms 후 1회 재시도, 재시도도 실패 시 Network Error(흰색 persistent). 404는 "Roleplay Session Not Found" 토스트 후 Overview 복귀.
+  - 마이크 눌림 상태에서 00:00 도달 → release 시점부터 동일 메시지/비활성 시작. 정상 finish는 기존 녹음 전송→AI→narration 흐름이 narration `resultId`로 자연 치환하므로 세션 상태 API를 호출하지 않고, 그 외 release(cancel/짧음/no-path)는 세션 상태 API를 호출.
+  - l10n: `roleplayAnalyzing` (en/ko/pt) 추가. 상세 §6-5-1 참조.
 - **Ending 스크린 및 Result 별점 API**:
   - Ending 스크린: 닫기 버튼 없음. RoleplayEndingDto(role.endingList 첫 요소) 기반 title/content/이미지. 이미지 있으면 1.5x→1x 2초 축소 후 80% 검정 레이어·콘텐츠 fade-in; 없으면 바로 레이어·콘텐츠. 상단 50% title+content, 하단 50% endingHowWas+별 5개(40×40 gap 5)+Next 버튼. Next 탭 시 `PUT /v1/roleplays/results/{rpResultId}?star={star}` 호출(응답 무시·fire-and-forget) 직후 Result V2로 즉시 전환. star=선택 별 개수(0~5).
 - Result 스크린: 박스레이어에 별점·mainTitle·subTitle 순차 노출 후 박스 축소. 본문레이어: like_at_result·likePoint·Mission(missionResult 아이콘)·Words·Lv 프로그레스바(getUserProfile)·Good Points·To Improve·Got it! 버튼(Overview 이동). `.docs/CONTEXT_SCREEN.md` §17 참조.

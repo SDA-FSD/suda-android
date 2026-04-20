@@ -184,13 +184,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get roleplayEndedFailed => '미션을 실패했습니다...';
 
   @override
-  String get roleplayEndedTimesup => '시간이 소진되었습니다...';
-
-  @override
   String get roleplayEndedComplete => '롤플레이를 완료했습니다';
 
   @override
   String get roleplayEndedEnding => '엔딩으로 이동합니다...';
+
+  @override
+  String get roleplayAnalyzing => '롤플레이를 분석 중입니다…';
 
   @override
   String get endingFailTitle => '모든 미션을 완수하지 못했습니다!';

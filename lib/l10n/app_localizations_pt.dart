@@ -193,13 +193,13 @@ class AppLocalizationsPt extends AppLocalizations {
   String get roleplayEndedFailed => 'Missão falhou...';
 
   @override
-  String get roleplayEndedTimesup => 'O tempo acabou...';
-
-  @override
   String get roleplayEndedComplete => 'Roleplay concluído';
 
   @override
   String get roleplayEndedEnding => 'Indo para o final em breve...';
+
+  @override
+  String get roleplayAnalyzing => 'Analisando seu roleplay...';
 
   @override
   String get endingFailTitle => 'Você não completou todas as missões!';

@@ -9,6 +9,13 @@ import '../../models/pagination.dart';
 import '../../models/roleplay_models.dart';
 import '../client/suda_http_client.dart';
 
+class RoleplaySessionNotFoundException implements Exception {
+  final String message;
+  RoleplaySessionNotFoundException(this.message);
+  @override
+  String toString() => message;
+}
+
 class RoleplayApi {
   static Future<RoleplayOverviewDto> getRoleplayOverview({
     required String accessToken,
@@ -76,6 +83,20 @@ class RoleplayApi {
       () => _getNarrationInternal(accessToken, rpSessionId),
       retryWithNewToken: (newToken) =>
           _getNarrationInternal(newToken, rpSessionId),
+    );
+  }
+
+  /// `GET /v1/roleplay-sessions/{rpSessionId}` — 세션 완료 상태 조회.
+  /// 응답: `{ completedYn: 'Y'|'N', resultId: number }`.
+  /// 404는 [RoleplaySessionNotFoundException]으로 구분된다.
+  static Future<RoleplaySessionStatusDto> getRoleplaySessionStatus({
+    required String accessToken,
+    required String rpSessionId,
+  }) async {
+    return await SudaHttpClient.executeWithRefresh(
+      () => _getRoleplaySessionStatusInternal(accessToken, rpSessionId),
+      retryWithNewToken: (newToken) =>
+          _getRoleplaySessionStatusInternal(newToken, rpSessionId),
     );
   }
 
@@ -457,6 +478,50 @@ class RoleplayApi {
 
     throw Exception(
       'GET /v1/roleplay-sessions/$rpSessionId/ai-message failed: HTTP $statusCode ${response.body}',
+    );
+  }
+
+  static Future<RoleplaySessionStatusDto> _getRoleplaySessionStatusInternal(
+    String accessToken,
+    String rpSessionId,
+  ) async {
+    final uri =
+        SudaHttpClient.buildUri('/v1/roleplay-sessions/$rpSessionId');
+    late final http.Response response;
+    try {
+      response = await SudaHttpClient.client
+          .get(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+              'Content-Type': 'application/json',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      rethrow;
+    }
+
+    final statusCode = response.statusCode;
+
+    if (statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+
+    if (statusCode == 404) {
+      throw RoleplaySessionNotFoundException(
+        'GET /v1/roleplay-sessions/$rpSessionId not found: HTTP 404',
+      );
+    }
+
+    if (statusCode >= 200 && statusCode < 300) {
+      final Map<String, dynamic> data =
+          jsonDecode(response.body) as Map<String, dynamic>;
+      return RoleplaySessionStatusDto.fromJson(data);
+    }
+
+    throw Exception(
+      'GET /v1/roleplay-sessions/$rpSessionId failed: HTTP $statusCode ${response.body}',
     );
   }
 

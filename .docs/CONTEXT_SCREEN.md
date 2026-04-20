@@ -899,7 +899,7 @@
 
 ### 이전 스크린 정보 (진입점)
 - **RoleplayEndingScreen**: 하단 "Next" 버튼 클릭 시 `RoleplayRouter.replaceWithResultV2()`로 즉시 전환 (ending screen 삭제)
-- **RoleplayPlayingScreen**: resultId 기반 종료 시 (미션 전부 완수 아님) 분기에서 `roleplayEndedTimesup` 또는 `roleplayEndedComplete` 3초 노출 후 `RoleplayRouter.replaceWithResultV2()`로 전환 (playing screen 삭제)
+- **RoleplayPlayingScreen**: resultId 기반 종료 시 (미션 전부 완수 아님) 분기에서 `roleplayEndedComplete` 3초 노출 후 `RoleplayRouter.replaceWithResultV2()`로 전환 (playing screen 삭제)
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
 - **RoleplayResultReportScreen** (Sub Screen): 본문 "Report" 문구 탭 시

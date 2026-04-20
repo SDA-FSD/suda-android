@@ -151,6 +151,20 @@ class TtsResultDto {
   }
 }
 
+class RoleplaySessionStatusDto {
+  final String? completedYn;
+  final int? resultId;
+
+  const RoleplaySessionStatusDto({this.completedYn, this.resultId});
+
+  factory RoleplaySessionStatusDto.fromJson(Map<String, dynamic> json) {
+    return RoleplaySessionStatusDto(
+      completedYn: json['completedYn'] as String?,
+      resultId: _optionalInt(json['resultId']),
+    );
+  }
+}
+
 class RoleplayNarrationDto {
   final String? text;
   final String? missionActiveYn;

@@ -100,6 +100,16 @@ class SudaApiClient {
     );
   }
 
+  static Future<RoleplaySessionStatusDto> getRoleplaySessionStatus({
+    required String accessToken,
+    required String rpSessionId,
+  }) {
+    return RoleplayApi.getRoleplaySessionStatus(
+      accessToken: accessToken,
+      rpSessionId: rpSessionId,
+    );
+  }
+
   static Future<String> getRoleplayHint({
     required String accessToken,
     required String rpSessionId,

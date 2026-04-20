@@ -16,8 +16,10 @@ import '../../widgets/roleplay_scaffold.dart';
 import '../../routes/roleplay_router.dart';
 import '../../services/roleplay_state_service.dart';
 import '../../services/appsflyer_service.dart';
+import '../../api/endpoints/roleplay_api.dart' as rp_api;
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
+import '../../utils/default_toast.dart';
 import '../../utils/suda_json_util.dart';
 
 /// Roleplay Playing Screen (Full Screen)
@@ -70,6 +72,10 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
   int _speedIndex = 0;
   int _committedSpeedIndex = 0;
   late final AnimationController _loadingRotationController;
+  late final AnimationController _analyzingBlinkController;
+  bool _isTimesupAnalyzing = false;
+  bool _isAnalyzingBlinking = false;
+  bool _timesupWhileRecording = false;
   bool _showUserStartGuide = false;
   bool _showExitLayer = false;
   static const double _headerTopSpacingDelta = 38;
@@ -86,6 +92,10 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
       duration: const Duration(milliseconds: 900),
     );
     _hintBlinkController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+    _analyzingBlinkController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 500),
     );
@@ -109,6 +119,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     _hintIdleTimer?.cancel();
     _hintIdleTimer = null;
     _hintBlinkController.dispose();
+    _analyzingBlinkController.dispose();
     _hintPlaybackSub?.cancel();
     _hintPlaybackSub = null;
     super.dispose();
@@ -134,7 +145,19 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
           _timer = null;
         }
       });
+      if (_remainingSeconds == 0) {
+        _onTimesupReached();
+      }
     });
+  }
+
+  void _onTimesupReached() {
+    if (_isTimesupAnalyzing || _timesupWhileRecording) return;
+    if (_isRecording) {
+      _timesupWhileRecording = true;
+      return;
+    }
+    _startTimesupAnalyzing(_TimesupReason.immediate);
   }
 
   void _initializeProgressState() {
@@ -768,7 +791,6 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
   void _onMicPressEnd(bool cancel) {
     if (cancel) {
       _cancelRecording();
-      _setMicState(_MicButtonState.defaultState);
     } else {
       _finishRecording();
     }
@@ -776,7 +798,6 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
 
   void _onMicPressCancel() {
     _cancelRecording();
-    _setMicState(_MicButtonState.defaultState);
   }
 
   void _syncLoadingAnimation() {
@@ -808,6 +829,12 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     debugPrint('[DEBUG] Recording cancelled');
     _stopRecording(discard: true);
     _removeRecordingEntry();
+    if (_timesupWhileRecording) {
+      _timesupWhileRecording = false;
+      _startTimesupAnalyzing(_TimesupReason.afterCancel);
+    } else {
+      _setMicState(_MicButtonState.defaultState);
+    }
   }
 
   Future<void> _beginRecording() async {
@@ -847,11 +874,19 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
       _setMicState(_MicButtonState.defaultState);
       _showHoldToSpeakMessage();
       debugPrint('[DEBUG] Recording finish -> short(duration<500)');
+      if (_timesupWhileRecording) {
+        _timesupWhileRecording = false;
+        _startTimesupAnalyzing(_TimesupReason.afterCancel);
+      }
       return;
     }
     if (path == null) {
       _setMicState(_MicButtonState.defaultState);
       debugPrint('[DEBUG] Recording finish -> no path');
+      if (_timesupWhileRecording) {
+        _timesupWhileRecording = false;
+        _startTimesupAnalyzing(_TimesupReason.afterCancel);
+      }
       return;
     }
     final bytes = await File(path).readAsBytes();
@@ -861,6 +896,10 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     _setHintEnabled(false);
     _cancelHintIdleAndBlink();
     debugPrint('[DEBUG] Recording finish -> sending audio');
+    if (_timesupWhileRecording) {
+      _timesupWhileRecording = false;
+      _startTimesupAnalyzing(_TimesupReason.afterFinish);
+    }
     await _sendUserMessageAudio(bytes);
   }
 
@@ -1404,6 +1443,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
 
   void _showEndedServiceMessage(String message) {
     _serviceMessageTimer?.cancel();
+    _stopAnalyzingBlink();
     setState(() {
       _serviceMessageText = message;
       _serviceMessageColor = _endedMessageColor;
@@ -1436,9 +1476,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     final allCompleted = _allMissionsCompleted;
     final String endedMessage = allCompleted
         ? l10n.roleplayEndedEnding
-        : (_remainingSeconds == 0
-              ? l10n.roleplayEndedTimesup
-              : l10n.roleplayEndedComplete);
+        : l10n.roleplayEndedComplete;
     _showEndedServiceMessage(endedMessage);
 
     final accessToken = await TokenStorage.loadAccessToken();
@@ -1495,6 +1533,112 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
       RoleplayRouter.replaceWithEnding(context);
     } else {
       RoleplayRouter.replaceWithResultV2(context);
+    }
+  }
+
+  void _startTimesupAnalyzing(_TimesupReason reason) {
+    if (_isTimesupAnalyzing) return;
+    final l10n = AppLocalizations.of(context)!;
+    _serviceMessageTimer?.cancel();
+    setState(() {
+      _isTimesupAnalyzing = true;
+      _isAnalyzingBlinking = true;
+      _serviceMessageText = l10n.roleplayAnalyzing;
+      _serviceMessageColor = null;
+      _isServiceMessageVisible = true;
+    });
+    _analyzingBlinkController.value = 0.0;
+    _analyzingBlinkController.repeat(reverse: true);
+    _setHintEnabled(false);
+    _cancelHintIdleAndBlink();
+    _setTypingEnabled(false);
+    if (reason != _TimesupReason.afterFinish) {
+      _setMicState(_MicButtonState.disabled);
+      _pollSessionStatusThenDispatch();
+    }
+  }
+
+  void _stopAnalyzingBlink() {
+    if (_analyzingBlinkController.isAnimating) {
+      _analyzingBlinkController.stop();
+    }
+    _analyzingBlinkController.reset();
+    if (_isAnalyzingBlinking) {
+      setState(() {
+        _isAnalyzingBlinking = false;
+      });
+    }
+  }
+
+  Future<void> _pollSessionStatusThenDispatch() async {
+    final result = await _fetchSessionStatusWithRetry();
+    if (!mounted) return;
+    if (result == null) {
+      _failAnalyzingWithNetworkError();
+      return;
+    }
+    if (result.completedYn == 'Y') {
+      final resultId = result.resultId ?? 0;
+      _dispatchTimesupResult(resultId);
+    } else {
+      _failAnalyzingWithNetworkError();
+    }
+  }
+
+  Future<RoleplaySessionStatusDto?> _fetchSessionStatusWithRetry() async {
+    for (int attempt = 0; attempt < 2; attempt++) {
+      try {
+        final status = await _fetchSessionStatusOnce();
+        if (status == null) return null;
+        if (status.completedYn == 'Y') return status;
+        if (attempt == 0) {
+          await Future.delayed(const Duration(milliseconds: 500));
+          if (!mounted) return null;
+          continue;
+        }
+        return status;
+      } on rp_api.RoleplaySessionNotFoundException catch (_) {
+        if (!mounted) return null;
+        _handleSessionNotFound();
+        return null;
+      } catch (e) {
+        debugPrint('[DEBUG] getRoleplaySessionStatus error(attempt=$attempt): $e');
+        if (attempt == 0) {
+          await Future.delayed(const Duration(milliseconds: 500));
+          if (!mounted) return null;
+          continue;
+        }
+        return null;
+      }
+    }
+    return null;
+  }
+
+  Future<RoleplaySessionStatusDto?> _fetchSessionStatusOnce() async {
+    final accessToken = await TokenStorage.loadAccessToken();
+    final sessionId = RoleplayStateService.instance.sessionId;
+    if (accessToken == null || sessionId == null) return null;
+    return SudaApiClient.getRoleplaySessionStatus(
+      accessToken: accessToken,
+      rpSessionId: sessionId,
+    );
+  }
+
+  void _dispatchTimesupResult(int resultId) {
+    _stopAnalyzingBlink();
+    _handleResultIdEnding(RoleplayNarrationDto(resultId: resultId));
+  }
+
+  void _failAnalyzingWithNetworkError() {
+    _stopAnalyzingBlink();
+    _showServiceMessage('Network Error', persistent: true);
+  }
+
+  void _handleSessionNotFound() {
+    _stopAnalyzingBlink();
+    DefaultToast.show(context, 'Roleplay Session Not Found');
+    if (context.mounted) {
+      RoleplayRouter.popToOverview(context);
     }
   }
 
@@ -2048,16 +2192,30 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
                   SizedBox(
                     height: 24,
                     child: Center(
-                      child: AnimatedOpacity(
-                        opacity: _isServiceMessageVisible ? 1 : 0,
-                        duration: const Duration(milliseconds: 500),
-                        child: Text(
-                          _serviceMessageText ?? '',
-                          style: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(
-                                color: _serviceMessageColor ?? Colors.white,
-                              ),
-                        ),
+                      child: AnimatedBuilder(
+                        animation: _analyzingBlinkController,
+                        builder: (context, _) {
+                          final textWidget = Text(
+                            _serviceMessageText ?? '',
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(
+                                  color: _serviceMessageColor ?? Colors.white,
+                                ),
+                          );
+                          if (_isAnalyzingBlinking) {
+                            return Opacity(
+                              opacity: _isServiceMessageVisible
+                                  ? _analyzingBlinkController.value
+                                  : 0,
+                              child: textWidget,
+                            );
+                          }
+                          return AnimatedOpacity(
+                            opacity: _isServiceMessageVisible ? 1 : 0,
+                            duration: const Duration(milliseconds: 500),
+                            child: textWidget,
+                          );
+                        },
                       ),
                     ),
                   ),
@@ -2065,7 +2223,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
                     SizedBox(
                       height: 120,
                       child: _MicButtonArea(
-                        isInteractive: _isMicInteractive,
+                        isInteractive: _isMicInteractive && !_isTimesupAnalyzing,
                         isLoading: _micState == _MicButtonState.loading,
                         isDisabled: _micState == _MicButtonState.disabled,
                         loadingRotationController: _loadingRotationController,
@@ -2094,7 +2252,9 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
                                   child: TextField(
                                     controller: _typingController,
                                     focusNode: _typingFocusNode,
-                                    enabled: _isTypingEnabled && _isUserTurn,
+                                    enabled: _isTypingEnabled &&
+                                        _isUserTurn &&
+                                        !_isTimesupAnalyzing,
                                     textInputAction: TextInputAction.send,
                                     onSubmitted: (_) => _handleSend(),
                                     style: Theme.of(context)
@@ -2104,9 +2264,11 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
                                     decoration: InputDecoration(
                                       isDense: true,
                                       border: InputBorder.none,
-                                      hintText: _isTypingEnabled
-                                          ? 'Type your message ...'
-                                          : 'Wait for your turn ...',
+                                      hintText: _isTimesupAnalyzing
+                                          ? ''
+                                          : (_isTypingEnabled
+                                              ? 'Type your message ...'
+                                              : 'Wait for your turn ...'),
                                       hintStyle: Theme.of(context)
                                           .textTheme
                                           .bodyMedium
@@ -2123,7 +2285,9 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
                               ),
                               const SizedBox(width: 10),
                               GestureDetector(
-                                onTap: _isTypingEnabled && _isUserTurn
+                                onTap: _isTypingEnabled &&
+                                        _isUserTurn &&
+                                        !_isTimesupAnalyzing
                                     ? _handleSend
                                     : null,
                                 child: Container(
@@ -2157,21 +2321,23 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           GestureDetector(
-                            onTap: () {
-                              final toRecording =
-                                  _inputMode == _InputMode.typing;
-                              if (!toRecording) {
-                                _cancelHintIdleAndBlink();
-                              }
-                              setState(() {
-                                _inputMode = toRecording
-                                    ? _InputMode.recording
-                                    : _InputMode.typing;
-                              });
-                              if (toRecording) {
-                                _scrollToLastEntry();
-                              }
-                            },
+                            onTap: _isTimesupAnalyzing
+                                ? null
+                                : () {
+                                    final toRecording =
+                                        _inputMode == _InputMode.typing;
+                                    if (!toRecording) {
+                                      _cancelHintIdleAndBlink();
+                                    }
+                                    setState(() {
+                                      _inputMode = toRecording
+                                          ? _InputMode.recording
+                                          : _InputMode.typing;
+                                    });
+                                    if (toRecording) {
+                                      _scrollToLastEntry();
+                                    }
+                                  },
                             child: SizedBox(
                               width: 40,
                               height: 40,
@@ -2188,7 +2354,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
                           ),
                           const Spacer(),
                           IgnorePointer(
-                            ignoring: !_isHintEnabled,
+                            ignoring: !_isHintEnabled || _isTimesupAnalyzing,
                             child: AnimatedBuilder(
                               animation: _hintBlinkController,
                               builder: (context, child) {
@@ -2371,6 +2537,8 @@ class _HintDottedUnderlinePainter extends CustomPainter {
   bool shouldRepaint(covariant _HintDottedUnderlinePainter oldDelegate) =>
       color != oldDelegate.color;
 }
+
+enum _TimesupReason { immediate, afterCancel, afterFinish }
 
 enum _MissionStatus { ready, success, failed }
 
