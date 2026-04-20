@@ -727,6 +727,7 @@ class _RoleplayResultScreenV2State extends State<RoleplayResultScreenV2>
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.only(left: 24, right: 24),
+      physics: _LeftSnapScrollPhysics(step: itemW + between),
       child: IntrinsicHeight(
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -745,6 +746,7 @@ class _RoleplayResultScreenV2State extends State<RoleplayResultScreenV2>
               ),
               if (i < items.length - 1) const SizedBox(width: between),
             ],
+            SizedBox(width: sw - itemW - 48),
           ],
         ),
       ),
@@ -1048,4 +1050,50 @@ class _ExpressionUpgradeCard extends StatelessWidget {
       ),
     );
   }
+}
+
+class _LeftSnapScrollPhysics extends ScrollPhysics {
+  const _LeftSnapScrollPhysics({required this.step, super.parent});
+
+  final double step;
+
+  @override
+  _LeftSnapScrollPhysics applyTo(ScrollPhysics? ancestor) {
+    return _LeftSnapScrollPhysics(step: step, parent: buildParent(ancestor));
+  }
+
+  double _targetPixels(ScrollMetrics position, Tolerance tolerance, double velocity) {
+    double p = position.pixels / step;
+    if (velocity < -tolerance.velocity) {
+      p = p.floorToDouble();
+    } else if (velocity > tolerance.velocity) {
+      p = p.ceilToDouble();
+    } else {
+      p = p.roundToDouble();
+    }
+    return (p * step).clamp(position.minScrollExtent, position.maxScrollExtent);
+  }
+
+  @override
+  Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
+    if ((velocity <= 0 && position.pixels <= position.minScrollExtent) ||
+        (velocity >= 0 && position.pixels >= position.maxScrollExtent)) {
+      return super.createBallisticSimulation(position, velocity);
+    }
+    final tolerance = toleranceFor(position);
+    final target = _targetPixels(position, tolerance, velocity);
+    if ((target - position.pixels).abs() < 1e-10) {
+      return null;
+    }
+    return ScrollSpringSimulation(
+      spring,
+      position.pixels,
+      target,
+      velocity,
+      tolerance: tolerance,
+    );
+  }
+
+  @override
+  bool get allowImplicitScrolling => false;
 }
