@@ -40,6 +40,7 @@ Future<void> showDailyTicketDefaultPopup(
 }) async {
   final l10n = AppLocalizations.of(context)!;
   final theme = Theme.of(context).textTheme;
+  var isClaiming = false;
   await DefaultPopup.show(
     context,
     topWidget: Center(
@@ -61,6 +62,9 @@ Future<void> showDailyTicketDefaultPopup(
         type: DefaultPopupButtonType.primary,
         label: l10n.dailyTicketButton,
         onPressed: () {
+          // 동일 프레임 내 멀티터치 등으로 인한 중복 호출 가드.
+          if (isClaiming) return;
+          isClaiming = true;
           unawaited(
             claimDailyTicketAfterPopup(
               context,
