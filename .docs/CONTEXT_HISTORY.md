@@ -76,7 +76,7 @@
 - 로그인 UX 개선: 로그인 성공 플로우에서는 스피너 유지, 실패 확정 시에만 로딩 종료
 - Roleplay Playing 헤더 우측 속도 슬라이더 UI 및 speed-rate API 연동 추가
 - Roleplay Playing 하단 녹음 영역 UI 정비: 서비스메시지(20) + 녹음버튼(120) 구조 및 상태 테스트 플로우 추가
-- Roleplay Playing 본문 영역에 AI 시작 메시지 UI/타이핑 구조 추가 (CDN/byte 음성 처리 포함)
+- Roleplay Playing 본문 영역에 AI 시작 메시지 UI 추가 (CDN/byte 음성 처리 포함, 말풍선은 즉시 전체 노출·음성 길이만큼 대기 후 나레이션)
 - Roleplay Playing 나레이션 fade-in 노출 및 사용자 턴 활성화 처리 추가
 - Roleplay Playing 사용자 턴 입력 처리(녹음/타이핑, 말풍선 누적, 짧은 녹음 안내) 추가
 - Roleplay Playing 번역 인덱스/번역 토글 및 미션 실패 처리 추가

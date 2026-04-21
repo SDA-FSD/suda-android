@@ -45,7 +45,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
   final AudioRecorder _recorder = AudioRecorder();
   DateTime? _recordingStartedAt;
   bool _isRecording = false;
-  Timer? _typingTimer;
+  Timer? _narrationDelayTimer;
   bool _hasHandledInitialTurn = false;
   Future<RoleplayNarrationDto?>? _pendingNarration;
   bool _isHintEnabled = false;
@@ -76,6 +76,8 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
   bool _isTimesupAnalyzing = false;
   bool _isAnalyzingBlinking = false;
   bool _timesupWhileRecording = false;
+  bool _pendingAnalyzingAfterAi = false;
+  Timer? _analyzingDelayTimer;
   bool _showUserStartGuide = false;
   bool _showExitLayer = false;
   static const double _headerTopSpacingDelta = 38;
@@ -109,7 +111,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
   void dispose() {
     _timer?.cancel();
     _timer = null;
-    _typingTimer?.cancel();
+    _narrationDelayTimer?.cancel();
     _serviceMessageTimer?.cancel();
     _audioPlayer.dispose();
     _recorder.dispose();
@@ -122,6 +124,8 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     _analyzingBlinkController.dispose();
     _hintPlaybackSub?.cancel();
     _hintPlaybackSub = null;
+    _analyzingDelayTimer?.cancel();
+    _analyzingDelayTimer = null;
     super.dispose();
   }
 
@@ -267,7 +271,6 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     Uint8List? soundBytes,
   }) async {
     final entry = _ConversationEntry.ai(text: text);
-    entry.visibleText = text;
     _resetHintPlaybackHighlight();
     _setHintEnabled(false);
     _cancelHintIdleAndBlink();
@@ -286,14 +289,30 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     final voiceDuration = _audioPlayer.duration;
     final fallbackMs = (text.length * 70).clamp(500, 15000);
     final delayMs = voiceDuration?.inMilliseconds ?? fallbackMs;
-    _typingTimer?.cancel();
+    _narrationDelayTimer?.cancel();
+    _analyzingDelayTimer?.cancel();
+    _analyzingDelayTimer = null;
+    if (_pendingAnalyzingAfterAi) {
+      _analyzingDelayTimer = Timer(const Duration(seconds: 1), () {
+        if (!mounted) return;
+        _analyzingDelayTimer = null;
+        _onAiPlaybackEnded();
+      });
+    }
     if (audioSource != null) {
       unawaited(_playPreparedAiVoice(audioSource));
     }
-    _typingTimer = Timer(Duration(milliseconds: delayMs), () {
+    _narrationDelayTimer = Timer(Duration(milliseconds: delayMs), () {
       if (!mounted) return;
-      _showNarrationAfterTyping();
+      _showNarrationAfterAiMessage();
     });
+  }
+
+  void _onAiPlaybackEnded() {
+    if (!mounted) return;
+    if (!_pendingAnalyzingAfterAi) return;
+    _pendingAnalyzingAfterAi = false;
+    _startAnalyzingBlink();
   }
 
   void _prepareNarrationAfterAiStart() {
@@ -359,10 +378,11 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     }
   }
 
-  Future<void> _showNarrationAfterTyping() async {
+  Future<void> _showNarrationAfterAiMessage() async {
     final narration = await _pendingNarration;
     if (!mounted) return;
     if (narration == null) {
+      _stopAnalyzingBlink();
       _showServiceMessage('Network Error', persistent: true);
       return;
     }
@@ -372,6 +392,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     }
     if (narration.text == null || narration.text!.isEmpty) {
       debugPrint('[DEBUG] Narration skip: text null or empty');
+      _stopAnalyzingBlink();
       return;
     }
     final step = narration.currentStep;
@@ -379,6 +400,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
       _setProgressToStep(step);
     }
     _wasMissionActive = narration.missionActiveYn == 'Y';
+    _stopAnalyzingBlink();
     final entry = _ConversationEntry.narration(narration: narration);
     await _addEntry(entry);
     _activateUserTurn();
@@ -943,61 +965,90 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     final textStyle = Theme.of(
       context,
     ).textTheme.bodyLarge?.copyWith(color: Colors.white);
-    final translationText = entry.translationText;
     final translationStyle = Theme.of(
       context,
-    ).textTheme.bodySmall?.copyWith(color: Colors.white);
+    ).textTheme.bodySmall?.copyWith(color: const Color(0xFF80D7CF));
     return AnimatedOpacity(
       opacity: entry.isVisible ? 1 : 0,
       duration: const Duration(milliseconds: 150),
       child: Align(
         alignment: Alignment.centerLeft,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                _buildAiAvatar(),
-                const SizedBox(width: gapAvatarToBubble),
-                ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: maxAiBubbleWidth),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 10,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF0CABA8),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Stack(
-                      children: [
-                        Opacity(
-                          opacity: 0,
-                          child: Text(messageText, style: textStyle),
-                        ),
-                        Text(entry.visibleText ?? '', style: textStyle),
+            _buildAiAvatar(),
+            const SizedBox(width: gapAvatarToBubble),
+            ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: maxAiBubbleWidth),
+              child: AnimatedSize(
+                duration: const Duration(milliseconds: 220),
+                curve: Curves.easeInOut,
+                alignment: Alignment.topLeft,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF0CABA8),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        messageText,
+                        style: textStyle,
+                        textAlign: TextAlign.start,
+                      ),
+                      if (entry.isTranslationExpanded) ...[
+                        if (entry.translationText != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 10),
+                            child: Text(
+                              entry.translationText!,
+                              style: translationStyle,
+                              textAlign: TextAlign.start,
+                            ),
+                          )
+                        else if (entry.isTranslationLoading)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 20, bottom: 10),
+                            child: SizedBox(
+                              width: double.infinity,
+                              child: Center(
+                                child: SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor:
+                                        const AlwaysStoppedAnimation<Color>(
+                                          Colors.white,
+                                        ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
                       ],
-                    ),
+                    ],
                   ),
                 ),
-                const SizedBox(width: gapBeforeAiTranslationIcon),
-                GestureDetector(
-                  onTap: () => _toggleTranslation(entry),
-                  child: Image.asset(
-                    'assets/images/icons/translation_grey.png',
-                    width: aiTranslationIconSize,
-                    height: aiTranslationIconSize,
-                  ),
-                ),
-              ],
-            ),
-            if (entry.isTranslationExpanded && translationText != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 6, left: 45),
-                child: Text(translationText, style: translationStyle),
               ),
+            ),
+            const SizedBox(width: gapBeforeAiTranslationIcon),
+            GestureDetector(
+              onTap: () => _toggleTranslation(entry),
+              child: Image.asset(
+                entry.isTranslationExpanded
+                    ? 'assets/images/icons/translation_mint.png'
+                    : 'assets/images/icons/translation_grey.png',
+                width: aiTranslationIconSize,
+                height: aiTranslationIconSize,
+              ),
+            ),
           ],
         ),
       ),
@@ -1459,6 +1510,11 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
   bool get _allMissionsCompleted =>
       _totalMissionCount > 0 && _completedMissionCount == _totalMissionCount;
 
+  int? get _lastMissionStepIndex {
+    if (_missionStatuses.isEmpty) return null;
+    return _missionStatuses.keys.reduce(math.max);
+  }
+
   Future<void> _handleResultIdEnding(RoleplayNarrationDto narration) async {
     final resultId = narration.resultId!;
     final l10n = AppLocalizations.of(context)!;
@@ -1536,12 +1592,12 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     }
   }
 
-  void _startTimesupAnalyzing(_TimesupReason reason) {
-    if (_isTimesupAnalyzing) return;
+  void _startAnalyzingBlink() {
+    if (!mounted) return;
+    if (_isAnalyzingBlinking) return;
     final l10n = AppLocalizations.of(context)!;
     _serviceMessageTimer?.cancel();
     setState(() {
-      _isTimesupAnalyzing = true;
       _isAnalyzingBlinking = true;
       _serviceMessageText = l10n.roleplayAnalyzing;
       _serviceMessageColor = null;
@@ -1549,6 +1605,14 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     });
     _analyzingBlinkController.value = 0.0;
     _analyzingBlinkController.repeat(reverse: true);
+  }
+
+  void _startTimesupAnalyzing(_TimesupReason reason) {
+    if (_isTimesupAnalyzing) return;
+    setState(() {
+      _isTimesupAnalyzing = true;
+    });
+    _startAnalyzingBlink();
     _setHintEnabled(false);
     _cancelHintIdleAndBlink();
     _setTypingEnabled(false);
@@ -1559,6 +1623,8 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
   }
 
   void _stopAnalyzingBlink() {
+    _analyzingDelayTimer?.cancel();
+    _analyzingDelayTimer = null;
     if (_analyzingBlinkController.isAnimating) {
       _analyzingBlinkController.stop();
     }
@@ -1708,6 +1774,10 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
       } else if (response.missionCompleteYn == 'N') {
         _setMissionFailed(_currentStep);
       }
+      final lastIndex = _lastMissionStepIndex;
+      if (lastIndex != null && _currentStep == lastIndex) {
+        _pendingAnalyzingAfterAi = true;
+      }
     }
     await _requestAiResponse();
   }
@@ -1744,11 +1814,22 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
       return;
     }
     if (entry.isTranslationLoading) return;
-    entry.isTranslationLoading = true;
+    setState(() {
+      entry.isTranslationLoading = true;
+      entry.isTranslationExpanded = true;
+    });
     final accessToken = await TokenStorage.loadAccessToken();
     final sessionId = RoleplayStateService.instance.sessionId;
     if (accessToken == null || sessionId == null) {
-      entry.isTranslationLoading = false;
+      if (!mounted) {
+        entry.isTranslationLoading = false;
+        entry.isTranslationExpanded = false;
+        return;
+      }
+      setState(() {
+        entry.isTranslationLoading = false;
+        entry.isTranslationExpanded = false;
+      });
       return;
     }
     try {
@@ -1760,12 +1841,18 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
       if (!mounted) return;
       setState(() {
         entry.translationText = translated;
-        entry.isTranslationExpanded = true;
+        entry.isTranslationLoading = false;
       });
     } catch (_) {
-      // ignore translation errors
-    } finally {
-      entry.isTranslationLoading = false;
+      if (!mounted) {
+        entry.isTranslationLoading = false;
+        entry.isTranslationExpanded = false;
+        return;
+      }
+      setState(() {
+        entry.isTranslationLoading = false;
+        entry.isTranslationExpanded = false;
+      });
     }
   }
 
@@ -2555,7 +2642,6 @@ class _ConversationEntry {
   final GlobalKey key = GlobalKey();
   int? conversationIndex;
   bool isVisible = false;
-  String? visibleText;
   String? translationText;
   bool isTranslationExpanded = false;
   bool isTranslationLoading = false;
@@ -2568,7 +2654,6 @@ class _ConversationEntry {
     required this.type,
     this.text,
     this.narration,
-    this.visibleText,
     this.hintIsLoading = false,
     this.hintAudioCache,
   });
@@ -2577,7 +2662,6 @@ class _ConversationEntry {
     return _ConversationEntry._(
       type: _ConversationEntryType.ai,
       text: text,
-      visibleText: '',
     );
   }
 

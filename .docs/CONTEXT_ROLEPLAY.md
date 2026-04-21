@@ -194,16 +194,18 @@
 - **턴 전환 기준**
   - 사용자 말풍선: user-message API 호출 직후 노출(텍스트/오디오 공통).
   - AI 말풍선: user-message 응답 직후 즉시 AI 응답 조회 호출.
-  - AI 말풍선 노출은 TTS 준비 후 시작하며, 타이핑 속도는 음성 재생 속도와 동기화.
+  - AI 말풍선은 TTS 준비 후 **전체 텍스트를 즉시 한 번에 노출**한다(글자 단위 타이핑 연출 없음). 본문 텍스트 정렬은 `TextAlign.start`. 음성이 있으면 노출과 동시에 재생 시작.
   - 나레이션 API는 AI 말풍선 노출 시작 시점에 즉시 호출.
-  - AI 말풍선 타이핑 종료 시 나레이션을 500ms fade-in으로 노출한다.
+  - AI 말풍선 노출 후 **음성 재생 길이만큼 대기(음성 없으면 fallback `text.length × 70ms`, clamp 500~15000ms)** → 나레이션을 500ms fade-in으로 노출한다. 내부 타이머는 `_narrationDelayTimer`, 트리거 메서드는 `_showNarrationAfterAiMessage`.
   - 나레이션 fade-in 시작 시점에 사용자 턴 활성화(마이크 default, 힌트 활성화, 타이핑 모드면 입력 포커스).
   - 나레이션 응답의 `currentStep`이 존재하면 진행바 단계 업데이트에 반영한다.
 - **starter 처리**
   - `RoleplayDto.starter`는 `SudaJson`이며, `key = roleplayRoleId`, `value = 시작 대사`.
   - 사용자 시작: 선택한 role의 id가 `starter.key`와 같으면 사용자 시작으로 판단. 첫 대사를 말하라는 1회성 안내 레이어 노출(본문 중앙 rgb(53,53,53) 배경, h2/body-secondary/흰박스+starter.value, l10n yourTurnFirst/sayLineBelowToStart, 사용자 말풍선 노출 시 해제).
   - AI 시작: 세션 초기화 응답으로 받은 AI 시작 보이스를 사용. Playing 진입 후 500ms 대기 → AI 말풍선 노출 시작 → 즉시 나레이션 호출.
-  - AI 시작 메시지 노출: Playing 본문에 AI 말풍선 표시. AI 말풍선 너비는 내용에 맞추되 최대 너비는 본문 `bodyWidth`에서 번역 아이콘(24)·번역 아이콘 앞 간격(5)·아바타(40)·아바타-말풍선 간격(5)을 뺀 값(`playing.dart` `_buildAiMessage`). 아바타는 `userRoleDto.avatarImgPath`에 CDN host를 prepend, 텍스트는 `starter.value` 사용. 음성 길이에 맞춰 타이핑 속도 조절.
+  - AI 시작 메시지 노출: Playing 본문에 AI 말풍선 표시. 아바타는 `userRoleDto.avatarImgPath`에 CDN host를 prepend, 텍스트는 `starter.value` 사용. 말풍선은 즉시 전체 노출하며, 음성 재생 길이만큼 대기 후 나레이션 fade-in(상세는 "턴 전환 기준" 참조).
+  - AI 말풍선 너비(공통): **상한 캡 + 내용 자연 폭** 방식. 상한 `maxAiBubbleWidth = bodyWidth − 번역 아이콘(24) − 번역 아이콘 앞 간격(5) − 아바타(40) − 아바타-말풍선 간격(5)`. `ConstrainedBox(maxWidth: maxAiBubbleWidth)` 하에 Container가 내용 폭만큼 차지. 내용이 상한을 초과하면 상한에서 자동 wrap. 별도 동적 폭 계산/캐시 없음.
+  - 번역 텍스트는 말풍선 폭 내에서 자연 wrap, 정렬 `TextAlign.start`.
   - AI 시작 보이스 처리: `aiSoundCdnYn == "Y"`이면 CDN host를 prepend해 재생, 아니면 `aiSoundFile`(byte[]) 재생.
 - **나레이션/미션 표기**
   - 나레이션 텍스트가 미션 안내인 경우 `missionActiveYn == "Y"`로 판단.
@@ -213,6 +215,14 @@
   - 녹음 중 mock 말풍선은 index 부여 대상이 아님.
 - **번역 캐시 범위**
   - 하나의 롤플레이 상태값 생명주기와 동일한 범위로 캐시 유지.
+- **AI 말풍선 번역 UX** (`playing.dart` `_buildAiMessage`/`_toggleTranslation`)
+  - 번역 아이콘(24×24): 비활성 `icons/translation_grey.png`, 활성(확장 상태) `icons/translation_mint.png`. 상태 토글은 `_ConversationEntry.isTranslationExpanded` 기준.
+  - 말풍선 내부 `AnimatedSize`(220ms, `Curves.easeInOut`, `topLeft`)로 높이 변화 애니메이션 처리. 말풍선 자체 padding 은 H12/V10 유지.
+  - 탭 직후: 즉시 `isTranslationExpanded=true`로 전환 → 아이콘 mint 스왑 + 말풍선 내부 본문 아래에 로딩 스피너(`CircularProgressIndicator` 흰색, 16×16, strokeWidth 2, 가로 중앙 정렬)를 `Padding(top:20, bottom:10)`으로 노출. 말풍선은 부드럽게 확장.
+  - 번역 결과 수신: 로딩 스피너 제거 후 동일 위치에 번역 텍스트를 `Padding(top:10)`(하단 패딩 0, 말풍선 vertical padding 10 이 하단 여백 제공)으로 노출. 스타일 `bodySmall` + `#80D7CF`, `TextAlign.start`. 말풍선 폭은 본문 기준 shrink-to-fit 값이 고정되어 있어 번역이 그 폭 내에서 wrap됨(번역이 본문보다 길면 줄 수가 늘어남).
+  - 재탭(결과 캐시 있음): 로딩 스피너 없이 번역 텍스트만 즉시 표시/숨김 토글. 캐시 존재 시 재호출하지 않음.
+  - 접힐 때: `isTranslationExpanded=false`로 번역 블록 제거 → `AnimatedSize`로 말풍선이 원래 크기로 부드럽게 축소. 아이콘도 grey 로 복귀.
+  - 에러/세션 미확보 시: 확장 상태 롤백(`isTranslationExpanded=false`) 하여 아이콘·말풍선 상태도 함께 원복.
 - **힌트 버튼 활성 조건**
   - 사용자 턴이기만 하면 활성화.
   - user-message 관련 API 호출 시작 시점부터 그 외 모든 상태는 비활성화.
@@ -363,6 +373,10 @@
   - **유연성**: `showCloseButton` 옵션을 통해 X 아이콘 노출 여부를 제어할 수 있음.
 
 ## 10. 최근 Roleplay 작업 메모
+- **마지막 미션 이후 분석중 선노출 (Playing)**:
+  - 마지막 미션(`missionList` 중 `scenarioFlowIndex` 최댓값 기준, null 제외)에 대한 user-message 응답 수신 직후 플래그를 세우고, **AI 말풍선 표출(≈오디오 재생 시작) 후 1초** 시점에 서비스메시지 영역에 `roleplayAnalyzing`(흰색·1s 블링크)을 선노출한다. 성공/실패 무관. 오디오 유무와 무관(오디오 없어도 동일 1s 타이머 기준).
+  - 기존 timesup 분석중과 동일한 공용 헬퍼(`_startAnalyzingBlink`/`_stopAnalyzingBlink`)를 사용. 엔딩/결과 안내(`_showEndedServiceMessage`) 노출 시, narration 계속 진행(`resultId == null`)의 fade-in 직전, narration null/빈 텍스트 시점에 자동 해제. `_stopAnalyzingBlink`는 분석중 pending 지연 타이머도 함께 cancel 처리.
+  - 해당 구간에는 입력/힌트/전송 등 별도 비활성 처리는 하지 않는다(이미 AI 턴이라 비활성 상태).
 - **Failed Report 스크린**:
   - `lib/screens/roleplay/failed_report.dart` (RoleplayFailedReportScreen, Sub Screen). 롤플레이 스캐폴드 적용.
   - 용도: Failed 화면에서만 진입, 사용자가 느낀 불편함 수집. Failed 화면 "Report" 텍스트 탭 시 `RoleplayRouter.pushFailedReport()`로 진입 (SubScreenRoute).
