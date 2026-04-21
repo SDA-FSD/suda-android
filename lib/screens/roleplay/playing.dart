@@ -1009,7 +1009,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
                             child: Text(
                               entry.translationText!,
                               style: translationStyle,
-                              textAlign: TextAlign.start,
+                              textAlign: TextAlign.justify,
                             ),
                           )
                         else if (entry.isTranslationLoading)

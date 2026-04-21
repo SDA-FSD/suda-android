@@ -205,7 +205,7 @@
   - AI 시작: 세션 초기화 응답으로 받은 AI 시작 보이스를 사용. Playing 진입 후 500ms 대기 → AI 말풍선 노출 시작 → 즉시 나레이션 호출.
   - AI 시작 메시지 노출: Playing 본문에 AI 말풍선 표시. 아바타는 `userRoleDto.avatarImgPath`에 CDN host를 prepend, 텍스트는 `starter.value` 사용. 말풍선은 즉시 전체 노출하며, 음성 재생 길이만큼 대기 후 나레이션 fade-in(상세는 "턴 전환 기준" 참조).
   - AI 말풍선 너비(공통): **상한 캡 + 내용 자연 폭** 방식. 상한 `maxAiBubbleWidth = bodyWidth − 번역 아이콘(24) − 번역 아이콘 앞 간격(5) − 아바타(40) − 아바타-말풍선 간격(5)`. `ConstrainedBox(maxWidth: maxAiBubbleWidth)` 하에 Container가 내용 폭만큼 차지. 내용이 상한을 초과하면 상한에서 자동 wrap. 별도 동적 폭 계산/캐시 없음.
-  - 번역 텍스트는 말풍선 폭 내에서 자연 wrap, 정렬 `TextAlign.start`.
+  - 번역 텍스트는 말풍선 폭 내에서 자연 wrap, 정렬 `TextAlign.justify`.
   - AI 시작 보이스 처리: `aiSoundCdnYn == "Y"`이면 CDN host를 prepend해 재생, 아니면 `aiSoundFile`(byte[]) 재생.
 - **나레이션/미션 표기**
   - 나레이션 텍스트가 미션 안내인 경우 `missionActiveYn == "Y"`로 판단.
@@ -219,7 +219,7 @@
   - 번역 아이콘(24×24): 비활성 `icons/translation_grey.png`, 활성(확장 상태) `icons/translation_mint.png`. 상태 토글은 `_ConversationEntry.isTranslationExpanded` 기준.
   - 말풍선 내부 `AnimatedSize`(220ms, `Curves.easeInOut`, `topLeft`)로 높이 변화 애니메이션 처리. 말풍선 자체 padding 은 H12/V10 유지.
   - 탭 직후: 즉시 `isTranslationExpanded=true`로 전환 → 아이콘 mint 스왑 + 말풍선 내부 본문 아래에 로딩 스피너(`CircularProgressIndicator` 흰색, 16×16, strokeWidth 2, 가로 중앙 정렬)를 `Padding(top:20, bottom:10)`으로 노출. 말풍선은 부드럽게 확장.
-  - 번역 결과 수신: 로딩 스피너 제거 후 동일 위치에 번역 텍스트를 `Padding(top:10)`(하단 패딩 0, 말풍선 vertical padding 10 이 하단 여백 제공)으로 노출. 스타일 `bodySmall` + `#80D7CF`, `TextAlign.start`. 말풍선 폭은 본문 기준 shrink-to-fit 값이 고정되어 있어 번역이 그 폭 내에서 wrap됨(번역이 본문보다 길면 줄 수가 늘어남).
+  - 번역 결과 수신: 로딩 스피너 제거 후 동일 위치에 번역 텍스트를 `Padding(top:10)`(하단 패딩 0, 말풍선 vertical padding 10 이 하단 여백 제공)으로 노출. 스타일 `bodySmall` + `#80D7CF`, `TextAlign.justify`. 번역은 말풍선 폭 내에서 wrap됨(번역이 본문보다 길면 줄 수가 늘어남).
   - 재탭(결과 캐시 있음): 로딩 스피너 없이 번역 텍스트만 즉시 표시/숨김 토글. 캐시 존재 시 재호출하지 않음.
   - 접힐 때: `isTranslationExpanded=false`로 번역 블록 제거 → `AnimatedSize`로 말풍선이 원래 크기로 부드럽게 축소. 아이콘도 grey 로 복귀.
   - 에러/세션 미확보 시: 확장 상태 롤백(`isTranslationExpanded=false`) 하여 아이콘·말풍선 상태도 함께 원복.
