@@ -78,7 +78,6 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
   bool _timesupWhileRecording = false;
   bool _pendingAnalyzingAfterAi = false;
   Timer? _analyzingDelayTimer;
-  bool _showUserStartGuide = false;
   bool _showExitLayer = false;
   static const double _headerTopSpacingDelta = 38;
   static const List<int> _speedRateSteps = [150, 120, 100, 70];
@@ -223,10 +222,24 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
   }
 
   void _handleUserStart() {
-    if (_isUserStarterRoleplay) {
-      setState(() => _showUserStartGuide = true);
-    }
     _activateUserTurn();
+    if (!_isUserStarterRoleplay) return;
+    final starterText = _getStarterText();
+    if (starterText == null || starterText.isEmpty) return;
+    final l10n = AppLocalizations.of(context);
+    final guideText = l10n?.sayLineBelowToStart ?? '';
+    final entry = _ConversationEntry.hintStarter(
+      text: starterText,
+      guideText: guideText,
+    );
+    entry.isVisible = true;
+    setState(() {
+      _conversationEntries.add(entry);
+    });
+    _hintUsedThisTurn = true;
+    _setHintEnabled(false);
+    _cancelHintIdleAndBlink();
+    _scrollHintEntryToBottom(entry);
   }
 
   Future<void> _handleAiStart() async {
@@ -1215,6 +1228,30 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     );
   }
 
+  Widget _buildHintGuideBar(BuildContext context, String guideText) {
+    final theme = Theme.of(context).textTheme;
+    return Container(
+      height: 27,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: const Color(0xFF054544),
+        borderRadius: BorderRadius.circular(13.5),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.4),
+            blurRadius: 6,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Text(
+        guideText,
+        style: theme.bodyMedium?.copyWith(color: const Color(0xFF0CABA8)),
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+
   Widget _buildHintBubble(
     BuildContext context,
     double bodyWidth,
@@ -1233,6 +1270,57 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     final theme = Theme.of(context).textTheme;
     final headline = theme.headlineSmall ?? theme.bodyLarge;
 
+    final guideText = entry.hintGuideText;
+    final body = Padding(
+      padding: const EdgeInsets.all(12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: 40,
+            child: Center(
+              child: GestureDetector(
+                onTap: () => unawaited(_onHintMegaphoneTap(entry)),
+                behavior: HitTestBehavior.opaque,
+                child: ColorFiltered(
+                  colorFilter: ColorFilter.mode(
+                    _hintMegaphoneTint(entry),
+                    BlendMode.srcIn,
+                  ),
+                  child: Image.asset(
+                    'assets/images/icons/megaphone.png',
+                    width: 24,
+                    height: 24,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(left: 8),
+              child: Wrap(
+                alignment: WrapAlignment.start,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                runSpacing: 4,
+                children: [
+                  for (var i = 0; i < words.length; i++) ...[
+                    if (i > 0) Text(' ', style: headline),
+                    _buildHintWordWithDottedUnderline(
+                      entry: entry,
+                      wordIndex: i,
+                      word: words[i],
+                      headline: headline,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
     return AnimatedOpacity(
       opacity: entry.isVisible ? 1 : 0,
       duration: const Duration(milliseconds: 150),
@@ -1241,55 +1329,18 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
         child: ConstrainedBox(
           constraints: BoxConstraints(maxWidth: bodyWidth),
           child: Container(
-            padding: const EdgeInsets.all(12),
+            clipBehavior: Clip.antiAlias,
             decoration: BoxDecoration(
               color: _hintBubbleBg.withValues(alpha: 0.7),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                SizedBox(
-                  width: 40,
-                  child: Center(
-                    child: GestureDetector(
-                      onTap: () => unawaited(_onHintMegaphoneTap(entry)),
-                      behavior: HitTestBehavior.opaque,
-                      child: ColorFiltered(
-                        colorFilter: ColorFilter.mode(
-                          _hintMegaphoneTint(entry),
-                          BlendMode.srcIn,
-                        ),
-                        child: Image.asset(
-                          'assets/images/icons/megaphone.png',
-                          width: 24,
-                          height: 24,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 8),
-                    child: Wrap(
-                      alignment: WrapAlignment.start,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      runSpacing: 4,
-                      children: [
-                        for (var i = 0; i < words.length; i++) ...[
-                          if (i > 0) Text(' ', style: headline),
-                          _buildHintWordWithDottedUnderline(
-                            entry: entry,
-                            wordIndex: i,
-                            word: words[i],
-                            headline: headline,
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                ),
+                if (guideText != null && guideText.isNotEmpty)
+                  _buildHintGuideBar(context, guideText),
+                body,
               ],
             ),
           ),
@@ -1373,50 +1424,6 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
           child: _WaveDots(),
         ),
       ),
-    );
-  }
-
-  Widget _buildUserStartGuideContent(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context).textTheme;
-    const guideColor = Color(0xFF0CABA8);
-    final starterLine = _getStarterText() ?? '';
-    final screenWidth = MediaQuery.of(context).size.width;
-    final maxContentWidth = screenWidth * 0.85;
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          l10n.yourTurnFirst,
-          style: theme.headlineMedium?.copyWith(color: guideColor),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 16),
-        Text(
-          l10n.sayLineBelowToStart,
-          style: theme.bodyMedium?.copyWith(color: Colors.white),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 24),
-        ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: maxContentWidth),
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              starterLine,
-              style: theme.bodyLarge?.copyWith(color: Colors.black),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ],
     );
   }
 
@@ -1755,7 +1762,6 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
         unawaited(_audioPlayer.stop());
       }
       setState(() {
-        _showUserStartGuide = false;
         _conversationEntries.removeWhere(
           (e) => e.type == _ConversationEntryType.hint,
         );
@@ -2254,17 +2260,6 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
                           );
                         },
                       ),
-                      if (_showUserStartGuide)
-                        Center(
-                          child: Container(
-                            color: const Color(0xFF353535),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 24,
-                              vertical: 28,
-                            ),
-                            child: _buildUserStartGuideContent(context),
-                          ),
-                        ),
                     ],
                   ),
                 ),
@@ -2649,6 +2644,7 @@ class _ConversationEntry {
   bool hintSentenceHighlightActive = false;
   int? hintWordHighlightIndex;
   Map<String, TtsResultDto>? hintAudioCache;
+  String? hintGuideText;
 
   _ConversationEntry._({
     required this.type,
@@ -2656,6 +2652,7 @@ class _ConversationEntry {
     this.narration,
     this.hintIsLoading = false,
     this.hintAudioCache,
+    this.hintGuideText,
   });
 
   factory _ConversationEntry.ai({required String text}) {
@@ -2684,6 +2681,19 @@ class _ConversationEntry {
       text: null,
       hintIsLoading: true,
       hintAudioCache: <String, TtsResultDto>{},
+    );
+  }
+
+  factory _ConversationEntry.hintStarter({
+    required String text,
+    required String guideText,
+  }) {
+    return _ConversationEntry._(
+      type: _ConversationEntryType.hint,
+      text: text,
+      hintIsLoading: false,
+      hintAudioCache: <String, TtsResultDto>{},
+      hintGuideText: guideText,
     );
   }
 

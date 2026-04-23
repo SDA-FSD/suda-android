@@ -201,7 +201,7 @@
   - 나레이션 응답의 `currentStep`이 존재하면 진행바 단계 업데이트에 반영한다.
 - **starter 처리**
   - `RoleplayDto.starter`는 `SudaJson`이며, `key = roleplayRoleId`, `value = 시작 대사`.
-  - 사용자 시작: 선택한 role의 id가 `starter.key`와 같으면 사용자 시작으로 판단. 첫 대사를 말하라는 1회성 안내 레이어 노출(본문 중앙 rgb(53,53,53) 배경, h2/body-secondary/흰박스+starter.value, l10n yourTurnFirst/sayLineBelowToStart, 사용자 말풍선 노출 시 해제).
+  - 사용자 시작: 선택한 role의 id가 `starter.key`와 같으면 사용자 시작으로 판단. Playing 진입 직후 **힌트형 말풍선 1개**를 conversation entries에 추가(기존 힌트 레이어와 동일 디자인·동작 — 본문 `starter.value` 표시, 문장 전체 재생 `GET /{rpSessionId}/hint/sound`, 단어별 재생 `GET /{rpSessionId}/hint/sound/{index}` 동일 API 사용). 힌트박스 내부 최상단에 full-bleed로 **안내바** 부착: 배경 `#054544`, stadium radius, 높이 27, 중앙 정렬 `bodyMedium`·`#0CABA8`, 텍스트는 l10n `sayLineBelowToStart`. 안내바 하단 그림자 `black 40% / blur 6 / offset(0,3)`, 힌트박스 `clipBehavior: antiAlias`로 그림자·안내바 모서리가 박스 내부로만 보이게 clip. 기존 힌트박스 `padding.all(12)`는 안내바 아래부터 그대로 이어짐. 라이트볼(힌트) 버튼은 해당 턴 사용된 것으로 간주해 비활성 유지(`_hintUsedThisTurn = true` + `_setHintEnabled(false)`). 사용자 첫 말풍선 노출 시 `_handleUserMessageResponse`의 hint entry 일괄 제거 로직에 흡수되어 자동 해제.
   - AI 시작: 세션 초기화 응답으로 받은 AI 시작 보이스를 사용. Playing 진입 후 500ms 대기 → AI 말풍선 노출 시작 → 즉시 나레이션 호출.
   - AI 시작 메시지 노출: Playing 본문에 AI 말풍선 표시. 아바타는 `userRoleDto.avatarImgPath`에 CDN host를 prepend, 텍스트는 `starter.value` 사용. 말풍선은 즉시 전체 노출하며, 음성 재생 길이만큼 대기 후 나레이션 fade-in(상세는 "턴 전환 기준" 참조).
   - AI 말풍선 너비(공통): **상한 캡 + 내용 자연 폭** 방식. 상한 `maxAiBubbleWidth = bodyWidth − 번역 아이콘(24) − 번역 아이콘 앞 간격(5) − 아바타(40) − 아바타-말풍선 간격(5)`. `ConstrainedBox(maxWidth: maxAiBubbleWidth)` 하에 Container가 내용 폭만큼 차지. 내용이 상한을 초과하면 상한에서 자동 wrap. 별도 동적 폭 계산/캐시 없음.
@@ -373,6 +373,13 @@
   - **유연성**: `showCloseButton` 옵션을 통해 X 아이콘 노출 여부를 제어할 수 있음.
 
 ## 10. 최근 Roleplay 작업 메모
+- **사용자 시작 안내 레이어 → 힌트형 레이어 리디자인 (Playing)**:
+  - 기존 Stack 오버레이(`_showUserStartGuide`·`_buildUserStartGuideContent`·본문 중앙 흰박스) 전면 제거.
+  - `_handleUserStart()`에서 `starter.value`를 본문으로 하는 hint-type conversation entry를 추가(`_ConversationEntry.hintStarter`). 문장 전체/단어별 재생은 기존 힌트와 동일 API 재사용.
+  - `_buildHintBubble` 구조 변경: outer Container `padding` 제거·`clipBehavior: antiAlias` 추가, 자식을 `Column(crossAxis: stretch)`로 변경해 [안내바(조건부) + 기존 Row에 `padding.all(12)` 래핑] 구성.
+  - 안내바(`_buildHintGuideBar`): 배경 `#054544`, `borderRadius: 13.5`, 높이 27, 중앙 `bodyMedium`·`#0CABA8`, 하단 그림자 `black 40% / blur 6 / offset(0,3)`. 힌트박스 `borderRadius: 12` + `antiAlias` clip으로 상단 양쪽 모서리는 힌트박스 radius를 따르고 그림자는 박스 내부로만 노출.
+  - `_ConversationEntry`에 `hintGuideText` 필드·`hintStarter` 팩토리 추가. 라이트볼 버튼은 `_hintUsedThisTurn=true`·`_setHintEnabled(false)`로 해당 턴 비활성.
+  - 자세한 스펙은 §6-4 "starter 처리" 참조.
 - **마지막 미션 이후 분석중 선노출 (Playing)**:
   - 마지막 미션(`missionList` 중 `scenarioFlowIndex` 최댓값 기준, null 제외)에 대한 user-message 응답 수신 직후 플래그를 세우고, **AI 말풍선 표출(≈오디오 재생 시작) 후 1초** 시점에 서비스메시지 영역에 `roleplayAnalyzing`(흰색·1s 블링크)을 선노출한다. 성공/실패 무관. 오디오 유무와 무관(오디오 없어도 동일 1s 타이머 기준).
   - 기존 timesup 분석중과 동일한 공용 헬퍼(`_startAnalyzingBlink`/`_stopAnalyzingBlink`)를 사용. 엔딩/결과 안내(`_showEndedServiceMessage`) 노출 시, narration 계속 진행(`resultId == null`)의 fade-in 직전, narration null/빈 텍스트 시점에 자동 해제. `_stopAnalyzingBlink`는 분석중 pending 지연 타이머도 함께 cancel 처리.
