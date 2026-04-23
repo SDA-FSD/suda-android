@@ -76,11 +76,12 @@
   - `SudaApiClient.getHomeContents()`: 홈 화면 콘텐츠 통합 조회 (`GET /v1/home/contents`)
     - 응답: `HomeDto` (restYn, restStartsAt, restEndsAt, banners, roleplays, **notiboxUnreadYn**)
     - **notiboxUnreadYn**: 알림함(notibox)에 사용자 기준 미읽음이 있으면 `Y`, 없으면 `N`. 홈·GNB 알림 탭 배지 판단에 사용(`main.dart`·`HomeScreen` 로드 시 `RestStatusService.instance.update(..., notiboxUnreadYn: ...)` 동기화).
+    - GNB 알림 탭 빨간 점: `main.dart`의 `_showNotiboxUnreadBadge` 계열 상태로 `GnbBar.showNotiboxUnreadBadge`에 전달. 알림함에서 **전 페이지 로드가 끝난 뒤** 로컬 목록에 미읽음이 없으면 `getHomeContents`로 동기화한 뒤에도 `notiboxUnreadYn`이 `Y`로 남는 경우 배지용 값을 `N`으로 보정한다(동기화 실패·일시 불일치 대비). notibox 페이지 크기(10)는 API와 동일하게 `NotificationBoxScreen`·`main.dart`에 상수로 둔다.
     - banners: `List<MainHomeBannerDto>` (imgPath, overlayText)
     - roleplays: `List<AppHomeRoleplayGroupDto>` (roleplayCategoryDto, list)
     - restYn/restStartsAt/restEndsAt·notiboxUnreadYn은 `GET /v1/home/contents` 처리 시 `RestStatusService.instance.update()`로 보관 (어떤 스크린에서도 접근 가능)
-  - `SudaApiClient.getNotifications()`: 알림함 목록 페이징 (`GET /v1/users/notification?pageNum=…`, `UserApi.getNotifications`) — 응답 원소 `NotificationDto`에 **readYn**(`Y`/`N`) 포함.
-  - `SudaApiClient.markNotificationRead()`: 알림 읽음 처리 (`POST /v1/users/notification/{notificationId}/read`, `UserApi.markNotificationRead`) — 응답 `QuestResultDto`.
+  - `SudaApiClient.getNotifications()`: 알림함 목록 페이징 (`GET /v1/users/notification?pageNum=…`, `UserApi.getNotifications`) — 응답 원소 `NotificationDto`에 **readYn**(`Y`/`N`) 포함. 서버는 `sendFinishedAt` 기준 30일 초과 알림을 내려주지 않으며(배지·목록 일치), 카드 하단 상대 날짜도 동일 필드(`sendFinishedAt`)를 UTC로 파싱 후 로컬 달력 일 단위로 표시(`notification_box.dart`).
+  - `SudaApiClient.markNotificationRead()`: 알림 읽음 처리 (`POST /v1/users/notification/{notificationId}/read`, `UserApi.markNotificationRead`) — 응답 `QuestResultDto`. GET에서 30일 초과로 빠진 항목도 서버가 ZSET에 남겨 둔 경우 POST 읽음은 성공할 수 있어, 재진입 시 `readYn`이 되돌아가지 않도록 한다.
   - `SudaApiClient.getLatestVersion()`: 최신 버전 정보 조회 (`GET /v1/latest-version`)
     - 응답: `VersionDto` (latestVersion, forceUpdateYn, androidMarketLink?, appleMarketLink?)
     - 최신 버전 정보는 `TokenStorage.saveLatestVersion()`으로 영구 저장
@@ -230,9 +231,13 @@
   - 경로 2: Splash > Home (자동 로그인)
 - **확장성**: `_performInitialization()` 메서드는 확장 가능한 구조로 설계
 - **푸시 알림 클릭 시 스크린 이동 (appPath)**:
-  - FCM data payload에 `appPath`(문자열)를 넣으면, 알림 클릭 시 해당 경로의 스크린으로 이동한다.
-  - **비로그인·동의 전**: appPath는 `PendingAppPathService`에 보관되며, 로그인·동의 완료 후 Home 진입 시 한 번 적용된다.
-  - **이미 Main(Home) 진입 후**: 백그라운드에서 알림 클릭 시에도 동일하게 pending에 넣고, 다음 프레임에 적용한다.
+  - FCM data에 `appPath`(문자열)와, 알림함 연동 시 `notificationId`·`addNotificationBoxYn`이 올 수 있다(suda-back `PushRoutingPayload`와 동일 키).
+  - **명시 `appPath`**: 어드민/백이 넣은 경로를 그대로 따른다(백은 이 경우 `notificationId`를 data에서 제거).
+  - **`appPath` 없이 알림함만 추가(Add Notibox=Y)**: 백이 `appPath`를 `/app/notification/{알림캠페인 id}` 형태로 넣고 `notificationId`를 동일 id로 둔다. 앱은 Alarm 탭으로 전환한 뒤 `NotificationBoxScreen`에서 해당 `id` 카드를 펼치고 `Scrollable.ensureVisible`(alignment 0)으로 상단에 맞춘다. 목록에 없으면 다음 페이지를 순차 로드해 찾거나, 끝까지 없으면 앵커만 해제한다.
+  - **Add Notibox=N·`appPath` 없음**: 백이 `appPath`를 `home`으로 보내며 앱은 홈 탭으로 이동한다.
+  - **`addNotificationBoxYn != 'Y'`인데 `appPath`가 비고 `notificationId`만 있는 경우**: pending에 `notificationId`를 넣지 않음(`_storeFcmNavigationFromData`). 적용 단계에서도 id-only 폴백은 `addNotificationBoxYn == 'Y'`일 때만 알림함, 그 외·미수신은 홈(`_applyPendingPushNavigation`).
+  - **비로그인·동의 전**: `PendingAppPathService`에 보관 후, 로그인·동의 완료 뒤 Main 진입 시 한 번 `takePending()`으로 적용한다.
+  - **이미 Main 진입 후**: 백그라운드에서 알림 탭 시에도 동일하게 pending에 넣고 다음 프레임에 적용한다.
   - 지원 경로·정의·신규 스크린 시 확인 절차는 `.docs/CONTEXT_SCREEN.md`의 **appPath (푸시 딥링크 경로)** 섹션을 따른다.
 
 ## 11. 코드 구조 및 리팩토링
@@ -248,7 +253,7 @@
 - **공통 UI 유틸**:
   - `lib/utils/default_toast.dart`: Overlay 기반 토스트 공통 처리 (배경 #353535/경고 #E4382A 85% 투명도, body-default 흰색, 좌우 패딩 16·세로 패딩 12·minHeight 없음, 하단 60px, 좌우 반원, 가로는 max 90% 디스플레이 내에서 짧은 문구는 콘텐츠 너비에 맞춤·`Align` widthFactor/heightFactor 1). **토스트 pill 탭** 시 표시 타이머를 끊고 **자동 사라짐과 동일한 fade-out**(동일 1초)으로 닫힘; 배경 UI 히트는 막지 않음.
   - 토스트 전체 목록 및 테스트 가이드: `.docs/TOAST_CATALOG.md`
-  - **Default Markdown** (`lib/utils/default_markdown.dart`): 서버 텍스트의 `***`(볼드+이탤릭), `**`(볼드), `*`(이탤릭)만 파싱해 `TextSpan` 리스트로 변환하는 공통 로직. `***` → `**` → `*` 순서로 처리하며 중첩 미지원. 줄바꿈은 기존 그대로 유지. 적용 구역: **Ending** 콘텐츠 영역(`RoleplayEndingScreen`·`ReviewEndingScreen`의 content). (`RoleplayOpeningScreen` 시나리오는 일반 `Text`·`bodyLarge` 흰색.)
+  - **Default Markdown** (`lib/utils/default_markdown.dart`): 서버 텍스트의 `***`(볼드+이탤릭), `**`(볼드), `*`(이탤릭)만 파싱해 `TextSpan` 리스트로 변환하는 공통 로직. `***` → `**` → `*` 순서로 처리하며 중첩 미지원. 줄바꿈은 기존 그대로 유지. 적용 구역: **Ending** 콘텐츠 영역(`RoleplayEndingScreen`·`ReviewEndingScreen`의 content), **공지사항 목록/상세**(`AnnouncementsScreen`·`AnnouncementDetailScreen`), **알림함 목록**(`NotificationBoxScreen` 접힘/펼침 본문). (`RoleplayOpeningScreen` 시나리오는 일반 `Text`·`bodyLarge` 흰색.)
 - **리팩토링 원칙**: 
   - 단일 책임 원칙: 각 서비스는 하나의 책임만 담당
   - 재사용성: 공통 기능은 서비스로 분리하여 재사용

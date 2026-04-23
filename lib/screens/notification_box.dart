@@ -1,9 +1,13 @@
+import 'dart:async' show unawaited;
+import 'dart:ui' show FontVariation;
+
 import 'package:flutter/material.dart';
 
 import '../api/suda_api_client.dart';
 import '../l10n/app_localizations.dart';
 import '../models/user_models.dart';
 import '../services/token_storage.dart';
+import '../utils/default_markdown.dart';
 import '../utils/suda_json_util.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/gnb_bar.dart';
@@ -61,6 +65,8 @@ class NotificationBoxScreen extends StatefulWidget {
     this.user,
     this.showNotiboxUnreadBadge = false,
     this.onFirstPageUnreadDetected,
+    this.focusNotificationId,
+    this.onFocusAnchorConsumed,
   });
 
   final VoidCallback? onNavigateToHome;
@@ -70,7 +76,12 @@ class NotificationBoxScreen extends StatefulWidget {
   final UserDto? user;
   final bool showNotiboxUnreadBadge;
   /// 첫 페이지(0) 조회 직후·펼침 읽음 처리 직후 등, 목록 기준 미읽음 존재 여부.
-  final ValueChanged<bool>? onFirstPageUnreadDetected;
+  /// [allPagesLoaded]는 notibox를 끝(빈 페이지)까지 로드했을 때만 true — GNB 배지와 서버 플래그 불일치 보정에 사용.
+  final void Function(bool hasUnread, {bool allPagesLoaded})? onFirstPageUnreadDetected;
+  /// 푸시 탭 등으로 이 카드를 펼친 상태로 상단에 맞출 알림 id (한 번 소비).
+  final int? focusNotificationId;
+  /// [focusNotificationId] 적용·탐색 종료 후 호출해 상위에서 id를 비운다.
+  final VoidCallback? onFocusAnchorConsumed;
 
   static const String routeName = '/notification_box';
 
@@ -79,6 +90,12 @@ class NotificationBoxScreen extends StatefulWidget {
 }
 
 class _NotificationBoxScreenState extends State<NotificationBoxScreen> {
+  /// suda-api `RedisZSetAdapter.PAGE_SIZE`와 동일해야 함.
+  static const int _notiboxPageSize = 10;
+
+  /// 알림함 카드 제목: 읽음/미읽음과 무관하게 동일 굵기(공지 제목과 동일 w600 / wght 600).
+  static const List<FontVariation> _cardTitleWght = [FontVariation('wght', 600)];
+
   final List<NotificationDto> _notifications = [];
   final ScrollController _scrollController = ScrollController();
   bool _isLoading = false;
@@ -88,6 +105,7 @@ class _NotificationBoxScreenState extends State<NotificationBoxScreen> {
   int _nextPageNum = 0;
   /// 펼침 상태인 알림 id (접힘이 기본)
   final Set<int> _expandedIds = {};
+  final Map<int, GlobalKey> _cardKeys = {};
 
   @override
   void initState() {
@@ -103,6 +121,11 @@ class _NotificationBoxScreenState extends State<NotificationBoxScreen> {
     // 알림 탭이 다시 활성화될 때 첫 페이지를 새로 조회
     if (!oldWidget.isActive && widget.isActive) {
       _refresh();
+    } else if (widget.focusNotificationId != null &&
+        widget.focusNotificationId != oldWidget.focusNotificationId) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _maybeConsumePendingAnchor();
+      });
     }
   }
 
@@ -133,6 +156,58 @@ class _NotificationBoxScreenState extends State<NotificationBoxScreen> {
     await _fetchPage(0);
   }
 
+  GlobalKey _cardKeyFor(int id) =>
+      _cardKeys.putIfAbsent(id, () => GlobalKey());
+
+  void _maybeConsumePendingAnchor() {
+    final id = widget.focusNotificationId;
+    if (id == null) return;
+
+    if (_isLoading && _notifications.isEmpty) return;
+
+    final idx = _notifications.indexWhere((e) => e.id == id);
+    if (idx >= 0) {
+      _applyPushAnchor(id);
+      return;
+    }
+    if (!_isLastPage && !_isLoadingMore && !_isLoading) {
+      unawaited(_fetchPage(_nextPageNum));
+      return;
+    }
+    widget.onFocusAnchorConsumed?.call();
+  }
+
+  void _applyPushAnchor(int id) {
+    final idx = _notifications.indexWhere((e) => e.id == id);
+    if (idx < 0) {
+      widget.onFocusAnchorConsumed?.call();
+      return;
+    }
+    final stillUnread = _notifications[idx].readYn != 'Y';
+    setState(() {
+      _expandedIds.add(id);
+      if (stillUnread) {
+        _notifications[idx] = _notifications[idx].copyWith(readYn: 'Y');
+      }
+    });
+    if (stillUnread) {
+      _markReadOnServer(id);
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final ctx = _cardKeyFor(id).currentContext;
+      if (ctx != null) {
+        Scrollable.ensureVisible(
+          ctx,
+          alignment: 0.0,
+          duration: const Duration(milliseconds: 280),
+          curve: Curves.easeInOutCubic,
+        );
+      }
+      widget.onFocusAnchorConsumed?.call();
+    });
+  }
+
   Future<void> _fetchPage(int pageNum) async {
     if (pageNum == 0) {
       if (_isLoading) return;
@@ -155,6 +230,9 @@ class _NotificationBoxScreenState extends State<NotificationBoxScreen> {
             _isLoadingMore = false;
             _isLastPage = true;
           });
+          if (widget.focusNotificationId != null) {
+            widget.onFocusAnchorConsumed?.call();
+          }
         }
         return;
       }
@@ -177,20 +255,35 @@ class _NotificationBoxScreenState extends State<NotificationBoxScreen> {
         }
 
         _nextPageNum = pageNum + 1;
-        _isLastPage = list.isEmpty;
+        _isLastPage = list.isEmpty || list.length < _notiboxPageSize;
         _isLoading = false;
         _isLoadingMore = false;
       });
       if (pageNum == 0) {
         final hasUnread = list.any((n) => n.readYn != 'Y');
-        widget.onFirstPageUnreadDetected?.call(hasUnread);
+        widget.onFirstPageUnreadDetected?.call(
+          hasUnread,
+          allPagesLoaded: _isLastPage,
+        );
+      } else if (_isLastPage) {
+        final hasUnread = _notifications.any((n) => n.readYn != 'Y');
+        widget.onFirstPageUnreadDetected?.call(
+          hasUnread,
+          allPagesLoaded: true,
+        );
       }
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _maybeConsumePendingAnchor();
+      });
     } catch (_) {
       if (!mounted) return;
       setState(() {
         _isLoading = false;
         _isLoadingMore = false;
       });
+      if (widget.focusNotificationId != null) {
+        widget.onFocusAnchorConsumed?.call();
+      }
     }
   }
 
@@ -204,7 +297,10 @@ class _NotificationBoxScreenState extends State<NotificationBoxScreen> {
       );
       if (!mounted) return;
       final hasUnread = _notifications.any((n) => n.readYn != 'Y');
-      widget.onFirstPageUnreadDetected?.call(hasUnread);
+      widget.onFirstPageUnreadDetected?.call(
+        hasUnread,
+        allPagesLoaded: _isLastPage,
+      );
     } catch (_) {
       if (!mounted) return;
       setState(() {
@@ -334,12 +430,17 @@ class _NotificationBoxScreenState extends State<NotificationBoxScreen> {
         key: ValueKey<String>('$itemId-$keyPrefix-$expanded'),
         alignment: Alignment.topLeft,
         widthFactor: 1.0,
-        child: Text(
-          expanded ? expandedText : collapsedText,
+        child: Text.rich(
+          TextSpan(
+            style: style,
+            children: DefaultMarkdown.buildSpans(
+              expanded ? expandedText : collapsedText,
+              style ?? const TextStyle(color: Colors.white),
+            ),
+          ),
           textAlign: TextAlign.start,
           maxLines: expanded ? null : 1,
           overflow: expanded ? TextOverflow.visible : TextOverflow.ellipsis,
-          style: style,
         ),
       ),
     );
@@ -363,13 +464,15 @@ class _NotificationBoxScreenState extends State<NotificationBoxScreen> {
     final isUnread = item.readYn != 'Y';
     final titleStyle = theme.textTheme.headlineSmall?.copyWith(
       color: Colors.white,
-      fontWeight: isUnread ? FontWeight.w600 : FontWeight.w500,
+      fontWeight: FontWeight.w600,
+      fontVariations: _cardTitleWght,
     );
     final contentStyle = theme.textTheme.bodyMedium?.copyWith(
       color: Colors.white,
     );
 
     return Padding(
+      key: _cardKeyFor(item.id),
       padding: const EdgeInsets.only(bottom: 24),
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
@@ -459,7 +562,7 @@ class _NotificationBoxScreenState extends State<NotificationBoxScreen> {
                     ),
                   ),
                 if (titleText.isNotEmpty && contentText.isNotEmpty)
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 8),
                 if (contentText.isNotEmpty)
                   titleText.isNotEmpty
                       ? _fadeTextSwitch(

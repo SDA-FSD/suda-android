@@ -1,9 +1,12 @@
+import 'dart:ui' show FontVariation;
+
 import 'package:flutter/material.dart';
 
 import '../../api/suda_api_client.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/user_models.dart';
 import '../../services/token_storage.dart';
+import '../../utils/default_markdown.dart';
 import '../../utils/suda_json_util.dart';
 import '../../utils/sub_screen_route.dart';
 import '../../widgets/default_popup.dart';
@@ -18,6 +21,10 @@ class AnnouncementsScreen extends StatefulWidget {
 }
 
 class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
+  /// 목록 제목: `headlineSmall`(20) + w600 / wght 600 (알림함 제목과 동일).
+  static const List<FontVariation> _listTitleWght = [FontVariation('wght', 600)];
+  static const List<FontVariation> _listBodyWght = [FontVariation('wght', 400)];
+
   final List<AppNoticeDto> _notices = [];
   final ScrollController _scrollController = ScrollController();
   bool _isLoading = false;
@@ -256,25 +263,56 @@ class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (titleText.isNotEmpty)
-                    Text(
-                      titleText,
+                    Text.rich(
+                      TextSpan(
+                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              fontVariations: _listTitleWght,
+                            ),
+                        children: DefaultMarkdown.buildSpans(
+                          titleText,
+                          Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                                fontVariations: _listTitleWght,
+                              ) ??
+                              const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                                fontVariations: _listTitleWght,
+                              ),
+                        ),
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                          ),
                     ),
                   if (titleText.isNotEmpty && contentText.isNotEmpty)
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 16),
                   if (contentText.isNotEmpty)
-                    Text(
-                      contentText,
+                    Text.rich(
+                      TextSpan(
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w400,
+                              fontVariations: _listBodyWght,
+                            ),
+                        children: DefaultMarkdown.buildSpans(
+                          contentText,
+                          Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w400,
+                                fontVariations: _listBodyWght,
+                              ) ??
+                              const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w400,
+                                fontVariations: _listBodyWght,
+                              ),
+                        ),
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Colors.white,
-                          ),
                     ),
                   const SizedBox(height: 8),
                   Align(

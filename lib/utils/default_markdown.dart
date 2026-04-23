@@ -1,3 +1,5 @@
+import 'dart:ui' show FontVariation;
+
 import 'package:flutter/material.dart';
 
 /// Default Markdown: 서버에서 내려오는 텍스트 중 `*`(이탤릭), `**`(볼드)만 파싱하여
@@ -11,6 +13,8 @@ import 'package:flutter/material.dart';
 class DefaultMarkdown {
   DefaultMarkdown._();
 
+  static const List<FontVariation> _boldWght = [FontVariation('wght', 800)];
+
   static List<InlineSpan> _buildInlineSpansWithoutTriple(
     String text,
     TextStyle baseStyle,
@@ -23,7 +27,10 @@ class DefaultMarkdown {
       if (i % 2 == 1) {
         segments.add(TextSpan(
           text: byBold[i],
-          style: baseStyle.copyWith(fontWeight: FontWeight.w700),
+          style: baseStyle.copyWith(
+            fontWeight: FontWeight.w800,
+            fontVariations: _boldWght,
+          ),
         ));
       } else {
         // 2) 볼드가 아닌 구간에서 * 로 분리: 홀수 인덱스가 이탤릭 구간
@@ -57,8 +64,9 @@ class DefaultMarkdown {
         segments.add(TextSpan(
           text: byBoldItalic[i],
           style: baseStyle.copyWith(
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w800,
             fontStyle: FontStyle.italic,
+            fontVariations: _boldWght,
           ),
         ));
       } else {

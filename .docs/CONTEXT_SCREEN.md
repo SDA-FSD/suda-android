@@ -620,7 +620,7 @@
 - **파일 경로**: `lib/screens/notification_box.dart`
 - **클래스명**: `NotificationBoxScreen` (StatefulWidget)
 - **스크린 타입**: **Main Screen**
-- **appPath**: `/box`
+- **appPath**: `/box` (GNB만 진입 시). 앱 공지 푸시(Add Notibox=Y·`appPath` 미지정)는 `/app/notification/{notificationId}`로 Alarm 탭 진입 후 해당 id 카드 펼침·상단 앵커.
 
 ### 스크린 용도
 - 사용자 알림함(알림 메시지) 목록을 표시하는 화면
@@ -1140,6 +1140,7 @@
 |---------|--------|------|
 | `/home` | HomeScreen (Main, Home 탭) | GNB Home |
 | `/box` | NotificationBoxScreen (Main, Alarm 탭) | GNB Alarm |
+| `/app/notification/{id}` | NotificationBoxScreen (Main, Alarm 탭) | 푸시: 해당 알림 id 카드 펼침·목록 상단 정렬 |
 | `/profile` | ProfileScreen (Main, Profile 탭) | GNB Profile |
 | `/roleplay/overview/{roleplayId}` | RoleplayOverviewScreen (Sub) | 예: `/roleplay/overview/12` |
 | `/profile/history/{resultId}` | HistoryScreen (Sub) | 예: `/profile/history/456` |

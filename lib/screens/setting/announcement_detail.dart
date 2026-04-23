@@ -1,8 +1,11 @@
+import 'dart:ui' show FontVariation;
+
 import 'package:flutter/material.dart';
 
 import '../../api/suda_api_client.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/user_models.dart';
+import '../../utils/default_markdown.dart';
 import '../../services/token_storage.dart';
 import '../../utils/suda_json_util.dart';
 import '../../widgets/app_scaffold.dart';
@@ -21,6 +24,8 @@ class AnnouncementDetailScreen extends StatefulWidget {
 }
 
 class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen> {
+  static const List<FontVariation> _detailTitleWght = [FontVariation('wght', 600)];
+
   AppNoticeDto? _notice;
   bool _isLoading = true;
   String? _error;
@@ -153,12 +158,27 @@ class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen> {
                     color: boxColor,
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: Text(
-                    titleText.isNotEmpty ? titleText : '',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
+                  child: Text.rich(
+                    TextSpan(
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                            fontVariations: _detailTitleWght,
+                          ),
+                      children: DefaultMarkdown.buildSpans(
+                        titleText.isNotEmpty ? titleText : '',
+                        Theme.of(context).textTheme.headlineSmall?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              fontVariations: _detailTitleWght,
+                            ) ??
+                            const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              fontVariations: _detailTitleWght,
+                            ),
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -173,12 +193,24 @@ class _AnnouncementDetailScreenState extends State<AnnouncementDetailScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: SingleChildScrollView(
-                    child: Text(
-                      contentText.isNotEmpty ? contentText : '',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Colors.white,
-                            height: 1.5,
-                          ),
+                    child: Text.rich(
+                      TextSpan(
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: Colors.white,
+                              height: 1.5,
+                            ),
+                        children: DefaultMarkdown.buildSpans(
+                          contentText.isNotEmpty ? contentText : '',
+                          Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: Colors.white,
+                                height: 1.5,
+                              ) ??
+                              const TextStyle(
+                                color: Colors.white,
+                                height: 1.5,
+                              ),
+                        ),
+                      ),
                     ),
                   ),
                 ),

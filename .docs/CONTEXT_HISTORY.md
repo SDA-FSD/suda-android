@@ -6,6 +6,7 @@
 
 ## 최근 작업 메모
 
+- **푸시 → 알림함 앵커**: FCM `appPath`+`notificationId`를 `PendingAppPathService`에 보관 후 `takePending()` 적용. `/app/notification/{id}` 시 Alarm 탭·`NotificationBoxScreen.focusNotificationId`로 펼침+`ensureVisible`. `lib/main.dart`, `lib/screens/notification_box.dart`, `.docs/CONTEXT.md` §10·`CONTEXT_SCREEN.md` 표.
 - **Expression 카드 흰색 하이라이트·탭 영역**: Profile Saved / Result V2 / History V2에서 **카드 전체 탭**(북마크 제외)으로 `GET …/expressions/{i}/sound` 재생. 목록·캐러셀마다 **최근 탭 1카드만** 배경 `#FFFFFF` 유지(재생 종료 후에도). 재생·페치 중만 메가폰 `#121212`, 재생 끝나면 메가폰 `#0CABA8`. 구현: `lib/screens/profile.dart`, `lib/screens/roleplay/result_v2.dart`, `lib/screens/roleplay/history_v2.dart`. 문서: `.docs/CONTEXT_SCREEN.md` §17-1·§19.
 - **DefaultToast 세로 패딩·minHeight 제거**: 세로 패딩 12 복원, `minHeight` 제거로 한 줄은 텍스트+패딩 높이만 사용·두 줄은 위아래 여백 확보. `lib/utils/default_toast.dart`, `.docs/CONTEXT.md`.
 - **DefaultToast 가로 shrink-wrap**: `Center`가 유한 maxWidth에서 전폭으로 확장되던 문제를 피하기 위해 바깥·안쪽 모두 `Align(alignment: Alignment.center, widthFactor: 1, heightFactor: 1)`로 교체해 짧은 문구일 때 pill 가로가 콘텐츠에 맞게 줄어듦. `lib/utils/default_toast.dart`, `.docs/CONTEXT.md`.
