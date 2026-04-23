@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-/// 푸시에서 소비할 appPath + (있으면) 읽음 처리용 알림 id.
+/// 푸시에서 소비할 appPath + (있으면) 알림함 앵커용 id.
 class PendingPushNavigation {
   const PendingPushNavigation({
     required this.path,
@@ -12,7 +12,7 @@ class PendingPushNavigation {
 }
 
 /// 푸시 알림 클릭 시 이동할 appPath를 로그인/동의 완료 전까지 보관하는 서비스.
-/// Home 진입 시점에 한 번 소비(적용 후 take)한다.
+/// Main 진입 시 한 번 `takePending()`으로 소비한다.
 /// [pendingNotifier] 변경 시 리스너가 setState를 호출해 이미 Main이 보이는 상태에서도 적용을 트리거할 수 있다.
 class PendingAppPathService {
   PendingAppPathService._();
@@ -43,19 +43,8 @@ class PendingAppPathService {
     }
   }
 
-  String? get() => _path;
-
   bool get hasPendingNavigation =>
       (_path != null && _path!.isNotEmpty) || _notificationId != null;
-
-  /// 한 번 소비. 적용 후 호출해 반환값으로 이동하고 내부는 비운다.
-  String? take() {
-    final p = _path;
-    _path = null;
-    _notificationId = null;
-    pendingNotifier.value = null;
-    return p;
-  }
 
   /// path·notificationId를 함께 소비. path 또는 id만 있어도 반환한다.
   PendingPushNavigation? takePending() {
@@ -67,12 +56,9 @@ class PendingAppPathService {
     if ((p == null || p.isEmpty) && n == null) {
       return null;
     }
-    return PendingPushNavigation(path: p ?? '', notificationId: n);
-  }
-
-  void clear() {
-    _path = null;
-    _notificationId = null;
-    pendingNotifier.value = null;
+    return PendingPushNavigation(
+      path: p ?? '',
+      notificationId: n,
+    );
   }
 }

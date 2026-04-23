@@ -40,6 +40,27 @@ import 'widgets/main_reregistration_restricted_popup.dart'
         showMainReregistrationRestrictedSignInDefaultPopup;
 import 'widgets/main_route_aware_wrapper.dart';
 
+String? _fcmDataString(dynamic v) {
+  if (v == null) return null;
+  if (v is String) return v.trim();
+  final s = v.toString().trim();
+  return s.isEmpty ? null : s;
+}
+
+/// FCM `data`를 그대로 pending에 넣는다. 규격은 suda-back `PushRoutingPayload`와 동일 키·값.
+void _storeFcmNavigationFromData(Map<String, dynamic> data) {
+  final pathRaw = _fcmDataString(data['appPath']);
+  final nid = _fcmDataString(data['notificationId']);
+  final path = (pathRaw != null && pathRaw.isNotEmpty) ? pathRaw : null;
+  final nidFinal = (nid != null && nid.isNotEmpty) ? nid : null;
+  if (path != null || nidFinal != null) {
+    PendingAppPathService.instance.set(
+      path,
+      notificationId: nidFinal,
+    );
+  }
+}
+
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   
@@ -60,13 +81,10 @@ void main() async {
   await Firebase.initializeApp();
   await AppsflyerService.initialize();
 
-  // 푸시 알림으로 앱이 켜진 경우 appPath 보관 (로그인/동의 후 Home 진입 시 적용)
+  // 푸시 알림으로 앱이 켜진 경우 appPath·notificationId 보관 (로그인/동의 후 Main 진입 시 적용)
   final initialMessage = await FirebaseMessaging.instance.getInitialMessage();
-  if (initialMessage?.data != null && initialMessage!.data['appPath'] != null) {
-    final path = initialMessage.data!['appPath'] as String?;
-    if (path != null && path.isNotEmpty) {
-      PendingAppPathService.instance.set(path);
-    }
+  if (initialMessage?.data != null) {
+    _storeFcmNavigationFromData(initialMessage!.data);
   }
 
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
@@ -104,6 +122,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   bool _notiboxHasUnreadFromAlarmList = false;
   DateTime? _lastNotiboxListSyncAttemptAt;
   StreamSubscription<RemoteMessage>? _fcmOnMessageSub;
+  /// 푸시(`/app/notification/{id}` 등)로 알림함에서 펼칠 대상 id. [NotificationBoxScreen]이 소비 후 null.
+  int? _notiboxAnchorNotificationId;
 
   bool get _showNotiboxUnreadBadge =>
       _homeNotiboxUnreadYn == 'Y' || _notiboxHasUnreadFromAlarmList;
@@ -116,12 +136,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     super.initState();
     MainUserSync.instance.register(_onMainUserUpdatedFromSubflow);
     WidgetsBinding.instance.addObserver(this);
-    // 푸시 알림 클릭(백그라운드/포그라운드) 시 appPath 보관
+    // 푸시 알림 클릭(백그라운드/포그라운드) 시 appPath·notificationId 보관
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      final path = message.data['appPath'] as String?;
-      if (path != null && path.isNotEmpty) {
-        PendingAppPathService.instance.set(path);
-      }
+      _storeFcmNavigationFromData(message.data);
     });
     _fcmOnMessageSub = FirebaseMessaging.onMessage.listen((_) {
       unawaited(_syncNotiboxListFirstPage());
@@ -197,17 +214,33 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     setState(() => _homeNotiboxUnreadYn = home.notiboxUnreadYn);
   }
 
-  void _onNotificationFirstPageUnread(bool hasUnread) {
-    unawaited(_applyNotiboxFirstPageUnreadFromList(hasUnread));
+  static const int _notiboxApiPageSize = 10;
+
+  void _onNotificationFirstPageUnread(
+    bool hasUnread, {
+    bool allPagesLoaded = false,
+  }) {
+    unawaited(_applyNotiboxFirstPageUnreadFromList(
+      hasUnread,
+      allPagesLoaded: allPagesLoaded,
+    ));
   }
 
-  /// 알림 0페이지 기준 미읽음 플래그 반영. 미읽음이 없으면 `getHomeContents`로
-  /// `notiboxUnreadYn`을 맞춰 홈만 갱신되지 않아 배지가 남는 경우를 줄인다.
-  Future<void> _applyNotiboxFirstPageUnreadFromList(bool hasUnread) async {
+  /// 알림 목록 기준 미읽음 플래그 반영. 미읽음이 없으면 `getHomeContents`로
+  /// `notiboxUnreadYn`을 맞춘다. [allPagesLoaded]이면 목록·읽음 상태를 신뢰해
+  /// 홈이 여전히 Y일 때 GNB 배지용으로 N으로 보정한다(동기화 실패·일시 불일치).
+  Future<void> _applyNotiboxFirstPageUnreadFromList(
+    bool hasUnread, {
+    bool allPagesLoaded = false,
+  }) async {
     if (!mounted) return;
     setState(() => _notiboxHasUnreadFromAlarmList = hasUnread);
     if (!hasUnread) {
       await _syncHomeNotiboxUnreadFromServer();
+      if (!mounted) return;
+      if (allPagesLoaded && _homeNotiboxUnreadYn == 'Y') {
+        setState(() => _homeNotiboxUnreadYn = 'N');
+      }
     }
   }
 
@@ -242,7 +275,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       );
       if (!mounted) return;
       final hasUnread = list.any((n) => n.readYn != 'Y');
-      await _applyNotiboxFirstPageUnreadFromList(hasUnread);
+      final allPagesLoaded =
+          list.isEmpty || list.length < _notiboxApiPageSize;
+      await _applyNotiboxFirstPageUnreadFromList(
+        hasUnread,
+        allPagesLoaded: allPagesLoaded,
+      );
     } catch (_) {}
   }
 
@@ -500,6 +538,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       _homeNotiboxUnreadYn = 'N';
       _notiboxHasUnreadFromAlarmList = false;
       _lastNotiboxListSyncAttemptAt = null;
+      _notiboxAnchorNotificationId = null;
     });
   }
 
@@ -534,14 +573,45 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     });
   }
 
-  /// 푸시로 보관된 appPath를 파싱해 탭 전환 또는 Sub 스크린 push. Main(Home) 진입 후 한 번만 호출.
-  void _applyPendingAppPath(String path) {
-    final nav = _navigatorKey.currentState;
-    final ctx = nav?.context;
-    if (ctx == null || !ctx.mounted) return;
+  /// 푸시로 보관된 경로를 파싱해 탭 전환 또는 Sub 스크린 push. Main 진입 후 한 번 소비.
+  void _applyPendingPushNavigation(PendingPushNavigation? pending) {
+    if (pending == null) return;
+    if (!(_navigatorKey.currentContext?.mounted ?? false)) return;
 
-    final segments = path.split('/').where((s) => s.isNotEmpty).toList();
-    if (segments.isEmpty) return;
+    final raw = pending.path.trim();
+    final segments = raw.isEmpty
+        ? <String>[]
+        : raw.split('/').where((s) => s.isNotEmpty).toList();
+
+    if (segments.length >= 3 &&
+        segments[0] == 'app' &&
+        segments[1] == 'notification') {
+      final id = int.tryParse(segments[2]) ?? pending.notificationId;
+      if (id != null) {
+        setState(() {
+          _currentMainScreen = 'alarm';
+          _notiboxAnchorNotificationId = id;
+        });
+        unawaited(_syncNotiboxListFirstPage(force: true));
+        return;
+      }
+    }
+
+    // path는 비었지만 id만 있는 경우(FCM data 불완전 등).
+    if (segments.isEmpty && pending.notificationId != null) {
+      setState(() {
+        _currentMainScreen = 'alarm';
+        _notiboxAnchorNotificationId = pending.notificationId;
+      });
+      unawaited(_syncNotiboxListFirstPage(force: true));
+      return;
+    }
+
+    _applyPendingAppPathFromSegments(segments);
+  }
+
+  void _applyPendingAppPathFromSegments(List<String> segments) {
+    if (!(_navigatorKey.currentContext?.mounted ?? false)) return;
 
     if (segments.length == 1) {
       switch (segments[0]) {
@@ -678,12 +748,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 )
               : Builder(
                   builder: (_) {
-                    final pending = PendingAppPathService.instance.get();
-                    if (pending != null) {
+                    if (PendingAppPathService.instance.hasPendingNavigation) {
                       WidgetsBinding.instance.addPostFrameCallback((_) {
                         if (!mounted) return;
-                        final path = PendingAppPathService.instance.take();
-                        if (path != null) _applyPendingAppPath(path);
+                        final pending =
+                            PendingAppPathService.instance.takePending();
+                        _applyPendingPushNavigation(pending);
                       });
                     }
                     return MainRouteAwareWrapper(
@@ -724,6 +794,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                         user: _user,
                         showNotiboxUnreadBadge: _showNotiboxUnreadBadge,
                         onFirstPageUnreadDetected: _onNotificationFirstPageUnread,
+                        focusNotificationId: _notiboxAnchorNotificationId,
+                        onFocusAnchorConsumed: () {
+                          if (mounted) {
+                            setState(() => _notiboxAnchorNotificationId = null);
+                          }
+                        },
                         ),
                         HomeScreen(
                         onNavigateToAlarm: _navigateToAlarm,
