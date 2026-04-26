@@ -18,6 +18,8 @@ import '../../services/main_user_sync.dart';
 import '../../services/roleplay_state_service.dart';
 import '../../services/token_storage.dart';
 import '../../utils/default_toast.dart';
+import '../../utils/sub_screen_route.dart';
+import 'review_chat.dart';
 
 const Color _exprTextPrimary = Color(0xFF121212);
 const Color _exprTextSecondary = Color(0xFF676767);
@@ -614,7 +616,13 @@ class _RoleplayResultScreenV2State extends State<RoleplayResultScreenV2>
             const SizedBox(height: 5),
             Text(
               _dto?.subTitle ?? '',
-              style: theme.headlineSmall?.copyWith(color: _mint),
+              style: const TextStyle(
+                fontFamily: 'ChironGoRoundTC',
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                fontVariations: [FontVariation('wght', 600)],
+                color: _mint,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 30),
@@ -626,7 +634,7 @@ class _RoleplayResultScreenV2State extends State<RoleplayResultScreenV2>
                   title: 'Mission',
                   child: _buildMissionIcons(),
                 ),
-                const SizedBox(width: 20),
+                const SizedBox(width: 10),
                 _buildStatCard(
                   context,
                   title: 'Words',
@@ -635,7 +643,7 @@ class _RoleplayResultScreenV2State extends State<RoleplayResultScreenV2>
                     style: theme.bodyLarge?.copyWith(color: Colors.white),
                   ),
                 ),
-                const SizedBox(width: 20),
+                const SizedBox(width: 10),
                 _buildStatCard(
                   context,
                   title: 'Like',
@@ -690,13 +698,20 @@ class _RoleplayResultScreenV2State extends State<RoleplayResultScreenV2>
                 style: theme.headlineSmall?.copyWith(color: Colors.white),
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 16),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   color: _feedbackBoxFill,
                   borderRadius: BorderRadius.circular(18),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0x33000000),
+                      blurRadius: 18,
+                      offset: Offset(0, 10),
+                    ),
+                  ],
                 ),
                 child: Padding(
                   padding:
@@ -771,13 +786,44 @@ class _RoleplayResultScreenV2State extends State<RoleplayResultScreenV2>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.only(left: 24),
-              child: Text(
-                'Expression Upgrade',
-                style: theme.headlineSmall?.copyWith(color: Colors.white),
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Expression Upgrade',
+                      style: theme.headlineSmall?.copyWith(color: Colors.white),
+                    ),
+                  ),
+                  GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () {
+                      final r = _dto;
+                      if (r == null) return;
+                      Navigator.push(
+                        context,
+                        SubScreenRoute(page: ReviewChatScreen(result: r)),
+                      );
+                    },
+                    child: Container(
+                      width: 80,
+                      height: 24,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: Colors.transparent,
+                        border: Border.all(color: Colors.white, width: 1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        'View Chat',
+                        style: theme.labelSmall?.copyWith(color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 16),
             _buildExpressionCarousel(context),
           ],
         ),
@@ -813,23 +859,35 @@ class _RoleplayResultScreenV2State extends State<RoleplayResultScreenV2>
                 children: [
                   const SizedBox(height: 28),
                   Center(
-                    child: ElevatedButton(
-                      onPressed: _isLeavingToOverview
-                          ? null
-                          : () => _navigateToOverview(context),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: _teal,
-                        foregroundColor: Colors.white,
-                        disabledBackgroundColor: _teal,
-                        disabledForegroundColor: Colors.white,
-                        shape: const StadiumBorder(),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 30,
-                          vertical: 18,
-                        ),
-                        elevation: 0,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(999),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Color(0x33000000),
+                            blurRadius: 18,
+                            offset: Offset(0, 5),
+                          ),
+                        ],
                       ),
-                      child: const Text('Got it!'),
+                      child: ElevatedButton(
+                        onPressed: _isLeavingToOverview
+                            ? null
+                            : () => _navigateToOverview(context),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: _teal,
+                          foregroundColor: Colors.white,
+                          disabledBackgroundColor: _teal,
+                          disabledForegroundColor: Colors.white,
+                          shape: const StadiumBorder(),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 30,
+                            vertical: 18,
+                          ),
+                          elevation: 0,
+                        ),
+                        child: const Text('Got it!'),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 35),
@@ -962,88 +1020,100 @@ class _ExpressionUpgradeCard extends StatelessWidget {
     return GestureDetector(
       onTap: onCardTap,
       behavior: HitTestBehavior.opaque,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(18),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          curve: Curves.easeOut,
-          color: highlighted ? Colors.white : _expressionUpgradeCardBg,
-          padding: const EdgeInsets.all(16),
-          child: Align(
-            alignment: Alignment.topLeft,
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    SvgPicture.asset(
-                      _checkMintSvg,
-                      width: 22,
-                      height: 22,
-                      fit: BoxFit.contain,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        expression,
-                        style: theme.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: _exprTextPrimary,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x33000000),
+              blurRadius: 18,
+              offset: Offset(0, 10),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(18),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            curve: Curves.easeOut,
+            color: highlighted ? Colors.white : _expressionUpgradeCardBg,
+            padding: const EdgeInsets.all(16),
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      SvgPicture.asset(
+                        _checkMintSvg,
+                        width: 22,
+                        height: 22,
+                        fit: BoxFit.contain,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          expression,
+                          style: theme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: _exprTextPrimary,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 15),
-                Padding(
-                  padding: const EdgeInsets.only(left: _bodyLeftIndent),
-                  child: Text(
-                    rephrased,
-                    style: theme.bodyMedium?.copyWith(
-                      color: _exprTextPrimary,
+                    ],
+                  ),
+                  const SizedBox(height: 15),
+                  Padding(
+                    padding: const EdgeInsets.only(left: _bodyLeftIndent),
+                    child: Text(
+                      rephrased,
+                      style: theme.bodyMedium?.copyWith(
+                        color: _exprTextPrimary,
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Padding(
-                  padding: const EdgeInsets.only(left: _bodyLeftIndent),
-                  child: Text(
-                    meaning,
-                    style: theme.bodySmall?.copyWith(
-                      color: _exprTextSecondary,
+                  const SizedBox(height: 8),
+                  Padding(
+                    padding: const EdgeInsets.only(left: _bodyLeftIndent),
+                    child: Text(
+                      meaning,
+                      style: theme.bodySmall?.copyWith(
+                        color: _exprTextSecondary,
+                      ),
                     ),
                   ),
-                ),
-                const Spacer(),
-                const SizedBox(height: 15),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Image.asset(
-                      _megaphonePng,
-                      width: 24,
-                      height: 24,
-                      fit: BoxFit.contain,
-                      color: playbackActive
-                          ? _megaphoneTintLoading
-                          : _megaphoneTintActive,
-                      colorBlendMode: BlendMode.srcIn,
-                    ),
-                    GestureDetector(
-                      onTap: onBookmarkTap,
-                      behavior: HitTestBehavior.opaque,
-                      child: Image.asset(
-                        bookmarked ? _bookmarkOnPng : _bookmarkOffPng,
+                  const Spacer(),
+                  const SizedBox(height: 15),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Image.asset(
+                        _megaphonePng,
                         width: 24,
                         height: 24,
                         fit: BoxFit.contain,
+                        color: playbackActive
+                            ? _megaphoneTintLoading
+                            : _megaphoneTintActive,
+                        colorBlendMode: BlendMode.srcIn,
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                      GestureDetector(
+                        onTap: onBookmarkTap,
+                        behavior: HitTestBehavior.opaque,
+                        child: Image.asset(
+                          bookmarked ? _bookmarkOnPng : _bookmarkOffPng,
+                          width: 24,
+                          height: 24,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),

@@ -77,7 +77,8 @@
     - 응답: `HomeDto` (restYn, restStartsAt, restEndsAt, banners, roleplays, **notiboxUnreadYn**)
     - **notiboxUnreadYn**: 알림함(notibox)에 사용자 기준 미읽음이 있으면 `Y`, 없으면 `N`. 홈·GNB 알림 탭 배지 판단에 사용(`main.dart`·`HomeScreen` 로드 시 `RestStatusService.instance.update(..., notiboxUnreadYn: ...)` 동기화).
     - GNB 알림 탭 빨간 점: `main.dart`의 `_showNotiboxUnreadBadge` 계열 상태로 `GnbBar.showNotiboxUnreadBadge`에 전달. 알림함에서 **전 페이지 로드가 끝난 뒤** 로컬 목록에 미읽음이 없으면 `getHomeContents`로 동기화한 뒤에도 `notiboxUnreadYn`이 `Y`로 남는 경우 배지용 값을 `N`으로 보정한다(동기화 실패·일시 불일치 대비). notibox 페이지 크기(10)는 API와 동일하게 `NotificationBoxScreen`·`main.dart`에 상수로 둔다.
-    - banners: `List<MainHomeBannerDto>` (imgPath, overlayText)
+    - banners: `List<MainHomeBannerDto>` (imgPath, overlayText, appPath?)
+      - `appPath`가 있으면 Home 배너 탭 시 기존 appPath 규칙(`_applyPendingPushNavigation`)으로 화면 이동한다.
     - roleplays: `List<AppHomeRoleplayGroupDto>` (roleplayCategoryDto, list)
     - restYn/restStartsAt/restEndsAt·notiboxUnreadYn은 `GET /v1/home/contents` 처리 시 `RestStatusService.instance.update()`로 보관 (어떤 스크린에서도 접근 가능)
   - `SudaApiClient.getNotifications()`: 알림함 목록 페이징 (`GET /v1/users/notification?pageNum=…`, `UserApi.getNotifications`) — 응답 원소 `NotificationDto`에 **readYn**(`Y`/`N`) 포함. 서버는 `sendFinishedAt` 기준 30일 초과 알림을 내려주지 않으며(배지·목록 일치), 카드 하단 상대 날짜도 동일 필드(`sendFinishedAt`)를 UTC로 파싱 후 로컬 달력 일 단위로 표시(`notification_box.dart`).
@@ -238,6 +239,8 @@
   - **`addNotificationBoxYn != 'Y'`인데 `appPath`가 비고 `notificationId`만 있는 경우**: pending에 `notificationId`를 넣지 않음(`_storeFcmNavigationFromData`). 적용 단계에서도 id-only 폴백은 `addNotificationBoxYn == 'Y'`일 때만 알림함, 그 외·미수신은 홈(`_applyPendingPushNavigation`).
   - **비로그인·동의 전**: `PendingAppPathService`에 보관 후, 로그인·동의 완료 뒤 Main 진입 시 한 번 `takePending()`으로 적용한다.
   - **이미 Main 진입 후**: 백그라운드에서 알림 탭 시에도 동일하게 pending에 넣고 다음 프레임에 적용한다.
+  - `/notice/{noticeId}`는 알림함이 아닌 공지사항 상세(`AnnouncementDetailScreen`)로 직접 진입한다.
+  - `/profile/history/{resultId}`는 `GET /v1/roleplays/results/{resultId}` 상세 조회 후 `version == 2`이면 `HistoryScreenV2`, 그 외·조회 실패 시 기존 `HistoryScreen`으로 진입한다.
   - 지원 경로·정의·신규 스크린 시 확인 절차는 `.docs/CONTEXT_SCREEN.md`의 **appPath (푸시 딥링크 경로)** 섹션을 따른다.
 
 ## 11. 코드 구조 및 리팩토링

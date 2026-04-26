@@ -40,15 +40,22 @@ class HomeDto {
     final List<MainHomeBannerDto> banners = bannersRaw == null
         ? []
         : (bannersRaw as List<dynamic>)
-            .map((item) => MainHomeBannerDto.fromJson(item as Map<String, dynamic>))
-            .toList();
+              .map(
+                (item) =>
+                    MainHomeBannerDto.fromJson(item as Map<String, dynamic>),
+              )
+              .toList();
 
     final roleplaysRaw = json['roleplays'];
     final List<AppHomeRoleplayGroupDto> roleplays = roleplaysRaw == null
         ? []
         : (roleplaysRaw as List<dynamic>)
-            .map((item) => AppHomeRoleplayGroupDto.fromJson(item as Map<String, dynamic>))
-            .toList();
+              .map(
+                (item) => AppHomeRoleplayGroupDto.fromJson(
+                  item as Map<String, dynamic>,
+                ),
+              )
+              .toList();
 
     return HomeDto(
       restYn: restYn,
@@ -64,10 +71,12 @@ class HomeDto {
 class MainHomeBannerDto {
   final String imgPath;
   final List<SudaJson> overlayText;
+  final String? appPath;
 
   const MainHomeBannerDto({
     required this.imgPath,
     required this.overlayText,
+    this.appPath,
   });
 
   factory MainHomeBannerDto.fromJson(Map<String, dynamic> json) {
@@ -76,8 +85,9 @@ class MainHomeBannerDto {
       overlayText: json['overlayText'] == null
           ? []
           : (json['overlayText'] as List<dynamic>)
-              .map((item) => SudaJson.fromJson(item as Map<String, dynamic>))
-              .toList(),
+                .map((item) => SudaJson.fromJson(item as Map<String, dynamic>))
+                .toList(),
+      appPath: json['appPath'] as String?,
     );
   }
 }
@@ -86,10 +96,7 @@ class RoleplayCategoryDto {
   final int id;
   final List<SudaJson> name;
 
-  const RoleplayCategoryDto({
-    required this.id,
-    required this.name,
-  });
+  const RoleplayCategoryDto({required this.id, required this.name});
 
   factory RoleplayCategoryDto.fromJson(Map<String, dynamic> json) {
     final nameValue = json['name'];
@@ -103,10 +110,7 @@ class RoleplayCategoryDto {
     } else {
       names = [];
     }
-    return RoleplayCategoryDto(
-      id: json['id'] as int? ?? 0,
-      name: names,
-    );
+    return RoleplayCategoryDto(id: json['id'] as int? ?? 0, name: names);
   }
 }
 
@@ -138,8 +142,8 @@ class AppHomeRoleplayDto {
       title: json['title'] == null
           ? []
           : (json['title'] as List<dynamic>)
-              .map((item) => SudaJson.fromJson(item as Map<String, dynamic>))
-              .toList(),
+                .map((item) => SudaJson.fromJson(item as Map<String, dynamic>))
+                .toList(),
       thumbnailImgPath: json['thumbnailImgPath'] as String?,
       bannerImgPath: json['bannerImgPath'] as String?,
       bannerColor: json['bannerColor'] as String?,
@@ -160,13 +164,17 @@ class AppHomeRoleplayGroupDto {
 
   factory AppHomeRoleplayGroupDto.fromJson(Map<String, dynamic> json) {
     return AppHomeRoleplayGroupDto(
-      roleplayCategoryDto:
-          RoleplayCategoryDto.fromJson(json['roleplayCategoryDto'] as Map<String, dynamic>),
+      roleplayCategoryDto: RoleplayCategoryDto.fromJson(
+        json['roleplayCategoryDto'] as Map<String, dynamic>,
+      ),
       list: json['list'] == null
           ? []
           : (json['list'] as List<dynamic>)
-              .map((item) => AppHomeRoleplayDto.fromJson(item as Map<String, dynamic>))
-              .toList(),
+                .map(
+                  (item) =>
+                      AppHomeRoleplayDto.fromJson(item as Map<String, dynamic>),
+                )
+                .toList(),
     );
   }
 }

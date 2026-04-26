@@ -28,7 +28,9 @@ import 'screens/profile.dart';
 import 'screens/notification_box.dart';
 import 'screens/agreement.dart';
 import 'screens/roleplay/history.dart';
+import 'screens/roleplay/history_v2.dart';
 import 'screens/setting/setting.dart';
+import 'screens/setting/announcement_detail.dart';
 import 'routes/roleplay_router.dart';
 import 'utils/sub_screen_route.dart';
 import 'config/app_config.dart';
@@ -54,20 +56,15 @@ void _storeFcmNavigationFromData(Map<String, dynamic> data) {
   final path = (pathRaw != null && pathRaw.isNotEmpty) ? pathRaw : null;
   final nidFinal = (nid != null && nid.isNotEmpty) ? nid : null;
   if (path != null || nidFinal != null) {
-    PendingAppPathService.instance.set(
-      path,
-      notificationId: nidFinal,
-    );
+    PendingAppPathService.instance.set(path, notificationId: nidFinal);
   }
 }
 
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
-  
+
   // 앱 방향을 세로로 고정
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-  ]);
+  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
   // 시스템 네비게이션 바 색상을 앱 기본 배경(#121212)과 통일
   SystemChrome.setSystemUIOverlayStyle(
@@ -104,24 +101,28 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
   final RouteObserver<ModalRoute<void>> _routeObserver =
       RouteObserver<ModalRoute<void>>();
-  
+
   GoogleSignInAccount? _googleUser;
   String? _accessToken;
   UserDto? _user;
   bool _isLoading = true;
   String _currentMainScreen = 'home'; // 'alarm' | 'home' | 'profile'
   int _homeTabSelectedCounter = 0; // 홈 탭 선택 시 증가 → HomeScreen 티켓 갱신
-  int _profileReturnCounter = 0; // Profile 탭 활성 상태에서 서브 스크린 pop 복귀 시 증가 → ProfileScreen 프로필 재조회
+  int _profileReturnCounter =
+      0; // Profile 탭 활성 상태에서 서브 스크린 pop 복귀 시 증가 → ProfileScreen 프로필 재조회
   bool _hasCheckedVersion = false; // 버전 체크 실행 여부
   bool _needsAgreement = false; // 서비스 이용 동의 필요 여부
   /// 앱 실행(토큰 없음) 시에만 true. CustomSplashScreen 표시 후 onComplete에서 false. 로그아웃 시에는 false로 곧바로 LoginScreen.
   bool _showCustomSplash = false;
+
   /// 마지막 홈 `getHomeContents`의 `notiboxUnreadYn` (`onHomeContentsLoaded`만 갱신)
   String _homeNotiboxUnreadYn = 'N';
+
   /// `GET /v1/users/notification?pageNum=0` 기준 미읽음 존재 여부
   bool _notiboxHasUnreadFromAlarmList = false;
   DateTime? _lastNotiboxListSyncAttemptAt;
   StreamSubscription<RemoteMessage>? _fcmOnMessageSub;
+
   /// 푸시(`/app/notification/{id}` 등)로 알림함에서 펼칠 대상 id. [NotificationBoxScreen]이 소비 후 null.
   int? _notiboxAnchorNotificationId;
 
@@ -144,7 +145,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       unawaited(_syncNotiboxListFirstPage());
     });
     // 이미 Main이 보일 때 pending 설정되면 rebuild하여 적용 트리거
-    PendingAppPathService.instance.pendingNotifier.addListener(_onPendingAppPathChanged);
+    PendingAppPathService.instance.pendingNotifier.addListener(
+      _onPendingAppPathChanged,
+    );
     // initState에서는 버전 체크를 실행하지 않음
     // MaterialApp 빌드 후 builder에서 실행
   }
@@ -220,10 +223,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     bool hasUnread, {
     bool allPagesLoaded = false,
   }) {
-    unawaited(_applyNotiboxFirstPageUnreadFromList(
-      hasUnread,
-      allPagesLoaded: allPagesLoaded,
-    ));
+    unawaited(
+      _applyNotiboxFirstPageUnreadFromList(
+        hasUnread,
+        allPagesLoaded: allPagesLoaded,
+      ),
+    );
   }
 
   /// 알림 목록 기준 미읽음 플래그 반영. 미읽음이 없으면 `getHomeContents`로
@@ -260,7 +265,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     final now = DateTime.now();
     if (!force &&
         _lastNotiboxListSyncAttemptAt != null &&
-        now.difference(_lastNotiboxListSyncAttemptAt!) < _notiboxListSyncCooldown) {
+        now.difference(_lastNotiboxListSyncAttemptAt!) <
+            _notiboxListSyncCooldown) {
       return;
     }
     if (!force) {
@@ -275,8 +281,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       );
       if (!mounted) return;
       final hasUnread = list.any((n) => n.readYn != 'Y');
-      final allPagesLoaded =
-          list.isEmpty || list.length < _notiboxApiPageSize;
+      final allPagesLoaded = list.isEmpty || list.length < _notiboxApiPageSize;
       await _applyNotiboxFirstPageUnreadFromList(
         hasUnread,
         allPagesLoaded: allPagesLoaded,
@@ -305,7 +310,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   void dispose() {
     _fcmOnMessageSub?.cancel();
     MainUserSync.instance.unregister();
-    PendingAppPathService.instance.pendingNotifier.removeListener(_onPendingAppPathChanged);
+    PendingAppPathService.instance.pendingNotifier.removeListener(
+      _onPendingAppPathChanged,
+    );
     TokenRefreshService.instance.stop();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
@@ -329,8 +336,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   /// 버전 체크 후 인증 상태 확인
   Future<void> _checkVersionAndAuth() async {
     // 버전 체크 실행 (VersionCheckService 사용)
-    final versionCheckPassed = await VersionCheckService.checkVersion(_navigatorKey);
-    
+    final versionCheckPassed = await VersionCheckService.checkVersion(
+      _navigatorKey,
+    );
+
     if (!versionCheckPassed) {
       // 버전 체크 실패 또는 강제 업데이트 필요 시 JWT 처리 진행하지 않음
       return;
@@ -438,7 +447,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   }
 
   /// 로그인 성공 시 호출
-  /// 
+  ///
   /// Google 로그인 후 JWT 토큰을 로드하고 사용자 정보를 조회한 뒤 화면 전환
   Future<void> _onSignIn(GoogleSignInResult result) async {
     // 1) Google 계정 정보 저장
@@ -466,7 +475,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       // 3) JWT를 사용하여 사용자 정보 조회
       final user = await SudaApiClient.getCurrentUser(accessToken: token);
       if (!mounted) return;
-      
+
       // 4) 재가입 제한 여부 확인 (APPLY_REJECTED 48시간 이내)
       if (_shouldShowReregistrationBlockedPopup(user)) {
         if (!mounted) return;
@@ -511,8 +520,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       TokenRefreshService.instance.start();
       setState(() {
         _accessToken = token;
-      _user = user;
-      _needsAgreement = needsAgreement;
+        _user = user;
+        _needsAgreement = needsAgreement;
       });
     } catch (_) {
       await TokenStorage.clearTokens();
@@ -649,23 +658,55 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           return;
         }
       }
+      if (segments[0] == 'notice' && segments.length >= 2) {
+        final noticeId = int.tryParse(segments[1]);
+        if (noticeId != null) {
+          setState(() => _currentMainScreen = 'profile');
+          unawaited(_syncNotiboxListFirstPage(force: true));
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            final c = _navigatorKey.currentState?.context;
+            if (c != null && c.mounted) {
+              Navigator.push(
+                c,
+                SubScreenRoute(
+                  page: AnnouncementDetailScreen(noticeId: noticeId),
+                ),
+              );
+            }
+          });
+          return;
+        }
+      }
       if (segments[0] == 'profile') {
-        if (segments.length >= 2 && segments[1] == 'history' &&
+        if (segments.length >= 2 &&
+            segments[1] == 'history' &&
             segments.length >= 3) {
           final resultId = int.tryParse(segments[2]);
           if (resultId != null) {
             setState(() => _currentMainScreen = 'profile');
             unawaited(_syncNotiboxListFirstPage(force: true));
-            WidgetsBinding.instance.addPostFrameCallback((_) {
+            WidgetsBinding.instance.addPostFrameCallback((_) async {
               if (!mounted) return;
+              Widget page = HistoryScreen(resultId: resultId);
+              final token = _accessToken;
+              if (token != null) {
+                try {
+                  final dto = await SudaApiClient.getRoleplayResult(
+                    accessToken: token,
+                    resultId: resultId,
+                  );
+                  if (!mounted) return;
+                  page = dto.version == 2
+                      ? HistoryScreenV2(resultId: resultId)
+                      : HistoryScreen(resultId: resultId);
+                } catch (_) {
+                  // Keep the previous appPath behavior if the version lookup fails.
+                }
+              }
               final c = _navigatorKey.currentState?.context;
               if (c != null && c.mounted) {
-                Navigator.push(
-                  c,
-                  SubScreenRoute(
-                    page: HistoryScreen(resultId: resultId),
-                  ),
-                );
+                Navigator.push(c, SubScreenRoute(page: page));
               }
             });
             return;
@@ -715,11 +756,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: const [
-        Locale('en'),
-        Locale('ko'),
-        Locale('pt'),
-      ],
+      supportedLocales: const [Locale('en'), Locale('ko'), Locale('pt')],
       locale: Locale(LanguageUtil.getCurrentLanguageCode()),
       // MaterialApp 빌드 후 첫 프레임이 그려진 후 버전 체크 실행
       builder: (BuildContext context, Widget? child) {
@@ -737,26 +774,26 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       theme: AppTheme.themeData,
       home: _accessToken == null
           ? (_showCustomSplash
-              ? CustomSplashScreen(
-                  onComplete: () => setState(() => _showCustomSplash = false),
-                )
-              : LoginScreen(onSignIn: _onSignIn))
+                ? CustomSplashScreen(
+                    onComplete: () => setState(() => _showCustomSplash = false),
+                  )
+                : LoginScreen(onSignIn: _onSignIn))
           : _needsAgreement
-              ? AgreementScreen(
-                  accessToken: _accessToken!,
-                  onAgreementComplete: _onAgreementComplete,
-                )
-              : Builder(
-                  builder: (_) {
-                    if (PendingAppPathService.instance.hasPendingNavigation) {
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        if (!mounted) return;
-                        final pending =
-                            PendingAppPathService.instance.takePending();
-                        _applyPendingPushNavigation(pending);
-                      });
-                    }
-                    return MainRouteAwareWrapper(
+          ? AgreementScreen(
+              accessToken: _accessToken!,
+              onAgreementComplete: _onAgreementComplete,
+            )
+          : Builder(
+              builder: (_) {
+                if (PendingAppPathService.instance.hasPendingNavigation) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (!mounted) return;
+                    final pending = PendingAppPathService.instance
+                        .takePending();
+                    _applyPendingPushNavigation(pending);
+                  });
+                }
+                return MainRouteAwareWrapper(
                   routeObserver: _routeObserver,
                   onReturnToRoute: () {
                     setState(() {
@@ -783,52 +820,60 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                       index: _currentMainScreen == 'alarm'
                           ? 0
                           : _currentMainScreen == 'home'
-                              ? 1
-                              : 2,
+                          ? 1
+                          : 2,
                       children: [
                         NotificationBoxScreen(
-                        onNavigateToHome: _navigateToHome,
-                        onNavigateToProfile: _navigateToProfile,
-                        onNavigateToAlarm: _navigateToAlarm,
-                        isActive: _currentMainScreen == 'alarm',
-                        user: _user,
-                        showNotiboxUnreadBadge: _showNotiboxUnreadBadge,
-                        onFirstPageUnreadDetected: _onNotificationFirstPageUnread,
-                        focusNotificationId: _notiboxAnchorNotificationId,
-                        onFocusAnchorConsumed: () {
-                          if (mounted) {
-                            setState(() => _notiboxAnchorNotificationId = null);
-                          }
-                        },
+                          onNavigateToHome: _navigateToHome,
+                          onNavigateToProfile: _navigateToProfile,
+                          onNavigateToAlarm: _navigateToAlarm,
+                          isActive: _currentMainScreen == 'alarm',
+                          user: _user,
+                          showNotiboxUnreadBadge: _showNotiboxUnreadBadge,
+                          onFirstPageUnreadDetected:
+                              _onNotificationFirstPageUnread,
+                          focusNotificationId: _notiboxAnchorNotificationId,
+                          onFocusAnchorConsumed: () {
+                            if (mounted) {
+                              setState(
+                                () => _notiboxAnchorNotificationId = null,
+                              );
+                            }
+                          },
                         ),
                         HomeScreen(
-                        onNavigateToAlarm: _navigateToAlarm,
-                        onNavigateToProfile: _navigateToProfile,
-                        user: _user,
-                        homeTabSelectedCounter: _homeTabSelectedCounter,
-                        showNotiboxUnreadBadge: _showNotiboxUnreadBadge,
-                        onHomeContentsLoaded: _onHomeContentsLoadedForBadge,
+                          onNavigateToAlarm: _navigateToAlarm,
+                          onNavigateToProfile: _navigateToProfile,
+                          user: _user,
+                          homeTabSelectedCounter: _homeTabSelectedCounter,
+                          showNotiboxUnreadBadge: _showNotiboxUnreadBadge,
+                          onHomeContentsLoaded: _onHomeContentsLoadedForBadge,
+                          onOpenAppPath: (path) {
+                            _applyPendingPushNavigation(
+                              PendingPushNavigation(path: path),
+                            );
+                          },
                         ),
                         ProfileScreen(
-                        onNavigateToHome: _navigateToHome,
-                        onNavigateToAlarm: _navigateToAlarm,
-                        onSignOut: _onSignOut,
-                        user: _user,
-                        onUserUpdated: (user) {
-                          setState(() {
-                            _user = user;
-                          });
-                        },
-                        isActive: _currentMainScreen == 'profile',
-                        profileReturnCounter: _profileReturnCounter,
-                        showNotiboxUnreadBadge: _showNotiboxUnreadBadge,
+                          onNavigateToHome: _navigateToHome,
+                          onNavigateToAlarm: _navigateToAlarm,
+                          onSignOut: _onSignOut,
+                          user: _user,
+                          onUserUpdated: (user) {
+                            setState(() {
+                              _user = user;
+                            });
+                          },
+                          isActive: _currentMainScreen == 'profile',
+                          profileReturnCounter: _profileReturnCounter,
+                          showNotiboxUnreadBadge: _showNotiboxUnreadBadge,
                         ),
                       ],
                     ),
                   ),
                 );
-                  },
-                ),
+              },
+            ),
     );
   }
 }

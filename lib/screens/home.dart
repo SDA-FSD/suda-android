@@ -15,13 +15,16 @@ import '../widgets/daily_ticket_popup.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/gnb_bar.dart';
 import '../services/effect_anchor_registry.dart';
+
 class HomeScreen extends StatefulWidget {
   final VoidCallback? onNavigateToAlarm;
   final VoidCallback? onNavigateToProfile;
   final UserDto? user;
+
   /// 홈 탭이 선택될 때마다 증가. didUpdateWidget에서 변경 시 티켓 갱신.
   final int? homeTabSelectedCounter;
   final ValueChanged<HomeDto>? onHomeContentsLoaded;
+  final ValueChanged<String>? onOpenAppPath;
   final bool showNotiboxUnreadBadge;
 
   const HomeScreen({
@@ -31,6 +34,7 @@ class HomeScreen extends StatefulWidget {
     this.user,
     this.homeTabSelectedCounter,
     this.onHomeContentsLoaded,
+    this.onOpenAppPath,
     this.showNotiboxUnreadBadge = false,
   });
 
@@ -144,7 +148,9 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     try {
-      final home = await SudaApiClient.getHomeContents(accessToken: _accessToken!);
+      final home = await SudaApiClient.getHomeContents(
+        accessToken: _accessToken!,
+      );
       if (!mounted) return;
 
       RestStatusService.instance.update(
@@ -195,7 +201,9 @@ class _HomeScreenState extends State<HomeScreen> {
       // 모든 배너 이미지에 대해 precacheImage 수행
       final List<Future<void>> futures = banners.map((banner) {
         return precacheImage(
-          CachedNetworkImageProvider('${AppConfig.cdnBaseUrl}${banner.imgPath}'),
+          CachedNetworkImageProvider(
+            '${AppConfig.cdnBaseUrl}${banner.imgPath}',
+          ),
           context,
         );
       }).toList();
@@ -239,7 +247,7 @@ class _HomeScreenState extends State<HomeScreen> {
   /// 배너 자동 슬라이드 타이머 시작
   void _startBannerTimer() {
     if (_bannerTimerStarted) return; // 이미 시작되었다면 무시
-    
+
     final bannerCount = _banners?.length ?? 0;
     if (bannerCount < 2) return; // 배너가 2개 미만이면 타이머 불필요
 
@@ -264,13 +272,12 @@ class _HomeScreenState extends State<HomeScreen> {
     return AppScaffold(
       showBackButton: false,
       title: 'Hi, ${widget.user?.name ?? 'User'}!',
-      titleStyle: Theme.of(context).textTheme.headlineSmall?.copyWith(color: Colors.white),
+      titleStyle: Theme.of(
+        context,
+      ).textTheme.headlineSmall?.copyWith(color: Colors.white),
       usePadding: false, // 배너 풀-폭 유지를 위해 본문 패딩 제거
       actions: [
-        KeyedSubtree(
-          key: _ticketBadgeKey,
-          child: _buildTicketBadge(context),
-        ),
+        KeyedSubtree(key: _ticketBadgeKey, child: _buildTicketBadge(context)),
       ],
       bottomNavigationBar: GnbBar(
         isAlarmActive: false,
@@ -322,8 +329,10 @@ class _HomeScreenState extends State<HomeScreen> {
             itemBuilder: (context, index) {
               final banner = _banners![index % bannerCount];
               final imageUrl = '${AppConfig.cdnBaseUrl}${banner.imgPath}';
-              
-              return ClipRRect(
+              final appPath = banner.appPath?.trim();
+              final hasAppPath = appPath != null && appPath.isNotEmpty;
+
+              final content = ClipRRect(
                 borderRadius: BorderRadius.circular(20),
                 child: Stack(
                   children: [
@@ -350,7 +359,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         color: Colors.grey[900],
                         width: double.infinity,
                         height: double.infinity,
-                        child: const Icon(Icons.broken_image, color: Colors.grey),
+                        child: const Icon(
+                          Icons.broken_image,
+                          color: Colors.grey,
+                        ),
                       ),
                     ),
                     // 오버레이 텍스트
@@ -361,22 +373,30 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Center(
                         child: Text(
                           _getOverlayText(banner),
-                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                            color: Colors.white,
-                            shadows: [
-                              const Shadow(
-                                blurRadius: 4.0,
-                                color: Colors.black54,
-                                offset: Offset(0, 2),
+                          style: Theme.of(context).textTheme.headlineMedium
+                              ?.copyWith(
+                                color: Colors.white,
+                                shadows: [
+                                  const Shadow(
+                                    blurRadius: 4.0,
+                                    color: Colors.black54,
+                                    offset: Offset(0, 2),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
                           textAlign: TextAlign.center,
                         ),
                       ),
                     ),
                   ],
                 ),
+              );
+              if (!hasAppPath) return content;
+
+              return GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => widget.onOpenAppPath?.call(appPath),
+                child: content,
               );
             },
           ),
@@ -424,7 +444,9 @@ class _HomeScreenState extends State<HomeScreen> {
       if (i < _visibleCategoryCount) {
         categories.add(
           CategoryRoleplayRow(
-            key: ValueKey('category_${_roleplayGroups![i].roleplayCategoryDto.id}'),
+            key: ValueKey(
+              'category_${_roleplayGroups![i].roleplayCategoryDto.id}',
+            ),
             group: _roleplayGroups![i],
             accessToken: _accessToken!,
             onRoleplayTap: (item) => _navigateToRoleplayOverview(item.id),
@@ -539,9 +561,9 @@ class _HomeScreenState extends State<HomeScreen> {
           Center(
             child: Text(
               '$_displayTicketCount',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.white,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: Colors.white),
             ),
           ),
         ],
@@ -587,10 +609,9 @@ class RoleplayThumbnail extends StatelessWidget {
   Widget build(BuildContext context) {
     final title = _getTitle();
     final imageUrl = '${AppConfig.cdnBaseUrl}${item.thumbnailImgPath}';
-    final textStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: Colors.white,
-          fontSize: 12,
-        );
+    final textStyle = Theme.of(
+      context,
+    ).textTheme.bodySmall?.copyWith(color: Colors.white, fontSize: 12);
 
     return Align(
       alignment: Alignment.topCenter,
@@ -607,7 +628,9 @@ class RoleplayThumbnail extends StatelessWidget {
                   imageUrl: imageUrl,
                   imageBuilder: (context, imageProvider) {
                     if (onRendered != null) {
-                      WidgetsBinding.instance.addPostFrameCallback((_) => onRendered!());
+                      WidgetsBinding.instance.addPostFrameCallback(
+                        (_) => onRendered!(),
+                      );
                     }
                     return Image(
                       image: imageProvider,
@@ -626,7 +649,9 @@ class RoleplayThumbnail extends StatelessWidget {
                   ),
                   errorWidget: (context, url, error) {
                     if (onRendered != null) {
-                      WidgetsBinding.instance.addPostFrameCallback((_) => onRendered!());
+                      WidgetsBinding.instance.addPostFrameCallback(
+                        (_) => onRendered!(),
+                      );
                     }
                     return Container(
                       width: width,
@@ -647,7 +672,9 @@ class RoleplayThumbnail extends StatelessWidget {
                     padding: const EdgeInsets.all(5), // 텍스트 상하좌우 마진 5
                     decoration: BoxDecoration(
                       color: Colors.black.withOpacity(0.6),
-                      borderRadius: BorderRadius.circular(10), // 상하좌우 모두 radius 10
+                      borderRadius: BorderRadius.circular(
+                        10,
+                      ), // 상하좌우 모두 radius 10
                     ),
                     alignment: Alignment.center,
                     child: LayoutBuilder(
@@ -670,9 +697,13 @@ class RoleplayThumbnail extends StatelessWidget {
                                   velocity: 30.0,
                                   pauseAfterRound: const Duration(seconds: 2),
                                   startPadding: 0,
-                                  accelerationDuration: const Duration(seconds: 1),
+                                  accelerationDuration: const Duration(
+                                    seconds: 1,
+                                  ),
                                   accelerationCurve: Curves.linear,
-                                  decelerationDuration: const Duration(milliseconds: 500),
+                                  decelerationDuration: const Duration(
+                                    milliseconds: 500,
+                                  ),
                                   decelerationCurve: Curves.easeOut,
                                 )
                               : Align(
@@ -730,7 +761,7 @@ class _CategoryRoleplayRowState extends State<CategoryRoleplayRow> {
     super.initState();
     _list = List.from(widget.group.list);
     // 첫 호출 데이터가 4개 미만이면 이미 마지막 페이지일 수 있음 (가정)
-    if (_list.length < 4) _isLastPage = true; 
+    if (_list.length < 4) _isLastPage = true;
     _scrollController.addListener(_onScroll);
 
     // 데이터가 아예 없는 카테고리라면 즉시 완료 보고하여 다음 카테고리 진행
@@ -747,7 +778,8 @@ class _CategoryRoleplayRowState extends State<CategoryRoleplayRow> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200 &&
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 200 &&
         !_isLoadingMore &&
         !_isLastPage) {
       _loadMore();
@@ -787,17 +819,23 @@ class _CategoryRoleplayRowState extends State<CategoryRoleplayRow> {
     final screenWidth = MediaQuery.of(context).size.width;
     final thumbWidth = screenWidth * 0.3;
     // 여유롭게 1.6배 비율 적용
-    final rowHeight = thumbWidth * 1.6; 
+    final rowHeight = thumbWidth * 1.6;
     final categoryTitle = _getCategoryTitle();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.only(left: 24, right: 24, bottom: 8), // 상단 패딩 제거 (SizedBox로 제어)
+          padding: const EdgeInsets.only(
+            left: 24,
+            right: 24,
+            bottom: 8,
+          ), // 상단 패딩 제거 (SizedBox로 제어)
           child: Text(
             categoryTitle,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: Colors.white),
+            style: Theme.of(
+              context,
+            ).textTheme.headlineSmall?.copyWith(color: Colors.white),
           ),
         ),
         SizedBox(
