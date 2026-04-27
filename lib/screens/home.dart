@@ -45,6 +45,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   bool _isInitialized = false; // 초기화 작업 한 번만 실행 플래그
   bool _dailyTicketPopupShown = false; // 세션 당 1회만 팝업 노출
+  bool _suspendTicketFetchOnHomeReturn = false; // 데일리 팝업 닫힘(pop)으로 인한 자동 티켓 조회 일시 중단
   List<MainHomeBannerDto>? _banners;
   bool _isLoadingBanners = true;
   List<AppHomeRoleplayGroupDto>? _roleplayGroups;
@@ -63,6 +64,9 @@ class _HomeScreenState extends State<HomeScreen> {
     super.didUpdateWidget(oldWidget);
     if (widget.homeTabSelectedCounter != null &&
         widget.homeTabSelectedCounter != oldWidget.homeTabSelectedCounter) {
+      // 서브 스크린(pop) 복귀와 동일하게 dialog(pop)도 didPopNext로 들어올 수 있음.
+      // 데일리 티켓 팝업을 닫는 순간에는 claim을 먼저 처리하고(성공 시) 그 뒤에만 재조회한다.
+      if (_suspendTicketFetchOnHomeReturn) return;
       _fetchTicket();
     }
   }
@@ -127,14 +131,18 @@ class _HomeScreenState extends State<HomeScreen> {
     if (!mounted) return;
     final token = _accessToken;
     if (token == null) return;
+    _suspendTicketFetchOnHomeReturn = true;
     await showDailyTicketDefaultPopup(
       context,
       token,
       onClaimSuccess: () async {
         if (!mounted) return;
         await _fetchTicket();
+        _suspendTicketFetchOnHomeReturn = false;
       },
     );
+    // "나중에"로 닫는 등 claim이 없었던 경우에는 여기서 해제.
+    _suspendTicketFetchOnHomeReturn = false;
   }
 
   /// 홈 콘텐츠 조회 (배너 + 롤플레이 통합 API)
