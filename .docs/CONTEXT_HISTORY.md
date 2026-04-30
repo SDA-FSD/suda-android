@@ -119,6 +119,7 @@
   - 인앱리뷰 호출 성공 반환 시 `POST /v1/users/quests/{questId}` 호출 (`questId = sessionId`)
   - 응답 `QuestResultDto.completeYn == 'Y'`인 경우에만 `surveySuccessToast` 토스트 노출, 그 외 별도 처리 없음.
 - **앱 버전 1.0.10**: `pubspec.yaml`의 `version` 값(예: 1.0.10+14)을 단일 사실 기준으로 사용. Setting 화면 하단: 개인정보·이용약관·오픈소스 블록 위로 조정, 그 아래 버전 텍스트 `v x.x.x` (fontSize 11, 흰색, 중앙 정렬) 노출.
+- **앱 버전 1.0.13**: `pubspec.yaml` 버전을 `1.0.12+18`에서 `1.0.13+20`으로 변경.
 - 버전 비교 및 강제 업데이트 로직은 `VersionCheckService`에서 `AppVersionService.getAppVersion()` 결과와 서버 응답 `latestVersion`를 비교하여 처리.
 - **버전 관리 원칙**: 신규 기능 개발 전 버전 상향이 필요할 때는 `pubspec.yaml`의 `version`만 관리(예: 1.0.9+13 → 1.0.10+14). 코드 내 버전 상수는 두지 않고, 런타임에 `AppVersionService`로 조회.
 - **푸시 appPath 연동**: FCM data에 `appPath` 포함 시 알림 클릭 후 해당 스크린으로 이동. 비로그인/미동의 시 `PendingAppPathService`에 보관, Home 진입 시 적용. 지원 경로·정의는 `.docs/CONTEXT_SCREEN.md` appPath 섹션. `lib/services/pending_app_path_service.dart`, `main.dart`(getInitialMessage·onMessageOpenedApp·_applyPendingAppPath).
