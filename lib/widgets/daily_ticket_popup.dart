@@ -12,6 +12,7 @@ Future<void> claimDailyTicketAfterPopup(
   BuildContext context,
   String accessToken, {
   Future<void> Function()? onSuccess,
+  void Function()? onFlowComplete,
 }) async {
   try {
     final result = await SudaApiClient.claimDailyTicket(
@@ -27,16 +28,22 @@ Future<void> claimDailyTicketAfterPopup(
     }
   } catch (_) {
     // 실패 시 별도 처리 없음
+  } finally {
+    onFlowComplete?.call();
   }
 }
 
 /// Daily ticket grant popup (`DefaultPopup`).
 ///
 /// [onClaimSuccess]: e.g. Home refreshes ticket count after claim.
+/// [onDismissedWithoutClaim]: "나중에" 등 claim 없이 닫힌 뒤(팝업 pop 이후 콜백).
+/// [onClaimFlowComplete]: claim 시도가 끝난 뒤 항상(성공/실패·토스트·onClaimSuccess 이후).
 Future<void> showDailyTicketDefaultPopup(
   BuildContext context,
   String accessToken, {
   Future<void> Function()? onClaimSuccess,
+  void Function()? onDismissedWithoutClaim,
+  void Function()? onClaimFlowComplete,
 }) async {
   final l10n = AppLocalizations.of(context)!;
   final theme = Theme.of(context).textTheme;
@@ -70,6 +77,7 @@ Future<void> showDailyTicketDefaultPopup(
               context,
               accessToken,
               onSuccess: onClaimSuccess,
+              onFlowComplete: onClaimFlowComplete,
             ),
           );
         },
@@ -77,7 +85,9 @@ Future<void> showDailyTicketDefaultPopup(
       DefaultPopupButton(
         type: DefaultPopupButtonType.text,
         label: l10n.surveyMaybeLater,
-        onPressed: () {},
+        onPressed: () {
+          onDismissedWithoutClaim?.call();
+        },
       ),
     ],
   );

@@ -138,11 +138,18 @@ class _HomeScreenState extends State<HomeScreen> {
       onClaimSuccess: () async {
         if (!mounted) return;
         await _fetchTicket();
+      },
+      onDismissedWithoutClaim: () {
+        if (!mounted) return;
+        _suspendTicketFetchOnHomeReturn = false;
+      },
+      onClaimFlowComplete: () {
+        if (!mounted) return;
         _suspendTicketFetchOnHomeReturn = false;
       },
     );
-    // "나중에"로 닫는 등 claim이 없었던 경우에는 여기서 해제.
-    _suspendTicketFetchOnHomeReturn = false;
+    // 주의: `await showDaily...`는 다이얼로그 pop 직후에 완료되며, claim은 그 다음 프레임에
+    // 비동기로 이어질 수 있음. 여기서 가드를 해제하면 GET/PUT 경합이 다시 생긴다.
   }
 
   /// 홈 콘텐츠 조회 (배너 + 롤플레이 통합 API)
@@ -528,7 +535,7 @@ class _HomeScreenState extends State<HomeScreen> {
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 24),
             itemCount: 4,
-            separatorBuilder: (context, index) => const SizedBox(width: 20),
+            separatorBuilder: (context, index) => const SizedBox(width: 8),
             itemBuilder: (context, index) => Shimmer.fromColors(
               baseColor: const Color(0xFF2A2A2A),
               highlightColor: const Color(0xFF3F3F3F),
@@ -853,7 +860,7 @@ class _CategoryRoleplayRowState extends State<CategoryRoleplayRow> {
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 24),
             itemCount: _list.length + (_isLoadingMore ? 1 : 0),
-            separatorBuilder: (context, index) => const SizedBox(width: 20),
+            separatorBuilder: (context, index) => const SizedBox(width: 8),
             itemBuilder: (context, index) {
               if (index < _list.length) {
                 return RoleplayThumbnail(

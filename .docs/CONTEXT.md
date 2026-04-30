@@ -67,6 +67,7 @@
   - `SudaApiClient.getUserTicket()`: 티켓 개수 조회 (`GET /v1/users/ticket`, 파라메터 없음, 응답: UserTicketDto(beforeTicketCount, finalTicketCount, dailyTicketGrantYn?)). `dailyTicketGrantYn == 'Y'`이면 HomeScreen에서 출석 보상 팝업 노출.
   - `SudaApiClient.claimDailyTicket()`: 데일리 티켓 수령 (`PUT /v1/users/tickets/daily`, 응답: QuestResultDto). `completeYn == 'Y'`이면 `surveySuccessToast` 노출 + 티켓 재조회.
     - 따닥 방지: `daily_ticket_popup.dart` 팝업 호출부에서 클로저 스코프 `isClaiming` 플래그로 primary 버튼의 중복 탭 가드(동일 프레임 멀티터치 대비). `DefaultPopup._popThenCallback`의 "pop 선행 → post-frame 콜백" 패턴과 이중으로 보호.
+    - `showDialog`의 `Future`는 다이얼로그 pop 직후에 완료되며, `claim`은 그 다음 프레임에 이어질 수 있어, 팝업 닫힘으로 `homeTabSelectedCounter`가 올라가 `didUpdateWidget`에서 `GET /ticket`이 나가면 `PUT /tickets/daily`와 경합할 수 있다. `HomeScreen`은 팝업 구간에 `_suspendTicketFetchOnHomeReturn`으로 그 자동 조회를 막고, `onDismissedWithoutClaim`·`claimDailyTicketAfterPopup`의 `finally`(`onClaimFlowComplete`)에서만 가드를 해제한다.
   - `SudaApiClient.getRoleplayResults()`: 롤플레이 결과 목록 페이징 (`GET /v1/roleplays/results?pageNum=0`, 0-based, 9개씩, 응답: SudaAppPage\<RpSimpleResultDto\>, RpSimpleResultDto: resultId, imgPath, starResult, createdAt)
   - `SudaApiClient.getRoleplayResultReload()`: 운영자용 리프레시 테스트 (`GET /v1/roleplays/results-reload/{resultId}`, 2xx 시 RoleplayResultDto 반환, 그 외 null. History 상단 별 탭 시 호출)
   - `SudaApiClient.updateName()`: 사용자 이름 변경 (`PUT /v1/users?name=...`)
@@ -80,6 +81,7 @@
     - banners: `List<MainHomeBannerDto>` (imgPath, overlayText, appPath?)
       - `appPath`가 있으면 Home 배너 탭 시 기존 appPath 규칙(`_applyPendingPushNavigation`)으로 화면 이동한다.
     - roleplays: `List<AppHomeRoleplayGroupDto>` (roleplayCategoryDto, list)
+      - 홈 화면 카테고리별 가로 썸네일: `lib/screens/home.dart` `CategoryRoleplayRow`에서 `ListView.separated` 구분 폭 **8**dp.
     - restYn/restStartsAt/restEndsAt·notiboxUnreadYn은 `GET /v1/home/contents` 처리 시 `RestStatusService.instance.update()`로 보관 (어떤 스크린에서도 접근 가능)
   - `SudaApiClient.getNotifications()`: 알림함 목록 페이징 (`GET /v1/users/notification?pageNum=…`, `UserApi.getNotifications`) — 응답 원소 `NotificationDto`에 **readYn**(`Y`/`N`) 포함. 서버는 `sendFinishedAt` 기준 30일 초과 알림을 내려주지 않으며(배지·목록 일치), 카드 하단 상대 날짜도 동일 필드(`sendFinishedAt`)를 UTC로 파싱 후 로컬 달력 일 단위로 표시(`notification_box.dart`).
   - `SudaApiClient.markNotificationRead()`: 알림 읽음 처리 (`POST /v1/users/notification/{notificationId}/read`, `UserApi.markNotificationRead`) — 응답 `QuestResultDto`. GET에서 30일 초과로 빠진 항목도 서버가 ZSET에 남겨 둔 경우 POST 읽음은 성공할 수 있어, 재진입 시 `readYn`이 되돌아가지 않도록 한다.
