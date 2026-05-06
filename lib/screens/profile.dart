@@ -17,6 +17,7 @@ import '../utils/sub_screen_route.dart';
 import '../widgets/default_popup.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/gnb_bar.dart';
+import '../widgets/level_progress_bar.dart';
 import 'roleplay/history.dart';
 import 'roleplay/history_v2.dart';
 import 'setting/setting.dart';
@@ -984,7 +985,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       const SizedBox(width: 10),
                       Expanded(
-                        child: _ProgressBar(
+                        child: LevelProgressBar(
                           progressPercentage: _progressPercentage ?? 0.0,
                         ),
                       ),
@@ -1234,38 +1235,6 @@ class _ProfileStatDivider extends StatelessWidget {
       width: 2,
       height: 44,
       color: const Color(0xFF1E1E1E),
-    );
-  }
-}
-
-class _ProgressBar extends StatelessWidget {
-  final double progressPercentage;
-
-  const _ProgressBar({required this.progressPercentage});
-
-  @override
-  Widget build(BuildContext context) {
-    final p = (progressPercentage.clamp(0, 100)) / 100.0;
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(2),
-      child: SizedBox(
-        height: 4,
-        child: Stack(
-          children: [
-            // base
-            const Positioned.fill(
-              child: ColoredBox(color: Color(0xFF635F5F)),
-            ),
-            // progress
-            FractionallySizedBox(
-              widthFactor: p,
-              heightFactor: 1,
-              alignment: Alignment.centerLeft,
-              child: const ColoredBox(color: Color(0xFF80D7CF)),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

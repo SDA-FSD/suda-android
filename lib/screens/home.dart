@@ -12,6 +12,7 @@ import '../routes/roleplay_router.dart';
 import '../utils/language_util.dart';
 import '../utils/suda_json_util.dart';
 import '../widgets/daily_ticket_popup.dart';
+import '../widgets/ticket_info_popup.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/gnb_bar.dart';
 import '../services/effect_anchor_registry.dart';
@@ -282,6 +283,10 @@ class _HomeScreenState extends State<HomeScreen> {
     RoleplayRouter.pushOverview(context, roleplayId, user: widget.user);
   }
 
+  Future<void> _onTicketBadgeTap(BuildContext context) async {
+    await showTicketInfoPopup(context);
+  }
+
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
@@ -292,7 +297,20 @@ class _HomeScreenState extends State<HomeScreen> {
       ).textTheme.headlineSmall?.copyWith(color: Colors.white),
       usePadding: false, // 배너 풀-폭 유지를 위해 본문 패딩 제거
       actions: [
-        KeyedSubtree(key: _ticketBadgeKey, child: _buildTicketBadge(context)),
+        KeyedSubtree(
+          key: _ticketBadgeKey,
+          child: GestureDetector(
+            onTap: () => _onTicketBadgeTap(context),
+            behavior: HitTestBehavior.opaque,
+            child: SizedBox(
+              width: 48,
+              height: 48,
+              child: Center(
+                child: _buildTicketBadge(context),
+              ),
+            ),
+          ),
+        ),
       ],
       bottomNavigationBar: GnbBar(
         isAlarmActive: false,

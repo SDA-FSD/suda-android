@@ -340,4 +340,31 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get roleplayResultFeedbackInsufficientWords =>
       '단어 수가 부족해 피드백을 드리기 어려워요. 30단어 이상으로 더 길게 말해보세요!';
+
+  @override
+  String get ticketInfoTitle => '티켓';
+
+  @override
+  String get ticketInfoBody1 => '티켓은 롤플레이 입장 시 사용됩니다';
+
+  @override
+  String get ticketInfoHowToPrefix => '획득방법: ';
+
+  @override
+  String get ticketInfoDailyCheckIn => '데일리 출석';
+
+  @override
+  String get ticketInfoHowToOr => ' 또는 ';
+
+  @override
+  String get ticketInfoLevelUp => '레벨업';
+
+  @override
+  String get ticketInfoLikesPrefix => '레벨업까지 ';
+
+  @override
+  String get ticketInfoLikesSuffix => ' 가 필요해요!';
+
+  @override
+  String get ticketInfoButtonOkay => 'Okay';
 }

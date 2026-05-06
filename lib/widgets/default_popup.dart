@@ -55,6 +55,7 @@ class DefaultPopup extends StatelessWidget {
   }) {
     return showDialog<void>(
       context: context,
+      useRootNavigator: true,
       barrierDismissible: barrierDismissible,
       barrierColor: Colors.transparent,
       builder: (ctx) => DefaultPopup(

@@ -18,6 +18,7 @@ class RoleplayStateService {
   String? _isUserTurnYn;
   UserDto? _user;
   RoleplayResultDto? _cachedResult;
+  DateTime? _lastRoleplayFinishedAt;
   final ValueNotifier<int> _overviewUpdateTick = ValueNotifier<int>(0);
 
   RoleplayOverviewDto? get overview => _overview;
@@ -28,6 +29,7 @@ class RoleplayStateService {
   String? get isUserTurnYn => _isUserTurnYn;
   UserDto? get user => _user;
   RoleplayResultDto? get cachedResult => _cachedResult;
+  DateTime? get lastRoleplayFinishedAt => _lastRoleplayFinishedAt;
   ValueListenable<int> get overviewUpdateTick => _overviewUpdateTick;
 
   void setOverview({
@@ -63,6 +65,11 @@ class RoleplayStateService {
     _cachedResult = result;
   }
 
+  /// 현재 시각을 마지막 롤플레이 종료 시각으로 기록한다.
+  void markRoleplayFinishedNow() {
+    _lastRoleplayFinishedAt = DateTime.now();
+  }
+
   void clear() {
     _roleplayId = null;
     _overview = null;
@@ -72,6 +79,7 @@ class RoleplayStateService {
     _isUserTurnYn = null;
     _user = null;
     _cachedResult = null;
+    // 최근 롤플레이 종료 시각은 세션 내 UX를 위해 유지한다.
     _overviewUpdateTick.value++;
   }
 }

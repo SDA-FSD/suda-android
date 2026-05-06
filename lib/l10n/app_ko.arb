@@ -137,5 +137,14 @@
   "reregistrationRestrictedMessage": "회원 탈퇴 후 2일 동안 재가입이 제한됩니다. 잠시 후 다시 시도해주세요.",
   "expressionSavedToProfile": "프로필에 저장되었습니다",
   "expressionUnsavedToProfile": "저장 해제되었습니다",
-  "roleplayResultFeedbackInsufficientWords": "단어 수가 부족해 피드백을 드리기 어려워요. 30단어 이상으로 더 길게 말해보세요!"
+  "roleplayResultFeedbackInsufficientWords": "단어 수가 부족해 피드백을 드리기 어려워요. 30단어 이상으로 더 길게 말해보세요!",
+  "ticketInfoTitle": "티켓",
+  "ticketInfoBody1": "티켓은 롤플레이 입장 시 사용됩니다",
+  "ticketInfoHowToPrefix": "획득방법: ",
+  "ticketInfoDailyCheckIn": "데일리 출석",
+  "ticketInfoHowToOr": " 또는 ",
+  "ticketInfoLevelUp": "레벨업",
+  "ticketInfoLikesPrefix": "레벨업까지 ",
+  "ticketInfoLikesSuffix": " 가 필요해요!",
+  "ticketInfoButtonOkay": "Okay"
 }

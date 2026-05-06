@@ -741,6 +741,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'We couldn’t provide feedback this time. Try expanding your response to 30 words or more!'**
   String get roleplayResultFeedbackInsufficientWords;
+
+  /// No description provided for @ticketInfoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ticket'**
+  String get ticketInfoTitle;
+
+  /// No description provided for @ticketInfoBody1.
+  ///
+  /// In en, this message translates to:
+  /// **'Tickets are used to play Roleplay'**
+  String get ticketInfoBody1;
+
+  /// No description provided for @ticketInfoHowToPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'How to get them: '**
+  String get ticketInfoHowToPrefix;
+
+  /// No description provided for @ticketInfoDailyCheckIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Check-in'**
+  String get ticketInfoDailyCheckIn;
+
+  /// No description provided for @ticketInfoHowToOr.
+  ///
+  /// In en, this message translates to:
+  /// **' or '**
+  String get ticketInfoHowToOr;
+
+  /// No description provided for @ticketInfoLevelUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Level up'**
+  String get ticketInfoLevelUp;
+
+  /// No description provided for @ticketInfoLikesPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'You need '**
+  String get ticketInfoLikesPrefix;
+
+  /// No description provided for @ticketInfoLikesSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **' to level up!'**
+  String get ticketInfoLikesSuffix;
+
+  /// No description provided for @ticketInfoButtonOkay.
+  ///
+  /// In en, this message translates to:
+  /// **'Okay'**
+  String get ticketInfoButtonOkay;
 }
 
 class _AppLocalizationsDelegate

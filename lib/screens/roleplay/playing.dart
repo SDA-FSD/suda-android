@@ -1591,6 +1591,8 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
       if (!mounted) return;
       RoleplayStateService.instance.setCachedResult(null);
     }
+    // 롤플레이 세션이 종료되어 결과가 확정된 시점을 기록한다.
+    RoleplayStateService.instance.markRoleplayFinishedNow();
     if (!mounted) return;
     if (allCompleted) {
       RoleplayRouter.replaceWithEnding(context);

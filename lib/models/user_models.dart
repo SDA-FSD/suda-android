@@ -41,17 +41,30 @@ class ProfileDto {
   final int currentLevel;
   final double progressPercentage;
 
+  /// 레벨업까지 남은 Like 수. 서버가 `GET /v1/users/profile`에 내려줄 때만 채워짐.
+  final int? likesToNextLevel;
+
   const ProfileDto({
     required this.userDto,
     required this.currentLevel,
     required this.progressPercentage,
+    this.likesToNextLevel,
   });
 
   factory ProfileDto.fromJson(Map<String, dynamic> json) {
+    final rawLikes = json['likesToNextLevel'];
+    int? likesToNext;
+    if (rawLikes is int) {
+      likesToNext = rawLikes;
+    } else if (rawLikes is num) {
+      likesToNext = rawLikes.round();
+    }
+
     return ProfileDto(
       userDto: UserDto.fromJson(json['userDto'] as Map<String, dynamic>),
       currentLevel: json['currentLevel'] as int? ?? 0,
       progressPercentage: (json['progressPercentage'] as num?)?.toDouble() ?? 0,
+      likesToNextLevel: likesToNext,
     );
   }
 }

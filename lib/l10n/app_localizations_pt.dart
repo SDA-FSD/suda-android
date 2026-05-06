@@ -356,4 +356,31 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get roleplayResultFeedbackInsufficientWords =>
       'Não foi possível fornecer feedback desta vez. Tente falar um pouco mais — procure usar mais de 30 palavras.';
+
+  @override
+  String get ticketInfoTitle => 'Ticket';
+
+  @override
+  String get ticketInfoBody1 => 'Use os ticket para jogar Roleplay';
+
+  @override
+  String get ticketInfoHowToPrefix => 'Como obtê-los: ';
+
+  @override
+  String get ticketInfoDailyCheckIn => 'Daily Check-in';
+
+  @override
+  String get ticketInfoHowToOr => ' or ';
+
+  @override
+  String get ticketInfoLevelUp => 'Level up';
+
+  @override
+  String get ticketInfoLikesPrefix => 'Você precisa de ';
+
+  @override
+  String get ticketInfoLikesSuffix => ' para\nsubir de nível!';
+
+  @override
+  String get ticketInfoButtonOkay => 'Okay';
 }

@@ -33,6 +33,7 @@
   - 각 환경별 패키지명: `kr.sudatalk.app.{env}` (prd는 suffix 없음)
   - 환경별 Google Client ID: `android/app/src/{env}/res/values/strings.xml`
   - 빌드 방법: `flutter run --flavor {env} -t lib/main.dart --dart-define=ENV={env}`
+  - **local 전용**: `android/app/src/local/AndroidManifest.xml`에서 `usesCleartextTraffic=true`를 병합한다. local API가 HTTP(`10.0.2.2:8083`)이므로 Android 9+에서 평문 차단 시 네트워크 오류가 나지 않도록 한다.
 - **Dart 환경 설정**: `lib/config/app_config.dart`에서 환경별 설정 관리
   - 환경 변수: `--dart-define=ENV=local|dev|stg|prd` 형태로 전달
   - 환경별 API URL 등 설정값 관리
@@ -46,7 +47,7 @@
   - 환경별 Google Server Client ID (idToken 발급용)
     - local: `558349443875-ceevp4cjf86ubp0p066qm5hsujukljg4.apps.googleusercontent.com`
     - dev  : `558349443875-ceevp4cjf86ubp0p066qm5hsujukljg4.apps.googleusercontent.com`
-  - prd  : `841694444330-g8gn852m4somers2668v46k3mm69p7dg.apps.googleusercontent.com`
+    - prd  : `841694444330-g8gn852m4somers2668v46k3mm69p7dg.apps.googleusercontent.com`
 
 ## 4. 인증 및 API 통신
 - **Google 로그인 연동**: `lib/services/auth_service.dart`
@@ -63,8 +64,9 @@
   - `SudaApiClient.logout()`: refreshToken과 deviceId로 서버 로그아웃 통지
   - `SudaApiClient.getCurrentUser()`: JWT를 사용하여 사용자 정보 조회 (`/v1/users`)
     - 메인 라우트가 서브에서 pop으로 다시 보일 때 `lib/main.dart` `_syncUserOnMainRouteReturn`에서 호출해 `_user` 전역 동기화(GNB·탭 공통). 레벨·진행률은 `getUserProfile`이 담당.
-  - `SudaApiClient.getUserProfile()`: 프로필 부가 정보 조회 (`GET /v1/users/profile`, 응답: ProfileDto(userDto, currentLevel, progressPercentage))
+  - `SudaApiClient.getUserProfile()`: 프로필 부가 정보 조회 (`GET /v1/users/profile`, 응답: ProfileDto(userDto, currentLevel, progressPercentage, likesToNextLevel?)). `likesToNextLevel`은 레벨업까지 남은 Like 수(티켓 설명 팝업 등). 백엔드 `suda-api`의 `LevelService.getLikesToNextLevel`·`ProfileDto`에서 계산·직렬화. 최대 레벨이면 JSON null → 미포함 시 클라이언트에서 해당 문구 미노출.
   - `SudaApiClient.getUserTicket()`: 티켓 개수 조회 (`GET /v1/users/ticket`, 파라메터 없음, 응답: UserTicketDto(beforeTicketCount, finalTicketCount, dailyTicketGrantYn?)). `dailyTicketGrantYn == 'Y'`이면 HomeScreen에서 출석 보상 팝업 노출.
+    - HomeScreen 상단 우측 티켓 배지 탭: `showTicketInfoPopup` (`lib/widgets/ticket_info_popup.dart`) → `getUserProfile` 후 티켓 설명·레벨 진행·`likesToNextLevel`(있으면) `DefaultPopup` 노출.
   - `SudaApiClient.claimDailyTicket()`: 데일리 티켓 수령 (`PUT /v1/users/tickets/daily`, 응답: QuestResultDto). `completeYn == 'Y'`이면 `surveySuccessToast` 노출 + 티켓 재조회.
     - 따닥 방지: `daily_ticket_popup.dart` 팝업 호출부에서 클로저 스코프 `isClaiming` 플래그로 primary 버튼의 중복 탭 가드(동일 프레임 멀티터치 대비). `DefaultPopup._popThenCallback`의 "pop 선행 → post-frame 콜백" 패턴과 이중으로 보호.
     - `showDialog`의 `Future`는 다이얼로그 pop 직후에 완료되며, `claim`은 그 다음 프레임에 이어질 수 있어, 팝업 닫힘으로 `homeTabSelectedCounter`가 올라가 `didUpdateWidget`에서 `GET /ticket`이 나가면 `PUT /tickets/daily`와 경합할 수 있다. `HomeScreen`은 팝업 구간에 `_suspendTicketFetchOnHomeReturn`으로 그 자동 조회를 막고, `onDismissedWithoutClaim`·`claimDailyTicketAfterPopup`의 `finally`(`onClaimFlowComplete`)에서만 가드를 해제한다.

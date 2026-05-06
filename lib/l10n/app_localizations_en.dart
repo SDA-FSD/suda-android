@@ -355,4 +355,31 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get roleplayResultFeedbackInsufficientWords =>
       'We couldn’t provide feedback this time. Try expanding your response to 30 words or more!';
+
+  @override
+  String get ticketInfoTitle => 'Ticket';
+
+  @override
+  String get ticketInfoBody1 => 'Tickets are used to play Roleplay';
+
+  @override
+  String get ticketInfoHowToPrefix => 'How to get them: ';
+
+  @override
+  String get ticketInfoDailyCheckIn => 'Daily Check-in';
+
+  @override
+  String get ticketInfoHowToOr => ' or ';
+
+  @override
+  String get ticketInfoLevelUp => 'Level up';
+
+  @override
+  String get ticketInfoLikesPrefix => 'You need ';
+
+  @override
+  String get ticketInfoLikesSuffix => ' to level up!';
+
+  @override
+  String get ticketInfoButtonOkay => 'Okay';
 }
