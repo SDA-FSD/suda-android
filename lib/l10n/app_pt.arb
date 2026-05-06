@@ -137,7 +137,7 @@
   "reregistrationRestrictedMessage": "Você poderá se cadastrar novamente 2 dias após excluir sua conta. Tente novamente mais tarde.",
   "expressionSavedToProfile": "Salvo no seu Perfil",
   "expressionUnsavedToProfile": "Desmarcado",
-  "roleplayResultFeedbackInsufficientWords": "Não foi possível fornecer feedback desta vez. Tente falar um pouco mais — procure usar mais de 30 palavras.",
+  "roleplayResultFeedbackInsufficientWords": "Não foi possível fornecer feedback desta vez. Tente falar um pouco mais — procure usar mais de 20 palavras.",
   "ticketInfoTitle": "Ticket",
   "ticketInfoBody1": "Use os ticket para jogar Roleplay",
   "ticketInfoHowToPrefix": "Como obtê-los: ",

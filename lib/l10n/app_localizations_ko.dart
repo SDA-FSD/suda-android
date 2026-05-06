@@ -339,7 +339,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get roleplayResultFeedbackInsufficientWords =>
-      '단어 수가 부족해 피드백을 드리기 어려워요. 30단어 이상으로 더 길게 말해보세요!';
+      '단어 수가 부족해 피드백을 드리기 어려워요. 20단어 이상으로 더 길게 말해보세요!';
 
   @override
   String get ticketInfoTitle => '티켓';

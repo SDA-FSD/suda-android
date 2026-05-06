@@ -354,7 +354,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get roleplayResultFeedbackInsufficientWords =>
-      'We couldn’t provide feedback this time. Try expanding your response to 30 words or more!';
+      'We couldn’t provide feedback this time. Try expanding your response to 20 words or more!';
 
   @override
   String get ticketInfoTitle => 'Ticket';
