@@ -44,10 +44,16 @@ Future<void> showTicketInfoPopup(BuildContext context) async {
       profile != null ? max(0, profile.currentLevel) : 0;
 
   final bodyChildren = <Widget>[
-    Text(
-      l10n.ticketInfoBody1,
-      style: baseStyle,
-      textAlign: TextAlign.center,
+    FittedBox(
+      fit: BoxFit.scaleDown,
+      alignment: Alignment.center,
+      child: Text(
+        l10n.ticketInfoBody1,
+        style: baseStyle,
+        textAlign: TextAlign.center,
+        maxLines: 1,
+        softWrap: false,
+      ),
     ),
     const SizedBox(height: 20),
     Column(

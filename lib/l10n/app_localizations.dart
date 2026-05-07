@@ -739,7 +739,7 @@ abstract class AppLocalizations {
   /// No description provided for @roleplayResultFeedbackInsufficientWords.
   ///
   /// In en, this message translates to:
-  /// **'We couldn’t provide feedback this time. Try expanding your response to 30 words or more!'**
+  /// **'We couldn’t provide feedback this time. Try expanding your response to 20 words or more!'**
   String get roleplayResultFeedbackInsufficientWords;
 
   /// No description provided for @ticketInfoTitle.
