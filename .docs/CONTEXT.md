@@ -128,6 +128,15 @@
   - 통계 필드: `roleplayCount`, `wordsSpokenCount`, `likePoint`
   - `metaInfo` 필드는 `List<SudaJson>` 타입
   - `SudaJson`: `key`, `value` 필드를 가진 구조체
+  - `UserDto.upsertMetaInfo(key, value)`: metaInfo의 key/value를 upsert(키 중복 제거 후 1개로 유지)
+  - `UserDto.hasMetaInfoValue(key, value)`: metaInfo에 특정 key/value가 존재하는지 체크
+
+- **스크린 노출 통계(클라이언트 best-effort 호출)**
+  - Tutorial 스크린이 실제로 노출되는 경우(완료 상태가 아니어서 화면을 보여주기로 확정된 경우): `POST /v1/users/tutorial-shown`
+    - requestBody 없음, 응답/실패 무시 (호출만)
+  - Overview 스크린 노출 시 사용자의 `metaInfo`에 `FIRST_OVERVIEW == 'Y'`가 아니면 “첫 진입”으로 간주:
+    - `POST /v1/users/first-overview` (requestBody 없음, 응답/실패 무시)
+    - **중복 호출 방지**를 위해 클라이언트 전역 사용자 상태의 `metaInfo`에 `FIRST_OVERVIEW='Y'`를 즉시 주입한다(`MainUserSync.notifyUserUpdated`로 메인 전역 `_user` 갱신).
 
 ## 5. 앱 아이콘 관리
 - **아이콘 원본**: `assets/images/app_icon.png` (1000px 이상의 큰 크기)

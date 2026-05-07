@@ -365,6 +365,18 @@ class SudaApiClient {
     return UserApi.completeTutorial(accessToken: accessToken);
   }
 
+  static Future<void> tutorialShown({
+    required String accessToken,
+  }) {
+    return UserApi.tutorialShown(accessToken: accessToken);
+  }
+
+  static Future<void> postFirstOverview({
+    required String accessToken,
+  }) {
+    return UserApi.postFirstOverview(accessToken: accessToken);
+  }
+
   static Future<void> updateAgreement({
     required String accessToken,
   }) {

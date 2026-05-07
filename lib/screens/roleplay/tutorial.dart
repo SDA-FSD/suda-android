@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:vibration/vibration.dart';
 import '../../routes/roleplay_router.dart';
@@ -76,6 +78,8 @@ class _RoleplayTutorialScreenState extends State<RoleplayTutorialScreen> {
       return;
     }
 
+    // 튜토리얼을 실제로 노출하기로 확정된 경우에만 best-effort로 통계 호출
+    unawaited(_postTutorialShownBestEffort());
     setState(() => _isCheckingUser = false);
   }
 
@@ -89,13 +93,20 @@ class _RoleplayTutorialScreenState extends State<RoleplayTutorialScreen> {
   void _updateLocalUserTutorialDone() {
     final currentUser = RoleplayStateService.instance.user;
     if (currentUser == null) return;
-    final updatedMeta = [
-      ...(currentUser.metaInfo ?? []).where((m) => m.key != 'TUTORIAL'),
-      const SudaJson(key: 'TUTORIAL', value: 'Y'),
-    ];
     RoleplayStateService.instance.setUser(
-      currentUser.copyWith(metaInfo: updatedMeta),
+      currentUser.upsertMetaInfo(key: 'TUTORIAL', value: 'Y'),
     );
+  }
+
+  Future<void> _postTutorialShownBestEffort() async {
+    try {
+      final accessToken = await TokenStorage.loadAccessToken();
+      if (!mounted) return;
+      if (accessToken == null) return;
+      await SudaApiClient.tutorialShown(accessToken: accessToken);
+    } catch (_) {
+      // best-effort: ignore
+    }
   }
 
   void _vibrate() {

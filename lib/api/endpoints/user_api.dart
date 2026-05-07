@@ -204,6 +204,72 @@ class UserApi {
     );
   }
 
+  /// POST /v1/users/tutorial-shown (best-effort; 200 only)
+  static Future<void> tutorialShown({
+    required String accessToken,
+  }) async {
+    final uri = SudaHttpClient.buildUri('/v1/users/tutorial-shown');
+
+    late final http.Response response;
+    try {
+      response = await SudaHttpClient.client
+          .post(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      rethrow;
+    }
+
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return;
+    }
+
+    throw Exception(
+      'POST /v1/users/tutorial-shown failed: HTTP ${response.statusCode} ${response.body}',
+    );
+  }
+
+  /// POST /v1/users/first-overview (best-effort; 200 only)
+  static Future<void> postFirstOverview({
+    required String accessToken,
+  }) async {
+    final uri = SudaHttpClient.buildUri('/v1/users/first-overview');
+
+    late final http.Response response;
+    try {
+      response = await SudaHttpClient.client
+          .post(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      rethrow;
+    }
+
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return;
+    }
+
+    throw Exception(
+      'POST /v1/users/first-overview failed: HTTP ${response.statusCode} ${response.body}',
+    );
+  }
+
   static Future<void> updateAgreement({
     required String accessToken,
   }) async {

@@ -150,6 +150,31 @@ class UserDto {
   }
 }
 
+extension UserDtoMetaInfoX on UserDto {
+  /// Upserts a metaInfo entry (key/value). Keeps other entries untouched.
+  /// If [metaInfo] is null/empty, it creates a new list with the given pair.
+  UserDto upsertMetaInfo({
+    required String key,
+    required String value,
+  }) {
+    final current = metaInfo ?? const <SudaJson>[];
+    final updated = <SudaJson>[
+      ...current.where((m) => m.key != key),
+      SudaJson(key: key, value: value),
+    ];
+    return copyWith(metaInfo: updated);
+  }
+
+  bool hasMetaInfoValue({
+    required String key,
+    required String value,
+  }) {
+    final current = metaInfo;
+    if (current == null || current.isEmpty) return false;
+    return current.any((m) => m.key == key && m.value == value);
+  }
+}
+
 class NotificationDto {
   final int id;
   final List<SudaJson>? title;
