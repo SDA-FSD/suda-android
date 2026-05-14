@@ -180,6 +180,9 @@
 
 **⚠️ 중요**: 스크린 관련 작업(추가/수정/삭제) 시 반드시 `CONTEXT_SCREEN.md` 문서도 함께 업데이트해야 합니다.
 
+## 7-0. 인증/동의 플로우 메모
+- 서비스 이용 동의(`SUDA_AGREEMENT`)가 필요할 때는 별도 `AgreementScreen`으로 전환하지 않고, `LoginScreen` 위에 bottom-up 레이어(blur+dim)로 동의 UI를 노출한다. 동의 완료 시 `POST /v1/users/agreement`와 AppsFlyer `af_complete_registration` 이벤트를 호출한 뒤 Main(Home)로 전환한다. 레이어를 동의 없이 닫을 때(dim 바깥 탭)는 로컬 JWT/refresh 삭제(`TokenStorage.clearTokens`)·`AuthService.signOut()`·메인 상태 초기화로 비로그인 `LoginScreen`으로 돌아간다.
+
 ## 7-1. Roleplay 스크린 컨텍스트
 
 - Roleplay 관련 스크린 흐름 및 데이터 정책은 `.docs/CONTEXT_ROLEPLAY.md`를 참조합니다.
@@ -219,17 +222,18 @@
     - 에러 메시지, 알림 메시지 등
   - **주의사항**: 사용자 이름이나 동적 데이터가 포함된 메시지도 기본 언어는 영어로 작성
 
-## 9. 앱 시작 화면 (네이티브 스플래시 · 커스텀 스플래시)
+## 9. 앱 시작 화면 (네이티브 스플래시)
 - **네이티브 스플래시**
   - **패키지**: `flutter_native_splash` (버전 2.3.10 이상) 사용
   - **설정**: `pubspec.yaml`의 `flutter_native_splash` 섹션에서 관리
-  - **디자인 사양**: 이미지 없음, 어두운 단색 배경(`#121212`)만 노출 (Android 12+ 대응 포함)
+  - **디자인 사양**: 어두운 단색 배경(`#121212`) 위에 `assets/images/splash_still_260513.png` 기반 Android 리소스 `splash_still.png`를 가로·세로 정중앙 노출한다. Android는 `launch_background.xml`의 `layer-list`에서 배경 shape + centered bitmap으로 처리한다. **밀도별 `splash_still.png` 픽셀**(논리 165×36dp 정합): mdpi 165×36, hdpi 248×54, xhdpi 330×72, xxhdpi 495×108, xxxhdpi 660×144. **Android 12(API 31)+** 는 시스템 스플래시가 `windowSplashScreenBackground`·`windowSplashScreenAnimatedIcon` 중심이라 `windowBackground` 비트맵이 나오지 않는 경우가 많다. **API 31+만** `assets/images/splash_still_square_v3.png`를 원본으로 한 **`res/drawable-v31/splash_still_square_v3.png`**(정사각형 합성 스틸)을 `windowSplashScreenAnimatedIcon`으로 둔다. 원본 수정 시 Android 쪽 PNG를 동기화한다.
   - **생성 명령**: `dart run flutter_native_splash:create`
   - **동작**: 앱 실행 시 자동 표시, `FlutterNativeSplash.preserve()`로 유지, JWT 확인 후 `FlutterNativeSplash.remove()` 호출
 - **진입 흐름**
-  - **앱 실행 시**: 네이티브 스플래시(배경색만) → **CustomSplashScreen** → LoginScreen 또는 (토큰 유효 시) HomeScreen
-  - **로그아웃 시**: 곧바로 LoginScreen (CustomSplashScreen 미표시)
-- **커스텀 스플래시**: `lib/screens/custom_splash.dart` (CustomSplashScreen). 토큰 없음인 앱 실행 시에만 노출되며, `onComplete` 콜백 후 LoginScreen으로 전환. 애니메이션·로고 노출 등은 추후 정의.
+  - **앱 실행 시**: 네이티브 스플래시(중앙 스틸 이미지) → LoginScreen 또는 (토큰 유효 시) HomeScreen
+  - **로그아웃 시**: 곧바로 LoginScreen
+- **LoginScreen 진입 연출(개편 중)**: `lib/screens/login.dart`는 네이티브 스플래시와 동일한 중앙 스틸 이미지에서 시작한다. 앱 초기 인증 확인 중에는 `lib/main.dart`의 `_StartupSplashFrame`으로 동일한 Flutter 스틸 프레임을 유지하고, LoginScreen 진입 경로에서는 스틸/로고 자산을 `precacheImage`로 준비한 뒤 첫 Flutter 프레임 이후 `FlutterNativeSplash.remove()`를 호출해 네이티브→Flutter 전환 깜빡임을 줄인다. **모든 동작 전 1000ms 대기** 후, 서로 독립적으로: 중앙 스틸(`splash_still_260513.png`) **500ms** fade-out(`Curves.easeOut`), 로고 파트(`splash_still_logo_part.png`) **1000ms** 스틸 좌측 겹침 위치→화면 정중앙 이동(`Curves.easeOut`, opacity 유지). 콘텐츠 영역은 fade-in 없음. 상단 50% 포스터 각 행은 화면 밖에서 **1000ms** 슬라인 등장(`Curves.easeOutCubic` 감속) 후 마키: 1행 왼쪽→우측 흐름·**60s** 주기, 2행 오른쪽→좌측·**70s**, 3행 왼쪽→우측·**66s**. 로고 아래 노출 영역(환영·버튼·약관)은 하단 바깥에서 **1000ms** 상승(`easeOutCubic`).
+- **CustomSplashScreen 제거**: 과거 네이티브 스플래시와 LoginScreen 사이에 표시하던 Flutter 커스텀 스플래시 애니메이션은 더 이상 사용하지 않는다.
 - **LoadingScreen 제거**: 네이티브 스플래시가 로딩 역할을 대체하므로 Flutter LoadingScreen은 제거됨
 
 ## 10. 푸시 알림

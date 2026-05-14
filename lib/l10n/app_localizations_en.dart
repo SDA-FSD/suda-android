@@ -108,6 +108,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginCatchphrase => 'Start talking. That\'s how you learn.';
 
   @override
+  String get loginWelcomeTitle => 'Welcome to SUDA!';
+
+  @override
+  String get loginWelcomeSubtitle =>
+      'Step into a story and start speaking English!';
+
+  @override
   String get loginErrorIdToken =>
       'Failed to get Google ID Token. Please try again.';
 

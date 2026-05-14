@@ -286,6 +286,18 @@ abstract class AppLocalizations {
   /// **'Start talking. That\'s how you learn.'**
   String get loginCatchphrase;
 
+  /// No description provided for @loginWelcomeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to SUDA!'**
+  String get loginWelcomeTitle;
+
+  /// No description provided for @loginWelcomeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Step into a story and start speaking English!'**
+  String get loginWelcomeSubtitle;
+
   /// No description provided for @loginErrorIdToken.
   ///
   /// In en, this message translates to:

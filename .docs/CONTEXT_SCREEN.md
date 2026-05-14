@@ -105,12 +105,12 @@
 ### 스플래시 관련 정의 파일
 - **패키지**: `flutter_native_splash` (버전 2.3.10 이상)
 - **설정 파일**: `pubspec.yaml`의 `flutter_native_splash` 섹션
-- **Android**: `android/app/src/main/res/drawable/launch_background.xml` (자동 생성)
+- **Android**: `android/app/src/main/res/drawable/launch_background.xml`, `android/app/src/main/res/drawable-v21/launch_background.xml`
 - **iOS**: `ios/Runner/Base.lproj/LaunchScreen.storyboard` (자동 생성)
 
 ### 스플래시 용도
 - 앱 실행 직후 Flutter 엔진 초기화 및 JWT 인증 상태 확인 중 표시
-- **이미지 없음**, 어두운 단색 배경(`#121212`)만 노출
+- 어두운 단색 배경(`#121212`) 위에 `splash_still.png`를 가로·세로 정중앙 노출
 - JWT 토큰 확인 및 서버 검증 완료 후 자동 제거
 
 ### 표시 조건
@@ -119,44 +119,17 @@
 - `FlutterNativeSplash.remove()` 호출 시 제거
 
 ### 제거 시점 및 이후 화면
-- JWT 토큰이 없을 때: `_checkAuthStatus()`에서 제거 → **CustomSplashScreen** → LoginScreen
-- JWT 토큰이 유효할 때: 서버 검증 완료 후 제거 → HomeScreen(또는 AgreementScreen)
-- JWT 토큰이 유효하지 않을 때: 에러 처리 후 제거 → CustomSplashScreen → LoginScreen
+- JWT 토큰이 없을 때: `_checkAuthStatus()`에서 제거 → LoginScreen
+- JWT 토큰이 유효할 때: 서버 검증 완료 후 제거 → HomeScreen(또는 서비스 동의 레이어)
+- JWT 토큰이 유효하지 않을 때: 에러 처리 후 제거 → LoginScreen
 
 ### 스플래시 내부 구현 특이사항
-- **배경색**: `#121212` (이미지 없음)
-- **생성 방법**: `dart run flutter_native_splash:create` 명령으로 자동 생성
-- **Android 12+ 지원**: `android_12.color` 설정
+- **배경색**: `#121212`
+- **중앙 이미지**: `assets/images/splash_still_260513.png` 기반 밀도별 `splash_still.png`(mdpi 165×36 ~ xxxhdpi 660×144 픽셀, 논리 165×36dp 유지)
+- **Android 구현**: `launch_background.xml`의 `layer-list`에서 배경 shape + `android:gravity="center"` bitmap
+- **생성 방법**: `dart run flutter_native_splash:create`로 기본 리소스 생성 가능. Android 중앙 스틸은 `launch_background.xml`과 밀도별 `splash_still.png`로 유지.
+- **Android 12+(API 31) 지원**: `windowSplashScreenAnimatedIcon` → `drawable-v31/splash_still_square_v3.png`(원본 `assets/images/splash_still_square_v3.png`와 동기화). API 30 이하는 기존 `launch_background` + 가로형 `splash_still` 유지. `LaunchTheme`은 `values-v31` / `values-night-v31`
 - **제어 방법**: `lib/main.dart`에서 `FlutterNativeSplash.preserve()` 및 `FlutterNativeSplash.remove()` 사용
-
----
-
-## 0. CustomSplashScreen (커스텀 스플래시)
-
-### 스크린 관련 정의 파일
-- **파일 경로**: `lib/screens/custom_splash.dart`
-- **클래스명**: `CustomSplashScreen` (StatefulWidget)
-- **스크린 타입**: **Full Screen** (GNB 없음, 인증 플로우 전 단계)
-- **appPath**: 해당 없음
-
-### 스크린 용도
-- 앱 실행 시 네이티브 스플래시 제거 후, LoginScreen 전에만 표시되는 Flutter 스플래시
-- 네이티브 스플래시(배경색만)와 LoginScreen 사이의 전환·애니메이션을 담당 (애니메이션 상세는 추후 정의)
-- **로그아웃 시에는 표시하지 않음** → 곧바로 LoginScreen으로 이동
-
-### 이전 스크린 정보 (진입점)
-- **네이티브 스플래시**: 앱 실행 후 JWT 토큰이 없거나 유효하지 않을 때 (`FlutterNativeSplash.remove()` 직후)
-
-### 이후 스크린 정보 (이동 가능한 다른 스크린)
-- **LoginScreen**: `onComplete` 콜백 호출 시 `_MyAppState`에서 `_showCustomSplash = false`로 전환하여 표시
-
-### 표시 조건
-- `_MyAppState._accessToken == null` 이면서 `_showCustomSplash == true`일 때만 표시
-- 로그아웃 시에는 `_onSignOut()`에서 `_showCustomSplash = false`로 설정하므로 CustomSplashScreen을 거치지 않고 LoginScreen으로 전환
-
-### 스크린 내부 구현 특이사항
-- **배경색**: `#121212` (네이티브 스플래시와 동일)
-- **완료 시점**: 현재는 `initState`에서 1.5초 후 `onComplete()` 호출. 추후 커스텀 스플래시 → Login 연계 애니메이션 정의 시 해당 시점으로 변경 가능
 
 ---
 
@@ -167,7 +140,8 @@
 - **클래스명**: `LoginScreen` (StatefulWidget)
 - **스크린 타입**: **Full Screen**
 - **appPath**: 해당 없음 (인증 플로우)
-- **캐치프레이즈·약관**: 좌우 패딩 각 `screenWidth * 0.1`(가용 너비 약 80%). 캐치프레이즈는 Google 로그인 버튼 직상단. 하단 `Column`의 `Spacer` 비율 9·(문구)·1·버튼·1·약관·1(총 12). `loginCatchphrase`(l10n: en/pt/ko), 중앙 정렬, 흰색, `bodyLarge`(body-default) + bold(w700).
+- **현재 임시 상태**: 로그인 화면 개편 중이며 `#121212` 배경 위 중앙 스틸 이미지에서 시작한다. **1000ms 대기** 후 스틸 500ms fade-out, 로고 파트 1000ms 중앙 이동, 포스터·하단 영역은 fade-in 없이 각각 등장 연출한다. 포스터 1~3행은 행별로 화면 밖→노출 위치 1000ms(`easeOutCubic`) 슬라인 후 마키(1행 좌에서 등장·우로·60s, 2행 우에서 등장·좌로·70s, 3행 좌에서 등장·우로·66s). 하단 노출 영역은 화면 아래 밖에서 1000ms 상승(`easeOutCubic`).
+- **서비스 이용 동의(레이어)**: 로그인 후 사용자 metaInfo의 `SUDA_AGREEMENT != 'Y'`인 경우, 별도 AgreementScreen으로 전환하지 않고 LoginScreen 위에 **bottom-up 레이어**(배경 blur+dim)로 동의 UI를 노출한다. 레이어 바깥 탭 시 닫힌다. 동의 완료 시 `POST /v1/users/agreement` + AppsFlyer `af_complete_registration` 이벤트를 호출하고 Main(Home)로 전환한다.
 
 ---
 
@@ -180,15 +154,13 @@
 - **appPath**: 해당 없음 (동의 플로우)
 
 ### 스크린 용도
-- 서비스 이용을 위한 필수 약관 동의 화면
-- 로그인 후 사용자 정보(`SudaUser`)의 `metaInfo` 중 `SUDA_AGREEMENT` 값이 'Y'가 아닌 경우 표시
+- (레거시) 과거 서비스 이용 동의를 별도 Full Screen으로 처리하던 구현. 현재 기본 플로우에서는 사용하지 않는다.
 
 ### 이전 스크린 정보 (진입점)
-- **LoginScreen**: 로그인 성공 후 동의 정보가 없을 때
-- **네이티브 스플래시**: 자동 로그인 후 동의 정보가 없을 때
+- 현재 기본 플로우에서는 미연결
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
-- **HomeScreen**: 동의 완료(`POST /v1/users/agreement`) 성공 시
+- **HomeScreen**: (레거시) 동의 완료(`POST /v1/users/agreement`) 성공 시
 - **WebViewScreen**: 이용약관 및 개인정보 처리방침 "자세히 보기" 클릭 시
 
 ### 스크린 내부 구현 특이사항
@@ -205,37 +177,22 @@
 - Google Sign-In을 통해 idToken 획득 후 SUDA 서버에 JWT 발급 요청
 
 ### 이전 스크린 정보 (진입점)
-- **CustomSplashScreen**: 앱 실행 후 토큰이 없거나 유효하지 않을 때 (커스텀 스플래시 `onComplete` 후 표시)
-- **HomeScreen**: 로그아웃 시 (`onSignOut` 콜백 호출) → CustomSplashScreen 없이 곧바로 LoginScreen 표시
-- **조건**: `_MyAppState`의 `_accessToken == null`이고 `_showCustomSplash == false`일 때 표시
+- **네이티브 스플래시**: 앱 실행 후 토큰이 없거나 유효하지 않을 때 (`FlutterNativeSplash.remove()` 직후)
+- **HomeScreen**: 로그아웃 시 (`onSignOut` 콜백 호출) → 곧바로 LoginScreen 표시
+- **조건**: `_MyAppState`의 `_accessToken == null`일 때 표시
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
 - **HomeScreen**: Google 로그인 성공 및 JWT 토큰 발급 성공 시
   - `onSignIn` 콜백 호출 → `_MyAppState._onSignIn()` 실행 → 상태 업데이트로 자동 전환
 
 ### 스크린 내부 구현 특이사항
-- **스크린 타입 특성**: Full Screen
-  - GNB 없음
-  - 시스템 뒤로가기 시 앱 종료 처리 필요 (`WillPopScope` 또는 `PopScope` 사용)
-- **Google 로그인 버튼**: `ElevatedButton.icon` 사용
-  - 로딩 중일 때 `CircularProgressIndicator` 표시
-  - Google 로고 이미지: `assets/images/google_logo.png` (없으면 `Icons.login` 아이콘 사용)
-- **로그인 플로우**:
-  1. `AuthService.signInWithGoogle()` 호출하여 Google 로그인 및 idToken 획득
-  2. idToken이 없으면 에러 메시지 표시 (SnackBar)
-  3. `SudaApiClient.loginWithGoogle()` 호출하여 SUDA 서버에 idToken 전달 및 JWT 발급
-  4. `TokenStorage.saveTokens()`로 JWT 토큰 저장
-  5. `onSignIn` 콜백 호출하여 상위로 결과 전달
-  6. 성공 시 환영 메시지 표시 (SnackBar)
-- **환경 표시**: 개발/스테이징 환경일 때 상단에 환경명 표시 (`AppConfig.isPrd == false`)
-- **에러 처리**: 모든 에러는 SnackBar로 표시, 터미널에도 로그 출력
-- **UI 구성**:
-  - 중앙 정렬된 Column 레이아웃
-  - 앱 로고 아이콘 (`Icons.chat_bubble_outline`, 80px)
-  - 앱 이름 "Suda" (32px, bold, deepPurple)
-  - 부제목 "AI와 함께하는 영어 대화" (16px, grey)
-  - 환경 표시 배지 (개발/스테이징 환경만)
-  - Google 로그인 버튼 (전체 너비, 50px 높이)
+- **스크린 타입 특성**: Full Screen, GNB 없음
+- **진입 애니메이션**: 초기 **1000ms** 무대 세팅 후, 스틸(`splash_still_260513.png`, 165×36) **500ms** fade-out, 로고 파트(`splash_still_logo_part.png`, 40×36) **1000ms** 이동, 하단 노출 요소는 **fade-in 없이** 화면 아래 밖→최종 위치 **1000ms** 슬라이드(`easeOutCubic`). 로고 파트 opacity는 유지한다.
+- **포스터 배경**: 스크린 상단 50%를 포스터 노출 영역으로 사용한다. 영역을 세로 3행으로 나눈다. 각 행은 **1000ms** 슬라인 등장(`easeOutCubic`: 화면 밖→노출, 1·3행은 왼쪽 밖, 2행은 오른쪽 밖) 후 무한 마키: **1행** 우측 흐름 **60s** 주기, **2행** 좌측 **70s**, **3행** 우측 **66s**. `assets/images/small_posters/*.png`를 3개 그룹으로 쓰며 `pubspec.yaml` assets 등록. 포스터당 4px 패딩, 썸네일은 Home `RoleplayThumbnail`과 동일하게 **`ClipRRect` radius 10**. 상·하 1/6 높이 검정 그라데이션 오버레이.
+- **노출 영역**: 최종 고정 로고 아래부터 화면 끝까지를 사용한다. 상단에는 12px 갭 뒤 환영 문구 첫줄(`headlineLarge`, `#0CABA8`)과 둘째줄(`bodyMedium`, 흰색), 중간 가상선(`dividerY`)에는 Google 로그인 버튼 **상단**이 맞도록 배치, 그 아래(`dividerY + 버튼 높이`)부터 높이 **`contentHeight/3`** 인 영역 중앙에 약관 문구를 둔다. 등장 연출 시 `Transform.translate` Y가 **노출 최상단(`contentTop+12`)이 뷰포트 하단 밖**으로 나가도록 거리를 `height`·`contentTop`에서 역산한다(여유 ~40px).
+- **Google 로그인 버튼**: 기존 `assets/images/android_dark_rd_SI.png` 버튼 이미지를 사용하고, 로딩 중에는 같은 영역에 `CircularProgressIndicator`를 표시한다.
+- **약관 문구**: 하단 영역 좌우 15% 패딩 안에서 `labelSmall` 기반으로 표시한다. 링크 색상/밑줄은 기존 `#80D7CF` 규칙 유지. 이용약관·개인정보처리방침 탭 시 각각 WebView로 이동한다.
+- **로그인 플로우**: `AuthService.signInWithGoogle()` → idToken 검증 → `SudaApiClient.loginWithGoogle()` → `TokenStorage.saveTokens()` → `onSignIn` 콜백 순서. 에러는 `DefaultToast`로 표시한다.
 
 ---
 
@@ -1076,13 +1033,10 @@
 ```
 앱 실행
   ↓
-[네이티브 스플래시] (어두운 단색 배경 #121212, 이미지 없음)
+[네이티브 스플래시] (#121212 배경 + 중앙 스틸 이미지)
   ↓ (Flutter 엔진 초기화 + JWT 처리)
-  ├─ 토큰 없음/유효하지 않음 → [CustomSplashScreen] → [LoginScreen]
+  ├─ 토큰 없음/유효하지 않음 → [LoginScreen]
   └─ 토큰 유효 → [HomeScreen] (또는 AgreementScreen)
-
-[CustomSplashScreen] (앱 실행 후 로그인 플로우에서만 표시)
-  └─ onComplete → [LoginScreen]
 
 [LoginScreen]
   ├─ 로그인 성공 → [HomeScreen]
@@ -1104,7 +1058,7 @@
   │       ├─ [FeedbackScreen]
   │       ├─ [WebViewScreen] (Privacy policy / Terms of Service)
   │       ├─ [OpenSourceLicenseScreen]
-  │       └─ Log out → [LoginScreen] (커스텀 스플래시 없이 곧바로 이동)
+  │       └─ Log out → [LoginScreen] (곧바로 이동)
   └─ [ProfileScreen] → [HistoryScreen] (롤플레이 히스토리 썸네일 탭)
           ├─ [ReviewChatScreen] (채팅 열람)
           └─ [ReviewEndingScreen] (엔딩 열람)
@@ -1113,18 +1067,18 @@
 ### 네비게이션 흐름 상세 설명
 
 1. **앱 실행 → 네이티브 스플래시**
-   - 네이티브 스플래시가 자동으로 표시됨 (어두운 단색 배경 #121212, 이미지 없음)
+   - 네이티브 스플래시가 자동으로 표시됨 (`#121212` 배경 + 중앙 스틸 이미지)
    - `FlutterNativeSplash.preserve()`로 Flutter 엔진 초기화 후에도 유지
 
-2. **네이티브 스플래시 → CustomSplashScreen 또는 HomeScreen**
+2. **네이티브 스플래시 → LoginScreen 또는 HomeScreen**
    - Flutter 엔진 초기화 완료 후 `_checkAuthStatus()` 실행
    - JWT 토큰 확인 및 서버 검증 (네이티브 스플래시 유지 중)
    - 처리 완료 후 `FlutterNativeSplash.remove()` 호출
-   - 토큰 없음/유효하지 않음 → CustomSplashScreen 표시 → onComplete 후 LoginScreen
+   - 토큰 없음/유효하지 않음 → LoginScreen 표시
    - 토큰 유효 → HomeScreen(또는 AgreementScreen) 표시
 
 3. **로그아웃 시**
-   - `_onSignOut()`에서 `_showCustomSplash = false` 설정 → CustomSplashScreen 없이 곧바로 LoginScreen 표시
+   - `_onSignOut()`에서 곧바로 LoginScreen 표시
 
 4. **LoginScreen ↔ HomeScreen/ProfileScreen**
    - 로그인 성공 시 HomeScreen으로 전환

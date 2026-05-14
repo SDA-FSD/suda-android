@@ -106,6 +106,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get loginCatchphrase => '수다 떨면서 외국어 배우기';
 
   @override
+  String get loginWelcomeTitle => 'Welcome to SUDA!';
+
+  @override
+  String get loginWelcomeSubtitle => '이야기 속에서 자연스럽게 말해보세요!';
+
+  @override
   String get loginErrorIdToken => 'Google ID 토큰을 가져오지 못했습니다. 다시 시도해 주세요.';
 
   @override

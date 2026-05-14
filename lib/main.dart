@@ -21,12 +21,10 @@ import 'services/version_check_service.dart';
 import 'services/token_refresh_service.dart';
 import 'services/appsflyer_service.dart';
 import 'services/main_user_sync.dart';
-import 'screens/custom_splash.dart';
 import 'screens/login.dart';
 import 'screens/home.dart';
 import 'screens/profile.dart';
 import 'screens/notification_box.dart';
-import 'screens/agreement.dart';
 import 'screens/roleplay/history.dart';
 import 'screens/roleplay/history_v2.dart';
 import 'screens/setting/setting.dart';
@@ -112,8 +110,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       0; // Profile 탭 활성 상태에서 서브 스크린 pop 복귀 시 증가 → ProfileScreen 프로필 재조회
   bool _hasCheckedVersion = false; // 버전 체크 실행 여부
   bool _needsAgreement = false; // 서비스 이용 동의 필요 여부
-  /// 앱 실행(토큰 없음) 시에만 true. CustomSplashScreen 표시 후 onComplete에서 false. 로그아웃 시에는 false로 곧바로 LoginScreen.
-  bool _showCustomSplash = false;
 
   /// 마지막 홈 `getHomeContents`의 `notiboxUnreadYn` (`onHomeContentsLoaded`만 갱신)
   String _homeNotiboxUnreadYn = 'N';
@@ -349,6 +345,32 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     await _checkAuthStatus();
   }
 
+  Future<void> _precacheLoginSplashAssets() async {
+    if (!mounted) return;
+
+    try {
+      await Future.wait([
+        precacheImage(
+          const AssetImage('assets/images/splash_still_260513.png'),
+          context,
+        ),
+        precacheImage(
+          const AssetImage('assets/images/splash_still_logo_part.png'),
+          context,
+        ),
+      ]);
+    } catch (_) {
+      // The transition should still continue if asset warm-up fails.
+    }
+  }
+
+  Future<void> _removeNativeSplashAfterFlutterFrame() async {
+    if (mounted) {
+      await WidgetsBinding.instance.endOfFrame;
+    }
+    FlutterNativeSplash.remove();
+  }
+
   /// 로그인 상태 확인 및 자동 로그인 시도
   Future<void> _checkAuthStatus() async {
     // 1) 저장된 JWT 토큰 확인
@@ -360,15 +382,15 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
     if (storedAccessToken == null) {
       TokenRefreshService.instance.stop();
-      // 저장된 토큰이 없으면 네이티브 스플래시 제거 후 커스텀 스플래시 → 로그인 화면
-      FlutterNativeSplash.remove();
+      await _precacheLoginSplashAssets();
+      if (!mounted) return;
       setState(() {
         _accessToken = null;
         _googleUser = null;
         _user = null;
         _isLoading = false;
-        _showCustomSplash = true; // 앱 실행 시에만 커스텀 스플래시 표시
       });
+      await _removeNativeSplashAfterFlutterFrame();
       return;
     }
 
@@ -396,7 +418,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           _accessToken = null;
           _user = null;
           _isLoading = false;
-          _showCustomSplash = true;
         });
         return;
       }
@@ -422,8 +443,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         }
       }
 
-      // 네이티브 스플래시 제거 후 화면 전환
-      FlutterNativeSplash.remove();
       TokenRefreshService.instance.start();
       setState(() {
         _accessToken = storedAccessToken;
@@ -432,17 +451,19 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         _needsAgreement = needsAgreement;
         _isLoading = false;
       });
+      await _removeNativeSplashAfterFlutterFrame();
     } catch (_) {
       await TokenStorage.clearTokens();
       TokenRefreshService.instance.stop();
-      FlutterNativeSplash.remove();
+      await _precacheLoginSplashAssets();
+      if (!mounted) return;
       setState(() {
         _accessToken = null;
         _googleUser = null;
         _user = null;
         _isLoading = false;
-        _showCustomSplash = true;
       });
+      await _removeNativeSplashAfterFlutterFrame();
     }
   }
 
@@ -493,7 +514,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           _accessToken = null;
           _user = null;
           _needsAgreement = false;
-          _showCustomSplash = false;
         });
         return;
       }
@@ -543,7 +563,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       _googleUser = null;
       _accessToken = null;
       _currentMainScreen = 'home'; // 로그아웃 후 다시 로그인 시 Home 화면으로
-      _showCustomSplash = false; // 로그아웃 시 커스텀 스플래시 없이 곧바로 LoginScreen
       _homeNotiboxUnreadYn = 'N';
       _notiboxHasUnreadFromAlarmList = false;
       _lastNotiboxListSyncAttemptAt = null;
@@ -579,6 +598,29 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   void _onAgreementComplete() {
     setState(() {
       _needsAgreement = false;
+    });
+  }
+
+  /// 동의 레이어를 동의 없이 닫을 때: 로컬 토큰 삭제 + Google 세션 정리 + 앱 상태 초기화
+  Future<void> _onAgreementDismissWithoutConsent() async {
+    TokenRefreshService.instance.stop();
+    try {
+      await AuthService.signOut();
+    } catch (_) {}
+    try {
+      await TokenStorage.clearTokens();
+    } catch (_) {}
+    if (!mounted) return;
+    setState(() {
+      _googleUser = null;
+      _accessToken = null;
+      _user = null;
+      _needsAgreement = false;
+      _currentMainScreen = 'home';
+      _homeNotiboxUnreadYn = 'N';
+      _notiboxHasUnreadFromAlarmList = false;
+      _lastNotiboxListSyncAttemptAt = null;
+      _notiboxAnchorNotificationId = null;
     });
   }
 
@@ -772,16 +814,18 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         return child ?? const SizedBox.shrink();
       },
       theme: AppTheme.themeData,
-      home: _accessToken == null
-          ? (_showCustomSplash
-                ? CustomSplashScreen(
-                    onComplete: () => setState(() => _showCustomSplash = false),
-                  )
-                : LoginScreen(onSignIn: _onSignIn))
+      home: _isLoading
+          ? const _StartupSplashFrame()
+          : _accessToken == null
+          ? LoginScreen(onSignIn: _onSignIn)
           : _needsAgreement
-          ? AgreementScreen(
+          ? LoginScreen(
+              onSignIn: _onSignIn,
               accessToken: _accessToken!,
+              showAgreementLayerOnStart: true,
               onAgreementComplete: _onAgreementComplete,
+              onAgreementDismissWithoutConsent:
+                  _onAgreementDismissWithoutConsent,
             )
           : Builder(
               builder: (_) {
@@ -874,6 +918,25 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 );
               },
             ),
+    );
+  }
+}
+
+class _StartupSplashFrame extends StatelessWidget {
+  const _StartupSplashFrame();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      backgroundColor: Color(0xFF121212),
+      body: Center(
+        child: Image(
+          image: AssetImage('assets/images/splash_still_260513.png'),
+          width: 165,
+          height: 36,
+          fit: BoxFit.contain,
+        ),
+      ),
     );
   }
 }

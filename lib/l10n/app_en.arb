@@ -48,6 +48,8 @@
   "loginTermsTitle": "Terms of Use",
   "loginPrivacyTitle": "Privacy Policy",
   "loginCatchphrase": "Start talking. That's how you learn.",
+  "loginWelcomeTitle": "Welcome to SUDA!",
+  "loginWelcomeSubtitle": "Step into a story and start speaking English!",
   "loginErrorIdToken": "Failed to get Google ID Token. Please try again.",
   "loginErrorFailed": "Login failed: {error}",
   "@loginErrorFailed": {
