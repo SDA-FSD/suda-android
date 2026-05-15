@@ -318,10 +318,10 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get dailyTicketContent =>
-      'Resgate seu ingresso grátis diário!\nEle desaparecerá se você não usar hoje.';
+      'Resgate seu ticket grátis diário!\nEle desaparecerá se você não usar hoje.';
 
   @override
-  String get dailyTicketButton => 'Resgatar ingresso';
+  String get dailyTicketButton => 'Resgatar ticket';
 
   @override
   String get notificationPermissionBlockedTitle => 'Notificações desativadas';
