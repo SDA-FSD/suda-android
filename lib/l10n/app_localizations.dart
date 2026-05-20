@@ -807,6 +807,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Okay'**
   String get ticketInfoButtonOkay;
+
+  /// No description provided for @reviewChatTapHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the chat bubble to play the audio.'**
+  String get reviewChatTapHint;
+
+  /// No description provided for @reviewChatNoAudioToPlay.
+  ///
+  /// In en, this message translates to:
+  /// **'There\'s no audio to play.'**
+  String get reviewChatNoAudioToPlay;
 }
 
 class _AppLocalizationsDelegate

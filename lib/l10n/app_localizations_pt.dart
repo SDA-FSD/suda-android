@@ -390,4 +390,11 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get ticketInfoButtonOkay => 'Okay';
+
+  @override
+  String get reviewChatTapHint =>
+      'Toque no balão de chat para reproduzir o áudio.';
+
+  @override
+  String get reviewChatNoAudioToPlay => 'Não há áudio para reproduzir.';
 }

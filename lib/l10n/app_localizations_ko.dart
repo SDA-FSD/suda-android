@@ -373,4 +373,10 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get ticketInfoButtonOkay => 'Okay';
+
+  @override
+  String get reviewChatTapHint => '채팅 말풍선을 눌러 오디오를 재생하세요.';
+
+  @override
+  String get reviewChatNoAudioToPlay => '재생할 음성이 없습니다.';
 }

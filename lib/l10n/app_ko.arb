@@ -148,5 +148,7 @@
   "ticketInfoLevelUp": "레벨업",
   "ticketInfoLikesPrefix": "레벨업까지 ",
   "ticketInfoLikesSuffix": " 가 필요해요!",
-  "ticketInfoButtonOkay": "Okay"
+  "ticketInfoButtonOkay": "Okay",
+  "reviewChatTapHint": "채팅 말풍선을 눌러 오디오를 재생하세요.",
+  "reviewChatNoAudioToPlay": "재생할 음성이 없습니다."
 }

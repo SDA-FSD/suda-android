@@ -389,4 +389,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ticketInfoButtonOkay => 'Okay';
+
+  @override
+  String get reviewChatTapHint => 'Tap the chat bubble to play the audio.';
+
+  @override
+  String get reviewChatNoAudioToPlay => 'There\'s no audio to play.';
 }

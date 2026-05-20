@@ -183,6 +183,31 @@ class RoleplayApi {
     );
   }
 
+  /// `GET /v1/roleplays/results/{resultId}/review-chat/audio-meta`
+  static Future<RpReviewChatAudioMetaDto> getReviewChatAudioMeta({
+    required String accessToken,
+    required int resultId,
+  }) async {
+    return await SudaHttpClient.executeWithRefresh(
+      () => _getReviewChatAudioMetaInternal(accessToken, resultId),
+      retryWithNewToken: (newToken) =>
+          _getReviewChatAudioMetaInternal(newToken, resultId),
+    );
+  }
+
+  /// `GET /v1/roleplays/results/{resultId}/review-chat/lines/{lineIndex}/user-sound`
+  static Future<TtsResultDto> getReviewChatUserSound({
+    required String accessToken,
+    required int resultId,
+    required int lineIndex,
+  }) async {
+    return await SudaHttpClient.executeWithRefresh(
+      () => _getReviewChatUserSoundInternal(accessToken, resultId, lineIndex),
+      retryWithNewToken: (newToken) =>
+          _getReviewChatUserSoundInternal(newToken, resultId, lineIndex),
+    );
+  }
+
   /// `GET /v1/roleplays/results/{resultId}/expressions/{expressionIndex}/sound` — TTS (`TtsResultDto`).
   static Future<TtsResultDto> getResultExpressionSound({
     required String accessToken,
@@ -826,6 +851,67 @@ class RoleplayApi {
 
     throw Exception(
       'GET /v1/roleplays/results/$resultId failed: HTTP ${response.statusCode} ${response.body}',
+    );
+  }
+
+  static Future<RpReviewChatAudioMetaDto> _getReviewChatAudioMetaInternal(
+    String accessToken,
+    int resultId,
+  ) async {
+    final uri = SudaHttpClient.buildUri(
+      '/v1/roleplays/results/$resultId/review-chat/audio-meta',
+    );
+    final response = await SudaHttpClient.client
+        .get(
+          uri,
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+            'Content-Type': 'application/json',
+          },
+        )
+        .timeout(const Duration(seconds: 10));
+    final statusCode = response.statusCode;
+    if (statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+    if (statusCode >= 200 && statusCode < 300) {
+      final Map<String, dynamic> data =
+          jsonDecode(response.body) as Map<String, dynamic>;
+      return RpReviewChatAudioMetaDto.fromJson(data);
+    }
+    throw Exception(
+      'GET /v1/roleplays/results/$resultId/review-chat/audio-meta failed: HTTP $statusCode ${response.body}',
+    );
+  }
+
+  static Future<TtsResultDto> _getReviewChatUserSoundInternal(
+    String accessToken,
+    int resultId,
+    int lineIndex,
+  ) async {
+    final uri = SudaHttpClient.buildUri(
+      '/v1/roleplays/results/$resultId/review-chat/lines/$lineIndex/user-sound',
+    );
+    final response = await SudaHttpClient.client
+        .get(
+          uri,
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+            'Content-Type': 'application/json',
+          },
+        )
+        .timeout(const Duration(seconds: 15));
+    final statusCode = response.statusCode;
+    if (statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+    if (statusCode >= 200 && statusCode < 300) {
+      final Map<String, dynamic> data =
+          jsonDecode(response.body) as Map<String, dynamic>;
+      return TtsResultDto.fromJson(data);
+    }
+    throw Exception(
+      'GET /v1/roleplays/results/$resultId/review-chat/lines/$lineIndex/user-sound failed: HTTP $statusCode ${response.body}',
     );
   }
 

@@ -185,6 +185,28 @@ class SudaApiClient {
     );
   }
 
+  static Future<RpReviewChatAudioMetaDto> getRoleplayReviewChatAudioMeta({
+    required String accessToken,
+    required int resultId,
+  }) {
+    return RoleplayApi.getReviewChatAudioMeta(
+      accessToken: accessToken,
+      resultId: resultId,
+    );
+  }
+
+  static Future<TtsResultDto> getRoleplayReviewChatUserSound({
+    required String accessToken,
+    required int resultId,
+    required int lineIndex,
+  }) {
+    return RoleplayApi.getReviewChatUserSound(
+      accessToken: accessToken,
+      resultId: resultId,
+      lineIndex: lineIndex,
+    );
+  }
+
   static Future<TtsResultDto> getRoleplayResultExpressionSound({
     required String accessToken,
     required int resultId,

@@ -148,5 +148,7 @@
   "ticketInfoLevelUp": "Level up",
   "ticketInfoLikesPrefix": "You need ",
   "ticketInfoLikesSuffix": " to level up!",
-  "ticketInfoButtonOkay": "Okay"
+  "ticketInfoButtonOkay": "Okay",
+  "reviewChatTapHint": "Tap the chat bubble to play the audio.",
+  "reviewChatNoAudioToPlay": "There's no audio to play."
 }

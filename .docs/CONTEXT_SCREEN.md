@@ -999,8 +999,10 @@
 
 ### 스크린 내부 구현 특이사항
 - **헤더**: 중앙 "Chat History" (headlineMedium·흰색), Setting 계열 스타일. 좌상단 뒤로가기(header_arrow_back.svg).
-- **배경색**: `#121212`. AppScaffold 사용, showBackButton: true.
-- **본문**: RoleplayResultDto.chatHistory(List\<SudaJson\>)를 순서대로 표시. key로 발화자 구분: USER(사용자 말풍선·우측·흰색), AI_CHARACTER(AI 말풍선·좌측·#0CABA8·avatarImgPath 아바타 40×40), AI_NARRATOR(나레이션·중앙·이탤릭 흰색), SYSTEM_MISSION(미션·중앙·Mission 뱃지+핑크 텍스트). value를 그대로 문구로 표시. Playing 스크린과 동일 말풍선/나레이션/미션 배치·스타일.
+- **배경**: 상→하 선형 그라데이션 `#054544`→`#0CABA8` + 검정 40% 오버레이(`0x66000000`). AppScaffold `backgroundColor: transparent`, showBackButton: true.
+- **안내 문구**: 헤더 아래 `reviewChatTapHint`(l10n·디바이스 언어) + 좌측 `assets/images/icons/speaker.png`(16×16), bodySmall·`#80D7CF`.
+- **본문**: RoleplayResultDto.chatHistory(List\<SudaJson\>)를 순서대로 표시. key로 발화자 구분: USER(사용자 말풍선·우측·흰색), AI_CHARACTER(AI 말풍선·좌측·#0CABA8·avatarImgPath 아바타 40×40), AI_NARRATOR(나레이션·중앙·이탤릭 흰색), SYSTEM_MISSION(미션·중앙·Mission 뱃지+핑크 텍스트). value를 그대로 문구로 표시. USER/AI 말풍선은 네 꼭짓점 동일 반지름(20)·둥근 직사각형 형태.
+- **오디오 재생 UX**: 진입 시 `GET …/review-chat/audio-meta`. USER(음성 입력)·AI_CHARACTER 말풍선 탭으로 재생(별도 스피커 버튼 없음). 재생·로딩 중 말풍선 배경 `#80D7CF`·텍스트 `#054544`(AnimatedContainer 180ms). 동일 라인 재탭 시 stop, 다른 라인 탭 시 전환. 완료 시 기본 색 복귀. 재생 불가·실패·텍스트 입력 라인 탭 시 `reviewChatNoAudioToPlay` 토스트(l10n). USER는 `GET …/lines/{lineIndex}/user-sound` bytes, AI는 meta `aiCdnPath`+CDN.
 
 ---
 

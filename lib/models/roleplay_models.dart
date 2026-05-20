@@ -601,3 +601,57 @@ class RpSimpleResultDto {
     );
   }
 }
+
+/// Review Chat 오디오 메타 (`GET …/review-chat/audio-meta`).
+class RpReviewChatLineDto {
+  final int lineIndex;
+  final String? role;
+  final String? userAudioYn;
+  final String? aiCdnYn;
+  final String? aiCdnPath;
+
+  const RpReviewChatLineDto({
+    required this.lineIndex,
+    this.role,
+    this.userAudioYn,
+    this.aiCdnYn,
+    this.aiCdnPath,
+  });
+
+  factory RpReviewChatLineDto.fromJson(Map<String, dynamic> json) {
+    return RpReviewChatLineDto(
+      lineIndex: _optionalInt(json['lineIndex']) ?? 0,
+      role: json['role'] as String?,
+      userAudioYn: json['userAudioYn'] as String?,
+      aiCdnYn: json['aiCdnYn'] as String?,
+      aiCdnPath: json['aiCdnPath'] as String?,
+    );
+  }
+
+  bool get hasUserAudio => userAudioYn == 'Y';
+  bool get hasAiCdn => aiCdnYn == 'Y' && aiCdnPath != null && aiCdnPath!.isNotEmpty;
+}
+
+class RpReviewChatAudioMetaDto {
+  final int? roleplayResultId;
+  final List<RpReviewChatLineDto> lines;
+
+  const RpReviewChatAudioMetaDto({
+    this.roleplayResultId,
+    this.lines = const [],
+  });
+
+  factory RpReviewChatAudioMetaDto.fromJson(Map<String, dynamic> json) {
+    final rawLines = json['lines'];
+    return RpReviewChatAudioMetaDto(
+      roleplayResultId: _optionalInt(json['roleplayResultId']),
+      lines: rawLines is List
+          ? rawLines
+              .map(
+                (e) => RpReviewChatLineDto.fromJson(e as Map<String, dynamic>),
+              )
+              .toList()
+          : const [],
+    );
+  }
+}
