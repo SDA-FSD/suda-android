@@ -85,6 +85,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   int? _savedHighlightedExpressionId;
   /// 페치·재생 중인 카드(메가폰 검정). 재생 종료 후 null.
   int? _savedPlaybackExpressionId;
+  bool _savedExpressionMutationInFlight = false;
 
   @override
   void initState() {
@@ -654,6 +655,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _deleteSavedExpression(UserExpressionDto item) async {
+    if (_savedExpressionMutationInFlight) {
+      return;
+    }
+    _savedExpressionMutationInFlight = true;
+    try {
     final token = await TokenStorage.loadAccessToken();
     if (!mounted) return;
     if (token == null || token.isEmpty) {
@@ -667,7 +673,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       return;
     }
 
-    try {
       await SudaApiClient.deleteUserExpression(
         accessToken: token,
         rpResultId: resultId,
@@ -717,6 +722,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     } catch (e) {
       if (!mounted) return;
       DefaultToast.show(context, e.toString(), isError: true);
+    } finally {
+      _savedExpressionMutationInFlight = false;
     }
   }
 

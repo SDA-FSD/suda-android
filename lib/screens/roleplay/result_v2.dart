@@ -82,6 +82,7 @@ class _RoleplayResultScreenV2State extends State<RoleplayResultScreenV2>
   int? _expressionHighlightedIndex;
   int? _expressionPlaybackIndex;
   final Set<int> _bookmarkedExpressionIndexes = <int>{};
+  bool _expressionBookmarkInFlight = false;
 
   RoleplayResultDto? get _dto => RoleplayStateService.instance.cachedResult;
 
@@ -361,19 +362,23 @@ class _RoleplayResultScreenV2State extends State<RoleplayResultScreenV2>
   }
 
   Future<void> _onExpressionBookmarkTap(int expressionIndex) async {
-    final resultId = _dto?.id;
-    final token = await TokenStorage.loadAccessToken();
-    if (!mounted) {
+    if (_expressionBookmarkInFlight) {
       return;
     }
-    if (token == null || resultId == null) {
-      DefaultToast.show(context, 'HTTP 401 · Request failed', isError: true);
-      return;
-    }
-
-    final isBookmarked = _bookmarkedExpressionIndexes.contains(expressionIndex);
-
+    _expressionBookmarkInFlight = true;
     try {
+      final resultId = _dto?.id;
+      final token = await TokenStorage.loadAccessToken();
+      if (!mounted) {
+        return;
+      }
+      if (token == null || resultId == null) {
+        DefaultToast.show(context, 'HTTP 401 · Request failed', isError: true);
+        return;
+      }
+
+      final isBookmarked = _bookmarkedExpressionIndexes.contains(expressionIndex);
+
       if (isBookmarked) {
         await SudaApiClient.deleteUserExpression(
           accessToken: token,
@@ -402,6 +407,8 @@ class _RoleplayResultScreenV2State extends State<RoleplayResultScreenV2>
         return;
       }
       DefaultToast.show(context, _httpErrorBrief(e), isError: true);
+    } finally {
+      _expressionBookmarkInFlight = false;
     }
   }
 

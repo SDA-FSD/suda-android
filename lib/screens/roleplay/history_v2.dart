@@ -48,6 +48,7 @@ class _HistoryScreenV2State extends State<HistoryScreenV2> {
   int? _expressionHighlightedIndex;
   int? _expressionPlaybackIndex;
   late final Set<int> _bookmarkedExpressionIndexes = <int>{};
+  bool _expressionBookmarkInFlight = false;
 
   static const Color _teal = Color(0xFF0CABA8);
   static const Color _topBg = Color(0xFF054544);
@@ -222,15 +223,19 @@ class _HistoryScreenV2State extends State<HistoryScreenV2> {
   }
 
   Future<void> _onExpressionBookmarkTap(int expressionIndex) async {
-    final isBookmarked = _bookmarkedExpressionIndexes.contains(expressionIndex);
-    final token = await TokenStorage.loadAccessToken();
-    if (!mounted) return;
-    if (token == null || token.isEmpty) {
-      DefaultToast.show(context, 'HTTP 401 · Request failed', isError: true);
+    if (_expressionBookmarkInFlight) {
       return;
     }
-
+    _expressionBookmarkInFlight = true;
     try {
+      final isBookmarked = _bookmarkedExpressionIndexes.contains(expressionIndex);
+      final token = await TokenStorage.loadAccessToken();
+      if (!mounted) return;
+      if (token == null || token.isEmpty) {
+        DefaultToast.show(context, 'HTTP 401 · Request failed', isError: true);
+        return;
+      }
+
       if (isBookmarked) {
         await SudaApiClient.deleteUserExpression(
           accessToken: token,
@@ -253,6 +258,8 @@ class _HistoryScreenV2State extends State<HistoryScreenV2> {
     } catch (e) {
       if (!mounted) return;
       DefaultToast.show(context, e.toString(), isError: true);
+    } finally {
+      _expressionBookmarkInFlight = false;
     }
   }
 
