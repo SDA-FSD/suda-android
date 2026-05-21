@@ -566,10 +566,10 @@
   - `Navigator.pushReplacement()`로 Tutorial 스크린을 스택에서 제거하며 전환
 
 ### 스크린 내부 구현 특이사항
-- **진입 시 조건 체크**: `RoleplayStateService.instance.user` 없으면 `GET /v1/users` 호출. `TUTORIAL == 'Y'`이면 즉시 `replaceWithOpeningFromTutorial()`로 스킵
+- **진입 시 조건 체크**: `RoleplayStateService.instance.user` 없으면 `GET /v1/users` 호출. `TUTORIAL == 'Y'`이면 첫 프레임 이후 `replaceWithOpeningFromTutorial()`로 스킵(`addPostFrameCallback` — build 중 `pushReplacement` 금지)
 - **이미지**: `assets/images/tutorials2/{lang}/tutorial-{1~6}.png` (lang: ko/pt/en, 기본 en)
 - **인디케이터**: 상단 6개 dot (활성: 흰색 / 비활성: 흰색 40% 불투명도)
-- **완료 처리**: 마지막(6번째) 페이지에서 화면 탭 시 `SudaApiClient.completeTutorial()` 호출 → `replaceWithOpeningFromTutorial()`
+- **완료 처리**: 마지막(6번째) 페이지에서 화면 탭 시 `SudaApiClient.completeTutorial()` 호출 → 첫 프레임 이후 `replaceWithOpeningFromTutorial()`
 - **뒤로가기**: `PopScope(canPop: true)` — Overview로 복귀 가능
 - **API**: `POST /v1/users/tutorial` (request body 없음, 200 응답 시 성공)
 - Route name: `/roleplay/tutorial`
