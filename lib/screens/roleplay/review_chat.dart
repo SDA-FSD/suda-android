@@ -412,9 +412,6 @@ class _ReviewChatScreenState extends State<ReviewChatScreen> {
           color: isActive ? _bubblePlayingText : Colors.black,
         );
     final maxBubbleWidth = bodyWidth * 0.7;
-    final maxTextWidth = maxBubbleWidth -
-        _bubblePaddingH * 2 -
-        (isLoading ? 24 : 0);
     final bubble = AnimatedContainer(
       duration: const Duration(milliseconds: 180),
       curve: Curves.easeOut,
@@ -424,12 +421,7 @@ class _ReviewChatScreenState extends State<ReviewChatScreen> {
       ),
       decoration: BoxDecoration(
         color: isActive ? _bubblePlayingBg : Colors.white,
-        borderRadius: _bubbleBorderRadius(
-          context: context,
-          text: text,
-          textStyle: textStyle,
-          maxTextWidth: maxTextWidth,
-        ),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

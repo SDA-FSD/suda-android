@@ -50,6 +50,14 @@ class _RoleplayTutorialScreenState extends State<RoleplayTutorialScreen> {
     super.dispose();
   }
 
+  /// Opening 전환은 첫 프레임 이후에만 수행(build 중 pushReplacement 방지).
+  void _scheduleReplaceWithOpening() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      RoleplayRouter.replaceWithOpeningFromTutorial(context);
+    });
+  }
+
   Future<void> _checkTutorialStatus() async {
     UserDto? user = RoleplayStateService.instance.user;
 
@@ -74,7 +82,7 @@ class _RoleplayTutorialScreenState extends State<RoleplayTutorialScreen> {
         false;
 
     if (tutorialDone) {
-      RoleplayRouter.replaceWithOpeningFromTutorial(context);
+      _scheduleReplaceWithOpening();
       return;
     }
 
@@ -150,7 +158,7 @@ class _RoleplayTutorialScreenState extends State<RoleplayTutorialScreen> {
         if (u != null) MainUserSync.instance.notifyUserUpdated(u);
       }
       if (!mounted) return;
-      RoleplayRouter.replaceWithOpeningFromTutorial(context);
+      _scheduleReplaceWithOpening();
     } catch (e) {
       if (!mounted) return;
       setState(() => _isSubmitting = false);
