@@ -89,14 +89,14 @@ class _ReviewChatScreenState extends State<ReviewChatScreen> {
     TextStyle? textStyle,
     double maxTextWidth,
   ) {
-    if (text.contains('\n')) return false;
+    if (text.contains('\n') || maxTextWidth <= 0) return false;
     final painter = TextPainter(
       text: TextSpan(text: text, style: textStyle),
-      maxLines: 2,
       textDirection: Directionality.of(context),
-    )..layout(maxWidth: maxTextWidth);
-    return !painter.didExceedMaxLines &&
-        painter.computeLineMetrics().length <= 1;
+      textScaler: MediaQuery.textScalerOf(context),
+      maxLines: 1,
+    )..layout();
+    return painter.width <= maxTextWidth + 0.5;
   }
 
   BorderRadius _bubbleBorderRadius({
@@ -412,6 +412,9 @@ class _ReviewChatScreenState extends State<ReviewChatScreen> {
           color: isActive ? _bubblePlayingText : Colors.black,
         );
     final maxBubbleWidth = bodyWidth * 0.7;
+    final maxTextWidth = maxBubbleWidth -
+        _bubblePaddingH * 2 -
+        (isLoading ? 24 : 0);
     final bubble = AnimatedContainer(
       duration: const Duration(milliseconds: 180),
       curve: Curves.easeOut,
@@ -421,7 +424,12 @@ class _ReviewChatScreenState extends State<ReviewChatScreen> {
       ),
       decoration: BoxDecoration(
         color: isActive ? _bubblePlayingBg : Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: _bubbleBorderRadius(
+          context: context,
+          text: text,
+          textStyle: textStyle,
+          maxTextWidth: maxTextWidth,
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
