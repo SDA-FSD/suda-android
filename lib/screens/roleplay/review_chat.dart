@@ -83,6 +83,15 @@ class _ReviewChatScreenState extends State<ReviewChatScreen> {
   bool _isLineActive(int lineIndex) =>
       _playingLineIndex == lineIndex || _loadingLineIndex == lineIndex;
 
+  double _bubbleInnerTextMaxWidth(
+    double outerMaxWidth, {
+    required bool isLoading,
+  }) {
+    return outerMaxWidth -
+        _bubblePaddingH * 2 -
+        (isLoading ? 24 : 0);
+  }
+
   bool _isSingleLineBubble(
     BuildContext context,
     String text,
@@ -95,8 +104,8 @@ class _ReviewChatScreenState extends State<ReviewChatScreen> {
       textDirection: Directionality.of(context),
       textScaler: MediaQuery.textScalerOf(context),
       maxLines: 1,
-    )..layout();
-    return painter.width <= maxTextWidth + 0.5;
+    )..layout(maxWidth: maxTextWidth);
+    return !painter.didExceedMaxLines;
   }
 
   BorderRadius _bubbleBorderRadius({
@@ -412,9 +421,6 @@ class _ReviewChatScreenState extends State<ReviewChatScreen> {
           color: isActive ? _bubblePlayingText : Colors.black,
         );
     final maxBubbleWidth = bodyWidth * 0.7;
-    final maxTextWidth = maxBubbleWidth -
-        _bubblePaddingH * 2 -
-        (isLoading ? 24 : 0);
     final bubble = AnimatedContainer(
       duration: const Duration(milliseconds: 180),
       curve: Curves.easeOut,
@@ -424,12 +430,7 @@ class _ReviewChatScreenState extends State<ReviewChatScreen> {
       ),
       decoration: BoxDecoration(
         color: isActive ? _bubblePlayingBg : Colors.white,
-        borderRadius: _bubbleBorderRadius(
-          context: context,
-          text: text,
-          textStyle: textStyle,
-          maxTextWidth: maxTextWidth,
-        ),
+        borderRadius: BorderRadius.circular(_bubbleRadiusMultiLine),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -476,45 +477,6 @@ class _ReviewChatScreenState extends State<ReviewChatScreen> {
     final textStyle = Theme.of(context).textTheme.bodyLarge?.copyWith(
           color: isActive ? _bubblePlayingText : Colors.white,
         );
-    final maxTextWidth = bubbleWidth -
-        40 -
-        5 -
-        _bubblePaddingH * 2 -
-        (isLoading ? 24 : 0);
-    final bubble = AnimatedContainer(
-      duration: const Duration(milliseconds: 180),
-      curve: Curves.easeOut,
-      padding: const EdgeInsets.symmetric(
-        horizontal: _bubblePaddingH,
-        vertical: _bubblePaddingV,
-      ),
-      decoration: BoxDecoration(
-        color: isActive ? _bubblePlayingBg : _aiBubbleIdleBg,
-        borderRadius: _bubbleBorderRadius(
-          context: context,
-          text: text,
-          textStyle: textStyle,
-          maxTextWidth: maxTextWidth,
-        ),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Expanded(child: Text(text, style: textStyle)),
-          if (isLoading) ...[
-            const SizedBox(width: 8),
-            SizedBox(
-              width: 16,
-              height: 16,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: _bubblePlayingText.withValues(alpha: 0.7),
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
 
     return Align(
       alignment: Alignment.centerLeft,
@@ -526,10 +488,52 @@ class _ReviewChatScreenState extends State<ReviewChatScreen> {
             _buildAvatar(),
             const SizedBox(width: 5),
             Expanded(
-              child: GestureDetector(
-                onTap: () => _onBubbleTap(lineIndex, item),
-                behavior: HitTestBehavior.opaque,
-                child: bubble,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final maxTextWidth = _bubbleInnerTextMaxWidth(
+                    constraints.maxWidth,
+                    isLoading: isLoading,
+                  );
+                  return GestureDetector(
+                    onTap: () => _onBubbleTap(lineIndex, item),
+                    behavior: HitTestBehavior.opaque,
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 180),
+                      curve: Curves.easeOut,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: _bubblePaddingH,
+                        vertical: _bubblePaddingV,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isActive ? _bubblePlayingBg : _aiBubbleIdleBg,
+                        borderRadius: _bubbleBorderRadius(
+                          context: context,
+                          text: text,
+                          textStyle: textStyle,
+                          maxTextWidth: maxTextWidth,
+                        ),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Expanded(child: Text(text, style: textStyle)),
+                          if (isLoading) ...[
+                            const SizedBox(width: 8),
+                            SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color:
+                                    _bubblePlayingText.withValues(alpha: 0.7),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           ],
