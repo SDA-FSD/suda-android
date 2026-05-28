@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import '../../models/pagination.dart';
+import '../../models/rps2_test_models.dart';
 import '../../models/roleplay_models.dart';
 import '../client/suda_http_client.dart';
 
@@ -106,8 +107,7 @@ class RoleplayApi {
   }) async {
     return await SudaHttpClient.executeWithRefresh(
       () => _getHintInternal(accessToken, rpSessionId),
-      retryWithNewToken: (newToken) =>
-          _getHintInternal(newToken, rpSessionId),
+      retryWithNewToken: (newToken) => _getHintInternal(newToken, rpSessionId),
     );
   }
 
@@ -167,8 +167,7 @@ class RoleplayApi {
   }) async {
     return await SudaHttpClient.executeWithRefresh(
       () => _getResultsInternal(accessToken, pageNum),
-      retryWithNewToken: (newToken) =>
-          _getResultsInternal(newToken, pageNum),
+      retryWithNewToken: (newToken) => _getResultsInternal(newToken, pageNum),
     );
   }
 
@@ -228,6 +227,18 @@ class RoleplayApi {
     );
   }
 
+  /// `POST /test/user-message` (`application/octet-stream`) - RpS2 Lab single-turn API.
+  static Future<RpS2TestTurnDto> postRpS2TestUserMessage({
+    required String accessToken,
+    required Uint8List audioData,
+  }) async {
+    return await SudaHttpClient.executeWithRefresh(
+      () => _postRpS2TestUserMessageInternal(accessToken, audioData),
+      retryWithNewToken: (newToken) =>
+          _postRpS2TestUserMessageInternal(newToken, audioData),
+    );
+  }
+
   /// GET /v1/roleplays/results-reload/{resultId}
   /// Returns RoleplayResultDto on 2xx, null otherwise (no throw). Operator refresh test.
   static Future<RoleplayResultDto?> getRoleplayResultReload({
@@ -241,8 +252,9 @@ class RoleplayApi {
     String accessToken,
     int resultId,
   ) async {
-    final uri =
-        SudaHttpClient.buildUri('/v1/roleplays/results-reload/$resultId');
+    final uri = SudaHttpClient.buildUri(
+      '/v1/roleplays/results-reload/$resultId',
+    );
     try {
       final response = await SudaHttpClient.client
           .get(
@@ -465,8 +477,9 @@ class RoleplayApi {
     String accessToken,
     String rpSessionId,
   ) async {
-    final uri =
-        SudaHttpClient.buildUri('/v1/roleplay-sessions/$rpSessionId/ai-message');
+    final uri = SudaHttpClient.buildUri(
+      '/v1/roleplay-sessions/$rpSessionId/ai-message',
+    );
     late final http.Response response;
     try {
       response = await SudaHttpClient.client
@@ -510,8 +523,7 @@ class RoleplayApi {
     String accessToken,
     String rpSessionId,
   ) async {
-    final uri =
-        SudaHttpClient.buildUri('/v1/roleplay-sessions/$rpSessionId');
+    final uri = SudaHttpClient.buildUri('/v1/roleplay-sessions/$rpSessionId');
     late final http.Response response;
     try {
       response = await SudaHttpClient.client
@@ -554,8 +566,9 @@ class RoleplayApi {
     String accessToken,
     String rpSessionId,
   ) async {
-    final uri =
-        SudaHttpClient.buildUri('/v1/roleplay-sessions/$rpSessionId/narration');
+    final uri = SudaHttpClient.buildUri(
+      '/v1/roleplay-sessions/$rpSessionId/narration',
+    );
     late final http.Response response;
     try {
       response = await SudaHttpClient.client
@@ -598,8 +611,9 @@ class RoleplayApi {
     String accessToken,
     String rpSessionId,
   ) async {
-    final uri =
-        SudaHttpClient.buildUri('/v1/roleplay-sessions/$rpSessionId/hint');
+    final uri = SudaHttpClient.buildUri(
+      '/v1/roleplay-sessions/$rpSessionId/hint',
+    );
     late final http.Response response;
     try {
       response = await SudaHttpClient.client
@@ -712,9 +726,7 @@ class RoleplayApi {
   ) async {
     final uri = SudaHttpClient.buildUri(
       '/v1/roleplay-sessions/$rpSessionId/translation',
-      {
-        'index': index.toString(),
-      },
+      {'index': index.toString()},
     );
     late final http.Response response;
     try {
@@ -748,19 +760,13 @@ class RoleplayApi {
     String accessToken,
     String speedRate,
   ) async {
-    final uri = SudaHttpClient.buildUri(
-      '/v1/users/speed-rate',
-      {'speedRate': speedRate},
-    );
+    final uri = SudaHttpClient.buildUri('/v1/users/speed-rate', {
+      'speedRate': speedRate,
+    });
     late final http.Response response;
     try {
       response = await SudaHttpClient.client
-          .put(
-            uri,
-            headers: {
-              'Authorization': 'Bearer $accessToken',
-            },
-          )
+          .put(uri, headers: {'Authorization': 'Bearer $accessToken'})
           .timeout(const Duration(seconds: 10));
     } on TimeoutException {
       rethrow;
@@ -998,10 +1004,9 @@ class RoleplayApi {
     int resultId,
     int star,
   ) async {
-    final uri = SudaHttpClient.buildUri(
-      '/v1/roleplays/results/$resultId',
-      {'star': star.toString()},
-    );
+    final uri = SudaHttpClient.buildUri('/v1/roleplays/results/$resultId', {
+      'star': star.toString(),
+    });
     late final http.Response response;
     try {
       response = await SudaHttpClient.client
@@ -1064,6 +1069,42 @@ class RoleplayApi {
 
     throw Exception(
       'POST /v1/roleplays/results/$roleplayResultId/report failed: HTTP ${response.statusCode} ${response.body}',
+    );
+  }
+
+  static Future<RpS2TestTurnDto> _postRpS2TestUserMessageInternal(
+    String accessToken,
+    Uint8List audioData,
+  ) async {
+    final uri = SudaHttpClient.buildUri('/test/user-message');
+    late final http.Response response;
+    try {
+      response = await SudaHttpClient.client
+          .post(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+              'Content-Type': 'application/octet-stream',
+            },
+            body: audioData,
+          )
+          .timeout(const Duration(seconds: 20));
+    } on TimeoutException {
+      rethrow;
+    }
+
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final Map<String, dynamic> data =
+          jsonDecode(response.body) as Map<String, dynamic>;
+      return RpS2TestTurnDto.fromJson(data);
+    }
+
+    throw Exception(
+      'POST /test/user-message failed: HTTP ${response.statusCode} ${response.body}',
     );
   }
 

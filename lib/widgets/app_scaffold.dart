@@ -15,6 +15,9 @@ class AppScaffold extends StatelessWidget {
   final String? title; // 헤더 좌측 상단에 표시될 보조 타이틀 (caption 스타일)
   final TextStyle? titleStyle; // 헤더 타이틀의 커스텀 스타일
   final String? centerTitle; // 헤더 중앙에 표시될 메인 타이틀 (h2 스타일)
+  final TextStyle? centerTitleStyle; // 헤더 중앙 타이틀 커스텀 스타일
+  final double bodyTopPadding; // 본문 시작 상단 패딩
+  final double centerTitleTop; // 중앙 타이틀 top 오프셋
   final Widget? leading; // 좌측 상단 버튼 (커스텀이 필요할 경우)
   final List<Widget>? actions; // 우측 상단에 표시될 버튼들
   final Color backgroundColor;
@@ -29,6 +32,9 @@ class AppScaffold extends StatelessWidget {
     this.title,
     this.titleStyle,
     this.centerTitle,
+    this.centerTitleStyle,
+    this.bodyTopPadding = 70,
+    this.centerTitleTop = 16,
     this.leading,
     this.actions,
     this.backgroundColor = const Color(0xFF121212),
@@ -53,7 +59,7 @@ class AppScaffold extends StatelessWidget {
             // 1. 본문 영역 (상단 70, 좌우 24 마진 적용) — GNB 아래까지 확장(본문이 GNB 위를 덮는 구조)
             Padding(
               padding: EdgeInsets.only(
-                top: 70,
+                top: bodyTopPadding,
                 left: usePadding ? 24 : 0,
                 right: usePadding ? 24 : 0,
               ),
@@ -63,13 +69,15 @@ class AppScaffold extends StatelessWidget {
             // 2. 헤더 중앙 제목 (h2 스타일)
             if (centerTitle != null)
               Positioned(
-                top: 16,
+                top: centerTitleTop,
                 left: 0,
                 right: 0,
                 child: Center(
                   child: Text(
                     centerTitle!,
-                    style: theme.headlineMedium?.copyWith(color: Colors.white),
+                    style:
+                        centerTitleStyle ??
+                        theme.headlineMedium?.copyWith(color: Colors.white),
                   ),
                 ),
               ),

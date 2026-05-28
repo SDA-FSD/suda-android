@@ -17,7 +17,9 @@ import '../../widgets/main_reregistration_restricted_popup.dart'
 import '../../widgets/daily_ticket_popup.dart'
     show showDailyTicketDefaultPopupForLab;
 import '../../widgets/app_scaffold.dart';
-import '../profile.dart' show showProfileDeleteSavedExpressionDefaultPopupForLab;
+import '../profile.dart'
+    show showProfileDeleteSavedExpressionDefaultPopupForLab;
+import 'rps2_test_screen.dart';
 import 'announcements.dart'
     show showAnnouncementsPostNoLongerAvailableDefaultPopupForLab;
 import '../roleplay/opening.dart'
@@ -29,10 +31,10 @@ import '../roleplay/opening.dart'
         showRoleplayOpeningInAppReviewQuestDefaultPopupForLab;
 import '../roleplay/result_v2.dart';
 
-/// Lab에서 재현 가능한 `DefaultPopup` 목록.  
+/// Lab에서 재현 가능한 `DefaultPopup` 목록.
 /// `DefaultPopup` 전환이 완료될 때마다 여기에 **한 항목씩** 추가한다.
 ///
-/// 라벨 규칙: 괄호로 분기/sessionId를 붙이지 않는다.  
+/// 라벨 규칙: 괄호로 분기/sessionId를 붙이지 않는다.
 final List<LabDefaultPopupOption> kLabDefaultPopupOptions = [
   LabDefaultPopupOption(
     id: 'roleplay_opening_daily_ticket',
@@ -114,8 +116,7 @@ class _LabScreenState extends State<LabScreen> {
   bool _guarded = false;
   bool _toastIsWarning = false;
   String? _selectedLabDefaultPopupId;
-  static const _longToastTestMessage =
-      'Test Popup, Test Toast, 가나다라마바사아자차카타파하';
+  static const _longToastTestMessage = 'Test Popup, Test Toast, 가나다라마바사아자차카타파하';
   static const _stylePreviewLines = ['말해요!?', 'Talk', 'E sua vez primeiro!'];
   final TextEditingController _rpResultIdController = TextEditingController();
   bool _rpResultTestLoading = false;
@@ -168,11 +169,7 @@ class _LabScreenState extends State<LabScreen> {
   }
 
   void _showTestToastLong() {
-    DefaultToast.show(
-      context,
-      _longToastTestMessage,
-      isError: _toastIsWarning,
-    );
+    DefaultToast.show(context, _longToastTestMessage, isError: _toastIsWarning);
   }
 
   Future<void> _openRpResultV2FromInput() async {
@@ -217,6 +214,16 @@ class _LabScreenState extends State<LabScreen> {
     } finally {
       if (mounted) setState(() => _rpResultTestLoading = false);
     }
+  }
+
+  Future<void> _openRpS2TestScreen() async {
+    if (!mounted) return;
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const RpS2TestScreen(initialTotalTurns: 6),
+      ),
+    );
   }
 
   Widget _buildSectionDivider() {
@@ -265,6 +272,28 @@ class _LabScreenState extends State<LabScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
+              'RpS2 Test',
+              style: theme.headlineSmall?.copyWith(color: Colors.white),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: ElevatedButton(
+                onPressed: _openRpS2TestScreen,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF0CABA8),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  elevation: 0,
+                ),
+                child: const Text('Open RpS2 Test'),
+              ),
+            ),
+            _buildSectionDivider(),
+            Text(
               'Default Popup Test',
               style: theme.headlineSmall?.copyWith(color: Colors.white),
             ),
@@ -273,7 +302,9 @@ class _LabScreenState extends State<LabScreen> {
               Text(
                 'No migrated DefaultPopup yet. Entries are added in '
                 '`kLabDefaultPopupOptions` after each migration.',
-                style: theme.bodyMedium?.copyWith(color: const Color(0xFF9E9E9E)),
+                style: theme.bodyMedium?.copyWith(
+                  color: const Color(0xFF9E9E9E),
+                ),
               ),
             ] else ...[
               InputDecorator(
@@ -402,7 +433,9 @@ class _LabScreenState extends State<LabScreen> {
               style: theme.bodyLarge?.copyWith(color: Colors.white),
               decoration: InputDecoration(
                 hintText: 'resultId',
-                hintStyle: theme.bodyMedium?.copyWith(color: const Color(0xFF635F5F)),
+                hintStyle: theme.bodyMedium?.copyWith(
+                  color: const Color(0xFF635F5F),
+                ),
                 filled: true,
                 fillColor: const Color(0xFF1E1E1E),
                 border: OutlineInputBorder(
@@ -417,7 +450,10 @@ class _LabScreenState extends State<LabScreen> {
                   borderRadius: BorderRadius.circular(16),
                   borderSide: const BorderSide(color: Color(0xFF80D7CF)),
                 ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 16,
+                ),
               ),
             ),
             const SizedBox(height: 8),
@@ -425,7 +461,9 @@ class _LabScreenState extends State<LabScreen> {
               width: double.infinity,
               height: 56,
               child: ElevatedButton(
-                onPressed: _rpResultTestLoading ? null : _openRpResultV2FromInput,
+                onPressed: _rpResultTestLoading
+                    ? null
+                    : _openRpResultV2FromInput,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF0CABA8),
                   foregroundColor: Colors.white,
@@ -434,7 +472,9 @@ class _LabScreenState extends State<LabScreen> {
                   ),
                   elevation: 0,
                 ),
-                child: Text(_rpResultTestLoading ? 'Loading...' : 'RP Result Test'),
+                child: Text(
+                  _rpResultTestLoading ? 'Loading...' : 'RP Result Test',
+                ),
               ),
             ),
             _buildSectionDivider(),

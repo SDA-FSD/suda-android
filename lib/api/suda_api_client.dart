@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import '../models/auth_models.dart';
 import '../models/home_models.dart';
 import '../models/pagination.dart';
+import '../models/rps2_test_models.dart';
 import '../models/roleplay_models.dart';
 import '../models/user_models.dart';
 import '../models/version_models.dart';
@@ -16,9 +17,7 @@ import 'endpoints/user_api.dart';
 import 'endpoints/version_api.dart';
 
 class SudaApiClient {
-  static Future<HomeDto> getHomeContents({
-    required String accessToken,
-  }) {
+  static Future<HomeDto> getHomeContents({required String accessToken}) {
     return HomeApi.getHomeContents(accessToken: accessToken);
   }
 
@@ -169,10 +168,7 @@ class SudaApiClient {
     required String accessToken,
     required int pageNum,
   }) {
-    return RoleplayApi.getResults(
-      accessToken: accessToken,
-      pageNum: pageNum,
-    );
+    return RoleplayApi.getResults(accessToken: accessToken, pageNum: pageNum);
   }
 
   static Future<RoleplayResultDto> getRoleplayResult({
@@ -216,6 +212,16 @@ class SudaApiClient {
       accessToken: accessToken,
       resultId: resultId,
       expressionIndex: expressionIndex,
+    );
+  }
+
+  static Future<RpS2TestTurnDto> postRpS2TestUserMessage({
+    required String accessToken,
+    required Uint8List audioData,
+  }) {
+    return RoleplayApi.postRpS2TestUserMessage(
+      accessToken: accessToken,
+      audioData: audioData,
     );
   }
 
@@ -295,21 +301,15 @@ class SudaApiClient {
     return AuthApi.logout(refreshToken: refreshToken, deviceId: deviceId);
   }
 
-  static Future<UserDto> getCurrentUser({
-    required String accessToken,
-  }) {
+  static Future<UserDto> getCurrentUser({required String accessToken}) {
     return UserApi.getCurrentUser(accessToken: accessToken);
   }
 
-  static Future<ProfileDto> getUserProfile({
-    required String accessToken,
-  }) {
+  static Future<ProfileDto> getUserProfile({required String accessToken}) {
     return UserApi.getUserProfile(accessToken: accessToken);
   }
 
-  static Future<UserTicketDto> getUserTicket({
-    required String accessToken,
-  }) {
+  static Future<UserTicketDto> getUserTicket({required String accessToken}) {
     return UserApi.getUserTicket(accessToken: accessToken);
   }
 
@@ -354,18 +354,17 @@ class SudaApiClient {
     required String accessToken,
     int pageNum = 0,
   }) {
-    return UserApi.getUserExpressions(accessToken: accessToken, pageNum: pageNum);
+    return UserApi.getUserExpressions(
+      accessToken: accessToken,
+      pageNum: pageNum,
+    );
   }
 
-  static Future<void> deleteUser({
-    required String accessToken,
-  }) {
+  static Future<void> deleteUser({required String accessToken}) {
     return UserApi.deleteUser(accessToken: accessToken);
   }
 
-  static Future<void> deleteProfileImage({
-    required String accessToken,
-  }) {
+  static Future<void> deleteProfileImage({required String accessToken}) {
     return UserApi.deleteProfileImage(accessToken: accessToken);
   }
 
@@ -381,27 +380,19 @@ class SudaApiClient {
     );
   }
 
-  static Future<void> completeTutorial({
-    required String accessToken,
-  }) {
+  static Future<void> completeTutorial({required String accessToken}) {
     return UserApi.completeTutorial(accessToken: accessToken);
   }
 
-  static Future<void> tutorialShown({
-    required String accessToken,
-  }) {
+  static Future<void> tutorialShown({required String accessToken}) {
     return UserApi.tutorialShown(accessToken: accessToken);
   }
 
-  static Future<void> postFirstOverview({
-    required String accessToken,
-  }) {
+  static Future<void> postFirstOverview({required String accessToken}) {
     return UserApi.postFirstOverview(accessToken: accessToken);
   }
 
-  static Future<void> updateAgreement({
-    required String accessToken,
-  }) {
+  static Future<void> updateAgreement({required String accessToken}) {
     return UserApi.updateAgreement(accessToken: accessToken);
   }
 
@@ -429,10 +420,7 @@ class SudaApiClient {
     required String accessToken,
     required String questId,
   }) {
-    return UserApi.postUserQuest(
-      accessToken: accessToken,
-      questId: questId,
-    );
+    return UserApi.postUserQuest(accessToken: accessToken, questId: questId);
   }
 
   static Future<String> submitSurvey({
@@ -461,10 +449,7 @@ class SudaApiClient {
     required String accessToken,
     required int pageNum,
   }) {
-    return UserApi.getNotifications(
-      accessToken: accessToken,
-      pageNum: pageNum,
-    );
+    return UserApi.getNotifications(accessToken: accessToken, pageNum: pageNum);
   }
 
   /// POST /v1/users/notification/{notificationId}/read
@@ -496,9 +481,6 @@ class SudaApiClient {
     required String accessToken,
     required int noticeId,
   }) {
-    return NoticeApi.getNotice(
-      accessToken: accessToken,
-      noticeId: noticeId,
-    );
+    return NoticeApi.getNotice(accessToken: accessToken, noticeId: noticeId);
   }
 }
