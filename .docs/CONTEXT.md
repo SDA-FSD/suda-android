@@ -288,9 +288,9 @@
 
 최근 작업 메모(이력)는 `.docs/CONTEXT_HISTORY.md`에 보관한다. 상세 항목은 해당 문서를 참조한다.
 - Lab `RpS2 Test`는 턴 수 입력 없이 `initialTotalTurns=6`으로 고정 진입한다.
-- `RpS2 Test` 상단 타이틀은 `"What Job Do I Even Want?"`를 사용하며, progress 아래 미션 영역은 **단일 다크그레이 카드(`#1E1E1E`) + 보더(`#353535`)** 구조를 사용한다. 좌측 원형 인디케이터는 기본 비활성 보더만 보이고, **완료된 미션의 원 내부만 AI 말풍선 색(`#0CABA8`)으로 채운 뒤 체크 아이콘**을 표시한다.
-- `RpS2 Test`의 progress 상단 텍스트(`currentTurn/totalTurns`)는 기본 노출되며, 채점 점수 텍스트가 표시되는 **약 2초 동안은 숨김** 처리 후 점수 사라지면 다시 노출한다. 상단 헤더(뒤로가기/타이틀) 및 미션 인디케이터/텍스트, AI 프로필-말풍선은 시각적 중앙 정렬을 맞춘다.
-- 상단 헤더 간격은 타이틀이 뒤로가기 아이콘과 시각적 중앙에 맞도록 타이틀 기준선을 소폭 하향하고, 타이틀과 progress 상단 텍스트 사이 간격은 촘촘하게 유지한다.
+- `RpS2 Test`의 progress 상단 텍스트(`currentTurn/totalTurns`)는 기본 노출되며, 채점 점수 텍스트가 표시되는 **약 2초 동안은 숨김** 처리 후 점수 사라지면 다시 노출한다.
+- `RpS2 Test` 프로그레스바는 턴별 사용자 발화 등급에 따라 세그먼트 색을 칠한다: Needs Improvement `#FFB700`, Unclear `#FF0000`, Good `#62FF00`, Perfect `#37FFED`(미판정/미완료는 기본색). **가장 최근 턴만 100% 불투명, 이전 턴 세그먼트는 40% 투명도**로 낮춘다.
+- `RpS2 Test`의 `/test/user-message` 응답 `score`는 `"meaning-relevance-vocabulary-grammar"` 형식이며 각 항목은 `Y`/`PARTIAL`/`N`이다. 프론트(`_parseScoreGrade`)는 split 후 `[meaning, relevance, vocabulary, grammar]` 순서로 사용해 서버와 동일한 규칙으로 최종 등급을 계산한다: (1) meaning 또는 relevance가 `N`이면 UNCLEAR, (2) meaning 또는 relevance가 `PARTIAL`이면 NEEDS_IMPROVEMENT, (3) 1·2 통과 후 grammar 또는 vocabulary가 `N`이면 NEEDS_IMPROVEMENT, (4) grammar·vocabulary 둘 다 `Y`면 PERFECT, (5) grammar 또는 vocabulary가 `PARTIAL`이면 GOOD, 그 외/malformed/누락(4토큰 미만·비정상 값)은 NEEDS_IMPROVEMENT. 프로그레스바 위 중앙 점수 오버레이에는 최종 enum 문자열(`UNCLEAR`/`NEEDS_IMPROVEMENT`/`GOOD`/`PERFECT`)을 그대로 노출한다.
 
 ## 13. 공통 오버레이 이펙트(Effect Overlay) 구조
 - **목적**: 특정 스크린의 UI 위에 “레이어처럼 나타났다 사라지는” 공통 애니메이션을 재생하고, 스크린은 **효과 종료 시점**을 감지해 다음 UI를 그릴 수 있도록 한다.

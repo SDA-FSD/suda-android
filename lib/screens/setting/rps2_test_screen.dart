@@ -25,6 +25,9 @@ class RpS2TestScreen extends StatefulWidget {
 
 enum _BubbleRole { ai, user, narration }
 
+/// 사용자 발화 등급 (프로그레스바 색상·점수 라벨에 사용).
+enum _UtteranceGrade { needsImprovement, unclear, good, perfect, unknown }
+
 class _RpS2Bubble {
   const _RpS2Bubble({required this.role, required this.text});
 
@@ -52,12 +55,16 @@ class _RpS2TestScreenState extends State<RpS2TestScreen> {
   late final List<String> _missionLabels;
   final Set<int> _completedMissionIndexes = <int>{};
 
+  /// 턴별 사용자 발화 등급 (프로그레스바 세그먼트 색상에 사용).
+  final List<_UtteranceGrade> _turnGrades = <_UtteranceGrade>[];
+
   bool _isRecording = false;
   bool _isProcessing = false;
   DateTime? _recordingStartedAt;
   int _currentTurn = 0;
   late int _totalTurns;
   String? _scoreOverlayText;
+  _UtteranceGrade? _scoreOverlayGrade;
   Timer? _scoreOverlayTimer;
 
   @override
@@ -194,8 +201,10 @@ class _RpS2TestScreenState extends State<RpS2TestScreen> {
       _bubbles.add(_RpS2Bubble(role: _BubbleRole.user, text: userText));
     }
 
+    final grade = _parseScoreGrade(res.score);
+    _turnGrades.add(grade);
     _currentTurn = (_currentTurn + 1).clamp(0, _totalTurns);
-    _showScoreOverlay(_normalizeScoreText(res.score));
+    _showScoreOverlay(grade);
     _markMissionCompleted(res.mission);
 
     setState(() {});
@@ -219,12 +228,18 @@ class _RpS2TestScreenState extends State<RpS2TestScreen> {
     }
   }
 
-  void _showScoreOverlay(String text) {
+  void _showScoreOverlay(_UtteranceGrade grade) {
     _scoreOverlayTimer?.cancel();
-    setState(() => _scoreOverlayText = text);
+    setState(() {
+      _scoreOverlayText = _gradeLabel(grade);
+      _scoreOverlayGrade = grade;
+    });
     _scoreOverlayTimer = Timer(const Duration(seconds: 2), () {
       if (!mounted) return;
-      setState(() => _scoreOverlayText = null);
+      setState(() {
+        _scoreOverlayText = null;
+        _scoreOverlayGrade = null;
+      });
     });
   }
 
@@ -260,10 +275,77 @@ class _RpS2TestScreenState extends State<RpS2TestScreen> {
     ];
   }
 
-  String _normalizeScoreText(String raw) {
-    final text = raw.trim();
-    if (text.isEmpty) return 'Score';
-    return text;
+  /// score는 "meaning-relevance-vocabulary-grammar"(각 Y/PARTIAL/N)로 내려온다.
+  /// 서버와 동일한 규칙으로 최종 등급을 계산한다. malformed/누락은 needsImprovement.
+  _UtteranceGrade _parseScoreGrade(String raw) {
+    final parts = raw
+        .split(RegExp(r'[-,/|]'))
+        .map((e) => e.trim().toUpperCase())
+        .toList();
+    if (parts.length < 4) return _UtteranceGrade.needsImprovement;
+
+    const valid = {'Y', 'PARTIAL', 'N'};
+    final meaning = parts[0];
+    final relevance = parts[1];
+    final vocabulary = parts[2];
+    final grammar = parts[3];
+    if (![meaning, relevance, vocabulary, grammar].every(valid.contains)) {
+      return _UtteranceGrade.needsImprovement;
+    }
+
+    if (meaning == 'N' || relevance == 'N') return _UtteranceGrade.unclear;
+    if (meaning == 'PARTIAL' || relevance == 'PARTIAL') {
+      return _UtteranceGrade.needsImprovement;
+    }
+    if (grammar == 'N' || vocabulary == 'N') {
+      return _UtteranceGrade.needsImprovement;
+    }
+    if (grammar == 'Y' && vocabulary == 'Y') return _UtteranceGrade.perfect;
+    if (grammar == 'PARTIAL' || vocabulary == 'PARTIAL') {
+      return _UtteranceGrade.good;
+    }
+    return _UtteranceGrade.needsImprovement;
+  }
+
+  String _gradeLabel(_UtteranceGrade grade) {
+    switch (grade) {
+      case _UtteranceGrade.needsImprovement:
+        return 'NEEDS_IMPROVEMENT';
+      case _UtteranceGrade.unclear:
+        return 'UNCLEAR';
+      case _UtteranceGrade.good:
+        return 'GOOD';
+      case _UtteranceGrade.perfect:
+        return 'PERFECT';
+      case _UtteranceGrade.unknown:
+        return 'NEEDS_IMPROVEMENT';
+    }
+  }
+
+  Color _gradeColor(_UtteranceGrade grade) {
+    switch (grade) {
+      case _UtteranceGrade.needsImprovement:
+        return const Color(0xFFFFB700);
+      case _UtteranceGrade.unclear:
+        return const Color(0xFFFF0000);
+      case _UtteranceGrade.good:
+        return const Color(0xFF62FF00);
+      case _UtteranceGrade.perfect:
+        return const Color(0xFF37FFED);
+      case _UtteranceGrade.unknown:
+        return _progressActiveColor;
+    }
+  }
+
+  /// 프로그레스바 세그먼트 색상. 완료된 턴은 등급 색, 가장 최근 턴만 100%·
+  /// 이전 턴은 40% 투명도. 미완료 턴은 기본 비활성색.
+  Color _segmentColor(int i) {
+    if (i >= _currentTurn) return _progressIdleColor;
+    final grade =
+        i < _turnGrades.length ? _turnGrades[i] : _UtteranceGrade.unknown;
+    final base = _gradeColor(grade);
+    final isLatest = i == _currentTurn - 1;
+    return isLatest ? base : base.withOpacity(0.4);
   }
 
   void _scrollToBottom() {
@@ -334,7 +416,9 @@ class _RpS2TestScreenState extends State<RpS2TestScreen> {
                     key: const ValueKey('score_text'),
                     textAlign: TextAlign.center,
                     style: theme.labelSmall?.copyWith(
-                      color: const Color(0xFFFFAAE1),
+                      color: _gradeColor(
+                        _scoreOverlayGrade ?? _UtteranceGrade.unknown,
+                      ),
                       fontSize: 10,
                       height: 1.0,
                     ),
@@ -359,9 +443,7 @@ class _RpS2TestScreenState extends State<RpS2TestScreen> {
                 child: Container(
                   height: 4,
                   decoration: BoxDecoration(
-                    color: i < _currentTurn
-                        ? _progressActiveColor
-                        : _progressIdleColor,
+                    color: _segmentColor(i),
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
