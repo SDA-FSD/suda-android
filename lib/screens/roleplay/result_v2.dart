@@ -26,7 +26,6 @@ const Color _exprTextSecondary = Color(0xFF676767);
 const Color _expressionUpgradeCardBg = Color(0xFF80D7CF);
 
 /// Roleplay Result V2 Screen (Full Screen)
-///
 /// 화면 fully shown 이후 1초 뒤 상단 이동 + LikeProgressEffect(레벨·라이크 진행) 후
 /// Feedback / Expression Upgrade 본문 레이어를 노출한다.
 class RoleplayResultScreenV2 extends StatefulWidget {
