@@ -43,7 +43,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get settingsTutorial => 'Tutorial';
 
   @override
-  String get settingsLanguageLevel => 'Nível de Idioma';
+  String get settingsCefrLevel => 'Nível de Idioma';
 
   @override
   String get pushNotifications => 'Notificações push';
@@ -154,10 +154,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get accountDeleteAction => 'Excluir';
 
   @override
-  String get languageLevelTitle => 'Escolha seu nível de inglês';
+  String get cefrLevelTitle => 'Escolha seu nível de inglês';
 
   @override
-  String get languageLevelDescription =>
+  String get cefrLevelDescription =>
       'Em SUDA, todos falarão com você no seu nível de inglês.';
 
   @override

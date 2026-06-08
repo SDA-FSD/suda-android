@@ -42,7 +42,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settingsTutorial => '튜토리얼';
 
   @override
-  String get settingsLanguageLevel => '언어 레벨';
+  String get settingsCefrLevel => '언어 레벨';
 
   @override
   String get pushNotifications => '푸시알림';
@@ -148,10 +148,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get accountDeleteAction => '삭제';
 
   @override
-  String get languageLevelTitle => '영어 레벨을 선택하세요';
+  String get cefrLevelTitle => '영어 레벨을 선택하세요';
 
   @override
-  String get languageLevelDescription => 'SUDA의 주민들은 당신의 레벨에 맞추어 대화합니다.';
+  String get cefrLevelDescription => 'SUDA의 주민들은 당신의 레벨에 맞추어 대화합니다.';
 
   @override
   String get feedbackPlaceholder => '생각, 제안사항 또는 겪으신 문제점을 공유해 주세요...';

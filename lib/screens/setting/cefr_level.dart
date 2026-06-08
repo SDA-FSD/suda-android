@@ -5,16 +5,16 @@ import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
 import '../../utils/default_toast.dart';
 
-class LanguageLevelScreen extends StatefulWidget {
+class CefrLevelScreen extends StatefulWidget {
   final UserDto? user;
 
-  const LanguageLevelScreen({super.key, this.user});
+  const CefrLevelScreen({super.key, this.user});
 
   @override
-  State<LanguageLevelScreen> createState() => _LanguageLevelScreenState();
+  State<CefrLevelScreen> createState() => _CefrLevelScreenState();
 }
 
-class _LanguageLevelScreenState extends State<LanguageLevelScreen> {
+class _CefrLevelScreenState extends State<CefrLevelScreen> {
   String _selectedLevel = ''; // A, B, C, D
   bool _isLoading = true;
   String? _updatingLevel; // 현재 업데이트 중인 레벨 (뱅글뱅글용)
@@ -126,13 +126,13 @@ class _LanguageLevelScreenState extends State<LanguageLevelScreen> {
               children: [
                 const SizedBox(height: 15),
                 Text(
-                  l10n.languageLevelTitle,
+                  l10n.cefrLevelTitle,
                   style: theme.headlineMedium?.copyWith(color: Colors.white),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 45),
                 Text(
-                  l10n.languageLevelDescription,
+                  l10n.cefrLevelDescription,
                   style: theme.bodyLarge?.copyWith(color: Colors.white),
                   textAlign: TextAlign.center,
                 ),

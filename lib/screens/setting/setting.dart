@@ -9,7 +9,7 @@ import '../../utils/sub_screen_route.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../services/app_version_service.dart';
 import 'account.dart';
-import 'language_level.dart';
+import 'cefr_level.dart';
 import 'push_agreement.dart';
 import 'feedback.dart';
 import 'announcements.dart';
@@ -94,8 +94,8 @@ class SettingScreen extends StatelessWidget {
           ),
           _buildMenuItem(
             context,
-            l10n.settingsLanguageLevel,
-            () => _navigateToSubScreen(context, LanguageLevelScreen(user: user)),
+            l10n.settingsCefrLevel,
+            () => _navigateToSubScreen(context, CefrLevelScreen(user: user)),
           ),
           _buildMenuItem(
             context,

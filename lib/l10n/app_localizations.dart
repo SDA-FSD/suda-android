@@ -166,11 +166,11 @@ abstract class AppLocalizations {
   /// **'Tutorial'**
   String get settingsTutorial;
 
-  /// No description provided for @settingsLanguageLevel.
+  /// No description provided for @settingsCefrLevel.
   ///
   /// In en, this message translates to:
   /// **'Language Level'**
-  String get settingsLanguageLevel;
+  String get settingsCefrLevel;
 
   /// No description provided for @pushNotifications.
   ///
@@ -364,17 +364,17 @@ abstract class AppLocalizations {
   /// **'Delete'**
   String get accountDeleteAction;
 
-  /// No description provided for @languageLevelTitle.
+  /// No description provided for @cefrLevelTitle.
   ///
   /// In en, this message translates to:
   /// **'Choose your English level'**
-  String get languageLevelTitle;
+  String get cefrLevelTitle;
 
-  /// No description provided for @languageLevelDescription.
+  /// No description provided for @cefrLevelDescription.
   ///
   /// In en, this message translates to:
   /// **'SUDA citizens will chat with you at your level.'**
-  String get languageLevelDescription;
+  String get cefrLevelDescription;
 
   /// No description provided for @feedbackPlaceholder.
   ///
@@ -751,7 +751,7 @@ abstract class AppLocalizations {
   /// No description provided for @roleplayResultFeedbackInsufficientWords.
   ///
   /// In en, this message translates to:
-  /// **'We couldn’t provide feedback this time. Try expanding your response to 20 words or more!'**
+  /// **'We couldn’t provide feedback this time. Try expanding your response to 7 words or more!'**
   String get roleplayResultFeedbackInsufficientWords;
 
   /// No description provided for @ticketInfoTitle.

@@ -343,7 +343,7 @@
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
 - **AccountScreen** (Sub Screen): "Account" 클릭 시
 - **PushAgreementScreen** (Sub Screen): "Notification" 클릭 시
-- **LanguageLevelScreen** (Sub Screen): "Language Level" 클릭 시
+- **CefrLevelScreen** (Sub Screen): "Language Level" 클릭 시
 - **FeedbackScreen** (Sub Screen): "Feedback" 클릭 시
 - **AnnouncementsScreen** (Sub Screen): "Announcements" 클릭 시
 - **WebViewScreen** (Sub Screen): "Privacy policy" 또는 "Terms of Service" 클릭 시
@@ -426,11 +426,11 @@
 
 ---
 
-## 6. LanguageLevelScreen
+## 6. CefrLevelScreen
 
 ### 스크린 관련 정의 파일
-- **파일 경로**: `lib/screens/setting/language_level.dart`
-- **클래스명**: `LanguageLevelScreen` (StatelessWidget)
+- **파일 경로**: `lib/screens/setting/cefr_level.dart`
+- **클래스명**: `CefrLevelScreen` (StatefulWidget)
 - **스크린 타입**: **Sub Screen**
 - **appPath**: 해당 없음 (Setting 하위)
 
@@ -1056,7 +1056,7 @@
   │               └─ [RoleplayFailedReportScreen] (Report 텍스트 탭 시, 백버튼/X → Failed 복귀)
   └─ [ProfileScreen] → [SettingScreen] (우측 상단 원형 버튼)
   │       ├─ [AccountScreen]
-  │       ├─ [LanguageLevelScreen]
+  │       ├─ [CefrLevelScreen]
   │       ├─ [FeedbackScreen]
   │       ├─ [WebViewScreen] (Privacy policy / Terms of Service)
   │       ├─ [OpenSourceLicenseScreen]
