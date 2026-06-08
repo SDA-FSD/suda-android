@@ -6,6 +6,7 @@
 
 ## 최근 작업 메모
 
+- **AgreementScreen 제거**: 미사용 레거시 `lib/screens/agreement.dart` 삭제. 서비스 이용 동의는 `LoginScreen` bottom-up 레이어만 사용. `.docs/CONTEXT.md` §7-0, `.docs/CONTEXT_SCREEN.md` §1·흐름도.
 - **Tutorial→Opening 네비게이션**: `TUTORIAL=Y` 스킵·완료 후 Opening 전환을 `addPostFrameCallback`으로 미룸(build 중 `pushReplacement`로 Navigator 잠금/Cannot start roleplay 연쇄 방지). `lib/screens/roleplay/tutorial.dart`, `.docs/CONTEXT_SCREEN.md` §11.2.
 - **푸시 → 알림함 앵커**: FCM `appPath`+`notificationId`를 `PendingAppPathService`에 보관 후 `takePending()` 적용. `/app/notification/{id}` 시 Alarm 탭·`NotificationBoxScreen.focusNotificationId`로 펼침+`ensureVisible`. `lib/main.dart`, `lib/screens/notification_box.dart`, `.docs/CONTEXT.md` §10·`CONTEXT_SCREEN.md` 표.
 - **Expression 카드 흰색 하이라이트·탭 영역**: Profile Saved / Result V2 / History V2에서 **카드 전체 탭**(북마크 제외)으로 `GET …/expressions/{i}/sound` 재생. 목록·캐러셀마다 **최근 탭 1카드만** 배경 `#FFFFFF` 유지(재생 종료 후에도). 재생·페치 중만 메가폰 `#121212`, 재생 끝나면 메가폰 `#0CABA8`. 구현: `lib/screens/profile.dart`, `lib/screens/roleplay/result_v2.dart`, `lib/screens/roleplay/history_v2.dart`. 문서: `.docs/CONTEXT_SCREEN.md` §17-1·§19.

@@ -141,33 +141,7 @@
 - **스크린 타입**: **Full Screen**
 - **appPath**: 해당 없음 (인증 플로우)
 - **현재 임시 상태**: 로그인 화면 개편 중이며 `#121212` 배경 위 중앙 스틸 이미지에서 시작한다. **1000ms 대기** 후 스틸 500ms fade-out, 로고 파트 1000ms 중앙 이동, 포스터·하단 영역은 fade-in 없이 각각 등장 연출한다. 포스터 1~3행은 행별로 화면 밖→노출 위치 1000ms(`easeOutCubic`) 슬라인 후 마키(1행 좌에서 등장·우로·60s, 2행 우에서 등장·좌로·70s, 3행 좌에서 등장·우로·66s). 하단 노출 영역은 화면 아래 밖에서 1000ms 상승(`easeOutCubic`).
-- **서비스 이용 동의(레이어)**: 로그인 후 사용자 metaInfo의 `SUDA_AGREEMENT != 'Y'`인 경우, 별도 AgreementScreen으로 전환하지 않고 LoginScreen 위에 **bottom-up 레이어**(배경 blur+dim)로 동의 UI를 노출한다. 레이어 바깥 탭 시 닫힌다. 동의 완료 시 `POST /v1/users/agreement` + AppsFlyer `af_complete_registration` 이벤트를 호출하고 Main(Home)로 전환한다.
-
----
-
-## 1.1 AgreementScreen
-
-### 스크린 관련 정의 파일
-- **파일 경로**: `lib/screens/agreement.dart`
-- **클래스명**: `AgreementScreen` (StatefulWidget)
-- **스크린 타입**: **Full Screen**
-- **appPath**: 해당 없음 (동의 플로우)
-
-### 스크린 용도
-- (레거시) 과거 서비스 이용 동의를 별도 Full Screen으로 처리하던 구현. 현재 기본 플로우에서는 사용하지 않는다.
-
-### 이전 스크린 정보 (진입점)
-- 현재 기본 플로우에서는 미연결
-
-### 이후 스크린 정보 (이동 가능한 다른 스크린)
-- **HomeScreen**: (레거시) 동의 완료(`POST /v1/users/agreement`) 성공 시
-- **WebViewScreen**: 이용약관 및 개인정보 처리방침 "자세히 보기" 클릭 시
-
-### 스크린 내부 구현 특이사항
-- **다국어 지원**: 한국어(ko), 영어(en), 포르투갈어(pt) 지원 (기본값 en)
-- **동의 항목**: 이용약관, 개인정보 처리방침 (모두 체크 시에만 버튼 활성화)
-- **API 호출**: `SudaApiClient.updateAgreement()` 호출
-- **디자인**: 어두운 배경색, 중앙 정렬 레이아웃
+- **서비스 이용 동의(레이어)**: 로그인 후 사용자 metaInfo의 `SUDA_AGREEMENT != 'Y'`인 경우, LoginScreen 위에 **bottom-up 레이어**(배경 blur+dim)로 동의 UI를 노출한다. 레이어 바깥 탭 시 닫힌다. 동의 완료 시 `POST /v1/users/agreement` + AppsFlyer `af_complete_registration` 이벤트를 호출하고 Main(Home)로 전환한다.
 
 ---
 
@@ -1040,7 +1014,7 @@
 [네이티브 스플래시] (#121212 배경 + 중앙 스틸 이미지)
   ↓ (Flutter 엔진 초기화 + JWT 처리)
   ├─ 토큰 없음/유효하지 않음 → [LoginScreen]
-  └─ 토큰 유효 → [HomeScreen] (또는 AgreementScreen)
+  └─ 토큰 유효 → [HomeScreen] (동의 미완료 시 LoginScreen 동의 레이어)
 
 [LoginScreen]
   ├─ 로그인 성공 → [HomeScreen]
@@ -1079,7 +1053,7 @@
    - JWT 토큰 확인 및 서버 검증 (네이티브 스플래시 유지 중)
    - 처리 완료 후 `FlutterNativeSplash.remove()` 호출
    - 토큰 없음/유효하지 않음 → LoginScreen 표시
-   - 토큰 유효 → HomeScreen(또는 AgreementScreen) 표시
+   - 토큰 유효 → HomeScreen 표시 (동의 미완료 시 LoginScreen 동의 레이어)
 
 3. **로그아웃 시**
    - `_onSignOut()`에서 곧바로 LoginScreen 표시
