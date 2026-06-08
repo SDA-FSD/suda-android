@@ -157,7 +157,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get cefrLevelTitle => 'Escolha seu nível de inglês';
 
   @override
-  String get cefrLevelAbsoluteBeginner => 'Iniciante absoluto';
+  String get cefrLevelAbsoluteBeginner => 'Iniciante Absoluto';
 
   @override
   String get cefrLevelBeginner => 'Iniciante';
@@ -167,6 +167,30 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get cefrLevelIntermediate => 'Intermediário';
+
+  @override
+  String get firstCefrLevelTitle => 'Qual é o seu nível de Inglês?';
+
+  @override
+  String get firstCefrLevelDescriptionPreA1 => 'Sei ler em inglês';
+
+  @override
+  String get firstCefrLevelDescriptionA1 =>
+      'Sei cumprimentos básicos e frases simples';
+
+  @override
+  String get firstCefrLevelDescriptionA2 =>
+      'Consigo entender e usar frases curtas e simples';
+
+  @override
+  String get firstCefrLevelDescriptionB1 =>
+      'Consigo expressar minha opinião e participar de conversas do dia a dia';
+
+  @override
+  String get firstCefrLevelSettingsHint => 'Você pode mudar a qualquer momento';
+
+  @override
+  String get firstCefrLevelConfirm => 'Confirmar';
 
   @override
   String get feedbackPlaceholder =>

@@ -163,6 +163,27 @@ class AppLocalizationsKo extends AppLocalizations {
   String get cefrLevelIntermediate => '중급';
 
   @override
+  String get firstCefrLevelTitle => '현재 영어 레벨을 선택해 주세요.';
+
+  @override
+  String get firstCefrLevelDescriptionPreA1 => '영어를 읽을 수 있어요';
+
+  @override
+  String get firstCefrLevelDescriptionA1 => '기본적인 인사말과 간단한 표현을 알아요';
+
+  @override
+  String get firstCefrLevelDescriptionA2 => '짧고 간단한 문장을 이해하고 사용할 수 있어요';
+
+  @override
+  String get firstCefrLevelDescriptionB1 => '제 의견을 말하고 일상 대화에 참여할 수 있어요';
+
+  @override
+  String get firstCefrLevelSettingsHint => '언제든지 변경할 수 있습니다';
+
+  @override
+  String get firstCefrLevelConfirm => '확인';
+
+  @override
   String get feedbackPlaceholder => '생각, 제안사항 또는 겪으신 문제점을 공유해 주세요...';
 
   @override

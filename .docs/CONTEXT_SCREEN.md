@@ -141,7 +141,34 @@
 - **스크린 타입**: **Full Screen**
 - **appPath**: 해당 없음 (인증 플로우)
 - **현재 임시 상태**: 로그인 화면 개편 중이며 `#121212` 배경 위 중앙 스틸 이미지에서 시작한다. **1000ms 대기** 후 스틸 500ms fade-out, 로고 파트 1000ms 중앙 이동, 포스터·하단 영역은 fade-in 없이 각각 등장 연출한다. 포스터 1~3행은 행별로 화면 밖→노출 위치 1000ms(`easeOutCubic`) 슬라인 후 마키(1행 좌에서 등장·우로·60s, 2행 우에서 등장·좌로·70s, 3행 좌에서 등장·우로·66s). 하단 노출 영역은 화면 아래 밖에서 1000ms 상승(`easeOutCubic`).
-- **서비스 이용 동의(레이어)**: 로그인 후 사용자 metaInfo의 `SUDA_AGREEMENT != 'Y'`인 경우, LoginScreen 위에 **bottom-up 레이어**(배경 blur+dim)로 동의 UI를 노출한다. 레이어 바깥 탭 시 닫힌다. 동의 완료 시 `POST /v1/users/agreement` + AppsFlyer `af_complete_registration` 이벤트를 호출하고 Main(Home)로 전환한다.
+- **서비스 이용 동의(레이어)**: 로그인 후 사용자 metaInfo의 `SUDA_AGREEMENT != 'Y'`인 경우, LoginScreen 위에 **bottom-up 레이어**(배경 blur+dim)로 동의 UI를 노출한다. 레이어 바깥 탭 시 닫힌다. 동의 완료 시 `POST /v1/users/agreement` + AppsFlyer `af_complete_registration` 이벤트를 호출한 뒤 **FirstCefrLevelScreen**(§1.2)으로 전환한다.
+
+---
+
+## 1.2 FirstCefrLevelScreen
+
+### 스크린 관련 정의 파일
+- **파일 경로**: `lib/screens/first_cefr_level.dart`
+- **클래스명**: `FirstCefrLevelScreen` (StatefulWidget)
+- **스크린 타입**: **Full Screen**
+- **appPath**: 해당 없음 (온보딩 플로우)
+
+### 스크린 용도
+- 서비스 이용 동의를 **방금 완료한 세션**에서 1회만 노출되는 CEFR 레벨 선택 화면
+- Setting `CefrLevelScreen`과 동일 API(`PUT /v1/users/language-level`) 사용
+
+### 이전 스크린 정보 (진입점)
+- **LoginScreen 동의 레이어**: `_onAgreementComplete` → `main.dart` `_needsFirstCefrLevel = true`
+
+### 이후 스크린 정보 (이동 가능한 다른 스크린)
+- **HomeScreen(Main)**: Confirm 탭 시 API 호출 후 `_onFirstCefrLevelComplete`(실패해도 Home)
+
+### 스크린 내부 구현 특이사항
+- **배경**: `#121212`. **PopScope** `canPop: false`(시스템·스와이프 백 차단)
+- **레이아웃**: 상·중·하 3등분(`Expanded`×3). 상단·하단은 각각 2등분 가상선 기준 배치
+- **중앙**: `PageView` 캐러셀(Pre-A1~B1, 기본 포커스 **A1**, 무한루프 없음). 포커스 원 40% width·`#0CABA8`, 대기 원 90%·반원 peek. 좌우 `#121212` 60%→0% 그라데이션. 스냅 후 `Vibration` 80ms
+- **Confirm**: width 70%·흰 배경·Stadium·검정 텍스트. l10n `firstCefrLevel*`
+- **Lab(dev)**: Setting > Lab > **Open First CEFR Level**
 
 ---
 
@@ -156,8 +183,9 @@
 - **조건**: `_MyAppState`의 `_accessToken == null`일 때 표시
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
-- **HomeScreen**: Google 로그인 성공 및 JWT 토큰 발급 성공 시
+- **HomeScreen**: Google 로그인 성공 및 JWT 토큰 발급 성공 시 (`SUDA_AGREEMENT == 'Y'`)
   - `onSignIn` 콜백 호출 → `_MyAppState._onSignIn()` 실행 → 상태 업데이트로 자동 전환
+- **FirstCefrLevelScreen**: 로그인 성공 후 동의 레이어에서 동의 완료 시(§1.2)
 
 ### 스크린 내부 구현 특이사항
 - **스크린 타입 특성**: Full Screen, GNB 없음
@@ -412,10 +440,10 @@
 - **SettingScreen**: "Language Level" 클릭 시
 
 ### 스크린 내부 구현 특이사항
-- 배경색: RGB(51, 51, 51) - SettingScreen 대비 10% 밝기 증가
-- 우측 상단 X 버튼 필수
-- 레벨 단일 표현: CEFR 라벨 `Pre-A1`/`A1`/`A2`/`B1`/`C1` (`EnglishLevelUtil`). 표시·선택 가능 4단계: `Pre-A1`·`A1`·`A2`·`B1` — 버튼 UI 라벨은 l10n. `C1` Advanced는 UI fade-out(비표시·비선택).
-- `ENGLISH_LEVEL` 메타·API `PUT /v1/users/language-level?languageLevel=` 모두 CEFR 라벨(`Pre-A1`/`A1`/`A2`/`B1`/`C1`)만 사용. 미설정·빈 값 → `Pre-A1`.
+- **AppScaffold** 헤더(뒤로가기 + 중앙 `settingsCefrLevel`) 유지. 본문 `usePadding: false`.
+- **UI**: `FirstCefrLevelScreen`(§1.2)과 동일 캐러셀·설명·Confirm 패턴(포커스 80%W·대기 40%). 본문 **h1 타이틀 없음**(헤더 `settingsCefrLevel`만). **`firstCefrLevelSettingsHint` 미노출**. 본문 세로 **1:1:1**(상·중·하): 설명=상단 2등분 **아래** 블록 중앙, 캐러셀=중앙 영역 중앙, Confirm=하단 2등분 **위** 블록 중앙. Sub Screen 슬라이드(300ms) 완료 후 좌·우 대기 원 **280ms fade-in**. 닫힘 시 좌·우 대기 원 **160ms fade-out** 후 pop.
+- 초기 포커스: 사용자 `ENGLISH_LEVEL` meta. Confirm 시 `PUT /v1/users/language-level` 후 pop(실패 시 토스트·유지).
+- 레벨 단일 표현: CEFR 라벨 `Pre-A1`/`A1`/`A2`/`B1` (`EnglishLevelUtil`). `C1` UI 미노출.
 
 ---
 
@@ -1017,7 +1045,7 @@
   └─ 토큰 유효 → [HomeScreen] (동의 미완료 시 LoginScreen 동의 레이어)
 
 [LoginScreen]
-  ├─ 로그인 성공 → [HomeScreen]
+  ├─ 로그인 성공 → [HomeScreen] (이미 동의) / [FirstCefrLevelScreen] (동의 직후)
   └─ 로그인 취소/실패 → [LoginScreen] (유지)
 
 [NotificationBoxScreen] ←→ [HomeScreen] ←→ [ProfileScreen] (GNB Alarm/Home/Profile 3탭 전환)
@@ -1053,7 +1081,7 @@
    - JWT 토큰 확인 및 서버 검증 (네이티브 스플래시 유지 중)
    - 처리 완료 후 `FlutterNativeSplash.remove()` 호출
    - 토큰 없음/유효하지 않음 → LoginScreen 표시
-   - 토큰 유효 → HomeScreen 표시 (동의 미완료 시 LoginScreen 동의 레이어)
+   - 토큰 유효 → HomeScreen 표시 (동의 미완료 시 LoginScreen 동의 레이어 → 동의 직후 FirstCefrLevelScreen → Home)
 
 3. **로그아웃 시**
    - `_onSignOut()`에서 곧바로 LoginScreen 표시

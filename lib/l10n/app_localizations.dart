@@ -394,6 +394,48 @@ abstract class AppLocalizations {
   /// **'Intermediate'**
   String get cefrLevelIntermediate;
 
+  /// No description provided for @firstCefrLevelTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What is your English level?'**
+  String get firstCefrLevelTitle;
+
+  /// No description provided for @firstCefrLevelDescriptionPreA1.
+  ///
+  /// In en, this message translates to:
+  /// **'I know how to read English'**
+  String get firstCefrLevelDescriptionPreA1;
+
+  /// No description provided for @firstCefrLevelDescriptionA1.
+  ///
+  /// In en, this message translates to:
+  /// **'I know basic greetings and simple phrases'**
+  String get firstCefrLevelDescriptionA1;
+
+  /// No description provided for @firstCefrLevelDescriptionA2.
+  ///
+  /// In en, this message translates to:
+  /// **'I can use and understand short, simple sentences'**
+  String get firstCefrLevelDescriptionA2;
+
+  /// No description provided for @firstCefrLevelDescriptionB1.
+  ///
+  /// In en, this message translates to:
+  /// **'I can share my opinion and join everyday conversation'**
+  String get firstCefrLevelDescriptionB1;
+
+  /// No description provided for @firstCefrLevelSettingsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'You can change it anytime'**
+  String get firstCefrLevelSettingsHint;
+
+  /// No description provided for @firstCefrLevelConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get firstCefrLevelConfirm;
+
   /// No description provided for @feedbackPlaceholder.
   ///
   /// In en, this message translates to:

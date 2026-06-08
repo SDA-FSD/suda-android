@@ -22,6 +22,7 @@ import 'services/token_refresh_service.dart';
 import 'services/appsflyer_service.dart';
 import 'services/main_user_sync.dart';
 import 'screens/login.dart';
+import 'screens/first_cefr_level.dart';
 import 'screens/home.dart';
 import 'screens/profile.dart';
 import 'screens/notification_box.dart';
@@ -110,6 +111,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       0; // Profile 탭 활성 상태에서 서브 스크린 pop 복귀 시 증가 → ProfileScreen 프로필 재조회
   bool _hasCheckedVersion = false; // 버전 체크 실행 여부
   bool _needsAgreement = false; // 서비스 이용 동의 필요 여부
+  bool _needsFirstCefrLevel = false; // 동의 직후 1회 CEFR 레벨 선택
 
   /// 마지막 홈 `getHomeContents`의 `notiboxUnreadYn` (`onHomeContentsLoaded`만 갱신)
   String _homeNotiboxUnreadYn = 'N';
@@ -598,6 +600,14 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   void _onAgreementComplete() {
     setState(() {
       _needsAgreement = false;
+      _needsFirstCefrLevel = true;
+    });
+  }
+
+  /// 최초 CEFR 레벨 선택 완료 시 호출 (API 실패여도 Home 진입)
+  void _onFirstCefrLevelComplete() {
+    setState(() {
+      _needsFirstCefrLevel = false;
     });
   }
 
@@ -827,6 +837,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               onAgreementDismissWithoutConsent:
                   _onAgreementDismissWithoutConsent,
             )
+          : _needsFirstCefrLevel
+          ? FirstCefrLevelScreen(onComplete: _onFirstCefrLevelComplete)
           : Builder(
               builder: (_) {
                 if (PendingAppPathService.instance.hasPendingNavigation) {

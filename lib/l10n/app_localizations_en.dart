@@ -168,6 +168,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cefrLevelIntermediate => 'Intermediate';
 
   @override
+  String get firstCefrLevelTitle => 'What is your English level?';
+
+  @override
+  String get firstCefrLevelDescriptionPreA1 => 'I know how to read English';
+
+  @override
+  String get firstCefrLevelDescriptionA1 =>
+      'I know basic greetings and simple phrases';
+
+  @override
+  String get firstCefrLevelDescriptionA2 =>
+      'I can use and understand short, simple sentences';
+
+  @override
+  String get firstCefrLevelDescriptionB1 =>
+      'I can share my opinion and join everyday conversation';
+
+  @override
+  String get firstCefrLevelSettingsHint => 'You can change it anytime';
+
+  @override
+  String get firstCefrLevelConfirm => 'Confirm';
+
+  @override
   String get feedbackPlaceholder =>
       'Please share your thoughts, suggestions, or any issues you\'ve encountered...';
 

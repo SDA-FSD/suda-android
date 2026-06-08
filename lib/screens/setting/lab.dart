@@ -30,6 +30,7 @@ import '../roleplay/opening.dart'
         showRoleplayOpeningShareQuestDefaultPopupForLab,
         showRoleplayOpeningInAppReviewQuestDefaultPopupForLab;
 import '../roleplay/result_v2.dart';
+import '../first_cefr_level.dart';
 
 /// Lab에서 재현 가능한 `DefaultPopup` 목록.
 /// `DefaultPopup` 전환이 완료될 때마다 여기에 **한 항목씩** 추가한다.
@@ -226,6 +227,18 @@ class _LabScreenState extends State<LabScreen> {
     );
   }
 
+  Future<void> _openFirstCefrLevelScreen() async {
+    if (!mounted) return;
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (routeContext) => FirstCefrLevelScreen(
+          onComplete: () => Navigator.of(routeContext).pop(),
+        ),
+      ),
+    );
+  }
+
   Widget _buildSectionDivider() {
     return const Padding(
       padding: EdgeInsets.symmetric(vertical: 24),
@@ -290,6 +303,28 @@ class _LabScreenState extends State<LabScreen> {
                   elevation: 0,
                 ),
                 child: const Text('Open RpS2 Test'),
+              ),
+            ),
+            _buildSectionDivider(),
+            Text(
+              'First CEFR Level',
+              style: theme.headlineSmall?.copyWith(color: Colors.white),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: ElevatedButton(
+                onPressed: _openFirstCefrLevelScreen,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF0CABA8),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  elevation: 0,
+                ),
+                child: const Text('Open First CEFR Level'),
               ),
             ),
             _buildSectionDivider(),
