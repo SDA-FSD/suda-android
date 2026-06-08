@@ -4,6 +4,7 @@ import '../../l10n/app_localizations.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
 import '../../utils/default_toast.dart';
+import '../../utils/english_level_util.dart';
 
 class CefrLevelScreen extends StatefulWidget {
   final UserDto? user;
@@ -15,16 +16,24 @@ class CefrLevelScreen extends StatefulWidget {
 }
 
 class _CefrLevelScreenState extends State<CefrLevelScreen> {
-  String _selectedLevel = ''; // A, B, C, D
+  String _selectedLevel = '';
   bool _isLoading = true;
-  String? _updatingLevel; // 현재 업데이트 중인 레벨 (뱅글뱅글용)
+  String? _updatingLevel;
 
-  final Map<String, String> _levelMap = {
-    'A': 'Beginner',
-    'B': 'Basic',
-    'C': 'Intermediate',
-    'D': 'Advanced',
-  };
+  String _levelLabel(AppLocalizations l10n, String cefrLevel) {
+    switch (cefrLevel) {
+      case 'Pre-A1':
+        return l10n.cefrLevelAbsoluteBeginner;
+      case 'A1':
+        return l10n.cefrLevelBeginner;
+      case 'A2':
+        return l10n.cefrLevelBasic;
+      case 'B1':
+        return l10n.cefrLevelIntermediate;
+      default:
+        return cefrLevel;
+    }
+  }
 
   @override
   void initState() {
@@ -36,10 +45,13 @@ class _CefrLevelScreenState extends State<CefrLevelScreen> {
     if (widget.user != null) {
       final levelMeta = widget.user!.metaInfo?.firstWhere(
         (meta) => meta.key == 'ENGLISH_LEVEL',
-        orElse: () => const SudaJson(key: 'ENGLISH_LEVEL', value: 'A'),
+        orElse: () => const SudaJson(
+          key: 'ENGLISH_LEVEL',
+          value: EnglishLevelUtil.defaultLevel,
+        ),
       );
       setState(() {
-        _selectedLevel = levelMeta?.value ?? 'A';
+        _selectedLevel = EnglishLevelUtil.normalizeToCefr(levelMeta?.value);
         _isLoading = false;
       });
     } else {
@@ -54,10 +66,13 @@ class _CefrLevelScreenState extends State<CefrLevelScreen> {
         final user = await SudaApiClient.getCurrentUser(accessToken: token);
         final levelMeta = user.metaInfo?.firstWhere(
           (meta) => meta.key == 'ENGLISH_LEVEL',
-          orElse: () => const SudaJson(key: 'ENGLISH_LEVEL', value: 'A'),
+          orElse: () => const SudaJson(
+            key: 'ENGLISH_LEVEL',
+            value: EnglishLevelUtil.defaultLevel,
+          ),
         );
         setState(() {
-          _selectedLevel = levelMeta?.value ?? 'A';
+          _selectedLevel = EnglishLevelUtil.normalizeToCefr(levelMeta?.value);
           _isLoading = false;
         });
       }
@@ -66,11 +81,11 @@ class _CefrLevelScreenState extends State<CefrLevelScreen> {
     }
   }
 
-  Future<void> _onLevelSelected(String levelKey) async {
-    if (_updatingLevel != null || _selectedLevel == levelKey) return;
+  Future<void> _onLevelSelected(String cefrLevel) async {
+    if (_updatingLevel != null || _selectedLevel == cefrLevel) return;
 
     setState(() {
-      _updatingLevel = levelKey;
+      _updatingLevel = cefrLevel;
     });
 
     try {
@@ -78,25 +93,22 @@ class _CefrLevelScreenState extends State<CefrLevelScreen> {
       if (token != null) {
         await SudaApiClient.updateLanguageLevel(
           accessToken: token,
-          languageLevel: levelKey,
+          languageLevel: cefrLevel,
         );
 
-        // 앱 내부의 user 객체 업데이트 (기존 메타 정보 유지하며 ENGLISH_LEVEL만 변경)
         if (widget.user != null && widget.user!.metaInfo != null) {
           final meta = widget.user!.metaInfo!;
           final index = meta.indexWhere((m) => m.key == 'ENGLISH_LEVEL');
-          
+
           if (index != -1) {
-            // 기존 키가 있으면 값만 교체
-            meta[index] = SudaJson(key: 'ENGLISH_LEVEL', value: levelKey);
+            meta[index] = SudaJson(key: 'ENGLISH_LEVEL', value: cefrLevel);
           } else {
-            // 없으면 새로 추가
-            meta.add(SudaJson(key: 'ENGLISH_LEVEL', value: levelKey));
+            meta.add(SudaJson(key: 'ENGLISH_LEVEL', value: cefrLevel));
           }
         }
 
         setState(() {
-          _selectedLevel = levelKey;
+          _selectedLevel = cefrLevel;
         });
       }
     } catch (e) {
@@ -131,31 +143,29 @@ class _CefrLevelScreenState extends State<CefrLevelScreen> {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 45),
-                Text(
-                  l10n.cefrLevelDescription,
-                  style: theme.bodyLarge?.copyWith(color: Colors.white),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 45),
-                ..._levelMap.entries.map((entry) => Padding(
+                ...EnglishLevelUtil.visibleLevels.map((cefrLevel) => Padding(
                       padding: const EdgeInsets.only(bottom: 15),
-                      child: _buildLevelButton(entry.key, entry.value, theme),
+                      child: _buildLevelButton(
+                        cefrLevel,
+                        _levelLabel(l10n, cefrLevel),
+                        theme,
+                      ),
                     )),
               ],
             ),
     );
   }
 
-  Widget _buildLevelButton(String levelKey, String levelLabel, TextTheme theme) {
-    final isActive = _selectedLevel == levelKey;
-    final isUpdating = _updatingLevel == levelKey;
+  Widget _buildLevelButton(String cefrLevel, String levelLabel, TextTheme theme) {
+    final isActive = _selectedLevel == cefrLevel;
+    final isUpdating = _updatingLevel == cefrLevel;
     final isAnyUpdating = _updatingLevel != null;
 
     return SizedBox(
       width: double.infinity,
       height: 56,
       child: ElevatedButton(
-        onPressed: isAnyUpdating ? null : () => _onLevelSelected(levelKey),
+        onPressed: isAnyUpdating ? null : () => _onLevelSelected(cefrLevel),
         style: ElevatedButton.styleFrom(
           backgroundColor: isActive ? const Color(0xFF0CABA8) : Colors.white,
           foregroundColor: isActive ? Colors.white : Colors.black,

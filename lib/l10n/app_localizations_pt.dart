@@ -157,8 +157,16 @@ class AppLocalizationsPt extends AppLocalizations {
   String get cefrLevelTitle => 'Escolha seu nível de inglês';
 
   @override
-  String get cefrLevelDescription =>
-      'Em SUDA, todos falarão com você no seu nível de inglês.';
+  String get cefrLevelAbsoluteBeginner => 'Iniciante absoluto';
+
+  @override
+  String get cefrLevelBeginner => 'Iniciante';
+
+  @override
+  String get cefrLevelBasic => 'Básico';
+
+  @override
+  String get cefrLevelIntermediate => 'Intermediário';
 
   @override
   String get feedbackPlaceholder =>

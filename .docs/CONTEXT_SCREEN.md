@@ -440,6 +440,8 @@
 ### 스크린 내부 구현 특이사항
 - 배경색: RGB(51, 51, 51) - SettingScreen 대비 10% 밝기 증가
 - 우측 상단 X 버튼 필수
+- 레벨 단일 표현: CEFR 라벨 `Pre-A1`/`A1`/`A2`/`B1`/`C1` (`EnglishLevelUtil`). 표시·선택 가능 4단계: `Pre-A1`·`A1`·`A2`·`B1` — 버튼 UI 라벨은 l10n. `C1` Advanced는 UI fade-out(비표시·비선택).
+- `ENGLISH_LEVEL` 메타·API `PUT /v1/users/language-level?languageLevel=` 모두 CEFR 라벨(`Pre-A1`/`A1`/`A2`/`B1`/`C1`)만 사용. 미설정·빈 값 → `Pre-A1`.
 
 ---
 

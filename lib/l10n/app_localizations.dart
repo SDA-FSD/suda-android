@@ -370,11 +370,29 @@ abstract class AppLocalizations {
   /// **'Choose your English level'**
   String get cefrLevelTitle;
 
-  /// No description provided for @cefrLevelDescription.
+  /// No description provided for @cefrLevelAbsoluteBeginner.
   ///
   /// In en, this message translates to:
-  /// **'SUDA citizens will chat with you at your level.'**
-  String get cefrLevelDescription;
+  /// **'Absolute Beginner'**
+  String get cefrLevelAbsoluteBeginner;
+
+  /// No description provided for @cefrLevelBeginner.
+  ///
+  /// In en, this message translates to:
+  /// **'Beginner'**
+  String get cefrLevelBeginner;
+
+  /// No description provided for @cefrLevelBasic.
+  ///
+  /// In en, this message translates to:
+  /// **'Basic'**
+  String get cefrLevelBasic;
+
+  /// No description provided for @cefrLevelIntermediate.
+  ///
+  /// In en, this message translates to:
+  /// **'Intermediate'**
+  String get cefrLevelIntermediate;
 
   /// No description provided for @feedbackPlaceholder.
   ///

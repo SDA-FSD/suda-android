@@ -156,8 +156,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cefrLevelTitle => 'Choose your English level';
 
   @override
-  String get cefrLevelDescription =>
-      'SUDA citizens will chat with you at your level.';
+  String get cefrLevelAbsoluteBeginner => 'Absolute Beginner';
+
+  @override
+  String get cefrLevelBeginner => 'Beginner';
+
+  @override
+  String get cefrLevelBasic => 'Basic';
+
+  @override
+  String get cefrLevelIntermediate => 'Intermediate';
 
   @override
   String get feedbackPlaceholder =>

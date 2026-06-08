@@ -151,7 +151,16 @@ class AppLocalizationsKo extends AppLocalizations {
   String get cefrLevelTitle => '영어 레벨을 선택하세요';
 
   @override
-  String get cefrLevelDescription => 'SUDA의 주민들은 당신의 레벨에 맞추어 대화합니다.';
+  String get cefrLevelAbsoluteBeginner => '완전 초급';
+
+  @override
+  String get cefrLevelBeginner => '초급';
+
+  @override
+  String get cefrLevelBasic => '기본';
+
+  @override
+  String get cefrLevelIntermediate => '중급';
 
   @override
   String get feedbackPlaceholder => '생각, 제안사항 또는 겪으신 문제점을 공유해 주세요...';
