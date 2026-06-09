@@ -224,8 +224,9 @@
   - `onNavigateToAlarm` 콜백 호출 → `_MyAppState._navigateToAlarm()` 실행 → 상태 업데이트로 전환
 - **ProfileScreen**: GNB의 Profile 버튼 클릭 시
   - `onNavigateToProfile` 콜백 호출 → `_MyAppState._navigateToProfile()` 실행 → 상태 업데이트로 전환
-- **RoleplayOverviewScreen** (Sub Screen): (현재는 명시적 버튼 없음, 향후 추가 예정)
-  - 향후 n개의 롤플레이가 Home Screen에 게시될 예정
+- **RoleplayOverviewScreen** (Sub Screen, **S1**): (현재는 명시적 버튼 없음, 향후 추가 예정)
+  - S1 단일 롤플레이 Overview. 홈 v2 이후 홈 썸네일 탭은 S2 `SeriesOverviewScreen`으로 진입.
+- **SeriesOverviewScreen** (Sub Screen, **S2**): Home 시리즈 썸네일 탭 시 `SeriesRouter.pushOverview`로 진입. `lib/screens/series/overview.dart`. 본문·API는 추후 지침(현재 placeholder).
 
 ### 스크린 내부 구현 특이사항
 - **스크린 타입 특성**: Main Screen
@@ -243,16 +244,17 @@
       - 구현: `AppScaffold(usePadding: false)`를 적용하여 배너가 화면 끝까지 닿도록 함
       - 기능: 무한 루프 스와이프, 자동 슬라이드(4초), 인디케이터, 다국어 오버레이
       - `MainHomeBannerDto.appPath`가 있으면 배너 탭 시 기존 appPath 규칙으로 화면 이동
-    - **롤플레이 카테고리**:
-      - 구성: 카테고리명(h3) + 가로 스크롤 썸네일 리스트
-      - 썸네일: 30% 너비, radius 10, 음영 박스 오버레이 타이틀  
+    - **시리즈 카테고리** (S2):
+      - 구성: 카테고리명(h3, `HomeCategoryDto.name` Map) + 가로 스크롤 썸네일 리스트
+      - 썸네일: 30% 너비, radius 10, 음영 박스 오버레이 타이틀 (`HomeSeriesDto.title` Map)  
         (텍스트가 영역을 초과할 때만 Marquee 적용)
       - 기능: 레이지 로딩(페이징) 지원, 로딩 중 Shimmer 스켈레톤 노출
+      - 탭: `SeriesOverviewScreen` (Sub, placeholder)
 - **API 연동**:
-  - **홈 콘텐츠 통합 조회**: `GET /v1/home/contents` (`SudaApiClient.getHomeContents()`)
-    - 응답: HomeDto (banners, roleplays, restYn, restStartsAt, restEndsAt)
+  - **홈 콘텐츠 통합 조회**: `GET /v2/home/contents` (`SudaApiClient.getHomeContents()`)
+    - 응답: HomeDto (banners, seriesList, restYn, restStartsAt, restEndsAt, notiboxUnreadYn)
     - banners: `MainHomeBannerDto(imgPath, overlayText, appPath?)`
-  - **롤플레이 페이징 조회**: `GET /v1/home/roleplays` (`SudaApiClient.getRoleplaysByCategory()`)
+  - **시리즈 페이징 조회**: `GET /v2/home/series?category={enumValue}&pageNum=…` (`SudaApiClient.getSeriesByCategory()`)
   - **푸시 토큰 등록**: `_registerPushToken()` 메서드로 처리
     - Firebase Messaging 토큰 획득 후 서버에 전송 (`POST /users/push-token`)
 - **초기화 작업**: `initState()`에서 `_performInitialization()` 호출 (한 번만 실행)

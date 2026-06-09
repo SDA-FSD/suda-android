@@ -6,6 +6,7 @@
 
 ## 최근 작업 메모
 
+- **Home API v2·S2 시리즈**: `GET /v2/home/contents`, `GET /v2/home/series`로 교체. 모델 `HomeSeriesGroupDto`/`HomeSeriesDto`/`HomeCategoryDto`. Home `CategorySeriesRow`·`SeriesThumbnail`, 탭 → `SeriesOverviewScreen`(placeholder). S1/S2 개념 `.docs/CONTEXT.md` §1-1. v1 Home RP 모델·`getRoleplaysByCategory` 제거.
 - **FirstCefrLevelScreen**: 서비스 이용 동의 직후 1회 Full Screen CEFR 선택(`lib/screens/first_cefr_level.dart`). Setting `CefrLevelScreen`도 동일 캐러셀 UI(§6, hint 없음·헤더 유지). Lab 테스트 메뉴. l10n `firstCefrLevel*`. `.docs/CONTEXT.md` §7-0·`CONTEXT_SCREEN.md` §1.2·§6.
 - **AgreementScreen 제거**: 미사용 레거시 `lib/screens/agreement.dart` 삭제. 서비스 이용 동의는 `LoginScreen` bottom-up 레이어만 사용. `.docs/CONTEXT.md` §7-0, `.docs/CONTEXT_SCREEN.md` §1·흐름도.
 - **Tutorial→Opening 네비게이션**: `TUTORIAL=Y` 스킵·완료 후 Opening 전환을 `addPostFrameCallback`으로 미룸(build 중 `pushReplacement`로 Navigator 잠금/Cannot start roleplay 연쇄 방지). `lib/screens/roleplay/tutorial.dart`, `.docs/CONTEXT_SCREEN.md` §11.2.

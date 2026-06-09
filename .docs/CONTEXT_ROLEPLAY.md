@@ -57,12 +57,13 @@
 - 사용자의 음성 전송은 **byte[](바이너리)** 방식으로 처리한다. (base64 미사용)
 
 ## 6. Roleplay 상세 조회 API
-- 홈 화면 카테고리별 롤플레이 목록 전체 조회: `GET /v1/home/contents` (roleplays 필드)
-  - 응답: HomeDto.roleplays → `List<AppHomeRoleplayGroupDto>` (roleplayCategoryDto, list)
-- 카테고리별 롤플레이 목록 페이징 조회: `GET /v1/home/roleplays`
-  - 파라미터: `roleplayCategoryId`, `pageNum`
-  - 응답: `SudaAppPage<AppHomeRoleplayDto>` (content, number, size, last, first)
-- 엔드포인트: `GET /v1/roleplays/{roleplayId}/overview`
+- **시즌 구분**: S1 = 단일 롤플레이( fade-out 예정 ). S2 = 시리즈(여러 에피소드) 단위. 홈 노출은 S2 API v2 사용.
+- 홈 화면 카테고리별 시리즈 목록(첫 페이지): `GET /v2/home/contents` (`seriesList` 필드)
+  - 응답: `HomeDto.seriesList` → `List<HomeSeriesGroupDto>` (`category`, `seriesList`)
+- 카테고리별 시리즈 페이징: `GET /v2/home/series?category={enumValue}&pageNum=…`
+  - `category`: `HomeCategoryDto.enumValue` (예: `DAILY_LIFE`, UI 비노출)
+  - 응답: `SudaAppPage<HomeSeriesDto>` (content, number, size, last, first)
+- **S1** Overview: `GET /v1/roleplays/{roleplayId}/overview`
 - 인증: Authorization Bearer JWT 필요
 - 응답: `RoleplayOverviewDto`
   - `roleplay`: `RoleplayDto`

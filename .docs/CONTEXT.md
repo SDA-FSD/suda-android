@@ -4,6 +4,10 @@
 - **Flutter기반 모듈**: AI와 영어로 대화할 수 있는 교육용 애플리케이션
 - **API 서버와 통신** suda-api 프로젝트에서 제공하는 API를 호출하여 동작
 
+## 1-1. Roleplay 시즌 (S1 / S2)
+- **S1 (Season 1)**: fade-out 예정. **단일 롤플레이** 단위 노출·플레이. `RoleplayOverviewScreen` → Opening → Playing → … (`GET /v1/roleplays/{roleplayId}/overview`).
+- **S2 (Season 2)**: 신규. 여러 롤플레이(**에피소드**)가 하나의 **시리즈**에 묶임. 홈에는 시리즈 단위로 노출하며, 탭 시 `SeriesOverviewScreen`(Sub, `lib/screens/series/overview.dart`)으로 진입(본문·API는 추후 지침). 홈 API: `GET /v2/home/contents`, 카테고리 페이징 `GET /v2/home/series?category={enumValue}&pageNum=…`.
+
 ## 2. 개발 환경 전제 조건
 - 대부분의 변경 작업 진행 시, IDE 외부에서 에뮬레이터 및 `flutter run` 상태임을 전제로 행동할 것
 - **테스트 디바이스 정보**:
@@ -76,15 +80,16 @@
   - `SudaApiClient.registerPushToken()`: 푸시 토큰 등록 (`POST /users/push-token`)
     - Request body: `{ "deviceType": "ANDROID", "pushToken": "<토큰값>", "languageCode": "en|ko|pt" }`
     - 응답 처리하지 않음 (에러 발생 시에도 무시)
-  - `SudaApiClient.getHomeContents()`: 홈 화면 콘텐츠 통합 조회 (`GET /v1/home/contents`)
-    - 응답: `HomeDto` (restYn, restStartsAt, restEndsAt, banners, roleplays, **notiboxUnreadYn**)
+  - `SudaApiClient.getHomeContents()`: 홈 화면 콘텐츠 통합 조회 (`GET /v2/home/contents`)
+    - 응답: `HomeDto` (restYn, restStartsAt, restEndsAt, banners, **seriesList**, **notiboxUnreadYn**)
     - **notiboxUnreadYn**: 알림함(notibox)에 사용자 기준 미읽음이 있으면 `Y`, 없으면 `N`. 홈·GNB 알림 탭 배지 판단에 사용(`main.dart`·`HomeScreen` 로드 시 `RestStatusService.instance.update(..., notiboxUnreadYn: ...)` 동기화).
     - GNB 알림 탭 빨간 점: `main.dart`의 `_showNotiboxUnreadBadge` 계열 상태로 `GnbBar.showNotiboxUnreadBadge`에 전달. 알림함에서 **전 페이지 로드가 끝난 뒤** 로컬 목록에 미읽음이 없으면 `getHomeContents`로 동기화한 뒤에도 `notiboxUnreadYn`이 `Y`로 남는 경우 배지용 값을 `N`으로 보정한다(동기화 실패·일시 불일치 대비). notibox 페이지 크기(10)는 API와 동일하게 `NotificationBoxScreen`·`main.dart`에 상수로 둔다.
     - banners: `List<MainHomeBannerDto>` (imgPath, overlayText, appPath?)
       - `appPath`가 있으면 Home 배너 탭 시 기존 appPath 규칙(`_applyPendingPushNavigation`)으로 화면 이동한다.
-    - roleplays: `List<AppHomeRoleplayGroupDto>` (roleplayCategoryDto, list)
-      - 홈 화면 카테고리별 가로 썸네일: `lib/screens/home.dart` `CategoryRoleplayRow`에서 `ListView.separated` 구분 폭 **8**dp.
-    - restYn/restStartsAt/restEndsAt·notiboxUnreadYn은 `GET /v1/home/contents` 처리 시 `RestStatusService.instance.update()`로 보관 (어떤 스크린에서도 접근 가능)
+    - seriesList: `List<HomeSeriesGroupDto>` (`category`: `HomeCategoryDto` — `enumValue`, `name` Map; `seriesList`: `List<HomeSeriesDto>` — `id`, `title` Map, `thumbnailImgPath`)
+      - 홈 화면 카테고리별 가로 썸네일: `lib/screens/home.dart` `CategorySeriesRow`에서 `ListView.separated` 구분 폭 **8**dp. 썸네일 탭 → `SeriesRouter.pushOverview` → `SeriesOverviewScreen`(S2, placeholder).
+    - restYn/restStartsAt/restEndsAt·notiboxUnreadYn은 `GET /v2/home/contents` 처리 시 `RestStatusService.instance.update()`로 보관 (어떤 스크린에서도 접근 가능)
+  - `SudaApiClient.getSeriesByCategory()`: 홈 카테고리별 시리즈 페이징 (`GET /v2/home/series?category={enumValue}&pageNum=…`, 0-based, size 4 가정). 응답 `SudaAppPage<HomeSeriesDto>`.
   - `SudaApiClient.getNotifications()`: 알림함 목록 페이징 (`GET /v1/users/notification?pageNum=…`, `UserApi.getNotifications`) — 응답 원소 `NotificationDto`에 **readYn**(`Y`/`N`) 포함. 서버는 `sendFinishedAt` 기준 30일 초과 알림을 내려주지 않으며(배지·목록 일치), 카드 하단 상대 날짜도 동일 필드(`sendFinishedAt`)를 UTC로 파싱 후 로컬 달력 일 단위로 표시(`notification_box.dart`).
   - `SudaApiClient.markNotificationRead()`: 알림 읽음 처리 (`POST /v1/users/notification/{notificationId}/read`, `UserApi.markNotificationRead`) — 응답 `QuestResultDto`. GET에서 30일 초과로 빠진 항목도 서버가 ZSET에 남겨 둔 경우 POST 읽음은 성공할 수 있어, 재진입 시 `readYn`이 되돌아가지 않도록 한다.
   - `SudaApiClient.getLatestVersion()`: 최신 버전 정보 조회 (`GET /v1/latest-version`)
@@ -93,11 +98,11 @@
     - 저장된 버전 정보는 `TokenStorage.loadLatestVersion()`으로 조회 가능
 - **RestStatusService**: `lib/services/rest_status_service.dart`
   - 서비스 점검 대응용 restYn, restStartsAt, restEndsAt·**notiboxUnreadYn** 전역 보관
-  - `GET /v1/home/contents` 응답 시 `RestStatusService.instance.update()`로 초기화/업데이트
+  - `GET /v2/home/contents` 응답 시 `RestStatusService.instance.update()`로 초기화/업데이트
   - 어떤 스크린에서도 `RestStatusService.instance.restYn` 등으로 접근 가능
   - `shouldShowRestOverlay()`: Overview 진입 전 휴식 레이어 노출 여부 (restYn=='Y' 또는 N이면서 UTC now가 restStartsAt~restEndsAt 사이)
 - **휴식 안내 레이어 (RestOverlay)**: `lib/widgets/rest_overlay.dart`
-  - Overview 진입 시 `RoleplayRouter.pushOverview`에서 restYn 확인 후, 필요 시 레이어 노출·스크린 이동 중단
+  - Overview·Series Overview 진입 시 restYn 확인 후, 필요 시 레이어 노출·스크린 이동 중단 (`RoleplayRouter.pushOverview`, `SeriesRouter.pushOverview`)
   - 배경: BackdropFilter sigma 6 + Color(0x59000000) (오버레이 공통)
   - 닫기: close.svg 24×24, 좌상 30,30, 40×40 탭 영역
   - 콘텐츠 영역: width 80%, height width×1.2+60, 중앙

@@ -21,14 +21,14 @@ class SudaApiClient {
     return HomeApi.getHomeContents(accessToken: accessToken);
   }
 
-  static Future<SudaAppPage<AppHomeRoleplayDto>> getRoleplaysByCategory({
+  static Future<SudaAppPage<HomeSeriesDto>> getSeriesByCategory({
     required String accessToken,
-    required int categoryId,
+    required String categoryEnumValue,
     required int pageNum,
   }) {
-    return HomeApi.getRoleplaysByCategory(
+    return HomeApi.getSeriesByCategory(
       accessToken: accessToken,
-      categoryId: categoryId,
+      categoryEnumValue: categoryEnumValue,
       pageNum: pageNum,
     );
   }

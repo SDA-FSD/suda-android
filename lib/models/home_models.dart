@@ -1,13 +1,23 @@
 import 'common_models.dart';
 
-/// GET /v1/home/contents 응답 DTO
+Map<String, String> _localizedMapFromJson(dynamic value) {
+  if (value == null) return const {};
+  if (value is Map) {
+    return value.map(
+      (key, val) => MapEntry(key.toString(), val?.toString() ?? ''),
+    );
+  }
+  return const {};
+}
+
+/// GET /v2/home/contents 응답 DTO
 class HomeDto {
   final String restYn;
   final DateTime? restStartsAt;
   final DateTime? restEndsAt;
   final String notiboxUnreadYn;
   final List<MainHomeBannerDto> banners;
-  final List<AppHomeRoleplayGroupDto> roleplays;
+  final List<HomeSeriesGroupDto> seriesList;
 
   const HomeDto({
     required this.restYn,
@@ -15,7 +25,7 @@ class HomeDto {
     this.restEndsAt,
     this.notiboxUnreadYn = 'N',
     required this.banners,
-    required this.roleplays,
+    required this.seriesList,
   });
 
   factory HomeDto.fromJson(Map<String, dynamic> json) {
@@ -46,12 +56,12 @@ class HomeDto {
               )
               .toList();
 
-    final roleplaysRaw = json['roleplays'];
-    final List<AppHomeRoleplayGroupDto> roleplays = roleplaysRaw == null
+    final seriesListRaw = json['seriesList'];
+    final List<HomeSeriesGroupDto> seriesList = seriesListRaw == null
         ? []
-        : (roleplaysRaw as List<dynamic>)
+        : (seriesListRaw as List<dynamic>)
               .map(
-                (item) => AppHomeRoleplayGroupDto.fromJson(
+                (item) => HomeSeriesGroupDto.fromJson(
                   item as Map<String, dynamic>,
                 ),
               )
@@ -63,7 +73,7 @@ class HomeDto {
       restEndsAt: parseInstant(json['restEndsAt']),
       notiboxUnreadYn: notiboxUnreadYn,
       banners: banners,
-      roleplays: roleplays,
+      seriesList: seriesList,
     );
   }
 }
@@ -92,87 +102,63 @@ class MainHomeBannerDto {
   }
 }
 
-class RoleplayCategoryDto {
-  final int id;
-  final List<SudaJson> name;
+class HomeCategoryDto {
+  final String enumValue;
+  final Map<String, String> name;
 
-  const RoleplayCategoryDto({required this.id, required this.name});
-
-  factory RoleplayCategoryDto.fromJson(Map<String, dynamic> json) {
-    final nameValue = json['name'];
-    final List<SudaJson> names;
-    if (nameValue is String) {
-      names = [SudaJson(key: 'en', value: nameValue)];
-    } else if (nameValue is List<dynamic>) {
-      names = nameValue
-          .map((item) => SudaJson.fromJson(item as Map<String, dynamic>))
-          .toList();
-    } else {
-      names = [];
-    }
-    return RoleplayCategoryDto(id: json['id'] as int? ?? 0, name: names);
-  }
-}
-
-class AppHomeRoleplayDto {
-  final int id;
-  final int? categoryId;
-  final List<SudaJson> title;
-  final String? thumbnailImgPath;
-  final String? bannerImgPath;
-  final String? bannerColor;
-  final int? roleplayCategoryId;
-  final int? order;
-
-  const AppHomeRoleplayDto({
-    required this.id,
-    this.categoryId,
-    required this.title,
-    this.thumbnailImgPath,
-    this.bannerImgPath,
-    this.bannerColor,
-    this.roleplayCategoryId,
-    this.order,
+  const HomeCategoryDto({
+    required this.enumValue,
+    required this.name,
   });
 
-  factory AppHomeRoleplayDto.fromJson(Map<String, dynamic> json) {
-    return AppHomeRoleplayDto(
-      id: json['id'] as int? ?? 0,
-      categoryId: json['categoryId'] as int?,
-      title: json['title'] == null
-          ? []
-          : (json['title'] as List<dynamic>)
-                .map((item) => SudaJson.fromJson(item as Map<String, dynamic>))
-                .toList(),
-      thumbnailImgPath: json['thumbnailImgPath'] as String?,
-      bannerImgPath: json['bannerImgPath'] as String?,
-      bannerColor: json['bannerColor'] as String?,
-      roleplayCategoryId: json['roleplayCategoryId'] as int?,
-      order: json['order'] as int?,
+  factory HomeCategoryDto.fromJson(Map<String, dynamic> json) {
+    return HomeCategoryDto(
+      enumValue: json['enumValue'] as String? ?? '',
+      name: _localizedMapFromJson(json['name']),
     );
   }
 }
 
-class AppHomeRoleplayGroupDto {
-  final RoleplayCategoryDto roleplayCategoryDto;
-  final List<AppHomeRoleplayDto> list;
+class HomeSeriesDto {
+  final int id;
+  final Map<String, String> title;
+  final String? thumbnailImgPath;
 
-  const AppHomeRoleplayGroupDto({
-    required this.roleplayCategoryDto,
-    required this.list,
+  const HomeSeriesDto({
+    required this.id,
+    required this.title,
+    this.thumbnailImgPath,
   });
 
-  factory AppHomeRoleplayGroupDto.fromJson(Map<String, dynamic> json) {
-    return AppHomeRoleplayGroupDto(
-      roleplayCategoryDto: RoleplayCategoryDto.fromJson(
-        json['roleplayCategoryDto'] as Map<String, dynamic>,
+  factory HomeSeriesDto.fromJson(Map<String, dynamic> json) {
+    return HomeSeriesDto(
+      id: json['id'] as int? ?? 0,
+      title: _localizedMapFromJson(json['title']),
+      thumbnailImgPath: json['thumbnailImgPath'] as String?,
+    );
+  }
+}
+
+class HomeSeriesGroupDto {
+  final HomeCategoryDto category;
+  final List<HomeSeriesDto> seriesList;
+
+  const HomeSeriesGroupDto({
+    required this.category,
+    required this.seriesList,
+  });
+
+  factory HomeSeriesGroupDto.fromJson(Map<String, dynamic> json) {
+    return HomeSeriesGroupDto(
+      category: HomeCategoryDto.fromJson(
+        json['category'] as Map<String, dynamic>,
       ),
-      list: json['list'] == null
+      seriesList: json['seriesList'] == null
           ? []
-          : (json['list'] as List<dynamic>)
+          : (json['seriesList'] as List<dynamic>)
                 .map(
                   (item) =>
-                      AppHomeRoleplayDto.fromJson(item as Map<String, dynamic>),
+                      HomeSeriesDto.fromJson(item as Map<String, dynamic>),
                 )
                 .toList(),
     );

@@ -8,7 +8,7 @@ import '../services/rest_status_service.dart';
 import '../services/token_storage.dart';
 import '../services/suda_api_client.dart';
 import '../config/app_config.dart';
-import '../routes/roleplay_router.dart';
+import '../routes/series_router.dart';
 import '../utils/language_util.dart';
 import '../utils/suda_json_util.dart';
 import '../widgets/daily_ticket_popup.dart';
@@ -49,8 +49,8 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _suspendTicketFetchOnHomeReturn = false; // 데일리 팝업 닫힘(pop)으로 인한 자동 티켓 조회 일시 중단
   List<MainHomeBannerDto>? _banners;
   bool _isLoadingBanners = true;
-  List<AppHomeRoleplayGroupDto>? _roleplayGroups;
-  bool _isLoadingGroups = true;
+  List<HomeSeriesGroupDto>? _seriesGroups;
+  bool _isLoadingSeriesGroups = true;
   String? _accessToken;
   late PageController _pageController;
   int _currentPage = 0;
@@ -106,7 +106,7 @@ class _HomeScreenState extends State<HomeScreen> {
     // 2. 푸시 토큰 등록
     await _registerPushToken();
 
-    // 3. 홈 콘텐츠 조회 (배너 + 롤플레이 통합 API)
+    // 3. 홈 콘텐츠 조회 (배너 + 시리즈 통합 API)
     await _fetchHomeContents();
     // 4. 티켓 개수 조회
     await _fetchTicket();
@@ -153,12 +153,12 @@ class _HomeScreenState extends State<HomeScreen> {
     // 비동기로 이어질 수 있음. 여기서 가드를 해제하면 GET/PUT 경합이 다시 생긴다.
   }
 
-  /// 홈 콘텐츠 조회 (배너 + 롤플레이 통합 API)
+  /// 홈 콘텐츠 조회 (배너 + 시리즈 통합 API)
   Future<void> _fetchHomeContents() async {
     if (_accessToken == null) {
       setState(() {
         _isLoadingBanners = false;
-        _isLoadingGroups = false;
+        _isLoadingSeriesGroups = false;
       });
       return;
     }
@@ -179,13 +179,13 @@ class _HomeScreenState extends State<HomeScreen> {
       widget.onHomeContentsLoaded?.call(home);
 
       final banners = home.banners;
-      final groups = home.roleplays;
+      final groups = home.seriesList;
 
       setState(() {
         _banners = banners;
-        _roleplayGroups = groups;
+        _seriesGroups = groups;
         _isLoadingBanners = false;
-        _isLoadingGroups = false;
+        _isLoadingSeriesGroups = false;
         if (banners.isNotEmpty) {
           final int initialPage = banners.length * 500;
           _pageController = PageController(initialPage: initialPage);
@@ -203,7 +203,7 @@ class _HomeScreenState extends State<HomeScreen> {
       if (mounted) {
         setState(() {
           _isLoadingBanners = false;
-          _isLoadingGroups = false;
+          _isLoadingSeriesGroups = false;
         });
       }
     }
@@ -279,8 +279,8 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  void _navigateToRoleplayOverview(int roleplayId) {
-    RoleplayRouter.pushOverview(context, roleplayId, user: widget.user);
+  void _navigateToSeriesOverview(int seriesId) {
+    SeriesRouter.pushOverview(context, seriesId, user: widget.user);
   }
 
   Future<void> _onTicketBadgeTap(BuildContext context) async {
@@ -328,7 +328,7 @@ class _HomeScreenState extends State<HomeScreen> {
             _buildBannerSection(),
             const SizedBox(height: 10), // 배너 하단 gap 10 추가
             const SizedBox(height: 32), // 배너와 첫 카테고리 사이 간격 (표준화)
-            _buildRoleplayGroupsSection(),
+            _buildSeriesGroupsSection(),
             const SizedBox(height: 40), // 하단 여백
           ],
         ),
@@ -461,28 +461,28 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  /// 롤플레이 그룹 섹션
-  Widget _buildRoleplayGroupsSection() {
-    if (_isLoadingGroups) {
+  /// 시리즈 카테고리 섹션
+  Widget _buildSeriesGroupsSection() {
+    if (_isLoadingSeriesGroups) {
       return _buildGroupsShimmer();
     }
 
-    if (_roleplayGroups == null || _roleplayGroups!.isEmpty) {
+    if (_seriesGroups == null || _seriesGroups!.isEmpty) {
       return const SizedBox.shrink();
     }
 
     // 허용된 개수만큼만 리스트 생성
     final List<Widget> categories = [];
-    for (int i = 0; i < _roleplayGroups!.length; i++) {
+    for (int i = 0; i < _seriesGroups!.length; i++) {
       if (i < _visibleCategoryCount) {
         categories.add(
-          CategoryRoleplayRow(
+          CategorySeriesRow(
             key: ValueKey(
-              'category_${_roleplayGroups![i].roleplayCategoryDto.id}',
+              'category_${_seriesGroups![i].category.enumValue}',
             ),
-            group: _roleplayGroups![i],
+            group: _seriesGroups![i],
             accessToken: _accessToken!,
-            onRoleplayTap: (item) => _navigateToRoleplayOverview(item.id),
+            onSeriesTap: (item) => _navigateToSeriesOverview(item.id),
             onRendered: () {
               // 현재 카테고리가 렌더링되면 다음 카테고리 허용
               if (_visibleCategoryCount <= i + 1) {
@@ -605,14 +605,14 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-/// 개별 롤플레이 썸네일 위젯
-class RoleplayThumbnail extends StatelessWidget {
-  final AppHomeRoleplayDto item;
+/// 개별 시리즈 썸네일 위젯
+class SeriesThumbnail extends StatelessWidget {
+  final HomeSeriesDto item;
   final double width;
   final VoidCallback? onRendered;
   final VoidCallback? onTap;
 
-  const RoleplayThumbnail({
+  const SeriesThumbnail({
     super.key,
     required this.item,
     required this.width,
@@ -621,7 +621,7 @@ class RoleplayThumbnail extends StatelessWidget {
   });
 
   String _getTitle() {
-    return SudaJsonUtil.localizedText(item.title);
+    return SudaJsonUtil.localizedMapText(item.title);
   }
 
   bool _shouldMarquee({
@@ -763,27 +763,27 @@ class RoleplayThumbnail extends StatelessWidget {
   }
 }
 
-/// 카테고리별 롤플레이 가로 행 (페이징 관리)
-class CategoryRoleplayRow extends StatefulWidget {
-  final AppHomeRoleplayGroupDto group;
+/// 카테고리별 시리즈 가로 행 (페이징 관리)
+class CategorySeriesRow extends StatefulWidget {
+  final HomeSeriesGroupDto group;
   final String accessToken;
   final VoidCallback? onRendered;
-  final void Function(AppHomeRoleplayDto item) onRoleplayTap;
+  final void Function(HomeSeriesDto item) onSeriesTap;
 
-  const CategoryRoleplayRow({
+  const CategorySeriesRow({
     super.key,
     required this.group,
     required this.accessToken,
-    required this.onRoleplayTap,
+    required this.onSeriesTap,
     this.onRendered,
   });
 
   @override
-  State<CategoryRoleplayRow> createState() => _CategoryRoleplayRowState();
+  State<CategorySeriesRow> createState() => _CategorySeriesRowState();
 }
 
-class _CategoryRoleplayRowState extends State<CategoryRoleplayRow> {
-  late List<AppHomeRoleplayDto> _list;
+class _CategorySeriesRowState extends State<CategorySeriesRow> {
+  late List<HomeSeriesDto> _list;
   int _currentPage = 0;
   bool _isLastPage = false;
   bool _isLoadingMore = false;
@@ -792,7 +792,7 @@ class _CategoryRoleplayRowState extends State<CategoryRoleplayRow> {
   @override
   void initState() {
     super.initState();
-    _list = List.from(widget.group.list);
+    _list = List.from(widget.group.seriesList);
     // 첫 호출 데이터가 4개 미만이면 이미 마지막 페이지일 수 있음 (가정)
     if (_list.length < 4) _isLastPage = true;
     _scrollController.addListener(_onScroll);
@@ -823,9 +823,9 @@ class _CategoryRoleplayRowState extends State<CategoryRoleplayRow> {
     setState(() => _isLoadingMore = true);
     try {
       final nextPnum = _currentPage + 1;
-      final page = await SudaApiClient.getRoleplaysByCategory(
+      final page = await SudaApiClient.getSeriesByCategory(
         accessToken: widget.accessToken,
-        categoryId: widget.group.roleplayCategoryDto.id,
+        categoryEnumValue: widget.group.category.enumValue,
         pageNum: nextPnum,
       );
       if (mounted) {
@@ -844,7 +844,7 @@ class _CategoryRoleplayRowState extends State<CategoryRoleplayRow> {
   }
 
   String _getCategoryTitle() {
-    return SudaJsonUtil.localizedText(widget.group.roleplayCategoryDto.name);
+    return SudaJsonUtil.localizedMapText(widget.group.category.name);
   }
 
   @override
@@ -881,10 +881,10 @@ class _CategoryRoleplayRowState extends State<CategoryRoleplayRow> {
             separatorBuilder: (context, index) => const SizedBox(width: 8),
             itemBuilder: (context, index) {
               if (index < _list.length) {
-                return RoleplayThumbnail(
+                return SeriesThumbnail(
                   item: _list[index],
                   width: thumbWidth,
-                  onTap: () => widget.onRoleplayTap(_list[index]),
+                  onTap: () => widget.onSeriesTap(_list[index]),
                   onRendered: index == 0 ? widget.onRendered : null,
                 );
               } else {

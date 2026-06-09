@@ -2,6 +2,19 @@ import '../models/common_models.dart';
 import 'language_util.dart';
 
 class SudaJsonUtil {
+  static String localizedMapText(
+    Map<String, String>? values, {
+    String? languageCode,
+  }) {
+    if (values == null || values.isEmpty) return '';
+    final langCode = languageCode ?? LanguageUtil.getCurrentLanguageCode();
+    final localized = values[langCode];
+    if (localized != null && localized.isNotEmpty) return localized;
+    final english = values['en'];
+    if (english != null && english.isNotEmpty) return english;
+    return values.values.firstWhere((v) => v.isNotEmpty, orElse: () => '');
+  }
+
   static String localizedText(List<SudaJson>? values, {String? languageCode}) {
     if (values == null || values.isEmpty) return '';
     final langCode = languageCode ?? LanguageUtil.getCurrentLanguageCode();

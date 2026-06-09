@@ -18,7 +18,7 @@ class HomeApi {
   }
 
   static Future<HomeDto> _getHomeContentsInternal(String accessToken) async {
-    final uri = SudaHttpClient.buildUri('/v1/home/contents');
+    final uri = SudaHttpClient.buildUri('/v2/home/contents');
     late final http.Response response;
     try {
       response = await SudaHttpClient.client
@@ -44,28 +44,36 @@ class HomeApi {
     }
 
     throw Exception(
-      'GET /v1/home/contents failed: HTTP ${response.statusCode} ${response.body}',
+      'GET /v2/home/contents failed: HTTP ${response.statusCode} ${response.body}',
     );
   }
 
-  static Future<SudaAppPage<AppHomeRoleplayDto>> getRoleplaysByCategory({
+  static Future<SudaAppPage<HomeSeriesDto>> getSeriesByCategory({
     required String accessToken,
-    required int categoryId,
+    required String categoryEnumValue,
     required int pageNum,
   }) async {
     return await SudaHttpClient.executeWithRefresh(
-      () => _getRoleplaysByCategoryInternal(accessToken, categoryId, pageNum),
-      retryWithNewToken: (newToken) =>
-          _getRoleplaysByCategoryInternal(newToken, categoryId, pageNum),
+      () => _getSeriesByCategoryInternal(
+        accessToken,
+        categoryEnumValue,
+        pageNum,
+      ),
+      retryWithNewToken: (newToken) => _getSeriesByCategoryInternal(
+        newToken,
+        categoryEnumValue,
+        pageNum,
+      ),
     );
   }
 
-  static Future<SudaAppPage<AppHomeRoleplayDto>> _getRoleplaysByCategoryInternal(
+  static Future<SudaAppPage<HomeSeriesDto>> _getSeriesByCategoryInternal(
     String accessToken,
-    int categoryId,
+    String categoryEnumValue,
     int pageNum,
   ) async {
-    final uri = SudaHttpClient.buildUri('/v1/home/roleplays/categories/$categoryId', {
+    final uri = SudaHttpClient.buildUri('/v2/home/series', {
+      'category': categoryEnumValue,
       'pageNum': pageNum.toString(),
     });
 
@@ -90,14 +98,14 @@ class HomeApi {
     if (response.statusCode >= 200 && response.statusCode < 300) {
       final Map<String, dynamic> data =
           jsonDecode(response.body) as Map<String, dynamic>;
-      return SudaAppPage<AppHomeRoleplayDto>.fromJson(
+      return SudaAppPage<HomeSeriesDto>.fromJson(
         data,
-        (json) => AppHomeRoleplayDto.fromJson(json),
+        (json) => HomeSeriesDto.fromJson(json),
       );
     }
 
     throw Exception(
-      'GET /v1/home/roleplays/categories failed: HTTP ${response.statusCode} ${response.body}',
+      'GET /v2/home/series failed: HTTP ${response.statusCode} ${response.body}',
     );
   }
 }
