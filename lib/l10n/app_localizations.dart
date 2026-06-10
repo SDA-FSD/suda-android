@@ -610,6 +610,42 @@ abstract class AppLocalizations {
   /// **'Practice more'**
   String get profileSavedRemoveCancel;
 
+  /// No description provided for @seriesOverviewTabEpisodes.
+  ///
+  /// In en, this message translates to:
+  /// **'Episode'**
+  String get seriesOverviewTabEpisodes;
+
+  /// No description provided for @seriesOverviewTabSimilarTopic.
+  ///
+  /// In en, this message translates to:
+  /// **'Similar Topic'**
+  String get seriesOverviewTabSimilarTopic;
+
+  /// No description provided for @seriesOverviewEpisodeNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Episode #{number}'**
+  String seriesOverviewEpisodeNumber(int number);
+
+  /// No description provided for @seriesOverviewPlay.
+  ///
+  /// In en, this message translates to:
+  /// **'Play'**
+  String get seriesOverviewPlay;
+
+  /// No description provided for @seriesOverviewLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Locked'**
+  String get seriesOverviewLocked;
+
+  /// No description provided for @seriesOverviewEpisodeLockedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete the previous episode to unlock.'**
+  String get seriesOverviewEpisodeLockedToast;
+
   /// No description provided for @noTicketsTitle.
   ///
   /// In en, this message translates to:

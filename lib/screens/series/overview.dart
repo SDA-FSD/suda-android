@@ -9,13 +9,18 @@ import '../../l10n/app_localizations.dart';
 import '../../models/series_models.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
+import '../../services/roleplay_state_service.dart';
+import '../../utils/default_toast.dart';
 import '../../utils/english_level_util.dart';
 import '../../utils/language_util.dart';
 import '../../utils/suda_json_util.dart';
 import '../../utils/sub_screen_route.dart';
 import '../../widgets/app_scaffold.dart';
+import '../../widgets/suda_label_tabs.dart';
+import '../../routes/roleplay_router.dart';
 import '../setting/cefr_level.dart';
 import 'series_information.dart';
+import 'widgets/series_episode_tab_content.dart';
 
 /// Series Overview Screen (Sub Screen, S2)
 class SeriesOverviewScreen extends StatefulWidget {
@@ -42,6 +47,9 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen> {
   final GlobalKey _titleKey = GlobalKey();
   bool _isFloatingHeaderVisible = true;
   bool _isInfoIconVisible = true;
+  int _episodeContentKey = 0;
+  int _scrollToUnlockToken = 0;
+  bool _isSynopsisExpanded = false;
 
   static const _heroHeightFactor = 0.6;
   static const _infoIconSize = 24.0;
@@ -76,6 +84,7 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen> {
         _isLoading = true;
         _errorMessage = null;
         _overview = null;
+        _isSynopsisExpanded = false;
       });
 
       final overview = await SudaApiClient.getSeriesOverview(
@@ -86,6 +95,7 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen> {
       setState(() {
         _overview = overview;
         _isLoading = false;
+        _scrollToUnlockToken++;
       });
     } catch (_) {
       if (!mounted) return;
@@ -174,6 +184,8 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen> {
       if (!mounted) return;
       setState(() {
         _overview = overview.copyWith(bestScoreMap: bestScoreMap);
+        _episodeContentKey++;
+        _scrollToUnlockToken++;
       });
     } catch (_) {}
   }
@@ -190,9 +202,9 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen> {
     final levelAfter = EnglishLevelUtil.readLevelFromUser(widget.user);
     if (levelBefore != levelAfter) {
       await _refreshBestScoreMap();
+    } else if (mounted) {
+      setState(() {});
     }
-
-    if (mounted) setState(() {});
   }
 
   Widget _buildLanguageLevelButton(BuildContext context) {
@@ -427,6 +439,76 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen> {
     );
   }
 
+  Future<void> _onEpisodePlay(RpS2SeriesEpisodeDto episode) async {
+    final accessToken = await TokenStorage.loadAccessToken();
+    if (!mounted) return;
+    if (accessToken == null) {
+      DefaultToast.show(context, 'Authentication required.', isError: true);
+      return;
+    }
+
+    try {
+      if (widget.user != null) {
+        RoleplayStateService.instance.setUser(widget.user);
+      }
+
+      final rpOverview = await SudaApiClient.getRoleplayOverview(
+        accessToken: accessToken,
+        roleplayId: episode.id,
+      );
+      if (!mounted) return;
+
+      RoleplayStateService.instance.setOverview(
+        roleplayId: episode.id,
+        overview: rpOverview,
+      );
+
+      final userCharacterId = _overview?.userCharacter?.id;
+      if (userCharacterId != null) {
+        RoleplayStateService.instance.setSelectedRole(userCharacterId);
+        final starterKey = rpOverview.roleplay?.starter?.key;
+        final starterRoleId = int.tryParse(starterKey ?? '');
+        final isUserStarter =
+            starterRoleId != null && starterRoleId == userCharacterId;
+        RoleplayStateService.instance
+            .setIsUserTurnYn(isUserStarter ? 'Y' : 'N');
+      }
+
+      RoleplayRouter.pushTutorial(context);
+    } catch (_) {
+      if (!mounted) return;
+      DefaultToast.show(
+        context,
+        'Failed to start episode.',
+        isError: true,
+      );
+    }
+  }
+
+  Widget _buildOverviewTabs(
+    BuildContext context,
+    RpS2SeriesOverviewDto overview,
+  ) {
+    return SudaLabelTabs(
+      contentGap: 24,
+      tabs: [
+        SudaLabelTab(
+          label: SudaTabLabel.l10n((l10n) => l10n.seriesOverviewTabEpisodes),
+          child: SeriesEpisodeTabContent(
+            key: ValueKey(_episodeContentKey),
+            overview: overview,
+            onPlayEpisode: _onEpisodePlay,
+            scrollToUnlockToken: _scrollToUnlockToken,
+          ),
+        ),
+        SudaLabelTab(
+          label: SudaTabLabel.l10n((l10n) => l10n.seriesOverviewTabSimilarTopic),
+          child: const SizedBox.shrink(),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final overview = _overview;
@@ -504,16 +586,34 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen> {
                             color: Colors.white,
                           ),
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 12),
                         _buildComplexityTag(overview?.synopsisComplexityLevel),
                         if (overview != null)
                           _buildProgressBarArea(overview),
-                        const SizedBox(height: 8),
-                        Text(
-                          synopsis,
-                          style: theme.bodySmall?.copyWith(color: Colors.white),
-                          textAlign: TextAlign.justify,
-                        ),
+                        if (synopsis.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          GestureDetector(
+                            onTap: () => setState(
+                              () => _isSynopsisExpanded = !_isSynopsisExpanded,
+                            ),
+                            behavior: HitTestBehavior.opaque,
+                            child: Text(
+                              synopsis,
+                              style: theme.bodySmall?.copyWith(
+                                color: Colors.white,
+                              ),
+                              textAlign: TextAlign.justify,
+                              maxLines: _isSynopsisExpanded ? null : 2,
+                              overflow: _isSynopsisExpanded
+                                  ? TextOverflow.visible
+                                  : TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                        if (overview != null) ...[
+                          const SizedBox(height: 40),
+                          _buildOverviewTabs(context, overview),
+                        ],
                         const SizedBox(height: 40),
                       ],
                     ),

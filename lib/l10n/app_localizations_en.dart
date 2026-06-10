@@ -283,6 +283,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileSavedRemoveCancel => 'Practice more';
 
   @override
+  String get seriesOverviewTabEpisodes => 'Episode';
+
+  @override
+  String get seriesOverviewTabSimilarTopic => 'Similar Topic';
+
+  @override
+  String seriesOverviewEpisodeNumber(int number) {
+    return 'Episode #$number';
+  }
+
+  @override
+  String get seriesOverviewPlay => 'Play';
+
+  @override
+  String get seriesOverviewLocked => 'Locked';
+
+  @override
+  String get seriesOverviewEpisodeLockedToast =>
+      'Complete the previous episode to unlock.';
+
+  @override
   String get noTicketsTitle => 'No tickets left…';
 
   @override

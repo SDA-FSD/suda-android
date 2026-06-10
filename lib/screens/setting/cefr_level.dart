@@ -411,16 +411,23 @@ class _CefrLevelScreenState extends State<CefrLevelScreen>
               builder: (context, child) {
                 final scale = _itemScale(index);
                 final diameter = baseDiameter * scale;
+                final isCenter = _isCenterCarouselIndex(index);
+                Widget circle = _buildLevelCircle(
+                  cefrLevel: cefrLevel,
+                  levelLabel: _levelLabel(l10n, cefrLevel),
+                  theme: theme,
+                  diameter: diameter,
+                );
+                if (isCenter) {
+                  circle = GestureDetector(
+                    onTap: (_isSubmitting || _isClosing) ? null : _onConfirm,
+                    behavior: HitTestBehavior.opaque,
+                    child: circle,
+                  );
+                }
                 return Opacity(
                   opacity: _opacityForCarouselItem(index),
-                  child: Center(
-                    child: _buildLevelCircle(
-                      cefrLevel: cefrLevel,
-                      levelLabel: _levelLabel(l10n, cefrLevel),
-                      theme: theme,
-                      diameter: diameter,
-                    ),
-                  ),
+                  child: Center(child: circle),
                 );
               },
             );

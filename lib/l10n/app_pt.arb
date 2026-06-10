@@ -109,6 +109,19 @@
   "profileSavedRemoveContent": "Você pode encontrá-la novamente no Histórico e salvá-la.",
   "profileSavedRemoveOk": "Remover",
   "profileSavedRemoveCancel": "Manter salvo",
+  "seriesOverviewTabEpisodes": "Episódio",
+  "seriesOverviewTabSimilarTopic": "Tópico Semelhante",
+  "seriesOverviewEpisodeNumber": "Episódio #{number}",
+  "@seriesOverviewEpisodeNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "seriesOverviewPlay": "Play",
+  "seriesOverviewLocked": "Locked",
+  "seriesOverviewEpisodeLockedToast": "Complete o episódio anterior para desbloquear.",
   "noTicketsTitle": "Acabou seus Tickets…",
   "noTicketsBody": "Você atingiu seu limite do dia.\nVolte Amanhã!",
   "surveyPromptLine1": "Você atingiu seu limite do dia.",

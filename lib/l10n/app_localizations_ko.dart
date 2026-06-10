@@ -271,6 +271,26 @@ class AppLocalizationsKo extends AppLocalizations {
   String get profileSavedRemoveCancel => '더 연습할래요';
 
   @override
+  String get seriesOverviewTabEpisodes => '에피소드';
+
+  @override
+  String get seriesOverviewTabSimilarTopic => '비슷한 주제';
+
+  @override
+  String seriesOverviewEpisodeNumber(int number) {
+    return '에피소드 #$number';
+  }
+
+  @override
+  String get seriesOverviewPlay => 'Play';
+
+  @override
+  String get seriesOverviewLocked => 'Locked';
+
+  @override
+  String get seriesOverviewEpisodeLockedToast => '이전 에피소드를 먼저 플레이하세요.';
+
+  @override
   String get noTicketsTitle => '티켓이 없습니다...';
 
   @override

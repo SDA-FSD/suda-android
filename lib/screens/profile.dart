@@ -18,6 +18,7 @@ import '../widgets/default_popup.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/gnb_bar.dart';
 import '../widgets/level_progress_bar.dart';
+import '../widgets/suda_label_tabs.dart';
 import 'roleplay/history.dart';
 import 'roleplay/history_v2.dart';
 import 'setting/setting.dart';
@@ -52,8 +53,6 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  static const Color _tabInactive = Color(0xFF635F5F);
-
   UserDto? _user;
   int? _currentLevel;
   double? _progressPercentage;
@@ -370,7 +369,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildHistorySection(BuildContext context) {
     final screenWidth = MediaQuery.sizeOf(context).width;
-    final contentWidth = screenWidth - 2 * _historyHPadding - 2 * _historyThumbGap;
+    final contentWidth =
+        screenWidth - 2 * _historyHPadding - 2 * _historyThumbGap;
     final itemWidth = contentWidth / 3;
     final itemHeight = itemWidth * 1.5;
 
@@ -379,9 +379,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final list = <Widget>[];
       for (var i = 0; i < 3; i++) {
         if (i > 0) list.add(const SizedBox(width: _historyThumbGap));
-        list.add(i < children.length
-            ? children[i]
-            : SizedBox(width: itemWidth, height: itemHeight));
+        list.add(
+          i < children.length
+              ? children[i]
+              : SizedBox(width: itemWidth, height: itemHeight),
+        );
       }
       return Row(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -411,7 +413,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         height: 120,
         child: Center(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
+            padding: const EdgeInsets.symmetric(horizontal: _historyHPadding),
             child: Text(
               AppLocalizations.of(context)!.profileHistoryEmpty,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
@@ -432,14 +434,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
         if (index < _historyList.length) {
           final item = _historyList[index];
           final resultId = item.resultId;
-          rowItems.add(_HistoryThumbnail(
-            item: item,
-            width: itemWidth,
-            height: itemHeight,
-            onTap: resultId != null
-                ? () => _openHistoryByVersion(resultId, item.version)
-                : null,
-          ));
+          rowItems.add(
+            _HistoryThumbnail(
+              item: item,
+              width: itemWidth,
+              height: itemHeight,
+              onTap: resultId != null
+                  ? () => _openHistoryByVersion(resultId, item.version)
+                  : null,
+            ),
+          );
         }
       }
       rows.add(rowOfThree(rowItems));
@@ -450,9 +454,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     if (_isLoadingMoreHistory) {
       rows.add(const SizedBox(height: _historyRowGap));
-      rows.add(rowOfThree(
-        List.generate(3, (_) => _historyShimmer(itemWidth, itemHeight)),
-      ));
+      rows.add(
+        rowOfThree(
+          List.generate(3, (_) => _historyShimmer(itemWidth, itemHeight)),
+        ),
+      );
     }
 
     return Padding(
@@ -508,61 +514,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildContentTabs(BuildContext context) {
-    final theme = Theme.of(context).textTheme;
-    final l10n = AppLocalizations.of(context)!;
-    final historySelected = _activeTab == _ProfileContentTab.history;
-    final savedSelected = _activeTab == _ProfileContentTab.saved;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: SizedBox(
-        height: 40,
-        child: Row(
-          children: [
-            Expanded(
-              child: GestureDetector(
-                onTap: () => _setActiveTab(_ProfileContentTab.history),
-                behavior: HitTestBehavior.opaque,
-                child: Padding(
-                  padding: const EdgeInsets.only(right: 20),
-                  child: Align(
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      l10n.profileHistory,
-                      style: theme.bodyLarge?.copyWith(
-                        color: historySelected ? Colors.white : _tabInactive,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            Container(
-              width: 2,
-              height: 20,
-              color: _tabInactive,
-            ),
-            Expanded(
-              child: GestureDetector(
-                onTap: () => _setActiveTab(_ProfileContentTab.saved),
-                behavior: HitTestBehavior.opaque,
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 20),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      l10n.profileSaved,
-                      style: theme.bodyLarge?.copyWith(
-                        color: savedSelected ? Colors.white : _tabInactive,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
+    return SudaLabelTabs(
+      labelPadding: const EdgeInsets.symmetric(horizontal: 24),
+      selectedIndex:
+          _activeTab == _ProfileContentTab.history ? 0 : 1,
+      onTabChanged: (index) => _setActiveTab(
+        index == 0 ? _ProfileContentTab.history : _ProfileContentTab.saved,
       ),
+      tabs: [
+        SudaLabelTab(
+          label: SudaTabLabel.l10n((l10n) => l10n.profileHistory),
+          child: _buildHistorySection(context),
+        ),
+        SudaLabelTab(
+          label: SudaTabLabel.l10n((l10n) => l10n.profileSaved),
+          child: _buildSavedSection(context),
+        ),
+      ],
     );
   }
 
@@ -1002,16 +970,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                 const SizedBox(height: 35),
 
-                // 탭 라벨 (History | Saved)
+                // 탭 (History | Saved)
                 const SizedBox(height: 14),
                 _buildContentTabs(context),
-                const SizedBox(height: 20),
-
-                // 탭 콘텐츠 영역
-                if (_activeTab == _ProfileContentTab.history)
-                  _buildHistorySection(context)
-                else
-                  _buildSavedSection(context),
               ],
             ),
           ),

@@ -285,6 +285,27 @@ class AppLocalizationsPt extends AppLocalizations {
   String get profileSavedRemoveCancel => 'Manter salvo';
 
   @override
+  String get seriesOverviewTabEpisodes => 'Episódio';
+
+  @override
+  String get seriesOverviewTabSimilarTopic => 'Tópico Semelhante';
+
+  @override
+  String seriesOverviewEpisodeNumber(int number) {
+    return 'Episódio #$number';
+  }
+
+  @override
+  String get seriesOverviewPlay => 'Play';
+
+  @override
+  String get seriesOverviewLocked => 'Locked';
+
+  @override
+  String get seriesOverviewEpisodeLockedToast =>
+      'Complete o episódio anterior para desbloquear.';
+
+  @override
   String get noTicketsTitle => 'Acabou seus Tickets…';
 
   @override

@@ -109,6 +109,19 @@
   "profileSavedRemoveContent": "You can find it again in History later.",
   "profileSavedRemoveOk": "Remove",
   "profileSavedRemoveCancel": "Practice more",
+  "seriesOverviewTabEpisodes": "Episode",
+  "seriesOverviewTabSimilarTopic": "Similar Topic",
+  "seriesOverviewEpisodeNumber": "Episode #{number}",
+  "@seriesOverviewEpisodeNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "seriesOverviewPlay": "Play",
+  "seriesOverviewLocked": "Locked",
+  "seriesOverviewEpisodeLockedToast": "Complete the previous episode to unlock.",
   "noTicketsTitle": "No tickets left…",
   "noTicketsBody": "You've reached today's limit.\nCome back tomorrow!",
   "surveyPromptLine1": "You've reached today's limit.",
