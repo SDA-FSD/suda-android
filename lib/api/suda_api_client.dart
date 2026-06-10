@@ -5,6 +5,7 @@ import '../models/home_models.dart';
 import '../models/pagination.dart';
 import '../models/rps2_test_models.dart';
 import '../models/roleplay_models.dart';
+import '../models/series_models.dart';
 import '../models/user_models.dart';
 import '../models/version_models.dart';
 import 'endpoints/auth_api.dart';
@@ -13,6 +14,7 @@ import 'endpoints/home_api.dart';
 import 'endpoints/notice_api.dart';
 import 'endpoints/push_api.dart';
 import 'endpoints/roleplay_api.dart';
+import 'endpoints/series_api.dart';
 import 'endpoints/user_api.dart';
 import 'endpoints/version_api.dart';
 
@@ -30,6 +32,26 @@ class SudaApiClient {
       accessToken: accessToken,
       categoryEnumValue: categoryEnumValue,
       pageNum: pageNum,
+    );
+  }
+
+  static Future<RpS2SeriesOverviewDto> getSeriesOverview({
+    required String accessToken,
+    required int seriesId,
+  }) {
+    return SeriesApi.getSeriesOverview(
+      accessToken: accessToken,
+      seriesId: seriesId,
+    );
+  }
+
+  static Future<Map<int, int>> getSeriesBestScore({
+    required String accessToken,
+    required int seriesId,
+  }) {
+    return SeriesApi.getSeriesBestScore(
+      accessToken: accessToken,
+      seriesId: seriesId,
     );
   }
 

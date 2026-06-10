@@ -429,4 +429,10 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get reviewChatNoAudioToPlay => 'Não há áudio para reproduzir.';
+
+  @override
+  String get seriesInformationTopicDifficulty => 'Dificuldade do Tópico';
+
+  @override
+  String get seriesInformationLearningGoals => 'Metas de aprendizado';
 }

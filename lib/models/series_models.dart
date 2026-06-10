@@ -1,0 +1,236 @@
+import '../utils/suda_json_util.dart';
+
+/// GET /rps2/series/{seriesId}/overview 응답 DTO
+class RpS2SeriesOverviewDto {
+  final int id;
+  final Map<String, String> title;
+  final String? category;
+  final String? synopsisComplexityLevel;
+  final Map<String, String> synopsis;
+  final String? thumbnailImgPath;
+  final RpS2CharacterDto? userCharacter;
+  final Map<String, String> endingTitle;
+  final Map<String, String> endingContent;
+  final String? endingImgPath;
+  final List<RpS2SeriesEpisodeDto> episodes;
+  final Map<int, int> bestScoreMap;
+
+  const RpS2SeriesOverviewDto({
+    required this.id,
+    required this.title,
+    this.category,
+    this.synopsisComplexityLevel,
+    required this.synopsis,
+    this.thumbnailImgPath,
+    this.userCharacter,
+    required this.endingTitle,
+    required this.endingContent,
+    this.endingImgPath,
+    required this.episodes,
+    required this.bestScoreMap,
+  });
+
+  factory RpS2SeriesOverviewDto.fromJson(Map<String, dynamic> json) {
+    final episodesRaw = json['episodes'];
+    final List<RpS2SeriesEpisodeDto> episodes = episodesRaw == null
+        ? []
+        : (episodesRaw as List<dynamic>)
+              .map(
+                (item) => RpS2SeriesEpisodeDto.fromJson(
+                  item as Map<String, dynamic>,
+                ),
+              )
+              .toList();
+
+    return RpS2SeriesOverviewDto(
+      id: (json['id'] as num?)?.toInt() ?? 0,
+      title: SudaJsonUtil.localizedMapFromJson(json['title']),
+      category: json['category'] as String?,
+      synopsisComplexityLevel: json['synopsisComplexityLevel'] as String?,
+      synopsis: SudaJsonUtil.localizedMapFromJson(json['synopsis']),
+      thumbnailImgPath: json['thumbnailImgPath'] as String?,
+      userCharacter: json['userCharacter'] == null
+          ? null
+          : RpS2CharacterDto.fromJson(
+              json['userCharacter'] as Map<String, dynamic>,
+            ),
+      endingTitle: SudaJsonUtil.localizedMapFromJson(json['endingTitle']),
+      endingContent: SudaJsonUtil.localizedMapFromJson(json['endingContent']),
+      endingImgPath: json['endingImgPath'] as String?,
+      episodes: episodes,
+      bestScoreMap: bestScoreMapFromJson(json['bestScoreMap']),
+    );
+  }
+
+  RpS2SeriesOverviewDto copyWith({
+    Map<int, int>? bestScoreMap,
+  }) {
+    return RpS2SeriesOverviewDto(
+      id: id,
+      title: title,
+      category: category,
+      synopsisComplexityLevel: synopsisComplexityLevel,
+      synopsis: synopsis,
+      thumbnailImgPath: thumbnailImgPath,
+      userCharacter: userCharacter,
+      endingTitle: endingTitle,
+      endingContent: endingContent,
+      endingImgPath: endingImgPath,
+      episodes: episodes,
+      bestScoreMap: bestScoreMap ?? this.bestScoreMap,
+    );
+  }
+}
+
+class RpS2SeriesEpisodeDto {
+  final int id;
+  final Map<String, String> title;
+  final Map<String, String> summary;
+  final Map<String, String> briefing;
+  final Map<String, String> learningFunction;
+  final String? thumbnailImgPath;
+  final RpS2CharacterDto? aiCharacter;
+  final Map<String, RpS2CefrDto> cefrMap;
+
+  const RpS2SeriesEpisodeDto({
+    required this.id,
+    required this.title,
+    required this.summary,
+    required this.briefing,
+    required this.learningFunction,
+    this.thumbnailImgPath,
+    this.aiCharacter,
+    this.cefrMap = const {},
+  });
+
+  factory RpS2SeriesEpisodeDto.fromJson(Map<String, dynamic> json) {
+    return RpS2SeriesEpisodeDto(
+      id: (json['id'] as num?)?.toInt() ?? 0,
+      title: SudaJsonUtil.localizedMapFromJson(json['title']),
+      summary: SudaJsonUtil.localizedMapFromJson(json['summary']),
+      briefing: SudaJsonUtil.localizedMapFromJson(json['briefing']),
+      learningFunction: SudaJsonUtil.localizedMapFromJson(json['learningFunction']),
+      thumbnailImgPath: json['thumbnailImgPath'] as String?,
+      aiCharacter: json['aiCharacter'] == null
+          ? null
+          : RpS2CharacterDto.fromJson(
+              json['aiCharacter'] as Map<String, dynamic>,
+            ),
+      cefrMap: _cefrMapFromJson(json['cefrMap']),
+    );
+  }
+}
+
+class RpS2CefrDto {
+  final int? requiredSpeechCount;
+  final String? startLine;
+  final List<RpS2CefrMissionDto> missions;
+
+  const RpS2CefrDto({
+    this.requiredSpeechCount,
+    this.startLine,
+    this.missions = const [],
+  });
+
+  factory RpS2CefrDto.fromJson(Map<String, dynamic> json) {
+    final missionsRaw = json['missions'];
+    final List<RpS2CefrMissionDto> missions = missionsRaw == null
+        ? []
+        : (missionsRaw as List<dynamic>)
+              .map(
+                (item) => RpS2CefrMissionDto.fromJson(
+                  item as Map<String, dynamic>,
+                ),
+              )
+              .toList();
+
+    return RpS2CefrDto(
+      requiredSpeechCount: (json['requiredSpeechCount'] as num?)?.toInt(),
+      startLine: json['startLine'] as String?,
+      missions: missions,
+    );
+  }
+}
+
+class RpS2CefrMissionDto {
+  final Map<String, String> keyExpression;
+  final Map<String, String> instruction;
+  final Map<String, String> sampleAnswer;
+
+  const RpS2CefrMissionDto({
+    required this.keyExpression,
+    required this.instruction,
+    required this.sampleAnswer,
+  });
+
+  factory RpS2CefrMissionDto.fromJson(Map<String, dynamic> json) {
+    return RpS2CefrMissionDto(
+      keyExpression: SudaJsonUtil.localizedMapFromJson(json['keyExpression']),
+      instruction: SudaJsonUtil.localizedMapFromJson(json['instruction']),
+      sampleAnswer: SudaJsonUtil.localizedMapFromJson(json['sampleAnswer']),
+    );
+  }
+}
+
+class RpS2CharacterDto {
+  final int? id;
+  final String? name;
+  final String? gender;
+  final String? ageRange;
+  final String? occupation;
+  final String? personality;
+  final String? speechStyle;
+  final String? nationality;
+  final String? rpImgPath;
+
+  const RpS2CharacterDto({
+    this.id,
+    this.name,
+    this.gender,
+    this.ageRange,
+    this.occupation,
+    this.personality,
+    this.speechStyle,
+    this.nationality,
+    this.rpImgPath,
+  });
+
+  factory RpS2CharacterDto.fromJson(Map<String, dynamic> json) {
+    return RpS2CharacterDto(
+      id: (json['id'] as num?)?.toInt(),
+      name: json['name'] as String?,
+      gender: json['gender'] as String?,
+      ageRange: json['ageRange'] as String?,
+      occupation: json['occupation'] as String?,
+      personality: json['personality'] as String?,
+      speechStyle: json['speechStyle'] as String?,
+      nationality: json['nationality'] as String?,
+      rpImgPath: json['rpImgPath'] as String?,
+    );
+  }
+}
+
+Map<String, RpS2CefrDto> _cefrMapFromJson(dynamic raw) {
+  if (raw is! Map) return const {};
+  final result = <String, RpS2CefrDto>{};
+  raw.forEach((key, value) {
+    if (value is! Map) return;
+    result[key.toString()] = RpS2CefrDto.fromJson(
+      Map<String, dynamic>.from(value),
+    );
+  });
+  return result;
+}
+
+Map<int, int> bestScoreMapFromJson(dynamic raw) {
+  if (raw is! Map) return const {};
+  final result = <int, int>{};
+  raw.forEach((key, value) {
+    final episodeId = int.tryParse(key.toString());
+    if (episodeId == null) return;
+    if (value is num) {
+      result[episodeId] = value.toInt();
+    }
+  });
+  return result;
+}

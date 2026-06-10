@@ -160,5 +160,7 @@
   "ticketInfoLikesSuffix": " to level up!",
   "ticketInfoButtonOkay": "Okay",
   "reviewChatTapHint": "Tap the chat bubble to play the audio.",
-  "reviewChatNoAudioToPlay": "There's no audio to play."
+  "reviewChatNoAudioToPlay": "There's no audio to play.",
+  "seriesInformationTopicDifficulty": "Topic Difficulty",
+  "seriesInformationLearningGoals": "Learning Goals"
 }

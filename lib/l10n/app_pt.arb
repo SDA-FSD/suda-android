@@ -160,5 +160,7 @@
   "ticketInfoLikesSuffix": " para\nsubir de nível!",
   "ticketInfoButtonOkay": "Okay",
   "reviewChatTapHint": "Toque no balão de chat para reproduzir o áudio.",
-  "reviewChatNoAudioToPlay": "Não há áudio para reproduzir."
+  "reviewChatNoAudioToPlay": "Não há áudio para reproduzir.",
+  "seriesInformationTopicDifficulty": "Dificuldade do Tópico",
+  "seriesInformationLearningGoals": "Metas de aprendizado"
 }

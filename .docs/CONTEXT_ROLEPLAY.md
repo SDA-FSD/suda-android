@@ -63,6 +63,7 @@
 - 카테고리별 시리즈 페이징: `GET /v2/home/series?category={enumValue}&pageNum=…`
   - `category`: `HomeCategoryDto.enumValue` (예: `DAILY_LIFE`, UI 비노출)
   - 응답: `SudaAppPage<HomeSeriesDto>` (content, number, size, last, first)
+- **S2** Series Overview: `GET /rps2/series/{seriesId}/overview` → `RpS2SeriesOverviewDto` (`lib/models/series_models.dart`). `SeriesOverviewScreen`에서 호출.
 - **S1** Overview: `GET /v1/roleplays/{roleplayId}/overview`
 - 인증: Authorization Bearer JWT 필요
 - 응답: `RoleplayOverviewDto`

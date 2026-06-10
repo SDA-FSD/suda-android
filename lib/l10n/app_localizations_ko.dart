@@ -409,4 +409,10 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get reviewChatNoAudioToPlay => '재생할 음성이 없습니다.';
+
+  @override
+  String get seriesInformationTopicDifficulty => '주제 난이도';
+
+  @override
+  String get seriesInformationLearningGoals => '학습목표';
 }

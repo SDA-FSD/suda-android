@@ -2,6 +2,16 @@ import '../models/common_models.dart';
 import 'language_util.dart';
 
 class SudaJsonUtil {
+  static Map<String, String> localizedMapFromJson(dynamic value) {
+    if (value == null) return const {};
+    if (value is Map) {
+      return value.map(
+        (key, val) => MapEntry(key.toString(), val?.toString() ?? ''),
+      );
+    }
+    return const {};
+  }
+
   static String localizedMapText(
     Map<String, String>? values, {
     String? languageCode,

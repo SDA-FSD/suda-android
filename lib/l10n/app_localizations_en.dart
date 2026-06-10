@@ -427,4 +427,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reviewChatNoAudioToPlay => 'There\'s no audio to play.';
+
+  @override
+  String get seriesInformationTopicDifficulty => 'Topic Difficulty';
+
+  @override
+  String get seriesInformationLearningGoals => 'Learning Goals';
 }

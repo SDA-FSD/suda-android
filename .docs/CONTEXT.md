@@ -90,6 +90,8 @@
       - 홈 화면 카테고리별 가로 썸네일: `lib/screens/home.dart` `CategorySeriesRow`에서 `ListView.separated` 구분 폭 **8**dp. 썸네일 탭 → `SeriesRouter.pushOverview` → `SeriesOverviewScreen`(S2, placeholder).
     - restYn/restStartsAt/restEndsAt·notiboxUnreadYn은 `GET /v2/home/contents` 처리 시 `RestStatusService.instance.update()`로 보관 (어떤 스크린에서도 접근 가능)
   - `SudaApiClient.getSeriesByCategory()`: 홈 카테고리별 시리즈 페이징 (`GET /v2/home/series?category={enumValue}&pageNum=…`, 0-based, size 4 가정). 응답 `SudaAppPage<HomeSeriesDto>`.
+  - `SudaApiClient.getSeriesOverview()`: S2 시리즈 Overview (`GET /rps2/series/{seriesId}/overview`, 응답 `RpS2SeriesOverviewDto`). `SeriesOverviewScreen` 진입 시 호출.
+  - `SudaApiClient.getSeriesBestScore()`: S2 시리즈 CEFR별 best score (`GET /rps2/series/{seriesId}/best-score`, 응답 `Map<int,int>`). `SeriesOverviewScreen`에서 언어레벨 변경 후 `bestScoreMap` 갱신.
   - `SudaApiClient.getNotifications()`: 알림함 목록 페이징 (`GET /v1/users/notification?pageNum=…`, `UserApi.getNotifications`) — 응답 원소 `NotificationDto`에 **readYn**(`Y`/`N`) 포함. 서버는 `sendFinishedAt` 기준 30일 초과 알림을 내려주지 않으며(배지·목록 일치), 카드 하단 상대 날짜도 동일 필드(`sendFinishedAt`)를 UTC로 파싱 후 로컬 달력 일 단위로 표시(`notification_box.dart`).
   - `SudaApiClient.markNotificationRead()`: 알림 읽음 처리 (`POST /v1/users/notification/{notificationId}/read`, `UserApi.markNotificationRead`) — 응답 `QuestResultDto`. GET에서 30일 초과로 빠진 항목도 서버가 ZSET에 남겨 둔 경우 POST 읽음은 성공할 수 있어, 재진입 시 `readYn`이 되돌아가지 않도록 한다.
   - `SudaApiClient.getLatestVersion()`: 최신 버전 정보 조회 (`GET /v1/latest-version`)

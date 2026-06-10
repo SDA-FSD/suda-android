@@ -879,6 +879,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'There\'s no audio to play.'**
   String get reviewChatNoAudioToPlay;
+
+  /// No description provided for @seriesInformationTopicDifficulty.
+  ///
+  /// In en, this message translates to:
+  /// **'Topic Difficulty'**
+  String get seriesInformationTopicDifficulty;
+
+  /// No description provided for @seriesInformationLearningGoals.
+  ///
+  /// In en, this message translates to:
+  /// **'Learning Goals'**
+  String get seriesInformationLearningGoals;
 }
 
 class _AppLocalizationsDelegate
