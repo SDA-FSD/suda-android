@@ -95,7 +95,7 @@ class _RoleplayTutorialScreenState extends State<RoleplayTutorialScreen> {
     final num = pageIndex + 1;
     final lang = LanguageUtil.getCurrentLanguageCode();
     final folder = (lang == 'ko' || lang == 'pt') ? lang : 'en';
-    return 'assets/images/tutorials2/$folder/tutorial-$num.png';
+    return 'assets/images/tutorials2/$folder/Tutorial-$num.png';
   }
 
   void _updateLocalUserTutorialDone() {
