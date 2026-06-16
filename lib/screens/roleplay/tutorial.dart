@@ -31,10 +31,10 @@ class _RoleplayTutorialScreenState extends State<RoleplayTutorialScreen> {
 
   static const List<Color> _pageColors = [
     Color(0xFF0CABA8),
-    Color(0xFFFFB700),
     Color(0xFFFF00A6),
     Color(0xFFFFB700),
     Color(0xFF0CABA8),
+    Color(0xFFFF00A6),
     Color(0xFF8A38F5),
   ];
 
