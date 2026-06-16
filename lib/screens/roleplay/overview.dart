@@ -9,12 +9,10 @@ import '../../config/app_config.dart';
 import '../../services/roleplay_state_service.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
-import '../../services/main_user_sync.dart';
 import '../../utils/default_toast.dart';
 import '../../utils/language_util.dart';
 import '../../utils/suda_json_util.dart';
 import '../../widgets/app_scaffold.dart';
-import '../../routes/roleplay_router.dart';
 
 /// Roleplay Overview Screen (Sub Screen)
 ///
@@ -103,9 +101,6 @@ class _RoleplayOverviewScreenState extends State<RoleplayOverviewScreen> {
         RoleplayStateService.instance.setUser(widget.user);
       }
 
-      // Overview 스크린 노출 시: FIRST_OVERVIEW 메타가 없거나 Y가 아니면 1회 호출 + 로컬 상태 Y로 갱신
-      _handleFirstOverviewBestEffort(accessToken);
-
       final overview = await SudaApiClient.getRoleplayOverview(
         accessToken: accessToken,
         roleplayId: roleplayId,
@@ -126,39 +121,6 @@ class _RoleplayOverviewScreenState extends State<RoleplayOverviewScreen> {
         _errorMessage = 'Failed to load roleplay overview.';
       });
     }
-  }
-
-  static const String _firstOverviewMetaKey = 'FIRST_OVERVIEW';
-
-  void _handleFirstOverviewBestEffort(String accessToken) {
-    final user = RoleplayStateService.instance.user ?? widget.user;
-    if (user == null) {
-      // user가 없으면 로컬 갱신을 못 하므로, 중복 호출 방지가 불가해 호출 자체도 생략한다.
-      return;
-    }
-    if (user.hasMetaInfoValue(key: _firstOverviewMetaKey, value: 'Y')) {
-      return;
-    }
-
-    // 서버 호출은 best-effort (응답/실패 무시)
-    unawaited(_postFirstOverviewBestEffort(accessToken));
-
-    // 클라이언트 전역/로컬 상태 즉시 갱신해서 재진입 시 중복 호출을 막는다.
-    final updatedUser = user.upsertMetaInfo(key: _firstOverviewMetaKey, value: 'Y');
-    RoleplayStateService.instance.setUser(updatedUser);
-    MainUserSync.instance.notifyUserUpdated(updatedUser);
-  }
-
-  Future<void> _postFirstOverviewBestEffort(String accessToken) async {
-    try {
-      await SudaApiClient.postFirstOverview(accessToken: accessToken);
-    } catch (_) {
-      // best-effort: ignore
-    }
-  }
-
-  void _navigateToOpening(BuildContext context) {
-    RoleplayRouter.pushTutorial(context);
   }
 
   String _getLocalizedText(List<SudaJson>? values) {
@@ -252,18 +214,8 @@ class _RoleplayOverviewScreenState extends State<RoleplayOverviewScreen> {
               isAvailableToUsers: availableToUsersYn == 'Y',
             );
             DefaultToast.show(context, message);
-          } else {
-            // 활성화된 경우 roleId 저장 후 오프닝으로 이동
-            final overview = RoleplayStateService.instance.overview;
-            final starterKey = overview?.roleplay?.starter?.key;
-            final starterRoleId = int.tryParse(starterKey ?? '');
-            final isUserStarter =
-                starterRoleId != null && starterRoleId == role.id;
-            RoleplayStateService.instance.setSelectedRole(role.id);
-            RoleplayStateService.instance
-                .setIsUserTurnYn(isUserStarter ? 'Y' : 'N');
-            _navigateToOpening(context);
           }
+          // S1 Opening 연결 해제 (fade-out). 상태 정리는 스크린 삭제 단계에서 처리.
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: backgroundColor,

@@ -5,6 +5,7 @@ import '../utils/full_screen_route.dart';
 import '../utils/sub_screen_route.dart';
 import '../widgets/rest_overlay.dart';
 import '../screens/roleplay/overview.dart';
+import '../screens/series/overview.dart';
 import '../screens/roleplay/opening.dart';
 import '../screens/roleplay/playing.dart';
 import '../screens/roleplay/ending.dart';
@@ -173,7 +174,8 @@ class RoleplayRouter {
 
   static void popToOverview(BuildContext context) {
     Navigator.of(context).popUntil((route) {
-      return route.isFirst || route.settings.name == RoleplayOverviewScreen.routeName;
+      return route.isFirst ||
+          route.settings.name == SeriesOverviewScreen.routeName;
     });
   }
 }

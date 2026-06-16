@@ -1,3 +1,4 @@
+import 'dart:async' show unawaited;
 import 'dart:ui' show ImageFilter;
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -7,10 +8,11 @@ import 'package:shimmer/shimmer.dart';
 import '../../config/app_config.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/series_models.dart';
+import '../../services/main_user_sync.dart';
+import '../../services/roleplay_state_service.dart';
+import '../../services/series_state_service.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
-import '../../services/roleplay_state_service.dart';
-import '../../utils/default_toast.dart';
 import '../../utils/english_level_util.dart';
 import '../../utils/language_util.dart';
 import '../../utils/suda_json_util.dart';
@@ -87,11 +89,24 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen> {
         _isSynopsisExpanded = false;
       });
 
+      if (widget.user != null) {
+        SeriesStateService.instance.setUser(widget.user);
+      }
+
+      _handleFirstOverviewBestEffort(accessToken);
+
       final overview = await SudaApiClient.getSeriesOverview(
         accessToken: accessToken,
         seriesId: widget.seriesId,
       );
       if (!mounted) return;
+
+      SeriesStateService.instance.setSeriesOverview(
+        seriesId: widget.seriesId,
+        overview: overview,
+        user: widget.user,
+      );
+
       setState(() {
         _overview = overview;
         _isLoading = false;
@@ -439,50 +454,36 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen> {
     );
   }
 
-  Future<void> _onEpisodePlay(RpS2SeriesEpisodeDto episode) async {
-    final accessToken = await TokenStorage.loadAccessToken();
-    if (!mounted) return;
-    if (accessToken == null) {
-      DefaultToast.show(context, 'Authentication required.', isError: true);
-      return;
-    }
+  static const String _firstOverviewMetaKey = 'FIRST_OVERVIEW';
 
+  void _handleFirstOverviewBestEffort(String accessToken) {
+    final user = SeriesStateService.instance.user ?? widget.user;
+    if (user == null) return;
+    if (user.hasMetaInfoValue(key: _firstOverviewMetaKey, value: 'Y')) return;
+
+    unawaited(_postFirstOverviewBestEffort(accessToken));
+
+    final updatedUser =
+        user.upsertMetaInfo(key: _firstOverviewMetaKey, value: 'Y');
+    SeriesStateService.instance.setUser(updatedUser);
+    MainUserSync.instance.notifyUserUpdated(updatedUser);
+  }
+
+  Future<void> _postFirstOverviewBestEffort(String accessToken) async {
     try {
-      if (widget.user != null) {
-        RoleplayStateService.instance.setUser(widget.user);
-      }
-
-      final rpOverview = await SudaApiClient.getRoleplayOverview(
-        accessToken: accessToken,
-        roleplayId: episode.id,
-      );
-      if (!mounted) return;
-
-      RoleplayStateService.instance.setOverview(
-        roleplayId: episode.id,
-        overview: rpOverview,
-      );
-
-      final userCharacterId = _overview?.userCharacter?.id;
-      if (userCharacterId != null) {
-        RoleplayStateService.instance.setSelectedRole(userCharacterId);
-        final starterKey = rpOverview.roleplay?.starter?.key;
-        final starterRoleId = int.tryParse(starterKey ?? '');
-        final isUserStarter =
-            starterRoleId != null && starterRoleId == userCharacterId;
-        RoleplayStateService.instance
-            .setIsUserTurnYn(isUserStarter ? 'Y' : 'N');
-      }
-
-      RoleplayRouter.pushTutorial(context);
+      await SudaApiClient.postFirstOverview(accessToken: accessToken);
     } catch (_) {
-      if (!mounted) return;
-      DefaultToast.show(
-        context,
-        'Failed to start episode.',
-        isError: true,
-      );
+      // best-effort: ignore
     }
+  }
+
+  void _onEpisodePlay(RpS2SeriesEpisodeDto episode) {
+    SeriesStateService.instance.setSelectedEpisodeId(episode.id);
+    if (widget.user != null) {
+      SeriesStateService.instance.setUser(widget.user);
+      RoleplayStateService.instance.setUser(widget.user);
+    }
+    RoleplayRouter.pushTutorial(context);
   }
 
   Widget _buildOverviewTabs(

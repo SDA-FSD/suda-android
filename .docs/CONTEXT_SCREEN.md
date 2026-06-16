@@ -722,28 +722,30 @@
 
 ### 스크린 관련 정의 파일
 - **파일 경로**: `lib/screens/roleplay/playing.dart`
-- **클래스명**: `RoleplayPlayingScreen` (StatelessWidget)
+- **클래스명**: `RoleplayPlayingScreen` (StatefulWidget)
 - **스크린 타입**: **Full Screen**
 - **appPath**: 해당 없음 (세션·플로우 의존)
 
 ### 스크린 용도
-- Roleplay 진행 중 화면
+- S2 Roleplay 진행 중 화면. AI 선시작 후 힌트 조건 처리, 사용자 발화, 나레이션, 후속 AI 말풍선, 턴바/미션 효과를 반복한다.
 
 ### 이전 스크린 정보 (진입점)
-- **RoleplayOpeningScreen**: 중앙 "Start" 텍스트 클릭 시
-  - `Navigator.pushReplacement()`로 전환 (opening screen 삭제)
+- **RoleplayOpeningScreen**: 정상 `POST /rps2/sessions` 후 `SeriesStateService.session` 저장 및 티켓 consume 이펙트 완료 시
+  - `RoleplayRouter.replaceWithPlaying()`로 전환 (opening screen 삭제)
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
-- **RoleplayEndingScreen** (Full Screen): 중앙 "Ending" 텍스트 클릭 시
-  - `Navigator.pushReplacement()`로 전환 (playing screen 삭제, 돌아올 일 없음)
-- **RoleplayFailedScreen** (Full Screen): 중앙 "Failed" 텍스트 클릭 시
-  - `Navigator.pushReplacement()`로 전환 (playing screen 삭제, 돌아올 일 없음)
+- **SeriesOverviewScreen** (Sub Screen): X/시스템 뒤로가기 확인 후 나가기 시 `RoleplayRouter.popToOverview()`로 복귀
+- **Ending/Failed/Result 계열**: S2 result 호출·이동은 아직 미구현. 현재 `requiredSpeechCount` 도달 후 응답 `narration`·`aiText`가 모두 비어 있을 때 `roleplayAnalyzing` 서비스 메시지 blink까지만 수행한다. 응답 본문이 있으면 정상 대화 루프를 계속 처리한다.
 
 ### 스크린 내부 구현 특이사항
-- Opening과 동일: `overviewImgPath`가 있으면 `RoleplayOverviewBackdrop` 전면 배경(`RoleplayScaffold` 투명). `RoleplayStateService`의 동일 overview 컨텍스트 사용.
-- 시스템 뒤로가기 버튼 클릭 시: "페이지를 나갑니다" 얼럿 노출, 확인 시 playing screen 삭제, 이전 overview 노출
-- 별도 X 버튼 제공 안 함
-- 중앙에 "Ending", "Failed" 텍스트 (임시, 향후 게임 진행 UI로 대체 예정)
+- `SeriesStateService.selectedEpisode`와 `overview.userCharacter` 기반. 배경은 episode `thumbnailImgPath`, 헤더 타이틀은 episode `title`, duration 없음.
+- 헤더 좌측 X/시스템 뒤로가기: 나가기 확인 레이어 노출, 확인 시 `/series/overview`까지 pop. 우측 `kebab.png`는 설정패널 토글(오토힌트, 음성 속도).
+- `RoleplayScaffold.belowHeader`에 S2 턴바 영역 표시. `requiredSpeechCount`개 턴박스를 렌더링하고, 사용자 발화 응답 `userGrade` A/B/C/D에 따라 색상·라벨 효과 후 40% opacity 상태로 남긴다.
+- 본문은 상단 고정 미션 패널 + 스크롤 대화 영역. 대화 entry는 AI/User/Narration 타입이며 힌트는 별도 bubble로 append된다. 힌트 텍스트 조회 `GET /rps2/sessions/{id}/hint/{rpMsgId}`는 202 not-ready 시 S1 delay 패턴으로 최대 15회 재시도한다. AI 말풍선은 번역 아이콘과 `GET /rps2/sessions/{id}/translation?index=`를 사용한다.
+- 미션 패널은 접힘/펼침을 지원한다. 접힘 상태 우측 숫자는 달성 수가 아니라 현재 노출 미션 순서(`activeMissionIndex + 1`) 기준이다. `missionCompletedIndex` 수신 시 해당 미션 row 또는 접힘 좌측 아이콘 위치에서 `mission_complete_effect.png` fade/회전 효과를 재생하고, 아이콘을 즉시 `rps2_mission_on.png`로 전환한다. 이미 완료 처리한 index가 재수신되면 무시한다. 접힘 상태 배경은 `#9E0067`로 300ms 전환되며, 다음 사용자 턴에 잔여 미션을 노출하기 전까지 유지된다. 잔여 미션으로의 표시 전환은 다음 사용자 턴 활성화 시점에 수행한다.
+- 푸터는 서비스 메시지 24px, 녹음/타이핑 입력, 하단 mic/keyboard·hint 아이콘 3층 구조. 사용자 턴 활성 시 `holdMicrophoneToSpeak` fade-in/out, 마지막 턴 도달 시 `roleplayAnalyzing` blink. 오토힌트 ON으로 힌트박스가 자동 노출된 턴은 사용자 턴 활성 후에도 힌트 버튼 disabled를 유지한다. 녹음 시작 완료 전 release/cancel이 들어오면 pending action으로 보관해 start 완료 직후 finish/cancel을 이어서 처리한다.
+- API: 사용자 음성 `POST /rps2/sessions/{id}/user-message/audio`(octet-stream), 텍스트 `POST /rps2/sessions/{id}/user-message/text`(raw string), 후속 AI 음성 `GET /rps2/sessions/{id}/ai-message/audio`.
+- 사용자 발화 응답 후 타이밍: 사용자 말풍선 노출 직후 후속 AI 음성을 미리 준비하고, 500ms 후 나레이션을 한 줄씩 fade-in(최소 1초 단계 보장)한 뒤 500ms 대기한다. 이 시점과 AI 음성 준비 완료 중 늦은 시점에 AI 말풍선을 노출하고 준비된 음성을 재생한다.
 
 ---
 

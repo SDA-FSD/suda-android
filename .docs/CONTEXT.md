@@ -6,7 +6,8 @@
 
 ## 1-1. Roleplay 시즌 (S1 / S2)
 - **S1 (Season 1)**: fade-out 예정. **단일 롤플레이** 단위 노출·플레이. `RoleplayOverviewScreen` → Opening → Playing → … (`GET /v1/roleplays/{roleplayId}/overview`).
-- **S2 (Season 2)**: 신규. 여러 롤플레이(**에피소드**)가 하나의 **시리즈**에 묶임. 홈에는 시리즈 단위로 노출하며, 탭 시 `SeriesOverviewScreen`(Sub, `lib/screens/series/overview.dart`)으로 진입(본문·API는 추후 지침). 홈 API: `GET /v2/home/contents`, 카테고리 페이징 `GET /v2/home/series?category={enumValue}&pageNum=…`.
+- **S2 (Season 2)**: 신규. 여러 롤플레이(**에피소드**)가 하나의 **시리즈**에 묶임. 홈에는 시리즈 단위로 노출하며, 탭 시 `SeriesOverviewScreen`(Sub, `lib/screens/series/overview.dart`)으로 진입. 에피소드 Play → Tutorial → `RoleplayOpeningScreen` → Playing → … 복귀는 `RoleplayRouter.popToOverview`가 `/series/overview`까지 pop. S2 플레이 컨텍스트는 `SeriesStateService`(`lib/services/series_state_service.dart`)에 `RpS2SeriesOverviewDto`·`selectedEpisodeId`·`user`를 보관(다른 시리즈 Overview 진입 시 refresh). 홈 API: `GET /v2/home/contents`, 카테고리 페이징 `GET /v2/home/series?category={enumValue}&pageNum=…`.
+- **S1 Opening 연결 해제**: `RoleplayOverviewScreen` 역할 Play 버튼은 Opening/Tutorial로 이동하지 않음(fade-out). S1 Overview 상태는 스크린 삭제 단계에서 정리 예정.
 
 ## 2. 개발 환경 전제 조건
 - 대부분의 변경 작업 진행 시, IDE 외부에서 에뮬레이터 및 `flutter run` 상태임을 전제로 행동할 것
@@ -141,7 +142,7 @@
 - **스크린 노출 통계(클라이언트 best-effort 호출)**
   - Tutorial 스크린이 실제로 노출되는 경우(완료 상태가 아니어서 화면을 보여주기로 확정된 경우): `POST /v1/users/tutorial-shown`
     - requestBody 없음, 응답/실패 무시 (호출만)
-  - Overview 스크린 노출 시 사용자의 `metaInfo`에 `FIRST_OVERVIEW == 'Y'`가 아니면 “첫 진입”으로 간주:
+  - **Series Overview** 로드 시(`SeriesOverviewScreen._loadOverview`) 사용자의 `metaInfo`에 `FIRST_OVERVIEW == 'Y'`가 아니면 “첫 진입”으로 간주:
     - `POST /v1/users/first-overview` (requestBody 없음, 응답/실패 무시)
     - **중복 호출 방지**를 위해 클라이언트 전역 사용자 상태의 `metaInfo`에 `FIRST_OVERVIEW='Y'`를 즉시 주입한다(`MainUserSync.notifyUserUpdated`로 메인 전역 `_user` 갱신).
 
@@ -192,9 +193,11 @@
 
 ## 7-1. Roleplay 스크린 컨텍스트
 
-- Roleplay 관련 스크린 흐름 및 데이터 정책은 `.docs/CONTEXT_ROLEPLAY.md`를 참조합니다.
+- Roleplay 관련 스크린 흐름 및 데이터 정책은 `.docs/CONTEXT_ROLEPLAY.md`를 참조한다.
+- **S2 (Season 2) Roleplay 마이그레이션 진행상황**은 `.docs/CONTEXT_ROLEPLAY_S2.md`를 참조한다.
 - Roleplay 세션 `sessionId`는 인메모리 공통 상태로 보관하고 롤플레이 종료 시 삭제됩니다.
-- **RoleplayOpeningScreen / RoleplayPlayingScreen** 전면 배경: `overviewImgPath`가 있으면 공통 위젯 `RoleplayOverviewBackdrop`(`lib/widgets/roleplay_overview_backdrop.dart`, Overview와 동일 CDN URL·캐시). 상세는 `.docs/CONTEXT_SCREEN.md` §12·§13.
+- **RoleplayOpeningScreen** (S2): `SeriesStateService.selectedEpisode`의 `thumbnailImgPath` 배경·`title`/`briefing`/`userCharacter.name` 본문. duration 헤더 없음. Start 시 `POST /rps2/sessions` (`seriesId`, `episodeId`) → `RpS2SessionDto`(`sessionId`, `aiSound`)를 `SeriesStateService`에 보관. 퀘스트 분기 sessionId 규칙은 S1과 동일.
+- **RoleplayPlayingScreen** (S2): `lib/screens/roleplay/playing.dart`에서 신규 구현. S1 전체 구현은 `lib/screens/roleplay/playing_backup.dart`에 보존(참조용). 헤더: `RoleplayScaffold`·episode `title`(로컬 언어)·X→나가기 확인 레이어·우측 `kebab.png` 설정패널. duration 없음. 배경 `thumbnailImgPath`. AI 선시작→힌트 조건 처리→사용자 발화(`POST /rps2/sessions/{id}/user-message/audio|text`)→사용자/나레이션/후속 AI 말풍선·턴바 등급·미션 완료 효과 루프까지 구현. `requiredSpeechCount` 도달 후는 `roleplayAnalyzing` blink까지만 구현(결과 호출·이동 추후). 상세는 `.docs/CONTEXT_SCREEN.md` §13.
 
 ## 8. 스타일 / 디자인 / 배치 규칙
 
@@ -280,7 +283,7 @@
 - **공통 UI 유틸**:
   - `lib/utils/default_toast.dart`: Overlay 기반 토스트 공통 처리 (배경 #353535/경고 #E4382A 85% 투명도, body-default 흰색, 좌우 패딩 16·세로 패딩 12·minHeight 없음, 하단 60px, 좌우 반원, 가로는 max 90% 디스플레이 내에서 짧은 문구는 콘텐츠 너비에 맞춤·`Align` widthFactor/heightFactor 1). **토스트 pill 탭** 시 표시 타이머를 끊고 **자동 사라짐과 동일한 fade-out**(동일 1초)으로 닫힘; 배경 UI 히트는 막지 않음.
   - 토스트 전체 목록 및 테스트 가이드: `.docs/TOAST_CATALOG.md`
-  - **Default Markdown** (`lib/utils/default_markdown.dart`): 서버 텍스트의 `***`(볼드+이탤릭), `**`(볼드), `*`(이탤릭)만 파싱해 `TextSpan` 리스트로 변환하는 공통 로직. `***` → `**` → `*` 순서로 처리하며 중첩 미지원. 줄바꿈은 기존 그대로 유지. 적용 구역: **Ending** 콘텐츠 영역(`RoleplayEndingScreen`·`ReviewEndingScreen`의 content), **공지사항 목록/상세**(`AnnouncementsScreen`·`AnnouncementDetailScreen`), **알림함 목록**(`NotificationBoxScreen` 접힘/펼침 본문). (`RoleplayOpeningScreen` 시나리오는 일반 `Text`·`bodyLarge` 흰색.)
+  - **Default Markdown** (`lib/utils/default_markdown.dart`): 서버 텍스트의 `***`(볼드+이탤릭), `**`(볼드), `*`(이탤릭)만 파싱해 `TextSpan` 리스트로 변환하는 공통 로직. `***` → `**` → `*` 순서로 처리하며 중첩 미지원. 줄바꿈은 기존 그대로 유지. 적용 구역: **Ending** 콘텐츠 영역(`RoleplayEndingScreen`·`ReviewEndingScreen`의 content), **공지사항 목록/상세**(`AnnouncementsScreen`·`AnnouncementDetailScreen`), **알림함 목록**(`NotificationBoxScreen` 접힘/펼침 본문), **RoleplayOpeningScreen Briefing**(`bodyLarge`·흰색).
 - **리팩토링 원칙**: 
   - 단일 책임 원칙: 각 서비스는 하나의 책임만 담당
   - 재사용성: 공통 기능은 서비스로 분리하여 재사용

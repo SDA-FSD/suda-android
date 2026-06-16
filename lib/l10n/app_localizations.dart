@@ -466,6 +466,12 @@ abstract class AppLocalizations {
   /// **'Hold microphone to speak'**
   String get holdMicrophoneToSpeak;
 
+  /// No description provided for @roleplayTypeMessagePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Type your message ...'**
+  String get roleplayTypeMessagePlaceholder;
+
   /// No description provided for @yourTurnFirst.
   ///
   /// In en, this message translates to:
@@ -501,6 +507,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Exit'**
   String get roleplayExitExit;
+
+  /// No description provided for @roleplayAutoHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto Hint'**
+  String get roleplayAutoHint;
+
+  /// No description provided for @roleplayHintLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Hint'**
+  String get roleplayHintLabel;
+
+  /// No description provided for @roleplayHintShowAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to see the English answer'**
+  String get roleplayHintShowAnswer;
+
+  /// No description provided for @roleplayVoiceSpeed.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice Speed'**
+  String get roleplayVoiceSpeed;
 
   /// No description provided for @roleplayEndedFailed.
   ///

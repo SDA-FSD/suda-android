@@ -15,7 +15,6 @@ class RoleplayStateService {
   int? _roleId;
   String? _sessionId;
   RoleplaySessionDto? _session;
-  String? _isUserTurnYn;
   UserDto? _user;
   RoleplayResultDto? _cachedResult;
   DateTime? _lastRoleplayFinishedAt;
@@ -26,7 +25,6 @@ class RoleplayStateService {
   int? get roleId => _roleId;
   String? get sessionId => _sessionId;
   RoleplaySessionDto? get session => _session;
-  String? get isUserTurnYn => _isUserTurnYn;
   UserDto? get user => _user;
   RoleplayResultDto? get cachedResult => _cachedResult;
   DateTime? get lastRoleplayFinishedAt => _lastRoleplayFinishedAt;
@@ -53,10 +51,6 @@ class RoleplayStateService {
     _session = session;
   }
 
-  void setIsUserTurnYn(String isUserTurnYn) {
-    _isUserTurnYn = isUserTurnYn;
-  }
-
   void setUser(UserDto? user) {
     _user = user;
   }
@@ -76,7 +70,6 @@ class RoleplayStateService {
     _roleId = null;
     _sessionId = null;
     _session = null;
-    _isUserTurnYn = null;
     _user = null;
     _cachedResult = null;
     // 최근 롤플레이 종료 시각은 세션 내 UX를 위해 유지한다.
