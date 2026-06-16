@@ -38,6 +38,7 @@ mixin PlayingHintMixin<T extends StatefulWidget>
   PlayingHintEntry? _hintEntry;
   bool _isFetchingHint = false;
   StreamSubscription<PlayerState>? _hintPlaybackSub;
+  void Function({GlobalKey? anchorKey})? scrollPlayingHintToBottomHandler;
 
   PlayingHintEntry? get activeHintEntry => _hintEntry;
 
@@ -115,21 +116,12 @@ mixin PlayingHintMixin<T extends StatefulWidget>
   int? _resolveLastAiRpMsgId() {
     final index = lastAiConversationIndex;
     if (index == null) return null;
-    return index + 1;
+    return index;
   }
 
   void _scrollHintToVisible(PlayingHintEntry entry) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      final ctx = entry.key.currentContext;
-      if (ctx == null) return;
-      Scrollable.ensureVisible(
-        ctx,
-        alignment: 1.0,
-        duration: const Duration(milliseconds: 250),
-        curve: Curves.easeOut,
-      );
-    });
+    if (!mounted) return;
+    scrollPlayingHintToBottomHandler?.call(anchorKey: entry.key);
   }
 
   void _resetHintPlaybackHighlight() {

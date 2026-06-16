@@ -159,23 +159,23 @@ class SeriesApi {
   static Future<String> getSessionTranslation({
     required String accessToken,
     required String rpSessionId,
-    required int index,
+    required int rpMsgId,
   }) async {
     return await SudaHttpClient.executeWithRefresh(
-      () => _getSessionTranslationInternal(accessToken, rpSessionId, index),
+      () => _getSessionTranslationInternal(accessToken, rpSessionId, rpMsgId),
       retryWithNewToken: (newToken) =>
-          _getSessionTranslationInternal(newToken, rpSessionId, index),
+          _getSessionTranslationInternal(newToken, rpSessionId, rpMsgId),
     );
   }
 
   static Future<String> _getSessionTranslationInternal(
     String accessToken,
     String rpSessionId,
-    int index,
+    int rpMsgId,
   ) async {
     final uri = SudaHttpClient.buildUri(
       '/rps2/sessions/$rpSessionId/translation',
-      {'index': index.toString()},
+      {'rpMsgId': rpMsgId.toString()},
     );
     late final http.Response response;
     try {

@@ -7,6 +7,7 @@ import '../utils/suda_json_util.dart';
 ///
 /// 접힘: 현재 미션 instruction 1개 + 진행 `completed/total`.
 /// 탭 시 아래로만 펼쳐 전체 미션 목록 노출.
+/// shine 효과는 [MissionCompleteEffect] 전역 오버레이에서 재생.
 class RoleplayMissionPanel extends StatefulWidget {
   static const double collapsedHeight = 54;
   static const double borderRadius = collapsedHeight / 2;
@@ -22,17 +23,14 @@ class RoleplayMissionPanel extends StatefulWidget {
   static const String missionIconOff =
       'assets/images/icons/rps2_mission_off.png';
   static const String missionIconOn = 'assets/images/icons/rps2_mission_on.png';
-  static const String missionCompleteEffect =
-      'assets/images/mission_complete_effect.png';
   static const Color completedBackgroundColor = Color(0xFF9E0067);
 
   final List<RpS2CefrMissionDto> missions;
   final int activeMissionIndex;
   final int completedCount;
   final Set<int> completedMissionIndexes;
-  final int? animatingMissionIndex;
-  final int animationSerial;
   final bool keepCompletedBackground;
+  final GlobalKey? missionIconAnchorKey;
 
   const RoleplayMissionPanel({
     super.key,
@@ -40,43 +38,16 @@ class RoleplayMissionPanel extends StatefulWidget {
     this.activeMissionIndex = 0,
     this.completedCount = 0,
     this.completedMissionIndexes = const {},
-    this.animatingMissionIndex,
-    this.animationSerial = 0,
     this.keepCompletedBackground = false,
+    this.missionIconAnchorKey,
   });
 
   @override
   State<RoleplayMissionPanel> createState() => _RoleplayMissionPanelState();
 }
 
-class _RoleplayMissionPanelState extends State<RoleplayMissionPanel>
-    with SingleTickerProviderStateMixin {
+class _RoleplayMissionPanelState extends State<RoleplayMissionPanel> {
   bool _expanded = false;
-  late final AnimationController _completeController;
-
-  @override
-  void initState() {
-    super.initState();
-    _completeController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1500),
-    );
-  }
-
-  @override
-  void didUpdateWidget(covariant RoleplayMissionPanel oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.animationSerial != widget.animationSerial &&
-        widget.animatingMissionIndex != null) {
-      _completeController.forward(from: 0);
-    }
-  }
-
-  @override
-  void dispose() {
-    _completeController.dispose();
-    super.dispose();
-  }
 
   void _toggleExpanded() {
     setState(() => _expanded = !_expanded);
@@ -91,29 +62,13 @@ class _RoleplayMissionPanelState extends State<RoleplayMissionPanel>
     return widget.completedMissionIndexes.contains(index);
   }
 
-  bool _isMissionAnimating(int index) {
-    return widget.animatingMissionIndex == index &&
-        _completeController.isAnimating;
-  }
-
-  bool _shouldShowCompletedIcon(int index) {
-    if (_isMissionCompleted(index)) return true;
-    if (!_isMissionAnimating(index)) return false;
-    return true;
-  }
-
   Widget _missionIcon(int index) {
-    return AnimatedBuilder(
-      animation: _completeController,
-      builder: (context, _) {
-        return Image.asset(
-          _shouldShowCompletedIcon(index)
-              ? RoleplayMissionPanel.missionIconOn
-              : RoleplayMissionPanel.missionIconOff,
-          width: RoleplayMissionPanel.iconSize,
-          height: RoleplayMissionPanel.iconSize,
-        );
-      },
+    return Image.asset(
+      _isMissionCompleted(index)
+          ? RoleplayMissionPanel.missionIconOn
+          : RoleplayMissionPanel.missionIconOff,
+      width: RoleplayMissionPanel.iconSize,
+      height: RoleplayMissionPanel.iconSize,
     );
   }
 
@@ -143,50 +98,24 @@ class _RoleplayMissionPanelState extends State<RoleplayMissionPanel>
     );
   }
 
-  Widget _buildMissionEffect() {
-    return AnimatedBuilder(
-      animation: _completeController,
-      builder: (context, _) {
-        final value = _completeController.value;
-        final opacity = value <= 1 / 3
-            ? (value * 3).clamp(0.0, 1.0)
-            : ((1 - value) * 1.5).clamp(0.0, 1.0);
-        final rotationDirection = (value * 8).round().isEven ? 1.0 : -1.0;
-        final rotation = 0.08 * rotationDirection;
-        return Opacity(
-          opacity: opacity,
-          child: Transform.rotate(
-            angle: rotation,
-            child: Image.asset(
-              RoleplayMissionPanel.missionCompleteEffect,
-              width: RoleplayMissionPanel.iconSize * 2.1,
-              height: RoleplayMissionPanel.iconSize * 2.1,
-              fit: BoxFit.contain,
-            ),
-          ),
-        );
-      },
-    );
-  }
-
   Widget _buildLeftIconSlot({
     required int index,
     Alignment alignment = Alignment.center,
   }) {
+    final icon = _missionIcon(index);
+    final anchoredIcon =
+        index == widget.activeMissionIndex &&
+            widget.missionIconAnchorKey != null
+        ? KeyedSubtree(key: widget.missionIconAnchorKey!, child: icon)
+        : icon;
+
     return SizedBox(
       width: _leftSlotWidth(),
       child: Align(
         alignment: alignment,
         child: Padding(
           padding: const EdgeInsets.only(left: RoleplayMissionPanel.sideInset),
-          child: Stack(
-            clipBehavior: Clip.none,
-            alignment: Alignment.center,
-            children: [
-              _missionIcon(index),
-              if (_isMissionAnimating(index)) _buildMissionEffect(),
-            ],
-          ),
+          child: anchoredIcon,
         ),
       ),
     );
@@ -300,9 +229,7 @@ class _RoleplayMissionPanelState extends State<RoleplayMissionPanel>
             widget.missions.isNotEmpty &&
             widget.completedMissionIndexes.length >= widget.missions.length;
         final shouldUseCompletedBackground =
-            widget.keepCompletedBackground ||
-            (widget.animatingMissionIndex != null &&
-                (!_expanded || allCompleted));
+            widget.keepCompletedBackground || allCompleted;
 
         return GestureDetector(
           onTap: _toggleExpanded,
@@ -344,7 +271,7 @@ class _RoleplayMissionPanelState extends State<RoleplayMissionPanel>
                   minHeight: RoleplayMissionPanel.collapsedHeight,
                 ),
                 decoration: BoxDecoration(
-                  color: shouldUseCompletedBackground || allCompleted
+                  color: shouldUseCompletedBackground
                       ? RoleplayMissionPanel.completedBackgroundColor
                       : RoleplayMissionPanel.backgroundColor,
                   borderRadius: BorderRadius.circular(

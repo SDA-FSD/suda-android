@@ -42,6 +42,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
   bool _hintUsedThisTurn = false;
   Timer? _hintIdleTimer;
   Timer? _serviceMessageTimer;
+  final ScrollController _bodyScrollController = ScrollController();
   bool _isServiceMessageVisible = false;
   String? _serviceMessageText;
   Color? _serviceMessageColor;
@@ -57,6 +58,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
   bool _isAnalyzingBlinking = false;
   Future<void> Function(RpS2UserMessageResponseDto response)?
   handleRpS2UserMessageResponse;
+  VoidCallback? turnGradeLabelFadeOutHandler;
 
   bool get isUserTurn => _isUserTurn;
 
@@ -81,6 +83,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
   void disposePlayingInput() {
     _hintIdleTimer?.cancel();
     _serviceMessageTimer?.cancel();
+    _bodyScrollController.dispose();
     _recorder.dispose();
     _typingFocusNode.dispose();
     _typingController.dispose();
@@ -168,6 +171,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
                 builder: (context, constraints) {
                   final children = conversationBuilder(constraints.maxWidth);
                   return SingleChildScrollView(
+                    controller: _bodyScrollController,
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -195,18 +199,52 @@ mixin PlayingInputMixin<T extends StatefulWidget>
     );
   }
 
+  void scrollPlayingBodyToBottom({GlobalKey? anchorKey}) {
+    void performScroll() {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final anchorContext = anchorKey?.currentContext;
+        if (anchorContext != null) {
+          Scrollable.ensureVisible(
+            anchorContext,
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeOut,
+            alignment: 1.0,
+            alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
+          );
+        }
+        if (!_bodyScrollController.hasClients) return;
+        final position = _bodyScrollController.position;
+        position.animateTo(
+          position.maxScrollExtent,
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeOut,
+        );
+      });
+    }
+
+    performScroll();
+    WidgetsBinding.instance.addPostFrameCallback((_) => performScroll());
+    Future<void>.delayed(const Duration(milliseconds: 280), performScroll);
+    Future<void>.delayed(const Duration(milliseconds: 480), performScroll);
+  }
+
   void showPlayingServiceMessage(String message, {bool persistent = false}) {
     _showServiceMessage(message, persistent: persistent);
   }
 
-  void startPlayingAnalyzingBlink() {
+  void startPlayingAnalyzingBlink({String? message}) {
     final l10n = AppLocalizations.of(context)!;
+    final resolvedMessage =
+        (message != null && message.trim().isNotEmpty)
+            ? message.trim()
+            : l10n.roleplayAnalyzing;
     _serviceMessageTimer?.cancel();
     if (!_analyzingBlinkController.isAnimating) {
       _analyzingBlinkController.repeat(reverse: true);
     }
     setState(() {
-      _serviceMessageText = l10n.roleplayAnalyzing;
+      _serviceMessageText = resolvedMessage;
       _serviceMessageColor = null;
       _isServiceMessageVisible = true;
       _isAnalyzingBlinking = true;
@@ -502,6 +540,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
   }
 
   void _onMicPressStart() {
+    turnGradeLabelFadeOutHandler?.call();
     unawaited(_beginRecording());
   }
 
@@ -521,6 +560,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
     if (!_isTypingEnabled || !_isUserTurn || _isInputLocked) return;
     final text = _typingController.text.trim();
     if (text.isEmpty) return;
+    turnGradeLabelFadeOutHandler?.call();
     _typingController.clear();
     _isInputLocked = true;
     _setTypingEnabled(false);

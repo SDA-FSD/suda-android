@@ -94,11 +94,11 @@ S1 턴 정책은 `.docs/CONTEXT_ROLEPLAY.md`만 본다. **S2는 아래가 단일
 | 단계 | 내용 | 데이터/API | 코드 상태 |
 |------|------|------------|-----------|
 | **Opening** | 세션 생성 | `POST /rps2/sessions` → `RpS2SessionDto` | ✅ `opening.dart` |
-| **① AI 시작** | 진입 직후 첫 AI 말풍선·TTS·번역 아이콘 | 텍스트: `cefrMap[ENGLISH_LEVEL].startLine` · 음성: `session.aiSound` · 아바타: `aiCharacter.rpImgPath` · 번역: `GET /rps2/sessions/{id}/translation?index=` | ✅ `playing_conversation_mixin.dart` **`startAiOpeningFlow`만** |
-| **② 힌트 자동** | AI 발화 후 조건부 | `_autoHintEnabled` + `GET /rps2/sessions/{id}/hint/{rpMsgId}` (`rpMsgId` = 마지막 AI `conversationIndex + 1`) | ✅ `playing_hint_mixin.dart` — 오토힌트 ON 자동 노출 후 사용자 턴·OFF 아이콘 탭+사용자 턴·AI 음성 종료 트리거·3s blink. 힌트 텍스트 조회만 202 not-ready 시 S1 delay 패턴으로 최대 15회 재시도 |
+| **① AI 시작** | 진입 직후 첫 AI 말풍선·TTS·번역 아이콘 | 텍스트: `cefrMap[ENGLISH_LEVEL].startLine` · 음성: `session.aiSound` · 아바타: `aiCharacter.rpImgPath` · 번역: `GET /rps2/sessions/{id}/translation?rpMsgId=` | ✅ `playing_conversation_mixin.dart` **`startAiOpeningFlow`만** |
+| **② 힌트 자동** | AI 발화 후 조건부 | `_autoHintEnabled` + `GET /rps2/sessions/{id}/hint/{rpMsgId}` (`rpMsgId` = 마지막 AI `conversationIndex`) | ✅ `playing_hint_mixin.dart` — 오토힌트 ON 자동 노출 후 사용자 턴·OFF 아이콘 탭+사용자 턴·AI 음성 종료 트리거·3s blink. 힌트 텍스트 조회만 202 not-ready 시 S1 delay 패턴으로 최대 15회 재시도 |
 | **③ 사용자 발화** | 마이크/타이핑 전송 | `POST /rps2/sessions/{id}/user-message/audio`, `POST /rps2/sessions/{id}/user-message/text` | ✅ `playing_input_mixin.dart` |
-| **④ 나레이션+후속 AI+턴바** | 사용자 1회 발화 후 서버 처리 | `RpS2UserMessageResponseDto(userText,userGrade,narration,aiText,missionCompletedIndex)` + `GET /rps2/sessions/{id}/ai-message/audio` | ✅ 사용자 말풍선·턴바 등급 효과·미션 완료 효과·나레이션·후속 AI 말풍선/음성 |
-| **⑤ 반복·종료** | 턴 소진·Ending | `requiredSpeechCount` + 응답 본문 | 🚧 `requiredSpeechCount`에 도달했고 응답 `narration`·`aiText`가 모두 비어 있을 때만 `roleplayAnalyzing` blink. 응답 본문이 있으면 정상 루프 처리. result 호출·이동은 추후 |
+| **④ 나레이션+후속 AI+턴바** | 사용자 1회 발화 후 서버 처리 | `RpS2UserMessageResponseDto(userText,userGrade,narration,aiText,missionCompletedIndex,serviceMessage?)` + `GET /rps2/sessions/{id}/ai-message/audio` | ✅ 사용자 말풍선·턴바 등급 효과·미션 완료 효과·나레이션·후속 AI 말풍선/음성 |
+| **⑤ 반복·종료** | 턴 소진·Ending | `requiredSpeechCount` | 🚧 마지막 턴도 나레이션·후속 AI 말풍선/음성 노출 후 `serviceMessage`(없으면 `roleplayAnalyzing`) blink. result 호출·이동은 추후 |
 
 ### 입력(마이크·타이핑) 활성 규칙
 
@@ -171,8 +171,8 @@ S1 턴 정책은 `.docs/CONTEXT_ROLEPLAY.md`만 본다. **S2는 아래가 단일
     - **상단 나머지**: turn bar 색 변경 시 그 바 **바로 위**에 노출할 라벨 텍스트 예비 영역 (`labelTexts`, 초기 `null`)
   - **초기 turn bar 색**: 전 턴 `#635F5F` **40%** (`Color(0x66635F5F)`, `RoleplayTurnBarArea.defaultBarColor`)
   - **상태 보관** (`playing.dart`): `_turnBarColors`, `_turnLabelTexts`, `_turnLabelColors` (길이 = `_turnCount`)
-  - **진행 정책**: 사용자 발화 **1회 완료**마다 해당 턴 turn bar 색 1개 갱신 → `requiredSpeechCount`회 발화 완료 + 응답 `narration`·`aiText` 없음일 때 `roleplayAnalyzing` blink(결과 호출·이동은 추후). `requiredSpeechCount`에 도달했더라도 응답 본문이 있으면 대화 append 루프를 계속 처리한다.
-  - **등급 효과**: A `#0CABA8` 라벨 en `wow!`/pt `bah!`, B `#62FF00` `ok!`, C `#FFB700` en `hmm…`/pt `nhé…`, D `#FF0000` en `oh…`/pt `oxi?`. 500ms 색 전환 후 동일색 라벨 fade-in/out, 최종 bar는 해당 색 40%.
+  - **진행 정책**: 사용자 발화 **1회 완료**마다 해당 턴 turn bar 색 1개 갱신 → `requiredSpeechCount`회 발화 완료(마지막 턴) 시에도 나레이션·후속 AI 말풍선/음성을 노출한 뒤 서버 `serviceMessage`(없으면 `roleplayAnalyzing`) blink(결과 호출·이동은 추후).
+  - **등급 효과**: A `#0CABA8` 라벨 en `wow!`/pt `bah!`, B `#62FF00` `ok!`, C `#FFB700` en `hmm…`/pt `nhé…`, D `#FF0000` en `oh…`/pt `oxi?`. bar 색 즉시 갱신 + 라벨 즉시 pop(1.0→1.42→1.0, 320ms). 라벨은 다음 사용자 발화 시작(마이크 press·Send) 시 150ms fade-out 후 제거, bar는 해당 색 40%로 전환.
 - **시스템 뒤로가기**: `PopScope` → X와 동일하게 확인 레이어
 - **나가기 확정**: `RoleplayRouter.popToOverview` → Series Overview
 - **설정패널 (configuration panel)** — `lib/widgets/roleplay_configuration_panel.dart`
@@ -200,20 +200,22 @@ S1 턴 정책은 `.docs/CONTEXT_ROLEPLAY.md`만 본다. **S2는 아래가 단일
   - 중앙: 텍스트 컬럼 width = (패널 − 좌·우 슬롯) × **90%**, 나머지 10%는 좌·우 **균등 여백**(아이콘↔텍스트 간격 확보). 접힘/펼침 동일 · `instruction` `bodyMedium` 흰색·**좌측 정렬** (`_activeMissionIndex`, 초기 0). 펼침 시 우 슬롯은 빈 공간으로 동일 width 유지
 - **탭 → 펼침**: **아래로만** `AnimatedSize`+`AnimatedSwitcher`(300ms, `easeInOutCubic`, fade+`SizeTransition`). 모서리 radius **27** 유지. 전체 미션 `instruction`+좌측 아이콘 세로 나열 · `0/3` **hide**. 재탭 → 접힘
 - **오버레이**: `buildPlayingBody`의 `SingleChildScrollView` 위에 `Positioned` — 메시지 append 시 위로 스크롤되며 패널에 가려짐
+- **스크롤 정책**: 본문 `SingleChildScrollView`는 `ScrollController`를 사용한다. AI/User/Narration entry 또는 힌트 bubble이 새로 추가될 때만 최하단으로 250ms 애니메이션 이동한다. 사용자가 상하 드래그로 과거 메시지를 보는 중에는 새 요소 추가가 없는 한 강제로 하단 고정하지 않는다.
 - **첫 AI 말풍선 Y**: 본문 스크롤 영역 상단에 **고정 `SizedBox(height: 72)`** (`PlayingConversationLayout.firstBubbleTopOffset`) — 패널에 가리지 않음. 추가 말풍선은 아래로 쌓이며 스크롤 시 패널 뒤로 이동
 - **AI 아바타**: `selectedEpisode.aiCharacter.rpImgPath` — Opening `initState`·Playing 전환 직전 `precacheImage`
-- **미션 완료 효과**: `missionCompletedIndex` 수신 시 해당 index를 완료 처리. 이미 완료 처리한 index가 다음 응답에 재사용되어 오면 무시한다. 접힘 상태에서는 active mission을 완료 대상 미션으로 전환하고 `mission_complete_effect.png`가 좌측 아이콘 중앙에서 500ms fade-in 후 1000ms fade-out(총 1.5s 회전), 해당 아이콘은 즉시 `rps2_mission_on.png` 상태. 배경은 `#9E0067`로 300ms 동안 전환하고, `_keepMissionCompletedBackground`로 다음 사용자 턴에 새 미션을 노출하기 전까지 유지한다. 미완료 미션 중 가장 앞선 index로의 `_activeMissionIndex` 전환은 **다음 사용자 턴 활성화 시점**에 수행하고, 이때 완료 배경 유지도 해제한다(모두 완료 시 유지). 펼침 상태에서는 해당 row 아이콘 기준으로 동일 효과를 재생하고, 모든 미션 완료 시에만 배경색이 완료색으로 바뀐다.
+- **미션 완료 효과**: `missionCompletedIndex` 수신 시 **`MissionCompleteEffect`**(`EffectOverlayService` root overlay)로 `mission_complete_effect.png`를 **디스플레이 width × 2/3** 크기(에셋 전체 기준)로 재생 — **미션 패널 active row 좌측 on/off 아이콘 중심**과 이미지 중심(핑크 원) 정렬, 좌·상단은 화면 밖으로 클리핑 가능(`Stack clipBehavior: none`). 중앙 원은 에셋 폭의 ~19%라 실제 눈에 띄는 크기는 화면의 ~12% 수준. 500ms fade-in → 1000ms fade-out(1.5s, 미세 회전). 아이콘 즉시 `rps2_mission_on.png`. 배경 `#9E0067` 300ms 전환, `_keepMissionCompletedBackground`로 다음 사용자 턴 전까지 유지.
 | **푸터** | `RoleplayScaffold.footer` | `SafeArea(top:false)` + 3층 (S1 §6-7) | **입력·아이콘 이식 완료**, 서비스메시지 **영역만** |
 
 **사용자 발화 후 응답 타이밍**
 
+- `conversationIndex`는 **1부터 시작**하며 AI/User/Narration entry를 모두 포함한 전체 대화 순번이다. 힌트 조회의 `rpMsgId`는 마지막 AI entry의 `conversationIndex`를 그대로 사용한다.
 - 사용자 말풍선 노출 직후 후속 AI 음성(`GET /rps2/sessions/{id}/ai-message/audio`)을 미리 준비한다.
 - 사용자 말풍선 후 **500ms 대기** → 나레이션 노출(`playing_conversation_mixin`, 한 줄씩 fade-in) → 나레이션 단계는 **최소 1초** 보장 → **500ms 대기**.
 - 위 시점과 AI 음성 준비 완료 중 늦은 시점에 AI 말풍선을 노출하고, 준비된 음성이 있으면 말풍선 노출과 동시에 재생한다.
 
 **푸터 3층 상세** (`lib/screens/roleplay/playing_input_mixin.dart` — `buildPlayingFooter`)
 
-1. **서비스메시지 영역**: height **24**, `bodyMedium` 중앙. 사용자 턴 활성 시 `holdMicrophoneToSpeak` fade-in/out, 마지막 턴 도달 시 `roleplayAnalyzing` blink.
+1. **서비스메시지 영역**: height **24**, `bodyMedium` 중앙. 사용자 턴 활성 시 `holdMicrophoneToSpeak` fade-in/out, 마지막 턴 나레이션·후속 AI 종료 후 서버 `serviceMessage`(없으면 `roleplayAnalyzing`) blink.
 2. **입력 영역**: S1과 동일 UX
    - **녹음**: height **120**, `RoleplayMicButtonArea` (`lib/widgets/roleplay_mic_button_area.dart`) — hold·Cancel 드래그·500ms 미만 거절·loading 회전. `AudioRecorder.start` 완료 전 손을 떼거나 cancel되면 pending action으로 저장 후 start 완료 시 finish/cancel을 이어서 처리한다.
    - **타이핑**: gap 10 + 입력 height **44** (`#353535` stadium) + Send 44×44 + gap 10
@@ -276,8 +278,8 @@ S1 턴 정책은 `.docs/CONTEXT_ROLEPLAY.md`만 본다. **S2는 아래가 단일
 | GET | `/rps2/series/{seriesId}/overview` | `RpS2SeriesOverviewDto` | SeriesOverview | ✅ |
 | GET | `/rps2/series/{seriesId}/best-score` | `Map<int,int>` | SeriesOverview (CEFR 변경) | ✅ |
 | POST | `/rps2/sessions` | req: `{seriesId, episodeId}` / res: `RpS2SessionDto` | Opening Start | ✅ |
-| GET | `/rps2/sessions/{id}/translation?index=` | **plain String** (JSON 아님, S1 translation 동일) | Playing ① AI 말풍선 번역 | ✅ `SeriesApi._parseStringResponse` = S1 lenient 파서 |
-| GET | `/rps2/sessions/{id}/hint/{rpMsgId}` | `RpS2HintDto` (`hint`, `translatedHint`) · `rpMsgId` = 마지막 AI `conversationIndex + 1` · 202 not-ready는 최대 15회 재시도 | Playing 힌트 | ✅ |
+| GET | `/rps2/sessions/{id}/translation?rpMsgId=` | **plain String** (JSON 아님) · `rpMsgId` = AI entry `conversationIndex` | Playing AI 말풍선 번역 | ✅ `SeriesApi._parseStringResponse` |
+| GET | `/rps2/sessions/{id}/hint/{rpMsgId}` | `RpS2HintDto` (`hint`, `translatedHint`) · `rpMsgId` = 마지막 AI `conversationIndex` · 202 not-ready는 최대 15회 재시도 | Playing 힌트 | ✅ |
 | GET | `/rps2/sessions/{id}/hint/sound` | `TtsResultDto` (`cdnYn`, `cdnPath`, `sound`) | 힌트 전체 재생 | ✅ |
 | GET | `/rps2/sessions/{id}/hint/sound/{wordIndex}` | 동일 | 힌트 단어 재생 | ✅ |
 | POST | `/rps2/sessions/{id}/user-message/audio` | req: `byte[]` octet-stream / res: `RpS2UserMessageResponseDto` | 사용자 음성 발화 | ✅ |
@@ -291,7 +293,7 @@ S1 턴 정책은 `.docs/CONTEXT_ROLEPLAY.md`만 본다. **S2는 아래가 단일
 
 **S1 세션 API** (`POST /v1/roleplay-sessions`): `RoleplayApi.createRoleplaySession` — **`playing_backup` / Lab 등 S1 전용**. S2 Opening에서는 **사용하지 않음**.
 
-**미구현 (Playing용)**: result/session status 및 Ending/Failed/Result 화면 전환 — **`requiredSpeechCount` 도달 + 응답 본문 없음으로 분석중 blink 진입한 이후는 추후 지침 대기**.
+**미구현 (Playing용)**: result/session status 및 Ending/Failed/Result 화면 전환 — **`requiredSpeechCount` 도달 후 `roleplayAnalyzing` blink 진입한 이후는 추후 지침 대기**.
 
 ---
 
@@ -327,6 +329,8 @@ lib/screens/roleplay/tutorial.dart         # Tutorial (S2 user 연동)
 lib/widgets/roleplay_scaffold.dart         # belowHeader 슬롯 (턴바영역 등)
 lib/widgets/roleplay_turn_bar_area.dart    # S2 Playing 턴바영역 위젯
 lib/widgets/roleplay_mission_panel.dart    # S2 Playing 미션 패널
+lib/effects/mission_complete_effect.dart   # 미션 완료 shine (EffectOverlayService)
+lib/widgets/effects/mission_complete_overlay.dart  # 미션 완료 전체화면 오버레이
 lib/widgets/roleplay_configuration_panel.dart  # S2 Playing 설정패널 (오토힌트·속도)
 lib/routes/roleplay_router.dart            # replaceWithPlaying, popToOverview
 lib/services/roleplay_state_service.dart   # S1 잔재 (Ending/Result/backup)
@@ -337,7 +341,7 @@ lib/utils/english_level_util.dart        # cefrMap 키 (ENGLISH_LEVEL)
 
 ## 8. 다음 작업 후보 (우선순위 참고)
 
-1. ~~**Playing**: 턴바영역 — 사용자 발화 완료 시 `_turnBarColors`·`_turnLabelTexts` 갱신 + 전 턴 완료 시 종료 분기~~ ✅ 마지막 턴은 분석중 blink까지만
+1. ~~**Playing**: 턴바영역 — 사용자 발화 완료 시 `_turnBarColors`·`_turnLabelTexts` 갱신 + 전 턴 완료 시 종료 분기~~ ✅ 마지막 턴 나레이션·후속 AI 후 `serviceMessage` blink
 2. ~~**Playing**: 햄버거 메뉴 UX + 패널 (S1 speed panel 대체)~~ ✅ 설정패널 UI
 3. ~~**Playing**: ① AI 선시작 말풍선·음성·번역~~ ✅ (나레이션·입력 활성 **미포함**)
 4. ~~**Playing**: RpS2 turn/message API 연동 (지침 수령 후)~~ ✅ user-message + GET ai-message/audio

@@ -290,6 +290,7 @@ class RpS2UserMessageResponseDto {
   final String? narration;
   final String? aiText;
   final int? missionCompletedIndex;
+  final String? serviceMessage;
 
   const RpS2UserMessageResponseDto({
     this.userText,
@@ -297,6 +298,7 @@ class RpS2UserMessageResponseDto {
     this.narration,
     this.aiText,
     this.missionCompletedIndex,
+    this.serviceMessage,
   });
 
   factory RpS2UserMessageResponseDto.fromJson(Map<String, dynamic> json) {
@@ -306,6 +308,7 @@ class RpS2UserMessageResponseDto {
       narration: json['narration'] as String?,
       aiText: json['aiText'] as String?,
       missionCompletedIndex: _optionalInt(json['missionCompletedIndex']),
+      serviceMessage: json['serviceMessage'] as String?,
     );
   }
 }

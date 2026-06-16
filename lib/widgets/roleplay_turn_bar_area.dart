@@ -14,10 +14,13 @@ class RoleplayTurnBarArea extends StatelessWidget {
   static const double turnBoxGap = 6;
   static const Color defaultBarColor = Color(0x66635F5F); // #635F5F 40%
 
+  static const Duration labelFadeOutDuration = Duration(milliseconds: 150);
+
   final int turnCount;
   final List<Color> barColors;
   final List<String?> labelTexts;
   final List<Color?> labelColors;
+  final bool labelFadeOut;
 
   const RoleplayTurnBarArea({
     super.key,
@@ -25,6 +28,7 @@ class RoleplayTurnBarArea extends StatelessWidget {
     required this.barColors,
     this.labelTexts = const [],
     this.labelColors = const [],
+    this.labelFadeOut = false,
   });
 
   @override
@@ -48,6 +52,7 @@ class RoleplayTurnBarArea extends StatelessWidget {
                       : defaultBarColor,
                   labelText: i < labelTexts.length ? labelTexts[i] : null,
                   labelColor: i < labelColors.length ? labelColors[i] : null,
+                  labelFadeOut: labelFadeOut,
                   labelStyle: theme.labelSmall?.copyWith(
                     color: Colors.white,
                     fontSize: 10,
@@ -68,12 +73,14 @@ class _TurnBox extends StatelessWidget {
   final Color barColor;
   final String? labelText;
   final Color? labelColor;
+  final bool labelFadeOut;
   final TextStyle? labelStyle;
 
   const _TurnBox({
     required this.barColor,
     this.labelText,
     this.labelColor,
+    this.labelFadeOut = false,
     this.labelStyle,
   });
 
@@ -83,20 +90,11 @@ class _TurnBox extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Expanded(
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 220),
-            child: labelText == null || labelText!.isEmpty
-                ? const SizedBox.shrink()
-                : Center(
-                    key: ValueKey<String>(labelText!),
-                    child: Text(
-                      labelText!,
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: labelStyle?.copyWith(color: labelColor),
-                    ),
-                  ),
+          child: _TurnGradeLabel(
+            text: labelText,
+            color: labelColor,
+            style: labelStyle,
+            fadeOut: labelFadeOut,
           ),
         ),
         AnimatedContainer(
@@ -111,6 +109,101 @@ class _TurnBox extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _TurnGradeLabel extends StatefulWidget {
+  final String? text;
+  final Color? color;
+  final TextStyle? style;
+  final bool fadeOut;
+
+  const _TurnGradeLabel({
+    this.text,
+    this.color,
+    this.style,
+    this.fadeOut = false,
+  });
+
+  @override
+  State<_TurnGradeLabel> createState() => _TurnGradeLabelState();
+}
+
+class _TurnGradeLabelState extends State<_TurnGradeLabel>
+    with SingleTickerProviderStateMixin {
+  static const Duration _popDuration = Duration(milliseconds: 320);
+
+  late final AnimationController _popController;
+  late final Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _popController = AnimationController(vsync: this, duration: _popDuration);
+    _scaleAnimation = TweenSequence<double>([
+      TweenSequenceItem(
+        tween: Tween(
+          begin: 1.0,
+          end: 1.42,
+        ).chain(CurveTween(curve: Curves.easeOutCubic)),
+        weight: 45,
+      ),
+      TweenSequenceItem(
+        tween: Tween(
+          begin: 1.42,
+          end: 1.0,
+        ).chain(CurveTween(curve: Curves.easeInCubic)),
+        weight: 55,
+      ),
+    ]).animate(_popController);
+    _triggerPopIfNeeded(null, widget.text);
+  }
+
+  @override
+  void didUpdateWidget(covariant _TurnGradeLabel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _triggerPopIfNeeded(oldWidget.text, widget.text);
+  }
+
+  void _triggerPopIfNeeded(String? oldText, String? newText) {
+    if (newText == null || newText.isEmpty) return;
+    if (oldText != newText) {
+      _popController.forward(from: 0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _popController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final text = widget.text;
+    if (text == null || text.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Center(
+      child: AnimatedOpacity(
+        opacity: widget.fadeOut ? 0 : 1,
+        duration: RoleplayTurnBarArea.labelFadeOutDuration,
+        curve: Curves.easeOut,
+        child: ScaleTransition(
+          scale: _scaleAnimation,
+          alignment: Alignment.bottomCenter,
+          child: Text(
+            text,
+            key: ValueKey<String>(text),
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: widget.style?.copyWith(color: widget.color),
+          ),
+        ),
+      ),
     );
   }
 }

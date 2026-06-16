@@ -62,7 +62,7 @@ class PlayingConversationEntry {
 mixin PlayingConversationMixin<T extends StatefulWidget> on State<T> {
   final List<PlayingConversationEntry> _conversationEntries = [];
   final AudioPlayer _audioPlayer = AudioPlayer();
-  int _nextConversationIndex = 0;
+  int _nextConversationIndex = 1;
   bool _hasStartedAiOpening = false;
   StreamSubscription<PlayerState>? _aiPlaybackSub;
 
@@ -77,6 +77,7 @@ mixin PlayingConversationMixin<T extends StatefulWidget> on State<T> {
 
   /// AI 시작 시 사용자 입력 비활성.
   VoidCallback? deactivateUserTurnHandler;
+  void Function({GlobalKey? anchorKey})? scrollPlayingBodyToBottomHandler;
 
   AudioPlayer get playingAudioPlayer => _audioPlayer;
 
@@ -146,6 +147,7 @@ mixin PlayingConversationMixin<T extends StatefulWidget> on State<T> {
     );
     if (!mounted) return;
     await _addEntry(entry, revealImmediately: true);
+    scrollPlayingBodyToBottomHandler?.call(anchorKey: entry.key);
     if (audioSource != null) {
       unawaited(_playPreparedAiVoice(audioSource, notifyOnComplete: true));
     } else {
@@ -236,10 +238,8 @@ mixin PlayingConversationMixin<T extends StatefulWidget> on State<T> {
     PlayingConversationEntry entry, {
     bool revealImmediately = false,
   }) async {
-    if (entry.isAi) {
-      entry.conversationIndex = _nextConversationIndex;
-      _nextConversationIndex += 1;
-    }
+    entry.conversationIndex = _nextConversationIndex;
+    _nextConversationIndex += 1;
     setState(() {
       _conversationEntries.add(entry);
       if (revealImmediately) {
@@ -247,17 +247,11 @@ mixin PlayingConversationMixin<T extends StatefulWidget> on State<T> {
       }
     });
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final context = entry.key.currentContext;
-      if (context != null) {
-        await Scrollable.ensureVisible(
-          context,
-          duration: const Duration(milliseconds: 250),
-          curve: Curves.easeOut,
-        );
-      }
+      scrollPlayingBodyToBottomHandler?.call(anchorKey: entry.key);
       if (!mounted) return;
       if (!revealImmediately) {
         setState(() => entry.isVisible = true);
+        scrollPlayingBodyToBottomHandler?.call(anchorKey: entry.key);
       }
     });
   }
@@ -290,7 +284,7 @@ mixin PlayingConversationMixin<T extends StatefulWidget> on State<T> {
       final translated = await SudaApiClient.getRpS2Translation(
         accessToken: accessToken,
         rpSessionId: sessionId,
-        index: entry.conversationIndex!,
+        rpMsgId: entry.conversationIndex!,
       );
       if (!mounted) return;
       setState(() {
@@ -336,7 +330,13 @@ mixin PlayingConversationMixin<T extends StatefulWidget> on State<T> {
       opacity: entry.isVisible ? 1 : 0,
       duration: const Duration(milliseconds: 500),
       child: Center(
-        child: _NarrationRevealText(text: entry.text, style: style),
+        child: _NarrationRevealText(
+          text: entry.text,
+          style: style,
+          onContentGrowth: () => scrollPlayingBodyToBottomHandler?.call(
+            anchorKey: entry.key,
+          ),
+        ),
       ),
     );
   }
@@ -500,8 +500,13 @@ mixin PlayingConversationMixin<T extends StatefulWidget> on State<T> {
 class _NarrationRevealText extends StatefulWidget {
   final String text;
   final TextStyle? style;
+  final VoidCallback? onContentGrowth;
 
-  const _NarrationRevealText({required this.text, this.style});
+  const _NarrationRevealText({
+    required this.text,
+    this.style,
+    this.onContentGrowth,
+  });
 
   @override
   State<_NarrationRevealText> createState() => _NarrationRevealTextState();
@@ -582,6 +587,7 @@ class _NarrationRevealTextState extends State<_NarrationRevealText> {
         setState(() {
           _visibleLineCount = math.min(i + 1, _lines.length);
         });
+        widget.onContentGrowth?.call();
       });
     }
   }

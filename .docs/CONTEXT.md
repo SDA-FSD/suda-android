@@ -197,7 +197,7 @@
 - **S2 (Season 2) Roleplay 마이그레이션 진행상황**은 `.docs/CONTEXT_ROLEPLAY_S2.md`를 참조한다.
 - Roleplay 세션 `sessionId`는 인메모리 공통 상태로 보관하고 롤플레이 종료 시 삭제됩니다.
 - **RoleplayOpeningScreen** (S2): `SeriesStateService.selectedEpisode`의 `thumbnailImgPath` 배경·`title`/`briefing`/`userCharacter.name` 본문. duration 헤더 없음. Start 시 `POST /rps2/sessions` (`seriesId`, `episodeId`) → `RpS2SessionDto`(`sessionId`, `aiSound`)를 `SeriesStateService`에 보관. 퀘스트 분기 sessionId 규칙은 S1과 동일.
-- **RoleplayPlayingScreen** (S2): `lib/screens/roleplay/playing.dart`에서 신규 구현. S1 전체 구현은 `lib/screens/roleplay/playing_backup.dart`에 보존(참조용). 헤더: `RoleplayScaffold`·episode `title`(로컬 언어)·X→나가기 확인 레이어·우측 `kebab.png` 설정패널. duration 없음. 배경 `thumbnailImgPath`. AI 선시작→힌트 조건 처리→사용자 발화(`POST /rps2/sessions/{id}/user-message/audio|text`)→사용자/나레이션/후속 AI 말풍선·턴바 등급·미션 완료 효과 루프까지 구현. `requiredSpeechCount` 도달 후는 `roleplayAnalyzing` blink까지만 구현(결과 호출·이동 추후). 상세는 `.docs/CONTEXT_SCREEN.md` §13.
+- **RoleplayPlayingScreen** (S2): `lib/screens/roleplay/playing.dart`에서 신규 구현. S1 전체 구현은 `lib/screens/roleplay/playing_backup.dart`에 보존(참조용). 헤더: `RoleplayScaffold`·episode `title`(로컬 언어)·X→나가기 확인 레이어·우측 `kebab.png` 설정패널. duration 없음. 배경 `thumbnailImgPath`. AI 선시작→힌트 조건 처리→사용자 발화(`POST /rps2/sessions/{id}/user-message/audio|text`)→사용자/나레이션/후속 AI 말풍선·턴바 등급·미션 완료 효과 루프까지 구현. `requiredSpeechCount` 도달(마지막 턴) 후에도 나레이션·후속 AI 노출 → 서버 `serviceMessage`(없으면 `roleplayAnalyzing`) blink까지만 구현(결과 호출·이동 추후). 상세는 `.docs/CONTEXT_SCREEN.md` §13.
 
 ## 8. 스타일 / 디자인 / 배치 규칙
 

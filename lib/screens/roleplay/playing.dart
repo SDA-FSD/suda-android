@@ -11,6 +11,7 @@ import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
 import '../../utils/english_level_util.dart';
 import '../../utils/suda_json_util.dart';
+import '../../effects/mission_complete_effect.dart';
 import '../../widgets/roleplay_configuration_panel.dart';
 import '../../widgets/roleplay_overview_backdrop.dart';
 import '../../widgets/roleplay_scaffold.dart';
@@ -50,17 +51,19 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
   late List<Color> _turnBarColors;
   late List<String?> _turnLabelTexts;
   late List<Color?> _turnLabelColors;
+  bool _turnLabelFadeOut = false;
   late final List<RpS2CefrMissionDto> _missions;
   int _activeMissionIndex = 0;
   int _completedMissionCount = 0;
   int _completedSpeechCount = 0;
   final Set<int> _completedMissionIndexes = {};
-  int? _animatingMissionIndex;
   int? _pendingActiveMissionIndex;
   bool _keepMissionCompletedBackground = false;
-  int _missionAnimationSerial = 0;
+  final GlobalKey _missionIconAnchorKey = GlobalKey();
   final List<Timer> _turnEffectTimers = [];
   Timer? _missionCompleteTimer;
+  bool _pendingAnalyzingAfterAi = false;
+  String? _pendingServiceMessage;
 
   @override
   void initState() {
@@ -80,7 +83,10 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     playingHintPrepareForAiMessageHandler = preparePlayingHintForAiMessage;
     playingHintResetIconForAiStartHandler = resetHintIconForAiStart;
     deactivateUserTurnHandler = deactivateUserTurn;
+    scrollPlayingBodyToBottomHandler = scrollPlayingBodyToBottom;
+    scrollPlayingHintToBottomHandler = scrollPlayingBodyToBottom;
     playingAiVoicePlaybackCompletedHandler = _onAiVoicePlaybackCompleted;
+    turnGradeLabelFadeOutHandler = _fadeOutTurnGradeLabelsOnSpeechStart;
     deactivateUserTurn();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) startAiOpeningFlow();
@@ -119,6 +125,10 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
 
   void _onAiVoicePlaybackCompleted() {
     if (!mounted) return;
+    if (_pendingAnalyzingAfterAi) {
+      _startLastTurnAnalyzing();
+      return;
+    }
     if (_autoHintEnabled) {
       unawaited(_showAutoHintThenActivateUserTurn());
     } else {
@@ -144,15 +154,6 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     final nextCompletedSpeechCount = _completedSpeechCount + 1;
     final reachedRequiredSpeechCount =
         _turnCount > 0 && nextCompletedSpeechCount >= _turnCount;
-    final narrationText = response.narration?.trim() ?? '';
-    final aiText = response.aiText?.trim() ?? '';
-    final shouldAnalyzeResult =
-        reachedRequiredSpeechCount && narrationText.isEmpty && aiText.isEmpty;
-
-    Future<RpS2SoundResDto?>? aiAudioFuture;
-    if (!shouldAnalyzeResult && aiText.isNotEmpty) {
-      aiAudioFuture = _fetchAiMessageAudio();
-    }
 
     if (userText.isNotEmpty) {
       await showPlayingUserMessage(userText);
@@ -163,17 +164,28 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     _animateTurnBarGrade(turnIndex, response.userGrade);
     _handleMissionCompleted(response.missionCompletedIndex);
 
-    if (shouldAnalyzeResult) {
-      startPlayingAnalyzingBlink();
-      return;
+    final narrationText = response.narration?.trim() ?? '';
+    final aiText = response.aiText?.trim() ?? '';
+    if (reachedRequiredSpeechCount) {
+      _pendingAnalyzingAfterAi = true;
+      _pendingServiceMessage = response.serviceMessage?.trim();
+    }
+
+    Future<RpS2SoundResDto?>? aiAudioFuture;
+    if (aiText.isNotEmpty) {
+      aiAudioFuture = _fetchAiMessageAudio();
     }
 
     await _showNarrationPhase(narrationText);
     if (!mounted) return;
 
     if (aiText.isEmpty) {
-      _applyPendingActiveMissionForNextTurn();
-      activateUserTurn();
+      if (reachedRequiredSpeechCount) {
+        _startLastTurnAnalyzing();
+      } else {
+        _applyPendingActiveMissionForNextTurn();
+        activateUserTurn();
+      }
       return;
     }
 
@@ -189,6 +201,13 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
       cdnPath: aiSound?.cdnPath,
       soundBytes: aiSound?.file,
     );
+  }
+
+  void _startLastTurnAnalyzing() {
+    _pendingAnalyzingAfterAi = false;
+    final message = _pendingServiceMessage;
+    _pendingServiceMessage = null;
+    startPlayingAnalyzingBlink(message: message);
   }
 
   Future<void> _showNarrationPhase(String narrationText) async {
@@ -229,24 +248,37 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     final label = _turnGradeLabel(grade);
     setState(() {
       _turnBarColors[index] = color;
-      _turnLabelTexts[index] = null;
+      _turnLabelTexts[index] = label;
       _turnLabelColors[index] = color;
     });
+  }
+
+  void _fadeOutTurnGradeLabelsOnSpeechStart() {
+    if (_turnLabelFadeOut) return;
+
+    var hasVisibleLabel = false;
+    for (final text in _turnLabelTexts) {
+      if (text != null && text.isNotEmpty) {
+        hasVisibleLabel = true;
+        break;
+      }
+    }
+    if (!hasVisibleLabel) return;
+
+    setState(() => _turnLabelFadeOut = true);
     _turnEffectTimers.add(
-      Timer(const Duration(milliseconds: 500), () {
+      Timer(RoleplayTurnBarArea.labelFadeOutDuration, () {
         if (!mounted) return;
         setState(() {
-          _turnLabelTexts[index] = label;
-          _turnLabelColors[index] = color;
-        });
-      }),
-    );
-    _turnEffectTimers.add(
-      Timer(const Duration(milliseconds: 1350), () {
-        if (!mounted) return;
-        setState(() {
-          _turnLabelTexts[index] = null;
-          _turnBarColors[index] = color.withValues(alpha: 0.4);
+          for (var i = 0; i < _turnCount; i++) {
+            if (_turnLabelTexts[i] == null) continue;
+            _turnLabelTexts[i] = null;
+            final baseColor = _turnLabelColors[i];
+            if (baseColor != null) {
+              _turnBarColors[i] = baseColor.withValues(alpha: 0.4);
+            }
+          }
+          _turnLabelFadeOut = false;
         });
       }),
     );
@@ -277,15 +309,13 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
       _activeMissionIndex = completedIndex;
       _completedMissionIndexes.add(completedIndex);
       _completedMissionCount = _completedMissionIndexes.length;
-      _animatingMissionIndex = completedIndex;
       _keepMissionCompletedBackground = true;
-      _missionAnimationSerial += 1;
     });
+    MissionCompleteEffect.play(context, anchorKey: _missionIconAnchorKey);
     _missionCompleteTimer = Timer(const Duration(milliseconds: 1500), () {
       if (!mounted) return;
       final nextIndex = _firstIncompleteMissionIndex();
       setState(() {
-        _animatingMissionIndex = null;
         _pendingActiveMissionIndex = nextIndex;
       });
     });
@@ -512,6 +542,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
                     barColors: _turnBarColors,
                     labelTexts: _turnLabelTexts,
                     labelColors: _turnLabelColors,
+                    labelFadeOut: _turnLabelFadeOut,
                   )
                 : null,
             belowHeaderHeight: _turnCount > 0
@@ -523,9 +554,8 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
                 activeMissionIndex: _activeMissionIndex,
                 completedCount: _completedMissionCount,
                 completedMissionIndexes: _completedMissionIndexes,
-                animatingMissionIndex: _animatingMissionIndex,
-                animationSerial: _missionAnimationSerial,
                 keepCompletedBackground: _keepMissionCompletedBackground,
+                missionIconAnchorKey: _missionIconAnchorKey,
               ),
               conversationBuilder: _buildConversationWithHint,
             ),

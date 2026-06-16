@@ -70,12 +70,12 @@ class SudaApiClient {
   static Future<String> getRpS2Translation({
     required String accessToken,
     required String rpSessionId,
-    required int index,
+    required int rpMsgId,
   }) {
     return SeriesApi.getSessionTranslation(
       accessToken: accessToken,
       rpSessionId: rpSessionId,
-      index: index,
+      rpMsgId: rpMsgId,
     );
   }
 
