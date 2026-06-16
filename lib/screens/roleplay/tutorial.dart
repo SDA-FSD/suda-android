@@ -32,10 +32,10 @@ class _RoleplayTutorialScreenState extends State<RoleplayTutorialScreen> {
 
   static const List<Color> _pageColors = [
     Color(0xFF0CABA8),
-    Color(0xFFFFB700),
     Color(0xFFFF00A6),
     Color(0xFFFFB700),
     Color(0xFF0CABA8),
+    Color(0xFFFF00A6),
     Color(0xFF8A38F5),
   ];
 
@@ -97,7 +97,7 @@ class _RoleplayTutorialScreenState extends State<RoleplayTutorialScreen> {
     final num = pageIndex + 1;
     final lang = LanguageUtil.getCurrentLanguageCode();
     final folder = (lang == 'ko' || lang == 'pt') ? lang : 'en';
-    return 'assets/images/tutorials2/$folder/tutorial-$num.png';
+    return 'assets/images/tutorials2/$folder/Tutorial-$num.png';
   }
 
   void _updateLocalUserTutorialDone() {
