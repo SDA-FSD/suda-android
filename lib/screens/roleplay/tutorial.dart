@@ -5,6 +5,7 @@ import 'package:vibration/vibration.dart';
 import '../../routes/roleplay_router.dart';
 import '../../services/main_user_sync.dart';
 import '../../services/roleplay_state_service.dart';
+import '../../services/series_state_service.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
 import '../../utils/default_toast.dart';
@@ -59,7 +60,7 @@ class _RoleplayTutorialScreenState extends State<RoleplayTutorialScreen> {
   }
 
   Future<void> _checkTutorialStatus() async {
-    UserDto? user = RoleplayStateService.instance.user;
+    UserDto? user = SeriesStateService.instance.user;
 
     if (user == null) {
       final accessToken = await TokenStorage.loadAccessToken();
@@ -67,6 +68,7 @@ class _RoleplayTutorialScreenState extends State<RoleplayTutorialScreen> {
       if (accessToken != null) {
         try {
           user = await SudaApiClient.getCurrentUser(accessToken: accessToken);
+          SeriesStateService.instance.setUser(user);
           RoleplayStateService.instance.setUser(user);
         } catch (_) {
           // 조회 실패 시 튜토리얼 노출
@@ -99,11 +101,12 @@ class _RoleplayTutorialScreenState extends State<RoleplayTutorialScreen> {
   }
 
   void _updateLocalUserTutorialDone() {
-    final currentUser = RoleplayStateService.instance.user;
+    final currentUser = SeriesStateService.instance.user;
     if (currentUser == null) return;
-    RoleplayStateService.instance.setUser(
-      currentUser.upsertMetaInfo(key: 'TUTORIAL', value: 'Y'),
-    );
+    final updated =
+        currentUser.upsertMetaInfo(key: 'TUTORIAL', value: 'Y');
+    SeriesStateService.instance.setUser(updated);
+    RoleplayStateService.instance.setUser(updated);
   }
 
   Future<void> _postTutorialShownBestEffort() async {
@@ -150,11 +153,12 @@ class _RoleplayTutorialScreenState extends State<RoleplayTutorialScreen> {
       try {
         final fresh = await SudaApiClient.getCurrentUser(accessToken: accessToken);
         if (!mounted) return;
+        SeriesStateService.instance.setUser(fresh);
         RoleplayStateService.instance.setUser(fresh);
         MainUserSync.instance.notifyUserUpdated(fresh);
       } catch (_) {
         _updateLocalUserTutorialDone();
-        final u = RoleplayStateService.instance.user;
+        final u = SeriesStateService.instance.user;
         if (u != null) MainUserSync.instance.notifyUserUpdated(u);
       }
       if (!mounted) return;

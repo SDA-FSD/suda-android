@@ -209,6 +209,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get holdMicrophoneToSpeak => 'Hold microphone to speak';
 
   @override
+  String get roleplayTypeMessagePlaceholder => 'Type your message ...';
+
+  @override
   String get yourTurnFirst => 'Your turn first!';
 
   @override
@@ -226,6 +229,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get roleplayExitExit => 'Exit';
+
+  @override
+  String get roleplayAutoHint => 'Auto Hint';
+
+  @override
+  String get roleplayHintLabel => 'Hint';
+
+  @override
+  String get roleplayHintShowAnswer => 'Tap to see the English answer';
+
+  @override
+  String get roleplayVoiceSpeed => 'Voice Speed';
 
   @override
   String get roleplayEndedFailed => 'Mission Failed...';

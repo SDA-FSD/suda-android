@@ -12,6 +12,9 @@ class RoleplayScaffold extends StatelessWidget {
   final String? duration; // 헤더 중앙 듀레이션 (MM:ss)
   final Color? durationColor;
   final Widget? headerExtra;
+  /// 헤더 타이틀 영역 바로 아래 전폭 슬롯 (예: S2 Playing 턴바영역). [belowHeaderHeight]와 쌍으로 사용.
+  final Widget? belowHeader;
+  final double belowHeaderHeight;
   /// 본문 시작 간격 델타 (정책 baseSpacing 70/90에 더해짐)
   final double headerTopSpacingDelta;
 
@@ -28,6 +31,8 @@ class RoleplayScaffold extends StatelessWidget {
     this.duration,
     this.durationColor,
     this.headerExtra,
+    this.belowHeader,
+    this.belowHeaderHeight = 0,
     this.headerTopSpacingDelta = 0,
     this.backgroundColor,
   });
@@ -84,6 +89,10 @@ class RoleplayScaffold extends StatelessWidget {
 
     final effectiveHeaderTopSpacing =
         baseHeaderTopSpacing + headerTopSpacingDelta;
+    final effectiveBelowHeaderHeight =
+        belowHeader != null ? belowHeaderHeight : 0.0;
+    final bodyTopOffset =
+        effectiveHeaderTopSpacing + effectiveBelowHeaderHeight;
 
     return Scaffold(
       backgroundColor: backgroundColor ?? const Color(0xFF121212),
@@ -94,7 +103,7 @@ class RoleplayScaffold extends StatelessWidget {
             // 1. 본문 영역 (헤더 공간 확보, 좌우 24 마진)
             Column(
               children: [
-                SizedBox(height: effectiveHeaderTopSpacing),
+                SizedBox(height: bodyTopOffset),
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -118,13 +127,15 @@ class RoleplayScaffold extends StatelessWidget {
                 child: _RoleplayCloseButton(onPressed: onClose),
               ),
 
-            // 4. 헤더 중앙 타이틀 및 듀레이션
+            // 4. 헤더 중앙 타이틀 및 듀레이션 (effectiveHeaderTopSpacing 영역 내 세로 중앙)
             Positioned(
-              top: 16,
+              top: 0,
               left: headerSideMargin,
               right: headerSideMargin,
+              height: effectiveHeaderTopSpacing,
               child: Column(
-                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.max,
                 children: [
                   if (title != null)
                     Padding(
@@ -153,6 +164,16 @@ class RoleplayScaffold extends StatelessWidget {
                 ],
               ),
             ),
+
+            // 5. 헤더 직하 전폭 영역 (좌우 마진 없음)
+            if (belowHeader != null)
+              Positioned(
+                top: effectiveHeaderTopSpacing,
+                left: 0,
+                right: 0,
+                height: effectiveBelowHeaderHeight,
+                child: belowHeader!,
+              ),
           ],
         ),
       ),

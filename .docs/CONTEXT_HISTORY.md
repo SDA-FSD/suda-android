@@ -6,6 +6,12 @@
 
 ## 최근 작업 메모
 
+- **Playing S2 힌트(②)**: AI 음성 종료 후 오토힌트 ON 자동 노출·OFF 아이콘+3s blink. `GET /rps2/sessions/{id}/hint/{rpMsgId}`(`rpMsgId`=AI `conversationIndex+1`)·hint/sound API. `playing_hint_mixin.dart` — S1 힌트박스 위치·2단계(번역→답변보기)·en 본문 즉시·이탤릭 단어·발화 완료 시 제거.
+- **CONTEXT_ROLEPLAY_S2.md**: S1→S2 Roleplay 마이그레이션 진행상황·SeriesState·Playing(`playing.dart` vs `playing_backup.dart`) 상태를 전용 문서로 정리. S2 작업 시 우선 참조.
+- **Playing S2 RpS2 세션 API**: Opening Start → `POST /rps2/sessions` `{seriesId, episodeId}` → `RpS2SessionDto`(`sessionId`, `aiSound`/`RpS2SoundResDto`)를 `SeriesStateService`에 저장. S1 `POST /v1/roleplay-sessions`는 `playing_backup` 경로용 유지.
+- **Playing S2 헤더**: `playing.dart`에 `RoleplayScaffold`·episode 로컬 타이틀·X 나가기 확인 레이어·우측 `kebab.png`(탭 동작 TODO). duration 없음. 배경은 episode `thumbnailImgPath`.
+- **Playing S2 분리**: `playing.dart`를 S2 빈 스캐폴드로 재시작. 기존 S1 전체 구현은 `playing_backup.dart`로 보존. 라우터는 계속 `playing.dart`의 `RoleplayPlayingScreen` 사용.
+- **S2 SeriesState·Opening 전환**: `SeriesStateService` 신설. `SeriesOverviewScreen` 로드 시 overview·FIRST_OVERVIEW 통계·에피소드 Play 시 `selectedEpisodeId` 설정 후 Tutorial→Opening. `RoleplayOpeningScreen`은 episode `title`/`thumbnailImgPath`/`briefing`·`userCharacter.name` 렌더(duration 제거). S1 `RoleplayOverviewScreen`→Opening 연결 해제. `isUserTurnYn` 제거·Playing은 AI 선시작. `popToOverview`→`/series/overview`. Playing 이후 S1 `RoleplayStateService` 참조는 추후 정리 예정.
 - **Home API v2·S2 시리즈**: `GET /v2/home/contents`, `GET /v2/home/series`로 교체. 모델 `HomeSeriesGroupDto`/`HomeSeriesDto`/`HomeCategoryDto`. Home `CategorySeriesRow`·`SeriesThumbnail`, 탭 → `SeriesOverviewScreen`(placeholder). S1/S2 개념 `.docs/CONTEXT.md` §1-1. v1 Home RP 모델·`getRoleplaysByCategory` 제거.
 - **FirstCefrLevelScreen**: 서비스 이용 동의 직후 1회 Full Screen CEFR 선택(`lib/screens/first_cefr_level.dart`). Setting `CefrLevelScreen`도 동일 캐러셀 UI(§6, hint 없음·헤더 유지). Lab 테스트 메뉴. l10n `firstCefrLevel*`. `.docs/CONTEXT.md` §7-0·`CONTEXT_SCREEN.md` §1.2·§6.
 - **AgreementScreen 제거**: 미사용 레거시 `lib/screens/agreement.dart` 삭제. 서비스 이용 동의는 `LoginScreen` bottom-up 레이어만 사용. `.docs/CONTEXT.md` §7-0, `.docs/CONTEXT_SCREEN.md` §1·흐름도.

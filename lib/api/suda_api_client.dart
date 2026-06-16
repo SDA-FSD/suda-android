@@ -55,6 +55,98 @@ class SudaApiClient {
     );
   }
 
+  static Future<RpS2SessionDto> createRpS2Session({
+    required String accessToken,
+    required int seriesId,
+    required int episodeId,
+  }) {
+    return SeriesApi.createSession(
+      accessToken: accessToken,
+      seriesId: seriesId,
+      episodeId: episodeId,
+    );
+  }
+
+  static Future<String> getRpS2Translation({
+    required String accessToken,
+    required String rpSessionId,
+    required int index,
+  }) {
+    return SeriesApi.getSessionTranslation(
+      accessToken: accessToken,
+      rpSessionId: rpSessionId,
+      index: index,
+    );
+  }
+
+  static Future<RpS2HintDto> getRpS2Hint({
+    required String accessToken,
+    required String rpSessionId,
+    required int rpMsgId,
+  }) {
+    return SeriesApi.getSessionHint(
+      accessToken: accessToken,
+      rpSessionId: rpSessionId,
+      rpMsgId: rpMsgId,
+    );
+  }
+
+  static Future<TtsResultDto> getRpS2HintSound({
+    required String accessToken,
+    required String rpSessionId,
+  }) {
+    return SeriesApi.getSessionHintSound(
+      accessToken: accessToken,
+      rpSessionId: rpSessionId,
+    );
+  }
+
+  static Future<TtsResultDto> getRpS2HintWordSound({
+    required String accessToken,
+    required String rpSessionId,
+    required int wordIndex,
+  }) {
+    return SeriesApi.getSessionHintWordSound(
+      accessToken: accessToken,
+      rpSessionId: rpSessionId,
+      wordIndex: wordIndex,
+    );
+  }
+
+  static Future<RpS2UserMessageResponseDto> sendRpS2UserMessageAudio({
+    required String accessToken,
+    required String rpSessionId,
+    required Uint8List audioData,
+  }) {
+    return SeriesApi.sendSessionUserMessageAudio(
+      accessToken: accessToken,
+      rpSessionId: rpSessionId,
+      audioData: audioData,
+    );
+  }
+
+  static Future<RpS2UserMessageResponseDto> sendRpS2UserMessageText({
+    required String accessToken,
+    required String rpSessionId,
+    required String text,
+  }) {
+    return SeriesApi.sendSessionUserMessageText(
+      accessToken: accessToken,
+      rpSessionId: rpSessionId,
+      text: text,
+    );
+  }
+
+  static Future<RpS2SoundResDto> getRpS2AiMessageAudio({
+    required String accessToken,
+    required String rpSessionId,
+  }) {
+    return SeriesApi.getSessionAiMessageAudio(
+      accessToken: accessToken,
+      rpSessionId: rpSessionId,
+    );
+  }
+
   static Future<RoleplayOverviewDto> getRoleplayOverview({
     required String accessToken,
     required int roleplayId,

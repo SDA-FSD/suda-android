@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../../../config/app_config.dart';
 import '../../../l10n/app_localizations.dart';
@@ -171,6 +172,15 @@ class _SeriesEpisodeTabContentState extends State<SeriesEpisodeTabContent> {
                     height: imageHeight,
                     fadeInDuration: Duration.zero,
                     fadeOutDuration: Duration.zero,
+                    placeholder: (context, url) => Shimmer.fromColors(
+                      baseColor: const Color(0xFF2A2A2A),
+                      highlightColor: const Color(0xFF3F3F3F),
+                      child: Container(
+                        width: width,
+                        height: imageHeight,
+                        color: Colors.white,
+                      ),
+                    ),
                     errorWidget: (context, url, error) =>
                         const ColoredBox(color: Color(0xFF353535)),
                   ),

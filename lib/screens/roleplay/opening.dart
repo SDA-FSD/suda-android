@@ -1,12 +1,13 @@
 import 'dart:async' show unawaited;
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:vibration/vibration.dart';
 import '../../config/app_config.dart';
 import '../../widgets/roleplay_overview_backdrop.dart';
 import '../../widgets/roleplay_scaffold.dart';
-import '../../services/roleplay_state_service.dart';
+import '../../services/series_state_service.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
 import '../../utils/default_toast.dart';
@@ -73,6 +74,22 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen>
       parent: _ticketFadeIn2Controller,
       curve: Curves.easeOut,
     );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) unawaited(_precacheAiCharacterImage());
+    });
+  }
+
+  Future<void> _precacheAiCharacterImage() async {
+    final path =
+        SeriesStateService.instance.selectedEpisode?.aiCharacter?.rpImgPath;
+    if (path == null || path.isEmpty) return;
+    if (!mounted) return;
+    final url = '${AppConfig.cdnBaseUrl}$path';
+    try {
+      await precacheImage(CachedNetworkImageProvider(url), context);
+    } catch (_) {
+      // preload 실패는 Playing에서 재시도
+    }
   }
 
   @override
@@ -130,19 +147,19 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen>
         return;
       }
 
-      final roleplayId = RoleplayStateService.instance.roleplayId;
-      final roleId = RoleplayStateService.instance.roleId;
-      if (roleplayId == null || roleId == null) {
+      final seriesId = SeriesStateService.instance.seriesId;
+      final episodeId = SeriesStateService.instance.selectedEpisodeId;
+      if (seriesId == null || episodeId == null) {
         DefaultToast.show(context, 'Cannot start roleplay');
         _restoreButton();
         return;
       }
 
       try {
-        final session = await SudaApiClient.createRoleplaySession(
+        final session = await SudaApiClient.createRpS2Session(
           accessToken: accessToken,
-          roleplayId: roleplayId,
-          roleId: roleId,
+          seriesId: seriesId,
+          episodeId: episodeId,
         );
         if (!context.mounted) return;
         final sessionId = session.sessionId;
@@ -188,8 +205,9 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen>
           return;
         }
         await _playTicketConsumeEffect();
-        RoleplayStateService.instance.setSessionId(sessionId);
-        RoleplayStateService.instance.setSession(session);
+        SeriesStateService.instance.setSession(session);
+        await _precacheAiCharacterImage();
+        if (!context.mounted) return;
         RoleplayRouter.replaceWithPlaying(context);
       } catch (e) {
         if (!context.mounted) return;
@@ -212,33 +230,22 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen>
 
   @override
   Widget build(BuildContext context) {
-    final overview = RoleplayStateService.instance.overview;
-    final roleplay = overview?.roleplay;
-    final roleId = RoleplayStateService.instance.roleId;
+    final episode = SeriesStateService.instance.selectedEpisode;
+    final seriesOverview = SeriesStateService.instance.overview;
 
-    // 선택된 역할 정보 찾기
-    final selectedRole = roleplay?.roleList?.firstWhere(
-      (r) => r.id == roleId,
-      orElse: () => roleplay.roleList!.first,
-    );
-
-    // 1. 영어 타이틀 추출
-    final titleEn = SudaJsonUtil.englishText(roleplay?.title);
-
-    // 2. 듀레이션 포맷팅 (00:05:00 -> 05:00)
-    String durationFormatted = '00:00';
-    if (roleplay?.duration != null && roleplay!.duration!.isNotEmpty) {
-      final parts = roleplay.duration!.split(':');
-      if (parts.length >= 3) {
-        durationFormatted = '${parts[1]}:${parts[2]}';
-      }
-    }
+    final title = episode == null
+        ? ''
+        : SudaJsonUtil.localizedMapText(episode.title);
+    final roleName = seriesOverview?.userCharacter?.name ?? '';
+    final briefing = episode == null
+        ? ''
+        : SudaJsonUtil.localizedMapText(episode.briefing);
 
     final theme = Theme.of(context).textTheme;
 
-    final overviewImgPath = roleplay?.overviewImgPath;
-    final backdropUrl = (overviewImgPath != null && overviewImgPath.isNotEmpty)
-        ? '${AppConfig.cdnBaseUrl}$overviewImgPath'
+    final thumbnailPath = episode?.thumbnailImgPath;
+    final backdropUrl = (thumbnailPath != null && thumbnailPath.isNotEmpty)
+        ? '${AppConfig.cdnBaseUrl}$thumbnailPath'
         : null;
 
     return PopScope(
@@ -257,8 +264,7 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen>
           RoleplayScaffold(
             backgroundColor: backdropUrl != null ? Colors.transparent : null,
             showCloseButton: widget.showCloseButton,
-            title: titleEn,
-            duration: durationFormatted,
+            title: title,
             body: Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min, // 중앙에 쫀쫀하게 모임
@@ -269,7 +275,7 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen>
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    SudaJsonUtil.localizedText(selectedRole?.name),
+                    roleName,
                     style: theme.headlineLarge?.copyWith(
                       color: const Color(0xFF0CABA8),
                     ),
@@ -277,7 +283,7 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen>
                   ),
                   const SizedBox(height: 40),
                   Text(
-                    'Scenario',
+                    'Briefing',
                     style: theme.headlineSmall?.copyWith(color: Colors.white),
                   ),
                   const SizedBox(height: 20),
@@ -285,7 +291,7 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen>
                     TextSpan(
                       style: theme.bodyLarge?.copyWith(color: Colors.white),
                       children: DefaultMarkdown.buildSpans(
-                        SudaJsonUtil.localizedText(selectedRole?.scenario),
+                        briefing,
                         theme.bodyLarge?.copyWith(color: Colors.white) ??
                             const TextStyle(color: Colors.white),
                       ),

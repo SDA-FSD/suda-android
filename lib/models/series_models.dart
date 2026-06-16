@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import '../utils/suda_json_util.dart';
 
 /// GET /rps2/series/{seriesId}/overview 응답 DTO
@@ -36,9 +39,8 @@ class RpS2SeriesOverviewDto {
         ? []
         : (episodesRaw as List<dynamic>)
               .map(
-                (item) => RpS2SeriesEpisodeDto.fromJson(
-                  item as Map<String, dynamic>,
-                ),
+                (item) =>
+                    RpS2SeriesEpisodeDto.fromJson(item as Map<String, dynamic>),
               )
               .toList();
 
@@ -62,9 +64,7 @@ class RpS2SeriesOverviewDto {
     );
   }
 
-  RpS2SeriesOverviewDto copyWith({
-    Map<int, int>? bestScoreMap,
-  }) {
+  RpS2SeriesOverviewDto copyWith({Map<int, int>? bestScoreMap}) {
     return RpS2SeriesOverviewDto(
       id: id,
       title: title,
@@ -109,7 +109,9 @@ class RpS2SeriesEpisodeDto {
       title: SudaJsonUtil.localizedMapFromJson(json['title']),
       summary: SudaJsonUtil.localizedMapFromJson(json['summary']),
       briefing: SudaJsonUtil.localizedMapFromJson(json['briefing']),
-      learningFunction: SudaJsonUtil.localizedMapFromJson(json['learningFunction']),
+      learningFunction: SudaJsonUtil.localizedMapFromJson(
+        json['learningFunction'],
+      ),
       thumbnailImgPath: json['thumbnailImgPath'] as String?,
       aiCharacter: json['aiCharacter'] == null
           ? null
@@ -138,9 +140,8 @@ class RpS2CefrDto {
         ? []
         : (missionsRaw as List<dynamic>)
               .map(
-                (item) => RpS2CefrMissionDto.fromJson(
-                  item as Map<String, dynamic>,
-                ),
+                (item) =>
+                    RpS2CefrMissionDto.fromJson(item as Map<String, dynamic>),
               )
               .toList();
 
@@ -233,4 +234,124 @@ Map<int, int> bestScoreMapFromJson(dynamic raw) {
     }
   });
   return result;
+}
+
+/// `POST /rps2/sessions` 요청 DTO
+class RpS2SessionRequestDto {
+  final int seriesId;
+  final int episodeId;
+
+  const RpS2SessionRequestDto({
+    required this.seriesId,
+    required this.episodeId,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {'seriesId': seriesId, 'episodeId': episodeId};
+  }
+}
+
+/// S2 세션 초기화 응답의 AI 사운드
+class RpS2SoundResDto {
+  final String? cdnYn;
+  final String? cdnPath;
+  final Uint8List? file;
+
+  const RpS2SoundResDto({this.cdnYn, this.cdnPath, this.file});
+
+  factory RpS2SoundResDto.fromJson(Map<String, dynamic> json) {
+    return RpS2SoundResDto(
+      cdnYn: json['cdnYn'] as String?,
+      cdnPath: json['cdnPath'] as String?,
+      file: _parseBytes(json['file']) ?? _parseBytes(json['sound']),
+    );
+  }
+}
+
+/// `GET /rps2/sessions/{rpSessionId}/hint/{rpMsgId}` 응답 DTO
+class RpS2HintDto {
+  final String? hint;
+  final String? translatedHint;
+
+  const RpS2HintDto({this.hint, this.translatedHint});
+
+  factory RpS2HintDto.fromJson(Map<String, dynamic> json) {
+    return RpS2HintDto(
+      hint: json['hint'] as String?,
+      translatedHint: json['translatedHint'] as String?,
+    );
+  }
+}
+
+/// `POST /rps2/sessions/{rpSessionId}/user-message/*` 응답 DTO.
+class RpS2UserMessageResponseDto {
+  final String? userText;
+  final String? userGrade;
+  final String? narration;
+  final String? aiText;
+  final int? missionCompletedIndex;
+
+  const RpS2UserMessageResponseDto({
+    this.userText,
+    this.userGrade,
+    this.narration,
+    this.aiText,
+    this.missionCompletedIndex,
+  });
+
+  factory RpS2UserMessageResponseDto.fromJson(Map<String, dynamic> json) {
+    return RpS2UserMessageResponseDto(
+      userText: json['userText'] as String?,
+      userGrade: json['userGrade'] as String?,
+      narration: json['narration'] as String?,
+      aiText: json['aiText'] as String?,
+      missionCompletedIndex: _optionalInt(json['missionCompletedIndex']),
+    );
+  }
+}
+
+/// `POST /rps2/sessions` 응답 DTO
+class RpS2SessionDto {
+  final String? sessionId;
+  final RpS2SoundResDto? aiSound;
+
+  const RpS2SessionDto({this.sessionId, this.aiSound});
+
+  factory RpS2SessionDto.fromJson(Map<String, dynamic> json) {
+    final raw = json['sessionId'];
+    final sessionId = raw?.toString();
+    return RpS2SessionDto(
+      sessionId: sessionId,
+      aiSound: _parseRpS2SoundRes(json['aiSound']),
+    );
+  }
+}
+
+RpS2SoundResDto? _parseRpS2SoundRes(dynamic raw) {
+  if (raw is! Map<String, dynamic>) return null;
+  return RpS2SoundResDto.fromJson(raw);
+}
+
+Uint8List? _parseBytes(dynamic value) {
+  if (value == null) {
+    return null;
+  }
+  if (value is List<int>) {
+    return Uint8List.fromList(value);
+  }
+  if (value is List<dynamic>) {
+    return Uint8List.fromList(value.map((item) => item as int).toList());
+  }
+  if (value is String && value.isNotEmpty) {
+    return Uint8List.fromList(base64Decode(value));
+  }
+  return null;
+}
+
+int? _optionalInt(dynamic value) {
+  if (value == null) return null;
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  if (value is String) return int.tryParse(value);
+  return null;
 }

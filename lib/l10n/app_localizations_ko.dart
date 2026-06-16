@@ -199,6 +199,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get holdMicrophoneToSpeak => '마이크를 길게 누르고 말하세요';
 
   @override
+  String get roleplayTypeMessagePlaceholder => '여기에 메시지를 입력하세요.';
+
+  @override
   String get yourTurnFirst => '먼저 시작해주세요!';
 
   @override
@@ -215,6 +218,18 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get roleplayExitExit => '나가기';
+
+  @override
+  String get roleplayAutoHint => '자동 힌트';
+
+  @override
+  String get roleplayHintLabel => '답변힌트';
+
+  @override
+  String get roleplayHintShowAnswer => '눌러서 영어 답변 보기';
+
+  @override
+  String get roleplayVoiceSpeed => '음성 속도';
 
   @override
   String get roleplayEndedFailed => '미션을 실패했습니다...';
