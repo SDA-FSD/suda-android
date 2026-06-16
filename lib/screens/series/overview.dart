@@ -479,9 +479,10 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen> {
 
   void _onEpisodePlay(RpS2SeriesEpisodeDto episode) {
     SeriesStateService.instance.setSelectedEpisodeId(episode.id);
-    if (widget.user != null) {
-      SeriesStateService.instance.setUser(widget.user);
-      RoleplayStateService.instance.setUser(widget.user);
+    final user = SeriesStateService.instance.user ?? widget.user;
+    if (user != null) {
+      SeriesStateService.instance.setUser(user);
+      RoleplayStateService.instance.setUser(user);
     }
     RoleplayRouter.pushTutorial(context);
   }
