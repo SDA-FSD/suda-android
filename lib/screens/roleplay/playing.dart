@@ -42,6 +42,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
         PlayingHintMixin,
         PlayingInputMixin {
   static const List<int> _speedRateSteps = [70, 100, 120, 150];
+  static const double _playingHeaderTopSpacing = 60;
 
   bool _showExitLayer = false;
   bool _showConfigurationPanel = false;
@@ -51,19 +52,19 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
   late List<Color> _turnBarColors;
   late List<String?> _turnLabelTexts;
   late List<Color?> _turnLabelColors;
-  bool _turnLabelFadeOut = false;
+  late List<bool> _turnLabelFadeOuts;
   late final List<RpS2CefrMissionDto> _missions;
   int _activeMissionIndex = 0;
   int _completedMissionCount = 0;
   int _completedSpeechCount = 0;
   final Set<int> _completedMissionIndexes = {};
-  int? _pendingActiveMissionIndex;
-  bool _keepMissionCompletedBackground = false;
   final GlobalKey _missionIconAnchorKey = GlobalKey();
   final List<Timer> _turnEffectTimers = [];
   Timer? _missionCompleteTimer;
   bool _pendingAnalyzingAfterAi = false;
   String? _pendingServiceMessage;
+  bool _showMissionCompletedFlash = false;
+  double _missionPanelOpacity = 1;
 
   @override
   void initState() {
@@ -79,6 +80,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     );
     _turnLabelTexts = List<String?>.filled(_turnCount, null);
     _turnLabelColors = List<Color?>.filled(_turnCount, null);
+    _turnLabelFadeOuts = List<bool>.filled(_turnCount, false);
     handleRpS2UserMessageResponse = _handleRpS2UserMessageResponse;
     playingHintPrepareForAiMessageHandler = preparePlayingHintForAiMessage;
     playingHintResetIconForAiStartHandler = resetHintIconForAiStart;
@@ -86,7 +88,6 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     scrollPlayingBodyToBottomHandler = scrollPlayingBodyToBottom;
     scrollPlayingHintToBottomHandler = scrollPlayingBodyToBottom;
     playingAiVoicePlaybackCompletedHandler = _onAiVoicePlaybackCompleted;
-    turnGradeLabelFadeOutHandler = _fadeOutTurnGradeLabelsOnSpeechStart;
     deactivateUserTurn();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) startAiOpeningFlow();
@@ -101,6 +102,14 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
       'Pre-A1' || 'A1' || 'A2' => true,
       _ => false,
     };
+  }
+
+  double _scaffoldBodyLeadHeight() {
+    final turnBarHeight =
+        _turnCount > 0 ? RoleplayTurnBarArea.areaHeight : 0.0;
+    return _playingHeaderTopSpacing +
+        turnBarHeight +
+        PlayingConversationLayout.bodyTopGap;
   }
 
   int _resolveInitialSpeedIndex() {
@@ -133,7 +142,6 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
       unawaited(_showAutoHintThenActivateUserTurn());
     } else {
       onHintAvailableAfterAi();
-      _applyPendingActiveMissionForNextTurn();
       activateUserTurn();
     }
   }
@@ -141,7 +149,6 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
   Future<void> _showAutoHintThenActivateUserTurn() async {
     await showPlayingHint();
     if (!mounted) return;
-    _applyPendingActiveMissionForNextTurn();
     activateUserTurn(enableHintButton: false);
   }
 
@@ -183,7 +190,6 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
       if (reachedRequiredSpeechCount) {
         _startLastTurnAnalyzing();
       } else {
-        _applyPendingActiveMissionForNextTurn();
         activateUserTurn();
       }
       return;
@@ -250,36 +256,32 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
       _turnBarColors[index] = color;
       _turnLabelTexts[index] = label;
       _turnLabelColors[index] = color;
+      _turnLabelFadeOuts[index] = false;
     });
+    _scheduleTurnGradeDim(index);
   }
 
-  void _fadeOutTurnGradeLabelsOnSpeechStart() {
-    if (_turnLabelFadeOut) return;
-
-    var hasVisibleLabel = false;
-    for (final text in _turnLabelTexts) {
-      if (text != null && text.isNotEmpty) {
-        hasVisibleLabel = true;
-        break;
-      }
-    }
-    if (!hasVisibleLabel) return;
-
-    setState(() => _turnLabelFadeOut = true);
+  void _scheduleTurnGradeDim(int index) {
     _turnEffectTimers.add(
-      Timer(RoleplayTurnBarArea.labelFadeOutDuration, () {
-        if (!mounted) return;
-        setState(() {
-          for (var i = 0; i < _turnCount; i++) {
-            if (_turnLabelTexts[i] == null) continue;
-            _turnLabelTexts[i] = null;
-            final baseColor = _turnLabelColors[i];
-            if (baseColor != null) {
-              _turnBarColors[i] = baseColor.withValues(alpha: 0.4);
-            }
-          }
-          _turnLabelFadeOut = false;
-        });
+      Timer(RoleplayTurnBarArea.turnGradeHighlightDuration, () {
+        if (!mounted || index < 0 || index >= _turnCount) return;
+        if (_turnLabelTexts[index] == null) return;
+        setState(() => _turnLabelFadeOuts[index] = true);
+        _turnEffectTimers.add(
+          Timer(RoleplayTurnBarArea.labelFadeOutDuration, () {
+            if (!mounted || index < 0 || index >= _turnCount) return;
+            setState(() {
+              _turnLabelTexts[index] = null;
+              final baseColor = _turnLabelColors[index];
+              if (baseColor != null) {
+                _turnBarColors[index] = baseColor.withValues(
+                  alpha: RoleplayTurnBarArea.pastTurnBarOpacity,
+                );
+              }
+              _turnLabelFadeOuts[index] = false;
+            });
+          }),
+        );
       }),
     );
   }
@@ -309,30 +311,24 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
       _activeMissionIndex = completedIndex;
       _completedMissionIndexes.add(completedIndex);
       _completedMissionCount = _completedMissionIndexes.length;
-      _keepMissionCompletedBackground = true;
+      _showMissionCompletedFlash = true;
     });
     MissionCompleteEffect.play(context, anchorKey: _missionIconAnchorKey);
-    _missionCompleteTimer = Timer(const Duration(milliseconds: 1500), () {
-      if (!mounted) return;
-      final nextIndex = _firstIncompleteMissionIndex();
-      setState(() {
-        _pendingActiveMissionIndex = nextIndex;
-      });
-    });
-  }
-
-  void _applyPendingActiveMissionForNextTurn() {
-    final nextIndex = _pendingActiveMissionIndex;
-    if (nextIndex == null) return;
-    if (nextIndex == _activeMissionIndex) {
-      _pendingActiveMissionIndex = null;
-      return;
-    }
-    setState(() {
-      _activeMissionIndex = nextIndex;
-      _pendingActiveMissionIndex = null;
-      _keepMissionCompletedBackground = false;
-    });
+    _missionCompleteTimer = Timer(
+      RoleplayMissionPanel.completedBackgroundDuration,
+      () {
+        if (!mounted) return;
+        final nextIndex = _firstIncompleteMissionIndex();
+        setState(() {
+          _showMissionCompletedFlash = false;
+          if (nextIndex != null) {
+            _activeMissionIndex = nextIndex;
+          } else {
+            _missionPanelOpacity = 0;
+          }
+        });
+      },
+    );
   }
 
   int? _firstIncompleteMissionIndex() {
@@ -508,6 +504,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final episode = SeriesStateService.instance.selectedEpisode;
     final title = episode == null
         ? ''
@@ -518,6 +515,8 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
         ? '${AppConfig.cdnBaseUrl}$thumbnailPath'
         : null;
     final topInset = MediaQuery.of(context).padding.top;
+    final bottomInset = MediaQuery.paddingOf(context).bottom;
+    const systemChromeColor = Color(0xFF121212);
 
     return PopScope(
       canPop: false,
@@ -531,30 +530,56 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
             Positioned.fill(
               child: RoleplayOverviewBackdrop(imageUrl: backdropUrl),
             ),
+          if (topInset > 0)
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              height: topInset,
+              child: const ColoredBox(color: systemChromeColor),
+            ),
+          if (bottomInset > 0)
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: bottomInset,
+              child: const ColoredBox(color: systemChromeColor),
+            ),
           RoleplayScaffold(
             backgroundColor: backdropUrl != null ? Colors.transparent : null,
             showCloseButton: widget.showCloseButton,
             onClose: _handleBackButton,
             title: title.isEmpty ? null : title,
+            titleStyle: theme.textTheme.bodySmall?.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+              fontVariations: const [FontVariation('wght', 700)],
+            ),
+            titleMaxLines: 1,
+            headerTopSpacingDelta: -10,
+            centerTitleInHeaderActionRow: true,
             belowHeader: _turnCount > 0
                 ? RoleplayTurnBarArea(
                     turnCount: _turnCount,
                     barColors: _turnBarColors,
                     labelTexts: _turnLabelTexts,
                     labelColors: _turnLabelColors,
-                    labelFadeOut: _turnLabelFadeOut,
+                    labelFadeOuts: _turnLabelFadeOuts,
                   )
                 : null,
             belowHeaderHeight: _turnCount > 0
                 ? RoleplayTurnBarArea.areaHeight
                 : 0,
             body: buildPlayingBody(
+              scaffoldBodyLeadHeight: _scaffoldBodyLeadHeight(),
+              missionPanelOpacity: _missionPanelOpacity,
               topOverlay: RoleplayMissionPanel(
                 missions: _missions,
                 activeMissionIndex: _activeMissionIndex,
                 completedCount: _completedMissionCount,
                 completedMissionIndexes: _completedMissionIndexes,
-                keepCompletedBackground: _keepMissionCompletedBackground,
+                showCompletedBackgroundFlash: _showMissionCompletedFlash,
                 missionIconAnchorKey: _missionIconAnchorKey,
               ),
               conversationBuilder: _buildConversationWithHint,

@@ -4,6 +4,17 @@ import 'package:flutter_svg/flutter_svg.dart';
 const double roleplayMicDefaultSize = 100;
 const double roleplayMicPressedSize = 115;
 
+/// 푸터 하단 mic↔keyboard·hint 아이콘 행 높이.
+const double roleplayFooterIconRowHeight = 40;
+
+/// 아이콘 행 세로 중앙(푸터 하단 기준). 마이크 이미지 하단을 여기에 맞춘다.
+const double roleplayFooterIconRowCenterFromBottom =
+    roleplayFooterIconRowHeight / 2;
+
+/// 녹음 모드: 마이크 이미지 하단이 아이콘 행 세로 중앙에 오도록 하는 스택 높이.
+const double roleplayMicFooterStackHeight =
+    roleplayMicDefaultSize + roleplayFooterIconRowCenterFromBottom;
+
 class _SlidingGradientTransform extends GradientTransform {
   final double slidePercent;
 
@@ -302,6 +313,12 @@ class _RoleplayMicButtonAreaState extends State<RoleplayMicButtonArea>
         _lastCancelCenter = cancelCenter;
         _lastMaxLeftOffset = maxLeftOffset;
 
+        final areaHeight = constraints.maxHeight;
+        final micImageBottomFromTop =
+            areaHeight - roleplayFooterIconRowCenterFromBottom;
+        final micRowTop = micImageBottomFromTop - roleplayMicPressedSize;
+        final micRowHeight = roleplayMicPressedSize;
+
         return ValueListenableBuilder<bool>(
           valueListenable: _isPressed,
           builder: (context, isPressed, _) {
@@ -310,39 +327,58 @@ class _RoleplayMicButtonAreaState extends State<RoleplayMicButtonArea>
             return Stack(
               clipBehavior: Clip.none,
               children: [
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: AnimatedOpacity(
-                    duration: const Duration(milliseconds: 150),
-                    opacity: shouldShowCancel ? 1 : 0,
-                    child: Text('Cancel', style: cancelStyle),
+                Positioned(
+                  left: 0,
+                  top: micRowTop,
+                  width: areaWidth,
+                  height: micRowHeight,
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: AnimatedOpacity(
+                      duration: const Duration(milliseconds: 150),
+                      opacity: shouldShowCancel ? 1 : 0,
+                      child: Text('Cancel', style: cancelStyle),
+                    ),
                   ),
                 ),
                 if (showArrows)
-                  _buildDragArrows(
-                    cancelWidth,
-                    120,
-                    centerX - (roleplayMicPressedSize / 2),
+                  Positioned(
+                    left: 0,
+                    top: micRowTop,
+                    width: areaWidth,
+                    height: micRowHeight,
+                    child: _buildDragArrows(
+                      cancelWidth,
+                      micRowHeight,
+                      centerX - (roleplayMicPressedSize / 2),
+                    ),
                   ),
-                Center(
-                  child: ValueListenableBuilder<double>(
-                    valueListenable: _dragOffset,
-                    builder: (context, dragOffset, __) {
-                      final effectiveOffset = isPressed ? dragOffset : 0.0;
-                      return Transform.translate(
-                        offset: Offset(effectiveOffset, 0),
-                        child: IgnorePointer(
-                          ignoring: !widget.isInteractive,
-                          child: Listener(
-                            onPointerDown: _onPointerDown,
-                            onPointerMove: _onPointerMove,
-                            onPointerUp: _onPointerUp,
-                            onPointerCancel: _onPointerCancel,
-                            child: _buildButton(context),
+                Positioned(
+                  left: 0,
+                  top: micRowTop,
+                  width: areaWidth,
+                  height: micRowHeight,
+                  child: Align(
+                    alignment: Alignment.bottomCenter,
+                    child: ValueListenableBuilder<double>(
+                      valueListenable: _dragOffset,
+                      builder: (context, dragOffset, __) {
+                        final effectiveOffset = isPressed ? dragOffset : 0.0;
+                        return Transform.translate(
+                          offset: Offset(effectiveOffset, 0),
+                          child: IgnorePointer(
+                            ignoring: !widget.isInteractive,
+                            child: Listener(
+                              onPointerDown: _onPointerDown,
+                              onPointerMove: _onPointerMove,
+                              onPointerUp: _onPointerUp,
+                              onPointerCancel: _onPointerCancel,
+                              child: _buildButton(context),
+                            ),
                           ),
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   ),
                 ),
               ],

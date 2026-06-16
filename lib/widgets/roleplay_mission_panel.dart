@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 import '../models/series_models.dart';
@@ -18,18 +20,21 @@ class RoleplayMissionPanel extends StatefulWidget {
 
   /// 좌·우 슬롯 사이 가용 폭 대비 텍스트 컬럼 비율 (나머지는 양쪽 균등 여백).
   static const double textColumnWidthFactor = 0.9;
-  static const Color backgroundColor = Color(0xFF353535);
 
   static const String missionIconOff =
       'assets/images/icons/rps2_mission_off.png';
   static const String missionIconOn = 'assets/images/icons/rps2_mission_on.png';
   static const Color completedBackgroundColor = Color(0xFF9E0067);
+  static const Duration completedBackgroundDuration = Duration(milliseconds: 1500);
+  static const Duration completedBackgroundFadeDuration = Duration(
+    milliseconds: 300,
+  );
 
   final List<RpS2CefrMissionDto> missions;
   final int activeMissionIndex;
   final int completedCount;
   final Set<int> completedMissionIndexes;
-  final bool keepCompletedBackground;
+  final bool showCompletedBackgroundFlash;
   final GlobalKey? missionIconAnchorKey;
 
   const RoleplayMissionPanel({
@@ -38,7 +43,7 @@ class RoleplayMissionPanel extends StatefulWidget {
     this.activeMissionIndex = 0,
     this.completedCount = 0,
     this.completedMissionIndexes = const {},
-    this.keepCompletedBackground = false,
+    this.showCompletedBackgroundFlash = false,
     this.missionIconAnchorKey,
   });
 
@@ -225,12 +230,6 @@ class _RoleplayMissionPanelState extends State<RoleplayMissionPanel> {
         final textGutterBefore = textGutterTotal / 2;
         final textGutterAfter = textGutterTotal / 2;
 
-        final allCompleted =
-            widget.missions.isNotEmpty &&
-            widget.completedMissionIndexes.length >= widget.missions.length;
-        final shouldUseCompletedBackground =
-            widget.keepCompletedBackground || allCompleted;
-
         return GestureDetector(
           onTap: _toggleExpanded,
           behavior: HitTestBehavior.opaque,
@@ -262,46 +261,109 @@ class _RoleplayMissionPanelState extends State<RoleplayMissionPanel> {
                   ],
                 );
               },
-              child: AnimatedContainer(
+              child: _MissionGlazedPanel(
                 key: ValueKey<bool>(_expanded),
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeOutCubic,
-                width: double.infinity,
-                constraints: const BoxConstraints(
-                  minHeight: RoleplayMissionPanel.collapsedHeight,
-                ),
-                decoration: BoxDecoration(
-                  color: shouldUseCompletedBackground
-                      ? RoleplayMissionPanel.completedBackgroundColor
-                      : RoleplayMissionPanel.backgroundColor,
-                  borderRadius: BorderRadius.circular(
-                    RoleplayMissionPanel.borderRadius,
+                borderRadius: RoleplayMissionPanel.borderRadius,
+                showCompletedBackground:
+                    widget.showCompletedBackgroundFlash,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    minHeight: RoleplayMissionPanel.collapsedHeight,
                   ),
-                ),
-                child: Stack(
-                  children: [
-                    _expanded
-                        ? _buildExpandedContent(
-                            theme,
-                            textColumnWidth,
-                            textGutterBefore,
-                            textGutterAfter,
-                            rightSlotWidth,
-                          )
-                        : _buildCollapsedContent(
-                            theme,
-                            textColumnWidth,
-                            textGutterBefore,
-                            textGutterAfter,
-                            rightSlotWidth,
-                          ),
-                  ],
+                  child: _expanded
+                      ? _buildExpandedContent(
+                          theme,
+                          textColumnWidth,
+                          textGutterBefore,
+                          textGutterAfter,
+                          rightSlotWidth,
+                        )
+                      : _buildCollapsedContent(
+                          theme,
+                          textColumnWidth,
+                          textGutterBefore,
+                          textGutterAfter,
+                          rightSlotWidth,
+                        ),
                 ),
               ),
             ),
           ),
         );
       },
+    );
+  }
+}
+
+/// 설정패널([RoleplayConfigurationPanel])과 동일 글래스 프레임.
+class _MissionGlazedPanel extends StatelessWidget {
+  final double borderRadius;
+  final bool showCompletedBackground;
+  final Widget child;
+
+  const _MissionGlazedPanel({
+    super.key,
+    required this.borderRadius,
+    this.showCompletedBackground = false,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(borderRadius),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.14),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(borderRadius),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(borderRadius),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.36),
+                      width: 1,
+                    ),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Colors.white.withValues(alpha: 0.22),
+                        Colors.white.withValues(alpha: 0.14),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              Positioned.fill(
+                child: AnimatedContainer(
+                  duration:
+                      RoleplayMissionPanel.completedBackgroundFadeDuration,
+                  curve: Curves.easeOutCubic,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(borderRadius),
+                    color: showCompletedBackground
+                        ? RoleplayMissionPanel.completedBackgroundColor
+                        : Colors.transparent,
+                  ),
+                ),
+              ),
+              child,
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

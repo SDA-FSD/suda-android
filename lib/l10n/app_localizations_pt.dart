@@ -238,7 +238,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get roleplayHintLabel => 'Dica';
 
   @override
-  String get roleplayHintShowAnswer => 'Clique para ver como responder';
+  String get roleplayHintShowAnswer => 'Ver resposta';
 
   @override
   String get roleplayVoiceSpeed => 'Velocidade da Voz';

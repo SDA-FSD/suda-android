@@ -17,11 +17,32 @@ import '../../utils/english_level_util.dart';
 class PlayingConversationLayout {
   PlayingConversationLayout._();
 
+  /// 본문 Column 상단 gap (턴바 직하).
+  static const double bodyTopGap = 8;
+
+  /// 미션 패널 오버레이 top (본문 Stack 내, [bodyTopGap] 아래).
+  static const double missionPanelTop = 2;
+
   /// 본문 스크롤 영역 상단부터 첫 말풍선까지 고정 여백 (미션 패널에 가리지 않도록).
-  static const double firstBubbleTopOffset = 72;
+  static const double firstBubbleTopOffset = 68;
+
+  /// 미션 패널 하단까지 본문 상단 페이드 (`#121212` 100% → 0%).
+  static const Color topContentFadeColor = Color(0xFF121212);
+
+  /// 본문 하단 페이드 — 디스플레이 하단~서비스메시지 상단. 배경·말풍선만 가림, 푸터 UI는 위에 노출.
+  static const Color bottomContentFadeColor = Color(0xFF121212);
+
+  /// 하단 페이드가 본문 스크롤 영역으로 침범하는 높이.
+  static const double bottomContentFadeBodyExtent = 48;
+
+  /// `RoleplayScaffold` 푸터 하단 `SizedBox` (playing 하단 여백).
+  static const double scaffoldFooterBottomGap = 24;
+
+  /// `RoleplayScaffold` 본문·푸터 좌우 `Padding` — 페이드 레이어는 이 inset을 상쇄해 디스플레이 전폭으로 확장.
+  static const double scaffoldBodyHorizontalInset = 24;
 }
 
-enum PlayingConversationEntryType { ai, user, narration }
+enum PlayingConversationEntryType { ai, user, narration, recording }
 
 class PlayingConversationEntry {
   final GlobalKey key = GlobalKey();
@@ -56,11 +77,23 @@ class PlayingConversationEntry {
     );
   }
 
+  factory PlayingConversationEntry.recording() {
+    return PlayingConversationEntry._(
+      type: PlayingConversationEntryType.recording,
+      text: '',
+    );
+  }
+
   bool get isAi => type == PlayingConversationEntryType.ai;
+
+  /// `conversationIndex`(rpMsgId) 부여 대상 여부. recording·힌트는 제외(S1 `consumesIndex` 동일).
+  bool get consumesConversationIndex =>
+      type != PlayingConversationEntryType.recording;
 }
 
 mixin PlayingConversationMixin<T extends StatefulWidget> on State<T> {
   final List<PlayingConversationEntry> _conversationEntries = [];
+  PlayingConversationEntry? _recordingEntry;
   final AudioPlayer _audioPlayer = AudioPlayer();
   int _nextConversationIndex = 1;
   bool _hasStartedAiOpening = false;
@@ -167,6 +200,22 @@ mixin PlayingConversationMixin<T extends StatefulWidget> on State<T> {
     await _addEntry(entry);
   }
 
+  void showPlayingRecordingEntry() {
+    if (_recordingEntry != null) return;
+    final entry = PlayingConversationEntry.recording();
+    _recordingEntry = entry;
+    unawaited(_addEntry(entry));
+  }
+
+  void removePlayingRecordingEntry() {
+    final entry = _recordingEntry;
+    if (entry == null) return;
+    setState(() {
+      _conversationEntries.remove(entry);
+    });
+    _recordingEntry = null;
+  }
+
   Future<AudioSource?> preparePlayingVoice({
     required String? cdnYn,
     required String? cdnPath,
@@ -238,8 +287,10 @@ mixin PlayingConversationMixin<T extends StatefulWidget> on State<T> {
     PlayingConversationEntry entry, {
     bool revealImmediately = false,
   }) async {
-    entry.conversationIndex = _nextConversationIndex;
-    _nextConversationIndex += 1;
+    if (entry.consumesConversationIndex) {
+      entry.conversationIndex = _nextConversationIndex;
+      _nextConversationIndex += 1;
+    }
     setState(() {
       _conversationEntries.add(entry);
       if (revealImmediately) {
@@ -315,6 +366,9 @@ mixin PlayingConversationMixin<T extends StatefulWidget> on State<T> {
               entry,
             ),
             PlayingConversationEntryType.narration => _buildNarration(entry),
+            PlayingConversationEntryType.recording => _buildRecordingBubble(
+              entry,
+            ),
           },
         ),
     ];
@@ -322,9 +376,11 @@ mixin PlayingConversationMixin<T extends StatefulWidget> on State<T> {
 
   Widget _buildNarration(PlayingConversationEntry entry) {
     if (entry.text.isEmpty) return const SizedBox.shrink();
-    final style = Theme.of(context).textTheme.bodyMedium?.copyWith(
+    // bodySmall 기본 height 1.2 — 이탤릭 glyph 여유를 위해 1.27로 소폭 상향.
+    final style = Theme.of(context).textTheme.bodySmall?.copyWith(
       color: Colors.white,
       fontStyle: FontStyle.italic,
+      height: 1.27,
     );
     return AnimatedOpacity(
       opacity: entry.isVisible ? 1 : 0,
@@ -345,7 +401,7 @@ mixin PlayingConversationMixin<T extends StatefulWidget> on State<T> {
     if (entry.text.isEmpty) return const SizedBox.shrink();
     final textStyle = Theme.of(
       context,
-    ).textTheme.bodyLarge?.copyWith(color: Colors.black);
+    ).textTheme.bodyMedium?.copyWith(color: Colors.white);
     final maxBubbleWidth = bodyWidth * 0.7;
     return AnimatedOpacity(
       opacity: entry.isVisible ? 1 : 0,
@@ -357,11 +413,29 @@ mixin PlayingConversationMixin<T extends StatefulWidget> on State<T> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Colors.white.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(entry.text, style: textStyle),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRecordingBubble(PlayingConversationEntry entry) {
+    return AnimatedOpacity(
+      opacity: entry.isVisible ? 1 : 0,
+      duration: const Duration(milliseconds: 150),
+      child: Align(
+        alignment: Alignment.centerRight,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.3),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: const _RecordingWaveDots(),
         ),
       ),
     );
@@ -383,10 +457,10 @@ mixin PlayingConversationMixin<T extends StatefulWidget> on State<T> {
     );
     final textStyle = Theme.of(
       context,
-    ).textTheme.bodyLarge?.copyWith(color: Colors.white);
+    ).textTheme.bodyMedium?.copyWith(color: Colors.white);
     final translationStyle = Theme.of(
       context,
-    ).textTheme.bodySmall?.copyWith(color: const Color(0xFF80D7CF));
+    ).textTheme.labelSmall?.copyWith(color: const Color(0xFF777373));
 
     return AnimatedOpacity(
       opacity: entry.isVisible ? 1 : 0,
@@ -394,7 +468,7 @@ mixin PlayingConversationMixin<T extends StatefulWidget> on State<T> {
       child: Align(
         alignment: Alignment.centerLeft,
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildAiAvatar(),
             const SizedBox(width: gapAvatarToBubble),
@@ -405,12 +479,9 @@ mixin PlayingConversationMixin<T extends StatefulWidget> on State<T> {
                 curve: Curves.easeInOut,
                 alignment: Alignment.topLeft,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 10,
-                  ),
+                  padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF0CABA8),
+                    color: const Color(0xFF353535),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Column(
@@ -514,6 +585,8 @@ class _NarrationRevealText extends StatefulWidget {
 
 class _NarrationRevealTextState extends State<_NarrationRevealText> {
   static const Duration _lineDuration = Duration(milliseconds: 260);
+  /// 이탤릭 glyph가 line metric 밖으로 나가는 경우를 위한 줄 여유(px).
+  static const double _lineExtraHeight = 1;
   int _visibleLineCount = 0;
   List<String> _lines = const [];
   List<double> _lineHeights = const [];
@@ -549,7 +622,9 @@ class _NarrationRevealTextState extends State<_NarrationRevealText> {
           textDirection,
         );
       }
-      _lineHeights = metrics.map((metric) => metric.height).toList();
+      _lineHeights = metrics
+          .map((metric) => metric.height + _lineExtraHeight)
+          .toList();
     }
     _scheduleReveal();
   }
@@ -628,12 +703,79 @@ class _NarrationRevealTextState extends State<_NarrationRevealText> {
                         visibleLines[i],
                         textAlign: TextAlign.center,
                         style: widget.style,
+                        textHeightBehavior: const TextHeightBehavior(
+                          applyHeightToFirstAscent: false,
+                          applyHeightToLastDescent: false,
+                        ),
                       ),
                     ),
                   ),
                 ),
             ],
           ),
+        );
+      },
+    );
+  }
+}
+
+/// S1 `playing_backup` `_WaveDots`와 동일 애니메이션(900ms sin 파도). 점 색만 S2 흰색.
+class _RecordingWaveDots extends StatefulWidget {
+  const _RecordingWaveDots();
+
+  @override
+  State<_RecordingWaveDots> createState() => _RecordingWaveDotsState();
+}
+
+class _RecordingWaveDotsState extends State<_RecordingWaveDots>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  double _opacityFor(int index, double t) {
+    final phase = (t * 2 * math.pi) + (index * 0.8);
+    final value = (1 + math.sin(phase)) / 2;
+    return 0.3 + (0.7 * value);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: List.generate(3, (index) {
+            final opacity = _opacityFor(index, _controller.value);
+            return Padding(
+              padding: EdgeInsets.only(right: index == 2 ? 0 : 4),
+              child: Opacity(
+                opacity: opacity,
+                child: Container(
+                  width: 6,
+                  height: 6,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+            );
+          }),
         );
       },
     );

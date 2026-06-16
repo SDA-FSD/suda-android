@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 
 /// S2 Playing **턴바영역**(turn bar area).
 ///
-/// 헤더 타이틀 영역 바로 아래, 디스플레이 전폭·높이 24.
+/// 헤더 타이틀 영역 바로 아래, 디스플레이 전폭·높이 20.
 /// [turnCount]개의 턴박스가 gap [turnBoxGap]만 두고 가로로 균등 분할된다.
 class RoleplayTurnBarArea extends StatelessWidget {
-  static const double areaHeight = 24;
+  static const double areaHeight = 20;
   static const double turnBarHeight = 4;
 
   /// 좌우 둥근 캡슐 형태 (Stadium). radius = height / 2.
@@ -14,13 +14,19 @@ class RoleplayTurnBarArea extends StatelessWidget {
   static const double turnBoxGap = 6;
   static const Color defaultBarColor = Color(0x66635F5F); // #635F5F 40%
 
+  /// 등급 색 100% 노출 유지 시간. 이후 bar·라벨 dim.
+  static const Duration turnGradeHighlightDuration = Duration(seconds: 2);
+
+  /// 지나간 턴 turn bar — 등급색 대비 불투명도.
+  static const double pastTurnBarOpacity = 0.2;
+
   static const Duration labelFadeOutDuration = Duration(milliseconds: 150);
 
   final int turnCount;
   final List<Color> barColors;
   final List<String?> labelTexts;
   final List<Color?> labelColors;
-  final bool labelFadeOut;
+  final List<bool> labelFadeOuts;
 
   const RoleplayTurnBarArea({
     super.key,
@@ -28,7 +34,7 @@ class RoleplayTurnBarArea extends StatelessWidget {
     required this.barColors,
     this.labelTexts = const [],
     this.labelColors = const [],
-    this.labelFadeOut = false,
+    this.labelFadeOuts = const [],
   });
 
   @override
@@ -52,7 +58,7 @@ class RoleplayTurnBarArea extends StatelessWidget {
                       : defaultBarColor,
                   labelText: i < labelTexts.length ? labelTexts[i] : null,
                   labelColor: i < labelColors.length ? labelColors[i] : null,
-                  labelFadeOut: labelFadeOut,
+                  labelFadeOut: i < labelFadeOuts.length && labelFadeOuts[i],
                   labelStyle: theme.labelSmall?.copyWith(
                     color: Colors.white,
                     fontSize: 10,

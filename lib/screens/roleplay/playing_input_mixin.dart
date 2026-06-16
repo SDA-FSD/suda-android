@@ -12,6 +12,7 @@ import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
 import '../../utils/default_toast.dart';
 import '../../widgets/roleplay_mic_button_area.dart';
+import '../../widgets/roleplay_mission_panel.dart';
 import 'playing_conversation_mixin.dart';
 import 'playing_hint_mixin.dart';
 
@@ -56,9 +57,10 @@ mixin PlayingInputMixin<T extends StatefulWidget>
   late final AnimationController _hintBlinkController;
   late final AnimationController _analyzingBlinkController;
   bool _isAnalyzingBlinking = false;
+  double _missionPanelHeight = RoleplayMissionPanel.collapsedHeight;
+  final GlobalKey _missionPanelSizeKey = GlobalKey();
   Future<void> Function(RpS2UserMessageResponseDto response)?
   handleRpS2UserMessageResponse;
-  VoidCallback? turnGradeLabelFadeOutHandler;
 
   bool get isUserTurn => _isUserTurn;
 
@@ -153,19 +155,39 @@ mixin PlayingInputMixin<T extends StatefulWidget>
     });
   }
 
-  /// 본문: 스크롤 영역 + 상단 고정 오버레이(미션 패널 등). 메시지는 패널 아래로 스크롤되어 가려짐.
+  /// 본문: 스크롤 영역 + 상·하단 페이드 + 미션 패널 오버레이.
   Widget buildPlayingBody({
+    required double scaffoldBodyLeadHeight,
     required Widget topOverlay,
+    required double missionPanelOpacity,
     required List<Widget> Function(double bodyWidth) conversationBuilder,
   }) {
+    final missionPanelFadeExtent = _missionPanelHeight * missionPanelOpacity;
+    final fadeHeight =
+        scaffoldBodyLeadHeight +
+        PlayingConversationLayout.missionPanelTop +
+        missionPanelFadeExtent;
+    final footerLowerHeight = _inputMode == _PlayingInputMode.recording
+        ? roleplayMicFooterStackHeight
+        : 10 + 44 + 10 + roleplayFooterIconRowHeight;
+    final bottomFadeExtension =
+        footerLowerHeight +
+        PlayingConversationLayout.scaffoldFooterBottomGap +
+        MediaQuery.paddingOf(context).bottom;
+    final bottomFadeHeight =
+        PlayingConversationLayout.bottomContentFadeBodyExtent +
+        bottomFadeExtension;
+    final fadeHorizontalBleed =
+        PlayingConversationLayout.scaffoldBodyHorizontalInset;
+
     return Column(
       mainAxisSize: MainAxisSize.max,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SizedBox(height: 8),
+        const SizedBox(height: PlayingConversationLayout.bodyTopGap),
         Expanded(
           child: Stack(
-            clipBehavior: Clip.hardEdge,
+            clipBehavior: Clip.none,
             children: [
               LayoutBuilder(
                 builder: (context, constraints) {
@@ -190,11 +212,89 @@ mixin PlayingInputMixin<T extends StatefulWidget>
                   );
                 },
               ),
-              Positioned(top: 6, left: 0, right: 0, child: topOverlay),
+              Positioned(
+                top: -scaffoldBodyLeadHeight,
+                left: -fadeHorizontalBleed,
+                right: -fadeHorizontalBleed,
+                height: fadeHeight,
+                child: IgnorePointer(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          PlayingConversationLayout.topContentFadeColor,
+                          PlayingConversationLayout.topContentFadeColor
+                              .withValues(alpha: 0),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                bottom: -bottomFadeExtension,
+                left: -fadeHorizontalBleed,
+                right: -fadeHorizontalBleed,
+                height: bottomFadeHeight,
+                child: IgnorePointer(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.bottomCenter,
+                        end: Alignment.topCenter,
+                        colors: [
+                          PlayingConversationLayout.bottomContentFadeColor,
+                          PlayingConversationLayout.bottomContentFadeColor
+                              .withValues(alpha: 0),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                top: PlayingConversationLayout.missionPanelTop,
+                left: 0,
+                right: 0,
+                child: AnimatedOpacity(
+                  opacity: missionPanelOpacity,
+                  duration:
+                      RoleplayMissionPanel.completedBackgroundFadeDuration,
+                  curve: Curves.easeOutCubic,
+                  child: IgnorePointer(
+                    ignoring: missionPanelOpacity < 1,
+                    child: NotificationListener<SizeChangedLayoutNotification>(
+                      onNotification: (notification) {
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          if (!mounted) return;
+                          final renderBox =
+                              _missionPanelSizeKey.currentContext
+                                      ?.findRenderObject()
+                                  as RenderBox?;
+                          if (renderBox == null || !renderBox.hasSize) return;
+                          final nextHeight = renderBox.size.height;
+                          if (nextHeight != _missionPanelHeight) {
+                            setState(() => _missionPanelHeight = nextHeight);
+                          }
+                        });
+                        return false;
+                      },
+                      child: SizeChangedLayoutNotifier(
+                        child: KeyedSubtree(
+                          key: _missionPanelSizeKey,
+                          child: topOverlay,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: PlayingConversationLayout.bodyTopGap),
       ],
     );
   }
@@ -263,6 +363,82 @@ mixin PlayingInputMixin<T extends StatefulWidget>
     });
   }
 
+  Widget _buildFooterIconRow() {
+    return Padding(
+      padding: const EdgeInsets.only(left: 16, right: 16),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          GestureDetector(
+            onTap: _isInputLocked
+                ? null
+                : () {
+                    final toRecording =
+                        _inputMode == _PlayingInputMode.typing;
+                    if (!toRecording) {
+                      _cancelHintIdleAndBlink();
+                    }
+                    setState(() {
+                      _inputMode = toRecording
+                          ? _PlayingInputMode.recording
+                          : _PlayingInputMode.typing;
+                    });
+                    if (toRecording && _isUserTurn) {
+                      _showHoldToSpeakMessage();
+                    }
+                  },
+            child: SizedBox(
+              width: 40,
+              height: 40,
+              child: Center(
+                child: Image.asset(
+                  _inputMode == _PlayingInputMode.typing
+                      ? 'assets/images/icons/mic.png'
+                      : 'assets/images/icons/keyboard.png',
+                  height: 30,
+                  width: 30,
+                ),
+              ),
+            ),
+          ),
+          const Spacer(),
+          IgnorePointer(
+            ignoring: !_isHintEnabled || _isInputLocked,
+            child: AnimatedBuilder(
+              animation: _hintBlinkController,
+              builder: (context, child) {
+                final baseOpacity = _isHintEnabled ? 1.0 : 0.4;
+                final blinkOpacity = _hintBlinkController.isAnimating
+                    ? _hintBlinkController.value
+                    : baseOpacity;
+                return Opacity(
+                  opacity: _hintBlinkController.isAnimating
+                      ? blinkOpacity
+                      : baseOpacity,
+                  child: child,
+                );
+              },
+              child: GestureDetector(
+                onTap: _isHintEnabled ? _onHintTap : null,
+                child: SizedBox(
+                  width: 40,
+                  height: 40,
+                  child: Center(
+                    child: Image.asset(
+                      'assets/images/icons/lightball.png',
+                      height: 24,
+                      width: 24,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget buildPlayingFooter() {
     final l10n = AppLocalizations.of(context)!;
 
@@ -302,15 +478,29 @@ mixin PlayingInputMixin<T extends StatefulWidget>
           ),
           if (_inputMode == _PlayingInputMode.recording)
             SizedBox(
-              height: 120,
-              child: RoleplayMicButtonArea(
-                isInteractive: _isMicInteractive && !_isInputLocked,
-                isLoading: _micState == _PlayingMicButtonState.loading,
-                isDisabled: _micState == _PlayingMicButtonState.disabled,
-                loadingRotationController: _loadingRotationController,
-                onPressStart: _onMicPressStart,
-                onPressEnd: _onMicPressEnd,
-                onPressCancel: _onMicPressCancel,
+              height: roleplayMicFooterStackHeight,
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    height: roleplayFooterIconRowHeight,
+                    child: _buildFooterIconRow(),
+                  ),
+                  Positioned.fill(
+                    child: RoleplayMicButtonArea(
+                      isInteractive: _isMicInteractive && !_isInputLocked,
+                      isLoading: _micState == _PlayingMicButtonState.loading,
+                      isDisabled: _micState == _PlayingMicButtonState.disabled,
+                      loadingRotationController: _loadingRotationController,
+                      onPressStart: _onMicPressStart,
+                      onPressEnd: _onMicPressEnd,
+                      onPressCancel: _onMicPressCancel,
+                    ),
+                  ),
+                ],
               ),
             )
           else
@@ -387,82 +577,11 @@ mixin PlayingInputMixin<T extends StatefulWidget>
                 const SizedBox(height: 10),
               ],
             ),
-          SizedBox(
-            height: 40,
-            child: Padding(
-              padding: const EdgeInsets.only(left: 16, right: 16),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  GestureDetector(
-                    onTap: _isInputLocked
-                        ? null
-                        : () {
-                            final toRecording =
-                                _inputMode == _PlayingInputMode.typing;
-                            if (!toRecording) {
-                              _cancelHintIdleAndBlink();
-                            }
-                            setState(() {
-                              _inputMode = toRecording
-                                  ? _PlayingInputMode.recording
-                                  : _PlayingInputMode.typing;
-                            });
-                            if (toRecording && _isUserTurn) {
-                              _showHoldToSpeakMessage();
-                            }
-                          },
-                    child: SizedBox(
-                      width: 40,
-                      height: 40,
-                      child: Center(
-                        child: Image.asset(
-                          _inputMode == _PlayingInputMode.typing
-                              ? 'assets/images/icons/mic.png'
-                              : 'assets/images/icons/keyboard.png',
-                          height: 30,
-                          width: 30,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const Spacer(),
-                  IgnorePointer(
-                    ignoring: !_isHintEnabled || _isInputLocked,
-                    child: AnimatedBuilder(
-                      animation: _hintBlinkController,
-                      builder: (context, child) {
-                        final baseOpacity = _isHintEnabled ? 1.0 : 0.4;
-                        final blinkOpacity = _hintBlinkController.isAnimating
-                            ? _hintBlinkController.value
-                            : baseOpacity;
-                        return Opacity(
-                          opacity: _hintBlinkController.isAnimating
-                              ? blinkOpacity
-                              : baseOpacity,
-                          child: child,
-                        );
-                      },
-                      child: GestureDetector(
-                        onTap: _isHintEnabled ? _onHintTap : null,
-                        child: SizedBox(
-                          width: 40,
-                          height: 40,
-                          child: Center(
-                            child: Image.asset(
-                              'assets/images/icons/lightball.png',
-                              height: 24,
-                              width: 24,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+          if (_inputMode != _PlayingInputMode.recording)
+            SizedBox(
+              height: roleplayFooterIconRowHeight,
+              child: _buildFooterIconRow(),
             ),
-          ),
         ],
       ),
     );
@@ -540,7 +659,6 @@ mixin PlayingInputMixin<T extends StatefulWidget>
   }
 
   void _onMicPressStart() {
-    turnGradeLabelFadeOutHandler?.call();
     unawaited(_beginRecording());
   }
 
@@ -560,7 +678,6 @@ mixin PlayingInputMixin<T extends StatefulWidget>
     if (!_isTypingEnabled || !_isUserTurn || _isInputLocked) return;
     final text = _typingController.text.trim();
     if (text.isEmpty) return;
-    turnGradeLabelFadeOutHandler?.call();
     _typingController.clear();
     _isInputLocked = true;
     _setTypingEnabled(false);
@@ -622,6 +739,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
     _isRecordingStarting = false;
     if (!mounted) return;
     setState(() => _isRecording = true);
+    showPlayingRecordingEntry();
     final pendingAction = _pendingRecordingAction;
     _pendingRecordingAction = null;
     if (pendingAction == _PendingRecordingAction.cancel) {
@@ -638,6 +756,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
     }
     _recordingStartedAt = null;
     await _stopRecording(discard: true);
+    removePlayingRecordingEntry();
     if (!mounted) return;
     setState(() => _isRecording = false);
     _setMicState(_PlayingMicButtonState.defaultState);
@@ -659,6 +778,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
         ? 0
         : DateTime.now().difference(startedAt).inMilliseconds;
     final path = await _stopRecording();
+    removePlayingRecordingEntry();
     if (!mounted) return;
     setState(() => _isRecording = false);
 

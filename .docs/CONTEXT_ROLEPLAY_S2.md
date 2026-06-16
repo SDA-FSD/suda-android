@@ -134,7 +134,7 @@ S1 턴 정책은 `.docs/CONTEXT_ROLEPLAY.md`만 본다. **S2는 아래가 단일
 - **데이터**: `SeriesStateService.selectedEpisode`, `overview.userCharacter`
 - **렌더**
   - 배경: episode `thumbnailImgPath` → `RoleplayOverviewBackdrop`
-  - 헤더 타이틀: episode `title` (`SudaJsonUtil.localizedMapText`)
+  - 헤더 타이틀: episode `title` (`SudaJsonUtil.localizedMapText`) — X·kebab 밴드(top 16·height 40) 세로 중앙
   - **duration 없음** (S2)
   - Your Role: `userCharacter.name`
   - Briefing: episode `briefing` (`DefaultMarkdown`)
@@ -158,21 +158,21 @@ S1 턴 정책은 `.docs/CONTEXT_ROLEPLAY.md`만 본다. **S2는 아래가 단일
 - `RoleplayScaffold` + episode `thumbnailImgPath` 배경
 - **헤더**
   - 좌상 **X** → 나가기 확인 레이어 (S1 `playing_backup._buildExitLayer`와 동일 UX·l10n)
-  - 중앙 **타이틀**: episode `title` (사용자 언어, fallback en)
+  - 중앙 **타이틀**: episode `title` (사용자 언어, fallback en) · `bodySmall` **w700** · **1줄** 말줄임
   - **duration 없음**
   - 우상 **`kebab.png`** (40×40 탭 영역) — 탭 시 **설정패널(configuration panel)** 토글
 - **턴바영역 (turn bar area)** — `RoleplayScaffold.belowHeader` + `lib/widgets/roleplay_turn_bar_area.dart`
-  - **위치**: 헤더 타이틀 영역(`effectiveHeaderTopSpacing` 70/90) **바로 아래**, 간격 0
-  - **크기**: height **24**, 좌우 **마진 24** (`RoleplayTurnBarArea.horizontalMargin`) — 턴박스 Row는 마진 안쪽에서 전폭 채움
+  - **위치**: 헤더 타이틀 영역(`effectiveHeaderTopSpacing` **60**, `headerTopSpacingDelta -10`) **바로 아래**, 간격 0
+  - **크기**: height **20**, 좌우 **마진 24** (`RoleplayTurnBarArea.horizontalMargin`) — 턴박스 Row는 마진 안쪽에서 전폭 채움
   - **턴박스 개수**: `selectedEpisode.cefrMap[EnglishLevelUtil.readLevelFromUser(user)].requiredSpeechCount` (`RpS2CefrDto`). `null` 또는 `<1`이면 영역 **미노출**
   - **가로 배치**: `requiredSpeechCount`개 `Expanded` 턴박스 + 턴박스 사이 **gap 6**만 → 개수가 적을수록 턴박스 하나의 width가 커짐
-  - **턴박스 내부**(세로, height 24 안):
+  - **턴박스 내부**(세로, height 20 안):
     - **하단**: turn bar — height **4**, **좌우 둥근 캡슐**(borderRadius = height/2 = **2**) — 턴 상태 색
     - **상단 나머지**: turn bar 색 변경 시 그 바 **바로 위**에 노출할 라벨 텍스트 예비 영역 (`labelTexts`, 초기 `null`)
   - **초기 turn bar 색**: 전 턴 `#635F5F` **40%** (`Color(0x66635F5F)`, `RoleplayTurnBarArea.defaultBarColor`)
   - **상태 보관** (`playing.dart`): `_turnBarColors`, `_turnLabelTexts`, `_turnLabelColors` (길이 = `_turnCount`)
   - **진행 정책**: 사용자 발화 **1회 완료**마다 해당 턴 turn bar 색 1개 갱신 → `requiredSpeechCount`회 발화 완료(마지막 턴) 시에도 나레이션·후속 AI 말풍선/음성을 노출한 뒤 서버 `serviceMessage`(없으면 `roleplayAnalyzing`) blink(결과 호출·이동은 추후).
-  - **등급 효과**: A `#0CABA8` 라벨 en `wow!`/pt `bah!`, B `#62FF00` `ok!`, C `#FFB700` en `hmm…`/pt `nhé…`, D `#FF0000` en `oh…`/pt `oxi?`. bar 색 즉시 갱신 + 라벨 즉시 pop(1.0→1.42→1.0, 320ms). 라벨은 다음 사용자 발화 시작(마이크 press·Send) 시 150ms fade-out 후 제거, bar는 해당 색 40%로 전환.
+  - **등급 효과**: A `#0CABA8` 라벨 en `wow!`/pt `bah!`, B `#62FF00` `ok!`, C `#FFB700` en `hmm…`/pt `nhé…`, D `#FF0000` en `oh…`/pt `oxi?`. bar 색·라벨 즉시 100% pop(1.0→1.42→1.0, 320ms). **2초 후** 라벨 150ms fade-out + bar 등급색 **20%**(`pastTurnBarOpacity`)로 dim(다음 사용자 턴 시작과 무관).
 - **시스템 뒤로가기**: `PopScope` → X와 동일하게 확인 레이어
 - **나가기 확정**: `RoleplayRouter.popToOverview` → Series Overview
 - **설정패널 (configuration panel)** — `lib/widgets/roleplay_configuration_panel.dart`
@@ -193,22 +193,25 @@ S1 턴 정책은 `.docs/CONTEXT_ROLEPLAY.md`만 본다. **S2는 아래가 단일
 **미션 패널 (mission panel)** — `lib/widgets/roleplay_mission_panel.dart`, 본문 `Stack` 상단 고정 오버레이
 
 - **데이터**: `selectedEpisode.cefrMap[ENGLISH_LEVEL].missions` (`List<RpS2CefrMissionDto>`, 보통 3개). `instruction`은 `SudaJsonUtil.localizedMapText`
-- **위치**: 본문 `Stack` 상단에서 **top 6** (gap 8 아래 추가 여백)
-- **레이아웃(접힘)**: 전폭(본문 inset 24 안) · height **54** · 배경 `#353535` · borderRadius **27**(알약형, height/2)
+- **위치**: 본문 `Stack` 상단에서 **top 2** (`PlayingConversationLayout.missionPanelTop`, gap 8 아래 추가 여백)
+- **레이아웃(접힘)**: 전폭(본문 inset 24 안) · height **54** · **글래스 프레임**(설정패널과 동일: `BackdropFilter` blur 12 · white gradient border α0.36 · gradient α0.22→0.14 · shadow blur 10) · borderRadius **27**(알약형, height/2)
   - 좌 **15**: `rps2_mission_off.png`/완료 시 `rps2_mission_on.png` 24×24 세로 중앙
   - 우 **20**: `{activeMissionIndex + 1}/{total}` `labelSmall` 흰색(달성 수가 아니라 현재 노출 미션 순서 기준)
   - 중앙: 텍스트 컬럼 width = (패널 − 좌·우 슬롯) × **90%**, 나머지 10%는 좌·우 **균등 여백**(아이콘↔텍스트 간격 확보). 접힘/펼침 동일 · `instruction` `bodyMedium` 흰색·**좌측 정렬** (`_activeMissionIndex`, 초기 0). 펼침 시 우 슬롯은 빈 공간으로 동일 width 유지
 - **탭 → 펼침**: **아래로만** `AnimatedSize`+`AnimatedSwitcher`(300ms, `easeInOutCubic`, fade+`SizeTransition`). 모서리 radius **27** 유지. 전체 미션 `instruction`+좌측 아이콘 세로 나열 · `0/3` **hide**. 재탭 → 접힘
-- **오버레이**: `buildPlayingBody`의 `SingleChildScrollView` 위에 `Positioned` — 메시지 append 시 위로 스크롤되며 패널에 가려짐
+- **오버레이**: `buildPlayingBody`의 `SingleChildScrollView` 위에 `Positioned` — 메시지 append 시 위로 스크롤되며 패널에 가려짐. 스크롤과 미션 패널 **사이**에 상단 페이드 레이어: SafeArea 상단~미션 패널 하단, `#121212` 100%→0% 세로 gradient(헤더·턴바·미션 패널은 페이드 위에 노출, 말풍선만 페이드에 가려짐). **하단 페이드**: 디스플레이 하단~서비스메시지 상단, `#121212` 100%→0%(본문 48px 침범 + 푸터 하단·safe·scaffold gap 24). 상·하단 페이드는 `scaffoldBodyHorizontalInset`(24) 상쇄로 **디스플레이 좌우 전폭**. `playing.dart` 최외곽 Stack에 상태표시줄·하단 시스템 영역 `#121212` 솔리드 보강(기존 페이드와 이어짐). 푸터 UI(서비스메시지·입력·아이콘)는 페인트 순서상 페이드 위에 노출, 배경·말풍선만 가림.
 - **스크롤 정책**: 본문 `SingleChildScrollView`는 `ScrollController`를 사용한다. AI/User/Narration entry 또는 힌트 bubble이 새로 추가될 때만 최하단으로 250ms 애니메이션 이동한다. 사용자가 상하 드래그로 과거 메시지를 보는 중에는 새 요소 추가가 없는 한 강제로 하단 고정하지 않는다.
-- **첫 AI 말풍선 Y**: 본문 스크롤 영역 상단에 **고정 `SizedBox(height: 72)`** (`PlayingConversationLayout.firstBubbleTopOffset`) — 패널에 가리지 않음. 추가 말풍선은 아래로 쌓이며 스크롤 시 패널 뒤로 이동
+- AI 말풍선 (`playing_conversation_mixin` `_buildAiMessage`): 배경 `#353535`·padding **10**·radius 12. 본문 `bodyMedium` 흰색. 번역 `labelSmall` `#777373`. 아바타 40×40은 말풍선 컨테이너 **상단** 정렬(`CrossAxisAlignment.start`).
+- 사용자 말풍선 (`_buildUserMessage`): 우측 정렬·max 너비 `bodyWidth×0.7`. 배경 흰색 **30%**·padding 좌우 12 상하 10·radius 12. 본문 `bodyMedium` 흰색.
+- 녹음 중 말풍선 (`_buildRecordingBubble`): S1과 동일 — 녹음 시작 시 entry append·150ms fade-in·우측 말풍선·3점 wave(900ms sin, opacity 0.3~1.0). 배경·점 색은 사용자 말풍선과 동일(흰 30%·흰 점). 녹음 종료/취소 시 제거 후 STT 결과 말풍선 노출.
+- **첫 AI 말풍선 Y**: 본문 스크롤 영역 상단에 **고정 `SizedBox(height: 68)`** (`PlayingConversationLayout.firstBubbleTopOffset`) — 패널에 가리지 않음. 추가 말풍선은 아래로 쌓이며 스크롤 시 패널 뒤로 이동
 - **AI 아바타**: `selectedEpisode.aiCharacter.rpImgPath` — Opening `initState`·Playing 전환 직전 `precacheImage`
-- **미션 완료 효과**: `missionCompletedIndex` 수신 시 **`MissionCompleteEffect`**(`EffectOverlayService` root overlay)로 `mission_complete_effect.png`를 **디스플레이 width × 2/3** 크기(에셋 전체 기준)로 재생 — **미션 패널 active row 좌측 on/off 아이콘 중심**과 이미지 중심(핑크 원) 정렬, 좌·상단은 화면 밖으로 클리핑 가능(`Stack clipBehavior: none`). 중앙 원은 에셋 폭의 ~19%라 실제 눈에 띄는 크기는 화면의 ~12% 수준. 500ms fade-in → 1000ms fade-out(1.5s, 미세 회전). 아이콘 즉시 `rps2_mission_on.png`. 배경 `#9E0067` 300ms 전환, `_keepMissionCompletedBackground`로 다음 사용자 턴 전까지 유지.
+- **미션 완료 효과**: `missionCompletedIndex` 수신 시 **`MissionCompleteEffect`**(`EffectOverlayService` root overlay)로 `mission_complete_effect.png`를 **디스플레이 width × 2/3** 크기(에셋 전체 기준)로 재생 — **미션 패널 active row 좌측 on/off 아이콘 중심**과 이미지 중심(핑크 원) 정렬, 좌·상단은 화면 밖으로 클리핑 가능(`Stack clipBehavior: none`). 중앙 원은 에셋 폭의 ~19%라 실제 눈에 띄는 크기는 화면의 ~12% 수준. 500ms fade-in → 1000ms fade-out(1.5s, 미세 회전). shine 시작과 동시에 `VibrationPreset.quickSuccessAlert` 축하 진동. 아이콘 즉시 `rps2_mission_on.png` 전환. 패널 배경은 동시에 `#9E0067` **1.5초** 노출 후 300ms 전환으로 글래스 프레임 복귀·**이 시점에** `activeMissionIndex`를 다음 미완료 미션으로 전환. **전 미션 달성 시** 글래스 복귀와 동시에 패널 전체 300ms fade-out.
 | **푸터** | `RoleplayScaffold.footer` | `SafeArea(top:false)` + 3층 (S1 §6-7) | **입력·아이콘 이식 완료**, 서비스메시지 **영역만** |
 
 **사용자 발화 후 응답 타이밍**
 
-- `conversationIndex`는 **1부터 시작**하며 AI/User/Narration entry를 모두 포함한 전체 대화 순번이다. 힌트 조회의 `rpMsgId`는 마지막 AI entry의 `conversationIndex`를 그대로 사용한다.
+- `conversationIndex`는 **1부터 시작**하며 AI/User/Narration entry를 포함한 전체 대화 순번이다. **recording preview 말풍선은 index를 소비하지 않는다** (`consumesConversationIndex`). 힌트 조회의 `rpMsgId`는 마지막 AI entry의 `conversationIndex`를 그대로 사용한다.
 - 사용자 말풍선 노출 직후 후속 AI 음성(`GET /rps2/sessions/{id}/ai-message/audio`)을 미리 준비한다.
 - 사용자 말풍선 후 **500ms 대기** → 나레이션 노출(`playing_conversation_mixin`, 한 줄씩 fade-in) → 나레이션 단계는 **최소 1초** 보장 → **500ms 대기**.
 - 위 시점과 AI 음성 준비 완료 중 늦은 시점에 AI 말풍선을 노출하고, 준비된 음성이 있으면 말풍선 노출과 동시에 재생한다.
@@ -217,7 +220,7 @@ S1 턴 정책은 `.docs/CONTEXT_ROLEPLAY.md`만 본다. **S2는 아래가 단일
 
 1. **서비스메시지 영역**: height **24**, `bodyMedium` 중앙. 사용자 턴 활성 시 `holdMicrophoneToSpeak` fade-in/out, 마지막 턴 나레이션·후속 AI 종료 후 서버 `serviceMessage`(없으면 `roleplayAnalyzing`) blink.
 2. **입력 영역**: S1과 동일 UX
-   - **녹음**: height **120**, `RoleplayMicButtonArea` (`lib/widgets/roleplay_mic_button_area.dart`) — hold·Cancel 드래그·500ms 미만 거절·loading 회전. `AudioRecorder.start` 완료 전 손을 떼거나 cancel되면 pending action으로 저장 후 start 완료 시 finish/cancel을 이어서 처리한다.
+   - **녹음**: height **120** (`roleplayMicFooterStackHeight` = mic 100px + 아이콘 행 중앙 20px), `RoleplayMicButtonArea` — 마이크 **이미지 하단**이 하단 아이콘 행(40px) 세로 중앙에 정렬·Cancel 드래그 영역 포함. hold·Cancel 드래그·500ms 미만 거절·loading 회전. `AudioRecorder.start` 완료 전 손을 떼거나 cancel되면 pending action으로 저장 후 start 완료 시 finish/cancel을 이어서 처리한다.
    - **타이핑**: gap 10 + 입력 height **44** (`#353535` stadium) + Send 44×44 + gap 10
 3. **하단 아이콘**: height **40**, 좌 mic↔keyboard(30×30)·우 hint lightball(24×24) — S1과 동일 토글·힌트 idle 3s 후 blink
 
@@ -232,7 +235,7 @@ S1 턴 정책은 `.docs/CONTEXT_ROLEPLAY.md`만 본다. **S2는 아래가 단일
 |------|----|----|
 | 녹음/타이핑 전송 | `POST /v1/roleplay-sessions/{id}/user-message/...` | `POST /rps2/sessions/{id}/user-message/audio`(octet-stream), `POST /rps2/sessions/{id}/user-message/text`(raw string) ✅ |
 | 힌트 탭 | `GET .../hint` + 본문 hint 말풍선 | **`GET /rps2/sessions/{id}/hint/{rpMsgId}`** + `playing_hint_mixin` — 2단계(번역→답변보기)·en은 본문 즉시·sound API. 202 not-ready는 150/250/400/700/1500ms ×3 패턴으로 최대 15회 재시도 | ✅ |
-| 녹음 중 본문 preview | recording 말풍선 | 본문 구현 후 연동 |
+| 녹음 중 본문 preview | recording 말풍선 | S1 동일 — 녹음 시작 시 우측 `...` wave 말풍선(150ms fade-in), S2 사용자 말풍선 색(흰 30%·흰 점) | ✅ |
 
 #### ❌ 아직 미구현 (S1 `playing_backup.dart`에서 이식·S2 API로 재설계 필요)
 

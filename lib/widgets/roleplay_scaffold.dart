@@ -9,6 +9,10 @@ class RoleplayScaffold extends StatelessWidget {
   final bool showCloseButton;
   final VoidCallback? onClose;
   final String? title; // 헤더 중앙 타이틀 (English)
+  /// null이면 `headlineSmall` + 흰색
+  final TextStyle? titleStyle;
+  /// null이면 2줄. 1이면 말줄임 한 줄.
+  final int? titleMaxLines;
   final String? duration; // 헤더 중앙 듀레이션 (MM:ss)
   final Color? durationColor;
   final Widget? headerExtra;
@@ -17,6 +21,9 @@ class RoleplayScaffold extends StatelessWidget {
   final double belowHeaderHeight;
   /// 본문 시작 간격 델타 (정책 baseSpacing 70/90에 더해짐)
   final double headerTopSpacingDelta;
+
+  /// true면 X·우측 액션 버튼 밴드(top 16, height 40) 안에서 타이틀 세로 중앙 정렬.
+  final bool centerTitleInHeaderActionRow;
 
   /// null이면 기본 롤플레이 배경 `#121212` (전면 이미지 등 뒤에 깔 레이어가 있을 때는 `Colors.transparent` 등으로 지정)
   final Color? backgroundColor;
@@ -28,12 +35,15 @@ class RoleplayScaffold extends StatelessWidget {
     this.showCloseButton = true,
     this.onClose,
     this.title,
+    this.titleStyle,
+    this.titleMaxLines,
     this.duration,
     this.durationColor,
     this.headerExtra,
     this.belowHeader,
     this.belowHeaderHeight = 0,
     this.headerTopSpacingDelta = 0,
+    this.centerTitleInHeaderActionRow = false,
     this.backgroundColor,
   });
 
@@ -42,19 +52,20 @@ class RoleplayScaffold extends StatelessWidget {
     required String title,
     required TextStyle? style,
     required double maxWidth,
+    required int maxLines,
   }) {
     final safeWidth = maxWidth.isFinite && maxWidth > 0 ? maxWidth : 0.0;
     final painter = TextPainter(
       text: TextSpan(text: title, style: style),
       textDirection: Directionality.of(context),
       textAlign: TextAlign.center,
-      maxLines: 2,
+      maxLines: maxLines,
       ellipsis: '…',
       textScaler: MediaQuery.textScalerOf(context),
     )..layout(maxWidth: safeWidth);
 
     final lines = painter.computeLineMetrics().length;
-    return lines.clamp(1, 2);
+    return lines.clamp(1, maxLines);
   }
 
   @override
@@ -62,14 +73,19 @@ class RoleplayScaffold extends StatelessWidget {
     final theme = Theme.of(context).textTheme;
 
     // Header layout rules:
-    // - title: max 2 lines with ellipsis
+    // - title: [titleMaxLines] lines with ellipsis (default 2)
     // - center header side margin: 30 (was 24)
-    // - body top spacing: base 70, but 90 only when the title actually wraps to 2 lines
+    // - body top spacing: base 70, but 90 only when maxLines>=2 and title wraps to 2 lines
     // - final body top spacing: base + headerTopSpacingDelta
     const headerSideMargin = 30.0;
     const titleHorizontalPadding = 20.0;
+    const headerActionTop = 16.0;
+    const headerActionHeight = 40.0;
 
     final titleText = title;
+    final effectiveTitleMaxLines = titleMaxLines ?? 2;
+    final effectiveTitleStyle =
+        titleStyle ?? theme.headlineSmall?.copyWith(color: Colors.white);
     final screenWidth = MediaQuery.of(context).size.width;
     final maxTitleWidth = (screenWidth -
             (headerSideMargin * 2) -
@@ -77,11 +93,13 @@ class RoleplayScaffold extends StatelessWidget {
         .clamp(0.0, double.infinity);
 
     final baseHeaderTopSpacing = (titleText != null &&
+            effectiveTitleMaxLines >= 2 &&
             _computeTitleLineCount(
                   context: context,
                   title: titleText,
-                  style: theme.headlineSmall,
+                  style: effectiveTitleStyle,
                   maxWidth: maxTitleWidth,
+                  maxLines: effectiveTitleMaxLines,
                 ) ==
                 2)
         ? 90.0
@@ -105,9 +123,12 @@ class RoleplayScaffold extends StatelessWidget {
               children: [
                 SizedBox(height: bodyTopOffset),
                 Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: body,
+                  child: ClipRect(
+                    clipBehavior: Clip.none,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: body,
+                    ),
                   ),
                 ),
                 // 2. 하단 가변 푸터 영역 (좌우 24 마진)
@@ -127,43 +148,66 @@ class RoleplayScaffold extends StatelessWidget {
                 child: _RoleplayCloseButton(onPressed: onClose),
               ),
 
-            // 4. 헤더 중앙 타이틀 및 듀레이션 (effectiveHeaderTopSpacing 영역 내 세로 중앙)
-            Positioned(
-              top: 0,
-              left: headerSideMargin,
-              right: headerSideMargin,
-              height: effectiveHeaderTopSpacing,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  if (title != null)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: titleHorizontalPadding,
+            // 4. 헤더 중앙 타이틀 및 듀레이션
+            if (centerTitleInHeaderActionRow &&
+                title != null &&
+                duration == null &&
+                headerExtra == null)
+              Positioned(
+                top: headerActionTop,
+                left: headerSideMargin,
+                right: headerSideMargin,
+                height: headerActionHeight,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: titleHorizontalPadding,
+                  ),
+                  child: Center(
+                    child: Text(
+                      title!,
+                      style: effectiveTitleStyle,
+                      textAlign: TextAlign.center,
+                      maxLines: effectiveTitleMaxLines,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
+              )
+            else
+              Positioned(
+                top: 0,
+                left: headerSideMargin,
+                right: headerSideMargin,
+                height: effectiveHeaderTopSpacing,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    if (title != null)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: titleHorizontalPadding,
+                        ),
+                        child: Text(
+                          title!,
+                          style: effectiveTitleStyle,
+                          textAlign: TextAlign.center,
+                          maxLines: effectiveTitleMaxLines,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                      child: Text(
-                        title!,
-                        style: theme.headlineSmall?.copyWith(
-                          color: Colors.white,
+                    if (duration != null)
+                      Text(
+                        duration!,
+                        style: theme.bodySmall?.copyWith(
+                          color: durationColor ?? Colors.white,
                         ),
                         textAlign: TextAlign.center,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                  if (duration != null)
-                    Text(
-                      duration!,
-                      style: theme.bodySmall?.copyWith(
-                        color: durationColor ?? Colors.white,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  if (headerExtra != null) headerExtra!,
-                ],
+                    if (headerExtra != null) headerExtra!,
+                  ],
+                ),
               ),
-            ),
 
             // 5. 헤더 직하 전폭 영역 (좌우 마진 없음)
             if (belowHeader != null)

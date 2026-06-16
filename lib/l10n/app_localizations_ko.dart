@@ -226,7 +226,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get roleplayHintLabel => '답변힌트';
 
   @override
-  String get roleplayHintShowAnswer => '눌러서 영어 답변 보기';
+  String get roleplayHintShowAnswer => '영어 답변 보기';
 
   @override
   String get roleplayVoiceSpeed => '음성 속도';
