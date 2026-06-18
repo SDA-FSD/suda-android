@@ -556,6 +556,18 @@ abstract class AppLocalizations {
   /// **'Analyzing your roleplay...'**
   String get roleplayAnalyzing;
 
+  /// No description provided for @roleplayOpeningAiCharacter.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Character'**
+  String get roleplayOpeningAiCharacter;
+
+  /// No description provided for @roleplayOpeningScenario.
+  ///
+  /// In en, this message translates to:
+  /// **'Scenario'**
+  String get roleplayOpeningScenario;
+
   /// No description provided for @endingFailTitle.
   ///
   /// In en, this message translates to:

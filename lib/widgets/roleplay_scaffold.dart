@@ -47,6 +47,15 @@ class RoleplayScaffold extends StatelessWidget {
     this.backgroundColor,
   });
 
+  /// S2 episode title (Opening/Playing): bodySmall 14pt w700, single-line ellipsis.
+  static TextStyle? episodeTitleStyle(TextTheme theme) {
+    return theme.bodySmall?.copyWith(
+      color: Colors.white,
+      fontWeight: FontWeight.w700,
+      fontVariations: const [FontVariation('wght', 700)],
+    );
+  }
+
   int _computeTitleLineCount({
     required BuildContext context,
     required String title,

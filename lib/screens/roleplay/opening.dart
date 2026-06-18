@@ -231,17 +231,17 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen>
   @override
   Widget build(BuildContext context) {
     final episode = SeriesStateService.instance.selectedEpisode;
-    final seriesOverview = SeriesStateService.instance.overview;
 
     final title = episode == null
         ? ''
         : SudaJsonUtil.localizedMapText(episode.title);
-    final roleName = seriesOverview?.userCharacter?.name ?? '';
+    final aiCharacterName = episode?.aiCharacter?.name ?? '';
     final briefing = episode == null
         ? ''
         : SudaJsonUtil.localizedMapText(episode.briefing);
 
     final theme = Theme.of(context).textTheme;
+    final l10n = AppLocalizations.of(context)!;
 
     final thumbnailPath = episode?.thumbnailImgPath;
     final backdropUrl = (thumbnailPath != null && thumbnailPath.isNotEmpty)
@@ -264,18 +264,21 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen>
           RoleplayScaffold(
             backgroundColor: backdropUrl != null ? Colors.transparent : null,
             showCloseButton: widget.showCloseButton,
-            title: title,
+            title: title.isEmpty ? null : title,
+            titleStyle: RoleplayScaffold.episodeTitleStyle(theme),
+            titleMaxLines: 1,
+            centerTitleInHeaderActionRow: true,
             body: Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min, // 중앙에 쫀쫀하게 모임
                 children: [
                   Text(
-                    'Your Role',
+                    l10n.roleplayOpeningAiCharacter,
                     style: theme.headlineSmall?.copyWith(color: Colors.white),
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    roleName,
+                    aiCharacterName,
                     style: theme.headlineLarge?.copyWith(
                       color: const Color(0xFF0CABA8),
                     ),
@@ -283,7 +286,7 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen>
                   ),
                   const SizedBox(height: 40),
                   Text(
-                    'Briefing',
+                    l10n.roleplayOpeningScenario,
                     style: theme.headlineSmall?.copyWith(color: Colors.white),
                   ),
                   const SizedBox(height: 20),

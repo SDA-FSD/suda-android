@@ -244,6 +244,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get roleplayAnalyzing => '롤플레이를 분석 중입니다…';
 
   @override
+  String get roleplayOpeningAiCharacter => 'AI 캐릭터';
+
+  @override
+  String get roleplayOpeningScenario => '시나리오';
+
+  @override
   String get endingFailTitle => '모든 미션을 완수하지 못했습니다!';
 
   @override

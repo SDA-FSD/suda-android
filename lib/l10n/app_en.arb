@@ -100,6 +100,8 @@
   "roleplayEndedComplete": "Roleplay Completed",
   "roleplayEndedEnding": "Moving to ending...",
   "roleplayAnalyzing": "Analyzing your roleplay...",
+  "roleplayOpeningAiCharacter": "AI Character",
+  "roleplayOpeningScenario": "Scenario",
   "endingFailTitle": "You didn't complete all the missions!",
   "endingFailSubtitle": "Try again and uncover the full story.",
   "endingReport": "Report",

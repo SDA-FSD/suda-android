@@ -551,11 +551,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
             showCloseButton: widget.showCloseButton,
             onClose: _handleBackButton,
             title: title.isEmpty ? null : title,
-            titleStyle: theme.textTheme.bodySmall?.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.w700,
-              fontVariations: const [FontVariation('wght', 700)],
-            ),
+            titleStyle: RoleplayScaffold.episodeTitleStyle(theme.textTheme),
             titleMaxLines: 1,
             headerTopSpacingDelta: -10,
             centerTitleInHeaderActionRow: true,

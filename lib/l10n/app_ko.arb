@@ -100,6 +100,8 @@
   "roleplayEndedComplete": "롤플레이를 완료했습니다",
   "roleplayEndedEnding": "엔딩으로 이동합니다...",
   "roleplayAnalyzing": "롤플레이를 분석 중입니다…",
+  "roleplayOpeningAiCharacter": "AI 캐릭터",
+  "roleplayOpeningScenario": "시나리오",
   "endingFailTitle": "모든 미션을 완수하지 못했습니다!",
   "endingFailSubtitle": "다시 시도하여 전체 스토리를 발견하세요.",
   "endingReport": "리포트",

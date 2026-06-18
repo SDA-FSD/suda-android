@@ -134,10 +134,10 @@ S1 턴 정책은 `.docs/CONTEXT_ROLEPLAY.md`만 본다. **S2는 아래가 단일
 - **데이터**: `SeriesStateService.selectedEpisode`, `overview.userCharacter`
 - **렌더**
   - 배경: episode `thumbnailImgPath` → `RoleplayOverviewBackdrop`
-  - 헤더 타이틀: episode `title` (`SudaJsonUtil.localizedMapText`) — X·kebab 밴드(top 16·height 40) 세로 중앙
+  - 헤더 타이틀: episode `title` (`SudaJsonUtil.localizedMapText`) · `bodySmall` **w700** · **1줄** 말줄임 — X 밴드(top 16·height 40) 세로 중앙(`centerTitleInHeaderActionRow`, `RoleplayScaffold.episodeTitleStyle`)
   - **duration 없음** (S2)
-  - Your Role: `userCharacter.name`
-  - Briefing: episode `briefing` (`DefaultMarkdown`)
+  - AI 캐릭터: l10n `roleplayOpeningAiCharacter`(en AI Character / ko AI 캐릭터 / pt Personagem IA) + `selectedEpisode.aiCharacter.name` (`headlineLarge` `#0CABA8`)
+  - 시나리오: l10n `roleplayOpeningScenario`(en Scenario / ko 시나리오 / pt Cenário) + episode `briefing` (`DefaultMarkdown`)
 - **Start (`Let's Start`)**
   1. 마이크 권한
   2. `POST /rps2/sessions` `{seriesId, episodeId}`
@@ -218,7 +218,7 @@ S1 턴 정책은 `.docs/CONTEXT_ROLEPLAY.md`만 본다. **S2는 아래가 단일
 
 **푸터 3층 상세** (`lib/screens/roleplay/playing_input_mixin.dart` — `buildPlayingFooter`)
 
-1. **서비스메시지 영역**: height **24**, `bodyMedium` 중앙. 사용자 턴 활성 시 `holdMicrophoneToSpeak` fade-in/out, 마지막 턴 나레이션·후속 AI 종료 후 서버 `serviceMessage`(없으면 `roleplayAnalyzing`) blink.
+1. **서비스메시지 영역**: height **24**, `bodyMedium` 중앙. **세션당 첫 사용자 발화 턴**에만 `holdMicrophoneToSpeak` fade-in/out, 마지막 턴 나레이션·후속 AI 종료 후 서버 `serviceMessage`(없으면 `roleplayAnalyzing`) blink.
 2. **입력 영역**: S1과 동일 UX
    - **녹음**: height **120** (`roleplayMicFooterStackHeight` = mic 100px + 아이콘 행 중앙 20px), `RoleplayMicButtonArea` — 마이크 **이미지 하단**이 하단 아이콘 행(40px) 세로 중앙에 정렬·Cancel 드래그 영역 포함. hold·Cancel 드래그·500ms 미만 거절·loading 회전. `AudioRecorder.start` 완료 전 손을 떼거나 cancel되면 pending action으로 저장 후 start 완료 시 finish/cancel을 이어서 처리한다.
    - **타이핑**: gap 10 + 입력 height **44** (`#353535` stadium) + Send 44×44 + gap 10

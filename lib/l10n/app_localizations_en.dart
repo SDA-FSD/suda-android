@@ -255,6 +255,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get roleplayAnalyzing => 'Analyzing your roleplay...';
 
   @override
+  String get roleplayOpeningAiCharacter => 'AI Character';
+
+  @override
+  String get roleplayOpeningScenario => 'Scenario';
+
+  @override
   String get endingFailTitle => 'You didn\'t complete all the missions!';
 
   @override

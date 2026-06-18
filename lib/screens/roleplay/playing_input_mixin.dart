@@ -57,6 +57,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
   late final AnimationController _hintBlinkController;
   late final AnimationController _analyzingBlinkController;
   bool _isAnalyzingBlinking = false;
+  bool _holdToSpeakMessageShown = false;
   double _missionPanelHeight = RoleplayMissionPanel.collapsedHeight;
   final GlobalKey _missionPanelSizeKey = GlobalKey();
   Future<void> Function(RpS2UserMessageResponseDto response)?
@@ -636,6 +637,8 @@ mixin PlayingInputMixin<T extends StatefulWidget>
   }
 
   void _showHoldToSpeakMessage() {
+    if (_holdToSpeakMessageShown) return;
+    _holdToSpeakMessageShown = true;
     final l10n = AppLocalizations.of(context)!;
     _showServiceMessage(l10n.holdMicrophoneToSpeak);
   }
