@@ -351,27 +351,41 @@ mixin PlayingConversationMixin<T extends StatefulWidget> on State<T> {
     }
   }
 
-  List<Widget> buildConversationEntryWidgets(double bodyWidth) {
+  List<Widget> buildConversationEntryWidgets(
+    double bodyWidth, {
+    bool omitRecording = false,
+  }) {
     return [
       for (final entry in _conversationEntries)
-        KeyedSubtree(
-          key: entry.key,
-          child: switch (entry.type) {
-            PlayingConversationEntryType.ai => _buildAiMessage(
-              bodyWidth,
-              entry,
-            ),
-            PlayingConversationEntryType.user => _buildUserMessage(
-              bodyWidth,
-              entry,
-            ),
-            PlayingConversationEntryType.narration => _buildNarration(entry),
-            PlayingConversationEntryType.recording => _buildRecordingBubble(
-              entry,
-            ),
-          },
-        ),
+        if (!(omitRecording &&
+            entry.type == PlayingConversationEntryType.recording))
+          KeyedSubtree(
+            key: entry.key,
+            child: switch (entry.type) {
+              PlayingConversationEntryType.ai => _buildAiMessage(
+                bodyWidth,
+                entry,
+              ),
+              PlayingConversationEntryType.user => _buildUserMessage(
+                bodyWidth,
+                entry,
+              ),
+              PlayingConversationEntryType.narration => _buildNarration(entry),
+              PlayingConversationEntryType.recording => _buildRecordingBubble(
+                entry,
+              ),
+            },
+          ),
     ];
+  }
+
+  Widget? buildActiveRecordingEntryWidget() {
+    final entry = _recordingEntry;
+    if (entry == null) return null;
+    return KeyedSubtree(
+      key: entry.key,
+      child: _buildRecordingBubble(entry),
+    );
   }
 
   Widget _buildNarration(PlayingConversationEntry entry) {

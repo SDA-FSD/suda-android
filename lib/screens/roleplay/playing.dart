@@ -339,13 +339,23 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
   }
 
   List<Widget> _buildConversationWithHint(double bodyWidth) {
-    final children = buildConversationEntryWidgets(bodyWidth);
     final hint = buildHintBubble(bodyWidth);
-    if (hint == null) return children;
+    final hasActiveHint = hint != null;
+    final children = buildConversationEntryWidgets(
+      bodyWidth,
+      omitRecording: hasActiveHint,
+    );
+    if (!hasActiveHint) return children;
+
+    final recordingWidget = buildActiveRecordingEntryWidget();
     return [
       ...children,
       if (children.isNotEmpty) const SizedBox(height: 14),
       KeyedSubtree(key: activeHintEntry!.key, child: hint),
+      if (recordingWidget != null) ...[
+        const SizedBox(height: 14),
+        recordingWidget,
+      ],
     ];
   }
 
