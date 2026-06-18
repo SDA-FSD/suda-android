@@ -13,13 +13,25 @@ class SeriesStateService {
   int? _selectedEpisodeId;
   UserDto? _user;
   RpS2SessionDto? _session;
+  RpS2UserHistoryDto? _cachedUserHistory;
 
   int? get seriesId => _seriesId;
   RpS2SeriesOverviewDto? get overview => _overview;
   int? get selectedEpisodeId => _selectedEpisodeId;
   UserDto? get user => _user;
   RpS2SessionDto? get session => _session;
+  RpS2UserHistoryDto? get cachedUserHistory => _cachedUserHistory;
   String? get sessionId => _session?.sessionId;
+
+  /// `overview.episodes` 배열 마지막 항목이 현재 선택 에피소드인지.
+  bool get isLastEpisode {
+    final episodes = _overview?.episodes;
+    final episodeId = _selectedEpisodeId;
+    if (episodes == null || episodes.isEmpty || episodeId == null) {
+      return false;
+    }
+    return episodes.last.id == episodeId;
+  }
 
   RpS2SeriesEpisodeDto? get selectedEpisode {
     final episodeId = _selectedEpisodeId;
@@ -41,6 +53,7 @@ class SeriesStateService {
     if (_seriesId != seriesId) {
       _selectedEpisodeId = null;
       _session = null;
+      _cachedUserHistory = null;
     }
     _seriesId = seriesId;
     _overview = overview;
@@ -52,6 +65,7 @@ class SeriesStateService {
   void setSelectedEpisodeId(int episodeId) {
     if (_selectedEpisodeId != episodeId) {
       _session = null;
+      _cachedUserHistory = null;
     }
     _selectedEpisodeId = episodeId;
   }
@@ -64,11 +78,16 @@ class SeriesStateService {
     _session = session;
   }
 
+  void setCachedUserHistory(RpS2UserHistoryDto? history) {
+    _cachedUserHistory = history;
+  }
+
   void clear() {
     _seriesId = null;
     _overview = null;
     _selectedEpisodeId = null;
     _user = null;
     _session = null;
+    _cachedUserHistory = null;
   }
 }

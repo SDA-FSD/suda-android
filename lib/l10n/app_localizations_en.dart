@@ -252,6 +252,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get roleplayEndedEnding => 'Moving to ending...';
 
   @override
+  String get roleplayFinishNotEnoughProgress => 'Not enough progress';
+
+  @override
+  String get roleplayFinishCompleted => 'Roleplay completed';
+
+  @override
+  String get roleplayFinishMovingToEnding => 'Moving to ending...';
+
+  @override
   String get roleplayAnalyzing => 'Analyzing your roleplay...';
 
   @override
@@ -265,6 +274,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get endingFailSubtitle => 'Try again and uncover the full story.';
+
+  @override
+  String get roleplayTryAgainMessage =>
+      'Unfortunately, your score wasn\'t high enough to earn the reward.';
 
   @override
   String get endingReport => 'Report';

@@ -9,7 +9,7 @@ import '../../utils/default_toast.dart';
 /// Roleplay Result Report Screen (Sub Screen)
 ///
 /// Result 화면에서만 진입. 사용자가 느낀 불편함을 수집하는 용도.
-/// 내부 표현·구성은 failed_report와 동일. Send 시 POST /v1/roleplays/results/{roleplayResultId}/report 사용.
+/// 내부 표현·구성은 try_again_report와 동일. Send 시 POST /v1/roleplays/results/{roleplayResultId}/report 사용.
 /// 성공(200) 시 스크린 닫고 부모 Result에서 Report 문구 숨김. Android 백버튼 또는 X 버튼 시 Result로 복귀.
 class RoleplayResultReportScreen extends StatefulWidget {
   static const String routeName = '/roleplay/result_report';

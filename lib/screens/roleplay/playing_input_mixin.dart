@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:record/record.dart';
 
+import '../../api/endpoints/series_api.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/series_models.dart';
 import '../../services/series_state_service.dart';
@@ -332,6 +333,34 @@ mixin PlayingInputMixin<T extends StatefulWidget>
 
   void showPlayingServiceMessage(String message, {bool persistent = false}) {
     _showServiceMessage(message, persistent: persistent);
+  }
+
+  void showPlayingEndedServiceMessage(String message) {
+    _serviceMessageTimer?.cancel();
+    if (_analyzingBlinkController.isAnimating) {
+      _analyzingBlinkController.stop();
+      _analyzingBlinkController.reset();
+    }
+    setState(() {
+      _isAnalyzingBlinking = false;
+      _serviceMessageText = message;
+      _serviceMessageColor = Colors.white;
+      _isServiceMessageVisible = true;
+    });
+  }
+
+  void lockPlayingInputForSessionEnd() {
+    _hintIdleTimer?.cancel();
+    _cancelHintIdleAndBlink();
+    dismissPlayingHint();
+    _isInputLocked = true;
+    _setUserTurn(false);
+    _setMicState(_PlayingMicButtonState.disabled);
+    _setTypingEnabled(false);
+    _setHintEnabled(false);
+    if (_isRecording || _isRecordingStarting) {
+      unawaited(_cancelRecording());
+    }
   }
 
   void startPlayingAnalyzingBlink({String? message}) {
@@ -837,6 +866,10 @@ mixin PlayingInputMixin<T extends StatefulWidget>
         rpSessionId: sessionId,
         audioData: audioData,
       );
+    } on RpS2SessionNotFoundException catch (_) {
+      if (!mounted) return;
+      playingSessionNotFoundHandler?.call();
+      return;
     } catch (e, st) {
       debugPrint('[DEBUG] S2 user audio request error: $e\n$st');
       if (!mounted) return;
@@ -868,6 +901,10 @@ mixin PlayingInputMixin<T extends StatefulWidget>
         rpSessionId: sessionId,
         text: text,
       );
+    } on RpS2SessionNotFoundException catch (_) {
+      if (!mounted) return;
+      playingSessionNotFoundHandler?.call();
+      return;
     } catch (e, st) {
       debugPrint('[DEBUG] S2 user text request error: $e\n$st');
       if (!mounted) return;

@@ -550,6 +550,24 @@ abstract class AppLocalizations {
   /// **'Moving to ending...'**
   String get roleplayEndedEnding;
 
+  /// No description provided for @roleplayFinishNotEnoughProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough progress'**
+  String get roleplayFinishNotEnoughProgress;
+
+  /// No description provided for @roleplayFinishCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Roleplay completed'**
+  String get roleplayFinishCompleted;
+
+  /// No description provided for @roleplayFinishMovingToEnding.
+  ///
+  /// In en, this message translates to:
+  /// **'Moving to ending...'**
+  String get roleplayFinishMovingToEnding;
+
   /// No description provided for @roleplayAnalyzing.
   ///
   /// In en, this message translates to:
@@ -579,6 +597,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Try again and uncover the full story.'**
   String get endingFailSubtitle;
+
+  /// No description provided for @roleplayTryAgainMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Unfortunately, your score wasn\'t high enough to earn the reward.'**
+  String get roleplayTryAgainMessage;
 
   /// No description provided for @endingReport.
   ///

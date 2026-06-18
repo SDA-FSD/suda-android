@@ -20,6 +20,7 @@ import '../../utils/language_util.dart';
 import '../../widgets/roleplay_mission_panel.dart';
 import '../../widgets/roleplay_turn_bar_area.dart';
 import 'playing_conversation_mixin.dart';
+import 'playing_finish_mixin.dart';
 import 'playing_hint_mixin.dart';
 import 'playing_input_mixin.dart';
 
@@ -40,7 +41,8 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
         TickerProviderStateMixin,
         PlayingConversationMixin,
         PlayingHintMixin,
-        PlayingInputMixin {
+        PlayingInputMixin,
+        PlayingFinishMixin {
   static const List<int> _speedRateSteps = [70, 100, 120, 150];
   static const double _playingHeaderTopSpacing = 60;
 
@@ -88,6 +90,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     scrollPlayingBodyToBottomHandler = scrollPlayingBodyToBottom;
     scrollPlayingHintToBottomHandler = scrollPlayingBodyToBottom;
     playingAiVoicePlaybackCompletedHandler = _onAiVoicePlaybackCompleted;
+    playingSessionNotFoundHandler = onRpS2SessionNotFound;
     deactivateUserTurn();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) startAiOpeningFlow();
@@ -176,6 +179,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     if (reachedRequiredSpeechCount) {
       _pendingAnalyzingAfterAi = true;
       _pendingServiceMessage = response.serviceMessage?.trim();
+      requestFinishAfterLastUserResponse();
     }
 
     Future<RpS2SoundResDto?>? aiAudioFuture;
@@ -214,6 +218,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     final message = _pendingServiceMessage;
     _pendingServiceMessage = null;
     startPlayingAnalyzingBlink(message: message);
+    onLastTurnPresentationComplete();
   }
 
   Future<void> _showNarrationPhase(String narrationText) async {

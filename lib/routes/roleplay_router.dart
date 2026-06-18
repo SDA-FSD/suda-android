@@ -9,10 +9,10 @@ import '../screens/series/overview.dart';
 import '../screens/roleplay/opening.dart';
 import '../screens/roleplay/playing.dart';
 import '../screens/roleplay/ending.dart';
-import '../screens/roleplay/failed.dart';
+import '../screens/roleplay/try_again.dart';
 import '../screens/roleplay/result.dart';
 import '../screens/roleplay/result_v2.dart';
-import '../screens/roleplay/failed_report.dart';
+import '../screens/roleplay/try_again_report.dart';
 import '../screens/roleplay/result_report.dart';
 import '../screens/roleplay/survey.dart';
 import '../screens/roleplay/tutorial.dart';
@@ -20,14 +20,14 @@ import '../screens/roleplay/tutorial.dart';
 class RoleplayRouter {
   static const String openingRouteName = '/roleplay/opening';
 
-  /// Failed Report 스크린을 push (Failed 화면에서만 진입). pop 시 결과값(전송 성공 시 true)을 반환.
-  static Future<T?> pushFailedReport<T>(BuildContext context) {
+  /// Try Again Report 스크린을 push (Try Again 화면에서만 진입). pop 시 결과값(전송 성공 시 true)을 반환.
+  static Future<T?> pushTryAgainReport<T>(BuildContext context) {
     return Navigator.push<T>(
       context,
       SubScreenRoute(
-        page: const RoleplayFailedReportScreen(),
+        page: const RoleplayTryAgainReportScreen(),
         settings: const RouteSettings(
-          name: RoleplayFailedReportScreen.routeName,
+          name: RoleplayTryAgainReportScreen.routeName,
         ),
       ),
     );
@@ -131,11 +131,12 @@ class RoleplayRouter {
     );
   }
 
-  static void replaceWithFailed(BuildContext context) {
+  static void replaceWithTryAgain(BuildContext context) {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => const RoleplayFailedScreen(),
+        settings: const RouteSettings(name: RoleplayTryAgainScreen.routeName),
+        builder: (context) => const RoleplayTryAgainScreen(),
       ),
     );
   }

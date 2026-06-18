@@ -735,7 +735,7 @@
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
 - **SeriesOverviewScreen** (Sub Screen): X/시스템 뒤로가기 확인 후 나가기 시 `RoleplayRouter.popToOverview()`로 복귀
-- **Ending/Failed/Result 계열**: S2 result 호출·이동은 아직 미구현. 현재 `requiredSpeechCount` 도달 후 응답 `narration`·`aiText`가 모두 비어 있을 때 `roleplayAnalyzing` 서비스 메시지 blink까지만 수행한다. 응답 본문이 있으면 정상 대화 루프를 계속 처리한다.
+- **Ending/Try Again/Result 계열**: S2 result 호출·이동은 아직 미구현. 현재 `requiredSpeechCount` 도달 후 응답 `narration`·`aiText`가 모두 비어 있을 때 `roleplayAnalyzing` 서비스 메시지 blink까지만 수행한다. 응답 본문이 있으면 정상 대화 루프를 계속 처리한다.
 
 ### 스크린 내부 구현 특이사항
 - `SeriesStateService.selectedEpisode`와 `overview.userCharacter` 기반. 배경은 episode `thumbnailImgPath`, 헤더 타이틀은 episode `title`(`bodySmall` w700·1줄 말줄임), 헤더 슬롯 높이 **60**, duration 없음. 타이틀은 X·kebab과 동일 밴드(top 16·height 40) 세로 중앙(`centerTitleInHeaderActionRow`).
@@ -775,16 +775,17 @@
 - 닫기(X) 버튼 없음. 시스템 뒤로가기 시 "Exit from ending screen" 얼럿, 확인 시 ending screen 삭제 후 Overview 노출.
 - 엔딩 데이터: 사용자 role(`RoleplayStateService.overview`·`roleId`)의 `endingList` 첫 번째 요소(`RoleplayEndingDto`) 사용. 이미지 없을 경우 바로 80% 검정 레이어·콘텐츠 노출.
 - 이미지 있을 경우: 디바이스 높이 100% 비율 유지 표시(기본). 중앙 기준 1.5배→1배 약 2초 축소 애니메이션 후, 80% 투명도 검정 레이어 fade-in, 이어서 콘텐츠 fade-in.
-- 레이아웃: 상단 75% = SingleChildScrollView(gap 50 / 타이틀 / gap 50 / 콘텐츠 / gap 50 / 평가문구 / gap 15 / 별 5개 40×40 gap 5). 콘텐츠 양이 많으면 이 영역 내 스크롤. 하단 25% = Next 버튼(Opening Let's start 스타일, l10n `endingNext`). 별점은 선택 시 해당 별 및 좌측 star_filled, 우측 star_empty. star=0 허용.
+- 레이아웃: 상단 `Expanded` + `SingleChildScrollView`(gap 50 / 타이틀 / gap 50 / 콘텐츠 / gap 50). 하단 고정 영역 = **전체 디스플레이 높이 35%**, 내부를 세로 2등분 — **상단** 중앙 별점 영역(`endingHowWas` + gap 15 + 별 5개), **하단** 중앙 Next 버튼(shrink-wrap). 별점은 선택 시 해당 별 및 좌측 star_filled, 우측 star_empty. star=0 허용.
 - Playing에서 ending 전환 확정 시점에 role.endingList 첫 요소의 `imgPath`에 CDN host prepend하여 이미지 preload.
 
 ---
 
-## 15. RoleplayFailedScreen
+## 15. RoleplayTryAgainScreen
 
 ### 스크린 관련 정의 파일
-- **파일 경로**: `lib/screens/roleplay/failed.dart`
-- **클래스명**: `RoleplayFailedScreen` (StatelessWidget)
+- **파일 경로**: `lib/screens/roleplay/try_again.dart`
+- **클래스명**: `RoleplayTryAgainScreen` (StatefulWidget)
+- **Route name**: `RoleplayTryAgainScreen.routeName` (`/roleplay/try_again`)
 - **스크린 타입**: **Full Screen**
 - **appPath**: 해당 없음 (세션·플로우 의존)
 
@@ -792,42 +793,42 @@
 - Roleplay 실패 종료 화면
 
 ### 이전 스크린 정보 (진입점)
-- **RoleplayPlayingScreen**: 중앙 "Failed" 텍스트 클릭 시
-  - `Navigator.pushReplacement()`로 전환 (playing screen 삭제)
+- **RoleplayPlayingScreen**: finish `0` 또는 세션 404 후 finish 실패 시
+  - `RoleplayRouter.replaceWithTryAgain()`으로 전환 (playing screen 삭제)
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
-- **RoleplayFailedReportScreen** (Sub Screen): "Report" 텍스트 클릭 시
-  - `RoleplayRouter.pushFailedReport()` → SubScreenRoute로 진입 (Failed 위에 쌓임)
-- **RoleplayResultScreen** (Full Screen): "Retry" 버튼 클릭 시 Overview로 복귀. Result로의 전환은 Playing에서 resultId 분기로 진행.
+- **RoleplayTryAgainReportScreen** (Sub Screen): "Report" 텍스트 클릭 시
+  - `RoleplayRouter.pushTryAgainReport()` → SubScreenRoute로 진입 (Try Again 위에 쌓임)
+- **Overview**: "Retry" 버튼·X·뒤로가기 시 Overview로 복귀 (S2: `popToOverview`, S1: `Navigator.pop`)
 
 ### 스크린 내부 구현 특이사항
 - 닫기(X)/시스템 뒤로가기: 확인 다이얼로그 없이 Overview로 복귀 (Opening과 동일).
-- 푸터 없음. 본문 5요소: Failed 타이틀, 하트 애니메이션, ending.fail 문구, Retry 버튼, Report 텍스트(탭 시 Failed Report Sub Screen 진입).
+- 푸터 없음. 본문 5요소: Try Again 타이틀, 하트 애니메이션, `roleplayTryAgainMessage` 문구, Retry 버튼, Report 텍스트(탭 시 Try Again Report Sub Screen 진입).
 
 ---
 
-## 16. RoleplayFailedReportScreen
+## 16. RoleplayTryAgainReportScreen
 
 ### 스크린 관련 정의 파일
-- **파일 경로**: `lib/screens/roleplay/failed_report.dart`
-- **클래스명**: `RoleplayFailedReportScreen` (StatefulWidget)
+- **파일 경로**: `lib/screens/roleplay/try_again_report.dart`
+- **클래스명**: `RoleplayTryAgainReportScreen` (StatefulWidget)
 - **스크린 타입**: **Sub Screen**
-- **appPath**: 해당 없음 (Failed 전용)
+- **appPath**: 해당 없음 (Try Again 전용)
 
 ### 스크린 용도
-- Failed 화면에서만 진입. 사용자가 느낀 불편함을 수집하는 용도.
+- Try Again 화면에서만 진입. 사용자가 느낀 불편함을 수집하는 용도.
 
 ### 이전 스크린 정보 (진입점)
-- **RoleplayFailedScreen**: "Report" 텍스트 클릭 시
-  - `RoleplayRouter.pushFailedReport()` → SubScreenRoute로 우측에서 슬라이드 인
+- **RoleplayTryAgainScreen**: "Report" 텍스트 클릭 시
+  - `RoleplayRouter.pushTryAgainReport()` → SubScreenRoute로 우측에서 슬라이드 인
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
-- **RoleplayFailedScreen**: X 버튼 또는 Android 백버튼 시 `Navigator.pop()`으로 Failed로 복귀
+- **RoleplayTryAgainScreen**: X 버튼 또는 Android 백버튼 시 `Navigator.pop()`으로 Try Again으로 복귀
 
 ### 스크린 내부 구현 특이사항
 - 롤플레이 스캐폴드(RoleplayScaffold) 적용.
-- Route name: `RoleplayFailedReportScreen.routeName` (`/roleplay/failed_report`).
-- Android 디바이스 백버튼: Failed로 복귀 (pop).
+- Route name: `RoleplayTryAgainReportScreen.routeName` (`/roleplay/try_again_report`).
+- Android 디바이스 백버튼: Try Again으로 복귀 (pop).
 - 본문: 입력창 + 제출 버튼(sendFeedback API). 성공 시 pop(true).
 
 ---
@@ -921,9 +922,9 @@
 - **RoleplayResultScreen** 또는 **RoleplayResultScreenV2**: X 버튼 또는 Android 백버튼 시 `Navigator.pop()`으로 Result로 복귀. 전송 성공(200) 시 `pop(context, true)`로 Result에서 Report 문구 숨김.
 
 ### 스크린 내부 구현 특이사항
-- 내부 표현·구성은 Failed Report와 동일 (RoleplayScaffold, reportTitle, 입력창, feedbackSend 버튼). Send 시 신규 엔드포인트만 사용.
+- 내부 표현·구성은 Try Again Report와 동일 (RoleplayScaffold, reportTitle, 입력창, feedbackSend 버튼). Send 시 신규 엔드포인트만 사용.
 - Route name: `RoleplayResultReportScreen.routeName` (`/roleplay/result_report`).
-- 다국어: failed_report 참고 (l10n.reportTitle, endingReport, feedbackPlaceholder, feedbackSend).
+- 다국어: try_again_report 참고 (l10n.reportTitle, endingReport, feedbackPlaceholder, feedbackSend).
 
 ---
 
@@ -1067,8 +1068,8 @@
   │           ├─ [RoleplayEndingScreen] (중앙 "Ending" 텍스트)
   │           │   └─ [RoleplayResultScreen]
   │           │       └─ [RoleplayResultReportScreen] (Report 문구 탭 시, 백버튼/X → Result 복귀)
-  │           └─ [RoleplayFailedScreen]
-  │               └─ [RoleplayFailedReportScreen] (Report 텍스트 탭 시, 백버튼/X → Failed 복귀)
+  │           └─ [RoleplayTryAgainScreen]
+  │               └─ [RoleplayTryAgainReportScreen] (Report 텍스트 탭 시, 백버튼/X → Try Again 복귀)
   └─ [ProfileScreen] → [SettingScreen] (우측 상단 원형 버튼)
   │       ├─ [AccountScreen]
   │       ├─ [CefrLevelScreen]
@@ -1130,7 +1131,7 @@
 | `/profile/history/{resultId}` | HistoryScreen / HistoryScreenV2 (Sub) | 예: `/profile/history/456`, 상세 result의 `version` 기준 분기 |
 | `/profile/setting` | SettingScreen (Sub) | Profile에서 진입 |
 
-- **제외**: Login, Agreement(인증 플로우), RoleplayOpening(role 선택 필수), Playing/Ending/Result/Failed(세션·플로우 의존).
+- **제외**: Login, Agreement(인증 플로우), RoleplayOpening(role 선택 필수), Playing/Ending/Result/Try Again(세션·플로우 의존).
 
 ### 신규 스크린 생성 시 appPath 확인 절차
 - **모든 스크린** 추가 시 이 문서에서 다음을 확인·정의한다.

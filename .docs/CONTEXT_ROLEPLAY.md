@@ -20,13 +20,13 @@
 - Ending (Full Screen)
   - 파일: `lib/screens/roleplay/ending.dart`
   - 클래스: `RoleplayEndingScreen`
-- Failed (Full Screen)
-  - 파일: `lib/screens/roleplay/failed.dart`
-  - 클래스: `RoleplayFailedScreen`
-- Failed Report (Sub Screen)
-  - 파일: `lib/screens/roleplay/failed_report.dart`
-  - 클래스: `RoleplayFailedReportScreen`
-  - 용도: 사용자가 느낀 불편함 수집. Failed에서 진입, 백버튼/X 시 Failed로 복귀.
+- Try Again (Full Screen)
+  - 파일: `lib/screens/roleplay/try_again.dart`
+  - 클래스: `RoleplayTryAgainScreen`
+- Try Again Report (Sub Screen)
+  - 파일: `lib/screens/roleplay/try_again_report.dart`
+  - 클래스: `RoleplayTryAgainReportScreen`
+  - 용도: 사용자가 느낀 불편함 수집. Try Again에서 진입, 백버튼/X 시 Try Again으로 복귀.
 - Result (Full Screen)
   - 파일: `lib/screens/roleplay/result.dart`
   - 클래스: `RoleplayResultScreen`
@@ -36,18 +36,18 @@
   - 용도: Result에서만 진입, 불편함 수집. Send 시 POST /v1/roleplays/results/{roleplayResultId}/report.
 
 ## 3. 기본 네비게이션 흐름 (현행 코드 기준)
-- Home -> Overview -> Opening -> Playing -> Ending/Failed -> Result -> Overview
+- Home -> Overview -> Opening -> Playing -> Ending/Try Again -> Result -> Overview
 - Home -> Overview -> Opening -> Survey(-10 분기, 선택형 3단계) -> Opening
-- Failed -> Failed Report (Sub Screen, push). Failed Report에서 백버튼/X -> Failed 복귀.
+- Try Again -> Try Again Report (Sub Screen, push). Try Again Report에서 백버튼/X -> Try Again 복귀.
 - Result -> Result Report (Sub Screen, push). Result Report에서 백버튼/X -> Result 복귀. 전송 성공 시 pop(true)로 Result에서 Report 문구 숨김.
-- Playing/Ending/Failed에서 뒤로가기는 확인 다이얼로그 후 Overview로 복귀 (Failed는 확인 없이 Overview 복귀).
+- Playing/Ending/Try Again에서 뒤로가기는 확인 다이얼로그 후 Overview로 복귀 (Try Again은 확인 없이 Overview 복귀).
 
 ## 4. 라우팅 중앙화 규칙
 - Roleplay 화면 전환 규칙은 `lib/routes/roleplay_router.dart`에서 관리한다.
 - Overview 진입은 Sub Screen 정책에 맞춰 `SubScreenRoute`를 사용한다.
-- Failed Report 진입: Failed에서 `RoleplayRouter.pushFailedReport()` → `SubScreenRoute` 사용 (백버튼 시 Failed 복귀).
+- Try Again Report 진입: Try Again에서 `RoleplayRouter.pushTryAgainReport()` → `SubScreenRoute` 사용 (백버튼 시 Try Again 복귀).
 - Result Report 진입: Result에서 `RoleplayRouter.pushResultReport()` → `SubScreenRoute` 사용 (백버튼 시 Result 복귀).
-- Opening/Playing/Ending/Failed/Result 전환은 기존과 동일하게 `MaterialPageRoute` 기반이다.
+- Opening/Playing/Ending/Try Again/Result 전환은 기존과 동일하게 `MaterialPageRoute` 기반이다.
 
 ## 5. Roleplay 데이터 정책 (요구 사항)
 - Home에서 특정 Roleplay 클릭 시 Overview로 이동하며 `roleplayId`를 확보해야 한다.
@@ -102,7 +102,7 @@
 - **세션 상태 조회**: `GET /v1/roleplay-sessions/{rpSessionId}`
   - req: path param만 사용
   - res: `{ completedYn: 'Y'|'N', resultId: number }` (`RoleplaySessionStatusDto`)
-  - 설명: 타임아웃(00:00) 종료 분석 플로우에서 서버 종료 판정 여부를 확인. `completedYn == 'Y'`이면 `resultId`로 기존 종료 분기(0 → Failed, 전부 완수 → Ending, 그 외 → ResultV2) 진입.
+  - 설명: 타임아웃(00:00) 종료 분석 플로우에서 서버 종료 판정 여부를 확인. `completedYn == 'Y'`이면 `resultId`로 기존 종료 분기(0 → Try Again, 전부 완수 → Ending, 그 외 → ResultV2) 진입.
   - 비고: 클라이언트는 `SudaApiClient.getRoleplaySessionStatus(...)` / `RoleplayApi.getRoleplaySessionStatus(...)`.
 - **힌트 텍스트 조회**: `GET /{rpSessionId}/hint`
   - req: path param만 사용
@@ -298,7 +298,7 @@
 
 ## 6-5. 나레이션 resultId 기반 종료/분기 규칙
 - narration 응답에 `resultId`가 포함되면 **roleplay 중단**으로 처리한다.
-- `resultId == 0`: roleplay 진행 실패(결과지 없음). 안내 메시지 후 Failed 스크린으로 이동.
+- `resultId == 0`: roleplay 진행 실패(결과지 없음). 안내 메시지 후 Try Again 스크린으로 이동.
 - `resultId > 0`:
   - 미션 성공률 100%: Ending 스크린 → Result V2 스크린
   - 그 외(사이값): Ending 없이 Result V2 스크린
@@ -307,7 +307,7 @@
 
 **Playing 화면 구현(UX)**
 - 종료 안내 메시지는 서비스메시지 영역에 **색상 `#0CABA8`**, **fade-in**으로 노출하며 **3초** 노출 후 해당 스크린으로 전환.
-- **1/3) resultId == 0**: l10n `roleplayEndedFailed` 노출 → 3초 후 Failed 스크린으로 전환.
+- **1/3) resultId == 0**: l10n `roleplayEndedFailed` 노출 → 3초 후 Try Again 스크린으로 전환.
 - **2/3) resultId > 0 이고 n개 미션 전부 완수 아님**: `roleplayEndedComplete` 노출. result 선조회·캐시 후(3초와 병렬, 캐시 완료까지 대기) Result V2 스크린으로 전환.
 - **3/3) resultId > 0 이고 n개 미션 전부 완수**: `roleplayEndedEnding` 노출. result 선조회·캐시 후(동일) Ending 스크린으로 전환.
 - **미션 달성 여부**: Overview 선택 role의 `missionList`로 총 개수, user-message 응답 `missionCompleteYn`으로 단계별 성공/실패 반영. Playing 내부 `_missionStatuses`(success 개수)로 전체 완수 여부 판단.
@@ -365,7 +365,7 @@
 - 유사 롤플레이 그리드(3열) 표시 및 제목 오버레이 텍스트 포함
 
 ## 9. 공통 레이아웃 (RoleplayScaffold)
-- **목적**: 롤플레이 단계별 스크린(Opening, Playing, Ending, Failed, Result)의 일관된 UI 구조 제공.
+- **목적**: 롤플레이 단계별 스크린(Opening, Playing, Ending, Try Again, Result)의 일관된 UI 구조 제공.
 - **파일**: `lib/widgets/roleplay_scaffold.dart`
 - **주요 특징**:
   - **전용 헤더**: 일반적인 화살표 뒤로가기 대신 닫기(X) 아이콘(`close.svg`, 24x24)을 좌상단(16, 16)에 고정 배치.
@@ -386,12 +386,12 @@
   - 마지막 미션(`missionList` 중 `scenarioFlowIndex` 최댓값 기준, null 제외)에 대한 user-message 응답 수신 직후 플래그를 세우고, **AI 말풍선 표출(≈오디오 재생 시작) 후 1초** 시점에 서비스메시지 영역에 `roleplayAnalyzing`(흰색·1s 블링크)을 선노출한다. 성공/실패 무관. 오디오 유무와 무관(오디오 없어도 동일 1s 타이머 기준).
   - 기존 timesup 분석중과 동일한 공용 헬퍼(`_startAnalyzingBlink`/`_stopAnalyzingBlink`)를 사용. 엔딩/결과 안내(`_showEndedServiceMessage`) 노출 시, narration 계속 진행(`resultId == null`)의 fade-in 직전, narration null/빈 텍스트 시점에 자동 해제. `_stopAnalyzingBlink`는 분석중 pending 지연 타이머도 함께 cancel 처리.
   - 해당 구간에는 입력/힌트/전송 등 별도 비활성 처리는 하지 않는다(이미 AI 턴이라 비활성 상태).
-- **Failed Report 스크린**:
-  - `lib/screens/roleplay/failed_report.dart` (RoleplayFailedReportScreen, Sub Screen). 롤플레이 스캐폴드 적용.
-  - 용도: Failed 화면에서만 진입, 사용자가 느낀 불편함 수집. Failed 화면 "Report" 텍스트 탭 시 `RoleplayRouter.pushFailedReport()`로 진입 (SubScreenRoute).
-  - Android 백버튼 또는 X 버튼 시 Failed로 복귀 (pop). 본문/푸터는 초기화 상태(플레이스홀더).
+- **Try Again Report 스크린**:
+  - `lib/screens/roleplay/try_again_report.dart` (RoleplayTryAgainReportScreen, Sub Screen). 롤플레이 스캐폴드 적용.
+  - 용도: Try Again 화면에서만 진입, 사용자가 느낀 불편함 수집. Try Again 화면 "Report" 텍스트 탭 시 `RoleplayRouter.pushTryAgainReport()`로 진입 (SubScreenRoute).
+  - Android 백버튼 또는 X 버튼 시 Try Again으로 복귀 (pop). 본문/푸터는 초기화 상태(플레이스홀더).
 - **resultId 기반 종료 분기 및 Result API·캐시**:
-  - Playing에서 narration `resultId` 수신 시 3분기 처리: resultId==0 → Failed, resultId>0·미션 일부 완수 → Result, resultId>0·미션 전부 완수 → Ending.
+  - Playing에서 narration `resultId` 수신 시 3분기 처리: resultId==0 → Try Again, resultId>0·미션 일부 완수 → Result, resultId>0·미션 전부 완수 → Ending.
   - 서비스메시지 영역에 종료 안내 메시지 색상 `#0CABA8`, fade-in, 3초 노출 후 해당 스크린 전환.
   - `GET /v1/roleplays/results/{resultId}` API 추가, `RoleplayResultDto` 및 `RoleplayStateService.setCachedResult/cachedResult`로 Result/Ending 진입 전 캐시. 3초와 캐시 완료를 함께 대기 후 전환.
   - Ending 전환 확정 시(미션 전부 완수) Playing에서 role.endingList 첫 요소의 `imgPath`에 CDN host prepend하여 이미지 preload.

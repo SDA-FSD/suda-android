@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 
+import '../../api/endpoints/series_api.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/series_state_service.dart';
 import '../../services/suda_api_client.dart';
@@ -104,6 +105,10 @@ mixin PlayingHintMixin<T extends StatefulWidget>
         entry.isVisible = true;
       });
       _scrollHintToVisible(entry);
+    } on RpS2SessionNotFoundException catch (_) {
+      if (!mounted) return;
+      setState(() => _hintEntry = null);
+      playingSessionNotFoundHandler?.call();
     } catch (e) {
       debugPrint('[DEBUG] RpS2 hint API error: $e');
       if (!mounted) return;
@@ -514,6 +519,15 @@ mixin PlayingHintMixin<T extends StatefulWidget>
         dto = await fetch();
         entry.hintAudioCache[cacheKey] = dto;
       }
+    } on RpS2SessionNotFoundException catch (_) {
+      if (mounted) {
+        setState(() {
+          entry.hintSentenceHighlightActive = false;
+          entry.hintWordHighlightIndex = null;
+        });
+        playingSessionNotFoundHandler?.call();
+      }
+      return;
     } catch (e) {
       debugPrint('[DEBUG] RpS2 hint audio error: $e');
       if (mounted) {

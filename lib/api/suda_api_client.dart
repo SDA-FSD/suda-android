@@ -146,6 +146,38 @@ class SudaApiClient {
     );
   }
 
+  static Future<int> finishRpS2Session({
+    required String accessToken,
+    required String rpSessionId,
+  }) {
+    return SeriesApi.finishSession(
+      accessToken: accessToken,
+      rpSessionId: rpSessionId,
+    );
+  }
+
+  static Future<RpS2UserHistoryDto> getRpS2UserHistory({
+    required String accessToken,
+    required int rpUserHistoryId,
+  }) {
+    return SeriesApi.getUserHistory(
+      accessToken: accessToken,
+      rpUserHistoryId: rpUserHistoryId,
+    );
+  }
+
+  static Future<void> updateRpS2UserStarRating({
+    required String accessToken,
+    required int rpUserHistoryId,
+    required int userStarRating,
+  }) {
+    return SeriesApi.updateUserStarRating(
+      accessToken: accessToken,
+      rpUserHistoryId: rpUserHistoryId,
+      userStarRating: userStarRating,
+    );
+  }
+
   static Future<RoleplayOverviewDto> getRoleplayOverview({
     required String accessToken,
     required int roleplayId,

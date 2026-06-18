@@ -6,6 +6,7 @@ import '../../l10n/app_localizations.dart';
 import '../../models/roleplay_models.dart';
 import '../../routes/roleplay_router.dart';
 import '../../services/roleplay_state_service.dart';
+import '../../services/series_state_service.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
 import '../../utils/suda_json_util.dart';
@@ -29,9 +30,12 @@ class _RoleplayEndingScreenState extends State<RoleplayEndingScreen>
   late final AnimationController _overlayController;
   late final AnimationController _contentController;
   late final Animation<double> _scaleAnimation;
-  int _selectedStars = 0;
+  late int _selectedStars;
 
-  RoleplayEndingDto? get _ending {
+  bool get _isS2Flow =>
+      SeriesStateService.instance.cachedUserHistory != null;
+
+  RoleplayEndingDto? get _s1Ending {
     final overview = RoleplayStateService.instance.overview;
     final roleId = RoleplayStateService.instance.roleId;
     if (overview == null || roleId == null) return null;
@@ -46,20 +50,57 @@ class _RoleplayEndingScreenState extends State<RoleplayEndingScreen>
     return null;
   }
 
+  String? get _imagePath {
+    if (_isS2Flow) {
+      return SeriesStateService.instance.overview?.endingImgPath;
+    }
+    return _s1Ending?.imgPath;
+  }
+
   bool get _hasImage {
-    final path = _ending?.imgPath;
+    final path = _imagePath;
     return path != null && path.isNotEmpty;
   }
 
   String get _imageUrl {
-    final path = _ending?.imgPath;
+    final path = _imagePath;
     if (path == null || path.isEmpty) return '';
     return '${AppConfig.cdnBaseUrl}$path';
+  }
+
+  String get _displayTitle {
+    if (_isS2Flow) {
+      return SudaJsonUtil.localizedMapText(
+        SeriesStateService.instance.overview?.endingTitle ?? const {},
+      );
+    }
+    final ending = _s1Ending;
+    return ending != null ? SudaJsonUtil.localizedText(ending.title) : '';
+  }
+
+  String get _displayContent {
+    if (_isS2Flow) {
+      return SudaJsonUtil.localizedMapText(
+        SeriesStateService.instance.overview?.endingContent ?? const {},
+      );
+    }
+    final ending = _s1Ending;
+    return ending != null ? SudaJsonUtil.localizedText(ending.content) : '';
+  }
+
+  int _resolveInitialStarRating() {
+    if (_isS2Flow) {
+      final rating = SeriesStateService.instance.cachedUserHistory?.userStarRating;
+      if (rating == null) return 0;
+      return rating.clamp(0, 5);
+    }
+    return 0;
   }
 
   @override
   void initState() {
     super.initState();
+    _selectedStars = _resolveInitialStarRating();
     _scaleController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
@@ -125,6 +166,12 @@ class _RoleplayEndingScreenState extends State<RoleplayEndingScreen>
   }
 
   void _navigateToResult(BuildContext context) {
+    if (_isS2Flow) {
+      if (!context.mounted) return;
+      RoleplayRouter.replaceWithResultV2(context);
+      return;
+    }
+
     final resultId = RoleplayStateService.instance.cachedResult?.id;
     TokenStorage.loadAccessToken().then((token) {
       if (resultId != null && token != null) {
@@ -139,20 +186,31 @@ class _RoleplayEndingScreenState extends State<RoleplayEndingScreen>
     RoleplayRouter.replaceWithResultV2(context);
   }
 
+  void _onStarSelected(int stars) {
+    setState(() => _selectedStars = stars);
+    if (!_isS2Flow) return;
+    final historyId = SeriesStateService.instance.cachedUserHistory?.id;
+    if (historyId == null) return;
+    TokenStorage.loadAccessToken().then((token) {
+      if (token == null) return;
+      SudaApiClient.updateRpS2UserStarRating(
+        accessToken: token,
+        rpUserHistoryId: historyId,
+        userStarRating: stars,
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context).textTheme;
     final l10n = AppLocalizations.of(context)!;
-    final ending = _ending;
-    final title = ending != null
-        ? SudaJsonUtil.localizedText(ending.title)
-        : '';
-    final content = ending != null
-        ? SudaJsonUtil.localizedText(ending.content)
-        : '';
+    final title = _displayTitle;
+    final content = _displayContent;
     final contentStyle = theme.bodyMedium?.copyWith(color: Colors.white)
         ?? TextStyle(color: Colors.white);
     final screenHeight = MediaQuery.sizeOf(context).height;
+    final bottomAreaHeight = screenHeight * 0.35;
 
     return PopScope(
       canPop: false,
@@ -199,7 +257,6 @@ class _RoleplayEndingScreenState extends State<RoleplayEndingScreen>
                 child: Column(
                   children: [
                     Expanded(
-                      flex: 3,
                       child: SingleChildScrollView(
                         padding: const EdgeInsets.symmetric(horizontal: 24),
                         child: Column(
@@ -215,75 +272,103 @@ class _RoleplayEndingScreenState extends State<RoleplayEndingScreen>
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 50),
-                            Text.rich(
-                              TextSpan(
+                            if (_isS2Flow)
+                              Text(
+                                content,
                                 style: contentStyle,
-                                children: DefaultMarkdown.buildSpans(
-                                  content,
-                                  contentStyle,
+                                textAlign: TextAlign.center,
+                              )
+                            else
+                              Text.rich(
+                                TextSpan(
+                                  style: contentStyle,
+                                  children: DefaultMarkdown.buildSpans(
+                                    content,
+                                    contentStyle,
+                                  ),
                                 ),
+                                textAlign: TextAlign.center,
                               ),
-                              textAlign: TextAlign.center,
-                            ),
                             const SizedBox(height: 50),
-                            Text(
-                              l10n.endingHowWas,
-                              style: theme.headlineMedium?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 15),
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: List.generate(5, (i) {
-                                final filled = (i + 1) <= _selectedStars;
-                                return Padding(
-                                  padding: EdgeInsets.only(
-                                    right: i < 4 ? 5 : 0,
-                                  ),
-                                  child: GestureDetector(
-                                    onTap: () => setState(
-                                      () => _selectedStars = i + 1,
-                                    ),
-                                    child: Image.asset(
-                                      filled
-                                          ? 'assets/images/icons/star_filled.png'
-                                          : 'assets/images/icons/star_empty.png',
-                                      width: 40,
-                                      height: 40,
-                                      fit: BoxFit.contain,
-                                    ),
-                                  ),
-                                );
-                              }),
-                            ),
                           ],
                         ),
                       ),
                     ),
-                    Expanded(
-                      flex: 1,
-                      child: Center(
-                        child: SizedBox(
-                          width: MediaQuery.sizeOf(context).width * 0.4,
-                          height: 54,
-                          child: ElevatedButton(
-                            onPressed: () => _navigateToResult(context),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF0CABA8),
-                              foregroundColor: Colors.white,
-                              shape: const StadiumBorder(),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 30,
-                                vertical: 18,
+                    SizedBox(
+                      height: bottomAreaHeight,
+                      child: Column(
+                        children: [
+                          Expanded(
+                            child: Center(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 24,
+                                ),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      l10n.endingHowWas,
+                                      style: theme.headlineMedium?.copyWith(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    const SizedBox(height: 15),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: List.generate(5, (i) {
+                                        final filled =
+                                            (i + 1) <= _selectedStars;
+                                        return Padding(
+                                          padding: EdgeInsets.only(
+                                            right: i < 4 ? 5 : 0,
+                                          ),
+                                          child: GestureDetector(
+                                            onTap: () =>
+                                                _onStarSelected(i + 1),
+                                            child: Image.asset(
+                                              filled
+                                                  ? 'assets/images/icons/star_filled.png'
+                                                  : 'assets/images/icons/star_empty.png',
+                                              width: 40,
+                                              height: 40,
+                                              fit: BoxFit.contain,
+                                            ),
+                                          ),
+                                        );
+                                      }),
+                                    ),
+                                  ],
+                                ),
                               ),
-                              elevation: 0,
                             ),
-                            child: Text(l10n.endingNext),
                           ),
-                        ),
+                          Expanded(
+                            child: Center(
+                              child: ElevatedButton(
+                                onPressed: () => _navigateToResult(context),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF0CABA8),
+                                  foregroundColor: Colors.white,
+                                  shape: const StadiumBorder(),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 30,
+                                    vertical: 18,
+                                  ),
+                                  elevation: 0,
+                                  tapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                  minimumSize: Size.zero,
+                                ),
+                                child: Text(l10n.endingNext),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],

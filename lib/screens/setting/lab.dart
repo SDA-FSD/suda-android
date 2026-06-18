@@ -5,6 +5,9 @@ import 'package:flutter/material.dart';
 import '../../config/app_config.dart';
 import '../../effects/like_progress_effect.dart';
 import '../../l10n/app_localizations.dart';
+import '../../models/series_models.dart';
+import '../../routes/roleplay_router.dart';
+import '../../services/series_state_service.dart';
 import '../../services/roleplay_state_service.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
@@ -28,6 +31,8 @@ import '../roleplay/opening.dart'
         showRoleplayOpeningPushNotificationQuestDefaultPopupForLab,
         showRoleplayOpeningShareQuestDefaultPopupForLab,
         showRoleplayOpeningInAppReviewQuestDefaultPopupForLab;
+import '../roleplay/ending.dart';
+import '../roleplay/try_again.dart';
 import '../roleplay/result_v2.dart';
 import '../first_cefr_level.dart';
 
@@ -120,6 +125,8 @@ class _LabScreenState extends State<LabScreen> {
   static const _stylePreviewLines = ['말해요!?', 'Talk', 'E sua vez primeiro!'];
   final TextEditingController _rpResultIdController = TextEditingController();
   bool _rpResultTestLoading = false;
+  bool _endingTestLoading = false;
+  static const int _labEndingSeriesId = 2;
 
   @override
   void dispose() {
@@ -228,6 +235,112 @@ class _LabScreenState extends State<LabScreen> {
     );
   }
 
+  void _seedLabS2TryAgainState() {
+    SeriesStateService.instance.setSeriesOverview(
+      seriesId: 1,
+      overview: const RpS2SeriesOverviewDto(
+        id: 1,
+        title: {'en': 'Lab Series'},
+        synopsis: {'en': ''},
+        endingTitle: {'en': 'Lab Ending'},
+        endingContent: {'en': ''},
+        episodes: [
+          RpS2SeriesEpisodeDto(
+            id: 1,
+            title: {'en': 'Lab Episode'},
+            summary: {'en': ''},
+            briefing: {'en': ''},
+            learningFunction: {'en': ''},
+          ),
+        ],
+        bestScoreMap: {},
+      ),
+    );
+    SeriesStateService.instance.setSelectedEpisodeId(1);
+  }
+
+  Future<void> _openTryAgainScreen() async {
+    _seedLabS2TryAgainState();
+    if (!mounted) return;
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const RoleplayTryAgainScreen()),
+    );
+  }
+
+  Future<void> _openEndingScreen() async {
+    if (_endingTestLoading) return;
+
+    setState(() => _endingTestLoading = true);
+    try {
+      final token = await TokenStorage.loadAccessToken();
+      if (token == null) {
+        if (!mounted) return;
+        DefaultToast.show(context, 'Not signed in', isError: true);
+        return;
+      }
+
+      final overview = await SudaApiClient.getSeriesOverview(
+        accessToken: token,
+        seriesId: _labEndingSeriesId,
+      );
+      SeriesStateService.instance.setSeriesOverview(
+        seriesId: _labEndingSeriesId,
+        overview: overview,
+      );
+      final episodes = overview.episodes;
+      if (episodes.isNotEmpty) {
+        SeriesStateService.instance.setSelectedEpisodeId(episodes.last.id);
+      }
+      SeriesStateService.instance.setCachedUserHistory(
+        const RpS2UserHistoryDto(
+          id: -1,
+          seriesId: _labEndingSeriesId,
+          userStarRating: 0,
+        ),
+      );
+
+      if (!mounted) return;
+      await Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const RoleplayEndingScreen()),
+      );
+    } catch (e) {
+      if (mounted) {
+        DefaultToast.show(context, 'Open Ending failed: $e', isError: true);
+      }
+    } finally {
+      if (mounted) setState(() => _endingTestLoading = false);
+    }
+  }
+
+  Future<void> _openTryAgainReportScreen() async {
+    if (!mounted) return;
+    await RoleplayRouter.pushTryAgainReport(context);
+  }
+
+  Widget _buildLabScreenButton({
+    required String label,
+    required VoidCallback onPressed,
+  }) {
+    return SizedBox(
+      width: double.infinity,
+      height: 56,
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF0CABA8),
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          elevation: 0,
+        ),
+        child: Text(label),
+      ),
+    );
+  }
+
   Widget _buildSectionDivider() {
     return const Padding(
       padding: EdgeInsets.symmetric(vertical: 24),
@@ -293,6 +406,31 @@ class _LabScreenState extends State<LabScreen> {
                 ),
                 child: const Text('Open First CEFR Level'),
               ),
+            ),
+            _buildSectionDivider(),
+            Text(
+              'Roleplay Ending',
+              style: theme.headlineSmall?.copyWith(color: Colors.white),
+            ),
+            const SizedBox(height: 12),
+            _buildLabScreenButton(
+              label: _endingTestLoading ? 'Loading…' : 'Open Ending',
+              onPressed: () => unawaited(_openEndingScreen()),
+            ),
+            _buildSectionDivider(),
+            Text(
+              'Roleplay Try Again',
+              style: theme.headlineSmall?.copyWith(color: Colors.white),
+            ),
+            const SizedBox(height: 12),
+            _buildLabScreenButton(
+              label: 'Open Try Again Screen',
+              onPressed: () => unawaited(_openTryAgainScreen()),
+            ),
+            const SizedBox(height: 8),
+            _buildLabScreenButton(
+              label: 'Open Try Again Report Screen',
+              onPressed: () => unawaited(_openTryAgainReportScreen()),
             ),
             _buildSectionDivider(),
             Text(

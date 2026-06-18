@@ -6,6 +6,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 
+import '../../api/endpoints/series_api.dart';
 import '../../config/app_config.dart';
 import '../../services/series_state_service.dart';
 import '../../services/suda_api_client.dart';
@@ -101,6 +102,9 @@ mixin PlayingConversationMixin<T extends StatefulWidget> on State<T> {
 
   /// AI 음성 재생 완료 시 힌트 트리거.
   VoidCallback? playingAiVoicePlaybackCompletedHandler;
+
+  /// 세션 404 시 finish 분기 (`PlayingFinishMixin.onRpS2SessionNotFound`).
+  VoidCallback? playingSessionNotFoundHandler;
 
   /// AI 말풍선 직전 힌트 영역 정리.
   VoidCallback? playingHintPrepareForAiMessageHandler;
@@ -241,6 +245,12 @@ mixin PlayingConversationMixin<T extends StatefulWidget> on State<T> {
     playingAiVoicePlaybackCompletedHandler?.call();
   }
 
+  Future<void> stopPlayingConversationAudio() async {
+    _aiPlaybackSub?.cancel();
+    _aiPlaybackSub = null;
+    await _audioPlayer.stop();
+  }
+
   Future<AudioSource?> _prepareAiVoice({
     required String? cdnYn,
     required String? cdnPath,
@@ -342,6 +352,14 @@ mixin PlayingConversationMixin<T extends StatefulWidget> on State<T> {
         entry.translationText = translated;
         entry.isTranslationLoading = false;
       });
+    } on RpS2SessionNotFoundException catch (_) {
+      if (!mounted) return;
+      setState(() {
+        entry.isTranslationLoading = false;
+        entry.isTranslationExpanded = false;
+      });
+      playingSessionNotFoundHandler?.call();
+      return;
     } catch (_) {
       if (!mounted) return;
       setState(() {

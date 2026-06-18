@@ -358,3 +358,292 @@ int? _optionalInt(dynamic value) {
   if (value is String) return int.tryParse(value);
   return null;
 }
+
+/// `GET /rps2/user-histories/{rpUserHistoryId}` 응답 DTO
+class RpS2UserHistoryDto {
+  final int? id;
+  final int? userId;
+  final int? seriesId;
+  final int? episodeId;
+  final int? episodeCefrId;
+  final String? sessionId;
+  final String? firstPlayYn;
+  final String? status;
+  final String? thumbnailImgPath;
+  final List<RpS2UserHistoryMsgDto> messages;
+  final Map<int, RpS2HintVo> hints;
+  final Map<int, String> translations;
+  final List<bool> missions;
+  final int? starScore;
+  final int? words;
+  final int? likePoint;
+  final List<RpS2KeyExpressionVo> keyExpressions;
+  final Map<int, RpS2UserFeedbackVo> speechFeedback;
+  final int? userStarRating;
+  final String? createdAt;
+  final String? updatedAt;
+  final int? beforeLikePoint;
+  final int? beforeLevel;
+  final int? beforeProgressPercentage;
+  final int? afterLikePoint;
+  final int? afterLevel;
+  final int? afterProgressPercentage;
+
+  const RpS2UserHistoryDto({
+    this.id,
+    this.userId,
+    this.seriesId,
+    this.episodeId,
+    this.episodeCefrId,
+    this.sessionId,
+    this.firstPlayYn,
+    this.status,
+    this.thumbnailImgPath,
+    this.messages = const [],
+    this.hints = const {},
+    this.translations = const {},
+    this.missions = const [],
+    this.starScore,
+    this.words,
+    this.likePoint,
+    this.keyExpressions = const [],
+    this.speechFeedback = const {},
+    this.userStarRating,
+    this.createdAt,
+    this.updatedAt,
+    this.beforeLikePoint,
+    this.beforeLevel,
+    this.beforeProgressPercentage,
+    this.afterLikePoint,
+    this.afterLevel,
+    this.afterProgressPercentage,
+  });
+
+  factory RpS2UserHistoryDto.fromJson(Map<String, dynamic> json) {
+    return RpS2UserHistoryDto(
+      id: _optionalInt(json['id']),
+      userId: _optionalInt(json['userId']),
+      seriesId: _optionalInt(json['seriesId']),
+      episodeId: _optionalInt(json['episodeId']),
+      episodeCefrId: _optionalInt(json['episodeCefrId']),
+      sessionId: json['sessionId']?.toString(),
+      firstPlayYn: json['firstPlayYn'] as String?,
+      status: json['status'] as String?,
+      thumbnailImgPath: json['thumbnailImgPath'] as String?,
+      messages: _userHistoryMessagesFromJson(json['messages']),
+      hints: _hintVoMapFromJson(json['hints']),
+      translations: _intStringMapFromJson(json['translations']),
+      missions: _boolListFromJson(json['missions']),
+      starScore: _optionalInt(json['starScore']),
+      words: _optionalInt(json['words']),
+      likePoint: _optionalInt(json['likePoint']),
+      keyExpressions: _keyExpressionsFromJson(json['keyExpressions']),
+      speechFeedback: _speechFeedbackMapFromJson(json['speechFeedback']),
+      userStarRating: _optionalInt(json['userStarRating']),
+      createdAt: json['createdAt']?.toString(),
+      updatedAt: json['updatedAt']?.toString(),
+      beforeLikePoint: _optionalInt(json['beforeLikePoint']),
+      beforeLevel: _optionalInt(json['beforeLevel']),
+      beforeProgressPercentage: _optionalInt(json['beforeProgressPercentage']),
+      afterLikePoint: _optionalInt(json['afterLikePoint']),
+      afterLevel: _optionalInt(json['afterLevel']),
+      afterProgressPercentage: _optionalInt(json['afterProgressPercentage']),
+    );
+  }
+}
+
+class RpS2UserHistoryMsgDto {
+  final int? id;
+  final String? role;
+  final String? content;
+  final int? prepareTextStartedAt;
+  final int? prepareTextEndedAt;
+  final int? prepareAudioStartedAt;
+  final int? prepareAudioEndedAt;
+  final int? deliveredAt;
+  final String? audioInputYn;
+  final String? audioPath;
+
+  const RpS2UserHistoryMsgDto({
+    this.id,
+    this.role,
+    this.content,
+    this.prepareTextStartedAt,
+    this.prepareTextEndedAt,
+    this.prepareAudioStartedAt,
+    this.prepareAudioEndedAt,
+    this.deliveredAt,
+    this.audioInputYn,
+    this.audioPath,
+  });
+
+  factory RpS2UserHistoryMsgDto.fromJson(Map<String, dynamic> json) {
+    return RpS2UserHistoryMsgDto(
+      id: _optionalInt(json['id']),
+      role: json['role']?.toString(),
+      content: json['content'] as String?,
+      prepareTextStartedAt: _optionalInt(json['prepareTextStartedAt']),
+      prepareTextEndedAt: _optionalInt(json['prepareTextEndedAt']),
+      prepareAudioStartedAt: _optionalInt(json['prepareAudioStartedAt']),
+      prepareAudioEndedAt: _optionalInt(json['prepareAudioEndedAt']),
+      deliveredAt: _optionalInt(json['deliveredAt']),
+      audioInputYn: json['audioInputYn'] as String?,
+      audioPath: json['audioPath'] as String?,
+    );
+  }
+}
+
+class RpS2HintVo {
+  final String? hint;
+  final String? translatedHint;
+  final Set<int> soundHistorySet;
+  final String? deliveredYn;
+
+  const RpS2HintVo({
+    this.hint,
+    this.translatedHint,
+    this.soundHistorySet = const {},
+    this.deliveredYn,
+  });
+
+  factory RpS2HintVo.fromJson(Map<String, dynamic> json) {
+    final rawHistory = json['soundHistorySet'];
+    final Set<int> soundHistorySet;
+    if (rawHistory is List) {
+      soundHistorySet = rawHistory
+          .map((item) => _optionalInt(item))
+          .whereType<int>()
+          .toSet();
+    } else {
+      soundHistorySet = const {};
+    }
+    return RpS2HintVo(
+      hint: json['hint'] as String?,
+      translatedHint: json['translatedHint'] as String?,
+      soundHistorySet: soundHistorySet,
+      deliveredYn: json['deliveredYn'] as String?,
+    );
+  }
+}
+
+class RpS2KeyExpressionVo {
+  final Map<String, String> keyExpression;
+  final Map<String, String> sampleAnswer;
+
+  const RpS2KeyExpressionVo({
+    required this.keyExpression,
+    required this.sampleAnswer,
+  });
+
+  factory RpS2KeyExpressionVo.fromJson(Map<String, dynamic> json) {
+    return RpS2KeyExpressionVo(
+      keyExpression: SudaJsonUtil.localizedMapFromJson(json['keyExpression']),
+      sampleAnswer: SudaJsonUtil.localizedMapFromJson(json['sampleAnswer']),
+    );
+  }
+}
+
+class RpS2UserFeedbackVo {
+  final String? grade;
+  final RpS2ScoreVo? score;
+  final String? feedback;
+
+  const RpS2UserFeedbackVo({this.grade, this.score, this.feedback});
+
+  factory RpS2UserFeedbackVo.fromJson(Map<String, dynamic> json) {
+    return RpS2UserFeedbackVo(
+      grade: json['grade'] as String?,
+      score: json['score'] == null
+          ? null
+          : RpS2ScoreVo.fromJson(json['score'] as Map<String, dynamic>),
+      feedback: json['feedback'] as String?,
+    );
+  }
+}
+
+class RpS2ScoreVo {
+  final String? meaning;
+  final String? relevance;
+  final String? vocabulary;
+  final String? grammar;
+
+  const RpS2ScoreVo({
+    this.meaning,
+    this.relevance,
+    this.vocabulary,
+    this.grammar,
+  });
+
+  factory RpS2ScoreVo.fromJson(Map<String, dynamic> json) {
+    return RpS2ScoreVo(
+      meaning: json['meaning'] as String?,
+      relevance: json['relevance'] as String?,
+      vocabulary: json['vocabulary'] as String?,
+      grammar: json['grammar'] as String?,
+    );
+  }
+}
+
+List<RpS2UserHistoryMsgDto> _userHistoryMessagesFromJson(dynamic raw) {
+  if (raw is! List) return const [];
+  return raw
+      .whereType<Map>()
+      .map(
+        (item) => RpS2UserHistoryMsgDto.fromJson(
+          Map<String, dynamic>.from(item),
+        ),
+      )
+      .toList();
+}
+
+Map<int, RpS2HintVo> _hintVoMapFromJson(dynamic raw) {
+  if (raw is! Map) return const {};
+  final result = <int, RpS2HintVo>{};
+  raw.forEach((key, value) {
+    final intKey = int.tryParse(key.toString());
+    if (intKey == null || value is! Map) return;
+    result[intKey] = RpS2HintVo.fromJson(Map<String, dynamic>.from(value));
+  });
+  return result;
+}
+
+Map<int, String> _intStringMapFromJson(dynamic raw) {
+  if (raw is! Map) return const {};
+  final result = <int, String>{};
+  raw.forEach((key, value) {
+    final intKey = int.tryParse(key.toString());
+    if (intKey == null || value == null) return;
+    result[intKey] = value.toString();
+  });
+  return result;
+}
+
+List<bool> _boolListFromJson(dynamic raw) {
+  if (raw is! List) return const [];
+  return raw.map((item) => item == true).toList();
+}
+
+List<RpS2KeyExpressionVo> _keyExpressionsFromJson(dynamic raw) {
+  if (raw is! List) return const [];
+  return raw
+      .whereType<Map>()
+      .map(
+        (item) => RpS2KeyExpressionVo.fromJson(
+          Map<String, dynamic>.from(item),
+        ),
+      )
+      .toList();
+}
+
+Map<int, RpS2UserFeedbackVo> _speechFeedbackMapFromJson(dynamic raw) {
+  if (raw is! Map) return const {};
+  final result = <int, RpS2UserFeedbackVo>{};
+  raw.forEach((key, value) {
+    final intKey = int.tryParse(key.toString());
+    if (intKey == null || value is! Map) return;
+    result[intKey] = RpS2UserFeedbackVo.fromJson(
+      Map<String, dynamic>.from(value),
+    );
+  });
+  return result;
+}

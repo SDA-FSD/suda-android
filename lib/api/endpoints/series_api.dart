@@ -8,7 +8,22 @@ import '../../models/roleplay_models.dart';
 import '../../models/series_models.dart';
 import '../client/suda_http_client.dart';
 
+class RpS2SessionNotFoundException implements Exception {
+  final String message;
+  RpS2SessionNotFoundException(this.message);
+  @override
+  String toString() => message;
+}
+
 class SeriesApi {
+  static void _throwIfRpS2SessionNotFound(
+    http.Response response,
+    String operation,
+  ) {
+    if (response.statusCode == 404) {
+      throw RpS2SessionNotFoundException('$operation: HTTP 404');
+    }
+  }
   static Future<RpS2SeriesOverviewDto> getSeriesOverview({
     required String accessToken,
     required int seriesId,
@@ -195,6 +210,10 @@ class SeriesApi {
     if (response.statusCode == 401) {
       throw UnauthorizedException('Access token expired');
     }
+    _throwIfRpS2SessionNotFound(
+      response,
+      'GET /rps2/sessions/$rpSessionId/translation',
+    );
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return _parseStringResponse(response.body);
     }
@@ -251,6 +270,9 @@ class SeriesApi {
         }
         return result;
       } catch (e) {
+        if (e is RpS2SessionNotFoundException) {
+          rethrow;
+        }
         final message = e.toString();
         final shouldRetry = message.contains('HTTP 202');
         if (!shouldRetry || attempt >= delays.length) {
@@ -296,6 +318,10 @@ class SeriesApi {
         'GET /rps2/sessions/$rpSessionId/hint/$rpMsgId not ready: HTTP 202',
       );
     }
+    _throwIfRpS2SessionNotFound(
+      response,
+      'GET /rps2/sessions/$rpSessionId/hint/$rpMsgId',
+    );
     if (response.statusCode >= 200 && response.statusCode < 300) {
       final Map<String, dynamic> data =
           jsonDecode(response.body) as Map<String, dynamic>;
@@ -342,6 +368,10 @@ class SeriesApi {
     if (response.statusCode == 401) {
       throw UnauthorizedException('Access token expired');
     }
+    _throwIfRpS2SessionNotFound(
+      response,
+      'GET /rps2/sessions/$rpSessionId/hint/sound',
+    );
     if (response.statusCode >= 200 && response.statusCode < 300) {
       final Map<String, dynamic> data =
           jsonDecode(response.body) as Map<String, dynamic>;
@@ -391,6 +421,10 @@ class SeriesApi {
     if (response.statusCode == 401) {
       throw UnauthorizedException('Access token expired');
     }
+    _throwIfRpS2SessionNotFound(
+      response,
+      'GET /rps2/sessions/$rpSessionId/hint/sound/$wordIndex',
+    );
     if (response.statusCode >= 200 && response.statusCode < 300) {
       final Map<String, dynamic> data =
           jsonDecode(response.body) as Map<String, dynamic>;
@@ -448,6 +482,10 @@ class SeriesApi {
     if (response.statusCode == 401) {
       throw UnauthorizedException('Access token expired');
     }
+    _throwIfRpS2SessionNotFound(
+      response,
+      'POST /rps2/sessions/$rpSessionId/user-message/audio',
+    );
     if (response.statusCode >= 200 && response.statusCode < 300) {
       final Map<String, dynamic> data =
           jsonDecode(response.body) as Map<String, dynamic>;
@@ -497,6 +535,10 @@ class SeriesApi {
     if (response.statusCode == 401) {
       throw UnauthorizedException('Access token expired');
     }
+    _throwIfRpS2SessionNotFound(
+      response,
+      'POST /rps2/sessions/$rpSessionId/user-message/text',
+    );
     if (response.statusCode >= 200 && response.statusCode < 300) {
       final Map<String, dynamic> data =
           jsonDecode(response.body) as Map<String, dynamic>;
@@ -550,6 +592,162 @@ class SeriesApi {
     }
     throw Exception(
       'GET /rps2/sessions/$rpSessionId/ai-message/audio failed: HTTP ${response.statusCode} ${response.body}',
+    );
+  }
+
+  static Future<int> finishSession({
+    required String accessToken,
+    required String rpSessionId,
+  }) async {
+    return await SudaHttpClient.executeWithRefresh(
+      () => _finishSessionInternal(accessToken, rpSessionId),
+      retryWithNewToken: (newToken) =>
+          _finishSessionInternal(newToken, rpSessionId),
+    );
+  }
+
+  static Future<int> _finishSessionInternal(
+    String accessToken,
+    String rpSessionId,
+  ) async {
+    final uri = SudaHttpClient.buildUri('/rps2/sessions/$rpSessionId/finish');
+    late final http.Response response;
+    try {
+      response = await SudaHttpClient.client
+          .put(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+              'Content-Type': 'application/json',
+            },
+          )
+          .timeout(const Duration(seconds: 20));
+    } on TimeoutException {
+      rethrow;
+    }
+
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+    _throwIfRpS2SessionNotFound(
+      response,
+      'PUT /rps2/sessions/$rpSessionId/finish',
+    );
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final decoded = jsonDecode(response.body);
+      if (decoded is num) {
+        return decoded.toInt();
+      }
+      throw Exception(
+        'PUT /rps2/sessions/$rpSessionId/finish invalid body: ${response.body}',
+      );
+    }
+    throw Exception(
+      'PUT /rps2/sessions/$rpSessionId/finish failed: HTTP ${response.statusCode} ${response.body}',
+    );
+  }
+
+  static Future<RpS2UserHistoryDto> getUserHistory({
+    required String accessToken,
+    required int rpUserHistoryId,
+  }) async {
+    return await SudaHttpClient.executeWithRefresh(
+      () => _getUserHistoryInternal(accessToken, rpUserHistoryId),
+      retryWithNewToken: (newToken) =>
+          _getUserHistoryInternal(newToken, rpUserHistoryId),
+    );
+  }
+
+  static Future<RpS2UserHistoryDto> _getUserHistoryInternal(
+    String accessToken,
+    int rpUserHistoryId,
+  ) async {
+    final uri = SudaHttpClient.buildUri(
+      '/rps2/user-histories/$rpUserHistoryId',
+    );
+    late final http.Response response;
+    try {
+      response = await SudaHttpClient.client
+          .get(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+              'Content-Type': 'application/json',
+            },
+          )
+          .timeout(const Duration(seconds: 20));
+    } on TimeoutException {
+      rethrow;
+    }
+
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+    _throwIfRpS2SessionNotFound(
+      response,
+      'GET /rps2/user-histories/$rpUserHistoryId',
+    );
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final Map<String, dynamic> data =
+          jsonDecode(response.body) as Map<String, dynamic>;
+      return RpS2UserHistoryDto.fromJson(data);
+    }
+    throw Exception(
+      'GET /rps2/user-histories/$rpUserHistoryId failed: HTTP ${response.statusCode} ${response.body}',
+    );
+  }
+
+  static Future<void> updateUserStarRating({
+    required String accessToken,
+    required int rpUserHistoryId,
+    required int userStarRating,
+  }) async {
+    return await SudaHttpClient.executeWithRefresh(
+      () => _updateUserStarRatingInternal(
+        accessToken,
+        rpUserHistoryId,
+        userStarRating,
+      ),
+      retryWithNewToken: (newToken) => _updateUserStarRatingInternal(
+        newToken,
+        rpUserHistoryId,
+        userStarRating,
+      ),
+    );
+  }
+
+  static Future<void> _updateUserStarRatingInternal(
+    String accessToken,
+    int rpUserHistoryId,
+    int userStarRating,
+  ) async {
+    final uri = SudaHttpClient.buildUri(
+      '/rps2/user-histories/$rpUserHistoryId/user-star-rating',
+    );
+    late final http.Response response;
+    try {
+      response = await SudaHttpClient.client
+          .put(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+              'Content-Type': 'application/json',
+            },
+            body: jsonEncode({'userStarRating': userStarRating}),
+          )
+          .timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      rethrow;
+    }
+
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return;
+    }
+    throw Exception(
+      'PUT /rps2/user-histories/$rpUserHistoryId/user-star-rating failed: HTTP ${response.statusCode} ${response.body}',
     );
   }
 

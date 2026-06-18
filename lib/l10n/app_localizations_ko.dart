@@ -241,6 +241,15 @@ class AppLocalizationsKo extends AppLocalizations {
   String get roleplayEndedEnding => '엔딩으로 이동합니다...';
 
   @override
+  String get roleplayFinishNotEnoughProgress => '대화 진행이 부족합니다';
+
+  @override
+  String get roleplayFinishCompleted => '롤플레이를 완료했습니다';
+
+  @override
+  String get roleplayFinishMovingToEnding => '엔딩으로 이동합니다...';
+
+  @override
   String get roleplayAnalyzing => '롤플레이를 분석 중입니다…';
 
   @override
@@ -254,6 +263,10 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get endingFailSubtitle => '다시 시도하여 전체 스토리를 발견하세요.';
+
+  @override
+  String get roleplayTryAgainMessage =>
+      '아쉽지만 대화 점수가 낮아 보상을 받을 수 없어요. 다시 도전해보세요!';
 
   @override
   String get endingReport => '리포트';

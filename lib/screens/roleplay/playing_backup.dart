@@ -1528,7 +1528,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
       _serviceMessageTimer?.cancel();
       _serviceMessageTimer = Timer(const Duration(seconds: 3), () {
         if (!mounted) return;
-        RoleplayRouter.replaceWithFailed(context);
+        RoleplayRouter.replaceWithTryAgain(context);
       });
       return;
     }
@@ -2161,9 +2161,9 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     RoleplayRouter.replaceWithEnding(context);
   }
 
-  void _navigateToFailed(BuildContext context) {
-    // playing screen 삭제하고 failed로 전환
-    RoleplayRouter.replaceWithFailed(context);
+  void _navigateToTryAgain(BuildContext context) {
+    // playing screen 삭제하고 try again으로 전환
+    RoleplayRouter.replaceWithTryAgain(context);
   }
 
   void _handleBackButton(BuildContext context) {
