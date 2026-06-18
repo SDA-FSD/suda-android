@@ -19,7 +19,6 @@ import '../../widgets/daily_ticket_popup.dart'
 import '../../widgets/app_scaffold.dart';
 import '../profile.dart'
     show showProfileDeleteSavedExpressionDefaultPopupForLab;
-import 'rps2_test_screen.dart';
 import 'announcements.dart'
     show showAnnouncementsPostNoLongerAvailableDefaultPopupForLab;
 import '../roleplay/opening.dart'
@@ -217,16 +216,6 @@ class _LabScreenState extends State<LabScreen> {
     }
   }
 
-  Future<void> _openRpS2TestScreen() async {
-    if (!mounted) return;
-    await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => const RpS2TestScreen(initialTotalTurns: 6),
-      ),
-    );
-  }
-
   Future<void> _openFirstCefrLevelScreen() async {
     if (!mounted) return;
     await Navigator.push(
@@ -284,28 +273,6 @@ class _LabScreenState extends State<LabScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'RpS2 Test',
-              style: theme.headlineSmall?.copyWith(color: Colors.white),
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: _openRpS2TestScreen,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0CABA8),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  elevation: 0,
-                ),
-                child: const Text('Open RpS2 Test'),
-              ),
-            ),
-            _buildSectionDivider(),
             Text(
               'First CEFR Level',
               style: theme.headlineSmall?.copyWith(color: Colors.white),

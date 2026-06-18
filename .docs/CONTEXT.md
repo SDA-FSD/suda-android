@@ -297,10 +297,6 @@
 ## 12. 최근 작업 메모
 
 최근 작업 메모(이력)는 `.docs/CONTEXT_HISTORY.md`에 보관한다. 상세 항목은 해당 문서를 참조한다.
-- Lab `RpS2 Test`는 턴 수 입력 없이 `initialTotalTurns=6`으로 고정 진입한다.
-- `RpS2 Test`의 progress 상단 텍스트(`currentTurn/totalTurns`)는 기본 노출되며, 채점 점수 텍스트가 표시되는 **약 2초 동안은 숨김** 처리 후 점수 사라지면 다시 노출한다.
-- `RpS2 Test` 프로그레스바는 턴별 사용자 발화 등급에 따라 세그먼트 색을 칠한다: Needs Improvement `#FFB700`, Unclear `#FF0000`, Good `#62FF00`, Perfect `#37FFED`(미판정/미완료는 기본색). **가장 최근 턴만 100% 불투명, 이전 턴 세그먼트는 40% 투명도**로 낮춘다.
-- `RpS2 Test`의 `/test/user-message` 응답 `score`는 `"meaning-relevance-vocabulary-grammar"` 형식이며 각 항목은 `Y`/`PARTIAL`/`N`이다. 프론트(`_parseScoreGrade`)는 split 후 `[meaning, relevance, vocabulary, grammar]` 순서로 사용해 서버와 동일한 규칙으로 최종 등급을 계산한다: (1) meaning 또는 relevance가 `N`이면 UNCLEAR, (2) meaning 또는 relevance가 `PARTIAL`이면 NEEDS_IMPROVEMENT, (3) 1·2 통과 후 grammar 또는 vocabulary가 `N`이면 NEEDS_IMPROVEMENT, (4) grammar·vocabulary 둘 다 `Y`면 PERFECT, (5) grammar 또는 vocabulary가 `PARTIAL`이면 GOOD, 그 외/malformed/누락(4토큰 미만·비정상 값)은 NEEDS_IMPROVEMENT. 프로그레스바 위 중앙 점수 오버레이에는 최종 enum 문자열(`UNCLEAR`/`NEEDS_IMPROVEMENT`/`GOOD`/`PERFECT`)을 그대로 노출한다.
 
 ## 13. 공통 오버레이 이펙트(Effect Overlay) 구조
 - **목적**: 특정 스크린의 UI 위에 “레이어처럼 나타났다 사라지는” 공통 애니메이션을 재생하고, 스크린은 **효과 종료 시점**을 감지해 다음 UI를 그릴 수 있도록 한다.

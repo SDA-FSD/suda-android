@@ -3,7 +3,6 @@ import 'dart:typed_data';
 import '../models/auth_models.dart';
 import '../models/home_models.dart';
 import '../models/pagination.dart';
-import '../models/rps2_test_models.dart';
 import '../models/roleplay_models.dart';
 import '../models/series_models.dart';
 import '../models/user_models.dart';
@@ -326,16 +325,6 @@ class SudaApiClient {
       accessToken: accessToken,
       resultId: resultId,
       expressionIndex: expressionIndex,
-    );
-  }
-
-  static Future<RpS2TestTurnDto> postRpS2TestUserMessage({
-    required String accessToken,
-    required Uint8List audioData,
-  }) {
-    return RoleplayApi.postRpS2TestUserMessage(
-      accessToken: accessToken,
-      audioData: audioData,
     );
   }
 
