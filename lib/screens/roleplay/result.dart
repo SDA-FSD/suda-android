@@ -22,6 +22,7 @@ import '../../services/token_storage.dart';
 import '../../utils/default_toast.dart';
 import '../../utils/sub_screen_route.dart';
 import '../../utils/suda_json_util.dart';
+import 'view_chat.dart';
 import 'review_chat.dart';
 
 const Color _exprTextPrimary = Color(0xFF121212);
@@ -1262,7 +1263,14 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
   }
 
   // S2 Review Chat API 연동 전 placeholder.
-  void _onS2ViewChatTap() {}
+  void _onS2ViewChatTap() {
+    final history = _s2History;
+    if (history == null) return;
+    Navigator.push(
+      context,
+      SubScreenRoute(page: ViewChatScreen(history: history)),
+    );
+  }
 
   Widget _buildKeyExpressionCarousel(BuildContext context) {
     final items = _s2History?.keyExpressions ?? const <RpS2KeyExpressionVo>[];

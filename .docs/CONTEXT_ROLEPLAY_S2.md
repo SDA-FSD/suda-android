@@ -351,7 +351,7 @@ S1 턴 정책은 `.docs/CONTEXT_ROLEPLAY.md`만 본다. **S2는 아래가 단일
 - **애니메이션 이후 본문** (`result.dart` S2 전용):
   - **Feedback 영역**: 삭제(S2)
   - **Key Expression**: `keyExpressions` — 카드 체크+`keyExpression(en)` / `keyExpression(사용자언어)` / `sampleAnswer(en)` / `sampleAnswer(사용자언어)`. 카드 전체 탭(북마크 제외) → `GET /rps2/user-histories/{rpUserHistoryId}/expressions/{expressionIndex}/sound`(`TtsResultDto`, index 0-based). fetch 중 `megaphone.png` `#121212`, 재생 중 `megaphone_fill.png` `#0CABA8`, 타 카드 탭 시 이전 재생 중단. 북마크 OFF→ON: `POST /rps2/user-histories/{id}/expressions/{index}` → `bookmark_on.png` + l10n `expressionSavedToProfile`. ON→OFF: `DELETE` 동일 경로 → `bookmark_off.png`(토스트 없음). 실패 시 HTTP 코드·간단 문구 토스트. 진입 시 북마크 UI 전부 off.
-  - **Speech Feedback**(신규): 섹션 헤더 + **View Chat** pill(동작 API 추후). 본문 — `speechFeedback` id 오름차순·행 gap 20·좌우 padding 24. **행당 단일 카드**(Key Expression 카드와 동일 흰 카드·shadow·padding 16).
+  - **Speech Feedback**(신규): 섹션 헤더 + **View Chat** pill → `ViewChatScreen`(`RpS2UserHistoryDto` 전달, `lib/screens/roleplay/view_chat.dart`). Review Chat과 동일 그라데이션 배경. `messages[]` role별 USER/AI_CHARACTER/AI_NARRATOR/SYSTEM_MISSION 렌더. **헤더 우측 메가폰**(기본색, fill은 자동재생 중만): `msgId` 오름차순 재생 가능 메시지 순차 자동재생, 말풍선 간 300ms 휴식, 재생 중 타겟 말풍선 하이라이트(`#80D7CF`). USER 말풍선은 Speech Feedback 카드 형태(grade·score·feedback 펼침/접힘). AI 말풍선은 아바타 없이 전폭, 우측 메가폰 아이콘. USER(`audioInputYn=='Y'`)·AI_CHARACTER(`audioPath` 있음) 개별 탭 재생 — USER는 `GET …/messages/{rpMsgId}/audio`, AI는 CDN `audioPath`. 안내 문구 영역 없음.
     - **접힘**: 1줄 grade `bodySmall` **w700**(grade색) · 2줄 사용자 발화 `bodyLarge` · 3줄 메가폰 + **Feedback** pill.
     - **펼침**: 1줄 아래 score 4행(**블록 너비 50%** 좌측, `labelSmall` label + bar h3, row gap 8, 하단 gap 8) · 2·3줄 사이 `feedback` `bodySmall` `#635F5F`.
     - **재생**: `messages[].audioInputYn == 'Y'`인 행만 메가폰 노출·카드 전체 탭(Feedback pill 제외) 재생. `N`이면 메가폰 미노출·카드 탭 재생 없음(Feedback pill 펼침만). API `GET /rps2/user-histories/{rpUserHistoryId}/messages/{rpMsgId}/audio`(`TtsResultDto`, `rpMsgId` = `speechFeedback` 키 = `messages[].id`). fetch 중 `megaphone.png` `#121212`, 재생 중 `megaphone_fill.png` `#0CABA8`. Key Expression 등 다른 재생 중이면 중단 후 우선 적용.
@@ -394,7 +394,7 @@ S1 턴 정책은 `.docs/CONTEXT_ROLEPLAY.md`만 본다. **S2는 아래가 단일
 
 **S1 세션 API** (`POST /v1/roleplay-sessions`): `RoleplayApi.createRoleplaySession` — **`playing_backup` / Lab 등 S1 전용**. S2 Opening에서는 **사용하지 않음**.
 
-**미구현 (Playing용)**: 없음 — finish·분기·navigate 구현 완료. **Ending S2 렌더링·별점 저장 ✅**. **Result S2 UI** — Key Expression·Speech Feedback 재생 ✅, View Chat 등 진행 중.
+**미구현 (Playing용)**: 없음 — finish·분기·navigate 구현 완료. **Ending S2 렌더링·별점 저장 ✅**. **Result S2 UI** — Key Expression·Speech Feedback 재생·View Chat ✅(1차), 세부 개선 진행 예정.
 
 ---
 
