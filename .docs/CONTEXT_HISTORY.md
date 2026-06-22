@@ -6,6 +6,8 @@
 
 ## 최근 작업 메모
 
+- **Key Expression 명칭 통일**: `ExpressionUpgradeDto` → `RpResultKeyExpressionDto`, `RoleplayResultDto.expressionUpgrades` → Dart `keyExpressions`(JSON `expressionUpgrades` 유지). Result·History V2 UI·변수·주석을 Key Expression 기준으로 정리. 구현: `lib/models/roleplay_models.dart`, `lib/screens/roleplay/result.dart`, `lib/screens/roleplay/history_v2.dart`. 문서: `.docs/CONTEXT_SCREEN.md` §17·§19, `.docs/CONTEXT_ROLEPLAY.md` §6-9, `.docs/CONTEXT_ROLEPLAY_S2.md` §4-5.
+- **Result 스크린 통합**: 구 레거시 `lib/screens/roleplay/result.dart` 삭제. 구 `result_v2.dart`를 `result.dart`·`RoleplayResultScreen`·`/roleplay/result`·`replaceWithResult()`로 통합. `playing_backup.dart`는 `@Deprecated replaceWithResultV2` alias로 호환 유지. 문서: `.docs/CONTEXT_SCREEN.md` §17, `.docs/CONTEXT_ROLEPLAY.md`, `.docs/CONTEXT_ROLEPLAY_S2.md` §4-5.
 - **Playing S2 힌트(②)**: AI 음성 종료 후 오토힌트 ON 자동 노출·OFF 아이콘+3s blink. `GET /rps2/sessions/{id}/hint/{rpMsgId}`(`rpMsgId`=AI `conversationIndex+1`)·hint/sound API. `playing_hint_mixin.dart` — S1 힌트박스 위치·2단계(번역→답변보기)·en 본문 즉시·이탤릭 단어·발화 완료 시 제거.
 - **CONTEXT_ROLEPLAY_S2.md**: S1→S2 Roleplay 마이그레이션 진행상황·SeriesState·Playing(`playing.dart` vs `playing_backup.dart`) 상태를 전용 문서로 정리. S2 작업 시 우선 참조.
 - **Playing S2 RpS2 세션 API**: Opening Start → `POST /rps2/sessions` `{seriesId, episodeId}` → `RpS2SessionDto`(`sessionId`, `aiSound`/`RpS2SoundResDto`)를 `SeriesStateService`에 저장. S1 `POST /v1/roleplay-sessions`는 `playing_backup` 경로용 유지.

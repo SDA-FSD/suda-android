@@ -768,8 +768,8 @@
 - **RoleplayPlayingScreen**: resultId 기반 종료 시 미션 전부 완수 분기에서 `roleplayEndedEnding` 3초 노출 후 `Navigator.pushReplacement()`로 전환 (playing screen 삭제)
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
-- **RoleplayResultScreenV2** (Full Screen): 하단 "Next" 버튼 클릭 시
-  - 별점 `PUT /v1/roleplays/results/{rpResultId}?star={star}` 호출(응답 무시·fire-and-forget) 직후 `RoleplayRouter.replaceWithResultV2()`로 즉시 전환 (ending screen 삭제, 돌아올 일 없음)
+- **RoleplayResultScreen** (Full Screen): 하단 "Next" 버튼 클릭 시
+  - 별점 `PUT /v1/roleplays/results/{rpResultId}?star={star}` 호출(응답 무시·fire-and-forget) 직후 `RoleplayRouter.replaceWithResult()`로 즉시 전환 (ending screen 삭제, 돌아올 일 없음)
 
 ### 스크린 내부 구현 특이사항
 - 닫기(X) 버튼 없음. 시스템 뒤로가기 시 "Exit from ending screen" 얼럿, 확인 시 ending screen 삭제 후 Overview 노출.
@@ -799,7 +799,8 @@
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
 - **RoleplayTryAgainReportScreen** (Sub Screen): "Report" 텍스트 클릭 시
   - `RoleplayRouter.pushTryAgainReport()` → SubScreenRoute로 진입 (Try Again 위에 쌓임)
-- **Overview**: "Retry" 버튼·X·뒤로가기 시 Overview로 복귀 (S2: `popToOverview`, S1: `Navigator.pop`)
+- **Overview**: X·뒤로가기 시 Overview 복귀 (S2: `popToOverview`, S1: `Navigator.pop`)
+- **Retry**: S2 `replaceWithOpeningForRetry` (세션 clear 후 동일 에피소드 Opening) · S1 `Navigator.pop`
 
 ### 스크린 내부 구현 특이사항
 - 닫기(X)/시스템 뒤로가기: 확인 다이얼로그 없이 Overview로 복귀 (Opening과 동일).
@@ -838,68 +839,38 @@
 ### 스크린 관련 정의 파일
 - **파일 경로**: `lib/screens/roleplay/result.dart`
 - **클래스명**: `RoleplayResultScreen` (StatefulWidget)
-- **스크린 타입**: **Full Screen**
-- **appPath**: 해당 없음 (세션·플로우 의존)
-
-### 스크린 용도
-- 기존 Roleplay 결과 화면
-- 현재 기본 종료 플로우에서는 직접 사용하지 않고, 레거시 구현 보존용으로 유지
-
-### 이전 스크린 정보 (진입점)
-- 현재 기본 플로우에서는 미연결
-- 필요 시 레거시 비교/참고용으로만 직접 연결 가능
-
-### 이후 스크린 정보 (이동 가능한 다른 스크린)
-- **RoleplayResultReportScreen** (Sub Screen): 본문 "Report" 문구 탭 시
-  - `RoleplayRouter.pushResultReport()` → SubScreenRoute로 진입 (Result 위에 쌓임)
-- 그 외: 최종 결과 화면(Overview 이동은 Got it! 버튼)
-
-### 스크린 내부 구현 특이사항
-- **박스레이어/본문레이어**: 줄어드는 영역을 박스레이어, 그 뒤쪽을 본문레이어로 칭함.
-- **진입(박스레이어)**: 전체 화면 #0CABA8 박스 → 로딩 300ms 후 별점 3개(70×70 -10°/80×80/70×70 +10°, starResult 1~3이면 star_gold else star_silver) 노출·진동 → 300ms 후 mainTitle(h1 흰색)·진동 → 300ms 후 subTitle(h3 검정)·진동 → 300ms 후 박스 축소 트리거. 박스 축소 시 내부 요소는 가로세로 중앙에 쫀쫀하게 유지. 박스 최종 높이 210, easeOutQuint 1.5s.
-- **본문레이어**: gap 35 → like_at_result 75×75 + likePoint(h1, 그라데이션 #80D7CF→#CFFFFB, 없으면 00) → gap 35 → 좌 50% Mission(body-default w600 Chiron GoRound TC #80D7CF) + missionResult별 아이콘(mission_succeeded/mission_failed, 높이 20, gap 없음) / 우 50% Words + words(없으면 00) → gap 25 → Lv.x 프로그레스바(Profile 동일, getUserProfile로 currentLevel·progressPercentage) → gap 25 → Good Points(h3 Chiron GoRound TC #80D7CF) → gap 20 → goodFeedback(body-caption 흰색) → gap 25 → To Improve(h3 동일) → gap 20 → improvementFeedback(body-caption 흰색) → gap 25 → Got it! 버튼(Opening Let's Start 스타일, 탭 시 Overview) → gap 35 → Report 문구(다국어 l10n.endingReport, 중앙 정렬, 탭 시 Result Report 스크린 진입, 전송 성공 후 돌아오면 숨김). SingleChildScrollView로 스크롤.
-- 시스템 뒤로가기 동작: 향후 구현 예정
-
----
-
-## 17-1. RoleplayResultScreenV2
-
-### 스크린 관련 정의 파일
-- **파일 경로**: `lib/screens/roleplay/result_v2.dart`
-- **클래스명**: `RoleplayResultScreenV2` (StatefulWidget)
+- **Route name**: `RoleplayResultScreen.routeName` (`/roleplay/result`)
 - **스크린 타입**: **Full Screen**
 - **전환 방식**: **bottom-up Full Screen** (`FullScreenRoute` + `FullScreenTransition.bottomUp`)
 - **appPath**: 해당 없음 (세션·플로우 의존)
 
 ### 스크린 용도
-- 기존 Result 화면을 보존한 채 별도 개선 작업을 진행하기 위한 신규 결과 화면
-- 현재 Roleplay 종료 플로우에서 기본 Result 화면으로 사용
+- Roleplay 종료 후 결과·피드백·보상을 노출하는 기본 Result 화면 (구 레거시 `result.dart` 삭제, 구 `result_v2` 구현을 본 파일로 통합)
 
 ### 이전 스크린 정보 (진입점)
-- **RoleplayEndingScreen**: 하단 "Next" 버튼 클릭 시 `RoleplayRouter.replaceWithResultV2()`로 즉시 전환 (ending screen 삭제)
-- **RoleplayPlayingScreen**: resultId 기반 종료 시 (미션 전부 완수 아님) 분기에서 `roleplayEndedComplete` 3초 노출 후 `RoleplayRouter.replaceWithResultV2()`로 전환 (playing screen 삭제)
+- **RoleplayEndingScreen**: 하단 "Next" 버튼 클릭 시 `RoleplayRouter.replaceWithResult()`로 즉시 전환 (ending screen 삭제)
+- **RoleplayPlayingScreen** (S1): resultId 기반 종료 시 (미션 전부 완수 아님) 분기에서 `roleplayEndedComplete` 3초 노출 후 `replaceWithResult()`로 전환
+- **RoleplayPlayingScreen** (S2): `PUT /rps2/sessions/{id}/finish` 성공·마지막 에피소드 아님 분기에서 `replaceWithResult()`로 전환 (`SeriesStateService.cachedUserHistory` 선저장)
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
 - **RoleplayResultReportScreen** (Sub Screen): 본문 "Report" 문구 탭 시
-  - `RoleplayRouter.pushResultReport()` → SubScreenRoute로 진입 (Result V2 위에 쌓임)
-- **ReviewChatScreen** (Sub Screen): Expression Upgrade 헤더 우측의 "View Chat" pill 버튼 탭 시
-  - `Navigator.push(SubScreenRoute(page: ReviewChatScreen(result: <RoleplayResultDto>)))`
-- 그 외: 최종 결과 화면(Overview 이동은 Got it! 버튼)
+  - `RoleplayRouter.pushResultReport()` → SubScreenRoute로 진입 (Result 위에 쌓임)
+- **ReviewChatScreen** (Sub Screen): S1 Key Expression 헤더 우측 "View Chat" pill 탭 시 (`RoleplayResultDto` 전달). S2 Speech Feedback 헤더 View Chat은 API 연동 추후.
+- 그 외: Got it! → Overview (`RoleplayRouter.popToOverview`)
 
 ### 스크린 내부 구현 특이사항
-- 현재 구조와 데이터 의존성은 `RoleplayStateService.instance.cachedResult` 기반으로 유지한다
-- **배경**: 상단 `#054544` → 하단 `#0CABA8` 세로 그라데이션을 전체 화면에 계속 유지한다. 기존 Result의 상단 단색/하단 검정 분리 구조는 사용하지 않는다.
-- **초기 박스레이어**: 화면 중앙에 별 3개 + mainTitle + subTitle + 3개 요약 카드(Mission / Words / Like)를 배치한다.
-- **별 애니메이션**: 기존 Result와 동일하게 silver 상태에서 `starResult` 개수만큼 왼쪽부터 gold로 바뀌며 진동한다.
-- **subTitle 색상**: 기존 검정 대신 `#80D7CF`.
-- **요약 카드 3종**: `#80D7CF` 50% 배경, 둥근 사각형, 그림자 포함. 각 카드 상단은 `labelPrimary` 흰색 라벨, 하단은 값 영역. 라벨과 값 사이에는 별도 `SizedBox` 세로 간격을 두지 않고 `Column` + `Expanded`(`Center`)로 값을 배치한다.
-  - Mission: 기존 Result와 동일한 mission 아이콘 표시 규칙
-  - Words: 기존 Result와 동일한 흰색 숫자 스타일
-  - Like: `assets/images/like_at_result.png` 30×30 + 기존 Result와 동일한 민트 그라데이션 숫자
-- **후속 타이밍**: Result V2 화면이 fully shown 된 뒤 1초 후, 박스레이어가 상단 영역으로 이동한다.
-- **동시 effect**: 박스레이어 상단 이동 시작과 동시에 `LikeProgressEffect.play()`를 호출한다(레거시 Result의 레벨·진행률·라이크 오버레이와 동일 계열). 파라미터는 `RoleplayResultDto.beforeLikePoint`, `afterLikePoint`, `beforeLevel`, `afterLevel`, `beforeProgressPercentage`, `afterProgressPercentage`를 사용한다.
-- **effect 이후 본문 레이어**: effect 완료 후 임시 `done` 문구는 사용하지 않는다. 박스레이어와 본문 스크롤 사이 세로 **gap 20**(스크롤 `padding` 상단 32). effect `onCompleted` **직후** Feedback 슬라이드 시작, **500ms 후** Expression Upgrade 슬라이드 시작, **1s 후** Got it!·Report 영역 동시 삽입 + **`FadeTransition`**(240ms·`Curves.easeOut`) 빠른 fade-in. (1) **Feedback**: **하단**에서 등장(자식 높이 대비 `SlideTransition` 시작 `Offset(0, 1.2)`로 디스플레이 아래쪽 밖에서 올라옴) + 동일 `CurvedAnimation`으로 **`FadeTransition` fade-in**, 제목 `Feedback`(headlineSmall·흰색·좌 24), 본문은 좌우 24 패딩 안쪽 민트(`#80D7CF`) 둥근 박스에 `overallFeedback`(bodyMedium·검정). `overallFeedback`가 null/빈 문자열이면 l10n `roleplayResultFeedbackInsufficientWords`를 대신 노출한다. (2) **Expression Upgrade**: `expressionUpgrades`가 비어 있으면 섹션 전체 미노출(헤더 우측의 'View Chat' 버튼도 함께 미노출). 있으면 Feedback과 동일하게 **하단·fade-in·슬라이드**, 제목 `Expression Upgrade`(동일 스타일). 헤더는 좌·우 24 패딩의 Row로 구성되며 좌측에 제목, 우측에 80×24 pill 'View Chat' 버튼(테두리 흰 1, 바탕 transparent, radius 12, labelSmall 흰)이 배치된다. 'View Chat' 버튼 탭 시 `Navigator.push(SubScreenRoute(page: ReviewChatScreen(result: _dto)))`로 ReviewChatScreen 진입. 가로 스크롤: 첫 카드 좌측 24, 카드 너비 화면의 70%, 카드 간격 16, `IntrinsicHeight`+`Row`로 모든 카드 높이를 최장 아이템에 맞춤. 카드 배경 기본 Feedback 박스와 동일 `#80D7CF`(선택된 카드만 배경 `#FFFFFF`로 유지·캐러셀/목록에서 **최근 탭 1개**). 카드 내용: `check_mint.svg`+expression(bodyLarge w700 `#121212`), gap 15, rephrasedSentence(bodyMedium `#121212`, **좌 30**), gap 8, meaningUserLanguage(bodySmall `#676767`, **동일 좌 30**), gap 15, 하단 행 좌 `megaphone.png`·우 `bookmark_off.png`(저장 성공 시 `bookmark_on.png`) 각 24×24. **카드 전체 탭**(북마크 제외) 시 `GET /v1/roleplays/results/{resultId}/expressions/{index}/sound`(index=카드 순번 0…) → `TtsResultDto`, Playing과 동일하게 `cdnYn`/`cdnPath`/`sound` 처리(`AppConfig.cdnBaseUrl` + `just_audio`). 재생·로딩 중 메가폰 **`#121212`**, 재생 종료 후 메가폰은 **`#0CABA8`**로 복귀하되 **흰 배경은 유지**. 다른 카드 탭 시 이전 카드는 민트 배경으로 돌아가고 재생 중단 후 새 요청. 오디오 오류 시 메가폰 틴트만 복귀(토스트 없음). 북마크: OFF 탭 시 `POST /v1/users/expressions` body `{"roleplayResultId":…,"expressionIndex":…}`, 200이면 아이콘 on + l10n `expressionSavedToProfile`; ON 탭 시 `DELETE /v1/users/expressions?rpResultId=…&expressionIndex=…`(history_v2와 동일), 200이면 아이콘 off(토스트 없음); 실패 시 `DefaultToast`로 HTTP 코드·간단 문구(`HTTP xxx · Request failed` / `Server error`). Result V2 진입 직후 북마크는 모두 off에서 시작(다른 스크린에서 해제·동기화는 별도). (3) **Got it!**: 탭 시 Overview로 pop하기 전에 best-effort로 `GET /v1/users`로 `UserDto` 갱신 후 Main에 반영(`MainUserSync.notifyUserUpdated`)하고, `GET /v1/roleplays/{roleplayId}`로 Overview를 재조회해 `RoleplayOverviewDto.starResultMap` 등을 최신화한다. (4) **Report**: `l10n.endingReport`·전송 성공 시 숨김 동작은 동일, 텍스트 색만 `#054544`.
-- 기존 `lib/screens/roleplay/result.dart`는 수정하지 않고, V2 전용 파일에서 독립적으로 개선 작업을 이어가는 것을 원칙으로 함
+- **진입 판별**: `SeriesStateService.cachedUserHistory != null`이면 **S2**, 아니면 **S1** (`RoleplayStateService.cachedResult`).
+- **배경**: 상단 `#054544` → 하단 `#0CABA8` 세로 그라데이션 전체 유지.
+- **초기 박스레이어**: 별 3개 + mainTitle + subTitle(`#80D7CF`) + Mission/Words/Like 3카드. S2 Mission은 `rps2_mission_on/off.png` 20×20(gap 2), S1은 `mission_succeeded`/`mission_failed`.
+- **별 애니메이션**: silver → `starResult`/`starScore` 개수만큼 gold 전환 + 진동.
+- **후속 타이밍**: fully shown 1초 후 박스레이어 상단 이동 + `LikeProgressEffect.play()` (before/after like·level·progress).
+- **effect 이후 본문 (S1)**: Feedback + Key Expression + Got it!/Report. Feedback 즉시, Key Expression 500ms 후, footer 1s 후 fade-in.
+- **effect 이후 본문 (S2)**: Feedback **없음**. Key Expression + Speech Feedback(본문 추후) + Got it!/Report. Key Expression·Speech Feedback 동시 슬라이드, footer 1s 후 fade-in.
+- **Expression/Key Expression 카드**: 가로 70% 캐러셀, 카드 탭 시 TTS(S1 API 연동 완료, S2 메가폰·북마크 UI만·API 추후), 북마크(S1 API 연동 완료).
+- **Got it! (S1)**: `GET /v1/users` + `GET /v1/roleplays/{roleplayId}/overview` best-effort 후 Overview pop.
+- **Got it! (S2)**: 동일 경로로 Overview pop (Series Overview).
+- **Report**: `l10n.endingReport`, 전송 성공 시 숨김, 텍스트 `#054544`.
+- **시스템 뒤로가기**: Got it!과 동일하게 Overview 복귀 (`PopScope`).
 
 ---
 
@@ -912,14 +883,14 @@
 - **appPath**: 해당 없음 (Result 전용)
 
 ### 스크린 용도
-- Result 화면들(Result / Result V2)에서 진입. 사용자가 느낀 불편함을 수집하는 용도. Send 시 `POST /v1/roleplays/results/{roleplayResultId}/report` (body: `{"content": "<string>"}`).
+- Result 화면에서 진입. 사용자가 느낀 불편함을 수집하는 용도. Send 시 `POST /v1/roleplays/results/{roleplayResultId}/report` (body: `{"content": "<string>"}`).
 
 ### 이전 스크린 정보 (진입점)
-- **RoleplayResultScreen** 또는 **RoleplayResultScreenV2**: 본문 "Report" 문구 탭 시
+- **RoleplayResultScreen**: 본문 "Report" 문구 탭 시
   - `RoleplayRouter.pushResultReport()` → SubScreenRoute로 우측에서 슬라이드 인
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
-- **RoleplayResultScreen** 또는 **RoleplayResultScreenV2**: X 버튼 또는 Android 백버튼 시 `Navigator.pop()`으로 Result로 복귀. 전송 성공(200) 시 `pop(context, true)`로 Result에서 Report 문구 숨김.
+- **RoleplayResultScreen**: X 버튼 또는 Android 백버튼 시 `Navigator.pop()`으로 Result로 복귀. 전송 성공(200) 시 `pop(context, true)`로 Result에서 Report 문구 숨김.
 
 ### 스크린 내부 구현 특이사항
 - 내부 표현·구성은 Try Again Report와 동일 (RoleplayScaffold, reportTitle, 입력창, feedbackSend 버튼). Send 시 신규 엔드포인트만 사용.
@@ -967,7 +938,7 @@
 - **appPath**: `/profile/history/{resultId}` 처리 중 상세 result의 `version == 2`일 때 진입
 
 ### 스크린 용도
-- Result V2에 대응하는 신규 히스토리 화면
+- Result에 대응하는 신규 히스토리 화면
 - Profile 히스토리 또는 appPath의 `version == 2` 분기에서 진입하며, resultId로 `GET /v1/roleplays/results/{resultId}`를 재조회해 최종 상태를 노출한다(애니메이션 없음).
 
 ### 이전 스크린 정보 (진입점)
@@ -975,17 +946,17 @@
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
 - **ProfileScreen**: 좌상단 뒤로가기 또는 시스템 뒤로가기 시 `Navigator.pop()`으로 복귀
-- **ReviewChatScreen** (Sub Screen): Expression Upgrade 헤더 우측의 "View Chat" 버튼 탭 시 (RoleplayResultDto 전달)
+- **ReviewChatScreen** (Sub Screen): Key Expression 헤더 우측의 "View Chat" 버튼 탭 시 (RoleplayResultDto 전달)
 - **ReviewEndingScreen** (Sub Screen): `endingId`가 있을 때만 하단 "Ending" 버튼 노출, 탭 시 (RoleplayEndingDto 조회 후 전달)
 
 ### 스크린 내부 구현 특이사항
 - **상태**: resultId로 `SudaApiClient.getRoleplayResult()` 조회 후 `RoleplayResultDto`를 스크린 상태로 보관. Roleplay 진행용(`RoleplayStateService`)과 혼용하지 않음.
-- **레이아웃**: Result V2의 effect 완료 상태를 기준으로, 상단 박스(별·mainTitle·subTitle·Mission/Words/Like 3카드 포함) + 본문(Feedback/Expression Upgrade/하단 버튼)을 애니메이션 없이 노출한다. (현행 구현 상단 박스 높이 340)
-- **배경**: Result V2와 동일하게 상단 `#054544` → 하단 `#0CABA8` 세로 그라데이션을 전체 화면에 유지한다. 상단 박스레이어는 별도 단색 배경을 두지 않는다.
+- **레이아웃**: Result의 effect 완료 상태를 기준으로, 상단 박스(별·mainTitle·subTitle·Mission/Words/Like 3카드 포함) + 본문(Feedback/Key Expression/하단 버튼)을 애니메이션 없이 노출한다. (현행 구현 상단 박스 높이 340)
+- **배경**: Result와 동일하게 상단 `#054544` → 하단 `#0CABA8` 세로 그라데이션을 전체 화면에 유지한다. 상단 박스레이어는 별도 단색 배경을 두지 않는다.
 - 본문 영역도 별도 단색 배경으로 덮지 않고, 동일 그라데이션 위에 카드/텍스트를 그대로 배치한다.
-- **Expression 카드(발음·하이라이트)**: Result V2 §17-1 Expression Upgrade와 동일 — 카드 전체 탭(북마크 제외), 흰 배경·메가폰 틴트·TTS 규칙 동일.
-- **Expression Upgrade 헤더 "View Chat" 버튼**: 헤더 라인(좌 24/우 24) 우측에 80×24 pill 버튼(테두리 흰색 1, 바탕 transparent, radius 12) + 내부 "View Chat" 텍스트(labelSmall·흰색). 탭 시 `Navigator.push(SubScreenRoute(page: ReviewChatScreen(result: _dto)))`. expressionUpgrades가 비어 있어 섹션 자체가 노출되지 않으면 이 버튼도 함께 노출되지 않음.
-- **하단 버튼 영역**: `endingId != null`일 때만 "Ending" 단독 버튼을 중앙 노출. 그 외에는 하단에 아무 버튼도 노출하지 않는다(View Chat 진입은 Expression Upgrade 헤더의 pill 버튼이 담당).
+- **Key Expression 카드(발음·하이라이트)**: Result §17 Key Expression(S1)과 동일 — 카드 전체 탭(북마크 제외), 흰 배경·메가폰 틴트·TTS 규칙 동일.
+- **Key Expression 헤더 "View Chat" 버튼**: 헤더 라인(좌 24/우 24) 우측에 80×24 pill 버튼(테두리 흰색 1, 바탕 transparent, radius 12) + 내부 "View Chat" 텍스트(labelSmall·흰색). 탭 시 `Navigator.push(SubScreenRoute(page: ReviewChatScreen(result: _dto)))`. `keyExpressions`가 비어 있어 섹션 자체가 노출되지 않으면 이 버튼도 함께 노출되지 않음.
+- **하단 버튼 영역**: `endingId != null`일 때만 "Ending" 단독 버튼을 중앙 노출. 그 외에는 하단에 아무 버튼도 노출하지 않는다(View Chat 진입은 Key Expression 헤더의 pill 버튼이 담당).
 - **Expression 북마크**:
   - 초기 상태: `RoleplayResultDto.savedExpressionIndexes`에 포함된 index는 `bookmark_on.png`, 그 외는 `bookmark_off.png`.
   - 추가(OFF→ON): `POST /v1/users/expressions` body `{ roleplayResultId: <resultId>, expressionIndex: <index> }` (성공 시 l10n `expressionSavedToProfile`).
@@ -1007,8 +978,8 @@
 
 ### 이전 스크린 정보 (진입점)
 - **HistoryScreen**: "View Chat" 버튼 탭 시 (RoleplayResultDto 전달)
-- **HistoryScreenV2**: Expression Upgrade 헤더 우측 "View Chat" pill 버튼 탭 시 (RoleplayResultDto 전달)
-- **RoleplayResultScreenV2**: Expression Upgrade 헤더 우측 "View Chat" pill 버튼 탭 시 (RoleplayResultDto 전달)
+- **HistoryScreenV2**: Key Expression 헤더 우측 "View Chat" pill 버튼 탭 시 (RoleplayResultDto 전달)
+- **RoleplayResultScreen**: Key Expression 헤더 우측 "View Chat" pill 버튼 탭 시 (RoleplayResultDto 전달)
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
 - **이전 스크린**: 좌상단 뒤로가기 또는 시스템 뒤로가기 시 `Navigator.pop()`으로 복귀

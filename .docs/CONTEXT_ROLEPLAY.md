@@ -102,7 +102,7 @@
 - **세션 상태 조회**: `GET /v1/roleplay-sessions/{rpSessionId}`
   - req: path param만 사용
   - res: `{ completedYn: 'Y'|'N', resultId: number }` (`RoleplaySessionStatusDto`)
-  - 설명: 타임아웃(00:00) 종료 분석 플로우에서 서버 종료 판정 여부를 확인. `completedYn == 'Y'`이면 `resultId`로 기존 종료 분기(0 → Try Again, 전부 완수 → Ending, 그 외 → ResultV2) 진입.
+  - 설명: 타임아웃(00:00) 종료 분석 플로우에서 서버 종료 판정 여부를 확인. `completedYn == 'Y'`이면 `resultId`로 기존 종료 분기(0 → Try Again, 전부 완수 → Ending, 그 외 → Result) 진입.
   - 비고: 클라이언트는 `SudaApiClient.getRoleplaySessionStatus(...)` / `RoleplayApi.getRoleplaySessionStatus(...)`.
 - **힌트 텍스트 조회**: `GET /{rpSessionId}/hint`
   - req: path param만 사용
@@ -300,15 +300,15 @@
 - narration 응답에 `resultId`가 포함되면 **roleplay 중단**으로 처리한다.
 - `resultId == 0`: roleplay 진행 실패(결과지 없음). 안내 메시지 후 Try Again 스크린으로 이동.
 - `resultId > 0`:
-  - 미션 성공률 100%: Ending 스크린 → Result V2 스크린
-  - 그 외(사이값): Ending 없이 Result V2 스크린
+  - 미션 성공률 100%: Ending 스크린 → Result 스크린
+  - 그 외(사이값): Ending 없이 Result 스크린
   - Result 스크린 연결 시 `resultId` 값을 유지해야 한다.
 - `resultId == null`: roleplay 진행 계속. 사용자 입력 대기 상태로 복귀.
 
 **Playing 화면 구현(UX)**
 - 종료 안내 메시지는 서비스메시지 영역에 **색상 `#0CABA8`**, **fade-in**으로 노출하며 **3초** 노출 후 해당 스크린으로 전환.
 - **1/3) resultId == 0**: l10n `roleplayEndedFailed` 노출 → 3초 후 Try Again 스크린으로 전환.
-- **2/3) resultId > 0 이고 n개 미션 전부 완수 아님**: `roleplayEndedComplete` 노출. result 선조회·캐시 후(3초와 병렬, 캐시 완료까지 대기) Result V2 스크린으로 전환.
+- **2/3) resultId > 0 이고 n개 미션 전부 완수 아님**: `roleplayEndedComplete` 노출. result 선조회·캐시 후(3초와 병렬, 캐시 완료까지 대기) Result 스크린으로 전환.
 - **3/3) resultId > 0 이고 n개 미션 전부 완수**: `roleplayEndedEnding` 노출. result 선조회·캐시 후(동일) Ending 스크린으로 전환.
 - **미션 달성 여부**: Overview 선택 role의 `missionList`로 총 개수, user-message 응답 `missionCompleteYn`으로 단계별 성공/실패 반영. Playing 내부 `_missionStatuses`(success 개수)로 전체 완수 여부 판단.
 
@@ -335,10 +335,10 @@
 ## 6-9. Result 조회 API 및 캐시
 - **엔드포인트**: `GET /v1/roleplays/results/{resultId}` (path param만 사용)
 - **클라이언트**: `SudaApiClient.getRoleplayResult(accessToken, resultId)` → `RoleplayApi.getRoleplayResult`
-- **응답**: `RoleplayResultDto` (id, version, userId, roleplayId, roleplayRoleId, endingId, chatHistory, completeYn, completedMissionIds, missionResult, starResult, words, goodFeedback, improvementFeedback, overallFeedback, expressionUpgrades, **savedExpressionIndexes**(nullable `List<int>`, 비어 있을 수 있음), beforeLikePoint, afterLikePoint, likePoint, likePointReceivedYn, star, createdAt, mainTitle, subTitle 등)
+- **응답**: `RoleplayResultDto` (id, version, userId, roleplayId, roleplayRoleId, endingId, chatHistory, completeYn, completedMissionIds, missionResult, starResult, words, goodFeedback, improvementFeedback, overallFeedback, **keyExpressions**(`RpResultKeyExpressionDto` 리스트, JSON 필드명 `expressionUpgrades`), **savedExpressionIndexes**(nullable `List<int>`, 비어 있을 수 있음), beforeLikePoint, afterLikePoint, likePoint, likePointReceivedYn, star, createdAt, mainTitle, subTitle 등)
 - **캐시**: Result/Ending 스크린에서 즉시 노출하기 위해, resultId를 인지한 직후 Playing에서 선조회하여 `RoleplayStateService.setCachedResult(dto)`로 저장. 이후 스크린 전환 시 `RoleplayStateService.instance.cachedResult`로 조회. 캐시가 늦으면 3초가 지나도 캐시 완료까지 대기한 뒤 전환.
 - DTO: `lib/models/roleplay_models.dart`의 `RoleplayResultDto`
-- **Expression 발음(Result V2)**: `GET /v1/roleplays/results/{resultId}/expressions/{expressionIndex}/sound` → `TtsResultDto`. 클라이언트: `SudaApiClient.getRoleplayResultExpressionSound` / `RoleplayApi.getResultExpressionSound`.
+- **Expression 발음(Result)**: `GET /v1/roleplays/results/{resultId}/expressions/{expressionIndex}/sound` → `TtsResultDto`. 클라이언트: `SudaApiClient.getRoleplayResultExpressionSound` / `RoleplayApi.getResultExpressionSound`.
 - **Expression 북마크**: 저장 `POST /v1/users/expressions`, JSON `{ "roleplayResultId": <int>, "expressionIndex": <int> }`. 클라이언트: `SudaApiClient.saveUserExpression` / `UserApi.saveUserExpression`. 해제 `DELETE /v1/users/expressions?rpResultId=…&expressionIndex=…`. 클라이언트: `SudaApiClient.deleteUserExpression` / `UserApi.deleteUserExpression`.
 
 ## 7. 단일 Roleplay 컨텍스트 보관
@@ -402,7 +402,7 @@
   - 마이크 눌림 상태에서 00:00 도달 → release 시점부터 동일 메시지/비활성 시작. 정상 finish는 기존 녹음 전송→AI→narration 흐름이 narration `resultId`로 자연 치환하므로 세션 상태 API를 호출하지 않고, 그 외 release(cancel/짧음/no-path)는 세션 상태 API를 호출.
   - l10n: `roleplayAnalyzing` (en/ko/pt) 추가. 상세 §6-5-1 참조.
 - **Ending 스크린 및 Result 별점 API**:
-  - Ending 스크린: 닫기 버튼 없음. RoleplayEndingDto(role.endingList 첫 요소) 기반 title/content/이미지. 이미지 있으면 1.5x→1x 2초 축소 후 80% 검정 레이어·콘텐츠 fade-in; 없으면 바로 레이어·콘텐츠. 상단 50% title+content, 하단 50% endingHowWas+별 5개(40×40 gap 5)+Next 버튼. Next 탭 시 `PUT /v1/roleplays/results/{rpResultId}?star={star}` 호출(응답 무시·fire-and-forget) 직후 Result V2로 즉시 전환. star=선택 별 개수(0~5).
+  - Ending 스크린: 닫기 버튼 없음. RoleplayEndingDto(role.endingList 첫 요소) 기반 title/content/이미지. 이미지 있으면 1.5x→1x 2초 축소 후 80% 검정 레이어·콘텐츠 fade-in; 없으면 바로 레이어·콘텐츠. 상단 50% title+content, 하단 50% endingHowWas+별 5개(40×40 gap 5)+Next 버튼. Next 탭 시 `PUT /v1/roleplays/results/{rpResultId}?star={star}` 호출(응답 무시·fire-and-forget) 직후 Result로 즉시 전환. star=선택 별 개수(0~5).
 - Result 스크린: 박스레이어에 별점·mainTitle·subTitle 순차 노출 후 박스 축소. 본문레이어: like_at_result·likePoint·Mission(missionResult 아이콘)·Words·Lv 프로그레스바(getUserProfile)·Good Points·To Improve·Got it! 버튼(Overview 이동). `.docs/CONTEXT_SCREEN.md` §17 참조.
   - `PUT /v1/roleplays/results/{resultId}?star={star}`: RoleplayApi.updateRoleplayResultStar, SudaApiClient.updateRoleplayResultStar. 응답 무시.
   - l10n: `endingHowWas`, `endingNext` (en/ko/pt) 추가.

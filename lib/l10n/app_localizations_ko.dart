@@ -432,6 +432,18 @@ class AppLocalizationsKo extends AppLocalizations {
       '단어 수가 부족해 피드백을 드리기 어려워요. 7단어 이상으로 더 길게 말해보세요!';
 
   @override
+  String get roleplayResultScoreMeaning => '의미';
+
+  @override
+  String get roleplayResultScoreRelevance => '연관성';
+
+  @override
+  String get roleplayResultScoreVocabulary => '어휘';
+
+  @override
+  String get roleplayResultScoreGrammar => '문법';
+
+  @override
   String get ticketInfoTitle => '티켓';
 
   @override

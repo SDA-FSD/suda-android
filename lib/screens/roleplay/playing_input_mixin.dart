@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:record/record.dart';
 
 import '../../api/endpoints/series_api.dart';
@@ -331,6 +332,50 @@ mixin PlayingInputMixin<T extends StatefulWidget>
     Future<void>.delayed(const Duration(milliseconds: 480), performScroll);
   }
 
+  /// 번역 펼침 등 말풍선 확장 시, 가려질 때만 최소 스크롤(하단 페이드 위까지).
+  void scrollToRevealBubbleIfNeeded({required GlobalKey anchorKey}) {
+    const animatedSizeMs = 220;
+    const settleBufferMs = 30;
+    final bottomInset =
+        PlayingConversationLayout.bottomContentFadeBodyExtent + 8;
+
+    void performScroll() {
+      if (!mounted) return;
+      final anchorContext = anchorKey.currentContext;
+      if (anchorContext == null || !_bodyScrollController.hasClients) return;
+
+      final renderObject = anchorContext.findRenderObject();
+      if (renderObject == null || !renderObject.attached) return;
+
+      final viewport = RenderAbstractViewport.maybeOf(renderObject);
+      if (viewport == null) return;
+
+      final position = _bodyScrollController.position;
+      final reveal = viewport.getOffsetToReveal(renderObject, 1.0);
+      final targetOffset = (reveal.offset + bottomInset).clamp(
+        position.minScrollExtent,
+        position.maxScrollExtent,
+      );
+
+      if (targetOffset <= position.pixels + 1.0) {
+        return;
+      }
+
+      position.animateTo(
+        targetOffset,
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOut,
+      );
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future<void>.delayed(
+        const Duration(milliseconds: animatedSizeMs + settleBufferMs),
+        performScroll,
+      );
+    });
+  }
+
   void showPlayingServiceMessage(String message, {bool persistent = false}) {
     _showServiceMessage(message, persistent: persistent);
   }
@@ -506,7 +551,8 @@ mixin PlayingInputMixin<T extends StatefulWidget>
               ),
             ),
           ),
-          if (_inputMode == _PlayingInputMode.recording)
+          if (_inputMode == _PlayingInputMode.recording) ...[
+            const SizedBox(height: 10),
             SizedBox(
               height: roleplayMicFooterStackHeight,
               child: Stack(
@@ -532,8 +578,8 @@ mixin PlayingInputMixin<T extends StatefulWidget>
                   ),
                 ],
               ),
-            )
-          else
+            ),
+          ] else
             Column(
               mainAxisSize: MainAxisSize.min,
               children: [

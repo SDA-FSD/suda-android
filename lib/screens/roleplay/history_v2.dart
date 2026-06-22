@@ -42,13 +42,13 @@ class _HistoryScreenV2State extends State<HistoryScreenV2> {
   bool _endingLoading = false;
   bool _reloadInProgress = false;
 
-  final AudioPlayer _expressionAudioPlayer = AudioPlayer();
-  StreamSubscription<PlayerState>? _expressionAudioSub;
-  int _expressionMegaphoneSeq = 0;
-  int? _expressionHighlightedIndex;
-  int? _expressionPlaybackIndex;
-  late final Set<int> _bookmarkedExpressionIndexes = <int>{};
-  bool _expressionBookmarkInFlight = false;
+  final AudioPlayer _keyExpressionAudioPlayer = AudioPlayer();
+  StreamSubscription<PlayerState>? _keyExpressionAudioSub;
+  int _keyExpressionMegaphoneSeq = 0;
+  int? _keyExpressionHighlightedIndex;
+  int? _keyExpressionPlaybackIndex;
+  late final Set<int> _keyExpressionBookmarkedIndexes = <int>{};
+  bool _keyExpressionBookmarkInFlight = false;
 
   static const Color _teal = Color(0xFF0CABA8);
   static const Color _topBg = Color(0xFF054544);
@@ -68,9 +68,9 @@ class _HistoryScreenV2State extends State<HistoryScreenV2> {
 
   @override
   void dispose() {
-    _expressionAudioSub?.cancel();
-    _expressionAudioSub = null;
-    unawaited(_expressionAudioPlayer.dispose());
+    _keyExpressionAudioSub?.cancel();
+    _keyExpressionAudioSub = null;
+    unawaited(_keyExpressionAudioPlayer.dispose());
     super.dispose();
   }
 
@@ -101,7 +101,7 @@ class _HistoryScreenV2State extends State<HistoryScreenV2> {
         _dto = result;
         _loading = false;
         _error = null;
-        _bookmarkedExpressionIndexes
+        _keyExpressionBookmarkedIndexes
           ..clear()
           ..addAll(result.savedExpressionIndexes ?? const <int>[]);
       });
@@ -129,7 +129,7 @@ class _HistoryScreenV2State extends State<HistoryScreenV2> {
       if (dto != null) {
         setState(() {
           _dto = dto;
-          _bookmarkedExpressionIndexes
+          _keyExpressionBookmarkedIndexes
             ..clear()
             ..addAll(dto.savedExpressionIndexes ?? const <int>[]);
         });
@@ -139,47 +139,47 @@ class _HistoryScreenV2State extends State<HistoryScreenV2> {
     }
   }
 
-  Future<AudioSource?> _prepareExpressionAudio({
+  Future<AudioSource?> _prepareKeyExpressionAudio({
     required String? cdnYn,
     required String? cdnPath,
     required Uint8List? soundBytes,
   }) async {
-    await _expressionAudioPlayer.stop();
+    await _keyExpressionAudioPlayer.stop();
     if (cdnYn == 'Y' && cdnPath != null && cdnPath.isNotEmpty) {
       final url = '${AppConfig.cdnBaseUrl}$cdnPath';
       final source = AudioSource.uri(Uri.parse(url));
-      await _expressionAudioPlayer.setAudioSource(source);
+      await _keyExpressionAudioPlayer.setAudioSource(source);
       return source;
     }
     if (soundBytes != null && soundBytes.isNotEmpty) {
       final source = AudioSource.uri(
         Uri.dataFromBytes(soundBytes, mimeType: 'audio/mpeg'),
       );
-      await _expressionAudioPlayer.setAudioSource(source);
+      await _keyExpressionAudioPlayer.setAudioSource(source);
       return source;
     }
     return null;
   }
 
-  Future<void> _onExpressionCardTap(int expressionIndex) async {
-    _expressionMegaphoneSeq++;
-    final seq = _expressionMegaphoneSeq;
-    _expressionAudioSub?.cancel();
-    _expressionAudioSub = null;
-    await _expressionAudioPlayer.stop();
+  Future<void> _onKeyExpressionCardTap(int expressionIndex) async {
+    _keyExpressionMegaphoneSeq++;
+    final seq = _keyExpressionMegaphoneSeq;
+    _keyExpressionAudioSub?.cancel();
+    _keyExpressionAudioSub = null;
+    await _keyExpressionAudioPlayer.stop();
 
     if (!mounted) return;
     setState(() {
-      _expressionHighlightedIndex = expressionIndex;
-      _expressionPlaybackIndex = expressionIndex;
+      _keyExpressionHighlightedIndex = expressionIndex;
+      _keyExpressionPlaybackIndex = expressionIndex;
     });
 
     final token = await TokenStorage.loadAccessToken();
-    if (!mounted || seq != _expressionMegaphoneSeq) return;
+    if (!mounted || seq != _keyExpressionMegaphoneSeq) return;
     if (token == null || token.isEmpty) {
       setState(() {
-        _expressionHighlightedIndex = null;
-        _expressionPlaybackIndex = null;
+        _keyExpressionHighlightedIndex = null;
+        _keyExpressionPlaybackIndex = null;
       });
       return;
     }
@@ -190,45 +190,45 @@ class _HistoryScreenV2State extends State<HistoryScreenV2> {
         resultId: widget.resultId,
         expressionIndex: expressionIndex,
       );
-      if (!mounted || seq != _expressionMegaphoneSeq) return;
+      if (!mounted || seq != _keyExpressionMegaphoneSeq) return;
 
-      final source = await _prepareExpressionAudio(
+      final source = await _prepareKeyExpressionAudio(
         cdnYn: tts.cdnYn,
         cdnPath: tts.cdnPath,
         soundBytes: tts.sound,
       );
-      if (!mounted || seq != _expressionMegaphoneSeq) return;
+      if (!mounted || seq != _keyExpressionMegaphoneSeq) return;
 
       if (source == null) {
-        setState(() => _expressionPlaybackIndex = null);
+        setState(() => _keyExpressionPlaybackIndex = null);
         return;
       }
 
-      _expressionAudioSub =
-          _expressionAudioPlayer.playerStateStream.listen((state) {
+      _keyExpressionAudioSub =
+          _keyExpressionAudioPlayer.playerStateStream.listen((state) {
         if (state.processingState == ProcessingState.completed) {
-          _expressionAudioSub?.cancel();
-          _expressionAudioSub = null;
-          if (!mounted || seq != _expressionMegaphoneSeq) return;
-          setState(() => _expressionPlaybackIndex = null);
+          _keyExpressionAudioSub?.cancel();
+          _keyExpressionAudioSub = null;
+          if (!mounted || seq != _keyExpressionMegaphoneSeq) return;
+          setState(() => _keyExpressionPlaybackIndex = null);
         }
       });
-      await _expressionAudioPlayer.play();
+      await _keyExpressionAudioPlayer.play();
     } catch (_) {
-      _expressionAudioSub?.cancel();
-      _expressionAudioSub = null;
-      if (!mounted || seq != _expressionMegaphoneSeq) return;
-      setState(() => _expressionPlaybackIndex = null);
+      _keyExpressionAudioSub?.cancel();
+      _keyExpressionAudioSub = null;
+      if (!mounted || seq != _keyExpressionMegaphoneSeq) return;
+      setState(() => _keyExpressionPlaybackIndex = null);
     }
   }
 
-  Future<void> _onExpressionBookmarkTap(int expressionIndex) async {
-    if (_expressionBookmarkInFlight) {
+  Future<void> _onKeyExpressionBookmarkTap(int expressionIndex) async {
+    if (_keyExpressionBookmarkInFlight) {
       return;
     }
-    _expressionBookmarkInFlight = true;
+    _keyExpressionBookmarkInFlight = true;
     try {
-      final isBookmarked = _bookmarkedExpressionIndexes.contains(expressionIndex);
+      final isBookmarked = _keyExpressionBookmarkedIndexes.contains(expressionIndex);
       final token = await TokenStorage.loadAccessToken();
       if (!mounted) return;
       if (token == null || token.isEmpty) {
@@ -243,7 +243,7 @@ class _HistoryScreenV2State extends State<HistoryScreenV2> {
           expressionIndex: expressionIndex,
         );
         if (!mounted) return;
-        setState(() => _bookmarkedExpressionIndexes.remove(expressionIndex));
+        setState(() => _keyExpressionBookmarkedIndexes.remove(expressionIndex));
       } else {
         await SudaApiClient.saveUserExpression(
           accessToken: token,
@@ -251,7 +251,7 @@ class _HistoryScreenV2State extends State<HistoryScreenV2> {
           expressionIndex: expressionIndex,
         );
         if (!mounted) return;
-        setState(() => _bookmarkedExpressionIndexes.add(expressionIndex));
+        setState(() => _keyExpressionBookmarkedIndexes.add(expressionIndex));
         final l10n = AppLocalizations.of(context)!;
         DefaultToast.show(context, l10n.expressionSavedToProfile);
       }
@@ -259,7 +259,7 @@ class _HistoryScreenV2State extends State<HistoryScreenV2> {
       if (!mounted) return;
       DefaultToast.show(context, e.toString(), isError: true);
     } finally {
-      _expressionBookmarkInFlight = false;
+      _keyExpressionBookmarkInFlight = false;
     }
   }
 
@@ -533,8 +533,8 @@ class _HistoryScreenV2State extends State<HistoryScreenV2> {
     );
   }
 
-  Widget _buildExpressionLayer(RoleplayResultDto dto) {
-    final items = dto.expressionUpgrades ?? const <ExpressionUpgradeDto>[];
+  Widget _buildKeyExpressionLayer(RoleplayResultDto dto) {
+    final items = dto.keyExpressions ?? const <RpResultKeyExpressionDto>[];
     if (items.isEmpty) return const SizedBox.shrink();
 
     final theme = Theme.of(context).textTheme;
@@ -551,7 +551,7 @@ class _HistoryScreenV2State extends State<HistoryScreenV2> {
             children: [
               Expanded(
                 child: Text(
-                  'Expression Upgrade',
+                  'Key Expression',
                   style: theme.headlineSmall?.copyWith(color: Colors.white),
                 ),
               ),
@@ -595,13 +595,13 @@ class _HistoryScreenV2State extends State<HistoryScreenV2> {
                 for (var i = 0; i < items.length; i++) ...[
                   SizedBox(
                     width: itemW,
-                    child: _ExpressionUpgradeCard(
+                    child: _KeyExpressionCard(
                       item: items[i],
-                      highlighted: _expressionHighlightedIndex == i,
-                      playbackActive: _expressionPlaybackIndex == i,
-                      bookmarked: _bookmarkedExpressionIndexes.contains(i),
-                      onCardTap: () => _onExpressionCardTap(i),
-                      onBookmarkTap: () => _onExpressionBookmarkTap(i),
+                      highlighted: _keyExpressionHighlightedIndex == i,
+                      playbackActive: _keyExpressionPlaybackIndex == i,
+                      bookmarked: _keyExpressionBookmarkedIndexes.contains(i),
+                      onCardTap: () => _onKeyExpressionCardTap(i),
+                      onBookmarkTap: () => _onKeyExpressionBookmarkTap(i),
                     ),
                   ),
                   if (i < items.length - 1) const SizedBox(width: between),
@@ -763,7 +763,7 @@ class _HistoryScreenV2State extends State<HistoryScreenV2> {
     }
 
     final dto = _dto!;
-    final hasUpgrades = dto.expressionUpgrades?.isNotEmpty ?? false;
+    final hasKeyExpressions = dto.keyExpressions?.isNotEmpty ?? false;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -797,9 +797,9 @@ class _HistoryScreenV2State extends State<HistoryScreenV2> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           _buildFeedback(dto),
-                          if (hasUpgrades) ...[
+                          if (hasKeyExpressions) ...[
                             const SizedBox(height: 28),
-                            _buildExpressionLayer(dto),
+                            _buildKeyExpressionLayer(dto),
                           ],
                           if (dto.endingId != null) ...[
                             const SizedBox(height: 28),
@@ -847,8 +847,8 @@ class _HistoryScreenV2State extends State<HistoryScreenV2> {
   }
 }
 
-class _ExpressionUpgradeCard extends StatelessWidget {
-  const _ExpressionUpgradeCard({
+class _KeyExpressionCard extends StatelessWidget {
+  const _KeyExpressionCard({
     required this.item,
     required this.highlighted,
     required this.playbackActive,
@@ -857,7 +857,7 @@ class _ExpressionUpgradeCard extends StatelessWidget {
     required this.onBookmarkTap,
   });
 
-  final ExpressionUpgradeDto item;
+  final RpResultKeyExpressionDto item;
   final bool highlighted;
   final bool playbackActive;
   final bool bookmarked;
@@ -871,7 +871,7 @@ class _ExpressionUpgradeCard extends StatelessWidget {
   static const double _bodyLeftIndent = 30;
   static const Color _exprTextPrimary = Color(0xFF121212);
   static const Color _exprTextSecondary = Color(0xFF676767);
-  static const Color _expressionUpgradeCardBg = Color(0xFF80D7CF);
+  static const Color _keyExpressionCardBg = Color(0xFF80D7CF);
   static const Color _megaphoneTintActive = Color(0xFF0CABA8);
   static const Color _megaphoneTintLoading = Color(0xFF121212);
 
@@ -901,7 +901,7 @@ class _ExpressionUpgradeCard extends StatelessWidget {
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 180),
             curve: Curves.easeOut,
-            color: highlighted ? Colors.white : _expressionUpgradeCardBg,
+            color: highlighted ? Colors.white : _keyExpressionCardBg,
             padding: const EdgeInsets.all(16),
             child: Align(
               alignment: Alignment.topLeft,

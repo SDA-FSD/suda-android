@@ -451,6 +451,18 @@ class AppLocalizationsEn extends AppLocalizations {
       'We couldn’t provide feedback this time. Try expanding your response to 7 words or more!';
 
   @override
+  String get roleplayResultScoreMeaning => 'Meaning';
+
+  @override
+  String get roleplayResultScoreRelevance => 'Relevance';
+
+  @override
+  String get roleplayResultScoreVocabulary => 'Vocabulary';
+
+  @override
+  String get roleplayResultScoreGrammar => 'Grammar';
+
+  @override
   String get ticketInfoTitle => 'Ticket';
 
   @override

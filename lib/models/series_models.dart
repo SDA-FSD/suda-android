@@ -382,6 +382,9 @@ class RpS2UserHistoryDto {
   final int? userStarRating;
   final String? createdAt;
   final String? updatedAt;
+  final String? mainTitle;
+  final String? subTitle;
+  final String? avatarImgPath;
   final int? beforeLikePoint;
   final int? beforeLevel;
   final int? beforeProgressPercentage;
@@ -411,6 +414,9 @@ class RpS2UserHistoryDto {
     this.userStarRating,
     this.createdAt,
     this.updatedAt,
+    this.mainTitle,
+    this.subTitle,
+    this.avatarImgPath,
     this.beforeLikePoint,
     this.beforeLevel,
     this.beforeProgressPercentage,
@@ -442,6 +448,9 @@ class RpS2UserHistoryDto {
       userStarRating: _optionalInt(json['userStarRating']),
       createdAt: json['createdAt']?.toString(),
       updatedAt: json['updatedAt']?.toString(),
+      mainTitle: json['mainTitle'] as String?,
+      subTitle: json['subTitle'] as String?,
+      avatarImgPath: json['avatarImgPath'] as String?,
       beforeLikePoint: _optionalInt(json['beforeLikePoint']),
       beforeLevel: _optionalInt(json['beforeLevel']),
       beforeProgressPercentage: _optionalInt(json['beforeProgressPercentage']),

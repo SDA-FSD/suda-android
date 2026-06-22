@@ -168,7 +168,7 @@ class _RoleplayEndingScreenState extends State<RoleplayEndingScreen>
   void _navigateToResult(BuildContext context) {
     if (_isS2Flow) {
       if (!context.mounted) return;
-      RoleplayRouter.replaceWithResultV2(context);
+      RoleplayRouter.replaceWithResult(context);
       return;
     }
 
@@ -183,7 +183,7 @@ class _RoleplayEndingScreenState extends State<RoleplayEndingScreen>
       }
     });
     if (!context.mounted) return;
-    RoleplayRouter.replaceWithResultV2(context);
+    RoleplayRouter.replaceWithResult(context);
   }
 
   void _onStarSelected(int stars) {

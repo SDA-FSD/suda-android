@@ -8,7 +8,7 @@ import '../../widgets/roleplay_scaffold.dart';
 /// Roleplay Try Again Screen (Full Screen)
 ///
 /// Roleplay 실패 종료 화면.
-/// 닫기(X)/시스템 뒤로가기 시 확인 다이얼로그 없이 Overview로 복귀 (Opening과 동일).
+/// 닫기(X)/시스템 뒤로가기 시 Overview로 복귀. Retry는 동일 에피소드 Opening으로 재시작(S2).
 /// 푸터 없음, 본문 영역만 노출.
 class RoleplayTryAgainScreen extends StatefulWidget {
   static const String routeName = '/roleplay/try_again';
@@ -68,6 +68,14 @@ class _RoleplayTryAgainScreenState extends State<RoleplayTryAgainScreen>
   void _goToOverview(BuildContext context) {
     if (_isS2Flow) {
       RoleplayRouter.popToOverview(context);
+      return;
+    }
+    Navigator.of(context).pop();
+  }
+
+  void _retry(BuildContext context) {
+    if (_isS2Flow) {
+      RoleplayRouter.replaceWithOpeningForRetry(context);
       return;
     }
     Navigator.of(context).pop();
@@ -159,7 +167,7 @@ class _RoleplayTryAgainScreenState extends State<RoleplayTryAgainScreen>
                   ),
                   Center(
                     child: ElevatedButton(
-                      onPressed: () => _goToOverview(context),
+                      onPressed: () => _retry(context),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
                         foregroundColor: Colors.black,

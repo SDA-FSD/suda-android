@@ -121,7 +121,7 @@ S1 턴 정책은 `.docs/CONTEXT_ROLEPLAY.md`만 본다. **S2는 아래가 단일
 | # | 조건 | 시점 |
 |---|------|------|
 | ① 세션 만료 | 사용자 유발 API(번역·힌트 조회/sound·발화 audio/text) **HTTP 404** | 즉시 `PUT finish` 1회 → 분기 |
-| ② 정상 마무리 | 마지막 사용자 발화 **응답 수신 직후** | `PUT finish` 백그라운드 시작 → 나레이션·후속 AI·분석중 blink 진행 |
+| ② 정상 마무리 | 마지막 AI `GET ai-message/audio` **수신 이후** (`aiText` 없으면 나레이션 후) | `PUT finish` 백그라운드 시작 · 전환은 AI 종료+finish 완료 후 |
 
 404 **제외**: `GET ai-message/audio`(자동), Opening TTS, `PUT speed-rate`
 
@@ -136,23 +136,27 @@ S1 턴 정책은 `.docs/CONTEXT_ROLEPLAY.md`만 본다. **S2는 아래가 단일
 |-------------|------------------------------------------|------|
 | **A) `0`** | `roleplayFinishNotEnoughProgress` | Try Again (`replaceWithTryAgain`) |
 | **① 404 → finish 실패** | 없음 | Try Again **즉시** |
-| **B) 자연수** + 마지막 에피소드 아님 | `roleplayFinishCompleted` | Result V2 (`replaceWithResultV2`) |
+| **B) 자연수** + 마지막 에피소드 아님 | `roleplayFinishCompleted` | Result (`replaceWithResult`) |
 | **C) 자연수** + 마지막 에피소드 | `roleplayFinishMovingToEnding` | Ending (`replaceWithEnding`) |
 
 - **마지막 에피소드**: `overview.episodes.last.id == selectedEpisodeId`
 - B/C: `GET /rps2/user-histories/{rpUserHistoryId}` — 3초 전환과 **병렬** 조회, 500ms 후 1회 재시도, 실패 시 Playing persistent `Network Error`
 - C: 이동 전 `overview.endingImgPath` precache
-- B/C 이동 전 `SeriesStateService.setCachedUserHistory` (result_v2·ending S2 UI 마이그레이션은 별도)
+- B/C 이동 전 `SeriesStateService.setCachedUserHistory` (Result S2 UI·ending S2 UI 마이그레이션 진행 중)
 
 #### 마지막 턴 타이밍
 
 ```
-마지막 user-message 응답 → requestFinishAfterLastUserResponse()
+마지막 user-message 응답 → (턴바·미션) **분석중 blink 즉시**
+  → user 말풍선·나레이션 → (aiText 있으면) GET ai-message/audio 수신
+  → requestFinishAfterLastUserResponse()
   → user 말풍선·턴바·미션 → 나레이션 → 후속 AI
   → startPlayingAnalyzingBlink → onLastTurnPresentationComplete()
   → finish 완료 대기 → stopAnalyzingBlink
   → A/B/C 전환 메시지 3초 (+ B/C user-histories 병렬) → navigate
 ```
+
+(`분석중 blink`는 마지막 `POST user-message` 응답 직후. `PUT finish`는 ai-audio 수신 후(또는 aiText 없으면 나레이션 후). `onLastTurnPresentationComplete`는 후속 AI 음성 종료 시 — aiText 없으면 finish 직후.)
 
 ---
 
@@ -244,7 +248,7 @@ S1 턴 정책은 `.docs/CONTEXT_ROLEPLAY.md`만 본다. **S2는 아래가 단일
 - **탭 → 펼침**: **아래로만** `AnimatedSize`+`AnimatedSwitcher`(300ms, `easeInOutCubic`, fade+`SizeTransition`). 모서리 radius **27** 유지. 전체 미션 `instruction`+좌측 아이콘 세로 나열 · `0/3` **hide**. 재탭 → 접힘
 - **오버레이**: `buildPlayingBody`의 `SingleChildScrollView` 위에 `Positioned` — 메시지 append 시 위로 스크롤되며 패널에 가려짐. 스크롤과 미션 패널 **사이**에 상단 페이드 레이어: SafeArea 상단~미션 패널 하단, `#121212` 100%→0% 세로 gradient(헤더·턴바·미션 패널은 페이드 위에 노출, 말풍선만 페이드에 가려짐). **하단 페이드**: 디스플레이 하단~서비스메시지 상단, `#121212` 100%→0%(본문 48px 침범 + 푸터 하단·safe·scaffold gap 24). 상·하단 페이드는 `scaffoldBodyHorizontalInset`(24) 상쇄로 **디스플레이 좌우 전폭**. `playing.dart` 최외곽 Stack에 상태표시줄·하단 시스템 영역 `#121212` 솔리드 보강(기존 페이드와 이어짐). 푸터 UI(서비스메시지·입력·아이콘)는 페인트 순서상 페이드 위에 노출, 배경·말풍선만 가림.
 - **스크롤 정책**: 본문 `SingleChildScrollView`는 `ScrollController`를 사용한다. AI/User/Narration entry 또는 힌트 bubble이 새로 추가될 때만 최하단으로 250ms 애니메이션 이동한다. 사용자가 상하 드래그로 과거 메시지를 보는 중에는 새 요소 추가가 없는 한 강제로 하단 고정하지 않는다.
-- AI 말풍선 (`playing_conversation_mixin` `_buildAiMessage`): 배경 `#353535`·padding **10**·radius 12. 본문 `bodyMedium` 흰색. 번역 `labelSmall` `#777373`. 아바타 40×40은 말풍선 컨테이너 **상단** 정렬(`CrossAxisAlignment.start`).
+- AI 말풍선 (`playing_conversation_mixin` `_buildAiMessage`): 배경 `#353535`·padding **10**·radius 12. 본문 `bodyMedium` 흰색. 번역 `labelSmall` `#777373`. 아바타 40×40은 말풍선 컨테이너 **상단** 정렬(`CrossAxisAlignment.start`). 번역 펼침 시 가려지면 `scrollToRevealBubbleIfNeeded` — `getOffsetToReveal`+하단 inset(페이드 48+8), 필요 시에만 아래로 최소 스크롤, `maxScrollExtent` 강제 없음.
 - 사용자 말풍선 (`_buildUserMessage`): 우측 정렬·max 너비 `bodyWidth×0.7`. 배경 흰색 **30%**·padding 좌우 12 상하 10·radius 12. 본문 `bodyMedium` 흰색.
 - 녹음 중 말풍선 (`_buildRecordingBubble`): S1과 동일 — 녹음 시작 시 entry append·150ms fade-in·우측 말풍선·3점 wave(900ms sin, opacity 0.3~1.0). 배경·점 색은 사용자 말풍선과 동일(흰 30%·흰 점). **힌트박스가 노출된 턴**에는 힌트박스 **아래**에 배치(`_buildConversationWithHint`에서 recording을 hint 뒤로 렌더). 녹음 종료/취소 시 제거 후 STT 결과 말풍선 노출.
 - **첫 AI 말풍선 Y**: 본문 스크롤 영역 상단에 **고정 `SizedBox(height: 68)`** (`PlayingConversationLayout.firstBubbleTopOffset`) — 패널에 가리지 않음. 추가 말풍선은 아래로 쌓이며 스크롤 시 패널 뒤로 이동
@@ -261,9 +265,9 @@ S1 턴 정책은 `.docs/CONTEXT_ROLEPLAY.md`만 본다. **S2는 아래가 단일
 
 **푸터 3층 상세** (`lib/screens/roleplay/playing_input_mixin.dart` — `buildPlayingFooter`)
 
-1. **서비스메시지 영역**: height **24**, `bodyMedium` 중앙. **세션당 첫 사용자 발화 턴**에만 `holdMicrophoneToSpeak` fade-in/out, 마지막 턴 나레이션·후속 AI 종료 후 서버 `serviceMessage`(없으면 `roleplayAnalyzing`) blink.
+1. **서비스메시지 영역**: height **24**, `bodyMedium` 중앙. **세션당 첫 사용자 발화 턴**에만 `holdMicrophoneToSpeak` fade-in/out. **마지막 턴** `POST user-message` 응답 **직후** 서버 `serviceMessage`(없으면 `roleplayAnalyzing`) blink(이후 나레이션·후속 AI 계속 노출).
 2. **입력 영역**: S1과 동일 UX
-   - **녹음**: height **120** (`roleplayMicFooterStackHeight` = mic 100px + 아이콘 행 중앙 20px), `RoleplayMicButtonArea` — 마이크 **이미지 하단**이 하단 아이콘 행(40px) 세로 중앙에 정렬·Cancel 드래그 영역 포함. hold·Cancel 드래그·500ms 미만 거절·loading 회전. `AudioRecorder.start` 완료 전 손을 떼거나 cancel되면 pending action으로 저장 후 start 완료 시 finish/cancel을 이어서 처리한다.
+   - **녹음**: gap **10** + height **120** (`roleplayMicFooterStackHeight` = mic 100px + 아이콘 행 중앙 20px), `RoleplayMicButtonArea` — 마이크 **이미지 하단**이 하단 아이콘 행(40px) 세로 중앙에 정렬·Cancel 드래그 영역 포함. hold·Cancel 드래그·500ms 미만 거절·loading 회전. `AudioRecorder.start` 완료 전 손을 떼거나 cancel되면 pending action으로 저장 후 start 완료 시 finish/cancel을 이어서 처리한다.
    - **타이핑**: gap 10 + 입력 height **44** (`#353535` stadium) + Send 44×44 + gap 10
 3. **하단 아이콘**: height **40**, 좌 mic↔keyboard(30×30)·우 hint lightball(24×24) — S1과 동일 토글·힌트 idle 3s 후 blink
 
@@ -293,7 +297,7 @@ S1 턴 정책은 `.docs/CONTEXT_ROLEPLAY.md`만 본다. **S2는 아래가 단일
 | Playing API 호출 | `/v1/roleplay-sessions/{id}/…` 전부 | ✅ `/rps2/sessions/{id}/user-message/audio|text`, `GET /ai-message/audio`, hint/translation/sound |
 | 설정패널 (kebab) | `_buildSpeedPanel`, `PUT /v1/users/speed-rate` | ✅ **설정패널** (`roleplay_configuration_panel.dart`) — 오토힌트 토글 + 가로 속도 슬라이더 |
 | 타임아웃 countdown | `roleplay.duration` 기반 | S2 **duration 개념 없음** — 정책 재정의 필요 |
-| 종료 → Ending/Try Again/Result | `_handleResultIdEnding`, `RoleplayRouter.replaceWith*` | ✅ `playing_finish_mixin` — `PUT finish` + user-histories + 분기 (result_v2/ending UI는 S2 마이그레이션 별도) |
+| 종료 → Ending/Try Again/Result | `_handleResultIdEnding`, `RoleplayRouter.replaceWith*` | ✅ `playing_finish_mixin` — `PUT finish` + user-histories + 분기 (Result/ending S2 UI 마이그레이션 진행 중) |
 | `isUserTurnYn` | S1 state | **삭제됨**. S2는 **AI 선시작 고정** (`playing_backup`도 `_handleInitialTurn` → `_handleAiStart` only) |
 
 #### Playing 작업 시 참조 순서 (권장)
@@ -306,7 +310,7 @@ S1 턴 정책은 `.docs/CONTEXT_ROLEPLAY.md`만 본다. **S2는 아래가 단일
 
 ### 4-5. Ending / Try Again / Result / Survey 🚧
 
-- **파일**: `ending.dart`, `try_again.dart`, `result.dart`, `result_v2.dart`, `survey.dart` 등
+- **파일**: `ending.dart`, `try_again.dart`, `result.dart`, `survey.dart` 등
 
 #### RoleplayEndingScreen 🚧 (S2 분기 추가)
 
@@ -319,7 +323,7 @@ S1 턴 정책은 `.docs/CONTEXT_ROLEPLAY.md`만 본다. **S2는 아래가 단일
 | 타이틀 | `overview.endingTitle` (`SudaJsonUtil.localizedMapText`) |
 | 본문 | `overview.endingContent` (`localizedMapText`, 마크다운 없음) |
 | 별점 | `cachedUserHistory.userStarRating` 초기값 · 탭마다 `PUT /rps2/user-histories/{id}/user-star-rating` |
-| Next → Result V2 | `replaceWithResultV2` (`cachedUserHistory` 유지) |
+| Next → Result | `replaceWithResult` (`cachedUserHistory` 유지) |
 
 - **S1 경로**: `RoleplayStateService` overview·roleId·`endingList` 첫 요소 — 기존 유지
 
@@ -336,9 +340,22 @@ S1 턴 정책은 `.docs/CONTEXT_ROLEPLAY.md`만 본다. **S2는 아래가 단일
 | 안내 문구 | `l10n.roleplayTryAgainMessage` (en/ko/pt) — 서브타이틀 **삭제** |
 | Retry 버튼 | 하드코딩 `'Retry'` |
 | Report | `l10n.endingReport` → Try Again Report (유지) |
-| X / 뒤로가기 / Retry | S2: `RoleplayRouter.popToOverview` · S1: `Navigator.pop()` |
+| X / 뒤로가기 | S2: `RoleplayRouter.popToOverview` · S1: `Navigator.pop()` |
+| Retry | S2: `RoleplayRouter.replaceWithOpeningForRetry` (세션 clear 후 Opening) · S1: `Navigator.pop()` |
 
-#### Result V2 ⏳
+#### RoleplayResultScreen 🚧 (S2 분기)
+
+- **S2 진입 판별**: `SeriesStateService.cachedUserHistory != null`
+- **로딩 애니메이션**(별점·패널·LikeProgressEffect): `RpS2UserHistoryDto` — `mainTitle`, `subTitle`, `starScore`, `missions`, `words`, `likePoint`, `before/afterLikePoint·Level·ProgressPercentage`
+  - Mission 아이콘: `missions(bool[])` → `rps2_mission_on/off.png` 20×20, gap 2
+- **애니메이션 이후 본문** (`result.dart` S2 전용):
+  - **Feedback 영역**: 삭제(S2)
+  - **Key Expression**: `keyExpressions` — 카드 체크+`keyExpression(en)` / `keyExpression(사용자언어)` / `sampleAnswer(en)` / `sampleAnswer(사용자언어)`. 좌하 메가폰·우하 북마크 **UI만**(API 추후)
+  - **Speech Feedback**(신규): 섹션 헤더 + **View Chat** pill(동작 API 추후). 본문 — `speechFeedback` id 오름차순·행 gap 20·좌우 padding 24. **행당 단일 카드**(Key Expression 카드와 동일 흰 카드·shadow·padding 16).
+    - **접힘**: 1줄 grade `bodySmall` **w700**(grade색) · 2줄 사용자 발화 `bodyLarge` · 3줄 메가폰 + **Feedback** pill.
+    - **펼침**: 1줄 아래 score 4행(**블록 너비 50%** 좌측, `labelSmall` label + bar h3, row gap 8, 하단 gap 8) · 2·3줄 사이 `feedback` `bodySmall` `#635F5F`.
+  - Footer: Got it! / Report(S1과 동일 UX, S2 Report API 미확인)
+- **S1 경로**: Feedback + Key Expression + View Chat(헤더) 유지
 
 ### 4-6. RoleplayOverviewScreen ⏸ (S1 fade-out)
 
@@ -372,7 +389,7 @@ S1 턴 정책은 `.docs/CONTEXT_ROLEPLAY.md`만 본다. **S2는 아래가 단일
 
 **S1 세션 API** (`POST /v1/roleplay-sessions`): `RoleplayApi.createRoleplaySession` — **`playing_backup` / Lab 등 S1 전용**. S2 Opening에서는 **사용하지 않음**.
 
-**미구현 (Playing용)**: 없음 — finish·분기·navigate 구현 완료. **Ending S2 렌더링·별점 저장 ✅**. **result_v2 S2 UI**는 별도.
+**미구현 (Playing용)**: 없음 — finish·분기·navigate 구현 완료. **Ending S2 렌더링·별점 저장 ✅**. **Result S2 UI**(Speech Feedback 본문·Key Expression API 등)는 진행 중.
 
 ---
 
@@ -426,8 +443,8 @@ lib/utils/english_level_util.dart        # cefrMap 키 (ENGLISH_LEVEL)
 3. ~~**Playing**: ① AI 선시작 말풍선·음성·번역~~ ✅ (나레이션·입력 활성 **미포함**)
 4. ~~**Playing**: RpS2 turn/message API 연동 (지침 수령 후)~~ ✅ user-message + GET ai-message/audio
 5. ~~**Playing**: 대화·미션 UI (backup 참조 + S2 episode/cefr 데이터)~~ ✅ 사용자/나레이션/후속 AI/미션 완료 효과
-6. ~~**Playing**: 마지막 턴 이후 result 호출·이동~~ ✅ `PUT finish` + user-histories + Try Again/ResultV2/Ending 분기
-7. **Ending/Try Again/Result**: `SeriesStateService.cachedUserHistory` 기반 S2 UI 마이그레이션 — **Ending ✅**, **Try Again ✅** (§4-5), Result V2 추후
+6. ~~**Playing**: 마지막 턴 이후 result 호출·이동~~ ✅ `PUT finish` + user-histories + Try Again/Result/Ending 분기
+7. **Ending/Try Again/Result**: `SeriesStateService.cachedUserHistory` 기반 S2 UI 마이그레이션 — **Ending ✅**, **Try Again ✅**, **Result 🚧**(§4-5)
 8. **RoleplayStateService** S2 경로에서 완전 분리 및 S1 코드 정리
 
 ---

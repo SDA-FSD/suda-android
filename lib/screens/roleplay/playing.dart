@@ -63,8 +63,8 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
   final GlobalKey _missionIconAnchorKey = GlobalKey();
   final List<Timer> _turnEffectTimers = [];
   Timer? _missionCompleteTimer;
-  bool _pendingAnalyzingAfterAi = false;
-  String? _pendingServiceMessage;
+  bool _lastTurnAwaitingAiPresentation = false;
+
   bool _showMissionCompletedFlash = false;
   double _missionPanelOpacity = 1;
 
@@ -88,6 +88,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     playingHintResetIconForAiStartHandler = resetHintIconForAiStart;
     deactivateUserTurnHandler = deactivateUserTurn;
     scrollPlayingBodyToBottomHandler = scrollPlayingBodyToBottom;
+    scrollToRevealBubbleIfNeededHandler = scrollToRevealBubbleIfNeeded;
     scrollPlayingHintToBottomHandler = scrollPlayingBodyToBottom;
     playingAiVoicePlaybackCompletedHandler = _onAiVoicePlaybackCompleted;
     playingSessionNotFoundHandler = onRpS2SessionNotFound;
@@ -137,8 +138,9 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
 
   void _onAiVoicePlaybackCompleted() {
     if (!mounted) return;
-    if (_pendingAnalyzingAfterAi) {
-      _startLastTurnAnalyzing();
+    if (_lastTurnAwaitingAiPresentation) {
+      _lastTurnAwaitingAiPresentation = false;
+      onLastTurnPresentationComplete();
       return;
     }
     if (_autoHintEnabled) {
@@ -177,9 +179,9 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     final narrationText = response.narration?.trim() ?? '';
     final aiText = response.aiText?.trim() ?? '';
     if (reachedRequiredSpeechCount) {
-      _pendingAnalyzingAfterAi = true;
-      _pendingServiceMessage = response.serviceMessage?.trim();
-      requestFinishAfterLastUserResponse();
+      startPlayingAnalyzingBlink(
+        message: response.serviceMessage?.trim(),
+      );
     }
 
     Future<RpS2SoundResDto?>? aiAudioFuture;
@@ -192,7 +194,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
 
     if (aiText.isEmpty) {
       if (reachedRequiredSpeechCount) {
-        _startLastTurnAnalyzing();
+        _beginLastTurnFinishFlow(awaitAiPresentation: false);
       } else {
         activateUserTurn();
       }
@@ -205,6 +207,9 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     ]);
     if (!mounted) return;
     final aiSound = results[1] as RpS2SoundResDto?;
+    if (reachedRequiredSpeechCount) {
+      _beginLastTurnFinishFlow(awaitAiPresentation: true);
+    }
     await showPlayingAiMessage(
       text: aiText,
       cdnYn: aiSound?.cdnYn,
@@ -213,12 +218,13 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     );
   }
 
-  void _startLastTurnAnalyzing() {
-    _pendingAnalyzingAfterAi = false;
-    final message = _pendingServiceMessage;
-    _pendingServiceMessage = null;
-    startPlayingAnalyzingBlink(message: message);
-    onLastTurnPresentationComplete();
+  void _beginLastTurnFinishFlow({required bool awaitAiPresentation}) {
+    requestFinishAfterLastUserResponse();
+    if (awaitAiPresentation) {
+      _lastTurnAwaitingAiPresentation = true;
+    } else {
+      onLastTurnPresentationComplete();
+    }
   }
 
   Future<void> _showNarrationPhase(String narrationText) async {

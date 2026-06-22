@@ -452,6 +452,18 @@ class AppLocalizationsPt extends AppLocalizations {
       'Não foi possível fornecer feedback desta vez. Tente falar um pouco mais — procure usar mais de 7 palavras.';
 
   @override
+  String get roleplayResultScoreMeaning => 'Significado';
+
+  @override
+  String get roleplayResultScoreRelevance => 'Relevância';
+
+  @override
+  String get roleplayResultScoreVocabulary => 'Vocabulário';
+
+  @override
+  String get roleplayResultScoreGrammar => 'Gramática';
+
+  @override
   String get ticketInfoTitle => 'Ticket';
 
   @override

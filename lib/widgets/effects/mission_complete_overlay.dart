@@ -9,6 +9,9 @@ class MissionCompleteOverlay extends StatefulWidget {
   /// [effectWidthFactor]는 **에셋 전체** 크기 기준이며, 눈에 보이는 원은 그보다 훨씬 작다.
   static const double effectWidthFactor = 2 / 3;
 
+  /// 아이콘 anchor 중심 대비 shine 정렬 미세 보정(논리 px).
+  static const Offset effectCenterOffset = Offset(2, 2);
+
   final GlobalKey anchorKey;
   final VoidCallback onCompleted;
 
@@ -89,6 +92,7 @@ class _MissionCompleteOverlayState extends State<MissionCompleteOverlay>
     final screenSize = MediaQuery.sizeOf(context);
     final effectSize = screenSize.width * MissionCompleteOverlay.effectWidthFactor;
     final center = _anchorCenter;
+    final effectCenter = center != null ? center + MissionCompleteOverlay.effectCenterOffset : null;
 
     return IgnorePointer(
       child: Material(
@@ -97,10 +101,10 @@ class _MissionCompleteOverlayState extends State<MissionCompleteOverlay>
           child: Stack(
             clipBehavior: Clip.none,
             children: [
-              if (center != null)
+              if (effectCenter != null)
                 Positioned(
-                  left: center.dx - effectSize / 2,
-                  top: center.dy - effectSize / 2,
+                  left: effectCenter.dx - effectSize / 2,
+                  top: effectCenter.dy - effectSize / 2,
                   width: effectSize,
                   height: effectSize,
                   child: AnimatedBuilder(

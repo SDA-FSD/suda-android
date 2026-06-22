@@ -78,6 +78,12 @@ class SeriesStateService {
     _session = session;
   }
 
+  /// Try Again Retry 등 동일 에피소드 재시작 전 이전 세션·히스토리 캐시 제거.
+  void clearPlaySession() {
+    _session = null;
+    _cachedUserHistory = null;
+  }
+
   void setCachedUserHistory(RpS2UserHistoryDto? history) {
     _cachedUserHistory = history;
   }

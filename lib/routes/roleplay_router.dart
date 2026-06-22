@@ -11,11 +11,11 @@ import '../screens/roleplay/playing.dart';
 import '../screens/roleplay/ending.dart';
 import '../screens/roleplay/try_again.dart';
 import '../screens/roleplay/result.dart';
-import '../screens/roleplay/result_v2.dart';
 import '../screens/roleplay/try_again_report.dart';
 import '../screens/roleplay/result_report.dart';
 import '../screens/roleplay/survey.dart';
 import '../screens/roleplay/tutorial.dart';
+import '../services/series_state_service.dart';
 
 class RoleplayRouter {
   static const String openingRouteName = '/roleplay/opening';
@@ -141,37 +141,38 @@ class RoleplayRouter {
     );
   }
 
-  /// Ending → Result 전환 시 흰 화면 방지: Material 대신 라우트 최상위를 #0CABA8로 그림.
-  static void replaceWithResult(BuildContext context) {
-    const teal = Color(0xFF0CABA8);
+  /// Try Again Retry — 동일 에피소드 Opening으로 재시작 (Overview 복귀 아님).
+  static void replaceWithOpeningForRetry(BuildContext context) {
+    SeriesStateService.instance.clearPlaySession();
     Navigator.pushReplacement(
       context,
-      PageRouteBuilder(
-        opaque: true,
-        pageBuilder: (context, _, __) => Container(
-          color: teal,
-          child: const RoleplayResultScreen(),
-        ),
-        settings: const RouteSettings(name: '/roleplay/result'),
+      MaterialPageRoute(
+        builder: (context) => const RoleplayOpeningScreen(),
+        settings: const RouteSettings(name: openingRouteName),
       ),
     );
   }
 
-  /// Result V2 전용 helper. 현재 기본 Result 종료 플로우에서 사용한다.
-  static void replaceWithResultV2(BuildContext context) {
+  /// Ending/Playing → Result 전환. FullScreenRoute + bottom-up.
+  static void replaceWithResult(BuildContext context) {
     const teal = Color(0xFF0CABA8);
     Navigator.pushReplacement(
       context,
       FullScreenRoute(
         transition: FullScreenTransition.bottomUp,
-        settings: const RouteSettings(name: RoleplayResultScreenV2.routeName),
+        settings: const RouteSettings(name: RoleplayResultScreen.routeName),
         page: Container(
           color: teal,
-          child: const RoleplayResultScreenV2(),
+          child: const RoleplayResultScreen(),
         ),
       ),
     );
   }
+
+  /// S1 `playing_backup.dart` 참조용. 신규 코드는 [replaceWithResult] 사용.
+  @Deprecated('Use replaceWithResult')
+  static void replaceWithResultV2(BuildContext context) =>
+      replaceWithResult(context);
 
   static void popToOverview(BuildContext context) {
     Navigator.of(context).popUntil((route) {

@@ -115,6 +115,8 @@ mixin PlayingConversationMixin<T extends StatefulWidget> on State<T> {
   /// AI 시작 시 사용자 입력 비활성.
   VoidCallback? deactivateUserTurnHandler;
   void Function({GlobalKey? anchorKey})? scrollPlayingBodyToBottomHandler;
+  void Function({required GlobalKey anchorKey})?
+      scrollToRevealBubbleIfNeededHandler;
 
   AudioPlayer get playingAudioPlayer => _audioPlayer;
 
@@ -321,9 +323,13 @@ mixin PlayingConversationMixin<T extends StatefulWidget> on State<T> {
     if (!entry.isAi) return;
     if (entry.conversationIndex == null) return;
     if (entry.translationText != null) {
+      final willExpand = !entry.isTranslationExpanded;
       setState(() {
-        entry.isTranslationExpanded = !entry.isTranslationExpanded;
+        entry.isTranslationExpanded = willExpand;
       });
+      if (willExpand) {
+        _scheduleTranslationReveal(entry);
+      }
       return;
     }
     if (entry.isTranslationLoading) return;
@@ -352,6 +358,7 @@ mixin PlayingConversationMixin<T extends StatefulWidget> on State<T> {
         entry.translationText = translated;
         entry.isTranslationLoading = false;
       });
+      _scheduleTranslationReveal(entry);
     } on RpS2SessionNotFoundException catch (_) {
       if (!mounted) return;
       setState(() {
@@ -367,6 +374,10 @@ mixin PlayingConversationMixin<T extends StatefulWidget> on State<T> {
         entry.isTranslationExpanded = false;
       });
     }
+  }
+
+  void _scheduleTranslationReveal(PlayingConversationEntry entry) {
+    scrollToRevealBubbleIfNeededHandler?.call(anchorKey: entry.key);
   }
 
   List<Widget> buildConversationEntryWidgets(

@@ -18,7 +18,7 @@ import 'playing_input_mixin.dart';
 ///
 /// 트리거:
 /// - 사용자 유발 API 404 → finish 시도 → 실패 시 즉시 Try Again, `0`이면 3초 메시지 후 Try Again
-/// - 마지막 사용자 발화 응답 직후 finish 백그라운드 호출 → 나레이션·AI·분석중 후 전환
+/// - 마지막 사용자 발화 응답 후 **마지막 AI `GET ai-message/audio` 수신 이후** finish 백그라운드 호출 → 나레이션·AI·분석중 후 전환
 mixin PlayingFinishMixin<T extends StatefulWidget>
     on State<T>, PlayingInputMixin<T>, PlayingConversationMixin<T> {
   bool _finishRequested = false;
@@ -32,7 +32,7 @@ mixin PlayingFinishMixin<T extends StatefulWidget>
     unawaited(_handleSessionExpiredFinish());
   }
 
-  /// 마지막 사용자 발화 응답 수신 직후 호출.
+  /// 마지막 사용자 발화 응답 처리 중 **마지막 AI 사운드 수신 이후** 호출.
   void requestFinishAfterLastUserResponse() {
     if (_finishRequested) return;
     _finishRequested = true;
@@ -180,7 +180,7 @@ mixin PlayingFinishMixin<T extends StatefulWidget>
     if (isLastEpisode) {
       RoleplayRouter.replaceWithEnding(context);
     } else {
-      RoleplayRouter.replaceWithResultV2(context);
+      RoleplayRouter.replaceWithResult(context);
     }
   }
 

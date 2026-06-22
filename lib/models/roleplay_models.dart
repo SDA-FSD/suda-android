@@ -397,19 +397,20 @@ class RoleplayMissionDto {
   }
 }
 
-class ExpressionUpgradeDto {
+/// S1 `GET /v1/roleplays/results/{id}` 응답의 Key Expression 항목 (JSON 필드명 `expressionUpgrades`).
+class RpResultKeyExpressionDto {
   final String? expression;
   final String? meaningUserLanguage;
   final String? rephrasedSentence;
 
-  const ExpressionUpgradeDto({
+  const RpResultKeyExpressionDto({
     this.expression,
     this.meaningUserLanguage,
     this.rephrasedSentence,
   });
 
-  factory ExpressionUpgradeDto.fromJson(Map<String, dynamic> json) {
-    return ExpressionUpgradeDto(
+  factory RpResultKeyExpressionDto.fromJson(Map<String, dynamic> json) {
+    return RpResultKeyExpressionDto(
       expression: json['expression'] as String?,
       meaningUserLanguage: json['meaningUserLanguage'] as String?,
       rephrasedSentence: json['rephrasedSentence'] as String?,
@@ -469,7 +470,7 @@ class RoleplayResultDto {
   final String? goodFeedback;
   final String? improvementFeedback;
   final String? overallFeedback;
-  final List<ExpressionUpgradeDto>? expressionUpgrades;
+  final List<RpResultKeyExpressionDto>? keyExpressions;
   final List<int>? savedExpressionIndexes;
   final int? beforeLikePoint;
   final int? afterLikePoint;
@@ -501,7 +502,7 @@ class RoleplayResultDto {
     this.goodFeedback,
     this.improvementFeedback,
     this.overallFeedback,
-    this.expressionUpgrades,
+    this.keyExpressions,
     this.savedExpressionIndexes,
     this.beforeLikePoint,
     this.afterLikePoint,
@@ -543,11 +544,11 @@ class RoleplayResultDto {
       goodFeedback: json['goodFeedback'] as String?,
       improvementFeedback: json['improvementFeedback'] as String?,
       overallFeedback: json['overallFeedback'] as String?,
-      expressionUpgrades: json['expressionUpgrades'] == null
+      keyExpressions: json['expressionUpgrades'] == null
           ? null
           : (json['expressionUpgrades'] as List<dynamic>)
               .map(
-                (item) => ExpressionUpgradeDto.fromJson(
+                (item) => RpResultKeyExpressionDto.fromJson(
                   item as Map<String, dynamic>,
                 ),
               )

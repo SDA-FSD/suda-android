@@ -916,6 +916,30 @@ abstract class AppLocalizations {
   /// **'We couldn’t provide feedback this time. Try expanding your response to 7 words or more!'**
   String get roleplayResultFeedbackInsufficientWords;
 
+  /// No description provided for @roleplayResultScoreMeaning.
+  ///
+  /// In en, this message translates to:
+  /// **'Meaning'**
+  String get roleplayResultScoreMeaning;
+
+  /// No description provided for @roleplayResultScoreRelevance.
+  ///
+  /// In en, this message translates to:
+  /// **'Relevance'**
+  String get roleplayResultScoreRelevance;
+
+  /// No description provided for @roleplayResultScoreVocabulary.
+  ///
+  /// In en, this message translates to:
+  /// **'Vocabulary'**
+  String get roleplayResultScoreVocabulary;
+
+  /// No description provided for @roleplayResultScoreGrammar.
+  ///
+  /// In en, this message translates to:
+  /// **'Grammar'**
+  String get roleplayResultScoreGrammar;
+
   /// No description provided for @ticketInfoTitle.
   ///
   /// In en, this message translates to:

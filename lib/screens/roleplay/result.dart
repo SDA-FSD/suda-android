@@ -1,20 +1,39 @@
+import 'dart:async';
 import 'dart:math' as math;
+import 'dart:typed_data';
+import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:vibration/vibration.dart';
 
+import '../../api/suda_api_client.dart';
+import '../../config/app_config.dart';
+import '../../effects/like_progress_effect.dart';
 import '../../l10n/app_localizations.dart';
+import '../../models/roleplay_models.dart';
+import '../../models/series_models.dart';
 import '../../routes/roleplay_router.dart';
+import '../../services/main_user_sync.dart';
 import '../../services/roleplay_state_service.dart';
+import '../../services/series_state_service.dart';
+import '../../services/token_storage.dart';
 import '../../utils/default_toast.dart';
+import '../../utils/sub_screen_route.dart';
+import '../../utils/suda_json_util.dart';
+import 'review_chat.dart';
+
+const Color _exprTextPrimary = Color(0xFF121212);
+const Color _exprTextSecondary = Color(0xFF676767);
+const Color _s1KeyExpressionCardBg = Color(0xFF80D7CF);
 
 /// Roleplay Result Screen (Full Screen)
-///
-/// 박스레이어: 줄어드는 영역. 본문레이어: 박스 뒤쪽 영역.
-/// 진입 시: 별점/메인타이틀/서브타이틀 즉시 노출(별은 silver 시작) →
-/// starResult 만큼 300ms 간격으로 좌→중→우 gold 전환(+진동) →
-/// 마지막 전환 500ms 후 박스 축소.
+/// 화면 fully shown 이후 1초 뒤 상단 이동 + LikeProgressEffect(레벨·라이크 진행) 후
+/// Feedback(S1) / Key Expression / Speech Feedback(S2) 본문 레이어를 노출한다.
 class RoleplayResultScreen extends StatefulWidget {
+  static const String routeName = '/roleplay/result';
+
   final bool showCloseButton;
 
   const RoleplayResultScreen({
@@ -28,263 +47,511 @@ class RoleplayResultScreen extends StatefulWidget {
 
 class _RoleplayResultScreenState extends State<RoleplayResultScreen>
     with TickerProviderStateMixin {
-  late final AnimationController _boxShrinkController;
-  bool _showStars = true;
-  bool _showMainTitle = true;
-  bool _showSubTitle = true;
-  int _revealedGoldStars = 0;
-  bool _shrinkScheduled = false;
-  bool _shrinkStarted = false;
-  double _shrinkFromHeight = 0;
-  int? _currentLevel;
-  double? _progressPercentage;
-  bool _reportSubmitted = false;
+  static const Color _topBg = Color(0xFF054544);
+  static const Color _bottomBg = Color(0xFF0CABA8);
+  static const Color _teal = Color(0xFF0CABA8);
+  static const Color _mint = Color(0xFF80D7CF);
+  static const Color _cardBg = Color(0x8080D7CF);
+  static const Color _feedbackBoxFill = Color(0xFF80D7CF);
+  static const Color _reportText = Color(0xFF054544);
+  static const String _starGold = 'assets/images/star_gold.png';
+  static const String _starSilver = 'assets/images/star_silver.png';
+  static const String _likeAtResult = 'assets/images/like_at_result.png';
+  static const String _missionSucceeded =
+      'assets/images/icons/mission_succeeded.png';
+  static const String _missionFailed =
+      'assets/images/icons/mission_failed.png';
+  static const String _rps2MissionOn =
+      'assets/images/icons/rps2_mission_on.png';
+  static const String _rps2MissionOff =
+      'assets/images/icons/rps2_mission_off.png';
 
-  // 5~8단계 애니메이션: 초기값(기존값)으로 세팅 후 단계별 전환
-  bool _missionRevealed = false;
-  int _displayWords = 0;
-  double _displayLikePoint = 0;
-  int? _displayLevel;
-  double _displayProgress = 0;
-  AnimationController? _likePointController;
-  AnimationController? _wordsController;
-  AnimationController? _levelProgressController;
-  bool _levelUpToastShown = false;
+  late final AnimationController _panelMoveController;
+  late final AnimationController _feedbackEntranceController;
+  late final AnimationController _keyExpressionSectionEntranceController;
+  late final AnimationController _footerFadeController;
+  final GlobalKey _panelKey = GlobalKey();
+  double? _panelMeasuredHeight;
+  Animation<double>? _routeAnimation;
+  bool _didAttachRouteAnimation = false;
+  bool _hasScheduledPostEntrance = false;
+  bool _hasStartedEffectSequence = false;
+  bool _effectDone = false;
+  bool _showFooterActions = false;
+  int _revealedGoldStars = 0;
+  bool _reportSubmitted = false;
+  bool _isLeavingToOverview = false;
+
+  final AudioPlayer _s1KeyExpressionAudioPlayer = AudioPlayer();
+  StreamSubscription<PlayerState>? _s1KeyExpressionAudioSub;
+  int _s1KeyExpressionMegaphoneSeq = 0;
+  int? _s1KeyExpressionHighlightedIndex;
+  int? _s1KeyExpressionPlaybackIndex;
+  final Set<int> _s1KeyExpressionBookmarkedIndexes = <int>{};
+  bool _s1KeyExpressionBookmarkInFlight = false;
+  int? _keyExpressionPlaybackIndex;
+  final Set<int> _keyExpressionBookmarkedIndexes = <int>{};
+
+  bool get _isS2Flow =>
+      SeriesStateService.instance.cachedUserHistory != null;
+
+  RoleplayResultDto? get _dto => RoleplayStateService.instance.cachedResult;
+
+  RpS2UserHistoryDto? get _s2History =>
+      SeriesStateService.instance.cachedUserHistory;
+
+  int get _starResult => _isS2Flow
+      ? (_s2History?.starScore ?? 0)
+      : (_dto?.starResult ?? 0);
+
+  String get _mainTitle => _isS2Flow
+      ? (_s2History?.mainTitle ?? '')
+      : (_dto?.mainTitle ?? '');
+
+  String get _subTitle => _isS2Flow
+      ? (_s2History?.subTitle ?? '')
+      : (_dto?.subTitle ?? '');
+
+  int get _words => _isS2Flow
+      ? (_s2History?.words ?? 0)
+      : (_dto?.words ?? 0);
+
+  int get _likePoint => _isS2Flow
+      ? (_s2History?.likePoint ?? 0)
+      : (_dto?.likePoint ?? 0);
+
+  static String _httpErrorBrief(Object error) {
+    final text = error.toString();
+    final match = RegExp(r'HTTP (\d{3})').firstMatch(text);
+    if (match != null) {
+      final code = int.parse(match.group(1)!);
+      final brief = code >= 500 ? 'Server error' : 'Request failed';
+      return 'HTTP $code · $brief';
+    }
+    return 'Request failed';
+  }
 
   @override
   void initState() {
     super.initState();
-    _boxShrinkController = AnimationController(
+    _panelMoveController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1500),
-    );
-    _boxShrinkController.addListener(() {
-      if (mounted) setState(() {});
-    });
-    _boxShrinkController.addStatusListener(_onBoxShrinkStatusChanged);
-    final dto = RoleplayStateService.instance.cachedResult;
-    _currentLevel = dto?.afterLevel;
-    _progressPercentage = dto?.afterProgressPercentage?.toDouble();
-    _displayLevel = dto?.beforeLevel;
-    _displayProgress = (dto?.beforeProgressPercentage ?? 0).toDouble();
-    _scheduleBoxLayerSequence();
-  }
-
-  void _onBoxShrinkStatusChanged(AnimationStatus status) {
-    if (status == AnimationStatus.completed) {
-      _boxShrinkController.removeStatusListener(_onBoxShrinkStatusChanged);
-      _scheduleContentAnimations();
-    }
-  }
-
-  Future<void> _scheduleContentAnimations() async {
-    if (!mounted) return;
-    await Future.delayed(const Duration(milliseconds: 300));
-    if (!mounted) return;
-    _startPhase5_7_8();
-    await Future.delayed(const Duration(milliseconds: 300));
-    if (!mounted) return;
-    _startPhase6();
-  }
-
-  void _startPhase5_7_8() {
-    final dto = RoleplayStateService.instance.cachedResult;
-    if (dto == null || !mounted) return;
-
-    final missionResultStr = dto.missionResult ?? '';
-    final hasAnyY = missionResultStr.toUpperCase().contains('Y');
-    if (hasAnyY) {
-      Vibration.vibrate(duration: 80);
-    }
-    setState(() => _missionRevealed = true);
-
-    final likePointTarget = (dto.likePoint ?? 0).toDouble();
-    _likePointController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 500),
-    );
-    _likePointController!.addListener(() {
-      if (mounted && _likePointController != null) setState(() {
-        _displayLikePoint = likePointTarget * _likePointController!.value;
-      });
-    });
-    final lpCtrl = _likePointController!;
-    lpCtrl.addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        lpCtrl.dispose();
-        _likePointController = null;
-      }
-    });
-    lpCtrl.forward();
-
-    final beforeLevel = dto.beforeLevel ?? 0;
-    final afterLevel = dto.afterLevel ?? 0;
-    final beforeProgress = (dto.beforeProgressPercentage ?? 0).toDouble();
-    final afterProgress = (dto.afterProgressPercentage ?? 0).toDouble();
-
-    _levelProgressController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 500),
-    );
-    _levelProgressController!.addListener(() {
-      if (!mounted || _levelProgressController == null) return;
-      final t = _levelProgressController!.value;
-      final levelProgress = _computeLevelProgress(
-        t: t,
-        beforeLevel: beforeLevel,
-        afterLevel: afterLevel,
-        beforeProgress: beforeProgress,
-        afterProgress: afterProgress,
-      );
-      setState(() {
-        _displayLevel = levelProgress.$1;
-        _displayProgress = levelProgress.$2;
-      });
-    });
-    final lvCtrl = _levelProgressController!;
-    lvCtrl.addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        if (afterLevel > beforeLevel && mounted && !_levelUpToastShown) {
-          _levelUpToastShown = true;
-          final ctx = context;
-          final l10n = AppLocalizations.of(ctx);
-          if (l10n != null) {
-            DefaultToast.show(ctx, l10n.surveySuccessToast);
-          }
+      duration: const Duration(milliseconds: 700),
+    )..addListener(() {
+        if (mounted) {
+          setState(() {});
         }
-        lvCtrl.dispose();
-        _levelProgressController = null;
-      }
-    });
-    lvCtrl.forward();
-  }
-
-  (int, double) _computeLevelProgress({
-    required double t,
-    required int beforeLevel,
-    required int afterLevel,
-    required double beforeProgress,
-    required double afterProgress,
-  }) {
-    if (beforeLevel == afterLevel) {
-      final p = beforeProgress + t * (afterProgress - beforeProgress);
-      return (beforeLevel, p.clamp(0, 100));
-    }
-    final levelDiff = afterLevel - beforeLevel;
-    final segment1 = 100 - beforeProgress;
-    final segmentLast = afterProgress;
-    final total = segment1 + 100.0 * (levelDiff - 1) + segmentLast;
-    final amount = (t * total).clamp(0.0, total);
-
-    if (amount <= segment1) {
-      final p = beforeProgress + (amount / segment1) * (100 - beforeProgress);
-      return (beforeLevel, p);
-    }
-    final remaining = amount - segment1;
-    final fullBars = (remaining / 100).floor().clamp(0, levelDiff - 1);
-    if (fullBars < levelDiff - 1) {
-      final progress = remaining - 100 * fullBars;
-      return (beforeLevel + 1 + fullBars, progress.clamp(0, 100));
-    }
-    final p = (remaining - 100 * (levelDiff - 1)) / segmentLast * afterProgress;
-    return (afterLevel, p.clamp(0, 100));
-  }
-
-  void _startPhase6() {
-    final dto = RoleplayStateService.instance.cachedResult;
-    if (dto == null || !mounted) return;
-    final wordsTarget = dto.words ?? 0;
-    if (wordsTarget > 0) {
-      Vibration.vibrate(duration: 80);
-    }
-    _wordsController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 300),
-    );
-    final wCtrl = _wordsController!;
-    wCtrl.addListener(() {
-      if (mounted) setState(() {
-        _displayWords = (wordsTarget * wCtrl.value).round();
       });
-    });
-    wCtrl.addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        wCtrl.dispose();
-        _wordsController = null;
-      }
-    });
-    wCtrl.forward();
+    _feedbackEntranceController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 450),
+    );
+    _keyExpressionSectionEntranceController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 450),
+    );
+    _footerFadeController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 240),
+    );
+    _scheduleStarSequence();
   }
 
-  void _startBoxShrink() {
-    if (!mounted || _shrinkStarted) return;
-    final h = MediaQuery.sizeOf(context).height;
-    setState(() {
-      _shrinkScheduled = true;
-      _shrinkFromHeight = h;
-      _shrinkStarted = true;
-    });
-    _boxShrinkController.forward();
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_didAttachRouteAnimation) {
+      return;
+    }
+    final route = ModalRoute.of(context);
+    final animation = route?.animation;
+    if (animation == null) {
+      _schedulePostEntranceSequence();
+      _didAttachRouteAnimation = true;
+      return;
+    }
+    _routeAnimation = animation;
+    animation.addStatusListener(_onRouteAnimationStatusChanged);
+    if (animation.status == AnimationStatus.completed) {
+      _schedulePostEntranceSequence();
+    }
+    _didAttachRouteAnimation = true;
   }
 
-  Future<void> _scheduleBoxLayerSequence() async {
-    final dto = RoleplayStateService.instance.cachedResult;
-    final rawStarResult = dto?.starResult ?? 0;
+  void _onRouteAnimationStatusChanged(AnimationStatus status) {
+    if (status == AnimationStatus.completed) {
+      _schedulePostEntranceSequence();
+    }
+  }
+
+  Future<void> _schedulePostEntranceSequence() async {
+    if (_hasScheduledPostEntrance) {
+      return;
+    }
+    _hasScheduledPostEntrance = true;
+    await Future.delayed(const Duration(seconds: 1));
+    if (!mounted) {
+      return;
+    }
+    _startPanelMoveAndEffect();
+  }
+
+  Future<void> _scheduleStarSequence() async {
+    final rawStarResult = _starResult;
     final targetGoldStars = (rawStarResult >= 1 && rawStarResult <= 3)
         ? rawStarResult
         : 0;
 
     for (var i = 1; i <= targetGoldStars; i++) {
       await Future.delayed(const Duration(milliseconds: 300));
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
       setState(() => _revealedGoldStars = i);
       Vibration.vibrate(duration: 80);
     }
+  }
 
-    await Future.delayed(const Duration(milliseconds: 500));
-    if (!mounted) return;
-    _startBoxShrink();
+  void _startPanelMoveAndEffect() {
+    if (_hasStartedEffectSequence) {
+      return;
+    }
+    _hasStartedEffectSequence = true;
+    _panelMoveController.forward();
+
+    if (_isS2Flow) {
+      final history = _s2History;
+      if (history == null) {
+        return;
+      }
+      _playLikeProgressEffect(
+        beforeLikePoint: history.beforeLikePoint ?? 0,
+        afterLikePoint: history.afterLikePoint ?? 0,
+        beforeLevel: history.beforeLevel ?? 0,
+        toBeLevel: history.afterLevel ?? 0,
+        beforeProgress: history.beforeProgressPercentage ?? 0,
+        toBeProgress: history.afterProgressPercentage ?? 0,
+        onEffectCompleted: _onS2LikeProgressEffectCompleted,
+      );
+      return;
+    }
+
+    final dto = _dto;
+    if (dto == null) {
+      return;
+    }
+
+    _playLikeProgressEffect(
+      beforeLikePoint: dto.beforeLikePoint ?? 0,
+      afterLikePoint: dto.afterLikePoint ?? 0,
+      beforeLevel: dto.beforeLevel ?? 0,
+      toBeLevel: dto.afterLevel ?? 0,
+      beforeProgress: dto.beforeProgressPercentage ?? 0,
+      toBeProgress: dto.afterProgressPercentage ?? 0,
+      onEffectCompleted: () => _onLikeProgressEffectCompleted(dto),
+    );
+  }
+
+  void _playLikeProgressEffect({
+    required int beforeLikePoint,
+    required int afterLikePoint,
+    required int beforeLevel,
+    required int toBeLevel,
+    required int beforeProgress,
+    required int toBeProgress,
+    VoidCallback? onEffectCompleted,
+  }) {
+    LikeProgressEffect.play(
+      context,
+      params: LikeProgressEffectParams(
+        asIsLikePoint: beforeLikePoint,
+        toBeLikePoint: afterLikePoint,
+        asIsLevel: beforeLevel,
+        toBeLevel: toBeLevel,
+        asIsProgress: beforeProgress,
+        toBeProgress: toBeProgress,
+      ),
+      onCompleted: () {
+        if (!mounted) {
+          return;
+        }
+        setState(() {
+          _effectDone = true;
+          _showFooterActions = false;
+        });
+        onEffectCompleted?.call();
+      },
+    );
+  }
+
+  void _onS2LikeProgressEffectCompleted() {
+    if (mounted) {
+      _keyExpressionSectionEntranceController.forward(from: 0);
+    }
+    Future.delayed(const Duration(milliseconds: 1000), () {
+      if (!mounted) {
+        return;
+      }
+      _footerFadeController.reset();
+      setState(() => _showFooterActions = true);
+      _footerFadeController.forward();
+    });
+  }
+
+  void _onLikeProgressEffectCompleted(RoleplayResultDto dto) {
+    if (mounted) {
+      _feedbackEntranceController.forward(from: 0);
+    }
+    final hasKeyExpressions = dto.keyExpressions?.isNotEmpty ?? false;
+    if (hasKeyExpressions) {
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (mounted) {
+          _keyExpressionSectionEntranceController.forward(from: 0);
+        }
+      });
+    }
+    Future.delayed(const Duration(milliseconds: 1000), () {
+      if (!mounted) {
+        return;
+      }
+      _footerFadeController.reset();
+      setState(() => _showFooterActions = true);
+      _footerFadeController.forward();
+    });
+  }
+
+  void _scheduleMeasurePanel() {
+    if (_panelMeasuredHeight != null) {
+      return;
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _panelMeasuredHeight != null) {
+        return;
+      }
+      final ctx = _panelKey.currentContext;
+      if (ctx == null) {
+        return;
+      }
+      final size = ctx.size;
+      if (size == null || size.height <= 0) {
+        return;
+      }
+      setState(() => _panelMeasuredHeight = size.height);
+    });
   }
 
   @override
   void dispose() {
-    _boxShrinkController.removeStatusListener(_onBoxShrinkStatusChanged);
-    _boxShrinkController.dispose();
-    _likePointController?.dispose();
-    _wordsController?.dispose();
-    _levelProgressController?.dispose();
+    _s1KeyExpressionAudioSub?.cancel();
+    _s1KeyExpressionAudioSub = null;
+    unawaited(_s1KeyExpressionAudioPlayer.dispose());
+    _routeAnimation?.removeStatusListener(_onRouteAnimationStatusChanged);
+    _panelMoveController.dispose();
+    _feedbackEntranceController.dispose();
+    _keyExpressionSectionEntranceController.dispose();
+    _footerFadeController.dispose();
     super.dispose();
   }
 
-  void _navigateToOverview(BuildContext context) {
-    RoleplayRouter.popToOverview(context);
+  Future<AudioSource?> _prepareS1KeyExpressionAudio({
+    required String? cdnYn,
+    required String? cdnPath,
+    required Uint8List? soundBytes,
+  }) async {
+    await _s1KeyExpressionAudioPlayer.stop();
+    if (cdnYn == 'Y' && cdnPath != null && cdnPath.isNotEmpty) {
+      final url = '${AppConfig.cdnBaseUrl}$cdnPath';
+      final source = AudioSource.uri(Uri.parse(url));
+      await _s1KeyExpressionAudioPlayer.setAudioSource(source);
+      return source;
+    }
+    if (soundBytes != null && soundBytes.isNotEmpty) {
+      final source = AudioSource.uri(
+        Uri.dataFromBytes(soundBytes, mimeType: 'audio/mpeg'),
+      );
+      await _s1KeyExpressionAudioPlayer.setAudioSource(source);
+      return source;
+    }
+    return null;
   }
 
-  static const double _finalBoxHeight = 210;
-  static const Color _teal = Color(0xFF0CABA8);
-  static const Color _defaultBg = Color(0xFF121212);
-  static const Color _mint = Color(0xFF80D7CF);
-  static const Color _mintLight = Color(0xFFCFFFFB);
-  static const Color _progressBase = Color(0xFF635F5F);
-  static const String _starGold = 'assets/images/star_gold.png';
-  static const String _starSilver = 'assets/images/star_silver.png';
-  static const String _likeAtResult = 'assets/images/like_at_result.png';
-  static const String _missionSucceeded = 'assets/images/icons/mission_succeeded.png';
-  static const String _missionFailed = 'assets/images/icons/mission_failed.png';
+  Future<void> _onS1KeyExpressionCardTap(int keyExpressionIndex) async {
+    _s1KeyExpressionMegaphoneSeq++;
+    final seq = _s1KeyExpressionMegaphoneSeq;
+    _s1KeyExpressionAudioSub?.cancel();
+    _s1KeyExpressionAudioSub = null;
+    await _s1KeyExpressionAudioPlayer.stop();
 
-  Widget _buildBoxLayerContent(BuildContext context) {
-    final dto = RoleplayStateService.instance.cachedResult;
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _s1KeyExpressionHighlightedIndex = keyExpressionIndex;
+      _s1KeyExpressionPlaybackIndex = keyExpressionIndex;
+    });
+
+    final resultId = _dto?.id;
+    final token = await TokenStorage.loadAccessToken();
+    if (!mounted || seq != _s1KeyExpressionMegaphoneSeq) {
+      return;
+    }
+
+    if (token == null || resultId == null) {
+      setState(() {
+        _s1KeyExpressionHighlightedIndex = null;
+        _s1KeyExpressionPlaybackIndex = null;
+      });
+      return;
+    }
+
+    try {
+      final tts = await SudaApiClient.getRoleplayResultExpressionSound(
+        accessToken: token,
+        resultId: resultId,
+        expressionIndex: keyExpressionIndex,
+      );
+      if (!mounted || seq != _s1KeyExpressionMegaphoneSeq) {
+        return;
+      }
+
+      final source = await _prepareS1KeyExpressionAudio(
+        cdnYn: tts.cdnYn,
+        cdnPath: tts.cdnPath,
+        soundBytes: tts.sound,
+      );
+      if (!mounted || seq != _s1KeyExpressionMegaphoneSeq) {
+        return;
+      }
+
+      if (source == null) {
+        setState(() => _s1KeyExpressionPlaybackIndex = null);
+        return;
+      }
+
+      _s1KeyExpressionAudioSub =
+          _s1KeyExpressionAudioPlayer.playerStateStream.listen((state) {
+        if (state.processingState == ProcessingState.completed) {
+          _s1KeyExpressionAudioSub?.cancel();
+          _s1KeyExpressionAudioSub = null;
+          if (!mounted || seq != _s1KeyExpressionMegaphoneSeq) {
+            return;
+          }
+          setState(() => _s1KeyExpressionPlaybackIndex = null);
+        }
+      });
+      await _s1KeyExpressionAudioPlayer.play();
+    } catch (_) {
+      _s1KeyExpressionAudioSub?.cancel();
+      _s1KeyExpressionAudioSub = null;
+      if (!mounted || seq != _s1KeyExpressionMegaphoneSeq) {
+        return;
+      }
+      setState(() => _s1KeyExpressionPlaybackIndex = null);
+    }
+  }
+
+  Future<void> _onS1KeyExpressionBookmarkTap(int keyExpressionIndex) async {
+    if (_s1KeyExpressionBookmarkInFlight) {
+      return;
+    }
+    _s1KeyExpressionBookmarkInFlight = true;
+    try {
+      final resultId = _dto?.id;
+      final token = await TokenStorage.loadAccessToken();
+      if (!mounted) {
+        return;
+      }
+      if (token == null || resultId == null) {
+        DefaultToast.show(context, 'HTTP 401 · Request failed', isError: true);
+        return;
+      }
+
+      final isBookmarked =
+          _s1KeyExpressionBookmarkedIndexes.contains(keyExpressionIndex);
+
+      if (isBookmarked) {
+        await SudaApiClient.deleteUserExpression(
+          accessToken: token,
+          rpResultId: resultId,
+          expressionIndex: keyExpressionIndex,
+        );
+        if (!mounted) {
+          return;
+        }
+        setState(
+          () => _s1KeyExpressionBookmarkedIndexes.remove(keyExpressionIndex),
+        );
+      } else {
+        await SudaApiClient.saveUserExpression(
+          accessToken: token,
+          roleplayResultId: resultId,
+          expressionIndex: keyExpressionIndex,
+        );
+        if (!mounted) {
+          return;
+        }
+        setState(
+          () => _s1KeyExpressionBookmarkedIndexes.add(keyExpressionIndex),
+        );
+        final l10n = AppLocalizations.of(context)!;
+        DefaultToast.show(context, l10n.expressionSavedToProfile);
+      }
+    } catch (e) {
+      if (!mounted) {
+        return;
+      }
+      DefaultToast.show(context, _httpErrorBrief(e), isError: true);
+    } finally {
+      _s1KeyExpressionBookmarkInFlight = false;
+    }
+  }
+
+  Future<void> _navigateToOverview(BuildContext context) async {
+    if (_isLeavingToOverview) return;
+    setState(() => _isLeavingToOverview = true);
+    final token = await TokenStorage.loadAccessToken();
+    if (!mounted) return;
+    if (token != null && token.isNotEmpty) {
+      try {
+        final user = await SudaApiClient.getCurrentUser(accessToken: token);
+        if (!mounted) return;
+        MainUserSync.instance.notifyUserUpdated(user);
+        RoleplayStateService.instance.setUser(user);
+      } catch (_) {
+        // best-effort: ignore
+      }
+
+      final roleplayId = RoleplayStateService.instance.roleplayId;
+      if (roleplayId != null) {
+        try {
+          final overview = await SudaApiClient.getRoleplayOverview(
+            accessToken: token,
+            roleplayId: roleplayId,
+          );
+          RoleplayStateService.instance.setOverview(
+            roleplayId: roleplayId,
+            overview: overview,
+          );
+        } catch (_) {
+          // best-effort: ignore
+        }
+      }
+    }
+    if (!mounted) return;
+    RoleplayRouter.popToOverview(this.context);
+  }
+
+  Widget _buildStarsRow() {
     final leftGold = _revealedGoldStars >= 1;
     final centerGold = _revealedGoldStars >= 2;
     final rightGold = _revealedGoldStars >= 3;
     final leftStar = leftGold ? _starGold : _starSilver;
     final centerStar = centerGold ? _starGold : _starSilver;
     final rightStar = rightGold ? _starGold : _starSilver;
-    final theme = Theme.of(context).textTheme;
 
-    // 70x70을 80x80과 같은 기준선에 맞추기 위해 10 하향
     const double star70Offset = 10.0;
-    final starsRow = Row(
+
+    return Row(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -292,7 +559,12 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
           angle: -10 * math.pi / 180,
           child: Transform.translate(
             offset: const Offset(0, star70Offset),
-            child: Image.asset(leftStar, width: 70, height: 70, fit: BoxFit.contain),
+            child: Image.asset(
+              leftStar,
+              width: 70,
+              height: 70,
+              fit: BoxFit.contain,
+            ),
           ),
         ),
         const SizedBox(width: 10),
@@ -302,303 +574,1046 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
           angle: 10 * math.pi / 180,
           child: Transform.translate(
             offset: const Offset(0, star70Offset),
-            child: Image.asset(rightStar, width: 70, height: 70, fit: BoxFit.contain),
-          ),
-        ),
-      ],
-    );
-
-    // 전체 노출 시 레이아웃 기준으로 고정, Opacity로 순차 노출해 위치 변경 없음
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        const SizedBox(height: 20),
-        Opacity(opacity: _showStars ? 1 : 0, child: starsRow),
-        const SizedBox(height: 5),
-        Opacity(
-          opacity: _showMainTitle ? 1 : 0,
-          child: Text(
-            dto?.mainTitle ?? '',
-            style: theme.headlineLarge?.copyWith(color: Colors.white),
-            textAlign: TextAlign.center,
-          ),
-        ),
-        const SizedBox(height: 5),
-        Opacity(
-          opacity: _showSubTitle ? 1 : 0,
-          child: Text(
-            dto?.subTitle ?? '',
-            style: theme.headlineSmall?.copyWith(color: Colors.black),
-            textAlign: TextAlign.center,
+            child: Image.asset(
+              rightStar,
+              width: 70,
+              height: 70,
+              fit: BoxFit.contain,
+            ),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildContentLayer(BuildContext context) {
-    final dto = RoleplayStateService.instance.cachedResult;
-    final theme = Theme.of(context).textTheme;
-    final l10n = AppLocalizations.of(context)!;
-    final screenWidth = MediaQuery.sizeOf(context).width;
-
-    // likePoint: 5~8단계에서 _displayLikePoint 사용 (0 → 결과값 500ms)
-    final likePointDisplay = '${_displayLikePoint.round()}'.padLeft(2, '0');
-    final likePointText = ShaderMask(
-      shaderCallback: (bounds) => const LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [_mint, _mintLight],
-      ).createShader(bounds),
-      blendMode: BlendMode.srcIn,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 2),
-        child: Text(
-          likePointDisplay,
-          style: theme.headlineLarge?.copyWith(color: Colors.white),
-        ),
-      ),
-    );
-
-    // Mission: 초기 N*n → 5단계에서 missionResult 아이콘으로 전환 (_missionRevealed)
-    final missionResultStr = dto?.missionResult ?? '';
-    final missionLen = missionResultStr.isEmpty
-        ? (dto?.completedMissionIds?.length ?? 0)
-        : missionResultStr.length;
+  Widget _buildMissionIcons() {
     final missionIcons = <Widget>[];
-    if (_missionRevealed) {
+
+    if (_isS2Flow) {
+      for (final success in _s2History?.missions ?? const <bool>[]) {
+        missionIcons.add(
+          Image.asset(
+            success ? _rps2MissionOn : _rps2MissionOff,
+            width: 20,
+            height: 20,
+            fit: BoxFit.contain,
+          ),
+        );
+      }
+    } else {
+      final missionResultStr = _dto?.missionResult ?? '';
+      final missionLen = missionResultStr.isEmpty
+          ? (_dto?.completedMissionIds?.length ?? 0)
+          : missionResultStr.length;
+
       if (missionResultStr.isEmpty) {
         for (var i = 0; i < missionLen; i++) {
-          missionIcons.add(Image.asset(_missionFailed, height: 20, width: 20, fit: BoxFit.contain));
+          missionIcons.add(
+            Image.asset(
+              _missionFailed,
+              height: 20,
+              width: 15,
+              fit: BoxFit.contain,
+            ),
+          );
         }
       } else {
         for (var i = 0; i < missionResultStr.length; i++) {
           final isSuccess = missionResultStr[i].toUpperCase() == 'Y';
-          missionIcons.add(Image.asset(
-            isSuccess ? _missionSucceeded : _missionFailed,
-            height: 20,
-            width: 20,
-            fit: BoxFit.contain,
-          ));
+          missionIcons.add(
+            Image.asset(
+              isSuccess ? _missionSucceeded : _missionFailed,
+              height: 20,
+              width: 15,
+              fit: BoxFit.contain,
+            ),
+          );
         }
-      }
-    } else {
-      for (var i = 0; i < missionLen; i++) {
-        missionIcons.add(Image.asset(_missionFailed, height: 20, width: 20, fit: BoxFit.contain));
       }
     }
 
-    // Words: 6단계에서 _displayWords 사용 (0 → 결과값 300ms)
-    final wordsDisplay = '$_displayWords'.padLeft(2, '0');
+    if (missionIcons.isEmpty) {
+      return const Text(
+        '—',
+        style: TextStyle(color: Colors.white),
+      );
+    }
 
-    final bodyDefaultMint = theme.bodyLarge?.copyWith(
-      fontWeight: FontWeight.w600,
-      fontFamily: 'ChironGoRoundTC',
-      fontVariations: const [FontVariation('wght', 600)],
-      color: _mint,
+    return Wrap(
+      alignment: WrapAlignment.center,
+      spacing: _isS2Flow ? 2 : 0,
+      runSpacing: 2,
+      children: missionIcons,
     );
-    final h3Mint = theme.headlineSmall?.copyWith(
-      fontFamily: 'ChironGoRoundTC',
-      fontVariations: const [FontVariation('wght', 700)],
-      color: _mint,
-    );
+  }
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const SizedBox(height: 35),
-        // 2) like_at_result 75x75 + likePoint (한 줄)
-        Center(
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Image.asset(_likeAtResult, width: 75, height: 75, fit: BoxFit.contain),
-              const SizedBox(width: 5),
-              Transform.translate(
-                offset: const Offset(0, 10),
-                child: likePointText,
-              ),
-            ],
-          ),
+  Widget _buildLikeText(BuildContext context) {
+    final theme = Theme.of(context).textTheme;
+    final likeValue = '$_likePoint'.padLeft(2, '0');
+
+    return Text(
+      likeValue,
+      style: theme.bodyLarge?.copyWith(color: Colors.white),
+    );
+  }
+
+  Widget _buildStatCard(
+    BuildContext context, {
+    required String title,
+    required Widget child,
+  }) {
+    final theme = Theme.of(context).textTheme;
+    final labelPrimary = theme.bodyLarge?.copyWith(
+          fontFamily: 'ChironGoRoundTC',
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+          fontVariations: const [FontVariation('wght', 600)],
+          letterSpacing: -0.4,
+          height: 1.2,
+          color: Colors.white,
+        ) ??
+        const TextStyle(
+          fontFamily: 'ChironGoRoundTC',
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+          fontVariations: [FontVariation('wght', 600)],
+          letterSpacing: -0.4,
+          height: 1.2,
+          color: Colors.white,
+        );
+
+    return Expanded(
+      child: Container(
+        height: 75,
+        decoration: BoxDecoration(
+          color: _cardBg,
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x33000000),
+              blurRadius: 18,
+              offset: Offset(0, 10),
+            ),
+          ],
         ),
-        const SizedBox(height: 35),
-        // 4) 좌 50% / 우 50%
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Expanded(
-              child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text('Mission', style: bodyDefaultMint),
-                    const SizedBox(height: 4),
-                    if (missionIcons.isEmpty)
-                      Text('—', style: theme.bodyMedium?.copyWith(color: Colors.white))
-                    else
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: missionIcons,
-                      ),
-                  ],
-                ),
-              ),
+            Text(
+              title,
+              style: labelPrimary,
+              textAlign: TextAlign.center,
             ),
             Expanded(
-              child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text('Words', style: bodyDefaultMint),
-                    const SizedBox(height: 4),
-                    Text(wordsDisplay, style: theme.bodyLarge?.copyWith(color: Colors.white)),
+              child: Center(child: child),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPanel(BuildContext context) {
+    final theme = Theme.of(context).textTheme;
+    final wordsDisplay = '$_words'.padLeft(2, '0');
+
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 560),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 50),
+            _buildStarsRow(),
+            const SizedBox(height: 5),
+            Text(
+              _mainTitle,
+              style: theme.headlineLarge?.copyWith(color: Colors.white),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 5),
+            Text(
+              _subTitle,
+              style: const TextStyle(
+                fontFamily: 'ChironGoRoundTC',
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                fontVariations: [FontVariation('wght', 600)],
+                color: _mint,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 30),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildStatCard(
+                  context,
+                  title: 'Mission',
+                  child: _buildMissionIcons(),
+                ),
+                const SizedBox(width: 10),
+                _buildStatCard(
+                  context,
+                  title: 'Words',
+                  child: Text(
+                    wordsDisplay,
+                    style: theme.bodyLarge?.copyWith(color: Colors.white),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                _buildStatCard(
+                  context,
+                  title: 'Like',
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Image.asset(
+                        _likeAtResult,
+                        width: 30,
+                        height: 30,
+                        fit: BoxFit.contain,
+                      ),
+                      const SizedBox(width: 2),
+                      Flexible(child: _buildLikeText(context)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFeedbackLayer(BuildContext context) {
+    final theme = Theme.of(context).textTheme;
+    final l10n = AppLocalizations.of(context)!;
+    final rawFeedback = _dto?.overallFeedback;
+    final feedback = (rawFeedback == null || rawFeedback.trim().isEmpty)
+        ? l10n.roleplayResultFeedbackInsufficientWords
+        : rawFeedback;
+
+    final entrance = CurvedAnimation(
+      parent: _feedbackEntranceController,
+      curve: Curves.easeOutCubic,
+    );
+    return FadeTransition(
+      opacity: Tween<double>(begin: 0, end: 1).animate(entrance),
+      child: SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(0, 1.2),
+          end: Offset.zero,
+        ).animate(entrance),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 24),
+              child: Text(
+                'Feedback',
+                style: theme.headlineSmall?.copyWith(color: Colors.white),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: _feedbackBoxFill,
+                  borderRadius: BorderRadius.circular(18),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0x33000000),
+                      blurRadius: 18,
+                      offset: Offset(0, 10),
+                    ),
                   ],
+                ),
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  child: Text(
+                    feedback,
+                    style: theme.bodyMedium?.copyWith(color: Colors.black),
+                  ),
                 ),
               ),
             ),
           ],
         ),
-        const SizedBox(height: 25),
-        // 6) 프로그레스바 (Profile과 동일)
-        Center(
-          child: SizedBox(
-            width: screenWidth * 0.7,
-            child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                'Lv. ${_displayLevel ?? 0}',
-                style: theme.labelSmall?.copyWith(color: Colors.white),
+      ),
+    );
+  }
+
+  Widget _buildS1KeyExpressionCarousel(BuildContext context) {
+    final items = _dto?.keyExpressions ?? const <RpResultKeyExpressionDto>[];
+    return _buildHorizontalSnapCarousel(
+      context: context,
+      itemCount: items.length,
+      itemBuilder: (context, index) {
+        final item = items[index];
+        return _S1KeyExpressionCard(
+          item: item,
+          highlighted: _s1KeyExpressionHighlightedIndex == index,
+          playbackActive: _s1KeyExpressionPlaybackIndex == index,
+          bookmarked: _s1KeyExpressionBookmarkedIndexes.contains(index),
+          onCardTap: () => _onS1KeyExpressionCardTap(index),
+          onBookmarkTap: () => _onS1KeyExpressionBookmarkTap(index),
+        );
+      },
+    );
+  }
+
+  Widget _buildS1KeyExpressionLayer(BuildContext context) {
+    final theme = Theme.of(context).textTheme;
+
+    final entrance = CurvedAnimation(
+      parent: _keyExpressionSectionEntranceController,
+      curve: Curves.easeOutCubic,
+    );
+    return FadeTransition(
+      opacity: Tween<double>(begin: 0, end: 1).animate(entrance),
+      child: SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(0, 1.2),
+          end: Offset.zero,
+        ).animate(entrance),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Key Expression',
+                      style: theme.headlineSmall?.copyWith(color: Colors.white),
+                    ),
+                  ),
+                  _buildViewChatButton(
+                    context,
+                    onTap: () {
+                      final r = _dto;
+                      if (r == null) return;
+                      Navigator.push(
+                        context,
+                        SubScreenRoute(page: ReviewChatScreen(result: r)),
+                      );
+                    },
+                  ),
+                ],
               ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _ResultProgressBar(progressPercentage: _displayProgress),
-              ),
-            ],
-          ),
-        ),
-        ),
-        const SizedBox(height: 25),
-        // 8) Good Points
-        Text('Good Points', style: h3Mint, textAlign: TextAlign.center),
-        const SizedBox(height: 20),
-        Text(
-          dto?.goodFeedback ?? '',
-          style: theme.bodySmall?.copyWith(color: Colors.white),
-        ),
-        const SizedBox(height: 25),
-        // 12) To Improve
-        Text('To Improve', style: h3Mint, textAlign: TextAlign.center),
-        const SizedBox(height: 20),
-        Text(
-          dto?.improvementFeedback ?? '',
-          style: theme.bodySmall?.copyWith(color: Colors.white),
-        ),
-        const SizedBox(height: 25),
-        // 16) Got it! 버튼 (Opening Let's Start 스타일, 내부 텍스트 기준 최소 width)
-        Center(
-          child: ElevatedButton(
-            onPressed: () => _navigateToOverview(context),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: _teal,
-              foregroundColor: Colors.white,
-              disabledBackgroundColor: _teal,
-              disabledForegroundColor: Colors.white,
-              shape: const StadiumBorder(),
-              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 18),
-              elevation: 0,
             ),
-            child: const Text("Got it!"),
-          ),
+            const SizedBox(height: 16),
+            _buildS1KeyExpressionCarousel(context),
+          ],
         ),
-        const SizedBox(height: 35),
-        // Report 문구 (다국어). 탭 시 Result Report 스크린 진입. 전송 성공 후 돌아오면 숨김.
-        Center(
-          child: _reportSubmitted
-              ? IgnorePointer(
-                  child: Opacity(
-                    opacity: 0,
+      ),
+    );
+  }
+
+  Widget _buildViewChatButton(BuildContext context, {VoidCallback? onTap}) {
+    final theme = Theme.of(context).textTheme;
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: Container(
+        width: 80,
+        height: 24,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: Colors.transparent,
+          border: Border.all(color: Colors.white, width: 1),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Text(
+          'View Chat',
+          style: theme.labelSmall?.copyWith(color: Colors.white),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionTitleRow(
+    BuildContext context, {
+    required String title,
+    Widget? trailing,
+  }) {
+    final theme = Theme.of(context).textTheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              title,
+              style: theme.headlineSmall?.copyWith(color: Colors.white),
+            ),
+          ),
+          if (trailing != null) trailing,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHorizontalSnapCarousel({
+    required BuildContext context,
+    required int itemCount,
+    required Widget Function(BuildContext context, int index) itemBuilder,
+    double bottomPadding = 0,
+  }) {
+    if (itemCount == 0) {
+      return const SizedBox.shrink();
+    }
+
+    final sw = MediaQuery.sizeOf(context).width;
+    final itemW = sw * 0.7;
+    const between = 16.0;
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: EdgeInsets.only(left: 24, right: 24, bottom: bottomPadding),
+      physics: _LeftSnapScrollPhysics(step: itemW + between),
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            for (var i = 0; i < itemCount; i++) ...[
+              SizedBox(
+                width: itemW,
+                child: itemBuilder(context, i),
+              ),
+              if (i < itemCount - 1) const SizedBox(width: between),
+            ],
+            SizedBox(width: sw - itemW - 48),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Key Expression sound/bookmark API 연동 전 placeholder.
+  void _onKeyExpressionCardTap(int index) {}
+
+  void _onKeyExpressionBookmarkTap(int index) {}
+
+  // S2 Review Chat API 연동 전 placeholder.
+  void _onS2ViewChatTap() {}
+
+  Widget _buildKeyExpressionCarousel(BuildContext context) {
+    final items = _s2History?.keyExpressions ?? const <RpS2KeyExpressionVo>[];
+    return _buildHorizontalSnapCarousel(
+      context: context,
+      itemCount: items.length,
+      bottomPadding: 20,
+      itemBuilder: (context, index) {
+        final item = items[index];
+        return _KeyExpressionCard(
+          item: item,
+          playbackActive: _keyExpressionPlaybackIndex == index,
+          bookmarked: _keyExpressionBookmarkedIndexes.contains(index),
+          onCardTap: () => _onKeyExpressionCardTap(index),
+          onBookmarkTap: () => _onKeyExpressionBookmarkTap(index),
+        );
+      },
+    );
+  }
+
+  Widget _buildKeyExpressionLayer(BuildContext context) {
+    final items = _s2History?.keyExpressions ?? const <RpS2KeyExpressionVo>[];
+    if (items.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final entrance = CurvedAnimation(
+      parent: _keyExpressionSectionEntranceController,
+      curve: Curves.easeOutCubic,
+    );
+    return FadeTransition(
+      opacity: Tween<double>(begin: 0, end: 1).animate(entrance),
+      child: SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(0, 1.2),
+          end: Offset.zero,
+        ).animate(entrance),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildSectionTitleRow(context, title: 'Key Expression'),
+            const SizedBox(height: 16),
+            _buildKeyExpressionCarousel(context),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSpeechFeedbackLayer(BuildContext context) {
+    final items = _buildSpeechFeedbackRows(context);
+    if (items.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final entrance = CurvedAnimation(
+      parent: _keyExpressionSectionEntranceController,
+      curve: Curves.easeOutCubic,
+    );
+    return FadeTransition(
+      opacity: Tween<double>(begin: 0, end: 1).animate(entrance),
+      child: SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(0, 1.2),
+          end: Offset.zero,
+        ).animate(entrance),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildSectionTitleRow(
+              context,
+              title: 'Speech Feedback',
+              trailing: _buildViewChatButton(
+                context,
+                onTap: _onS2ViewChatTap,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Column(
+                children: [
+                  for (var i = 0; i < items.length; i++) ...[
+                    if (i > 0) const SizedBox(height: 20),
+                    items[i],
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _buildSpeechFeedbackRows(BuildContext context) {
+    final history = _s2History;
+    if (history == null || history.speechFeedback.isEmpty) {
+      return const [];
+    }
+
+    final messageById = <int, RpS2UserHistoryMsgDto>{
+      for (final message in history.messages)
+        if (message.id != null) message.id!: message,
+    };
+
+    final sortedIds = history.speechFeedback.keys.toList()..sort();
+    final rows = <Widget>[];
+    for (final messageId in sortedIds) {
+      final message = messageById[messageId];
+      final feedback = history.speechFeedback[messageId];
+      if (message == null || feedback == null) {
+        continue;
+      }
+
+      rows.add(
+        _SpeechFeedbackRow(
+          feedback: feedback,
+          userSpeech: message.content ?? '',
+        ),
+      );
+    }
+    return rows;
+  }
+
+  Widget _buildS2FooterActions(BuildContext context) {
+    final theme = Theme.of(context).textTheme;
+    final l10n = AppLocalizations.of(context)!;
+
+    return FadeTransition(
+      opacity: CurvedAnimation(
+        parent: _footerFadeController,
+        curve: Curves.easeOut,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(height: 28),
+          Center(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(999),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x33000000),
+                    blurRadius: 18,
+                    offset: Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: ElevatedButton(
+                onPressed: _isLeavingToOverview
+                    ? null
+                    : () => _navigateToOverview(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _teal,
+                  foregroundColor: Colors.white,
+                  disabledBackgroundColor: _teal,
+                  disabledForegroundColor: Colors.white,
+                  shape: const StadiumBorder(),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 30,
+                    vertical: 18,
+                  ),
+                  elevation: 0,
+                ),
+                child: const Text('Got it!'),
+              ),
+            ),
+          ),
+          const SizedBox(height: 35),
+          Center(
+            child: _reportSubmitted
+                ? IgnorePointer(
+                    child: Opacity(
+                      opacity: 0,
+                      child: Text(
+                        l10n.endingReport,
+                        style:
+                            theme.bodySmall?.copyWith(color: _reportText),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  )
+                : GestureDetector(
+                    onTap: () async {
+                      final result =
+                          await RoleplayRouter.pushResultReport<bool>(
+                        context,
+                      );
+                      if (result == true && mounted) {
+                        setState(() => _reportSubmitted = true);
+                      }
+                    },
                     child: Text(
                       l10n.endingReport,
-                      style: theme.bodySmall?.copyWith(color: Colors.white),
+                      style: theme.bodySmall?.copyWith(color: _reportText),
                       textAlign: TextAlign.center,
                     ),
                   ),
-                )
-              : GestureDetector(
-                  onTap: () async {
-                    final result =
-                        await RoleplayRouter.pushResultReport<bool>(context);
-                    if (result == true && mounted) {
-                      setState(() => _reportSubmitted = true);
-                    }
-                  },
-                  child: Text(
-                    l10n.endingReport,
-                    style: theme.bodySmall?.copyWith(color: Colors.white),
-                    textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildS2PostEffectBody(BuildContext context) {
+    final bottomInset = MediaQuery.paddingOf(context).bottom;
+
+    return SingleChildScrollView(
+      padding: EdgeInsets.fromLTRB(0, 32, 0, 16 + bottomInset),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _buildKeyExpressionLayer(context),
+          const SizedBox(height: 28),
+          _buildSpeechFeedbackLayer(context),
+          if (_showFooterActions) _buildS2FooterActions(context),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPostEffectBody(BuildContext context) {
+    final theme = Theme.of(context).textTheme;
+    final l10n = AppLocalizations.of(context)!;
+    final bottomInset = MediaQuery.paddingOf(context).bottom;
+    final hasKeyExpressions = _dto?.keyExpressions?.isNotEmpty ?? false;
+
+    return SingleChildScrollView(
+      padding: EdgeInsets.fromLTRB(0, 32, 0, 16 + bottomInset),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _buildFeedbackLayer(context),
+          if (hasKeyExpressions) ...[
+            const SizedBox(height: 28),
+            _buildS1KeyExpressionLayer(context),
+          ],
+          if (_showFooterActions)
+            FadeTransition(
+              opacity: CurvedAnimation(
+                parent: _footerFadeController,
+                curve: Curves.easeOut,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const SizedBox(height: 28),
+                  Center(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(999),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Color(0x33000000),
+                            blurRadius: 18,
+                            offset: Offset(0, 5),
+                          ),
+                        ],
+                      ),
+                      child: ElevatedButton(
+                        onPressed: _isLeavingToOverview
+                            ? null
+                            : () => _navigateToOverview(context),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: _teal,
+                          foregroundColor: Colors.white,
+                          disabledBackgroundColor: _teal,
+                          disabledForegroundColor: Colors.white,
+                          shape: const StadiumBorder(),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 30,
+                            vertical: 18,
+                          ),
+                          elevation: 0,
+                        ),
+                        child: const Text('Got it!'),
+                      ),
+                    ),
                   ),
-                ),
-        ),
-        const SizedBox(height: 40),
-      ],
+                  const SizedBox(height: 35),
+                  Center(
+                    child: _reportSubmitted
+                        ? IgnorePointer(
+                            child: Opacity(
+                              opacity: 0,
+                              child: Text(
+                                l10n.endingReport,
+                                style: theme.bodySmall
+                                    ?.copyWith(color: _reportText),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          )
+                        : GestureDetector(
+                            onTap: () async {
+                              final result = await RoleplayRouter
+                                  .pushResultReport<bool>(context);
+                              if (result == true && mounted) {
+                                setState(() => _reportSubmitted = true);
+                              }
+                            },
+                            child: Text(
+                              l10n.endingReport,
+                              style: theme.bodySmall
+                                  ?.copyWith(color: _reportText),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                  ),
+                  const SizedBox(height: 24),
+                ],
+              ),
+            ),
+        ],
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    _scheduleMeasurePanel();
+    final moveProgress = Curves.easeOutCubic.transform(_panelMoveController.value);
     final screenHeight = MediaQuery.sizeOf(context).height;
-    final shrinkT = _boxShrinkController.value;
-    final boxHeight = _shrinkStarted
-        ? _finalBoxHeight +
-            (_shrinkFromHeight - _finalBoxHeight) *
-                (1 - Curves.easeOutQuint.transform(shrinkT))
-        : screenHeight;
+    final targetHeight = (_panelMeasuredHeight ?? screenHeight).clamp(0.0, screenHeight);
+    final boxHeight = lerpDouble(screenHeight, targetHeight, moveProgress) ?? screenHeight;
 
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        Positioned.fill(child: Container(color: _teal)),
-        PopScope(
-          canPop: false,
-          onPopInvoked: (didPop) {
-            if (!didPop) _navigateToOverview(context);
-          },
-          child: Scaffold(
-            backgroundColor: Colors.transparent,
-            body: Column(
-              children: [
-                AnimatedBuilder(
-                  animation: _boxShrinkController,
-                  builder: (context, child) {
-                    return SizedBox(
-                      height: boxHeight,
-                      width: double.infinity,
-                      child: Container(
-                        color: _teal,
-                        alignment: Alignment.center,
-                        child: _buildBoxLayerContent(context),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) {
+          _navigateToOverview(context);
+        }
+      },
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: DecoratedBox(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [_topBg, _bottomBg],
+            ),
+          ),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Column(
+                children: [
+                  SizedBox(
+                    height: boxHeight,
+                    width: double.infinity,
+                    child: Container(
+                      alignment: Alignment.center,
+                      child: KeyedSubtree(
+                        key: _panelKey,
+                        child: _buildPanel(context),
                       ),
-                    );
-                  },
+                    ),
+                  ),
+                  if (_effectDone)
+                    Expanded(
+                      child: _isS2Flow
+                          ? _buildS2PostEffectBody(context)
+                          : _buildPostEffectBody(context),
+                    ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SpeechFeedbackCardShell extends StatelessWidget {
+  const _SpeechFeedbackCardShell({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: const BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(18)),
+        boxShadow: [
+          BoxShadow(
+            color: Color(0x33000000),
+            blurRadius: 18,
+            offset: Offset(0, 10),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(18),
+        child: ColoredBox(
+          color: Colors.white,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: child,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SpeechFeedbackGradeStyle {
+  static const Color gradeA = Color(0xFF0CABA8);
+  static const Color gradeB = Color(0xFF009628);
+  static const Color gradeC = Color(0xFFFFB700);
+  static const Color gradeD = Color(0xFFB40000);
+
+  static ({String label, Color color})? resolve(String? grade) {
+    switch (grade?.toUpperCase()) {
+      case 'A':
+        return (label: 'PERFECT', color: gradeA);
+      case 'B':
+        return (label: 'GOOD', color: gradeB);
+      case 'C':
+        return (label: 'NEEDS IMPROVEMENT', color: gradeC);
+      case 'D':
+        return (label: 'UNCLEAR', color: gradeD);
+      default:
+        return null;
+    }
+  }
+}
+
+class _SpeechFeedbackGradeBadge extends StatelessWidget {
+  const _SpeechFeedbackGradeBadge({required this.grade});
+
+  final String? grade;
+
+  @override
+  Widget build(BuildContext context) {
+    final resolved = _SpeechFeedbackGradeStyle.resolve(grade);
+    if (resolved == null) {
+      return const SizedBox.shrink();
+    }
+
+    final theme = Theme.of(context).textTheme;
+    return Text(
+      resolved.label,
+      textAlign: TextAlign.start,
+      style: theme.bodySmall?.copyWith(
+        color: resolved.color,
+        fontWeight: FontWeight.w700,
+        height: 1.2,
+      ),
+    );
+  }
+}
+
+class _SpeechFeedbackScoreBarTrack extends StatelessWidget {
+  const _SpeechFeedbackScoreBarTrack({
+    required this.scoreValue,
+    required this.barColor,
+  });
+
+  final String? scoreValue;
+  final Color barColor;
+
+  static const Color _trackColor = Color(0xFFD9D9D9);
+
+  static double _progressFactor(String? value) {
+    switch (value?.toUpperCase()) {
+      case 'GOOD':
+        return 1.0;
+      case 'FAIR':
+        return 0.6;
+      case 'POOR':
+        return 0.2;
+      default:
+        return 0.0;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final progress = _progressFactor(scoreValue).clamp(0.0, 1.0);
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(1.5),
+      child: SizedBox(
+        height: 3,
+        width: double.infinity,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            const ColoredBox(color: _trackColor),
+            if (progress > 0)
+              FractionallySizedBox(
+                widthFactor: progress,
+                heightFactor: 1,
+                alignment: Alignment.centerLeft,
+                child: ColoredBox(
+                  color: barColor,
+                  child: const SizedBox.expand(),
                 ),
-                Expanded(
-                  child: Container(
-                    color: _defaultBg,
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: _buildContentLayer(context),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SpeechFeedbackScorePanel extends StatelessWidget {
+  const _SpeechFeedbackScorePanel({
+    required this.score,
+    required this.barColor,
+  });
+
+  final RpS2ScoreVo? score;
+  final Color barColor;
+
+  static const Color _labelColor = Color(0xFF777373);
+  static const double _labelBarGap = 4;
+  static const double _rowGap = 8;
+  static const double _rowHeight = 14;
+
+  static double _labelColumnWidth(
+    BuildContext context,
+    List<String> labels,
+    TextStyle labelStyle,
+  ) {
+    var maxWidth = 0.0;
+    for (final label in labels) {
+      final painter = TextPainter(
+        text: TextSpan(text: label, style: labelStyle),
+        textDirection: Directionality.of(context),
+        maxLines: 1,
+      )..layout();
+      maxWidth = math.max(maxWidth, painter.width);
+    }
+    return maxWidth.ceilToDouble();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (score == null) {
+      return const SizedBox.shrink();
+    }
+
+    final theme = Theme.of(context).textTheme;
+    final labelStyle = theme.labelSmall?.copyWith(color: _labelColor);
+    final l10n = AppLocalizations.of(context)!;
+    final rows = <({String label, String? value})>[
+      (label: l10n.roleplayResultScoreMeaning, value: score!.meaning),
+      (label: l10n.roleplayResultScoreRelevance, value: score!.relevance),
+      (label: l10n.roleplayResultScoreVocabulary, value: score!.vocabulary),
+      (label: l10n.roleplayResultScoreGrammar, value: score!.grammar),
+    ];
+    final labelWidth = _labelColumnWidth(
+      context,
+      rows.map((row) => row.label).toList(),
+      labelStyle ?? const TextStyle(fontSize: 12),
+    );
+
+    Widget buildRowGap(int index) {
+      return index > 0 ? const SizedBox(height: _rowGap) : const SizedBox.shrink();
+    }
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: labelWidth,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (var i = 0; i < rows.length; i++) ...[
+                buildRowGap(i),
+                SizedBox(
+                  height: _rowHeight,
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(rows[i].label, style: labelStyle),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+        const SizedBox(width: _labelBarGap),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (var i = 0; i < rows.length; i++) ...[
+                buildRowGap(i),
+                SizedBox(
+                  height: _rowHeight,
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: _SpeechFeedbackScoreBarTrack(
+                      scoreValue: rows[i].value,
+                      barColor: barColor,
                     ),
                   ),
                 ),
               ],
-            ),
+            ],
           ),
         ),
       ],
@@ -606,38 +1621,527 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
   }
 }
 
-/// Profile 스크린과 동일한 Lv.x 프로그레스바 형태 (height 4, base #635F5F, progress #80D7CF)
-class _ResultProgressBar extends StatelessWidget {
-  final double progressPercentage;
+class _SpeechFeedbackFeedbackButton extends StatelessWidget {
+  const _SpeechFeedbackFeedbackButton({
+    required this.onTap,
+    required this.expanded,
+  });
 
-  const _ResultProgressBar({required this.progressPercentage});
+  final VoidCallback onTap;
+  final bool expanded;
+
+  static const String _clickToFoldPng =
+      'assets/images/icons/click_to_fold.png';
+  static const Color _teal = Color(0xFF0CABA8);
 
   @override
   Widget build(BuildContext context) {
-    final p = (progressPercentage.clamp(0, 100)) / 100.0;
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(2),
-      child: SizedBox(
-        height: 4,
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return Stack(
-              children: [
-                const Positioned.fill(
-                  child: ColoredBox(color: Color(0xFF635F5F)),
-                ),
-                Positioned(
-                  left: 0,
-                  top: 0,
-                  bottom: 0,
-                  width: constraints.maxWidth * p,
-                  child: const ColoredBox(color: Color(0xFF80D7CF)),
-                ),
-              ],
-            );
-          },
+    final theme = Theme.of(context).textTheme;
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: Container(
+        height: 24,
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        decoration: BoxDecoration(
+          color: Colors.transparent,
+          border: Border.all(color: _teal, width: 1),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Feedback',
+              style: theme.labelSmall?.copyWith(color: _teal),
+            ),
+            const SizedBox(width: 4),
+            Transform.flip(
+              flipY: !expanded,
+              child: Image.asset(
+                _clickToFoldPng,
+                width: 12,
+                height: 12,
+                fit: BoxFit.contain,
+                color: _teal,
+                colorBlendMode: BlendMode.srcIn,
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
+}
+
+class _SpeechFeedbackRow extends StatefulWidget {
+  const _SpeechFeedbackRow({
+    required this.feedback,
+    required this.userSpeech,
+  });
+
+  final RpS2UserFeedbackVo feedback;
+  final String userSpeech;
+
+  @override
+  State<_SpeechFeedbackRow> createState() => _SpeechFeedbackRowState();
+}
+
+class _SpeechFeedbackRowState extends State<_SpeechFeedbackRow> {
+  static const String _megaphonePng = 'assets/images/icons/megaphone.png';
+  static const Color _megaphoneTint = Color(0xFF0CABA8);
+  static const Color _feedbackTextColor = Color(0xFF635F5F);
+
+  static const Duration _expandDuration = Duration(milliseconds: 300);
+  static const Curve _expandCurve = Curves.easeInOutCubic;
+
+  bool _expanded = false;
+
+  void _onMegaphoneTap() {
+    // TTS API 연동 추후.
+  }
+
+  void _onFeedbackTap() {
+    setState(() => _expanded = !_expanded);
+  }
+
+  Widget _buildExpandedFeedbackText(BuildContext context) {
+    final theme = Theme.of(context).textTheme;
+    final feedbackText = widget.feedback.feedback?.trim();
+    final hasFeedback =
+        feedbackText != null && feedbackText.isNotEmpty;
+
+    if (!_expanded || !hasFeedback) {
+      return const SizedBox(width: double.infinity);
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Text(
+        feedbackText,
+        style: theme.bodySmall?.copyWith(
+          color: _feedbackTextColor,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildExpandedScorePanel(BuildContext context) {
+    final gradeStyle = _SpeechFeedbackGradeStyle.resolve(widget.feedback.grade);
+    if (!_expanded || widget.feedback.score == null) {
+      return const SizedBox(width: double.infinity);
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 8, bottom: 8),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: FractionallySizedBox(
+          widthFactor: 0.5,
+          alignment: Alignment.centerLeft,
+          child: _SpeechFeedbackScorePanel(
+            score: widget.feedback.score,
+            barColor: gradeStyle?.color ?? _SpeechFeedbackGradeStyle.gradeA,
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context).textTheme;
+    final showScorePanel = _expanded && widget.feedback.score != null;
+
+    return AnimatedSize(
+      duration: _expandDuration,
+      curve: _expandCurve,
+      alignment: Alignment.topCenter,
+      clipBehavior: Clip.hardEdge,
+      child: _SpeechFeedbackCardShell(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _SpeechFeedbackGradeBadge(grade: widget.feedback.grade),
+            AnimatedSize(
+              duration: _expandDuration,
+              curve: _expandCurve,
+              alignment: Alignment.topCenter,
+              clipBehavior: Clip.hardEdge,
+              child: _buildExpandedScorePanel(context),
+            ),
+            if (!showScorePanel) const SizedBox(height: 8),
+            Text(
+              widget.userSpeech,
+              style: theme.bodyLarge?.copyWith(
+                color: _exprTextPrimary,
+              ),
+            ),
+            AnimatedSize(
+              duration: _expandDuration,
+              curve: _expandCurve,
+              alignment: Alignment.topCenter,
+              clipBehavior: Clip.hardEdge,
+              child: _buildExpandedFeedbackText(context),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: _onMegaphoneTap,
+                  child: Image.asset(
+                    _megaphonePng,
+                    width: 24,
+                    height: 24,
+                    fit: BoxFit.contain,
+                    color: _megaphoneTint,
+                    colorBlendMode: BlendMode.srcIn,
+                  ),
+                ),
+                _SpeechFeedbackFeedbackButton(
+                  onTap: _onFeedbackTap,
+                  expanded: _expanded,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _KeyExpressionCard extends StatelessWidget {
+  const _KeyExpressionCard({
+    required this.item,
+    required this.playbackActive,
+    required this.bookmarked,
+    required this.onCardTap,
+    required this.onBookmarkTap,
+  });
+
+  final RpS2KeyExpressionVo item;
+  final bool playbackActive;
+  final bool bookmarked;
+  final VoidCallback onCardTap;
+  final VoidCallback onBookmarkTap;
+
+  static const String _checkMintSvg = 'assets/images/icons/check_mint.svg';
+  static const String _megaphonePng = 'assets/images/icons/megaphone.png';
+  static const String _bookmarkOffPng = 'assets/images/icons/bookmark_off.png';
+  static const String _bookmarkOnPng = 'assets/images/icons/bookmark_on.png';
+  static const double _bodyLeftIndent = 30;
+  static const Color _megaphoneTintActive = Color(0xFF0CABA8);
+  static const Color _megaphoneTintLoading = Color(0xFF121212);
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context).textTheme;
+    final keyExpressionEn = SudaJsonUtil.localizedMapText(
+      item.keyExpression,
+      languageCode: 'en',
+    );
+    final keyExpressionUserLang = SudaJsonUtil.localizedMapText(
+      item.keyExpression,
+    );
+    final sampleAnswerEn = SudaJsonUtil.localizedMapText(
+      item.sampleAnswer,
+      languageCode: 'en',
+    );
+    final sampleAnswerUserLang = SudaJsonUtil.localizedMapText(
+      item.sampleAnswer,
+    );
+
+    return GestureDetector(
+      onTap: onCardTap,
+      behavior: HitTestBehavior.opaque,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x33000000),
+              blurRadius: 18,
+              offset: Offset(0, 10),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(18),
+          child: Container(
+            color: Colors.white,
+            padding: const EdgeInsets.all(16),
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      SvgPicture.asset(
+                        _checkMintSvg,
+                        width: 22,
+                        height: 22,
+                        fit: BoxFit.contain,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          keyExpressionEn,
+                          style: theme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: _exprTextPrimary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Padding(
+                    padding: const EdgeInsets.only(left: _bodyLeftIndent),
+                    child: Text(
+                      keyExpressionUserLang,
+                      style: theme.bodySmall?.copyWith(
+                        color: _exprTextSecondary,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 15),
+                  Text(
+                    sampleAnswerEn,
+                    style: theme.bodyMedium?.copyWith(
+                      color: _exprTextPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    sampleAnswerUserLang,
+                    style: theme.bodySmall?.copyWith(
+                      color: _exprTextSecondary,
+                    ),
+                  ),
+                  const Spacer(),
+                  const SizedBox(height: 15),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Image.asset(
+                        _megaphonePng,
+                        width: 24,
+                        height: 24,
+                        fit: BoxFit.contain,
+                        color: playbackActive
+                            ? _megaphoneTintLoading
+                            : _megaphoneTintActive,
+                        colorBlendMode: BlendMode.srcIn,
+                      ),
+                      GestureDetector(
+                        onTap: onBookmarkTap,
+                        behavior: HitTestBehavior.opaque,
+                        child: Image.asset(
+                          bookmarked ? _bookmarkOnPng : _bookmarkOffPng,
+                          width: 24,
+                          height: 24,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _S1KeyExpressionCard extends StatelessWidget {
+  const _S1KeyExpressionCard({
+    required this.item,
+    required this.highlighted,
+    required this.playbackActive,
+    required this.bookmarked,
+    required this.onCardTap,
+    required this.onBookmarkTap,
+  });
+
+  final RpResultKeyExpressionDto item;
+  final bool highlighted;
+  final bool playbackActive;
+  final bool bookmarked;
+  final VoidCallback onCardTap;
+  final VoidCallback onBookmarkTap;
+
+  static const String _checkMintSvg = 'assets/images/icons/check_mint.svg';
+  static const String _megaphonePng = 'assets/images/icons/megaphone.png';
+  static const String _bookmarkOffPng = 'assets/images/icons/bookmark_off.png';
+  static const String _bookmarkOnPng = 'assets/images/icons/bookmark_on.png';
+  /// check(22) + gap(8) — rephrased·meaning 좌측 정렬 공통
+  static const double _bodyLeftIndent = 30;
+  static const Color _megaphoneTintActive = Color(0xFF0CABA8);
+  static const Color _megaphoneTintLoading = Color(0xFF121212);
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context).textTheme;
+    final expression = item.expression ?? '';
+    final meaning = item.meaningUserLanguage ?? '';
+    final rephrased = item.rephrasedSentence ?? '';
+
+    return GestureDetector(
+      onTap: onCardTap,
+      behavior: HitTestBehavior.opaque,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x33000000),
+              blurRadius: 18,
+              offset: Offset(0, 10),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(18),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            curve: Curves.easeOut,
+            color: highlighted ? Colors.white : _s1KeyExpressionCardBg,
+            padding: const EdgeInsets.all(16),
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      SvgPicture.asset(
+                        _checkMintSvg,
+                        width: 22,
+                        height: 22,
+                        fit: BoxFit.contain,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          expression,
+                          style: theme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: _exprTextPrimary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 15),
+                  Padding(
+                    padding: const EdgeInsets.only(left: _bodyLeftIndent),
+                    child: Text(
+                      rephrased,
+                      style: theme.bodyMedium?.copyWith(
+                        color: _exprTextPrimary,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Padding(
+                    padding: const EdgeInsets.only(left: _bodyLeftIndent),
+                    child: Text(
+                      meaning,
+                      style: theme.bodySmall?.copyWith(
+                        color: _exprTextSecondary,
+                      ),
+                    ),
+                  ),
+                  const Spacer(),
+                  const SizedBox(height: 15),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Image.asset(
+                        _megaphonePng,
+                        width: 24,
+                        height: 24,
+                        fit: BoxFit.contain,
+                        color: playbackActive
+                            ? _megaphoneTintLoading
+                            : _megaphoneTintActive,
+                        colorBlendMode: BlendMode.srcIn,
+                      ),
+                      GestureDetector(
+                        onTap: onBookmarkTap,
+                        behavior: HitTestBehavior.opaque,
+                        child: Image.asset(
+                          bookmarked ? _bookmarkOnPng : _bookmarkOffPng,
+                          width: 24,
+                          height: 24,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LeftSnapScrollPhysics extends ScrollPhysics {
+  const _LeftSnapScrollPhysics({required this.step, super.parent});
+
+  final double step;
+
+  @override
+  _LeftSnapScrollPhysics applyTo(ScrollPhysics? ancestor) {
+    return _LeftSnapScrollPhysics(step: step, parent: buildParent(ancestor));
+  }
+
+  double _targetPixels(ScrollMetrics position, Tolerance tolerance, double velocity) {
+    double p = position.pixels / step;
+    if (velocity < -tolerance.velocity) {
+      p = p.floorToDouble();
+    } else if (velocity > tolerance.velocity) {
+      p = p.ceilToDouble();
+    } else {
+      p = p.roundToDouble();
+    }
+    return (p * step).clamp(position.minScrollExtent, position.maxScrollExtent);
+  }
+
+  @override
+  Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
+    if ((velocity <= 0 && position.pixels <= position.minScrollExtent) ||
+        (velocity >= 0 && position.pixels >= position.maxScrollExtent)) {
+      return super.createBallisticSimulation(position, velocity);
+    }
+    final tolerance = toleranceFor(position);
+    final target = _targetPixels(position, tolerance, velocity);
+    if ((target - position.pixels).abs() < 1e-10) {
+      return null;
+    }
+    return ScrollSpringSimulation(
+      spring,
+      position.pixels,
+      target,
+      velocity,
+      tolerance: tolerance,
+    );
+  }
+
+  @override
+  bool get allowImplicitScrolling => false;
 }
