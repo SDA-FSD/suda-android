@@ -89,8 +89,15 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
   int? _s1KeyExpressionPlaybackIndex;
   final Set<int> _s1KeyExpressionBookmarkedIndexes = <int>{};
   bool _s1KeyExpressionBookmarkInFlight = false;
-  int? _keyExpressionPlaybackIndex;
+  final AudioPlayer _keyExpressionAudioPlayer = AudioPlayer();
+  StreamSubscription<PlayerState>? _keyExpressionAudioSub;
+  int _keyExpressionMegaphoneSeq = 0;
+  int? _keyExpressionActiveIndex;
+  bool _keyExpressionIsPlaying = false;
   final Set<int> _keyExpressionBookmarkedIndexes = <int>{};
+  bool _keyExpressionBookmarkInFlight = false;
+  int? _speechFeedbackActiveMsgId;
+  bool _speechFeedbackIsPlaying = false;
 
   bool get _isS2Flow =>
       SeriesStateService.instance.cachedUserHistory != null;
@@ -345,6 +352,9 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
     _s1KeyExpressionAudioSub?.cancel();
     _s1KeyExpressionAudioSub = null;
     unawaited(_s1KeyExpressionAudioPlayer.dispose());
+    _keyExpressionAudioSub?.cancel();
+    _keyExpressionAudioSub = null;
+    unawaited(_keyExpressionAudioPlayer.dispose());
     _routeAnimation?.removeStatusListener(_onRouteAnimationStatusChanged);
     _panelMoveController.dispose();
     _feedbackEntranceController.dispose();
@@ -997,10 +1007,259 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
     );
   }
 
-  // Key Expression sound/bookmark API 연동 전 placeholder.
-  void _onKeyExpressionCardTap(int index) {}
+  Future<AudioSource?> _prepareKeyExpressionAudio({
+    required String? cdnYn,
+    required String? cdnPath,
+    required Uint8List? soundBytes,
+  }) async {
+    await _keyExpressionAudioPlayer.stop();
+    if (cdnYn == 'Y' && cdnPath != null && cdnPath.isNotEmpty) {
+      final url = '${AppConfig.cdnBaseUrl}$cdnPath';
+      final source = AudioSource.uri(Uri.parse(url));
+      await _keyExpressionAudioPlayer.setAudioSource(source);
+      return source;
+    }
+    if (soundBytes != null && soundBytes.isNotEmpty) {
+      final source = AudioSource.uri(
+        Uri.dataFromBytes(soundBytes, mimeType: 'audio/mpeg'),
+      );
+      await _keyExpressionAudioPlayer.setAudioSource(source);
+      return source;
+    }
+    return null;
+  }
 
-  void _onKeyExpressionBookmarkTap(int index) {}
+  Future<void> _onKeyExpressionCardTap(int expressionIndex) async {
+    _keyExpressionMegaphoneSeq++;
+    final seq = _keyExpressionMegaphoneSeq;
+    _keyExpressionAudioSub?.cancel();
+    _keyExpressionAudioSub = null;
+    await _keyExpressionAudioPlayer.stop();
+
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _keyExpressionActiveIndex = expressionIndex;
+      _keyExpressionIsPlaying = false;
+      _speechFeedbackActiveMsgId = null;
+      _speechFeedbackIsPlaying = false;
+    });
+
+    final historyId = _s2History?.id;
+    final token = await TokenStorage.loadAccessToken();
+    if (!mounted || seq != _keyExpressionMegaphoneSeq) {
+      return;
+    }
+
+    if (token == null || historyId == null) {
+      setState(() {
+        _keyExpressionActiveIndex = null;
+        _keyExpressionIsPlaying = false;
+      });
+      return;
+    }
+
+    try {
+      final tts = await SudaApiClient.getRpS2UserHistoryExpressionSound(
+        accessToken: token,
+        rpUserHistoryId: historyId,
+        expressionIndex: expressionIndex,
+      );
+      if (!mounted || seq != _keyExpressionMegaphoneSeq) {
+        return;
+      }
+
+      final source = await _prepareKeyExpressionAudio(
+        cdnYn: tts.cdnYn,
+        cdnPath: tts.cdnPath,
+        soundBytes: tts.sound,
+      );
+      if (!mounted || seq != _keyExpressionMegaphoneSeq) {
+        return;
+      }
+
+      if (source == null) {
+        setState(() {
+          _keyExpressionActiveIndex = null;
+          _keyExpressionIsPlaying = false;
+        });
+        return;
+      }
+
+      setState(() => _keyExpressionIsPlaying = true);
+
+      _keyExpressionAudioSub =
+          _keyExpressionAudioPlayer.playerStateStream.listen((state) {
+        if (state.processingState == ProcessingState.completed) {
+          _keyExpressionAudioSub?.cancel();
+          _keyExpressionAudioSub = null;
+          if (!mounted || seq != _keyExpressionMegaphoneSeq) {
+            return;
+          }
+          setState(() {
+            _keyExpressionActiveIndex = null;
+            _keyExpressionIsPlaying = false;
+          });
+        }
+      });
+      await _keyExpressionAudioPlayer.play();
+    } catch (_) {
+      _keyExpressionAudioSub?.cancel();
+      _keyExpressionAudioSub = null;
+      if (!mounted || seq != _keyExpressionMegaphoneSeq) {
+        return;
+      }
+      setState(() {
+        _keyExpressionActiveIndex = null;
+        _keyExpressionIsPlaying = false;
+      });
+    }
+  }
+
+  Future<void> _onSpeechFeedbackAudioTap(int rpMsgId) async {
+    _keyExpressionMegaphoneSeq++;
+    final seq = _keyExpressionMegaphoneSeq;
+    _keyExpressionAudioSub?.cancel();
+    _keyExpressionAudioSub = null;
+    await _keyExpressionAudioPlayer.stop();
+
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _keyExpressionActiveIndex = null;
+      _keyExpressionIsPlaying = false;
+      _speechFeedbackActiveMsgId = rpMsgId;
+      _speechFeedbackIsPlaying = false;
+    });
+
+    final historyId = _s2History?.id;
+    final token = await TokenStorage.loadAccessToken();
+    if (!mounted || seq != _keyExpressionMegaphoneSeq) {
+      return;
+    }
+
+    if (token == null || historyId == null) {
+      setState(() {
+        _speechFeedbackActiveMsgId = null;
+        _speechFeedbackIsPlaying = false;
+      });
+      return;
+    }
+
+    try {
+      final tts = await SudaApiClient.getRpS2UserHistoryMessageAudio(
+        accessToken: token,
+        rpUserHistoryId: historyId,
+        rpMsgId: rpMsgId,
+      );
+      if (!mounted || seq != _keyExpressionMegaphoneSeq) {
+        return;
+      }
+
+      final source = await _prepareKeyExpressionAudio(
+        cdnYn: tts.cdnYn,
+        cdnPath: tts.cdnPath,
+        soundBytes: tts.sound,
+      );
+      if (!mounted || seq != _keyExpressionMegaphoneSeq) {
+        return;
+      }
+
+      if (source == null) {
+        setState(() {
+          _speechFeedbackActiveMsgId = null;
+          _speechFeedbackIsPlaying = false;
+        });
+        return;
+      }
+
+      setState(() => _speechFeedbackIsPlaying = true);
+
+      _keyExpressionAudioSub =
+          _keyExpressionAudioPlayer.playerStateStream.listen((state) {
+        if (state.processingState == ProcessingState.completed) {
+          _keyExpressionAudioSub?.cancel();
+          _keyExpressionAudioSub = null;
+          if (!mounted || seq != _keyExpressionMegaphoneSeq) {
+            return;
+          }
+          setState(() {
+            _speechFeedbackActiveMsgId = null;
+            _speechFeedbackIsPlaying = false;
+          });
+        }
+      });
+      await _keyExpressionAudioPlayer.play();
+    } catch (_) {
+      _keyExpressionAudioSub?.cancel();
+      _keyExpressionAudioSub = null;
+      if (!mounted || seq != _keyExpressionMegaphoneSeq) {
+        return;
+      }
+      setState(() {
+        _speechFeedbackActiveMsgId = null;
+        _speechFeedbackIsPlaying = false;
+      });
+    }
+  }
+
+  Future<void> _onKeyExpressionBookmarkTap(int keyExpressionIndex) async {
+    if (_keyExpressionBookmarkInFlight) {
+      return;
+    }
+    _keyExpressionBookmarkInFlight = true;
+    try {
+      final historyId = _s2History?.id;
+      final token = await TokenStorage.loadAccessToken();
+      if (!mounted) {
+        return;
+      }
+      if (token == null || historyId == null) {
+        DefaultToast.show(context, 'HTTP 401 · Request failed', isError: true);
+        return;
+      }
+
+      final isBookmarked =
+          _keyExpressionBookmarkedIndexes.contains(keyExpressionIndex);
+
+      if (isBookmarked) {
+        await SudaApiClient.deleteRpS2UserHistoryExpression(
+          accessToken: token,
+          rpUserHistoryId: historyId,
+          expressionIndex: keyExpressionIndex,
+        );
+        if (!mounted) {
+          return;
+        }
+        setState(
+          () => _keyExpressionBookmarkedIndexes.remove(keyExpressionIndex),
+        );
+      } else {
+        await SudaApiClient.saveRpS2UserHistoryExpression(
+          accessToken: token,
+          rpUserHistoryId: historyId,
+          expressionIndex: keyExpressionIndex,
+        );
+        if (!mounted) {
+          return;
+        }
+        setState(
+          () => _keyExpressionBookmarkedIndexes.add(keyExpressionIndex),
+        );
+        final l10n = AppLocalizations.of(context)!;
+        DefaultToast.show(context, l10n.expressionSavedToProfile);
+      }
+    } catch (e) {
+      if (!mounted) {
+        return;
+      }
+      DefaultToast.show(context, _httpErrorBrief(e), isError: true);
+    } finally {
+      _keyExpressionBookmarkInFlight = false;
+    }
+  }
 
   // S2 Review Chat API 연동 전 placeholder.
   void _onS2ViewChatTap() {}
@@ -1015,10 +1274,13 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
         final item = items[index];
         return _KeyExpressionCard(
           item: item,
-          playbackActive: _keyExpressionPlaybackIndex == index,
+          fetchingActive:
+              _keyExpressionActiveIndex == index && !_keyExpressionIsPlaying,
+          playingActive:
+              _keyExpressionActiveIndex == index && _keyExpressionIsPlaying,
           bookmarked: _keyExpressionBookmarkedIndexes.contains(index),
-          onCardTap: () => _onKeyExpressionCardTap(index),
-          onBookmarkTap: () => _onKeyExpressionBookmarkTap(index),
+          onCardTap: () => unawaited(_onKeyExpressionCardTap(index)),
+          onBookmarkTap: () => unawaited(_onKeyExpressionBookmarkTap(index)),
         );
       },
     );
@@ -1123,6 +1385,14 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
         _SpeechFeedbackRow(
           feedback: feedback,
           userSpeech: message.content ?? '',
+          audioInputEnabled: message.audioInputYn == 'Y',
+          fetchingActive:
+              _speechFeedbackActiveMsgId == messageId &&
+              !_speechFeedbackIsPlaying,
+          playingActive:
+              _speechFeedbackActiveMsgId == messageId &&
+              _speechFeedbackIsPlaying,
+          onAudioTap: () => unawaited(_onSpeechFeedbackAudioTap(messageId)),
         ),
       );
     }
@@ -1678,10 +1948,18 @@ class _SpeechFeedbackRow extends StatefulWidget {
   const _SpeechFeedbackRow({
     required this.feedback,
     required this.userSpeech,
+    required this.audioInputEnabled,
+    required this.fetchingActive,
+    required this.playingActive,
+    required this.onAudioTap,
   });
 
   final RpS2UserFeedbackVo feedback;
   final String userSpeech;
+  final bool audioInputEnabled;
+  final bool fetchingActive;
+  final bool playingActive;
+  final VoidCallback onAudioTap;
 
   @override
   State<_SpeechFeedbackRow> createState() => _SpeechFeedbackRowState();
@@ -1689,17 +1967,16 @@ class _SpeechFeedbackRow extends StatefulWidget {
 
 class _SpeechFeedbackRowState extends State<_SpeechFeedbackRow> {
   static const String _megaphonePng = 'assets/images/icons/megaphone.png';
-  static const Color _megaphoneTint = Color(0xFF0CABA8);
+  static const String _megaphoneFillPng =
+      'assets/images/icons/megaphone_fill.png';
+  static const Color _megaphoneTintActive = Color(0xFF0CABA8);
+  static const Color _megaphoneTintLoading = Color(0xFF121212);
   static const Color _feedbackTextColor = Color(0xFF635F5F);
 
   static const Duration _expandDuration = Duration(milliseconds: 300);
   static const Curve _expandCurve = Curves.easeInOutCubic;
 
   bool _expanded = false;
-
-  void _onMegaphoneTap() {
-    // TTS API 연동 추후.
-  }
 
   void _onFeedbackTap() {
     setState(() => _expanded = !_expanded);
@@ -1753,7 +2030,7 @@ class _SpeechFeedbackRowState extends State<_SpeechFeedbackRow> {
     final theme = Theme.of(context).textTheme;
     final showScorePanel = _expanded && widget.feedback.score != null;
 
-    return AnimatedSize(
+    final card = AnimatedSize(
       duration: _expandDuration,
       curve: _expandCurve,
       alignment: Alignment.topCenter,
@@ -1787,20 +2064,21 @@ class _SpeechFeedbackRowState extends State<_SpeechFeedbackRow> {
             ),
             const SizedBox(height: 12),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: widget.audioInputEnabled
+                  ? MainAxisAlignment.spaceBetween
+                  : MainAxisAlignment.end,
               children: [
-                GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: _onMegaphoneTap,
-                  child: Image.asset(
-                    _megaphonePng,
+                if (widget.audioInputEnabled)
+                  Image.asset(
+                    widget.playingActive ? _megaphoneFillPng : _megaphonePng,
                     width: 24,
                     height: 24,
                     fit: BoxFit.contain,
-                    color: _megaphoneTint,
+                    color: widget.fetchingActive
+                        ? _megaphoneTintLoading
+                        : _megaphoneTintActive,
                     colorBlendMode: BlendMode.srcIn,
                   ),
-                ),
                 _SpeechFeedbackFeedbackButton(
                   onTap: _onFeedbackTap,
                   expanded: _expanded,
@@ -1811,26 +2089,40 @@ class _SpeechFeedbackRowState extends State<_SpeechFeedbackRow> {
         ),
       ),
     );
+
+    if (!widget.audioInputEnabled) {
+      return card;
+    }
+
+    return GestureDetector(
+      onTap: widget.onAudioTap,
+      behavior: HitTestBehavior.opaque,
+      child: card,
+    );
   }
 }
 
 class _KeyExpressionCard extends StatelessWidget {
   const _KeyExpressionCard({
     required this.item,
-    required this.playbackActive,
+    required this.fetchingActive,
+    required this.playingActive,
     required this.bookmarked,
     required this.onCardTap,
     required this.onBookmarkTap,
   });
 
   final RpS2KeyExpressionVo item;
-  final bool playbackActive;
+  final bool fetchingActive;
+  final bool playingActive;
   final bool bookmarked;
   final VoidCallback onCardTap;
   final VoidCallback onBookmarkTap;
 
   static const String _checkMintSvg = 'assets/images/icons/check_mint.svg';
   static const String _megaphonePng = 'assets/images/icons/megaphone.png';
+  static const String _megaphoneFillPng =
+      'assets/images/icons/megaphone_fill.png';
   static const String _bookmarkOffPng = 'assets/images/icons/bookmark_off.png';
   static const String _bookmarkOnPng = 'assets/images/icons/bookmark_on.png';
   static const double _bodyLeftIndent = 30;
@@ -1931,11 +2223,11 @@ class _KeyExpressionCard extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Image.asset(
-                        _megaphonePng,
+                        playingActive ? _megaphoneFillPng : _megaphonePng,
                         width: 24,
                         height: 24,
                         fit: BoxFit.contain,
-                        color: playbackActive
+                        color: fetchingActive
                             ? _megaphoneTintLoading
                             : _megaphoneTintActive,
                         colorBlendMode: BlendMode.srcIn,

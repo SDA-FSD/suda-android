@@ -178,6 +178,54 @@ class SudaApiClient {
     );
   }
 
+  static Future<TtsResultDto> getRpS2UserHistoryExpressionSound({
+    required String accessToken,
+    required int rpUserHistoryId,
+    required int expressionIndex,
+  }) {
+    return SeriesApi.getUserHistoryExpressionSound(
+      accessToken: accessToken,
+      rpUserHistoryId: rpUserHistoryId,
+      expressionIndex: expressionIndex,
+    );
+  }
+
+  static Future<void> saveRpS2UserHistoryExpression({
+    required String accessToken,
+    required int rpUserHistoryId,
+    required int expressionIndex,
+  }) {
+    return SeriesApi.saveUserHistoryExpression(
+      accessToken: accessToken,
+      rpUserHistoryId: rpUserHistoryId,
+      expressionIndex: expressionIndex,
+    );
+  }
+
+  static Future<void> deleteRpS2UserHistoryExpression({
+    required String accessToken,
+    required int rpUserHistoryId,
+    required int expressionIndex,
+  }) {
+    return SeriesApi.deleteUserHistoryExpression(
+      accessToken: accessToken,
+      rpUserHistoryId: rpUserHistoryId,
+      expressionIndex: expressionIndex,
+    );
+  }
+
+  static Future<TtsResultDto> getRpS2UserHistoryMessageAudio({
+    required String accessToken,
+    required int rpUserHistoryId,
+    required int rpMsgId,
+  }) {
+    return SeriesApi.getUserHistoryMessageAudio(
+      accessToken: accessToken,
+      rpUserHistoryId: rpUserHistoryId,
+      rpMsgId: rpMsgId,
+    );
+  }
+
   static Future<RoleplayOverviewDto> getRoleplayOverview({
     required String accessToken,
     required int roleplayId,

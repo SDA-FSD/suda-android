@@ -350,10 +350,11 @@ S1 턴 정책은 `.docs/CONTEXT_ROLEPLAY.md`만 본다. **S2는 아래가 단일
   - Mission 아이콘: `missions(bool[])` → `rps2_mission_on/off.png` 20×20, gap 2
 - **애니메이션 이후 본문** (`result.dart` S2 전용):
   - **Feedback 영역**: 삭제(S2)
-  - **Key Expression**: `keyExpressions` — 카드 체크+`keyExpression(en)` / `keyExpression(사용자언어)` / `sampleAnswer(en)` / `sampleAnswer(사용자언어)`. 좌하 메가폰·우하 북마크 **UI만**(API 추후)
+  - **Key Expression**: `keyExpressions` — 카드 체크+`keyExpression(en)` / `keyExpression(사용자언어)` / `sampleAnswer(en)` / `sampleAnswer(사용자언어)`. 카드 전체 탭(북마크 제외) → `GET /rps2/user-histories/{rpUserHistoryId}/expressions/{expressionIndex}/sound`(`TtsResultDto`, index 0-based). fetch 중 `megaphone.png` `#121212`, 재생 중 `megaphone_fill.png` `#0CABA8`, 타 카드 탭 시 이전 재생 중단. 북마크 OFF→ON: `POST /rps2/user-histories/{id}/expressions/{index}` → `bookmark_on.png` + l10n `expressionSavedToProfile`. ON→OFF: `DELETE` 동일 경로 → `bookmark_off.png`(토스트 없음). 실패 시 HTTP 코드·간단 문구 토스트. 진입 시 북마크 UI 전부 off.
   - **Speech Feedback**(신규): 섹션 헤더 + **View Chat** pill(동작 API 추후). 본문 — `speechFeedback` id 오름차순·행 gap 20·좌우 padding 24. **행당 단일 카드**(Key Expression 카드와 동일 흰 카드·shadow·padding 16).
     - **접힘**: 1줄 grade `bodySmall` **w700**(grade색) · 2줄 사용자 발화 `bodyLarge` · 3줄 메가폰 + **Feedback** pill.
     - **펼침**: 1줄 아래 score 4행(**블록 너비 50%** 좌측, `labelSmall` label + bar h3, row gap 8, 하단 gap 8) · 2·3줄 사이 `feedback` `bodySmall` `#635F5F`.
+    - **재생**: `messages[].audioInputYn == 'Y'`인 행만 메가폰 노출·카드 전체 탭(Feedback pill 제외) 재생. `N`이면 메가폰 미노출·카드 탭 재생 없음(Feedback pill 펼침만). API `GET /rps2/user-histories/{rpUserHistoryId}/messages/{rpMsgId}/audio`(`TtsResultDto`, `rpMsgId` = `speechFeedback` 키 = `messages[].id`). fetch 중 `megaphone.png` `#121212`, 재생 중 `megaphone_fill.png` `#0CABA8`. Key Expression 등 다른 재생 중이면 중단 후 우선 적용.
   - Footer: Got it! / Report(S1과 동일 UX, S2 Report API 미확인)
 - **S1 경로**: Feedback + Key Expression + View Chat(헤더) 유지
 
@@ -380,6 +381,10 @@ S1 턴 정책은 `.docs/CONTEXT_ROLEPLAY.md`만 본다. **S2는 아래가 단일
 | GET | `/rps2/sessions/{id}/ai-message/audio` | `RpS2SoundResDto` (`cdnYn`, `cdnPath`, `file`/`sound`) | 후속 AI 음성 | ✅ |
 | PUT | `/rps2/sessions/{id}/finish` | res: JSON `Long` (`0` 또는 `rpUserHistoryId`) | Playing 마무리 | ✅ |
 | GET | `/rps2/user-histories/{rpUserHistoryId}` | `RpS2UserHistoryDto` | finish 성공 후 result/ending 이동 전 | ✅ |
+| GET | `/rps2/user-histories/{rpUserHistoryId}/expressions/{expressionIndex}/sound` | `TtsResultDto` (`cdnYn`, `cdnPath`, `sound`) | Result Key Expression 카드 탭 | ✅ |
+| POST | `/rps2/user-histories/{rpUserHistoryId}/expressions/{expressionIndex}` | void (200) | Result Key Expression 북마크 저장 | ✅ |
+| DELETE | `/rps2/user-histories/{rpUserHistoryId}/expressions/{expressionIndex}` | void (200) | Result Key Expression 북마크 삭제 | ✅ |
+| GET | `/rps2/user-histories/{rpUserHistoryId}/messages/{rpMsgId}/audio` | `TtsResultDto` (`cdnYn`, `cdnPath`, `sound`) | Result Speech Feedback 카드·메가폰 탭 | ✅ |
 | PUT | `/rps2/user-histories/{rpUserHistoryId}/user-star-rating` | req: `{userStarRating: 0~5}` | Ending 별 탭마다 | ✅ |
 
 **모델 파일**: `lib/models/series_models.dart`  
@@ -389,7 +394,7 @@ S1 턴 정책은 `.docs/CONTEXT_ROLEPLAY.md`만 본다. **S2는 아래가 단일
 
 **S1 세션 API** (`POST /v1/roleplay-sessions`): `RoleplayApi.createRoleplaySession` — **`playing_backup` / Lab 등 S1 전용**. S2 Opening에서는 **사용하지 않음**.
 
-**미구현 (Playing용)**: 없음 — finish·분기·navigate 구현 완료. **Ending S2 렌더링·별점 저장 ✅**. **Result S2 UI**(Speech Feedback 본문·Key Expression API 등)는 진행 중.
+**미구현 (Playing용)**: 없음 — finish·분기·navigate 구현 완료. **Ending S2 렌더링·별점 저장 ✅**. **Result S2 UI** — Key Expression·Speech Feedback 재생 ✅, View Chat 등 진행 중.
 
 ---
 
