@@ -883,7 +883,9 @@
 - **appPath**: 해당 없음 (Result 전용)
 
 ### 스크린 용도
-- Result 화면에서 진입. 사용자가 느낀 불편함을 수집하는 용도. Send 시 `POST /v1/roleplays/results/{roleplayResultId}/report` (body: `{"content": "<string>"}`).
+- Result 화면에서 진입. 사용자가 느낀 불편함을 수집하는 용도.
+- **S1** Send: `POST /v1/roleplays/results/{roleplayResultId}/report` (body: `{"content": "<string>"}`).
+- **S2** Send: `POST /rps2/user-histories/{rpUserHistoryId}/report` (body 동일). `SeriesStateService.cachedUserHistory.id` 사용.
 
 ### 이전 스크린 정보 (진입점)
 - **RoleplayResultScreen**: 본문 "Report" 문구 탭 시
@@ -893,7 +895,7 @@
 - **RoleplayResultScreen**: X 버튼 또는 Android 백버튼 시 `Navigator.pop()`으로 Result로 복귀. 전송 성공(200) 시 `pop(context, true)`로 Result에서 Report 문구 숨김.
 
 ### 스크린 내부 구현 특이사항
-- 내부 표현·구성은 Try Again Report와 동일 (RoleplayScaffold, reportTitle, 입력창, feedbackSend 버튼). Send 시 신규 엔드포인트만 사용.
+- 내부 표현·구성은 Try Again Report와 동일 (그라데이션 배경 + 글래스 입력창 + Stadium Send 버튼). S1/S2 분기는 Send API·ID 소스만 다름.
 - Route name: `RoleplayResultReportScreen.routeName` (`/roleplay/result_report`).
 - 다국어: try_again_report 참고 (l10n.reportTitle, endingReport, feedbackPlaceholder, feedbackSend).
 

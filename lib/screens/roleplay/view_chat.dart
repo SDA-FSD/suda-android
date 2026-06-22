@@ -634,16 +634,23 @@ class _ViewChatUserCardState extends State<_ViewChatUserCard> {
 
     return Padding(
       padding: const EdgeInsets.only(top: 8, bottom: 8),
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: FractionallySizedBox(
-          widthFactor: 0.5,
-          alignment: Alignment.centerLeft,
-          child: _ViewChatScorePanel(
-            score: widget.feedback!.score,
-            barColor: gradeStyle?.color ?? _ViewChatGradeStyle.gradeA,
-          ),
-        ),
+      child: _ViewChatScorePanel(
+        score: widget.feedback!.score,
+        barColor: gradeStyle?.color ?? _ViewChatGradeStyle.gradeA,
+      ),
+    );
+  }
+
+  Widget _buildScoreSpeechDivider() {
+    if (!_expanded || widget.feedback?.score == null) {
+      return const SizedBox.shrink();
+    }
+
+    return const Padding(
+      padding: EdgeInsets.only(bottom: 8),
+      child: ColoredBox(
+        color: Color(0xFFD9D9D9),
+        child: SizedBox(width: double.infinity, height: 1),
       ),
     );
   }
@@ -692,6 +699,13 @@ class _ViewChatUserCardState extends State<_ViewChatUserCard> {
                   alignment: Alignment.topCenter,
                   clipBehavior: Clip.hardEdge,
                   child: _buildExpandedScorePanel(context),
+                ),
+                AnimatedSize(
+                  duration: _expandDuration,
+                  curve: _expandCurve,
+                  alignment: Alignment.topCenter,
+                  clipBehavior: Clip.hardEdge,
+                  child: _buildScoreSpeechDivider(),
                 ),
                 if (!showScorePanel) const SizedBox(height: 8),
                 Text(
@@ -870,6 +884,7 @@ class _ViewChatScorePanel extends StatelessWidget {
   static const double _labelBarGap = 4;
   static const double _rowGap = 8;
   static const double _rowHeight = 14;
+  static const double _columnGap = 8;
 
   static double _labelColumnWidth(
     BuildContext context,
@@ -888,6 +903,60 @@ class _ViewChatScorePanel extends StatelessWidget {
     return maxWidth.ceilToDouble();
   }
 
+  Widget _buildScoreRow({
+    required String label,
+    required String? value,
+    required TextStyle labelStyle,
+    required double labelWidth,
+  }) {
+    return SizedBox(
+      height: _rowHeight,
+      child: Row(
+        children: [
+          SizedBox(
+            width: labelWidth,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(label, style: labelStyle),
+            ),
+          ),
+          const SizedBox(width: _labelBarGap),
+          Expanded(
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: _ViewChatScoreBarTrack(
+                scoreValue: value,
+                barColor: barColor,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildScoreColumn({
+    required List<({String label, String? value})> rows,
+    required TextStyle labelStyle,
+    required double labelWidth,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (var i = 0; i < rows.length; i++) ...[
+          if (i > 0) const SizedBox(height: _rowGap),
+          _buildScoreRow(
+            label: rows[i].label,
+            value: rows[i].value,
+            labelStyle: labelStyle,
+            labelWidth: labelWidth,
+          ),
+        ],
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (score == null) {
@@ -896,68 +965,42 @@ class _ViewChatScorePanel extends StatelessWidget {
 
     final theme = Theme.of(context).textTheme;
     final labelStyle = theme.labelSmall?.copyWith(color: _labelColor);
+    final resolvedLabelStyle = labelStyle ?? const TextStyle(fontSize: 12);
     final l10n = AppLocalizations.of(context)!;
-    final rows = <({String label, String? value})>[
+    final leftRows = <({String label, String? value})>[
       (label: l10n.roleplayResultScoreMeaning, value: score!.meaning),
-      (label: l10n.roleplayResultScoreRelevance, value: score!.relevance),
       (label: l10n.roleplayResultScoreVocabulary, value: score!.vocabulary),
+    ];
+    final rightRows = <({String label, String? value})>[
+      (label: l10n.roleplayResultScoreRelevance, value: score!.relevance),
       (label: l10n.roleplayResultScoreGrammar, value: score!.grammar),
+    ];
+    final allLabels = [
+      ...leftRows.map((row) => row.label),
+      ...rightRows.map((row) => row.label),
     ];
     final labelWidth = _labelColumnWidth(
       context,
-      rows.map((row) => row.label).toList(),
-      labelStyle ?? const TextStyle(fontSize: 12),
+      allLabels,
+      resolvedLabelStyle,
     );
-
-    Widget buildRowGap(int index) {
-      return index > 0 ? const SizedBox(height: _rowGap) : const SizedBox.shrink();
-    }
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(
-          width: labelWidth,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              for (var i = 0; i < rows.length; i++) ...[
-                buildRowGap(i),
-                SizedBox(
-                  height: _rowHeight,
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(rows[i].label, style: labelStyle),
-                  ),
-                ),
-              ],
-            ],
+        Expanded(
+          child: _buildScoreColumn(
+            rows: leftRows,
+            labelStyle: resolvedLabelStyle,
+            labelWidth: labelWidth,
           ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: _columnGap),
         Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              for (var i = 0; i < rows.length; i++) ...[
-                buildRowGap(i),
-                SizedBox(
-                  height: _rowHeight,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      _ViewChatScoreBarTrack(
-                        scoreValue: rows[i].value,
-                        barColor: barColor,
-                      ),
-                      const SizedBox(height: _labelBarGap),
-                    ],
-                  ),
-                ),
-              ],
-            ],
+          child: _buildScoreColumn(
+            rows: rightRows,
+            labelStyle: resolvedLabelStyle,
+            labelWidth: labelWidth,
           ),
         ),
       ],

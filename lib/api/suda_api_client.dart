@@ -178,6 +178,19 @@ class SudaApiClient {
     );
   }
 
+  /// POST /rps2/user-histories/{rpUserHistoryId}/report, body: { "content": content }
+  static Future<void> sendRpS2UserHistoryReport({
+    required String accessToken,
+    required int rpUserHistoryId,
+    required String content,
+  }) {
+    return SeriesApi.sendUserHistoryReport(
+      accessToken: accessToken,
+      rpUserHistoryId: rpUserHistoryId,
+      content: content,
+    );
+  }
+
   static Future<TtsResultDto> getRpS2UserHistoryExpressionSound({
     required String accessToken,
     required int rpUserHistoryId,

@@ -974,6 +974,64 @@ class SeriesApi {
     );
   }
 
+  /// POST /rps2/user-histories/{rpUserHistoryId}/report
+  /// Request body: JSON with string field `content`.
+  static Future<void> sendUserHistoryReport({
+    required String accessToken,
+    required int rpUserHistoryId,
+    required String content,
+  }) async {
+    return await SudaHttpClient.executeWithRefresh(
+      () => _sendUserHistoryReportInternal(
+        accessToken,
+        rpUserHistoryId,
+        content,
+      ),
+      retryWithNewToken: (newToken) => _sendUserHistoryReportInternal(
+        newToken,
+        rpUserHistoryId,
+        content,
+      ),
+    );
+  }
+
+  static Future<void> _sendUserHistoryReportInternal(
+    String accessToken,
+    int rpUserHistoryId,
+    String content,
+  ) async {
+    final uri = SudaHttpClient.buildUri(
+      '/rps2/user-histories/$rpUserHistoryId/report',
+    );
+    late final http.Response response;
+    try {
+      response = await SudaHttpClient.client
+          .post(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+              'Content-Type': 'application/json',
+            },
+            body: jsonEncode({'content': content}),
+          )
+          .timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      rethrow;
+    }
+
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return;
+    }
+
+    throw Exception(
+      'POST /rps2/user-histories/$rpUserHistoryId/report failed: HTTP ${response.statusCode} ${response.body}',
+    );
+  }
+
   /// S1 `RoleplayApi._parseStringResponse`와 동일 — 응답이 plain text 또는 JSON String.
   static String _parseStringResponse(String body) {
     try {

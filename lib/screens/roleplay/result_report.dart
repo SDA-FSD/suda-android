@@ -1,15 +1,21 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
-import '../../widgets/roleplay_scaffold.dart';
+
 import '../../l10n/app_localizations.dart';
+import '../../services/roleplay_state_service.dart';
+import '../../services/series_state_service.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
-import '../../services/roleplay_state_service.dart';
 import '../../utils/default_toast.dart';
+import '../../widgets/roleplay_configuration_panel.dart';
+import '../../widgets/roleplay_scaffold.dart';
 
 /// Roleplay Result Report Screen (Sub Screen)
 ///
 /// Result 화면에서만 진입. 사용자가 느낀 불편함을 수집하는 용도.
-/// 내부 표현·구성은 try_again_report와 동일. Send 시 POST /v1/roleplays/results/{roleplayResultId}/report 사용.
+/// S1: POST /v1/roleplays/results/{roleplayResultId}/report
+/// S2: POST /rps2/user-histories/{rpUserHistoryId}/report
 /// 성공(200) 시 스크린 닫고 부모 Result에서 Report 문구 숨김. Android 백버튼 또는 X 버튼 시 Result로 복귀.
 class RoleplayResultReportScreen extends StatefulWidget {
   static const String routeName = '/roleplay/result_report';
@@ -17,13 +23,20 @@ class RoleplayResultReportScreen extends StatefulWidget {
   const RoleplayResultReportScreen({super.key});
 
   @override
-  State<RoleplayResultReportScreen> createState() => _RoleplayResultReportScreenState();
+  State<RoleplayResultReportScreen> createState() =>
+      _RoleplayResultReportScreenState();
 }
 
 class _RoleplayResultReportScreenState extends State<RoleplayResultReportScreen> {
+  static const Color _gradientBottom = Color(0xFF076664);
+  static const Color _gradientTop = Color(0xFF032929);
+
   final TextEditingController _controller = TextEditingController();
   bool _isSubmitting = false;
   bool _canSubmit = false;
+
+  bool get _isS2Flow =>
+      SeriesStateService.instance.cachedUserHistory != null;
 
   @override
   void initState() {
@@ -48,8 +61,15 @@ class _RoleplayResultReportScreenState extends State<RoleplayResultReportScreen>
   Future<void> _handleSend() async {
     if (!_canSubmit || _isSubmitting) return;
 
-    final resultId = RoleplayStateService.instance.cachedResult?.id;
-    if (resultId == null) {
+    final content = _controller.text.trim();
+    final historyId = _isS2Flow
+        ? SeriesStateService.instance.cachedUserHistory?.id
+        : null;
+    final resultId = _isS2Flow
+        ? null
+        : RoleplayStateService.instance.cachedResult?.id;
+
+    if (_isS2Flow ? historyId == null : resultId == null) {
       if (mounted) {
         DefaultToast.show(
           context,
@@ -65,11 +85,19 @@ class _RoleplayResultReportScreenState extends State<RoleplayResultReportScreen>
     try {
       final token = await TokenStorage.loadAccessToken();
       if (token != null) {
-        await SudaApiClient.sendResultReport(
-          accessToken: token,
-          roleplayResultId: resultId,
-          content: _controller.text.trim(),
-        );
+        if (_isS2Flow) {
+          await SudaApiClient.sendRpS2UserHistoryReport(
+            accessToken: token,
+            rpUserHistoryId: historyId!,
+            content: content,
+          );
+        } else {
+          await SudaApiClient.sendResultReport(
+            accessToken: token,
+            roleplayResultId: resultId!,
+            content: content,
+          );
+        }
 
         if (mounted) {
           Navigator.pop(context, true);
@@ -90,6 +118,65 @@ class _RoleplayResultReportScreenState extends State<RoleplayResultReportScreen>
     }
   }
 
+  Widget _buildGlazedInputArea(TextTheme theme, String hintText) {
+    const radius = RoleplayConfigurationPanel.panelBorderRadius;
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(radius),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.14),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(radius),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(radius),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.36),
+                width: 1,
+              ),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Colors.white.withValues(alpha: 0.22),
+                  Colors.white.withValues(alpha: 0.14),
+                ],
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: TextField(
+                controller: _controller,
+                maxLines: null,
+                expands: true,
+                keyboardType: TextInputType.multiline,
+                style: theme.bodyLarge?.copyWith(color: Colors.white),
+                decoration: InputDecoration(
+                  hintText: hintText,
+                  hintStyle: theme.bodyLarge?.copyWith(
+                    color: const Color(0xFF8D8D8D),
+                  ),
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.zero,
+                ),
+                autofocus: true,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -97,70 +184,75 @@ class _RoleplayResultReportScreenState extends State<RoleplayResultReportScreen>
 
     return PopScope(
       canPop: true,
-      onPopInvoked: (didPop) {},
-      child: RoleplayScaffold(
-        showCloseButton: true,
-        onClose: () => Navigator.of(context).pop(),
-        title: l10n.reportTitle,
-        body: Column(
-          children: [
-            const SizedBox(height: 15),
-            Expanded(
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1A1A1A),
-                  borderRadius: BorderRadius.circular(16),
+      onPopInvokedWithResult: (didPop, _) {},
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          const ColoredBox(color: _gradientTop),
+          Positioned.fill(
+            child: IgnorePointer(
+              child: DecoratedBox(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.bottomCenter,
+                    end: Alignment.topCenter,
+                    colors: [_gradientBottom, _gradientTop],
+                  ),
                 ),
-                child: TextField(
-                  controller: _controller,
-                  maxLines: null,
-                  keyboardType: TextInputType.multiline,
-                  style: theme.bodyLarge?.copyWith(color: Colors.white),
-                  decoration: InputDecoration(
-                    hintText: l10n.feedbackPlaceholder,
-                    hintStyle: theme.bodyLarge?.copyWith(
-                      color: const Color(0xFF8D8D8D),
+              ),
+            ),
+          ),
+          RoleplayScaffold(
+            backgroundColor: Colors.transparent,
+            showCloseButton: true,
+            onClose: () => Navigator.of(context).pop(),
+            title: l10n.reportTitle,
+            body: Column(
+              children: [
+                const SizedBox(height: 15),
+                Expanded(
+                  child: _buildGlazedInputArea(
+                    theme,
+                    l10n.feedbackPlaceholder,
+                  ),
+                ),
+                const SizedBox(height: 15),
+                Center(
+                  child: SizedBox(
+                    height: 56,
+                    child: ElevatedButton(
+                      onPressed:
+                          (_canSubmit && !_isSubmitting) ? _handleSend : null,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF0CABA8),
+                        foregroundColor: Colors.white,
+                        disabledBackgroundColor: const Color(0xFF353535),
+                        disabledForegroundColor: Colors.white38,
+                        shape: const StadiumBorder(),
+                        elevation: 0,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        minimumSize: const Size(0, 56),
+                        padding: const EdgeInsets.symmetric(horizontal: 30),
+                      ),
+                      child: _isSubmitting
+                          ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : Text(l10n.feedbackSend),
                     ),
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.zero,
                   ),
-                  autofocus: true,
                 ),
-              ),
+                const SizedBox(height: 24),
+              ],
             ),
-            const SizedBox(height: 15),
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: (_canSubmit && !_isSubmitting) ? _handleSend : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0CABA8),
-                  foregroundColor: Colors.white,
-                  disabledBackgroundColor: const Color(0xFF353535),
-                  disabledForegroundColor: Colors.white38,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  elevation: 0,
-                ),
-                child: _isSubmitting
-                    ? const SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 2,
-                        ),
-                      )
-                    : Text(l10n.feedbackSend),
-              ),
-            ),
-            const SizedBox(height: 24),
-          ],
-        ),
-        footer: const SizedBox.shrink(),
+            footer: const SizedBox.shrink(),
+          ),
+        ],
       ),
     );
   }
