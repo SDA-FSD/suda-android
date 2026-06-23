@@ -3,14 +3,11 @@ import 'package:flutter/material.dart';
 
 import '../../config/app_config.dart';
 import '../../l10n/app_localizations.dart';
-import '../../models/roleplay_models.dart';
 import '../../routes/roleplay_router.dart';
-import '../../services/roleplay_state_service.dart';
 import '../../services/series_state_service.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
 import '../../utils/suda_json_util.dart';
-import '../../utils/default_markdown.dart';
 
 /// Roleplay Ending Screen (Full Screen)
 ///
@@ -32,30 +29,8 @@ class _RoleplayEndingScreenState extends State<RoleplayEndingScreen>
   late final Animation<double> _scaleAnimation;
   late int _selectedStars;
 
-  bool get _isS2Flow =>
-      SeriesStateService.instance.cachedUserHistory != null;
-
-  RoleplayEndingDto? get _s1Ending {
-    final overview = RoleplayStateService.instance.overview;
-    final roleId = RoleplayStateService.instance.roleId;
-    if (overview == null || roleId == null) return null;
-    final roleList = overview.roleplay?.roleList;
-    if (roleList == null) return null;
-    for (final r in roleList) {
-      if (r.id == roleId) {
-        final list = r.endingList;
-        return list != null && list.isNotEmpty ? list.first : null;
-      }
-    }
-    return null;
-  }
-
-  String? get _imagePath {
-    if (_isS2Flow) {
-      return SeriesStateService.instance.overview?.endingImgPath;
-    }
-    return _s1Ending?.imgPath;
-  }
+  String? get _imagePath =>
+      SeriesStateService.instance.overview?.endingImgPath;
 
   bool get _hasImage {
     final path = _imagePath;
@@ -68,33 +43,19 @@ class _RoleplayEndingScreenState extends State<RoleplayEndingScreen>
     return '${AppConfig.cdnBaseUrl}$path';
   }
 
-  String get _displayTitle {
-    if (_isS2Flow) {
-      return SudaJsonUtil.localizedMapText(
+  String get _displayTitle => SudaJsonUtil.localizedMapText(
         SeriesStateService.instance.overview?.endingTitle ?? const {},
       );
-    }
-    final ending = _s1Ending;
-    return ending != null ? SudaJsonUtil.localizedText(ending.title) : '';
-  }
 
-  String get _displayContent {
-    if (_isS2Flow) {
-      return SudaJsonUtil.localizedMapText(
+  String get _displayContent => SudaJsonUtil.localizedMapText(
         SeriesStateService.instance.overview?.endingContent ?? const {},
       );
-    }
-    final ending = _s1Ending;
-    return ending != null ? SudaJsonUtil.localizedText(ending.content) : '';
-  }
 
   int _resolveInitialStarRating() {
-    if (_isS2Flow) {
-      final rating = SeriesStateService.instance.cachedUserHistory?.userStarRating;
-      if (rating == null) return 0;
-      return rating.clamp(0, 5);
-    }
-    return 0;
+    final rating =
+        SeriesStateService.instance.cachedUserHistory?.userStarRating;
+    if (rating == null) return 0;
+    return rating.clamp(0, 5);
   }
 
   @override
@@ -166,29 +127,12 @@ class _RoleplayEndingScreenState extends State<RoleplayEndingScreen>
   }
 
   void _navigateToResult(BuildContext context) {
-    if (_isS2Flow) {
-      if (!context.mounted) return;
-      RoleplayRouter.replaceWithResult(context);
-      return;
-    }
-
-    final resultId = RoleplayStateService.instance.cachedResult?.id;
-    TokenStorage.loadAccessToken().then((token) {
-      if (resultId != null && token != null) {
-        SudaApiClient.updateRoleplayResultStar(
-          accessToken: token,
-          resultId: resultId,
-          star: _selectedStars,
-        );
-      }
-    });
     if (!context.mounted) return;
     RoleplayRouter.replaceWithResult(context);
   }
 
   void _onStarSelected(int stars) {
     setState(() => _selectedStars = stars);
-    if (!_isS2Flow) return;
     final historyId = SeriesStateService.instance.cachedUserHistory?.id;
     if (historyId == null) return;
     TokenStorage.loadAccessToken().then((token) {
@@ -208,7 +152,7 @@ class _RoleplayEndingScreenState extends State<RoleplayEndingScreen>
     final title = _displayTitle;
     final content = _displayContent;
     final contentStyle = theme.bodyMedium?.copyWith(color: Colors.white)
-        ?? TextStyle(color: Colors.white);
+        ?? const TextStyle(color: Colors.white);
     final screenHeight = MediaQuery.sizeOf(context).height;
     final bottomAreaHeight = screenHeight * 0.35;
 
@@ -272,23 +216,11 @@ class _RoleplayEndingScreenState extends State<RoleplayEndingScreen>
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 50),
-                            if (_isS2Flow)
-                              Text(
-                                content,
-                                style: contentStyle,
-                                textAlign: TextAlign.center,
-                              )
-                            else
-                              Text.rich(
-                                TextSpan(
-                                  style: contentStyle,
-                                  children: DefaultMarkdown.buildSpans(
-                                    content,
-                                    contentStyle,
-                                  ),
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
+                            Text(
+                              content,
+                              style: contentStyle,
+                              textAlign: TextAlign.center,
+                            ),
                             const SizedBox(height: 50),
                           ],
                         ),

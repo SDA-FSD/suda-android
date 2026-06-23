@@ -12,7 +12,7 @@
 | 홈 노출 단위 | 단일 roleplay (v1, 제거 중) | **시리즈** → 에피소드 |
 | Overview | `RoleplayOverviewScreen` | `SeriesOverviewScreen` |
 | 플레이 state | `RoleplayStateService` | **`SeriesStateService`** |
-| Opening 데이터 | `RoleplayOverviewDto` / role 선택 | **`RpS2SeriesEpisodeDto`** + `userCharacter` |
+| Opening 데이터 | `RoleplayOverviewDto` / role 선택 | **`RpS2SeriesEpisodeDto`** (`aiCharacter` 등) |
 | 세션 생성 | `POST /v1/roleplay-sessions` `{roleplayId, roleId}` | **`POST /rps2/sessions` `{seriesId, episodeId}`** |
 | Playing 구현 | `playing_backup.dart` (보존) | **`playing.dart` (신규, 진행 중)** |
 
@@ -43,7 +43,7 @@ Home (시리즈 썸네일)
 | 필드 | 타입 | 설정 시점 | 용도 |
 |------|------|-----------|------|
 | `seriesId` | `int?` | Series Overview 로드 | 세션 API `seriesId` |
-| `overview` | `RpS2SeriesOverviewDto?` | Series Overview 로드 | 시리즈 메타·`userCharacter`·`episodes`·`bestScoreMap` |
+| `overview` | `RpS2SeriesOverviewDto?` | Series Overview 로드 | 시리즈 메타·`episodes`·`bestScoreMap`·ending 필드 |
 | `selectedEpisodeId` | `int?` | 에피소드 Play 탭 | 현재 플레이 대상 에피소드 id |
 | `user` | `UserDto?` | Overview / Episode Play / Tutorial | 사용자·metaInfo (속도 등) |
 | `session` | `RpS2SessionDto?` | Opening Start 성공 | `sessionId`, 초기 `aiSound` |
@@ -178,7 +178,7 @@ S1 턴 정책은 `.docs/CONTEXT_ROLEPLAY.md`만 본다. **S2는 아래가 단일
 ### 4-3. RoleplayOpeningScreen ✅ (S2 UI·세션)
 
 - **파일**: `lib/screens/roleplay/opening.dart`
-- **데이터**: `SeriesStateService.selectedEpisode`, `overview.userCharacter`
+- **데이터**: `SeriesStateService.selectedEpisode` (`title`/`briefing`/`thumbnailImgPath`/`aiCharacter`)
 - **렌더**
   - 배경: episode `thumbnailImgPath` → `RoleplayOverviewBackdrop`
   - 헤더 타이틀: episode `title` (`SudaJsonUtil.localizedMapText`) · `bodySmall` **w700** · **1줄** 말줄임 — X 밴드(top 16·height 40) 세로 중앙(`centerTitleInHeaderActionRow`, `RoleplayScaffold.episodeTitleStyle`)
@@ -382,7 +382,7 @@ S1 턴 정책은 `.docs/CONTEXT_ROLEPLAY.md`만 본다. **S2는 아래가 단일
 | PUT | `/rps2/sessions/{id}/finish` | res: JSON `Long` (`0` 또는 `rpUserHistoryId`) | Playing 마무리 | ✅ |
 | GET | `/rps2/user-histories?pageNum=` | `SudaAppPage<RpS2SimpleHistoryDto>` | Profile History 목록 | ✅ |
 | GET | `/rps2/user-histories/{rpUserHistoryId}` | `RpS2UserHistoryDto` | finish 성공 후 result/ending 이동 전 · **Profile History 상세** | ✅ |
-| GET | `/rps2/user-histories/{rpUserHistoryId}/expressions/{expressionIndex}/sound` | `TtsResultDto` (`cdnYn`, `cdnPath`, `sound`) | Result Key Expression 카드 탭 | ✅ |
+| GET | `/rps2/user-histories/{rpUserHistoryId}/expressions/{expressionIndex}/sound` | `TtsResultDto` (`cdnYn`, `cdnPath`, `sound`) | Result Key Expression · **Profile Saved expression** 카드 탭 | ✅ |
 | POST | `/rps2/user-histories/{rpUserHistoryId}/expressions/{expressionIndex}` | void (200) | Result Key Expression 북마크 저장 | ✅ |
 | DELETE | `/rps2/user-histories/{rpUserHistoryId}/expressions/{expressionIndex}` | void (200) | Result Key Expression 북마크 삭제 | ✅ |
 | GET | `/rps2/user-histories/{rpUserHistoryId}/messages/{rpMsgId}/audio` | `TtsResultDto` (`cdnYn`, `cdnPath`, `sound`) | Result Speech Feedback 카드·메가폰 탭 | ✅ |
@@ -391,6 +391,8 @@ S1 턴 정책은 `.docs/CONTEXT_ROLEPLAY.md`만 본다. **S2는 아래가 단일
 
 **모델 파일**: `lib/models/series_models.dart`  
 (`RpS2SessionRequestDto`, `RpS2SessionDto`, `RpS2SoundResDto`, `RpS2UserMessageResponseDto`, `RpS2SeriesOverviewDto`, `RpS2SeriesEpisodeDto`, …)
+
+**`RpS2UserHistoryDto` 응답 필드(클라이언트 사용분만)**: `id`, `messages[]`(`id`, `role`, `content`, `audioInputYn`, `audioPath`), `missions`, `starScore`, `words`, `likePoint`, `keyExpressions`, `speechFeedback`, `userStarRating`, `mainTitle`, `subTitle`, `before/afterLikePoint·Level·ProgressPercentage`. 메타(`userId`·`seriesId`·`hints`·`translations` 등) 및 `messages` 타임스탬프 필드는 서버·클라이언트 모두 제외.
 
 **API 파일**: `lib/api/endpoints/series_api.dart` → `SudaApiClient.createRpS2Session`
 
@@ -407,7 +409,7 @@ S1 턴 정책은 `.docs/CONTEXT_ROLEPLAY.md`만 본다. **S2는 아래가 단일
 | `roleplayId` + `roleId` 세션 요청 | `seriesId` + `episodeId` |
 | Opening 헤더 duration | **없음** |
 | Opening Scenario (`role.scenario`) | **Briefing** (`episode.briefing`) |
-| 역할명 (`roleList` / role 선택) | **`userCharacter.name`** (고정) |
+| 역할명 (`roleList` / role 선택) | **`aiCharacter.name`** (에피소드 고정) |
 | `isUserTurnYn` state | **삭제** — AI 선시작 |
 | `popToOverview` → RoleplayOverview | → **SeriesOverview** |
 | `FIRST_OVERVIEW` on Roleplay Overview | → **Series Overview** 로드 시 |

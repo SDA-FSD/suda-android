@@ -12,7 +12,6 @@ import '../../api/suda_api_client.dart';
 import '../../config/app_config.dart';
 import '../../effects/like_progress_effect.dart';
 import '../../l10n/app_localizations.dart';
-import '../../models/roleplay_models.dart';
 import '../../models/series_models.dart';
 import '../../routes/roleplay_router.dart';
 import '../../services/main_user_sync.dart';
@@ -23,15 +22,13 @@ import '../../utils/default_toast.dart';
 import '../../utils/sub_screen_route.dart';
 import '../../utils/suda_json_util.dart';
 import 'view_chat.dart';
-import 'review_chat.dart';
 
 const Color _exprTextPrimary = Color(0xFF121212);
 const Color _exprTextSecondary = Color(0xFF676767);
-const Color _s1KeyExpressionCardBg = Color(0xFF80D7CF);
 
 /// Roleplay Result Screen (Full Screen)
 /// 화면 fully shown 이후 1초 뒤 상단 이동 + LikeProgressEffect(레벨·라이크 진행) 후
-/// Feedback(S1) / Key Expression / Speech Feedback(S2) 본문 레이어를 노출한다.
+/// Key Expression / Speech Feedback 본문 레이어를 노출한다.
 class RoleplayResultScreen extends StatefulWidget {
   static const String routeName = '/roleplay/result';
 
@@ -59,22 +56,16 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
   static const Color _teal = Color(0xFF0CABA8);
   static const Color _mint = Color(0xFF80D7CF);
   static const Color _cardBg = Color(0x8080D7CF);
-  static const Color _feedbackBoxFill = Color(0xFF80D7CF);
   static const Color _reportText = Color(0xFF054544);
   static const String _starGold = 'assets/images/star_gold.png';
   static const String _starSilver = 'assets/images/star_silver.png';
   static const String _likeAtResult = 'assets/images/like_at_result.png';
-  static const String _missionSucceeded =
-      'assets/images/icons/mission_succeeded.png';
-  static const String _missionFailed =
-      'assets/images/icons/mission_failed.png';
   static const String _rps2MissionOn =
       'assets/images/icons/rps2_mission_on.png';
   static const String _rps2MissionOff =
       'assets/images/icons/rps2_mission_off.png';
 
   late final AnimationController _panelMoveController;
-  late final AnimationController _feedbackEntranceController;
   late final AnimationController _keyExpressionSectionEntranceController;
   late final AnimationController _footerFadeController;
   final GlobalKey _panelKey = GlobalKey();
@@ -89,13 +80,6 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
   bool _reportSubmitted = false;
   bool _isLeavingToOverview = false;
 
-  final AudioPlayer _s1KeyExpressionAudioPlayer = AudioPlayer();
-  StreamSubscription<PlayerState>? _s1KeyExpressionAudioSub;
-  int _s1KeyExpressionMegaphoneSeq = 0;
-  int? _s1KeyExpressionHighlightedIndex;
-  int? _s1KeyExpressionPlaybackIndex;
-  final Set<int> _s1KeyExpressionBookmarkedIndexes = <int>{};
-  bool _s1KeyExpressionBookmarkInFlight = false;
   final AudioPlayer _keyExpressionAudioPlayer = AudioPlayer();
   StreamSubscription<PlayerState>? _keyExpressionAudioSub;
   int _keyExpressionMegaphoneSeq = 0;
@@ -106,33 +90,18 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
   int? _speechFeedbackActiveMsgId;
   bool _speechFeedbackIsPlaying = false;
 
-  bool get _isS2Flow =>
-      SeriesStateService.instance.cachedUserHistory != null;
-
-  RoleplayResultDto? get _dto => RoleplayStateService.instance.cachedResult;
-
   RpS2UserHistoryDto? get _s2History =>
       SeriesStateService.instance.cachedUserHistory;
 
-  int get _starResult => _isS2Flow
-      ? (_s2History?.starScore ?? 0)
-      : (_dto?.starResult ?? 0);
+  int get _starResult => _s2History?.starScore ?? 0;
 
-  String get _mainTitle => _isS2Flow
-      ? (_s2History?.mainTitle ?? '')
-      : (_dto?.mainTitle ?? '');
+  String get _mainTitle => _s2History?.mainTitle ?? '';
 
-  String get _subTitle => _isS2Flow
-      ? (_s2History?.subTitle ?? '')
-      : (_dto?.subTitle ?? '');
+  String get _subTitle => _s2History?.subTitle ?? '';
 
-  int get _words => _isS2Flow
-      ? (_s2History?.words ?? 0)
-      : (_dto?.words ?? 0);
+  int get _words => _s2History?.words ?? 0;
 
-  int get _likePoint => _isS2Flow
-      ? (_s2History?.likePoint ?? 0)
-      : (_dto?.likePoint ?? 0);
+  int get _likePoint => _s2History?.likePoint ?? 0;
 
   static String _httpErrorBrief(Object error) {
     final text = error.toString();
@@ -156,10 +125,6 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
           setState(() {});
         }
       });
-    _feedbackEntranceController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 450),
-    );
     _keyExpressionSectionEntranceController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 450),
@@ -261,36 +226,18 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
     _hasStartedEffectSequence = true;
     _panelMoveController.forward();
 
-    if (_isS2Flow) {
-      final history = _s2History;
-      if (history == null) {
-        return;
-      }
-      _playLikeProgressEffect(
-        beforeLikePoint: history.beforeLikePoint ?? 0,
-        afterLikePoint: history.afterLikePoint ?? 0,
-        beforeLevel: history.beforeLevel ?? 0,
-        toBeLevel: history.afterLevel ?? 0,
-        beforeProgress: history.beforeProgressPercentage ?? 0,
-        toBeProgress: history.afterProgressPercentage ?? 0,
-        onEffectCompleted: _onS2LikeProgressEffectCompleted,
-      );
+    final history = _s2History;
+    if (history == null) {
       return;
     }
-
-    final dto = _dto;
-    if (dto == null) {
-      return;
-    }
-
     _playLikeProgressEffect(
-      beforeLikePoint: dto.beforeLikePoint ?? 0,
-      afterLikePoint: dto.afterLikePoint ?? 0,
-      beforeLevel: dto.beforeLevel ?? 0,
-      toBeLevel: dto.afterLevel ?? 0,
-      beforeProgress: dto.beforeProgressPercentage ?? 0,
-      toBeProgress: dto.afterProgressPercentage ?? 0,
-      onEffectCompleted: () => _onLikeProgressEffectCompleted(dto),
+      beforeLikePoint: history.beforeLikePoint ?? 0,
+      afterLikePoint: history.afterLikePoint ?? 0,
+      beforeLevel: history.beforeLevel ?? 0,
+      toBeLevel: history.afterLevel ?? 0,
+      beforeProgress: history.beforeProgressPercentage ?? 0,
+      toBeProgress: history.afterProgressPercentage ?? 0,
+      onEffectCompleted: _onS2LikeProgressEffectCompleted,
     );
   }
 
@@ -340,28 +287,6 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
     });
   }
 
-  void _onLikeProgressEffectCompleted(RoleplayResultDto dto) {
-    if (mounted) {
-      _feedbackEntranceController.forward(from: 0);
-    }
-    final hasKeyExpressions = dto.keyExpressions?.isNotEmpty ?? false;
-    if (hasKeyExpressions) {
-      Future.delayed(const Duration(milliseconds: 500), () {
-        if (mounted) {
-          _keyExpressionSectionEntranceController.forward(from: 0);
-        }
-      });
-    }
-    Future.delayed(const Duration(milliseconds: 1000), () {
-      if (!mounted) {
-        return;
-      }
-      _footerFadeController.reset();
-      setState(() => _showFooterActions = true);
-      _footerFadeController.forward();
-    });
-  }
-
   void _scheduleMeasurePanel() {
     if (_panelMeasuredHeight != null) {
       return;
@@ -384,171 +309,14 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
 
   @override
   void dispose() {
-    _s1KeyExpressionAudioSub?.cancel();
-    _s1KeyExpressionAudioSub = null;
-    unawaited(_s1KeyExpressionAudioPlayer.dispose());
     _keyExpressionAudioSub?.cancel();
     _keyExpressionAudioSub = null;
     unawaited(_keyExpressionAudioPlayer.dispose());
     _routeAnimation?.removeStatusListener(_onRouteAnimationStatusChanged);
     _panelMoveController.dispose();
-    _feedbackEntranceController.dispose();
     _keyExpressionSectionEntranceController.dispose();
     _footerFadeController.dispose();
     super.dispose();
-  }
-
-  Future<AudioSource?> _prepareS1KeyExpressionAudio({
-    required String? cdnYn,
-    required String? cdnPath,
-    required Uint8List? soundBytes,
-  }) async {
-    await _s1KeyExpressionAudioPlayer.stop();
-    if (cdnYn == 'Y' && cdnPath != null && cdnPath.isNotEmpty) {
-      final url = '${AppConfig.cdnBaseUrl}$cdnPath';
-      final source = AudioSource.uri(Uri.parse(url));
-      await _s1KeyExpressionAudioPlayer.setAudioSource(source);
-      return source;
-    }
-    if (soundBytes != null && soundBytes.isNotEmpty) {
-      final source = AudioSource.uri(
-        Uri.dataFromBytes(soundBytes, mimeType: 'audio/mpeg'),
-      );
-      await _s1KeyExpressionAudioPlayer.setAudioSource(source);
-      return source;
-    }
-    return null;
-  }
-
-  Future<void> _onS1KeyExpressionCardTap(int keyExpressionIndex) async {
-    _s1KeyExpressionMegaphoneSeq++;
-    final seq = _s1KeyExpressionMegaphoneSeq;
-    _s1KeyExpressionAudioSub?.cancel();
-    _s1KeyExpressionAudioSub = null;
-    await _s1KeyExpressionAudioPlayer.stop();
-
-    if (!mounted) {
-      return;
-    }
-    setState(() {
-      _s1KeyExpressionHighlightedIndex = keyExpressionIndex;
-      _s1KeyExpressionPlaybackIndex = keyExpressionIndex;
-    });
-
-    final resultId = _dto?.id;
-    final token = await TokenStorage.loadAccessToken();
-    if (!mounted || seq != _s1KeyExpressionMegaphoneSeq) {
-      return;
-    }
-
-    if (token == null || resultId == null) {
-      setState(() {
-        _s1KeyExpressionHighlightedIndex = null;
-        _s1KeyExpressionPlaybackIndex = null;
-      });
-      return;
-    }
-
-    try {
-      final tts = await SudaApiClient.getRoleplayResultExpressionSound(
-        accessToken: token,
-        resultId: resultId,
-        expressionIndex: keyExpressionIndex,
-      );
-      if (!mounted || seq != _s1KeyExpressionMegaphoneSeq) {
-        return;
-      }
-
-      final source = await _prepareS1KeyExpressionAudio(
-        cdnYn: tts.cdnYn,
-        cdnPath: tts.cdnPath,
-        soundBytes: tts.sound,
-      );
-      if (!mounted || seq != _s1KeyExpressionMegaphoneSeq) {
-        return;
-      }
-
-      if (source == null) {
-        setState(() => _s1KeyExpressionPlaybackIndex = null);
-        return;
-      }
-
-      _s1KeyExpressionAudioSub =
-          _s1KeyExpressionAudioPlayer.playerStateStream.listen((state) {
-        if (state.processingState == ProcessingState.completed) {
-          _s1KeyExpressionAudioSub?.cancel();
-          _s1KeyExpressionAudioSub = null;
-          if (!mounted || seq != _s1KeyExpressionMegaphoneSeq) {
-            return;
-          }
-          setState(() => _s1KeyExpressionPlaybackIndex = null);
-        }
-      });
-      await _s1KeyExpressionAudioPlayer.play();
-    } catch (_) {
-      _s1KeyExpressionAudioSub?.cancel();
-      _s1KeyExpressionAudioSub = null;
-      if (!mounted || seq != _s1KeyExpressionMegaphoneSeq) {
-        return;
-      }
-      setState(() => _s1KeyExpressionPlaybackIndex = null);
-    }
-  }
-
-  Future<void> _onS1KeyExpressionBookmarkTap(int keyExpressionIndex) async {
-    if (_s1KeyExpressionBookmarkInFlight) {
-      return;
-    }
-    _s1KeyExpressionBookmarkInFlight = true;
-    try {
-      final resultId = _dto?.id;
-      final token = await TokenStorage.loadAccessToken();
-      if (!mounted) {
-        return;
-      }
-      if (token == null || resultId == null) {
-        DefaultToast.show(context, 'HTTP 401 · Request failed', isError: true);
-        return;
-      }
-
-      final isBookmarked =
-          _s1KeyExpressionBookmarkedIndexes.contains(keyExpressionIndex);
-
-      if (isBookmarked) {
-        await SudaApiClient.deleteUserExpression(
-          accessToken: token,
-          rpResultId: resultId,
-          expressionIndex: keyExpressionIndex,
-        );
-        if (!mounted) {
-          return;
-        }
-        setState(
-          () => _s1KeyExpressionBookmarkedIndexes.remove(keyExpressionIndex),
-        );
-      } else {
-        await SudaApiClient.saveUserExpression(
-          accessToken: token,
-          roleplayResultId: resultId,
-          expressionIndex: keyExpressionIndex,
-        );
-        if (!mounted) {
-          return;
-        }
-        setState(
-          () => _s1KeyExpressionBookmarkedIndexes.add(keyExpressionIndex),
-        );
-        final l10n = AppLocalizations.of(context)!;
-        DefaultToast.show(context, l10n.expressionSavedToProfile);
-      }
-    } catch (e) {
-      if (!mounted) {
-        return;
-      }
-      DefaultToast.show(context, _httpErrorBrief(e), isError: true);
-    } finally {
-      _s1KeyExpressionBookmarkInFlight = false;
-    }
   }
 
   Future<void> _exitResult(BuildContext context) async {
@@ -572,22 +340,6 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
         RoleplayStateService.instance.setUser(user);
       } catch (_) {
         // best-effort: ignore
-      }
-
-      final roleplayId = RoleplayStateService.instance.roleplayId;
-      if (roleplayId != null) {
-        try {
-          final overview = await SudaApiClient.getRoleplayOverview(
-            accessToken: token,
-            roleplayId: roleplayId,
-          );
-          RoleplayStateService.instance.setOverview(
-            roleplayId: roleplayId,
-            overview: overview,
-          );
-        } catch (_) {
-          // best-effort: ignore
-        }
       }
     }
     if (!mounted) return;
@@ -642,47 +394,15 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
   Widget _buildMissionIcons() {
     final missionIcons = <Widget>[];
 
-    if (_isS2Flow) {
-      for (final success in _s2History?.missions ?? const <bool>[]) {
-        missionIcons.add(
-          Image.asset(
-            success ? _rps2MissionOn : _rps2MissionOff,
-            width: 20,
-            height: 20,
-            fit: BoxFit.contain,
-          ),
-        );
-      }
-    } else {
-      final missionResultStr = _dto?.missionResult ?? '';
-      final missionLen = missionResultStr.isEmpty
-          ? (_dto?.completedMissionIds?.length ?? 0)
-          : missionResultStr.length;
-
-      if (missionResultStr.isEmpty) {
-        for (var i = 0; i < missionLen; i++) {
-          missionIcons.add(
-            Image.asset(
-              _missionFailed,
-              height: 20,
-              width: 15,
-              fit: BoxFit.contain,
-            ),
-          );
-        }
-      } else {
-        for (var i = 0; i < missionResultStr.length; i++) {
-          final isSuccess = missionResultStr[i].toUpperCase() == 'Y';
-          missionIcons.add(
-            Image.asset(
-              isSuccess ? _missionSucceeded : _missionFailed,
-              height: 20,
-              width: 15,
-              fit: BoxFit.contain,
-            ),
-          );
-        }
-      }
+    for (final success in _s2History?.missions ?? const <bool>[]) {
+      missionIcons.add(
+        Image.asset(
+          success ? _rps2MissionOn : _rps2MissionOff,
+          width: 20,
+          height: 20,
+          fit: BoxFit.contain,
+        ),
+      );
     }
 
     if (missionIcons.isEmpty) {
@@ -694,7 +414,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
 
     return Wrap(
       alignment: WrapAlignment.center,
-      spacing: _isS2Flow ? 2 : 0,
+      spacing: 2,
       runSpacing: 2,
       children: missionIcons,
     );
@@ -836,134 +556,6 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
                 ),
               ],
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFeedbackLayer(BuildContext context) {
-    final theme = Theme.of(context).textTheme;
-    final l10n = AppLocalizations.of(context)!;
-    final rawFeedback = _dto?.overallFeedback;
-    final feedback = (rawFeedback == null || rawFeedback.trim().isEmpty)
-        ? l10n.roleplayResultFeedbackInsufficientWords
-        : rawFeedback;
-
-    final entrance = CurvedAnimation(
-      parent: _feedbackEntranceController,
-      curve: Curves.easeOutCubic,
-    );
-    return FadeTransition(
-      opacity: Tween<double>(begin: 0, end: 1).animate(entrance),
-      child: SlideTransition(
-        position: Tween<Offset>(
-          begin: const Offset(0, 1.2),
-          end: Offset.zero,
-        ).animate(entrance),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 24),
-              child: Text(
-                'Feedback',
-                style: theme.headlineSmall?.copyWith(color: Colors.white),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: _feedbackBoxFill,
-                  borderRadius: BorderRadius.circular(18),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Color(0x33000000),
-                      blurRadius: 18,
-                      offset: Offset(0, 10),
-                    ),
-                  ],
-                ),
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                  child: Text(
-                    feedback,
-                    style: theme.bodyMedium?.copyWith(color: Colors.black),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildS1KeyExpressionCarousel(BuildContext context) {
-    final items = _dto?.keyExpressions ?? const <RpResultKeyExpressionDto>[];
-    return _buildHorizontalSnapCarousel(
-      context: context,
-      itemCount: items.length,
-      itemBuilder: (context, index) {
-        final item = items[index];
-        return _S1KeyExpressionCard(
-          item: item,
-          highlighted: _s1KeyExpressionHighlightedIndex == index,
-          playbackActive: _s1KeyExpressionPlaybackIndex == index,
-          bookmarked: _s1KeyExpressionBookmarkedIndexes.contains(index),
-          onCardTap: () => _onS1KeyExpressionCardTap(index),
-          onBookmarkTap: () => _onS1KeyExpressionBookmarkTap(index),
-        );
-      },
-    );
-  }
-
-  Widget _buildS1KeyExpressionLayer(BuildContext context) {
-    final theme = Theme.of(context).textTheme;
-
-    final entrance = CurvedAnimation(
-      parent: _keyExpressionSectionEntranceController,
-      curve: Curves.easeOutCubic,
-    );
-    return FadeTransition(
-      opacity: Tween<double>(begin: 0, end: 1).animate(entrance),
-      child: SlideTransition(
-        position: Tween<Offset>(
-          begin: const Offset(0, 1.2),
-          end: Offset.zero,
-        ).animate(entrance),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      'Key Expression',
-                      style: theme.headlineSmall?.copyWith(color: Colors.white),
-                    ),
-                  ),
-                  _buildViewChatButton(
-                    context,
-                    onTap: () {
-                      final r = _dto;
-                      if (r == null) return;
-                      Navigator.push(
-                        context,
-                        SubScreenRoute(page: ReviewChatScreen(result: r)),
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-            _buildS1KeyExpressionCarousel(context),
           ],
         ),
       ),
@@ -1556,76 +1148,6 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
     );
   }
 
-  Widget _buildPostEffectBody(BuildContext context) {
-    final bottomInset = MediaQuery.paddingOf(context).bottom;
-    final hasKeyExpressions = _dto?.keyExpressions?.isNotEmpty ?? false;
-
-    return SingleChildScrollView(
-      padding: EdgeInsets.fromLTRB(0, 32, 0, 16 + bottomInset),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _buildFeedbackLayer(context),
-          if (hasKeyExpressions) ...[
-            const SizedBox(height: 28),
-            _buildS1KeyExpressionLayer(context),
-          ],
-          if (_showFooterActions)
-            FadeTransition(
-              opacity: CurvedAnimation(
-                parent: _footerFadeController,
-                curve: Curves.easeOut,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const SizedBox(height: 28),
-                  Center(
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(999),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Color(0x33000000),
-                            blurRadius: 18,
-                            offset: Offset(0, 5),
-                          ),
-                        ],
-                      ),
-                      child: ElevatedButton(
-                        onPressed: _isLeavingToOverview
-                            ? null
-                            : () => _exitResult(context),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: _teal,
-                          foregroundColor: Colors.white,
-                          disabledBackgroundColor: _teal,
-                          disabledForegroundColor: Colors.white,
-                          shape: const StadiumBorder(),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 30,
-                            vertical: 18,
-                          ),
-                          elevation: 0,
-                        ),
-                        child: const Text('Got it!'),
-                      ),
-                    ),
-                  ),
-                  if (widget.showReportLink) ...[
-                    const SizedBox(height: 35),
-                    _buildReportLink(context),
-                  ],
-                  const SizedBox(height: 24),
-                ],
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     _scheduleMeasurePanel();
@@ -1669,9 +1191,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
                   ),
                   if (_effectDone)
                     Expanded(
-                      child: _isS2Flow
-                          ? _buildS2PostEffectBody(context)
-                          : _buildPostEffectBody(context),
+                      child: _buildS2PostEffectBody(context),
                     ),
                 ],
               ),
@@ -2304,144 +1824,6 @@ class _KeyExpressionCard extends StatelessWidget {
                         height: 24,
                         fit: BoxFit.contain,
                         color: fetchingActive
-                            ? _megaphoneTintLoading
-                            : _megaphoneTintActive,
-                        colorBlendMode: BlendMode.srcIn,
-                      ),
-                      GestureDetector(
-                        onTap: onBookmarkTap,
-                        behavior: HitTestBehavior.opaque,
-                        child: Image.asset(
-                          bookmarked ? _bookmarkOnPng : _bookmarkOffPng,
-                          width: 24,
-                          height: 24,
-                          fit: BoxFit.contain,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _S1KeyExpressionCard extends StatelessWidget {
-  const _S1KeyExpressionCard({
-    required this.item,
-    required this.highlighted,
-    required this.playbackActive,
-    required this.bookmarked,
-    required this.onCardTap,
-    required this.onBookmarkTap,
-  });
-
-  final RpResultKeyExpressionDto item;
-  final bool highlighted;
-  final bool playbackActive;
-  final bool bookmarked;
-  final VoidCallback onCardTap;
-  final VoidCallback onBookmarkTap;
-
-  static const String _checkMintSvg = 'assets/images/icons/check_mint.svg';
-  static const String _megaphonePng = 'assets/images/icons/megaphone.png';
-  static const String _bookmarkOffPng = 'assets/images/icons/bookmark_off.png';
-  static const String _bookmarkOnPng = 'assets/images/icons/bookmark_on.png';
-  /// check(22) + gap(8) — rephrased·meaning 좌측 정렬 공통
-  static const double _bodyLeftIndent = 30;
-  static const Color _megaphoneTintActive = Color(0xFF0CABA8);
-  static const Color _megaphoneTintLoading = Color(0xFF121212);
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context).textTheme;
-    final expression = item.expression ?? '';
-    final meaning = item.meaningUserLanguage ?? '';
-    final rephrased = item.rephrasedSentence ?? '';
-
-    return GestureDetector(
-      onTap: onCardTap,
-      behavior: HitTestBehavior.opaque,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(18),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x33000000),
-              blurRadius: 18,
-              offset: Offset(0, 10),
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(18),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 180),
-            curve: Curves.easeOut,
-            color: highlighted ? Colors.white : _s1KeyExpressionCardBg,
-            padding: const EdgeInsets.all(16),
-            child: Align(
-              alignment: Alignment.topLeft,
-              child: Column(
-                mainAxisSize: MainAxisSize.max,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      SvgPicture.asset(
-                        _checkMintSvg,
-                        width: 22,
-                        height: 22,
-                        fit: BoxFit.contain,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          expression,
-                          style: theme.bodyLarge?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            color: _exprTextPrimary,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 15),
-                  Padding(
-                    padding: const EdgeInsets.only(left: _bodyLeftIndent),
-                    child: Text(
-                      rephrased,
-                      style: theme.bodyMedium?.copyWith(
-                        color: _exprTextPrimary,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Padding(
-                    padding: const EdgeInsets.only(left: _bodyLeftIndent),
-                    child: Text(
-                      meaning,
-                      style: theme.bodySmall?.copyWith(
-                        color: _exprTextSecondary,
-                      ),
-                    ),
-                  ),
-                  const Spacer(),
-                  const SizedBox(height: 15),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Image.asset(
-                        _megaphonePng,
-                        width: 24,
-                        height: 24,
-                        fit: BoxFit.contain,
-                        color: playbackActive
                             ? _megaphoneTintLoading
                             : _megaphoneTintActive,
                         colorBlendMode: BlendMode.srcIn,

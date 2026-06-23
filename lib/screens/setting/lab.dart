@@ -184,7 +184,6 @@ class _LabScreenState extends State<LabScreen> {
     SeriesStateService.instance.setSeriesOverview(
       seriesId: 1,
       overview: const RpS2SeriesOverviewDto(
-        id: 1,
         title: {'en': 'Lab Series'},
         synopsis: {'en': ''},
         endingTitle: {'en': 'Lab Ending'},
@@ -240,7 +239,6 @@ class _LabScreenState extends State<LabScreen> {
       SeriesStateService.instance.setCachedUserHistory(
         const RpS2UserHistoryDto(
           id: -1,
-          seriesId: _labEndingSeriesId,
           userStarRating: 0,
         ),
       );

@@ -26,7 +26,7 @@ import 'playing_input_mixin.dart';
 
 /// S2 Roleplay Playing Screen (Full Screen)
 ///
-/// S1 구현 백업: `playing_backup.dart`
+/// S2 Playing 화면.
 class RoleplayPlayingScreen extends StatefulWidget {
   final bool showCloseButton;
 

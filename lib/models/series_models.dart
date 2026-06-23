@@ -5,13 +5,10 @@ import '../utils/suda_json_util.dart';
 
 /// GET /rps2/series/{seriesId}/overview 응답 DTO
 class RpS2SeriesOverviewDto {
-  final int id;
   final Map<String, String> title;
-  final String? category;
   final String? synopsisComplexityLevel;
   final Map<String, String> synopsis;
   final String? thumbnailImgPath;
-  final RpS2CharacterDto? userCharacter;
   final Map<String, String> endingTitle;
   final Map<String, String> endingContent;
   final String? endingImgPath;
@@ -19,13 +16,10 @@ class RpS2SeriesOverviewDto {
   final Map<int, int> bestScoreMap;
 
   const RpS2SeriesOverviewDto({
-    required this.id,
     required this.title,
-    this.category,
     this.synopsisComplexityLevel,
     required this.synopsis,
     this.thumbnailImgPath,
-    this.userCharacter,
     required this.endingTitle,
     required this.endingContent,
     this.endingImgPath,
@@ -45,17 +39,10 @@ class RpS2SeriesOverviewDto {
               .toList();
 
     return RpS2SeriesOverviewDto(
-      id: (json['id'] as num?)?.toInt() ?? 0,
       title: SudaJsonUtil.localizedMapFromJson(json['title']),
-      category: json['category'] as String?,
       synopsisComplexityLevel: json['synopsisComplexityLevel'] as String?,
       synopsis: SudaJsonUtil.localizedMapFromJson(json['synopsis']),
       thumbnailImgPath: json['thumbnailImgPath'] as String?,
-      userCharacter: json['userCharacter'] == null
-          ? null
-          : RpS2CharacterDto.fromJson(
-              json['userCharacter'] as Map<String, dynamic>,
-            ),
       endingTitle: SudaJsonUtil.localizedMapFromJson(json['endingTitle']),
       endingContent: SudaJsonUtil.localizedMapFromJson(json['endingContent']),
       endingImgPath: json['endingImgPath'] as String?,
@@ -66,13 +53,10 @@ class RpS2SeriesOverviewDto {
 
   RpS2SeriesOverviewDto copyWith({Map<int, int>? bestScoreMap}) {
     return RpS2SeriesOverviewDto(
-      id: id,
       title: title,
-      category: category,
       synopsisComplexityLevel: synopsisComplexityLevel,
       synopsis: synopsis,
       thumbnailImgPath: thumbnailImgPath,
-      userCharacter: userCharacter,
       endingTitle: endingTitle,
       endingContent: endingContent,
       endingImgPath: endingImgPath,
@@ -174,38 +158,14 @@ class RpS2CefrMissionDto {
 }
 
 class RpS2CharacterDto {
-  final int? id;
   final String? name;
-  final String? gender;
-  final String? ageRange;
-  final String? occupation;
-  final String? personality;
-  final String? speechStyle;
-  final String? nationality;
   final String? rpImgPath;
 
-  const RpS2CharacterDto({
-    this.id,
-    this.name,
-    this.gender,
-    this.ageRange,
-    this.occupation,
-    this.personality,
-    this.speechStyle,
-    this.nationality,
-    this.rpImgPath,
-  });
+  const RpS2CharacterDto({this.name, this.rpImgPath});
 
   factory RpS2CharacterDto.fromJson(Map<String, dynamic> json) {
     return RpS2CharacterDto(
-      id: (json['id'] as num?)?.toInt(),
       name: json['name'] as String?,
-      gender: json['gender'] as String?,
-      ageRange: json['ageRange'] as String?,
-      occupation: json['occupation'] as String?,
-      personality: json['personality'] as String?,
-      speechStyle: json['speechStyle'] as String?,
-      nationality: json['nationality'] as String?,
       rpImgPath: json['rpImgPath'] as String?,
     );
   }
@@ -362,17 +322,7 @@ int? _optionalInt(dynamic value) {
 /// `GET /rps2/user-histories/{rpUserHistoryId}` 응답 DTO
 class RpS2UserHistoryDto {
   final int? id;
-  final int? userId;
-  final int? seriesId;
-  final int? episodeId;
-  final int? episodeCefrId;
-  final String? sessionId;
-  final String? firstPlayYn;
-  final String? status;
-  final String? thumbnailImgPath;
   final List<RpS2UserHistoryMsgDto> messages;
-  final Map<int, RpS2HintVo> hints;
-  final Map<int, String> translations;
   final List<bool> missions;
   final int? starScore;
   final int? words;
@@ -380,11 +330,8 @@ class RpS2UserHistoryDto {
   final List<RpS2KeyExpressionVo> keyExpressions;
   final Map<int, RpS2UserFeedbackVo> speechFeedback;
   final int? userStarRating;
-  final String? createdAt;
-  final String? updatedAt;
   final String? mainTitle;
   final String? subTitle;
-  final String? avatarImgPath;
   final int? beforeLikePoint;
   final int? beforeLevel;
   final int? beforeProgressPercentage;
@@ -394,17 +341,7 @@ class RpS2UserHistoryDto {
 
   const RpS2UserHistoryDto({
     this.id,
-    this.userId,
-    this.seriesId,
-    this.episodeId,
-    this.episodeCefrId,
-    this.sessionId,
-    this.firstPlayYn,
-    this.status,
-    this.thumbnailImgPath,
     this.messages = const [],
-    this.hints = const {},
-    this.translations = const {},
     this.missions = const [],
     this.starScore,
     this.words,
@@ -412,11 +349,8 @@ class RpS2UserHistoryDto {
     this.keyExpressions = const [],
     this.speechFeedback = const {},
     this.userStarRating,
-    this.createdAt,
-    this.updatedAt,
     this.mainTitle,
     this.subTitle,
-    this.avatarImgPath,
     this.beforeLikePoint,
     this.beforeLevel,
     this.beforeProgressPercentage,
@@ -428,17 +362,7 @@ class RpS2UserHistoryDto {
   factory RpS2UserHistoryDto.fromJson(Map<String, dynamic> json) {
     return RpS2UserHistoryDto(
       id: _optionalInt(json['id']),
-      userId: _optionalInt(json['userId']),
-      seriesId: _optionalInt(json['seriesId']),
-      episodeId: _optionalInt(json['episodeId']),
-      episodeCefrId: _optionalInt(json['episodeCefrId']),
-      sessionId: json['sessionId']?.toString(),
-      firstPlayYn: json['firstPlayYn'] as String?,
-      status: json['status'] as String?,
-      thumbnailImgPath: json['thumbnailImgPath'] as String?,
       messages: _userHistoryMessagesFromJson(json['messages']),
-      hints: _hintVoMapFromJson(json['hints']),
-      translations: _intStringMapFromJson(json['translations']),
       missions: _boolListFromJson(json['missions']),
       starScore: _optionalInt(json['starScore']),
       words: _optionalInt(json['words']),
@@ -446,11 +370,8 @@ class RpS2UserHistoryDto {
       keyExpressions: _keyExpressionsFromJson(json['keyExpressions']),
       speechFeedback: _speechFeedbackMapFromJson(json['speechFeedback']),
       userStarRating: _optionalInt(json['userStarRating']),
-      createdAt: json['createdAt']?.toString(),
-      updatedAt: json['updatedAt']?.toString(),
       mainTitle: json['mainTitle'] as String?,
       subTitle: json['subTitle'] as String?,
-      avatarImgPath: json['avatarImgPath'] as String?,
       beforeLikePoint: _optionalInt(json['beforeLikePoint']),
       beforeLevel: _optionalInt(json['beforeLevel']),
       beforeProgressPercentage: _optionalInt(json['beforeProgressPercentage']),
@@ -492,11 +413,6 @@ class RpS2UserHistoryMsgDto {
   final int? id;
   final String? role;
   final String? content;
-  final int? prepareTextStartedAt;
-  final int? prepareTextEndedAt;
-  final int? prepareAudioStartedAt;
-  final int? prepareAudioEndedAt;
-  final int? deliveredAt;
   final String? audioInputYn;
   final String? audioPath;
 
@@ -504,11 +420,6 @@ class RpS2UserHistoryMsgDto {
     this.id,
     this.role,
     this.content,
-    this.prepareTextStartedAt,
-    this.prepareTextEndedAt,
-    this.prepareAudioStartedAt,
-    this.prepareAudioEndedAt,
-    this.deliveredAt,
     this.audioInputYn,
     this.audioPath,
   });
@@ -518,46 +429,8 @@ class RpS2UserHistoryMsgDto {
       id: _optionalInt(json['id']),
       role: json['role']?.toString(),
       content: json['content'] as String?,
-      prepareTextStartedAt: _optionalInt(json['prepareTextStartedAt']),
-      prepareTextEndedAt: _optionalInt(json['prepareTextEndedAt']),
-      prepareAudioStartedAt: _optionalInt(json['prepareAudioStartedAt']),
-      prepareAudioEndedAt: _optionalInt(json['prepareAudioEndedAt']),
-      deliveredAt: _optionalInt(json['deliveredAt']),
       audioInputYn: json['audioInputYn'] as String?,
       audioPath: json['audioPath'] as String?,
-    );
-  }
-}
-
-class RpS2HintVo {
-  final String? hint;
-  final String? translatedHint;
-  final Set<int> soundHistorySet;
-  final String? deliveredYn;
-
-  const RpS2HintVo({
-    this.hint,
-    this.translatedHint,
-    this.soundHistorySet = const {},
-    this.deliveredYn,
-  });
-
-  factory RpS2HintVo.fromJson(Map<String, dynamic> json) {
-    final rawHistory = json['soundHistorySet'];
-    final Set<int> soundHistorySet;
-    if (rawHistory is List) {
-      soundHistorySet = rawHistory
-          .map((item) => _optionalInt(item))
-          .whereType<int>()
-          .toSet();
-    } else {
-      soundHistorySet = const {};
-    }
-    return RpS2HintVo(
-      hint: json['hint'] as String?,
-      translatedHint: json['translatedHint'] as String?,
-      soundHistorySet: soundHistorySet,
-      deliveredYn: json['deliveredYn'] as String?,
     );
   }
 }
@@ -630,28 +503,6 @@ List<RpS2UserHistoryMsgDto> _userHistoryMessagesFromJson(dynamic raw) {
         ),
       )
       .toList();
-}
-
-Map<int, RpS2HintVo> _hintVoMapFromJson(dynamic raw) {
-  if (raw is! Map) return const {};
-  final result = <int, RpS2HintVo>{};
-  raw.forEach((key, value) {
-    final intKey = int.tryParse(key.toString());
-    if (intKey == null || value is! Map) return;
-    result[intKey] = RpS2HintVo.fromJson(Map<String, dynamic>.from(value));
-  });
-  return result;
-}
-
-Map<int, String> _intStringMapFromJson(dynamic raw) {
-  if (raw is! Map) return const {};
-  final result = <int, String>{};
-  raw.forEach((key, value) {
-    final intKey = int.tryParse(key.toString());
-    if (intKey == null || value == null) return;
-    result[intKey] = value.toString();
-  });
-  return result;
 }
 
 List<bool> _boolListFromJson(dynamic raw) {

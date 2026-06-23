@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../routes/roleplay_router.dart';
-import '../../services/series_state_service.dart';
 import '../../widgets/roleplay_scaffold.dart';
 
 /// Roleplay Try Again Screen (Full Screen)
@@ -34,8 +33,6 @@ class _RoleplayTryAgainScreenState extends State<RoleplayTryAgainScreen>
   /// Try Again Report 스크린에서 정상 전송 완료 후 돌아온 경우에만 true. 이때만 Report 텍스트 숨김.
   bool _reportSubmitted = false;
 
-  bool get _isS2Flow => SeriesStateService.instance.overview != null;
-
   @override
   void initState() {
     super.initState();
@@ -66,19 +63,11 @@ class _RoleplayTryAgainScreenState extends State<RoleplayTryAgainScreen>
   }
 
   void _goToOverview(BuildContext context) {
-    if (_isS2Flow) {
-      RoleplayRouter.popToOverview(context);
-      return;
-    }
-    Navigator.of(context).pop();
+    RoleplayRouter.popToOverview(context);
   }
 
   void _retry(BuildContext context) {
-    if (_isS2Flow) {
-      RoleplayRouter.replaceWithOpeningForRetry(context);
-      return;
-    }
-    Navigator.of(context).pop();
+    RoleplayRouter.replaceWithOpeningForRetry(context);
   }
 
   @override

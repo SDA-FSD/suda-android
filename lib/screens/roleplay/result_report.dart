@@ -3,7 +3,6 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 import '../../l10n/app_localizations.dart';
-import '../../services/roleplay_state_service.dart';
 import '../../services/series_state_service.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
@@ -13,10 +12,7 @@ import '../../widgets/roleplay_scaffold.dart';
 
 /// Roleplay Result Report Screen (Sub Screen)
 ///
-/// Result 화면에서만 진입. 사용자가 느낀 불편함을 수집하는 용도.
-/// S1: POST /v1/roleplays/results/{roleplayResultId}/report
-/// S2: POST /rps2/user-histories/{rpUserHistoryId}/report
-/// 성공(200) 시 스크린 닫고 부모 Result에서 Report 문구 숨김. Android 백버튼 또는 X 버튼 시 Result로 복귀.
+/// Result 화면에서만 진입. `POST /rps2/user-histories/{rpUserHistoryId}/report`
 class RoleplayResultReportScreen extends StatefulWidget {
   static const String routeName = '/roleplay/result_report';
 
@@ -34,9 +30,6 @@ class _RoleplayResultReportScreenState extends State<RoleplayResultReportScreen>
   final TextEditingController _controller = TextEditingController();
   bool _isSubmitting = false;
   bool _canSubmit = false;
-
-  bool get _isS2Flow =>
-      SeriesStateService.instance.cachedUserHistory != null;
 
   @override
   void initState() {
@@ -62,14 +55,9 @@ class _RoleplayResultReportScreenState extends State<RoleplayResultReportScreen>
     if (!_canSubmit || _isSubmitting) return;
 
     final content = _controller.text.trim();
-    final historyId = _isS2Flow
-        ? SeriesStateService.instance.cachedUserHistory?.id
-        : null;
-    final resultId = _isS2Flow
-        ? null
-        : RoleplayStateService.instance.cachedResult?.id;
+    final historyId = SeriesStateService.instance.cachedUserHistory?.id;
 
-    if (_isS2Flow ? historyId == null : resultId == null) {
+    if (historyId == null) {
       if (mounted) {
         DefaultToast.show(
           context,
@@ -85,19 +73,11 @@ class _RoleplayResultReportScreenState extends State<RoleplayResultReportScreen>
     try {
       final token = await TokenStorage.loadAccessToken();
       if (token != null) {
-        if (_isS2Flow) {
-          await SudaApiClient.sendRpS2UserHistoryReport(
-            accessToken: token,
-            rpUserHistoryId: historyId!,
-            content: content,
-          );
-        } else {
-          await SudaApiClient.sendResultReport(
-            accessToken: token,
-            roleplayResultId: resultId!,
-            content: content,
-          );
-        }
+        await SudaApiClient.sendRpS2UserHistoryReport(
+          accessToken: token,
+          rpUserHistoryId: historyId,
+          content: content,
+        );
 
         if (mounted) {
           Navigator.pop(context, true);

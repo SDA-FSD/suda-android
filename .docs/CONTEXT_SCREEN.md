@@ -319,6 +319,7 @@
       - 바탕: `#635F5F`
       - 진행: `#80D7CF` (progressPercentage / 100)
 - **Profile 히스토리 (S2)**: `GET /rps2/user-histories?pageNum=` (0-based 페이징). 썸네일 3열 그리드 — `imgPath`·`starResult`·`createdAt`(dd/mm) 기존과 동일. 상단 좌측 **CEFR 알약** + 우측 별 3개. 탭 시 `HistoryScreen(rpUserHistoryId)` → `GET /rps2/user-histories/{id}` 후 Result 본문(애니메이션 없음).
+- **Saved 표현 (Expression 탭)**: 목록 `GET /v1/users/expressions?pageNum=` · 카드 탭 TTS `GET /rps2/user-histories/{rpUserHistoryId}/expressions/{expressionIndex}/sound` (`roleplayResultId` → `rpUserHistoryId`, `TtsResultDto`) · 삭제 `DELETE /v1/users/expressions?rpResultId=…&expressionIndex=…`. 카드 배경 기본·재생 모두 `#FFFFFF`.
 - **Saved 표현 삭제 확인 팝업**: Saved 탭의 expression 카드에서 `bookmark_on` 탭 시 `DefaultPopup`으로 삭제 confirm 팝업을 띄운다. 상단 버튼(삭제/Remove) 탭 시 팝업을 닫고 `DELETE /v1/users/expressions`를 호출해 목록에서 제거, 하단 버튼(Practice more/더 연습할래요) 탭 시 팝업만 닫는다.
 - **Props**:
   - `onNavigateToHome`: Home 화면으로 이동 시 호출되는 콜백 (VoidCallback?)
@@ -736,7 +737,7 @@
 - **Ending/Try Again/Result 계열**: S2 result 호출·이동은 아직 미구현. 현재 `requiredSpeechCount` 도달 후 응답 `narration`·`aiText`가 모두 비어 있을 때 `roleplayAnalyzing` 서비스 메시지 blink까지만 수행한다. 응답 본문이 있으면 정상 대화 루프를 계속 처리한다.
 
 ### 스크린 내부 구현 특이사항
-- `SeriesStateService.selectedEpisode`와 `overview.userCharacter` 기반. 배경은 episode `thumbnailImgPath`, 헤더 타이틀은 episode `title`(`bodySmall` w700·1줄 말줄임), 헤더 슬롯 높이 **60**, duration 없음. 타이틀은 X·kebab과 동일 밴드(top 16·height 40) 세로 중앙(`centerTitleInHeaderActionRow`).
+- `SeriesStateService.selectedEpisode` 기반. 배경은 episode `thumbnailImgPath`, 헤더 타이틀은 episode `title`(`bodySmall` w700·1줄 말줄임), 본문은 `briefing`·`aiCharacter.name`. 헤더 슬롯 높이 **60**, duration 없음. 타이틀은 X·kebab과 동일 밴드(top 16·height 40) 세로 중앙(`centerTitleInHeaderActionRow`).
 - 헤더 좌측 X/시스템 뒤로가기: 나가기 확인 레이어 노출, 확인 시 `/series/overview`까지 pop. 우측 `kebab.png`는 설정패널 토글(오토힌트, 음성 속도).
 - `RoleplayScaffold.belowHeader`에 S2 턴바 영역 표시. `requiredSpeechCount`개 턴박스를 렌더링하고, 사용자 발화 응답 `userGrade` A/B/C/D에 따라 색상·라벨 효과 후 40% opacity 상태로 남긴다.
 - 본문은 상단 고정 미션 패널 + 스크롤 대화 영역. 대화 entry는 AI/User/Narration 타입이며 힌트는 별도 bubble로 append된다. 힌트 텍스트 조회 `GET /rps2/sessions/{id}/hint/{rpMsgId}`는 202 not-ready 시 S1 delay 패턴으로 최대 15회 재시도한다. AI 말풍선은 번역 아이콘과 `GET /rps2/sessions/{id}/translation?index=`를 사용한다.

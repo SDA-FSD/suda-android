@@ -574,9 +574,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final token = await TokenStorage.loadAccessToken();
     if (!mounted || seq != _savedMegaphoneSeq) return;
 
-    final resultId = item.roleplayResultId;
+    // roleplayResultId: v1 목록·삭제의 rpResultId, S2 TTS의 rpUserHistoryId.
+    final rpUserHistoryId = item.roleplayResultId;
     final expressionIndex = item.expressionIndex;
-    if (token == null || resultId == null || expressionIndex == null) {
+    if (token == null || rpUserHistoryId == null || expressionIndex == null) {
       setState(() {
         _savedPlaybackExpressionId = null;
         _savedHighlightedExpressionId = null;
@@ -585,9 +586,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
 
     try {
-      final tts = await SudaApiClient.getRoleplayResultExpressionSound(
+      final tts = await SudaApiClient.getRpS2UserHistoryExpressionSound(
         accessToken: token,
-        resultId: resultId,
+        rpUserHistoryId: rpUserHistoryId,
         expressionIndex: expressionIndex,
       );
       if (!mounted || seq != _savedMegaphoneSeq) return;
@@ -999,7 +1000,6 @@ class _SavedExpressionCard extends StatelessWidget {
 
   static const Color _exprTextPrimary = Color(0xFF121212);
   static const Color _exprTextSecondary = Color(0xFF676767);
-  static const Color _mint = Color(0xFF80D7CF);
   static const String _checkMintSvg = 'assets/images/icons/check_mint.svg';
   static const String _megaphonePng = 'assets/images/icons/megaphone.png';
   static const String _bookmarkOnPng = 'assets/images/icons/bookmark_on.png';
@@ -1022,7 +1022,7 @@ class _SavedExpressionCard extends StatelessWidget {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
           curve: Curves.easeOut,
-          color: isHighlighted ? Colors.white : _mint,
+          color: Colors.white,
           padding: const EdgeInsets.all(16),
           child: Align(
             alignment: Alignment.topLeft,

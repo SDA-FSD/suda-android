@@ -169,11 +169,6 @@ class RoleplayRouter {
     );
   }
 
-  /// S1 `playing_backup.dart` 참조용. 신규 코드는 [replaceWithResult] 사용.
-  @Deprecated('Use replaceWithResult')
-  static void replaceWithResultV2(BuildContext context) =>
-      replaceWithResult(context);
-
   static void popToOverview(BuildContext context) {
     Navigator.of(context).popUntil((route) {
       return route.isFirst ||

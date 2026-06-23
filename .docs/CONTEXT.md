@@ -75,9 +75,7 @@
   - `SudaApiClient.claimDailyTicket()`: 데일리 티켓 수령 (`PUT /v1/users/tickets/daily`, 응답: QuestResultDto). `completeYn == 'Y'`이면 `surveySuccessToast` 노출 + 티켓 재조회.
     - 따닥 방지: `daily_ticket_popup.dart` 팝업 호출부에서 클로저 스코프 `isClaiming` 플래그로 primary 버튼의 중복 탭 가드(동일 프레임 멀티터치 대비). `DefaultPopup._popThenCallback`의 "pop 선행 → post-frame 콜백" 패턴과 이중으로 보호.
     - `showDialog`의 `Future`는 다이얼로그 pop 직후에 완료되며, `claim`은 그 다음 프레임에 이어질 수 있어, 팝업 닫힘으로 `homeTabSelectedCounter`가 올라가 `didUpdateWidget`에서 `GET /ticket`이 나가면 `PUT /tickets/daily`와 경합할 수 있다. `HomeScreen`은 팝업 구간에 `_suspendTicketFetchOnHomeReturn`으로 그 자동 조회를 막고, `onDismissedWithoutClaim`·`claimDailyTicketAfterPopup`의 `finally`(`onClaimFlowComplete`)에서만 가드를 해제한다.
-  - `SudaApiClient.getRoleplayResults()`: 롤플레이 결과 목록 페이징 (`GET /v1/roleplays/results?pageNum=0`, 0-based, 9개씩, 응답: SudaAppPage\<RpSimpleResultDto\>) — **Profile History 탭은 S2 `GET /rps2/user-histories` 사용**
   - `SudaApiClient.getRpS2UserHistories()`: Profile History 목록 페이징 (`GET /rps2/user-histories?pageNum=0`, 0-based, 응답: SudaAppPage\<RpS2SimpleHistoryDto\> — `id`, `imgPath`, `starResult`, `cefrLevel`, `createdAt`)
-  - `SudaApiClient.getRoleplayResultReload()`: 운영자용 리프레시 테스트 (`GET /v1/roleplays/results-reload/{resultId}`, 2xx 시 RoleplayResultDto 반환, 그 외 null. History 상단 별 탭 시 호출)
   - `SudaApiClient.updateName()`: 사용자 이름 변경 (`PUT /v1/users?name=...`)
   - `SudaApiClient.registerPushToken()`: 푸시 토큰 등록 (`POST /users/push-token`)
     - Request body: `{ "deviceType": "ANDROID", "pushToken": "<토큰값>", "languageCode": "en|ko|pt" }`
@@ -197,8 +195,9 @@
 - Roleplay 관련 스크린 흐름 및 데이터 정책은 `.docs/CONTEXT_ROLEPLAY.md`를 참조한다.
 - **S2 (Season 2) Roleplay 마이그레이션 진행상황**은 `.docs/CONTEXT_ROLEPLAY_S2.md`를 참조한다.
 - Roleplay 세션 `sessionId`는 인메모리 공통 상태로 보관하고 롤플레이 종료 시 삭제됩니다.
-- **RoleplayOpeningScreen** (S2): `SeriesStateService.selectedEpisode`의 `thumbnailImgPath` 배경·`title`/`briefing`/`userCharacter.name` 본문. duration 헤더 없음. Start 시 `POST /rps2/sessions` (`seriesId`, `episodeId`) → `RpS2SessionDto`(`sessionId`, `aiSound`)를 `SeriesStateService`에 보관. 퀘스트 분기 sessionId 규칙은 S1과 동일.
-- **RoleplayPlayingScreen** (S2): `lib/screens/roleplay/playing.dart`에서 신규 구현. S1 전체 구현은 `lib/screens/roleplay/playing_backup.dart`에 보존(참조용). 헤더: `RoleplayScaffold`·episode `title`(로컬 언어)·X→나가기 확인 레이어·우측 `kebab.png` 설정패널. duration 없음. 배경 `thumbnailImgPath`. AI 선시작→힌트 조건 처리→사용자 발화(`POST /rps2/sessions/{id}/user-message/audio|text`)→사용자/나레이션/후속 AI 말풍선·턴바 등급·미션 완료 효과 루프까지 구현. `requiredSpeechCount` 도달(마지막 턴) 후에도 나레이션·후속 AI 노출 → 서버 `serviceMessage`(없으면 `roleplayAnalyzing`) blink까지만 구현(결과 호출·이동 추후). 상세는 `.docs/CONTEXT_SCREEN.md` §13.
+- **RoleplayOpeningScreen** (S2): `SeriesStateService.selectedEpisode`의 `thumbnailImgPath` 배경·`title`/`briefing`·`aiCharacter.name` 본문. duration 헤더 없음. Start 시 `POST /rps2/sessions` (`seriesId`, `episodeId`) → `RpS2SessionDto`(`sessionId`, `aiSound`)를 `SeriesStateService`에 보관. 퀘스트 분기 sessionId 규칙은 S1과 동일.
+- **RoleplayPlayingScreen** (S2): `lib/screens/roleplay/playing.dart`. S1 `playing_backup.dart`·세션/결과 API 클라이언트는 **삭제됨**(2026-06). 헤더: `RoleplayScaffold`·episode `title`(로컬 언어)·X→나가기 확인 레이어·우측 `kebab.png` 설정패널. 상세는 `.docs/CONTEXT_SCREEN.md` §13.
+- **S1 Roleplay 잔여 코드 정리**(2026-06): `review_chat.dart`·`review_ending.dart`·`playing_backup.dart` 삭제. `result.dart`/`ending.dart`/`result_report.dart` S2 전용화. `RoleplayApi`는 `getRoleplayOverview`(딥링크 overview)·`updateSpeedRate`(Playing 속도)만 유지. Profile Saved는 `GET/DELETE /v1/users/expressions` + S2 TTS sound.
 
 ## 8. 스타일 / 디자인 / 배치 규칙
 
