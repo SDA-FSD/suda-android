@@ -1807,7 +1807,7 @@ class _SpeechFeedbackScorePanel extends StatelessWidget {
   static const double _labelBarGap = 4;
   static const double _rowGap = 8;
   static const double _rowHeight = 14;
-  static const double _columnGap = 8;
+  static const double _columnGap = 24;
 
   static double _labelColumnWidth(
     BuildContext context,
@@ -2051,7 +2051,7 @@ class _SpeechFeedbackRowState extends State<_SpeechFeedbackRow> {
     }
 
     return Padding(
-      padding: const EdgeInsets.only(top: 8, bottom: 8),
+      padding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
       child: _SpeechFeedbackScorePanel(
         score: widget.feedback.score,
         barColor: gradeStyle?.color ?? _SpeechFeedbackGradeStyle.gradeA,
