@@ -166,6 +166,17 @@ class SudaApiClient {
     );
   }
 
+  /// GET /rps2/user-histories?pageNum=0 (0-based)
+  static Future<SudaAppPage<RpS2SimpleHistoryDto>> getRpS2UserHistories({
+    required String accessToken,
+    required int pageNum,
+  }) {
+    return SeriesApi.getUserHistories(
+      accessToken: accessToken,
+      pageNum: pageNum,
+    );
+  }
+
   static Future<void> updateRpS2UserStarRating({
     required String accessToken,
     required int rpUserHistoryId,

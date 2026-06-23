@@ -75,7 +75,8 @@
   - `SudaApiClient.claimDailyTicket()`: 데일리 티켓 수령 (`PUT /v1/users/tickets/daily`, 응답: QuestResultDto). `completeYn == 'Y'`이면 `surveySuccessToast` 노출 + 티켓 재조회.
     - 따닥 방지: `daily_ticket_popup.dart` 팝업 호출부에서 클로저 스코프 `isClaiming` 플래그로 primary 버튼의 중복 탭 가드(동일 프레임 멀티터치 대비). `DefaultPopup._popThenCallback`의 "pop 선행 → post-frame 콜백" 패턴과 이중으로 보호.
     - `showDialog`의 `Future`는 다이얼로그 pop 직후에 완료되며, `claim`은 그 다음 프레임에 이어질 수 있어, 팝업 닫힘으로 `homeTabSelectedCounter`가 올라가 `didUpdateWidget`에서 `GET /ticket`이 나가면 `PUT /tickets/daily`와 경합할 수 있다. `HomeScreen`은 팝업 구간에 `_suspendTicketFetchOnHomeReturn`으로 그 자동 조회를 막고, `onDismissedWithoutClaim`·`claimDailyTicketAfterPopup`의 `finally`(`onClaimFlowComplete`)에서만 가드를 해제한다.
-  - `SudaApiClient.getRoleplayResults()`: 롤플레이 결과 목록 페이징 (`GET /v1/roleplays/results?pageNum=0`, 0-based, 9개씩, 응답: SudaAppPage\<RpSimpleResultDto\>, RpSimpleResultDto: resultId, imgPath, starResult, createdAt)
+  - `SudaApiClient.getRoleplayResults()`: 롤플레이 결과 목록 페이징 (`GET /v1/roleplays/results?pageNum=0`, 0-based, 9개씩, 응답: SudaAppPage\<RpSimpleResultDto\>) — **Profile History 탭은 S2 `GET /rps2/user-histories` 사용**
+  - `SudaApiClient.getRpS2UserHistories()`: Profile History 목록 페이징 (`GET /rps2/user-histories?pageNum=0`, 0-based, 응답: SudaAppPage\<RpS2SimpleHistoryDto\> — `id`, `imgPath`, `starResult`, `cefrLevel`, `createdAt`)
   - `SudaApiClient.getRoleplayResultReload()`: 운영자용 리프레시 테스트 (`GET /v1/roleplays/results-reload/{resultId}`, 2xx 시 RoleplayResultDto 반환, 그 외 null. History 상단 별 탭 시 호출)
   - `SudaApiClient.updateName()`: 사용자 이름 변경 (`PUT /v1/users?name=...`)
   - `SudaApiClient.registerPushToken()`: 푸시 토큰 등록 (`POST /users/push-token`)
@@ -267,7 +268,7 @@
   - **비로그인·동의 전**: `PendingAppPathService`에 보관 후, 로그인·동의 완료 뒤 Main 진입 시 한 번 `takePending()`으로 적용한다.
   - **이미 Main 진입 후**: 백그라운드에서 알림 탭 시에도 동일하게 pending에 넣고 다음 프레임에 적용한다.
   - `/notice/{noticeId}`는 알림함이 아닌 공지사항 상세(`AnnouncementDetailScreen`)로 직접 진입한다.
-  - `/profile/history/{resultId}`는 `GET /v1/roleplays/results/{resultId}` 상세 조회 후 `version == 2`이면 `HistoryScreenV2`, 그 외·조회 실패 시 기존 `HistoryScreen`으로 진입한다.
+  - `/profile/history/{rpUserHistoryId}`는 `HistoryScreen`으로 진입하며, `GET /rps2/user-histories/{rpUserHistoryId}`로 상세를 조회한다.
   - 지원 경로·정의·신규 스크린 시 확인 절차는 `.docs/CONTEXT_SCREEN.md`의 **appPath (푸시 딥링크 경로)** 섹션을 따른다.
 
 ## 11. 코드 구조 및 리팩토링

@@ -36,10 +36,16 @@ class RoleplayResultScreen extends StatefulWidget {
   static const String routeName = '/roleplay/result';
 
   final bool showCloseButton;
+  final bool skipEntranceAnimation;
+  final bool exitViaPop;
+  final bool showReportLink;
 
   const RoleplayResultScreen({
     super.key,
     this.showCloseButton = true,
+    this.skipEntranceAnimation = false,
+    this.exitViaPop = false,
+    this.showReportLink = true,
   });
 
   @override
@@ -162,12 +168,40 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
       vsync: this,
       duration: const Duration(milliseconds: 240),
     );
-    _scheduleStarSequence();
+    if (widget.skipEntranceAnimation) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _bootstrapSkipEntrance();
+        }
+      });
+    } else {
+      _scheduleStarSequence();
+    }
+  }
+
+  void _bootstrapSkipEntrance() {
+    _hasScheduledPostEntrance = true;
+    _hasStartedEffectSequence = true;
+    final targetGoldStars = (_starResult >= 1 && _starResult <= 3)
+        ? _starResult
+        : 0;
+    setState(() {
+      _revealedGoldStars = targetGoldStars;
+      _panelMoveController.value = 1.0;
+      _effectDone = true;
+      _showFooterActions = true;
+      _keyExpressionSectionEntranceController.value = 1.0;
+      _footerFadeController.value = 1.0;
+    });
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    if (widget.skipEntranceAnimation) {
+      _didAttachRouteAnimation = true;
+      return;
+    }
     if (_didAttachRouteAnimation) {
       return;
     }
@@ -515,6 +549,14 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
     } finally {
       _s1KeyExpressionBookmarkInFlight = false;
     }
+  }
+
+  Future<void> _exitResult(BuildContext context) async {
+    if (widget.exitViaPop) {
+      Navigator.of(context).pop();
+      return;
+    }
+    await _navigateToOverview(context);
   }
 
   Future<void> _navigateToOverview(BuildContext context) async {
@@ -1407,10 +1449,44 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
     return rows;
   }
 
-  Widget _buildS2FooterActions(BuildContext context) {
+  Widget _buildReportLink(BuildContext context) {
+    if (!widget.showReportLink) {
+      return const SizedBox.shrink();
+    }
+
     final theme = Theme.of(context).textTheme;
     final l10n = AppLocalizations.of(context)!;
 
+    return Center(
+      child: _reportSubmitted
+          ? IgnorePointer(
+              child: Opacity(
+                opacity: 0,
+                child: Text(
+                  l10n.endingReport,
+                  style: theme.bodySmall?.copyWith(color: _reportText),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            )
+          : GestureDetector(
+              onTap: () async {
+                final result =
+                    await RoleplayRouter.pushResultReport<bool>(context);
+                if (result == true && mounted) {
+                  setState(() => _reportSubmitted = true);
+                }
+              },
+              child: Text(
+                l10n.endingReport,
+                style: theme.bodySmall?.copyWith(color: _reportText),
+                textAlign: TextAlign.center,
+              ),
+            ),
+    );
+  }
+
+  Widget _buildS2FooterActions(BuildContext context) {
     return FadeTransition(
       opacity: CurvedAnimation(
         parent: _footerFadeController,
@@ -1436,7 +1512,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
               child: ElevatedButton(
                 onPressed: _isLeavingToOverview
                     ? null
-                    : () => _navigateToOverview(context),
+                    : () => _exitResult(context),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: _teal,
                   foregroundColor: Colors.white,
@@ -1453,37 +1529,10 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
               ),
             ),
           ),
-          const SizedBox(height: 35),
-          Center(
-            child: _reportSubmitted
-                ? IgnorePointer(
-                    child: Opacity(
-                      opacity: 0,
-                      child: Text(
-                        l10n.endingReport,
-                        style:
-                            theme.bodySmall?.copyWith(color: _reportText),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  )
-                : GestureDetector(
-                    onTap: () async {
-                      final result =
-                          await RoleplayRouter.pushResultReport<bool>(
-                        context,
-                      );
-                      if (result == true && mounted) {
-                        setState(() => _reportSubmitted = true);
-                      }
-                    },
-                    child: Text(
-                      l10n.endingReport,
-                      style: theme.bodySmall?.copyWith(color: _reportText),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-          ),
+          if (widget.showReportLink) ...[
+            const SizedBox(height: 35),
+            _buildReportLink(context),
+          ],
           const SizedBox(height: 24),
         ],
       ),
@@ -1508,8 +1557,6 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
   }
 
   Widget _buildPostEffectBody(BuildContext context) {
-    final theme = Theme.of(context).textTheme;
-    final l10n = AppLocalizations.of(context)!;
     final bottomInset = MediaQuery.paddingOf(context).bottom;
     final hasKeyExpressions = _dto?.keyExpressions?.isNotEmpty ?? false;
 
@@ -1549,7 +1596,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
                       child: ElevatedButton(
                         onPressed: _isLeavingToOverview
                             ? null
-                            : () => _navigateToOverview(context),
+                            : () => _exitResult(context),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: _teal,
                           foregroundColor: Colors.white,
@@ -1566,36 +1613,10 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
                       ),
                     ),
                   ),
-                  const SizedBox(height: 35),
-                  Center(
-                    child: _reportSubmitted
-                        ? IgnorePointer(
-                            child: Opacity(
-                              opacity: 0,
-                              child: Text(
-                                l10n.endingReport,
-                                style: theme.bodySmall
-                                    ?.copyWith(color: _reportText),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          )
-                        : GestureDetector(
-                            onTap: () async {
-                              final result = await RoleplayRouter
-                                  .pushResultReport<bool>(context);
-                              if (result == true && mounted) {
-                                setState(() => _reportSubmitted = true);
-                              }
-                            },
-                            child: Text(
-                              l10n.endingReport,
-                              style: theme.bodySmall
-                                  ?.copyWith(color: _reportText),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                  ),
+                  if (widget.showReportLink) ...[
+                    const SizedBox(height: 35),
+                    _buildReportLink(context),
+                  ],
                   const SizedBox(height: 24),
                 ],
               ),
@@ -1617,7 +1638,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
         if (!didPop) {
-          _navigateToOverview(context);
+          _exitResult(context);
         }
       },
       child: Scaffold(

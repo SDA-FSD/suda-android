@@ -355,7 +355,7 @@ S1 턴 정책은 `.docs/CONTEXT_ROLEPLAY.md`만 본다. **S2는 아래가 단일
     - **접힘**: 1줄 grade `bodySmall` **w700**(grade색) · 2줄 사용자 발화 `bodyLarge` · 3줄 메가폰 + **Feedback** pill.
     - **펼침**: score 4항목 — 카드 전폭 **50:50** 2열(좌: Meaning·Vocabulary, 우: Relevance·Grammar). score 패널 좌·우 **24** · 열 간격 **24** · 각 행 `labelSmall` label + bar, 4 label 공통 너비로 bar 좌우 길이 균등. score 영역과 사용자 발화 사이 `#D9D9D9` 1px 구분선 · 2·3줄 사이 `feedback` `bodySmall` `#635F5F`.
     - **재생**: `messages[].audioInputYn == 'Y'`인 행만 메가폰 노출·카드 전체 탭(Feedback pill 제외) 재생. `N`이면 메가폰 미노출·카드 탭 재생 없음(Feedback pill 펼침만). API `GET /rps2/user-histories/{rpUserHistoryId}/messages/{rpMsgId}/audio`(`TtsResultDto`, `rpMsgId` = `speechFeedback` 키 = `messages[].id`). fetch 중 `megaphone.png` `#121212`, 재생 중 `megaphone_fill.png` `#0CABA8`. Key Expression 등 다른 재생 중이면 중단 후 우선 적용.
-  - Footer: Got it! / Report(S1과 동일 UX) — S2는 `POST /rps2/user-histories/{rpUserHistoryId}/report`
+  - Footer: Got it! / Report(S1과 동일 UX) — S2는 `POST /rps2/user-histories/{rpUserHistoryId}/report`. **Profile History 진입**(`showReportLink: false`) 시 Report 링크 미노출.
 - **S1 경로**: Feedback + Key Expression + View Chat(헤더) 유지
 
 ### 4-6. RoleplayOverviewScreen ⏸ (S1 fade-out)
@@ -380,7 +380,8 @@ S1 턴 정책은 `.docs/CONTEXT_ROLEPLAY.md`만 본다. **S2는 아래가 단일
 | POST | `/rps2/sessions/{id}/user-message/text` | req: raw `String` / res: `RpS2UserMessageResponseDto` | 사용자 텍스트 발화 | ✅ |
 | GET | `/rps2/sessions/{id}/ai-message/audio` | `RpS2SoundResDto` (`cdnYn`, `cdnPath`, `file`/`sound`) | 후속 AI 음성 | ✅ |
 | PUT | `/rps2/sessions/{id}/finish` | res: JSON `Long` (`0` 또는 `rpUserHistoryId`) | Playing 마무리 | ✅ |
-| GET | `/rps2/user-histories/{rpUserHistoryId}` | `RpS2UserHistoryDto` | finish 성공 후 result/ending 이동 전 | ✅ |
+| GET | `/rps2/user-histories?pageNum=` | `SudaAppPage<RpS2SimpleHistoryDto>` | Profile History 목록 | ✅ |
+| GET | `/rps2/user-histories/{rpUserHistoryId}` | `RpS2UserHistoryDto` | finish 성공 후 result/ending 이동 전 · **Profile History 상세** | ✅ |
 | GET | `/rps2/user-histories/{rpUserHistoryId}/expressions/{expressionIndex}/sound` | `TtsResultDto` (`cdnYn`, `cdnPath`, `sound`) | Result Key Expression 카드 탭 | ✅ |
 | POST | `/rps2/user-histories/{rpUserHistoryId}/expressions/{expressionIndex}` | void (200) | Result Key Expression 북마크 저장 | ✅ |
 | DELETE | `/rps2/user-histories/{rpUserHistoryId}/expressions/{expressionIndex}` | void (200) | Result Key Expression 북마크 삭제 | ✅ |

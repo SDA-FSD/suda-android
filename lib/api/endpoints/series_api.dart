@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
+import '../../models/pagination.dart';
 import '../../models/roleplay_models.dart';
 import '../../models/series_models.dart';
 import '../client/suda_http_client.dart';
@@ -644,6 +645,60 @@ class SeriesApi {
     }
     throw Exception(
       'PUT /rps2/sessions/$rpSessionId/finish failed: HTTP ${response.statusCode} ${response.body}',
+    );
+  }
+
+  /// GET /rps2/user-histories?pageNum=0 (0-based)
+  static Future<SudaAppPage<RpS2SimpleHistoryDto>> getUserHistories({
+    required String accessToken,
+    required int pageNum,
+  }) async {
+    return await SudaHttpClient.executeWithRefresh(
+      () => _getUserHistoriesInternal(accessToken, pageNum),
+      retryWithNewToken: (newToken) =>
+          _getUserHistoriesInternal(newToken, pageNum),
+    );
+  }
+
+  static Future<SudaAppPage<RpS2SimpleHistoryDto>> _getUserHistoriesInternal(
+    String accessToken,
+    int pageNum,
+  ) async {
+    final uri = SudaHttpClient.buildUri('/rps2/user-histories', {
+      'pageNum': pageNum.toString(),
+    });
+    late final http.Response response;
+    try {
+      response = await SudaHttpClient.client
+          .get(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+              'Content-Type': 'application/json',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      rethrow;
+    }
+
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final Map<String, dynamic> data =
+          jsonDecode(response.body) as Map<String, dynamic>;
+      return SudaAppPage<RpS2SimpleHistoryDto>.fromJson(
+        data,
+        (json) => RpS2SimpleHistoryDto.fromJson(
+          Map<String, dynamic>.from(json),
+        ),
+      );
+    }
+
+    throw Exception(
+      'GET /rps2/user-histories failed: HTTP ${response.statusCode} ${response.body}',
     );
   }
 

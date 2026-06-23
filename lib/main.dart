@@ -27,7 +27,6 @@ import 'screens/home.dart';
 import 'screens/profile.dart';
 import 'screens/notification_box.dart';
 import 'screens/roleplay/history.dart';
-import 'screens/roleplay/history_v2.dart';
 import 'screens/setting/setting.dart';
 import 'screens/setting/announcement_detail.dart';
 import 'routes/roleplay_router.dart';
@@ -734,31 +733,20 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         if (segments.length >= 2 &&
             segments[1] == 'history' &&
             segments.length >= 3) {
-          final resultId = int.tryParse(segments[2]);
-          if (resultId != null) {
+          final rpUserHistoryId = int.tryParse(segments[2]);
+          if (rpUserHistoryId != null) {
             setState(() => _currentMainScreen = 'profile');
             unawaited(_syncNotiboxListFirstPage(force: true));
-            WidgetsBinding.instance.addPostFrameCallback((_) async {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
               if (!mounted) return;
-              Widget page = HistoryScreen(resultId: resultId);
-              final token = _accessToken;
-              if (token != null) {
-                try {
-                  final dto = await SudaApiClient.getRoleplayResult(
-                    accessToken: token,
-                    resultId: resultId,
-                  );
-                  if (!mounted) return;
-                  page = dto.version == 2
-                      ? HistoryScreenV2(resultId: resultId)
-                      : HistoryScreen(resultId: resultId);
-                } catch (_) {
-                  // Keep the previous appPath behavior if the version lookup fails.
-                }
-              }
               final c = _navigatorKey.currentState?.context;
               if (c != null && c.mounted) {
-                Navigator.push(c, SubScreenRoute(page: page));
+                Navigator.push(
+                  c,
+                  SubScreenRoute(
+                    page: HistoryScreen(rpUserHistoryId: rpUserHistoryId),
+                  ),
+                );
               }
             });
             return;

@@ -348,7 +348,7 @@
 - `isUserTurnYn`는 Playing 상태에서 사용자의 입력 가능 여부를 나타내며(`Y`/`N`),
   Roleplay 생명주기 동안 공통 상태로 보관한다.
 - **`cachedResult`**: resultId 기반 종료 시 Playing에서 `GET /v1/roleplays/results/{resultId}`로 조회한 `RoleplayResultDto`를 `setCachedResult(dto)`로 저장. Ending/Result 스크린에서 `cachedResult`로 즉시 표시. `clear()` 시 함께 제거.
-- **Profile 히스토리 분기**: `GET /v1/roleplays/results?pageNum=...` 목록 항목(`RpSimpleResultDto`)의 `version`으로 분기한다. `version == 1` 또는 예외값(null/기타)은 기존 `HistoryScreen`, `version == 2`는 `HistoryScreenV2`로 진입한다.
+- **Profile 히스토리**: `GET /rps2/user-histories?pageNum=...` 목록 → 탭 시 `HistoryScreen(rpUserHistoryId)` → `GET /rps2/user-histories/{id}` → `RoleplayResultScreen`(애니메이션 없음).
 - 흐름/수명 현행 구현 완료(필요 시 보완)
 
 ## 8. Overview UI 구성 (요약)

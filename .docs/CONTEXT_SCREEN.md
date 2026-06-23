@@ -298,10 +298,8 @@
   - `onNavigateToHome` 콜백 호출 → `_MyAppState._navigateToHome()` 실행 → 상태 업데이트로 전환
 - **SettingScreen** (Sub Screen): 우측 상단 원형 버튼 클릭 시
   - `Navigator.push()`로 iOS 스타일 슬라이드 애니메이션으로 표시
-- **HistoryScreen** (Sub Screen): 롤플레이 히스토리 썸네일 탭 시 `version == 1` 또는 예외값(null/기타)인 경우 진입
-  - `Navigator.push(SubScreenRoute(page: HistoryScreen(resultId: ...)))` 로 진입
-- **HistoryScreenV2** (Sub Screen): 롤플레이 히스토리 썸네일 탭 시 `version == 2`인 경우 진입
-  - `Navigator.push(SubScreenRoute(page: HistoryScreenV2(resultId: ...)))` 로 진입
+- **HistoryScreen** (Sub Screen): 롤플레이 히스토리 썸네일 탭 시 진입 (`rpUserHistoryId` 전달)
+  - `Navigator.push(SubScreenRoute(page: HistoryScreen(rpUserHistoryId: …)))` 로 진입
 
 ### 스크린 내부 구현 특이사항
 - **스크린 타입 특성**: Main Screen
@@ -320,7 +318,7 @@
     - 프로그레스 바: height 4, radius 2
       - 바탕: `#635F5F`
       - 진행: `#80D7CF` (progressPercentage / 100)
-    - Progress Box 아래 gap 50 이후, 남은 하단 영역은 추후 히스토리 영역 예정 (현재는 빈 상태)
+- **Profile 히스토리 (S2)**: `GET /rps2/user-histories?pageNum=` (0-based 페이징). 썸네일 3열 그리드 — `imgPath`·`starResult`·`createdAt`(dd/mm) 기존과 동일. 상단 좌측 **CEFR 알약** + 우측 별 3개. 탭 시 `HistoryScreen(rpUserHistoryId)` → `GET /rps2/user-histories/{id}` 후 Result 본문(애니메이션 없음).
 - **Saved 표현 삭제 확인 팝업**: Saved 탭의 expression 카드에서 `bookmark_on` 탭 시 `DefaultPopup`으로 삭제 confirm 팝업을 띄운다. 상단 버튼(삭제/Remove) 탭 시 팝업을 닫고 `DELETE /v1/users/expressions`를 호출해 목록에서 제거, 하단 버튼(Practice more/더 연습할래요) 탭 시 팝업만 닫는다.
 - **Props**:
   - `onNavigateToHome`: Home 화면으로 이동 시 호출되는 콜백 (VoidCallback?)
@@ -907,63 +905,24 @@
 - **파일 경로**: `lib/screens/roleplay/history.dart`
 - **클래스명**: `HistoryScreen` (StatefulWidget)
 - **스크린 타입**: **Sub Screen**
-- **appPath**: `/profile/history/{resultId}` (예: `/profile/history/456`, 상세 result의 `version == 1` 또는 예외값(null/기타)일 때 진입)
+- **appPath**: `/profile/history/{rpUserHistoryId}` (예: `/profile/history/456`)
 
 ### 스크린 용도
-- Profile에서 진입. 롤플레이 결과 요약. Result Screen과 동일 구조(초기 애니메이션 없음).
-- History ↔ ReviewChat/ReviewEnding 왔다 갔다 하는 동안 하나의 roleplay result 정보를 스크린 상태로 보존. 나갈 때·새로 진입할 때 갱신.
+- Profile에서 진입. S2 롤플레이 결과 요약. Result와 **동일 API·동일 본문 UI**, **초기 애니메이션 없음**.
 
 ### 이전 스크린 정보 (진입점)
-- **ProfileScreen**: 롤플레이 히스토리 영역의 썸네일 탭 시 `version == 1` 또는 예외값(null/기타)일 때 진입 (resultId 전달)
-- **appPath**: `/profile/history/{resultId}` 처리 중 상세 result 조회 결과 `version == 1` 또는 예외값(null/기타)이거나 조회 실패 시 진입
+- **ProfileScreen**: 롤플레이 히스토리 썸네일 탭 시 (`rpUserHistoryId` 전달)
+- **appPath**: `/profile/history/{rpUserHistoryId}`
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
-- **ReviewChatScreen** (Sub Screen): 롤플레이 채팅 내용 열람 진입 (추후 지침)
-- **ReviewEndingScreen** (Sub Screen): 롤플레이 엔딩 내용 열람 진입 (추후 지침)
-- **ProfileScreen**: X 버튼 또는 시스템 뒤로가기 시 `Navigator.pop()`으로 복귀
+- **ViewChatScreen** (Sub Screen): Speech Feedback 헤더 View Chat pill 탭 시 (`RpS2UserHistoryDto` 전달)
+- **ProfileScreen**: Got it! / 시스템 뒤로가기 시 `Navigator.pop()`으로 복귀
 
 ### 스크린 내부 구현 특이사항
-- **상태**: resultId로 `SudaApiClient.getRoleplayResult()` 조회 후 `RoleplayResultDto` 및 `getUserProfile()`(Lv·progress)를 스크린 상태로 보관. **롤플레이 진행용(RoleplayStateService)과 혼용하지 않음.**
-- **버전 조건**: 구버전 스냅샷 보존용 화면으로, Profile 히스토리 항목의 `version == 1` 데이터만 이 화면을 사용한다.
-- **레이아웃**: Result와 동일(박스 210 + 본문). 초기 애니메이션 없이 애니 완료 시점 형태로 노출(별·mainTitle·subTitle·likePoint·Mission·Words·Lv·Good Points·To Improve·Got it 버튼).
-- **Got it 버튼**: 노출만, 동작 없음(추후 지침). Report 문구 없음.
-- 우측 상단 X 버튼 필수.
-
----
-
-## 19-1. HistoryScreenV2
-
-### 스크린 관련 정의 파일
-- **파일 경로**: `lib/screens/roleplay/history_v2.dart`
-- **클래스명**: `HistoryScreenV2` (StatefulWidget)
-- **스크린 타입**: **Sub Screen**
-- **appPath**: `/profile/history/{resultId}` 처리 중 상세 result의 `version == 2`일 때 진입
-
-### 스크린 용도
-- Result에 대응하는 신규 히스토리 화면
-- Profile 히스토리 또는 appPath의 `version == 2` 분기에서 진입하며, resultId로 `GET /v1/roleplays/results/{resultId}`를 재조회해 최종 상태를 노출한다(애니메이션 없음).
-
-### 이전 스크린 정보 (진입점)
-- **ProfileScreen**: 롤플레이 히스토리 영역의 썸네일 탭 시 `version == 2`일 때 진입 (resultId 전달)
-
-### 이후 스크린 정보 (이동 가능한 다른 스크린)
-- **ProfileScreen**: 좌상단 뒤로가기 또는 시스템 뒤로가기 시 `Navigator.pop()`으로 복귀
-- **ReviewChatScreen** (Sub Screen): Key Expression 헤더 우측의 "View Chat" 버튼 탭 시 (RoleplayResultDto 전달)
-- **ReviewEndingScreen** (Sub Screen): `endingId`가 있을 때만 하단 "Ending" 버튼 노출, 탭 시 (RoleplayEndingDto 조회 후 전달)
-
-### 스크린 내부 구현 특이사항
-- **상태**: resultId로 `SudaApiClient.getRoleplayResult()` 조회 후 `RoleplayResultDto`를 스크린 상태로 보관. Roleplay 진행용(`RoleplayStateService`)과 혼용하지 않음.
-- **레이아웃**: Result의 effect 완료 상태를 기준으로, 상단 박스(별·mainTitle·subTitle·Mission/Words/Like 3카드 포함) + 본문(Feedback/Key Expression/하단 버튼)을 애니메이션 없이 노출한다. (현행 구현 상단 박스 높이 340)
-- **배경**: Result와 동일하게 상단 `#054544` → 하단 `#0CABA8` 세로 그라데이션을 전체 화면에 유지한다. 상단 박스레이어는 별도 단색 배경을 두지 않는다.
-- 본문 영역도 별도 단색 배경으로 덮지 않고, 동일 그라데이션 위에 카드/텍스트를 그대로 배치한다.
-- **Key Expression 카드(발음·하이라이트)**: Result §17 Key Expression(S1)과 동일 — 카드 전체 탭(북마크 제외), 흰 배경·메가폰 틴트·TTS 규칙 동일.
-- **Key Expression 헤더 "View Chat" 버튼**: 헤더 라인(좌 24/우 24) 우측에 80×24 pill 버튼(테두리 흰색 1, 바탕 transparent, radius 12) + 내부 "View Chat" 텍스트(labelSmall·흰색). 탭 시 `Navigator.push(SubScreenRoute(page: ReviewChatScreen(result: _dto)))`. `keyExpressions`가 비어 있어 섹션 자체가 노출되지 않으면 이 버튼도 함께 노출되지 않음.
-- **하단 버튼 영역**: `endingId != null`일 때만 "Ending" 단독 버튼을 중앙 노출. 그 외에는 하단에 아무 버튼도 노출하지 않는다(View Chat 진입은 Key Expression 헤더의 pill 버튼이 담당).
-- **Expression 북마크**:
-  - 초기 상태: `RoleplayResultDto.savedExpressionIndexes`에 포함된 index는 `bookmark_on.png`, 그 외는 `bookmark_off.png`.
-  - 추가(OFF→ON): `POST /v1/users/expressions` body `{ roleplayResultId: <resultId>, expressionIndex: <index> }` (성공 시 l10n `expressionSavedToProfile`).
-  - 제거(ON→OFF): `DELETE /v1/users/expressions?rpResultId=<resultId>&expressionIndex=<index>` (성공 시 토스트 없음, UI만 `bookmark_off`).
-  - 실패 시: 에러 토스트로 내용 출력.
+- **로드**: `GET /rps2/user-histories/{rpUserHistoryId}` → `SeriesStateService.setCachedUserHistory`
+- **표시**: `RoleplayResultScreen(skipEntranceAnimation: true, exitViaPop: true, showReportLink: false)` — LikeProgressEffect·패널 이동·별 순차 애니 생략, effect 완료 상태 본문 즉시 노출. **Report 링크 미노출**.
+- **종료**: dispose 시 `SeriesStateService.cachedUserHistory` clear
+- S1 `GET /v1/roleplays/results`·`history_v2.dart`·version 분기 **삭제**
 
 ---
 
@@ -979,9 +938,7 @@
 - History Screen에서 진입. 롤플레이 채팅 내용 열람.
 
 ### 이전 스크린 정보 (진입점)
-- **HistoryScreen**: "View Chat" 버튼 탭 시 (RoleplayResultDto 전달)
-- **HistoryScreenV2**: Key Expression 헤더 우측 "View Chat" pill 버튼 탭 시 (RoleplayResultDto 전달)
-- **RoleplayResultScreen**: Key Expression 헤더 우측 "View Chat" pill 버튼 탭 시 (RoleplayResultDto 전달)
+- **RoleplayResultScreen** (S1 Key Expression View Chat): Key Expression 헤더 우측 "View Chat" pill 탭 시 (RoleplayResultDto 전달)
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
 - **이전 스크린**: 좌상단 뒤로가기 또는 시스템 뒤로가기 시 `Navigator.pop()`으로 복귀
@@ -1101,7 +1058,7 @@
 | `/profile` | ProfileScreen (Main, Profile 탭) | GNB Profile |
 | `/notice/{noticeId}` | AnnouncementDetailScreen (Sub) | 예: `/notice/123` |
 | `/roleplay/overview/{roleplayId}` | RoleplayOverviewScreen (Sub) | 예: `/roleplay/overview/12` |
-| `/profile/history/{resultId}` | HistoryScreen / HistoryScreenV2 (Sub) | 예: `/profile/history/456`, 상세 result의 `version` 기준 분기 |
+| `/profile/history/{rpUserHistoryId}` | HistoryScreen (Sub) | 예: `/profile/history/456`, S2 user-history id |
 | `/profile/setting` | SettingScreen (Sub) | Profile에서 진입 |
 
 - **제외**: Login, Agreement(인증 플로우), RoleplayOpening(role 선택 필수), Playing/Ending/Result/Try Again(세션·플로우 의존).

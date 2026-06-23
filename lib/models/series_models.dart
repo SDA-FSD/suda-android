@@ -461,6 +461,33 @@ class RpS2UserHistoryDto {
   }
 }
 
+/// `GET /rps2/user-histories?pageNum=` 페이징 응답의 content 항목
+class RpS2SimpleHistoryDto {
+  final int? id;
+  final String? imgPath;
+  final int? starResult;
+  final String? cefrLevel;
+  final String? createdAt;
+
+  const RpS2SimpleHistoryDto({
+    this.id,
+    this.imgPath,
+    this.starResult,
+    this.cefrLevel,
+    this.createdAt,
+  });
+
+  factory RpS2SimpleHistoryDto.fromJson(Map<String, dynamic> json) {
+    return RpS2SimpleHistoryDto(
+      id: _optionalInt(json['id']),
+      imgPath: json['imgPath'] as String?,
+      starResult: _optionalInt(json['starResult']),
+      cefrLevel: json['cefrLevel'] as String?,
+      createdAt: json['createdAt'] as String?,
+    );
+  }
+}
+
 class RpS2UserHistoryMsgDto {
   final int? id;
   final String? role;

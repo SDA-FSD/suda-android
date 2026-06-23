@@ -9,6 +9,7 @@ import 'package:just_audio/just_audio.dart';
 import 'package:shimmer/shimmer.dart';
 import '../config/app_config.dart';
 import '../l10n/app_localizations.dart';
+import '../models/series_models.dart';
 import '../services/auth_service.dart';
 import '../services/token_storage.dart';
 import '../services/suda_api_client.dart';
@@ -20,7 +21,6 @@ import '../widgets/gnb_bar.dart';
 import '../widgets/level_progress_bar.dart';
 import '../widgets/suda_label_tabs.dart';
 import 'roleplay/history.dart';
-import 'roleplay/history_v2.dart';
 import 'setting/setting.dart';
 
 enum _ProfileContentTab { history, saved }
@@ -61,7 +61,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   _ProfileContentTab _activeTab = _ProfileContentTab.history;
 
   // 롤플레이 히스토리 페이징
-  final List<RpSimpleResultDto> _historyList = [];
+  final List<RpS2SimpleHistoryDto> _historyList = [];
   int _historyNextPageNum = 0;
   bool _isHistoryLastPage = false;
   bool _isLoadingHistory = false;
@@ -155,7 +155,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         if (mounted) setState(() => _isLoadingHistory = false);
         return;
       }
-      final page = await SudaApiClient.getRoleplayResults(
+      final page = await SudaApiClient.getRpS2UserHistories(
         accessToken: token,
         pageNum: pageNum,
       );
@@ -163,7 +163,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final sameFirstAsCurrent = pageNum == 0 &&
           _historyList.isNotEmpty &&
           page.content.isNotEmpty &&
-          _historyList.first.resultId == page.content.first.resultId;
+          _historyList.first.id == page.content.first.id;
       if (sameFirstAsCurrent) {
         setState(() => _isLoadingHistory = false);
         return;
@@ -352,13 +352,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Future<void> _openHistoryByVersion(int resultId, int? version) async {
-    final page = version == 2
-        ? HistoryScreenV2(resultId: resultId)
-        : HistoryScreen(resultId: resultId);
+  Future<void> _openHistory(int rpUserHistoryId) async {
     await Navigator.push(
       context,
-      SubScreenRoute(page: page),
+      SubScreenRoute(
+        page: HistoryScreen(rpUserHistoryId: rpUserHistoryId),
+      ),
     );
   }
 
@@ -433,14 +432,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
         final index = i + j;
         if (index < _historyList.length) {
           final item = _historyList[index];
-          final resultId = item.resultId;
+          final historyId = item.id;
           rowItems.add(
             _HistoryThumbnail(
               item: item,
               width: itemWidth,
               height: itemHeight,
-              onTap: resultId != null
-                  ? () => _openHistoryByVersion(resultId, item.version)
+              onTap: historyId != null
+                  ? () => _openHistory(historyId)
                   : null,
             ),
           );
@@ -1207,12 +1206,12 @@ class _ProfileStatDivider extends StatelessWidget {
   }
 }
 
-/// 프로필 히스토리 썸네일 (CDN·캐시·shimmer·상단 별·하단 날짜). 탭 시 History 스크린 진입.
+/// 프로필 히스토리 썸네일 (CDN·캐시·shimmer·상단 CEFR·별·하단 날짜). 탭 시 History 스크린 진입.
 class _HistoryThumbnail extends StatelessWidget {
   static const String _starGold = 'assets/images/star_gold.png';
   static const String _starSilver = 'assets/images/star_silver.png';
 
-  final RpSimpleResultDto item;
+  final RpS2SimpleHistoryDto item;
   final double width;
   final double height;
   final VoidCallback? onTap;
@@ -1244,6 +1243,7 @@ class _HistoryThumbnail extends StatelessWidget {
     final goldCount = starResult.clamp(0, 3);
     final starSize = (width * 0.4) / 3;
     final dateText = _formatDate(item.createdAt);
+    final cefrLevel = item.cefrLevel?.trim();
 
     final imageWidget = ClipRRect(
       borderRadius: BorderRadius.circular(10),
@@ -1307,25 +1307,33 @@ class _HistoryThumbnail extends StatelessWidget {
               ),
             ),
           ),
-          // 상단 별 3개: gap 2, width 40% 오른쪽 정렬, starResult만큼 gold
+          // 상단 CEFR 알약(좌) + 별 3개(우): 동일 높이(starSize)
           Positioned(
             top: 2,
-            right: 0,
-            child: SizedBox(
-              width: width * 0.4,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: List.generate(3, (i) {
-                  final isGold = i < goldCount;
-                  return Image.asset(
-                    isGold ? _starGold : _starSilver,
-                    width: starSize,
+            left: 2,
+            right: 2,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                if (cefrLevel != null && cefrLevel.isNotEmpty)
+                  _CefrLevelPill(
+                    label: cefrLevel,
                     height: starSize,
-                    fit: BoxFit.contain,
-                  );
-                }),
-              ),
+                  ),
+                const Spacer(),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: List.generate(3, (i) {
+                    final isGold = i < goldCount;
+                    return Image.asset(
+                      isGold ? _starGold : _starSilver,
+                      width: starSize,
+                      height: starSize,
+                      fit: BoxFit.contain,
+                    );
+                  }),
+                ),
+              ],
             ),
           ),
           // 하단 날짜: 텍스트 길이만큼만 차지, 오른쪽 하단에 검정 60%
@@ -1358,6 +1366,58 @@ class _HistoryThumbnail extends StatelessWidget {
       );
     }
     return content;
+  }
+}
+
+class _CefrLevelPill extends StatelessWidget {
+  const _CefrLevelPill({
+    required this.label,
+    required this.height,
+  });
+
+  final String label;
+  final double height;
+
+  static Color? _colorFor(String level) {
+    switch (level) {
+      case 'Pre-A1':
+        return const Color(0xFFFFB700);
+      case 'A1':
+        return const Color(0xFF0CABA8);
+      case 'A2':
+        return const Color(0xFFFF00A6);
+      case 'B1':
+        return const Color(0xFF8A38F5);
+      default:
+        return null;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final color = _colorFor(label);
+    if (color == null) {
+      return const SizedBox.shrink();
+    }
+
+    final theme = Theme.of(context).textTheme;
+    return Container(
+      height: height,
+      padding: const EdgeInsets.symmetric(horizontal: 6),
+      decoration: BoxDecoration(
+        color: Colors.transparent,
+        border: Border.all(color: color, width: 1),
+        borderRadius: BorderRadius.circular(height / 2),
+      ),
+      child: Text(
+        label,
+        maxLines: 1,
+        style: theme.labelSmall?.copyWith(
+          color: color,
+          height: 1,
+        ),
+      ),
+    );
   }
 }
 
