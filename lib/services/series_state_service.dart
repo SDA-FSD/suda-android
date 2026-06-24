@@ -14,6 +14,8 @@ class SeriesStateService {
   UserDto? _user;
   RpS2SessionDto? _session;
   RpS2UserHistoryDto? _cachedUserHistory;
+  bool _bestScoreRefreshPending = false;
+  bool _profileHistoryRefreshPending = false;
 
   int? get seriesId => _seriesId;
   RpS2SeriesOverviewDto? get overview => _overview;
@@ -88,6 +90,28 @@ class SeriesStateService {
     _cachedUserHistory = history;
   }
 
+  /// Roleplay 스택에서 Overview로 pop 직전에 설정. Overview [didPopNext]에서 소비.
+  void markBestScoreRefreshPending() {
+    _bestScoreRefreshPending = true;
+  }
+
+  bool consumeBestScoreRefreshPending() {
+    if (!_bestScoreRefreshPending) return false;
+    _bestScoreRefreshPending = false;
+    return true;
+  }
+
+  /// Roleplay 종료 후 Profile History 목록 갱신용. Profile 탭 활성 시 소비.
+  void markProfileHistoryRefreshPending() {
+    _profileHistoryRefreshPending = true;
+  }
+
+  bool consumeProfileHistoryRefreshPending() {
+    if (!_profileHistoryRefreshPending) return false;
+    _profileHistoryRefreshPending = false;
+    return true;
+  }
+
   void clear() {
     _seriesId = null;
     _overview = null;
@@ -95,5 +119,7 @@ class SeriesStateService {
     _user = null;
     _session = null;
     _cachedUserHistory = null;
+    _bestScoreRefreshPending = false;
+    _profileHistoryRefreshPending = false;
   }
 }

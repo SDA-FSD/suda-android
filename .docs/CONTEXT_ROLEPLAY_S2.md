@@ -166,6 +166,7 @@ S1 턴 정책은 `.docs/CONTEXT_ROLEPLAY.md`만 본다. **S2는 아래가 단일
 
 - **파일**: `lib/screens/series/overview.dart`
 - **API**: `GET /rps2/series/{seriesId}/overview`, `GET /rps2/series/{seriesId}/best-score`
+- **복귀 시 bestScore 갱신**: `RoleplayRouter.popToOverview` 직전 `markBestScoreRefreshPending` → Overview `RouteAware.didPopNext`에서 `GET .../best-score` 재조회(현재 CEFR 기준). CEFR 변경 후와 동일 API.
 - **로드 시**: `SeriesStateService.setSeriesOverview`, **`FIRST_OVERVIEW`** 통계 (`POST /v1/users/first-overview`, metaInfo `FIRST_OVERVIEW=Y` 가드)
 - **에피소드 Play**: `setSelectedEpisodeId(episode.id)` → `RoleplayRouter.pushTutorial` (S1 `getRoleplayOverview` **호출 안 함**)
 
@@ -374,6 +375,7 @@ S1 턴 정책은 `.docs/CONTEXT_ROLEPLAY.md`만 본다. **S2는 아래가 단일
 | POST | `/rps2/sessions` | req: `{seriesId, episodeId}` / res: `RpS2SessionDto` | Opening Start | ✅ |
 | GET | `/rps2/sessions/{id}/translation?rpMsgId=` | **plain String** (JSON 아님) · `rpMsgId` = AI entry `conversationIndex` | Playing AI 말풍선 번역 | ✅ `SeriesApi._parseStringResponse` |
 | GET | `/rps2/sessions/{id}/hint/{rpMsgId}` | `RpS2HintDto` (`hint`, `translatedHint`) · `rpMsgId` = 마지막 AI `conversationIndex` · 202 not-ready는 최대 15회 재시도 | Playing 힌트 | ✅ |
+| PUT | `/rps2/sessions/{id}/hint/{rpMsgId}` | void (200) | 영문 힌트 노출 시 — en 사용자·번역 없음 즉시 노출, 그 외 **답변보기** 탭 시. 실패 무시(플레이 영향 없음) | ✅ |
 | GET | `/rps2/sessions/{id}/hint/sound` | `TtsResultDto` (`cdnYn`, `cdnPath`, `sound`) | 힌트 전체 재생 | ✅ |
 | GET | `/rps2/sessions/{id}/hint/sound/{wordIndex}` | 동일 | 힌트 단어 재생 | ✅ |
 | POST | `/rps2/sessions/{id}/user-message/audio` | req: `byte[]` octet-stream / res: `RpS2UserMessageResponseDto` | 사용자 음성 발화 | ✅ |

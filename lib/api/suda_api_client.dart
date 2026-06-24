@@ -90,6 +90,18 @@ class SudaApiClient {
     );
   }
 
+  static Future<void> markRpS2HintDelivered({
+    required String accessToken,
+    required String rpSessionId,
+    required int rpMsgId,
+  }) {
+    return SeriesApi.markSessionHintDelivered(
+      accessToken: accessToken,
+      rpSessionId: rpSessionId,
+      rpMsgId: rpMsgId,
+    );
+  }
+
   static Future<TtsResultDto> getRpS2HintSound({
     required String accessToken,
     required String rpSessionId,

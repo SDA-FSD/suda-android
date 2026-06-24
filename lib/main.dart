@@ -39,6 +39,7 @@ import 'widgets/main_reregistration_restricted_popup.dart'
         showMainReregistrationRestrictedAuthCheckDefaultPopup,
         showMainReregistrationRestrictedSignInDefaultPopup;
 import 'widgets/main_route_aware_wrapper.dart';
+import 'navigation/app_route_observer.dart';
 
 String? _fcmDataString(dynamic v) {
   if (v == null) return null;
@@ -97,9 +98,6 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   // Navigator를 MaterialApp 빌드 전에도 접근할 수 있도록 GlobalKey 사용
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
-  final RouteObserver<ModalRoute<void>> _routeObserver =
-      RouteObserver<ModalRoute<void>>();
-
   GoogleSignInAccount? _googleUser;
   String? _accessToken;
   UserDto? _user;
@@ -785,7 +783,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     return MaterialApp(
       navigatorKey: _navigatorKey,
       navigatorObservers: [
-        _routeObserver,
+        appRouteObserver,
         FirebaseAnalyticsObserver(analytics: FirebaseAnalytics.instance),
       ],
       title: 'SUDA',
@@ -838,7 +836,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   });
                 }
                 return MainRouteAwareWrapper(
-                  routeObserver: _routeObserver,
+                  routeObserver: appRouteObserver,
                   onReturnToRoute: () {
                     setState(() {
                       _homeTabSelectedCounter++;

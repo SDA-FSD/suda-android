@@ -170,6 +170,9 @@ class RoleplayRouter {
   }
 
   static void popToOverview(BuildContext context) {
+    SeriesStateService.instance
+      ..markBestScoreRefreshPending()
+      ..markProfileHistoryRefreshPending();
     Navigator.of(context).popUntil((route) {
       return route.isFirst ||
           route.settings.name == SeriesOverviewScreen.routeName;

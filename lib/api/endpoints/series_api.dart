@@ -333,6 +333,60 @@ class SeriesApi {
     );
   }
 
+  /// 영문 힌트 노출(또는 답변보기 탭) 시 서버에 전달 완료를 기록한다.
+  static Future<void> markSessionHintDelivered({
+    required String accessToken,
+    required String rpSessionId,
+    required int rpMsgId,
+  }) async {
+    await SudaHttpClient.executeWithRefresh(
+      () => _markSessionHintDeliveredInternal(
+        accessToken,
+        rpSessionId,
+        rpMsgId,
+      ),
+      retryWithNewToken: (newToken) => _markSessionHintDeliveredInternal(
+        newToken,
+        rpSessionId,
+        rpMsgId,
+      ),
+    );
+  }
+
+  static Future<void> _markSessionHintDeliveredInternal(
+    String accessToken,
+    String rpSessionId,
+    int rpMsgId,
+  ) async {
+    final uri = SudaHttpClient.buildUri(
+      '/rps2/sessions/$rpSessionId/hint/$rpMsgId',
+    );
+    late final http.Response response;
+    try {
+      response = await SudaHttpClient.client
+          .put(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+              'Content-Type': 'application/json',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      rethrow;
+    }
+
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return;
+    }
+    throw Exception(
+      'PUT /rps2/sessions/$rpSessionId/hint/$rpMsgId failed: HTTP ${response.statusCode} ${response.body}',
+    );
+  }
+
   static Future<TtsResultDto> getSessionHintSound({
     required String accessToken,
     required String rpSessionId,

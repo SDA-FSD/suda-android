@@ -14,11 +14,13 @@ import 'playing_conversation_mixin.dart';
 
 class PlayingHintEntry {
   final GlobalKey key = GlobalKey();
+  int? rpMsgId;
   bool isVisible = false;
   bool isLoading = false;
   String? hintText;
   String? translatedHint;
   bool showAnswerBody = false;
+  bool englishHintDeliveredPutSent = false;
   bool hintSentenceHighlightActive = false;
   int? hintWordHighlightIndex;
   final Map<String, TtsResultDto> hintAudioCache = {};
@@ -77,6 +79,7 @@ mixin PlayingHintMixin<T extends StatefulWidget>
 
     _isFetchingHint = true;
     final entry = PlayingHintEntry()
+      ..rpMsgId = rpMsgId
       ..isLoading = true
       ..isVisible = true;
     setState(() => _hintEntry = entry);
@@ -97,13 +100,17 @@ mixin PlayingHintMixin<T extends StatefulWidget>
       }
       final isEnglishUser = LanguageUtil.getCurrentLanguageCode() == 'en';
       final translated = dto.translatedHint?.trim() ?? '';
+      final revealEnglishImmediately = isEnglishUser || translated.isEmpty;
       setState(() {
         entry.isLoading = false;
         entry.hintText = hint;
         entry.translatedHint = translated.isEmpty ? null : translated;
-        entry.showAnswerBody = isEnglishUser || translated.isEmpty;
+        entry.showAnswerBody = revealEnglishImmediately;
         entry.isVisible = true;
       });
+      if (revealEnglishImmediately) {
+        _acknowledgeHintEnglishDeliveredBestEffort(entry);
+      }
       _scrollHintToVisible(entry);
     } on RpS2SessionNotFoundException catch (_) {
       if (!mounted) return;
@@ -145,8 +152,34 @@ mixin PlayingHintMixin<T extends StatefulWidget>
   }
 
   void _revealHintAnswerBody(PlayingHintEntry entry) {
+    _acknowledgeHintEnglishDeliveredBestEffort(entry);
     setState(() => entry.showAnswerBody = true);
     _scrollHintToVisible(entry);
+  }
+
+  void _acknowledgeHintEnglishDeliveredBestEffort(PlayingHintEntry entry) {
+    if (entry.englishHintDeliveredPutSent) return;
+    final rpMsgId = entry.rpMsgId;
+    if (rpMsgId == null) return;
+    entry.englishHintDeliveredPutSent = true;
+    unawaited(_acknowledgeHintEnglishDeliveredAsync(rpMsgId));
+  }
+
+  Future<void> _acknowledgeHintEnglishDeliveredAsync(int rpMsgId) async {
+    try {
+      final accessToken = await TokenStorage.loadAccessToken();
+      final sessionId = SeriesStateService.instance.sessionId;
+      if (accessToken == null || sessionId == null || sessionId.isEmpty) {
+        return;
+      }
+      await SudaApiClient.markRpS2HintDelivered(
+        accessToken: accessToken,
+        rpSessionId: sessionId,
+        rpMsgId: rpMsgId,
+      );
+    } catch (e) {
+      debugPrint('[DEBUG] RpS2 hint delivered PUT ignored: $e');
+    }
   }
 
   Widget? buildHintBubble(double bodyWidth) {

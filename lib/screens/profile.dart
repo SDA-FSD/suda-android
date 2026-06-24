@@ -11,6 +11,7 @@ import '../config/app_config.dart';
 import '../l10n/app_localizations.dart';
 import '../models/series_models.dart';
 import '../services/auth_service.dart';
+import '../services/series_state_service.dart';
 import '../services/token_storage.dart';
 import '../services/suda_api_client.dart';
 import '../utils/default_toast.dart';
@@ -268,12 +269,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (widget.user != null && widget.user != oldWidget.user) {
       setState(() => _user = widget.user);
     }
-    // 활성 상태로 전환될 때마다 프로필 갱신. 히스토리는 끝까지 본 경우에만 0페이지 재조회.
+    // 활성 상태로 전환될 때마다 프로필 갱신. 롤플레이 복귀 후면 History 0페이지 재조회.
     if (!oldWidget.isActive && widget.isActive) {
       _refreshProfile();
-      if (_activeTab == _ProfileContentTab.history &&
-          _shouldRefetchHistoryFromStart()) {
-        _fetchHistoryPage(0);
+      if (_activeTab == _ProfileContentTab.history) {
+        if (SeriesStateService.instance.consumeProfileHistoryRefreshPending()) {
+          _fetchHistoryPage(0);
+        } else if (_shouldRefetchHistoryFromStart()) {
+          _fetchHistoryPage(0);
+        }
       }
     }
     // Profile 탭이 활성인 상태에서 서브 스크린 pop으로 복귀할 때도 동일

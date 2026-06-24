@@ -76,6 +76,7 @@
     - 따닥 방지: `daily_ticket_popup.dart` 팝업 호출부에서 클로저 스코프 `isClaiming` 플래그로 primary 버튼의 중복 탭 가드(동일 프레임 멀티터치 대비). `DefaultPopup._popThenCallback`의 "pop 선행 → post-frame 콜백" 패턴과 이중으로 보호.
     - `showDialog`의 `Future`는 다이얼로그 pop 직후에 완료되며, `claim`은 그 다음 프레임에 이어질 수 있어, 팝업 닫힘으로 `homeTabSelectedCounter`가 올라가 `didUpdateWidget`에서 `GET /ticket`이 나가면 `PUT /tickets/daily`와 경합할 수 있다. `HomeScreen`은 팝업 구간에 `_suspendTicketFetchOnHomeReturn`으로 그 자동 조회를 막고, `onDismissedWithoutClaim`·`claimDailyTicketAfterPopup`의 `finally`(`onClaimFlowComplete`)에서만 가드를 해제한다.
   - `SudaApiClient.getRpS2UserHistories()`: Profile History 목록 페이징 (`GET /rps2/user-histories?pageNum=0`, 0-based, 응답: SudaAppPage\<RpS2SimpleHistoryDto\> — `id`, `imgPath`, `starResult`, `cefrLevel`, `createdAt`)
+    - 롤플레이 스택 `popToOverview` 직후 `markProfileHistoryRefreshPending` → 이후 Profile 탭 활성 시 0페이지 재조회(기존 스크롤·페이징 조건 우회). 그 외 탭 재진입은 `ProfileScreen._shouldRefetchHistoryFromStart` 조건부.
   - `SudaApiClient.updateName()`: 사용자 이름 변경 (`PUT /v1/users?name=...`)
   - `SudaApiClient.registerPushToken()`: 푸시 토큰 등록 (`POST /users/push-token`)
     - Request body: `{ "deviceType": "ANDROID", "pushToken": "<토큰값>", "languageCode": "en|ko|pt" }`

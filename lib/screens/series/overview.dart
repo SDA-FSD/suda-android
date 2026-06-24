@@ -19,6 +19,7 @@ import '../../utils/suda_json_util.dart';
 import '../../utils/sub_screen_route.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../widgets/suda_label_tabs.dart';
+import '../../navigation/app_route_observer.dart';
 import '../../routes/roleplay_router.dart';
 import '../setting/cefr_level.dart';
 import 'series_information.dart';
@@ -41,7 +42,8 @@ class SeriesOverviewScreen extends StatefulWidget {
   State<SeriesOverviewScreen> createState() => _SeriesOverviewScreenState();
 }
 
-class _SeriesOverviewScreenState extends State<SeriesOverviewScreen> {
+class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
+    with RouteAware {
   bool _isLoading = true;
   String? _errorMessage;
   RpS2SeriesOverviewDto? _overview;
@@ -64,10 +66,32 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final route = ModalRoute.of(context);
+    if (route is ModalRoute<void>) {
+      appRouteObserver.subscribe(this, route);
+    }
+  }
+
+  @override
   void dispose() {
+    appRouteObserver.unsubscribe(this);
     _scrollController.removeListener(_handleScroll);
     _scrollController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didPopNext() {
+    _refreshBestScoreMapIfPending();
+  }
+
+  void _refreshBestScoreMapIfPending() {
+    if (!SeriesStateService.instance.consumeBestScoreRefreshPending()) {
+      return;
+    }
+    unawaited(_refreshBestScoreMap());
   }
 
   Future<void> _loadOverview() async {
@@ -197,8 +221,14 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen> {
         seriesId: widget.seriesId,
       );
       if (!mounted) return;
+      final updated = overview.copyWith(bestScoreMap: bestScoreMap);
+      SeriesStateService.instance.setSeriesOverview(
+        seriesId: widget.seriesId,
+        overview: updated,
+        user: SeriesStateService.instance.user ?? widget.user,
+      );
       setState(() {
-        _overview = overview.copyWith(bestScoreMap: bestScoreMap);
+        _overview = updated;
         _episodeContentKey++;
         _scrollToUnlockToken++;
       });
