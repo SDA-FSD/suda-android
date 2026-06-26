@@ -1694,9 +1694,13 @@ class _SpeechFeedbackRowState extends State<_SpeechFeedbackRow> {
                   : MainAxisAlignment.end,
               children: [
                 if (widget.audioInputEnabled)
-                  _buildMegaphoneAudioIcon(
-                    isLoading: widget.fetchingActive,
-                    isPlaying: widget.playingActive,
+                  GestureDetector(
+                    onTap: widget.onAudioTap,
+                    behavior: HitTestBehavior.opaque,
+                    child: _buildMegaphoneAudioIcon(
+                      isLoading: widget.fetchingActive,
+                      isPlaying: widget.playingActive,
+                    ),
                   ),
                 _SpeechFeedbackFeedbackButton(
                   onTap: _onFeedbackTap,
@@ -1709,12 +1713,8 @@ class _SpeechFeedbackRowState extends State<_SpeechFeedbackRow> {
       ),
     );
 
-    if (!widget.audioInputEnabled) {
-      return card;
-    }
-
     return GestureDetector(
-      onTap: widget.onAudioTap,
+      onTap: _onFeedbackTap,
       behavior: HitTestBehavior.opaque,
       child: card,
     );

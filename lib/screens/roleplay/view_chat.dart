@@ -723,32 +723,36 @@ class _ViewChatUserCardState extends State<_ViewChatUserCard> {
                         : MainAxisAlignment.end,
                     children: [
                       if (widget.audioInputEnabled)
-                        widget.isLoading
-                            ? SizedBox(
-                                width: 24,
-                                height: 24,
-                                child: Center(
-                                  child: SizedBox(
-                                    width: 16,
-                                    height: 16,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: _megaphoneSpinnerColor
-                                          .withValues(alpha: 0.7),
+                        GestureDetector(
+                          onTap: widget.onAudioTap,
+                          behavior: HitTestBehavior.opaque,
+                          child: widget.isLoading
+                              ? SizedBox(
+                                  width: 24,
+                                  height: 24,
+                                  child: Center(
+                                    child: SizedBox(
+                                      width: 16,
+                                      height: 16,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: _megaphoneSpinnerColor
+                                            .withValues(alpha: 0.7),
+                                      ),
                                     ),
                                   ),
+                                )
+                              : Image.asset(
+                                  widget.isPlaying
+                                      ? _megaphoneFillPng
+                                      : _megaphonePng,
+                                  width: 24,
+                                  height: 24,
+                                  fit: BoxFit.contain,
+                                  color: _megaphoneTintActive,
+                                  colorBlendMode: BlendMode.srcIn,
                                 ),
-                              )
-                            : Image.asset(
-                                widget.isPlaying
-                                    ? _megaphoneFillPng
-                                    : _megaphonePng,
-                                width: 24,
-                                height: 24,
-                                fit: BoxFit.contain,
-                                color: _megaphoneTintActive,
-                                colorBlendMode: BlendMode.srcIn,
-                              ),
+                        ),
                       if (showFeedbackButton)
                         _ViewChatFeedbackButton(
                           onTap: _onFeedbackTap,
@@ -764,14 +768,10 @@ class _ViewChatUserCardState extends State<_ViewChatUserCard> {
       ),
     );
 
-    if (!widget.audioInputEnabled) {
-      return Align(alignment: Alignment.centerRight, child: card);
-    }
-
     return Align(
       alignment: Alignment.centerRight,
       child: GestureDetector(
-        onTap: widget.onAudioTap,
+        onTap: _onFeedbackTap,
         behavior: HitTestBehavior.opaque,
         child: card,
       ),

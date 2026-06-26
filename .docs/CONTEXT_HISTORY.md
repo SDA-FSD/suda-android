@@ -6,6 +6,8 @@
 
 ## 최근 작업 메모
 
+- **Series Overview 복귀 시 bestScore 갱신**: `RouteAware.didPopNext`에서 `consumeBestScoreRefreshPending` 후 `GET .../best-score` 재조회·`SeriesStateService` 동기화. `popToOverview`의 `markBestScoreRefreshPending`과 연결. 구현: `lib/screens/series/overview.dart`. 문서: `.docs/CONTEXT_ROLEPLAY_S2.md` §4-1.
+- **Result Speech Feedback 카드 탭 동작**: Result·History 공통(`RoleplayResultScreen`) — 카드 영역 탭 → 펼침/접힘, 좌하단 메가폰 탭 → 사용자 음성 재생만. View Chat USER 말풍선도 동일. 구현: `lib/screens/roleplay/result.dart` `_SpeechFeedbackRowState`, `lib/screens/roleplay/view_chat.dart` `_ViewChatUserCardState`. 문서: `.docs/CONTEXT_ROLEPLAY_S2.md` §4-5.
 - **Key Expression 명칭 통일**: `ExpressionUpgradeDto` → `RpResultKeyExpressionDto`, `RoleplayResultDto.expressionUpgrades` → Dart `keyExpressions`(JSON `expressionUpgrades` 유지). Result·History V2 UI·변수·주석을 Key Expression 기준으로 정리. 구현: `lib/models/roleplay_models.dart`, `lib/screens/roleplay/result.dart`, `lib/screens/roleplay/history_v2.dart`. 문서: `.docs/CONTEXT_SCREEN.md` §17·§19, `.docs/CONTEXT_ROLEPLAY.md` §6-9, `.docs/CONTEXT_ROLEPLAY_S2.md` §4-5.
 - **Result 스크린 통합**: 구 레거시 `lib/screens/roleplay/result.dart` 삭제. 구 `result_v2.dart`를 `result.dart`·`RoleplayResultScreen`·`/roleplay/result`·`replaceWithResult()`로 통합. `playing_backup.dart`는 `@Deprecated replaceWithResultV2` alias로 호환 유지. 문서: `.docs/CONTEXT_SCREEN.md` §17, `.docs/CONTEXT_ROLEPLAY.md`, `.docs/CONTEXT_ROLEPLAY_S2.md` §4-5.
 - **Playing S2 힌트(②)**: AI 음성 종료 후 오토힌트 ON 자동 노출·OFF 아이콘+3s blink. `GET /rps2/sessions/{id}/hint/{rpMsgId}`(`rpMsgId`=AI `conversationIndex+1`)·hint/sound API. `playing_hint_mixin.dart` — S1 힌트박스 위치·2단계(번역→답변보기)·en 본문 즉시·이탤릭 단어·발화 완료 시 제거.
