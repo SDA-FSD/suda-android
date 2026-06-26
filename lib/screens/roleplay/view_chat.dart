@@ -42,7 +42,6 @@ class _ViewChatScreenState extends State<ViewChatScreen> {
   static const Color _bubblePlayingText = Color(0xFF054544);
   static const Color _aiBubbleIdleBg = Color(0xFF0CABA8);
   static const Color _megaphoneTintActive = Color(0xFF0CABA8);
-  static const Color _megaphoneTintLoading = Color(0xFF121212);
   static const String _megaphonePng = 'assets/images/icons/megaphone.png';
   static const String _megaphoneFillPng =
       'assets/images/icons/megaphone_fill.png';
@@ -385,7 +384,6 @@ class _ViewChatScreenState extends State<ViewChatScreen> {
 
   Widget _buildMegaphoneIcon({
     required bool playingActive,
-    required bool fetchingActive,
     bool tint = true,
     Color idleColor = _megaphoneTintActive,
   }) {
@@ -395,9 +393,7 @@ class _ViewChatScreenState extends State<ViewChatScreen> {
       height: 24,
       fit: BoxFit.contain,
       color: tint
-          ? (fetchingActive
-              ? _megaphoneTintLoading
-              : (playingActive ? _megaphoneTintActive : idleColor))
+          ? (playingActive ? _megaphoneTintActive : idleColor)
           : null,
       colorBlendMode: tint ? BlendMode.srcIn : null,
     );
@@ -468,8 +464,6 @@ class _ViewChatScreenState extends State<ViewChatScreen> {
                         child: _buildMegaphoneIcon(
                           playingActive:
                               msgId != null && _playingMsgId == msgId,
-                          fetchingActive:
-                              msgId != null && _loadingMsgId == msgId,
                           idleColor: Colors.white,
                         ),
                       ),
@@ -587,7 +581,7 @@ class _ViewChatUserCardState extends State<_ViewChatUserCard> {
   static const String _megaphoneFillPng =
       'assets/images/icons/megaphone_fill.png';
   static const Color _megaphoneTintActive = Color(0xFF0CABA8);
-  static const Color _megaphoneTintLoading = Color(0xFF121212);
+  static const Color _megaphoneSpinnerColor = Color(0xFF054544);
   static const Duration _expandDuration = Duration(milliseconds: 300);
   static const Curve _expandCurve = Curves.easeInOutCubic;
 
@@ -729,18 +723,32 @@ class _ViewChatUserCardState extends State<_ViewChatUserCard> {
                         : MainAxisAlignment.end,
                     children: [
                       if (widget.audioInputEnabled)
-                        Image.asset(
-                          widget.isPlaying
-                              ? _megaphoneFillPng
-                              : _megaphonePng,
-                          width: 24,
-                          height: 24,
-                          fit: BoxFit.contain,
-                          color: widget.isLoading
-                              ? _megaphoneTintLoading
-                              : _megaphoneTintActive,
-                          colorBlendMode: BlendMode.srcIn,
-                        ),
+                        widget.isLoading
+                            ? SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: Center(
+                                  child: SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: _megaphoneSpinnerColor
+                                          .withValues(alpha: 0.7),
+                                    ),
+                                  ),
+                                ),
+                              )
+                            : Image.asset(
+                                widget.isPlaying
+                                    ? _megaphoneFillPng
+                                    : _megaphonePng,
+                                width: 24,
+                                height: 24,
+                                fit: BoxFit.contain,
+                                color: _megaphoneTintActive,
+                                colorBlendMode: BlendMode.srcIn,
+                              ),
                       if (showFeedbackButton)
                         _ViewChatFeedbackButton(
                           onTap: _onFeedbackTap,

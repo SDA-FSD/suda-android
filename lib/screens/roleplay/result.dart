@@ -1551,7 +1551,6 @@ class _SpeechFeedbackRowState extends State<_SpeechFeedbackRow> {
   static const String _megaphoneFillPng =
       'assets/images/icons/megaphone_fill.png';
   static const Color _megaphoneTintActive = Color(0xFF0CABA8);
-  static const Color _megaphoneTintLoading = Color(0xFF121212);
   static const Color _feedbackTextColor = Color(0xFF635F5F);
   static const Color _scoreSpeechDividerColor = Color(0xFFD9D9D9);
 
@@ -1562,6 +1561,36 @@ class _SpeechFeedbackRowState extends State<_SpeechFeedbackRow> {
 
   void _onFeedbackTap() {
     setState(() => _expanded = !_expanded);
+  }
+
+  Widget _buildMegaphoneAudioIcon({
+    required bool isLoading,
+    required bool isPlaying,
+  }) {
+    if (isLoading) {
+      return SizedBox(
+        width: 24,
+        height: 24,
+        child: Center(
+          child: SizedBox(
+            width: 16,
+            height: 16,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: _megaphoneTintActive.withValues(alpha: 0.7),
+            ),
+          ),
+        ),
+      );
+    }
+    return Image.asset(
+      isPlaying ? _megaphoneFillPng : _megaphonePng,
+      width: 24,
+      height: 24,
+      fit: BoxFit.contain,
+      color: _megaphoneTintActive,
+      colorBlendMode: BlendMode.srcIn,
+    );
   }
 
   Widget _buildExpandedFeedbackText(BuildContext context) {
@@ -1665,15 +1694,9 @@ class _SpeechFeedbackRowState extends State<_SpeechFeedbackRow> {
                   : MainAxisAlignment.end,
               children: [
                 if (widget.audioInputEnabled)
-                  Image.asset(
-                    widget.playingActive ? _megaphoneFillPng : _megaphonePng,
-                    width: 24,
-                    height: 24,
-                    fit: BoxFit.contain,
-                    color: widget.fetchingActive
-                        ? _megaphoneTintLoading
-                        : _megaphoneTintActive,
-                    colorBlendMode: BlendMode.srcIn,
+                  _buildMegaphoneAudioIcon(
+                    isLoading: widget.fetchingActive,
+                    isPlaying: widget.playingActive,
                   ),
                 _SpeechFeedbackFeedbackButton(
                   onTap: _onFeedbackTap,
@@ -1723,7 +1746,36 @@ class _KeyExpressionCard extends StatelessWidget {
   static const String _bookmarkOnPng = 'assets/images/icons/bookmark_on.png';
   static const double _bodyLeftIndent = 30;
   static const Color _megaphoneTintActive = Color(0xFF0CABA8);
-  static const Color _megaphoneTintLoading = Color(0xFF121212);
+
+  Widget _buildMegaphoneAudioIcon({
+    required bool isLoading,
+    required bool isPlaying,
+  }) {
+    if (isLoading) {
+      return SizedBox(
+        width: 24,
+        height: 24,
+        child: Center(
+          child: SizedBox(
+            width: 16,
+            height: 16,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: _megaphoneTintActive.withValues(alpha: 0.7),
+            ),
+          ),
+        ),
+      );
+    }
+    return Image.asset(
+      isPlaying ? _megaphoneFillPng : _megaphonePng,
+      width: 24,
+      height: 24,
+      fit: BoxFit.contain,
+      color: _megaphoneTintActive,
+      colorBlendMode: BlendMode.srcIn,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1818,15 +1870,9 @@ class _KeyExpressionCard extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Image.asset(
-                        playingActive ? _megaphoneFillPng : _megaphonePng,
-                        width: 24,
-                        height: 24,
-                        fit: BoxFit.contain,
-                        color: fetchingActive
-                            ? _megaphoneTintLoading
-                            : _megaphoneTintActive,
-                        colorBlendMode: BlendMode.srcIn,
+                      _buildMegaphoneAudioIcon(
+                        isLoading: fetchingActive,
+                        isPlaying: playingActive,
                       ),
                       GestureDetector(
                         onTap: onBookmarkTap,

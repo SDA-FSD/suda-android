@@ -83,8 +83,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   int _savedMegaphoneSeq = 0;
   /// 가장 최근 탭한 카드(흰 배경 유지, 목록에서 하나만).
   int? _savedHighlightedExpressionId;
-  /// 페치·재생 중인 카드(메가폰 검정). 재생 종료 후 null.
-  int? _savedPlaybackExpressionId;
+  int? _savedActiveExpressionId;
+  bool _savedIsFetching = false;
+  bool _savedIsPlaying = false;
   bool _savedExpressionMutationInFlight = false;
 
   @override
@@ -497,7 +498,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _savedAudioSub = null;
       unawaited(_savedAudioPlayer.stop());
       _savedHighlightedExpressionId = null;
-      _savedPlaybackExpressionId = null;
+      _savedActiveExpressionId = null;
+      _savedIsFetching = false;
+      _savedIsPlaying = false;
 
       setState(() {
         _activeTab = tab;
@@ -572,7 +575,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (!mounted || seq != _savedMegaphoneSeq) return;
     setState(() {
       _savedHighlightedExpressionId = id;
-      _savedPlaybackExpressionId = id;
+      _savedActiveExpressionId = id;
+      _savedIsFetching = true;
+      _savedIsPlaying = false;
     });
 
     final token = await TokenStorage.loadAccessToken();
@@ -583,7 +588,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final expressionIndex = item.expressionIndex;
     if (token == null || rpUserHistoryId == null || expressionIndex == null) {
       setState(() {
-        _savedPlaybackExpressionId = null;
+        _savedActiveExpressionId = null;
+        _savedIsFetching = false;
+        _savedIsPlaying = false;
         _savedHighlightedExpressionId = null;
       });
       return;
@@ -605,16 +612,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (!mounted || seq != _savedMegaphoneSeq) return;
 
       if (source == null) {
-        setState(() => _savedPlaybackExpressionId = null);
+        setState(() {
+          _savedActiveExpressionId = null;
+          _savedIsFetching = false;
+          _savedIsPlaying = false;
+        });
         return;
       }
+
+      setState(() {
+        _savedIsFetching = false;
+        _savedIsPlaying = true;
+      });
 
       _savedAudioSub = _savedAudioPlayer.playerStateStream.listen((state) {
         if (state.processingState == ProcessingState.completed) {
           _savedAudioSub?.cancel();
           _savedAudioSub = null;
           if (!mounted || seq != _savedMegaphoneSeq) return;
-          setState(() => _savedPlaybackExpressionId = null);
+          setState(() {
+            _savedActiveExpressionId = null;
+            _savedIsFetching = false;
+            _savedIsPlaying = false;
+          });
         }
       });
       await _savedAudioPlayer.play();
@@ -622,7 +642,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _savedAudioSub?.cancel();
       _savedAudioSub = null;
       if (!mounted || seq != _savedMegaphoneSeq) return;
-      setState(() => _savedPlaybackExpressionId = null);
+      setState(() {
+        _savedActiveExpressionId = null;
+        _savedIsFetching = false;
+        _savedIsPlaying = false;
+      });
     }
   }
 
@@ -656,12 +680,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (index < 0) return;
       final removed = _savedList.removeAt(index);
       final rid = removed.id;
-      if (rid == _savedPlaybackExpressionId) {
+      if (rid == _savedActiveExpressionId) {
         _savedMegaphoneSeq++;
         _savedAudioSub?.cancel();
         _savedAudioSub = null;
         unawaited(_savedAudioPlayer.stop());
-        _savedPlaybackExpressionId = null;
+        _savedActiveExpressionId = null;
+        _savedIsFetching = false;
+        _savedIsPlaying = false;
       }
       if (rid == _savedHighlightedExpressionId) {
         _savedHighlightedExpressionId = null;
@@ -680,7 +706,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: _SavedExpressionCard(
                   item: removed,
                   isHighlighted: false,
-                  isPlaybackActive: false,
+                  isFetching: false,
+                  isPlaying: false,
                   onTap: () {},
                   onDeleteTap: () {},
                 ),
@@ -793,8 +820,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
               final itemId = item.id;
               final isHighlighted =
                   itemId != null && itemId == _savedHighlightedExpressionId;
-              final isPlaybackActive =
-                  itemId != null && itemId == _savedPlaybackExpressionId;
+              final isFetching =
+                  itemId != null &&
+                  itemId == _savedActiveExpressionId &&
+                  _savedIsFetching;
+              final isPlaying =
+                  itemId != null &&
+                  itemId == _savedActiveExpressionId &&
+                  _savedIsPlaying;
               return FadeTransition(
                 opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
                 child: SizeTransition(
@@ -804,7 +837,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     child: _SavedExpressionCard(
                       item: item,
                       isHighlighted: isHighlighted,
-                      isPlaybackActive: isPlaybackActive,
+                      isFetching: isFetching,
+                      isPlaying: isPlaying,
                       onTap: () => _onSavedExpressionTap(item),
                       onDeleteTap: () => _confirmDeleteSavedExpression(item),
                     ),
@@ -990,14 +1024,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
 class _SavedExpressionCard extends StatelessWidget {
   final UserExpressionDto item;
   final bool isHighlighted;
-  final bool isPlaybackActive;
+  final bool isFetching;
+  final bool isPlaying;
   final VoidCallback onTap;
   final VoidCallback onDeleteTap;
 
   const _SavedExpressionCard({
     required this.item,
     required this.isHighlighted,
-    required this.isPlaybackActive,
+    required this.isFetching,
+    required this.isPlaying,
     required this.onTap,
     required this.onDeleteTap,
   });
@@ -1006,10 +1042,38 @@ class _SavedExpressionCard extends StatelessWidget {
   static const Color _exprTextSecondary = Color(0xFF676767);
   static const String _checkMintSvg = 'assets/images/icons/check_mint.svg';
   static const String _megaphonePng = 'assets/images/icons/megaphone.png';
+  static const String _megaphoneFillPng =
+      'assets/images/icons/megaphone_fill.png';
   static const String _bookmarkOnPng = 'assets/images/icons/bookmark_on.png';
   static const double _bodyLeftIndent = 30;
   static const Color _megaphoneTintActive = Color(0xFF0CABA8);
-  static const Color _megaphoneTintLoading = Color(0xFF121212);
+
+  Widget _buildMegaphoneAudioIcon() {
+    if (isFetching) {
+      return SizedBox(
+        width: 24,
+        height: 24,
+        child: Center(
+          child: SizedBox(
+            width: 16,
+            height: 16,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: _megaphoneTintActive.withValues(alpha: 0.7),
+            ),
+          ),
+        ),
+      );
+    }
+    return Image.asset(
+      isPlaying ? _megaphoneFillPng : _megaphonePng,
+      width: 24,
+      height: 24,
+      fit: BoxFit.contain,
+      color: _megaphoneTintActive,
+      colorBlendMode: BlendMode.srcIn,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1075,16 +1139,7 @@ class _SavedExpressionCard extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Image.asset(
-                      _megaphonePng,
-                      width: 24,
-                      height: 24,
-                      fit: BoxFit.contain,
-                      color: isPlaybackActive
-                          ? _megaphoneTintLoading
-                          : _megaphoneTintActive,
-                      colorBlendMode: BlendMode.srcIn,
-                    ),
+                    _buildMegaphoneAudioIcon(),
                     GestureDetector(
                       onTap: onDeleteTap,
                       behavior: HitTestBehavior.opaque,
