@@ -139,7 +139,7 @@ class _RoleplayMissionPanelState extends State<RoleplayMissionPanel> {
     );
     final instruction = _instructionAt(safeIndex);
     final total = widget.missions.length;
-    final progressIndex = safeIndex + 1;
+    final completed = widget.completedCount;
     final progressStyle = theme.labelSmall?.copyWith(color: Colors.white);
 
     return SizedBox(
@@ -163,7 +163,7 @@ class _RoleplayMissionPanelState extends State<RoleplayMissionPanel> {
                   right: RoleplayMissionPanel.rightProgressInset,
                 ),
                 child: Text(
-                  '$progressIndex/$total',
+                  '$completed/$total',
                   style: progressStyle,
                   textAlign: TextAlign.center,
                 ),
