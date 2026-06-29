@@ -13,7 +13,7 @@ import '../../widgets/roleplay_scaffold.dart';
 ///
 /// Try Again 화면에서만 진입. 사용자가 느낀 불편함을 수집하는 용도.
 /// Feedback 스크린과 동일한 본문 구조(입력창 + 제출 버튼). sendFeedback API 사용.
-/// 성공 시 토스트 없이 스크린만 닫음. Android 백버튼 또는 X 버튼 시 Try Again으로 복귀.
+/// 성공 시 feedbackSuccess 토스트 후 pop(true). Android 백버튼 또는 X 버튼 시 Try Again으로 복귀.
 class RoleplayTryAgainReportScreen extends StatefulWidget {
   static const String routeName = '/roleplay/try_again_report';
 
@@ -67,6 +67,8 @@ class _RoleplayTryAgainReportScreenState
         );
 
         if (mounted) {
+          final l10n = AppLocalizations.of(context)!;
+          DefaultToast.show(context, l10n.feedbackSuccess);
           Navigator.pop(context, true);
         }
       }

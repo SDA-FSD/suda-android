@@ -80,6 +80,8 @@ class _RoleplayResultReportScreenState extends State<RoleplayResultReportScreen>
         );
 
         if (mounted) {
+          final l10n = AppLocalizations.of(context)!;
+          DefaultToast.show(context, l10n.feedbackSuccess);
           Navigator.pop(context, true);
         }
       }

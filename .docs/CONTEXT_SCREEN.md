@@ -463,8 +463,9 @@
 - **SettingScreen**: "Feedback" 클릭 시
 
 ### 스크린 내부 구현 특이사항
-- 배경색: RGB(51, 51, 51) - SettingScreen 대비 10% 밝기 증가
-- 우측 상단 X 버튼 필수
+- 배경색: `AppScaffold` 기본 `#121212`
+- 헤더: 중앙 `settingsFeedback`(h2), 좌상 뒤로가기
+- 본문: Report 스크린과 동일 글래스 입력창(`RoleplayConfigurationPanel.panelBorderRadius`·blur·반투명 그라데이션) + 중앙 Stadium Send 버튼
 
 ---
 
@@ -829,7 +830,7 @@
 - 롤플레이 스캐폴드(RoleplayScaffold) 적용.
 - Route name: `RoleplayTryAgainReportScreen.routeName` (`/roleplay/try_again_report`).
 - Android 디바이스 백버튼: Try Again으로 복귀 (pop).
-- 본문: 입력창 + 제출 버튼(sendFeedback API). 성공 시 pop(true).
+- 본문: 입력창 + 제출 버튼(sendFeedback API). 성공 시 `feedbackSuccess` 토스트 후 pop(true).
 
 ---
 
@@ -891,7 +892,7 @@
   - `RoleplayRouter.pushResultReport()` → SubScreenRoute로 우측에서 슬라이드 인
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
-- **RoleplayResultScreen**: X 버튼 또는 Android 백버튼 시 `Navigator.pop()`으로 Result로 복귀. 전송 성공(200) 시 `pop(context, true)`로 Result에서 Report 문구 숨김.
+- **RoleplayResultScreen**: X 버튼 또는 Android 백버튼 시 `Navigator.pop()`으로 Result로 복귀. 전송 성공(200) 시 `feedbackSuccess` 토스트 후 `pop(context, true)`로 Result에서 Report 문구 숨김.
 
 ### 스크린 내부 구현 특이사항
 - 내부 표현·구성은 Try Again Report와 동일 (그라데이션 배경 + 글래스 입력창 + Stadium Send 버튼). S1/S2 분기는 Send API·ID 소스만 다름.
