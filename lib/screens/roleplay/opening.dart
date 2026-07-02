@@ -335,40 +335,37 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen>
                     ),
                   ),
                 ),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.4,
-                  child: ElevatedButton(
-                    onPressed: _isLoading
-                        ? null
-                        : () async {
-                            setState(() => _isLoading = true);
-                            await _navigateToPlaying(context);
-                          },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0CABA8),
-                      foregroundColor: Colors.white,
-                      disabledBackgroundColor: const Color(0xFF0CABA8),
-                      disabledForegroundColor: Colors.white,
-                      shape: const StadiumBorder(),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 30,
-                        vertical: 18,
-                      ),
-                      elevation: 0,
+                ElevatedButton(
+                  onPressed: _isLoading
+                      ? null
+                      : () async {
+                          setState(() => _isLoading = true);
+                          await _navigateToPlaying(context);
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF0CABA8),
+                    foregroundColor: Colors.white,
+                    disabledBackgroundColor: const Color(0xFF0CABA8),
+                    disabledForegroundColor: Colors.white,
+                    shape: const StadiumBorder(),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 30,
+                      vertical: 18,
                     ),
-                    child: _isLoading
-                        ? const SizedBox(
-                            height: 24,
-                            width: 24,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.white,
-                              ),
-                            ),
-                          )
-                        : const Text("Let's Start"),
+                    elevation: 0,
                   ),
+                  child: _isLoading
+                      ? const SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
+                          ),
+                        )
+                      : const Text("Let's Start"),
                 ),
                 const SizedBox(height: 50),
               ],
