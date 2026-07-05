@@ -11,8 +11,6 @@ import '../config/app_config.dart';
 import '../routes/series_router.dart';
 import '../utils/language_util.dart';
 import '../utils/suda_json_util.dart';
-import '../widgets/daily_ticket_popup.dart';
-import '../widgets/ticket_info_popup.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/gnb_bar.dart';
 import '../services/effect_anchor_registry.dart';
@@ -22,7 +20,7 @@ class HomeScreen extends StatefulWidget {
   final VoidCallback? onNavigateToProfile;
   final UserDto? user;
 
-  /// 홈 탭이 선택될 때마다 증가. didUpdateWidget에서 변경 시 티켓 갱신.
+  /// 홈 탭이 선택될 때마다 증가. didUpdateWidget에서 변경 시 에너지 갱신.
   final int? homeTabSelectedCounter;
   final ValueChanged<HomeDto>? onHomeContentsLoaded;
   final ValueChanged<String>? onOpenAppPath;
@@ -45,8 +43,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   bool _isInitialized = false; // 초기화 작업 한 번만 실행 플래그
-  bool _dailyTicketPopupShown = false; // 세션 당 1회만 팝업 노출
-  bool _suspendTicketFetchOnHomeReturn = false; // 데일리 팝업 닫힘(pop)으로 인한 자동 티켓 조회 일시 중단
   List<MainHomeBannerDto>? _banners;
   bool _isLoadingBanners = true;
   List<HomeSeriesGroupDto>? _seriesGroups;
@@ -57,7 +53,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Timer? _bannerTimer;
   bool _bannerTimerStarted = false; // 타이머 시작 여부 플래그
   int _visibleCategoryCount = 0; // 현재 렌더링 허용된 카테고리 개수
-  int _displayTicketCount = 0;
+  UserEnergyDto? _energy;
+  Timer? _unlimitedTimer;
   final GlobalKey _ticketBadgeKey = GlobalKey();
 
   @override
@@ -65,10 +62,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.didUpdateWidget(oldWidget);
     if (widget.homeTabSelectedCounter != null &&
         widget.homeTabSelectedCounter != oldWidget.homeTabSelectedCounter) {
-      // 서브 스크린(pop) 복귀와 동일하게 dialog(pop)도 didPopNext로 들어올 수 있음.
-      // 데일리 티켓 팝업을 닫는 순간에는 claim을 먼저 처리하고(성공 시) 그 뒤에만 재조회한다.
-      if (_suspendTicketFetchOnHomeReturn) return;
-      _fetchTicket();
+      _fetchEnergy();
     }
   }
 
@@ -87,6 +81,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void dispose() {
     _bannerTimer?.cancel();
+    _unlimitedTimer?.cancel();
     _pageController.dispose();
     EffectAnchorRegistry.instance.unregister(
       EffectAnchorId.ticketBadge,
@@ -108,50 +103,56 @@ class _HomeScreenState extends State<HomeScreen> {
 
     // 3. 홈 콘텐츠 조회 (배너 + 시리즈 통합 API)
     await _fetchHomeContents();
-    // 4. 티켓 개수 조회
-    await _fetchTicket();
+    // 4. 에너지 조회
+    await _fetchEnergy();
   }
 
-  Future<void> _fetchTicket() async {
+  Future<void> _fetchEnergy() async {
     if (_accessToken == null) return;
     try {
-      final dto = await SudaApiClient.getUserTicket(accessToken: _accessToken!);
+      final dto = await SudaApiClient.getUserEnergy(accessToken: _accessToken!);
       if (!mounted) return;
-      setState(() => _displayTicketCount = dto.finalTicketCount);
-      if (dto.dailyTicketGrantYn == 'Y') {
-        await _showDailyTicketPopup();
-      }
+      setState(() => _energy = dto);
+      _syncUnlimitedTimer();
     } catch (_) {
       // 실패 시 표시값 유지
     }
   }
 
-  Future<void> _showDailyTicketPopup() async {
-    if (_dailyTicketPopupShown) return;
-    _dailyTicketPopupShown = true;
-    if (!mounted) return;
-    final token = _accessToken;
-    if (token == null) return;
-    _suspendTicketFetchOnHomeReturn = true;
-    await showDailyTicketDefaultPopup(
-      context,
-      token,
-      onClaimSuccess: () async {
-        if (!mounted) return;
-        await _fetchTicket();
-      },
-      onDismissedWithoutClaim: () {
-        if (!mounted) return;
-        _suspendTicketFetchOnHomeReturn = false;
-      },
-      onClaimFlowComplete: () {
-        if (!mounted) return;
-        _suspendTicketFetchOnHomeReturn = false;
-      },
-    );
-    // 주의: `await showDaily...`는 다이얼로그 pop 직후에 완료되며, claim은 그 다음 프레임에
-    // 비동기로 이어질 수 있음. 여기서 가드를 해제하면 GET/PUT 경합이 다시 생긴다.
+  void _syncUnlimitedTimer() {
+    _unlimitedTimer?.cancel();
+    _unlimitedTimer = null;
+
+    final energy = _energy;
+    if (energy == null || !energy.isUnlimitedActiveAt(DateTime.now().toUtc())) {
+      return;
+    }
+
+    _unlimitedTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (!mounted) return;
+      final endsAt = _energy?.unlimitedEndsAt;
+      if (endsAt == null || !endsAt.isAfter(DateTime.now().toUtc())) {
+        _unlimitedTimer?.cancel();
+        _unlimitedTimer = null;
+        _fetchEnergy();
+        return;
+      }
+      setState(() {});
+    });
   }
+
+  String _formatUnlimitedRemaining(DateTime endsAt) {
+    final nowUtc = DateTime.now().toUtc();
+    var remaining = endsAt.difference(nowUtc);
+    if (remaining.isNegative) remaining = Duration.zero;
+    final totalSeconds = remaining.inSeconds;
+    final minutes = totalSeconds ~/ 60;
+    final seconds = totalSeconds % 60;
+    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+  }
+
+  /// 후속 작업: 에너지 정보 팝업 연결 예정.
+  void _onEnergyBadgeTap() {}
 
   /// 홈 콘텐츠 조회 (배너 + 시리즈 통합 API)
   Future<void> _fetchHomeContents() async {
@@ -283,10 +284,6 @@ class _HomeScreenState extends State<HomeScreen> {
     SeriesRouter.pushOverview(context, seriesId, user: widget.user);
   }
 
-  Future<void> _onTicketBadgeTap(BuildContext context) async {
-    await showTicketInfoPopup(context);
-  }
-
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
@@ -300,13 +297,13 @@ class _HomeScreenState extends State<HomeScreen> {
         KeyedSubtree(
           key: _ticketBadgeKey,
           child: GestureDetector(
-            onTap: () => _onTicketBadgeTap(context),
+            onTap: _onEnergyBadgeTap,
             behavior: HitTestBehavior.opaque,
-            child: SizedBox(
-              width: 48,
-              height: 48,
-              child: Center(
-                child: _buildTicketBadge(context),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+              child: Align(
+                alignment: Alignment.topRight,
+                child: _buildEnergyBadge(context),
               ),
             ),
           ),
@@ -577,30 +574,48 @@ class _HomeScreenState extends State<HomeScreen> {
     return SudaJsonUtil.localizedText(banner.overlayText);
   }
 
-  /// 상단 우측 티켓 아이콘 + 개수 (38x20, body-caption 흰색)
-  Widget _buildTicketBadge(BuildContext context) {
-    return SizedBox(
-      width: 38,
-      height: 20,
-      child: Stack(
-        fit: StackFit.expand,
+  /// 상단 우측 에너지 배지 (아이콘 24×24 + bodyMedium w700 흰색 텍스트)
+  Widget _buildEnergyBadge(BuildContext context) {
+    final textStyle = Theme.of(
+      context,
+    ).textTheme.bodyMedium?.copyWith(
+          color: Colors.white,
+          fontWeight: FontWeight.w700,
+          fontVariations: const [FontVariation('wght', 700)],
+        );
+    final energy = _energy;
+    final nowUtc = DateTime.now().toUtc();
+
+    if (energy != null && energy.isUnlimitedActiveAt(nowUtc)) {
+      return Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Image.asset(
-            'assets/images/icons/ticket.png',
-            width: 38,
-            height: 20,
-            fit: BoxFit.cover,
+            'assets/images/icons/unlimited.png',
+            width: 24,
+            height: 24,
           ),
-          Center(
-            child: Text(
-              '$_displayTicketCount',
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: Colors.white),
-            ),
+          const SizedBox(width: 5),
+          Text(
+            _formatUnlimitedRemaining(energy.unlimitedEndsAt!),
+            style: textStyle,
           ),
         ],
-      ),
+      );
+    }
+
+    final count = energy?.energyCount ?? 0;
+    final max = energy?.maxEnergyCount ?? 0;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Image.asset(
+          'assets/images/icons/energy.png',
+          width: 24,
+          height: 24,
+        ),
+        Text('$count/$max', style: textStyle),
+      ],
     );
   }
 }

@@ -1,5 +1,47 @@
 import 'common_models.dart';
 
+/// GET /v1/users/energy 응답
+class UserEnergyDto {
+  final int energyCount;
+  final int maxEnergyCount;
+  final DateTime? lastAutoChargedAt;
+  final DateTime? unlimitedEndsAt;
+
+  const UserEnergyDto({
+    required this.energyCount,
+    required this.maxEnergyCount,
+    this.lastAutoChargedAt,
+    this.unlimitedEndsAt,
+  });
+
+  factory UserEnergyDto.fromJson(Map<String, dynamic> json) {
+    DateTime? parseInstant(dynamic v) {
+      if (v == null) return null;
+      if (v is String) {
+        try {
+          return DateTime.parse(v);
+        } catch (_) {
+          return null;
+        }
+      }
+      return null;
+    }
+
+    return UserEnergyDto(
+      energyCount: json['energyCount'] as int? ?? 0,
+      maxEnergyCount: json['maxEnergyCount'] as int? ?? 0,
+      lastAutoChargedAt: parseInstant(json['lastAutoChargedAt']),
+      unlimitedEndsAt: parseInstant(json['unlimitedEndsAt']),
+    );
+  }
+
+  bool isUnlimitedActiveAt(DateTime nowUtc) {
+    final endsAt = unlimitedEndsAt;
+    if (endsAt == null) return false;
+    return endsAt.isAfter(nowUtc);
+  }
+}
+
 /// GET /v1/users/ticket 응답
 class UserTicketDto {
   final int beforeTicketCount;

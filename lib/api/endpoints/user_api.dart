@@ -331,6 +331,15 @@ class UserApi {
     );
   }
 
+  static Future<UserEnergyDto> getUserEnergy({
+    required String accessToken,
+  }) async {
+    return await SudaHttpClient.executeWithRefresh(
+      () => _getUserEnergyInternal(accessToken),
+      retryWithNewToken: (newToken) => _getUserEnergyInternal(newToken),
+    );
+  }
+
   static Future<UserTicketDto> getUserTicket({
     required String accessToken,
   }) async {
@@ -379,6 +388,38 @@ class UserApi {
 
     throw Exception(
       'PUT /v1/users/tickets/daily failed: HTTP ${response.statusCode} ${response.body}',
+    );
+  }
+
+  static Future<UserEnergyDto> _getUserEnergyInternal(String accessToken) async {
+    final uri = SudaHttpClient.buildUri('/v1/users/energy');
+
+    late final http.Response response;
+    try {
+      response = await SudaHttpClient.client
+          .get(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      rethrow;
+    }
+
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final Map<String, dynamic> data =
+          jsonDecode(response.body) as Map<String, dynamic>;
+      return UserEnergyDto.fromJson(data);
+    }
+
+    throw Exception(
+      'GET /v1/users/energy failed: HTTP ${response.statusCode} ${response.body}',
     );
   }
 

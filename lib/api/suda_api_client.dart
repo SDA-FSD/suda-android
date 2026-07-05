@@ -315,6 +315,10 @@ class SudaApiClient {
     return UserApi.getUserProfile(accessToken: accessToken);
   }
 
+  static Future<UserEnergyDto> getUserEnergy({required String accessToken}) {
+    return UserApi.getUserEnergy(accessToken: accessToken);
+  }
+
   static Future<UserTicketDto> getUserTicket({required String accessToken}) {
     return UserApi.getUserTicket(accessToken: accessToken);
   }
