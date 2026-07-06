@@ -190,5 +190,9 @@
   "reviewChatTapHint": "Tap the chat bubble to play the audio.",
   "reviewChatNoAudioToPlay": "There's no audio to play.",
   "seriesInformationTopicDifficulty": "Topic Difficulty",
-  "seriesInformationLearningGoals": "Learning Goals"
+  "seriesInformationLearningGoals": "Learning Goals",
+  "energyInfoTitle": "Energy",
+  "energyInfoRechargeUntil": "@@TIME@@ until your next recharge!",
+  "energyInfoFull": "Your energy is full.",
+  "energyInfoUnlimitedEndsIn": "Unlimited Energy ends in @@TIME@@"
 }

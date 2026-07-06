@@ -1017,6 +1017,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Learning Goals'**
   String get seriesInformationLearningGoals;
+
+  /// No description provided for @energyInfoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Energy'**
+  String get energyInfoTitle;
+
+  /// No description provided for @energyInfoRechargeUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'@@TIME@@ until your next recharge!'**
+  String get energyInfoRechargeUntil;
+
+  /// No description provided for @energyInfoFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Your energy is full.'**
+  String get energyInfoFull;
+
+  /// No description provided for @energyInfoUnlimitedEndsIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited Energy ends in @@TIME@@'**
+  String get energyInfoUnlimitedEndsIn;
 }
 
 class _AppLocalizationsDelegate

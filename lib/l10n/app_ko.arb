@@ -190,5 +190,9 @@
   "reviewChatTapHint": "채팅 말풍선을 눌러 오디오를 재생하세요.",
   "reviewChatNoAudioToPlay": "재생할 음성이 없습니다.",
   "seriesInformationTopicDifficulty": "주제 난이도",
-  "seriesInformationLearningGoals": "학습목표"
+  "seriesInformationLearningGoals": "학습목표",
+  "energyInfoTitle": "에너지",
+  "energyInfoRechargeUntil": "다음 충전까지 @@TIME@@ 남았어요!",
+  "energyInfoFull": "에너지가 가득 찼습니다.",
+  "energyInfoUnlimitedEndsIn": "무제한 에너지 종료까지 @@TIME@@"
 }

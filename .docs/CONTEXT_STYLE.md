@@ -148,6 +148,7 @@ Text('아주 작은 라벨', style: theme.labelSmall); // body-tiny
 ### 4.3 DefaultPopup (공통 팝업 프레임)
 
 - **구현 파일**: `lib/widgets/default_popup.dart`
+- **카드 프레임 (glassy)**: radius `16`, `BackdropFilter` blur sigma `12`, 테두리 흰색 36%·1px, 내부 배경 검정 50% 베이스 + 흰색 frost 그라데이션 18%→10% (topLeft→bottomRight), 그림자 검정 14%·blur 10·offset (0, 2). **dim 오버레이 없음** (`barrierColor: transparent`). `barrierDismissible`일 때만 투명 전체 영역 탭으로 닫기.
 - **타이틀 타이포**: `textTheme.headlineMedium` + 흰색 (`heading2` 계열)
 - **본문 슬롯(`bodyWidget`)**: 내부 타이포/정렬/추가 위젯 구성은 호출부 책임(자유도 높음)
 - **슬롯 간격 규칙**: `DefaultPopup`은 **topWidget ↔ title ↔ body ↔ buttons** 사이에만 세로 `20`을 보장한다(`bodyWidget` 내부 간격은 강제하지 않음)

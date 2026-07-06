@@ -11,6 +11,7 @@ import '../config/app_config.dart';
 import '../routes/series_router.dart';
 import '../utils/language_util.dart';
 import '../utils/suda_json_util.dart';
+import '../widgets/energy_info_popup.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/gnb_bar.dart';
 import '../services/effect_anchor_registry.dart';
@@ -151,8 +152,11 @@ class _HomeScreenState extends State<HomeScreen> {
     return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
   }
 
-  /// 후속 작업: 에너지 정보 팝업 연결 예정.
-  void _onEnergyBadgeTap() {}
+  Future<void> _onEnergyBadgeTap() async {
+    await showEnergyInfoPopup(context);
+    if (!mounted) return;
+    await _fetchEnergy();
+  }
 
   /// 홈 콘텐츠 조회 (배너 + 시리즈 통합 API)
   Future<void> _fetchHomeContents() async {
@@ -605,7 +609,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     final count = energy?.energyCount ?? 0;
-    final max = energy?.maxEnergyCount ?? 0;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -614,7 +617,7 @@ class _HomeScreenState extends State<HomeScreen> {
           width: 24,
           height: 24,
         ),
-        Text('$count/$max', style: textStyle),
+        Text('$count', style: textStyle),
       ],
     );
   }

@@ -502,4 +502,18 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get seriesInformationLearningGoals => 'Metas de aprendizado';
+
+  @override
+  String get energyInfoTitle => 'Energia';
+
+  @override
+  String get energyInfoRechargeUntil =>
+      'Faltam @@TIME@@ para a próxima recarga!';
+
+  @override
+  String get energyInfoFull => 'Sua energia está cheia.';
+
+  @override
+  String get energyInfoUnlimitedEndsIn =>
+      'Energia ilimitada termina em @@TIME@@';
 }

@@ -500,4 +500,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get seriesInformationLearningGoals => 'Learning Goals';
+
+  @override
+  String get energyInfoTitle => 'Energy';
+
+  @override
+  String get energyInfoRechargeUntil => '@@TIME@@ until your next recharge!';
+
+  @override
+  String get energyInfoFull => 'Your energy is full.';
+
+  @override
+  String get energyInfoUnlimitedEndsIn => 'Unlimited Energy ends in @@TIME@@';
 }

@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
 enum DefaultPopupButtonType {
-  /// Primary action (spec name: "default"): full-width, height 44, stadium,
-  /// uses `ElevatedButtonTheme`.
+  /// Primary action (spec name: "default"): height 44, width shrink-wrap to label,
+  /// stadium, uses `ElevatedButtonTheme`.
   primary,
 
   /// Tertiary: uses `TextButtonTheme`.
@@ -30,6 +30,8 @@ class DefaultPopupButton {
 /// - `DefaultPopup`은 **topWidget ↔ title ↔ body ↔ buttons** 사이에만 세로 20 간격을 보장한다.
 /// - 버튼 탭 시: **항상 팝업을 닫은 뒤** `onPressed`를 호출한다.
 class DefaultPopup extends StatelessWidget {
+  static const double cardBorderRadius = 16;
+
   final Widget? topWidget;
   final String? titleText;
   final Widget? bodyWidget;
@@ -126,8 +128,6 @@ class DefaultPopup extends StatelessWidget {
     final screenWidth = size.width;
     final screenHeight = size.height;
 
-    const overlayColor = Color(0x66000000); // black 40%
-
     final trimmedTitle = titleText?.trim();
     final title = trimmedTitle ?? '';
     final hasTitle = title.isNotEmpty;
@@ -139,89 +139,110 @@ class DefaultPopup extends StatelessWidget {
     final hasBody = body != null;
     final hasButtons = buttons.isNotEmpty;
 
+    final cardContent = Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Flexible(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                padding: const EdgeInsets.only(
+                  top: 20,
+                  left: 16,
+                  right: 16,
+                  bottom: 16,
+                ),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minWidth: constraints.maxWidth,
+                    maxWidth: constraints.maxWidth,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ..._buildMainContentSlots(
+                        context,
+                        hasTop: hasTop,
+                        top: top,
+                        hasTitle: hasTitle,
+                        title: title,
+                        hasBody: hasBody,
+                        body: body,
+                        hasButtons: hasButtons,
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+
     return PopScope(
       canPop: barrierDismissible,
       child: Stack(
         children: [
-          Positioned.fill(
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: barrierDismissible ? () => Navigator.of(context).pop() : null,
-              child: const ColoredBox(color: overlayColor),
+          if (barrierDismissible)
+            Positioned.fill(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => Navigator.of(context).pop(),
+                child: const SizedBox.expand(),
+              ),
             ),
-          ),
           Center(
             child: ConstrainedBox(
               constraints: BoxConstraints(
                 maxWidth: screenWidth * 0.8,
                 maxHeight: screenHeight * 0.8,
               ),
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        width: 10,
-                        color: const Color(0xFF80D7CF),
-                      ),
-                      borderRadius: BorderRadius.circular(30),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(cardBorderRadius),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.14),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
                     ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(20),
-                      child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-                        child: ColoredBox(
-                          color: const Color(0x991E1E1E),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Flexible(
-                                child: LayoutBuilder(
-                                  builder: (context, constraints) {
-                                    return SingleChildScrollView(
-                                      padding: const EdgeInsets.only(
-                                        top: 20,
-                                        left: 16,
-                                        right: 16,
-                                        bottom: 16,
-                                      ),
-                                      child: ConstrainedBox(
-                                        constraints: BoxConstraints(
-                                          minWidth: constraints.maxWidth,
-                                          maxWidth: constraints.maxWidth,
-                                        ),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.stretch,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.start,
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            ..._buildMainContentSlots(
-                                              context,
-                                              hasTop: hasTop,
-                                              top: top,
-                                              hasTitle: hasTitle,
-                                              title: title,
-                                              hasBody: hasBody,
-                                              body: body,
-                                              hasButtons: hasButtons,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(cardBorderRadius),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        borderRadius:
+                            BorderRadius.circular(cardBorderRadius),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.36),
+                          width: 1,
+                        ),
+                        color: Colors.black.withValues(alpha: 0.50),
+                      ),
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          borderRadius:
+                              BorderRadius.circular(cardBorderRadius),
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              Colors.white.withValues(alpha: 0.18),
+                              Colors.white.withValues(alpha: 0.10),
                             ],
                           ),
                         ),
+                        child: cardContent,
                       ),
                     ),
                   ),
-                ],
+                ),
               ),
             ),
           ),
@@ -238,28 +259,34 @@ class DefaultPopup extends StatelessWidget {
       if (i > 0) out.add(const SizedBox(height: 20));
       final b = buttons[i];
       out.add(
-        SizedBox(
-          height: 44,
-          width: double.infinity,
-          child: switch (b.type) {
-            DefaultPopupButtonType.primary => ElevatedButton(
-                onPressed: () => _popThenCallback(context, b.onPressed),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0CABA8),
-                  foregroundColor: Colors.white,
-                  shape: const StadiumBorder(),
-                  elevation: 0,
-                ).merge(elevatedBase),
-                child: Text(b.label),
-              ),
-            DefaultPopupButtonType.text => TextButton(
-                onPressed: () => _popThenCallback(context, b.onPressed),
-                style: TextButton.styleFrom(
-                  foregroundColor: Colors.white,
-                ).merge(textBase),
-                child: Text(b.label),
-              ),
-          },
+        Align(
+          alignment: Alignment.center,
+          child: SizedBox(
+            height: 44,
+            child: switch (b.type) {
+              DefaultPopupButtonType.primary => ElevatedButton(
+                  onPressed: () => _popThenCallback(context, b.onPressed),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF0CABA8),
+                    foregroundColor: Colors.white,
+                    shape: const StadiumBorder(),
+                    elevation: 0,
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ).merge(elevatedBase),
+                  child: Text(b.label),
+                ),
+              DefaultPopupButtonType.text => TextButton(
+                  onPressed: () => _popThenCallback(context, b.onPressed),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ).merge(textBase),
+                  child: Text(b.label),
+                ),
+            },
+          ),
         ),
       );
     }

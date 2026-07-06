@@ -190,5 +190,9 @@
   "reviewChatTapHint": "Toque no balão de chat para reproduzir o áudio.",
   "reviewChatNoAudioToPlay": "Não há áudio para reproduzir.",
   "seriesInformationTopicDifficulty": "Dificuldade do Tópico",
-  "seriesInformationLearningGoals": "Metas de aprendizado"
+  "seriesInformationLearningGoals": "Metas de aprendizado",
+  "energyInfoTitle": "Energia",
+  "energyInfoRechargeUntil": "Faltam @@TIME@@ para a próxima recarga!",
+  "energyInfoFull": "Sua energia está cheia.",
+  "energyInfoUnlimitedEndsIn": "Energia ilimitada termina em @@TIME@@"
 }

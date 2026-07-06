@@ -481,4 +481,16 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get seriesInformationLearningGoals => '학습목표';
+
+  @override
+  String get energyInfoTitle => '에너지';
+
+  @override
+  String get energyInfoRechargeUntil => '다음 충전까지 @@TIME@@ 남았어요!';
+
+  @override
+  String get energyInfoFull => '에너지가 가득 찼습니다.';
+
+  @override
+  String get energyInfoUnlimitedEndsIn => '무제한 에너지 종료까지 @@TIME@@';
 }

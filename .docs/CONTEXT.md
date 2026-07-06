@@ -72,8 +72,8 @@
   - `SudaApiClient.getUserProfile()`: 프로필 부가 정보 조회 (`GET /v1/users/profile`, 응답: ProfileDto(userDto, currentLevel, progressPercentage, likesToNextLevel?)). `likesToNextLevel`은 레벨업까지 남은 Like 수(티켓 설명 팝업 등). 백엔드 `suda-api`의 `LevelService.getLikesToNextLevel`·`ProfileDto`에서 계산·직렬화. 최대 레벨이면 JSON null → 미포함 시 클라이언트에서 해당 문구 미노출.
   - `SudaApiClient.getUserEnergy()`: 에너지 조회 (`GET /v1/users/energy`, 파라메터 없음, 응답: UserEnergyDto(energyCount, maxEnergyCount, lastAutoChargedAt?, unlimitedEndsAt?)). HomeScreen 초기화·홈 탭 재진입(`homeTabSelectedCounter`) 시 호출해 우상단 배지 갱신.
     - **무제한 모드**: `unlimitedEndsAt`이 현재(UTC) 이후이면 `unlimited.png`(24×24) + 5dp gap + 남은 시간 `MM:SS`(bodyMedium w700, 흰색). 1초 주기 타이머로 갱신, 만료 시 자동 재조회 후 일반 모드 전환.
-    - **일반 모드**: `unlimitedEndsAt`이 null 또는 과거이면 `energy.png`(24×24) + `energyCount/maxEnergyCount`(bodyMedium w700, 흰색).
-    - 배지는 `GestureDetector`로 탭 영역만 준비(`_onEnergyBadgeTap`, 후속 작업에서 정보 팝업 연결 예정).
+    - **일반 모드**: `unlimitedEndsAt`이 null 또는 과거이면 `energy.png`(24×24) + `energyCount`(bodyMedium w700, 흰색).
+    - 배지는 `GestureDetector`로 탭 시 `showEnergyInfoPopup` (`lib/widgets/energy_info_popup.dart`) → `GET /v1/users/energy` 재조회 후 `DefaultPopup` 노출(프로그레스바·충전/무제한 타이머·가득 참 문구).
   - `SudaApiClient.getUserTicket()`: 티켓 개수 조회 (`GET /v1/users/ticket`, 파라메터 없음, 응답: UserTicketDto(beforeTicketCount, finalTicketCount, dailyTicketGrantYn?)). HomeScreen 배지·데일리 출석 팝업 트리거에는 **더 이상 사용하지 않음**(에너지 전환).
   - `SudaApiClient.claimDailyTicket()`: 데일리 티켓 수령 (`PUT /v1/users/tickets/daily`, 응답: QuestResultDto). `completeYn == 'Y'`이면 `surveySuccessToast` 노출 + 티켓 재조회.
     - 따닥 방지: `daily_ticket_popup.dart` 팝업 호출부에서 클로저 스코프 `isClaiming` 플래그로 primary 버튼의 중복 탭 가드(동일 프레임 멀티터치 대비). `DefaultPopup._popThenCallback`의 "pop 선행 → post-frame 콜백" 패턴과 이중으로 보호.
@@ -217,11 +217,11 @@
 - **표준 팝업 (DefaultPopup)**: `lib/widgets/default_popup.dart`
   - 목적: 기존의 자유로운 콘텐츠 구성 패턴을 유지하되, **표준 슬롯(topWidget/title/body/buttons)**과 **표준 프레임 규격**을 제공한다.
   - 재사용: `DefaultPopup.show(context, { topWidget, titleText, bodyWidget, buttons, barrierDismissible })`.
-  - 배경/테두리/블러(고정): 배경 검정 40%, 테두리 10·#80D7CF, radius 30, 내부 배경 `#1E1E1E` 60% + blur sigma 6.
+  - 배경/테두리/블러(glassy): radius 16, blur sigma 12, 테두리 흰색 36%·1px, 내부 배경 검정 50% + frost 그라데이션 흰색 18%→10%, 그림자 검정 14%·blur 10·offset (0,2). **dim 오버레이 없음**.
   - 닫기 UX: 좌상단 닫기 아이콘은 사용하지 않으며, 필요 시 `buttons`에 **text 타입의 닫기 버튼**을 포함한다(라벨은 하드코딩 금지, 예: `l10n.surveyMaybeLater`). 탭 시 팝업 닫힘 후 콜백 실행 규칙은 동일.
   - 카드 높이: 고정 높이 없이 내용에 따라 결정되되, **최대 높이는 화면 높이의 80%**로 캡되며 초과 시 **`topWidget + titleText + bodyWidget + buttons` 영역만 스크롤**(닫기 아이콘은 스크롤 미포함).
   - 본문 영역 패딩: 상 20 / 좌·우·하 16. `bodyWidget` 내부 레이아웃은 호출부 자율이며, `DefaultPopup`은 **topWidget ↔ title ↔ body ↔ buttons 사이**에만 세로 20 간격을 보장한다.
-  - 버튼: `primary`(스펙상 이름은 `default`이나 Dart 예약어 회피, full width, height 44, #0CABA8, Stadium, `ElevatedButtonTheme` 병합) / `text`(`TextButtonTheme` 병합, 흰색 텍스트). 버튼 탭 시 **항상 팝업을 닫은 뒤** 콜백을 호출한다.
+  - 버튼: `primary`(스펙상 이름은 `default`이나 Dart 예약어 회피, height 44, 라벨 너비 shrink-wrap·가운데 정렬, #0CABA8, Stadium, `ElevatedButtonTheme` 병합) / `text`(`TextButtonTheme` 병합, 흰색 텍스트, shrink-wrap·가운데 정렬). 버튼 탭 시 **항상 팝업을 닫은 뒤** 콜백을 호출한다.
   - 마이그레이션: 팝업 UI는 **점진적으로** `DefaultPopup`으로 옮긴다(동시 대량 치환 금지).
   - Dev 확인(Lab): `lib/screens/setting/lab.dart`의 `kLabDefaultPopupOptions`에 전환 완료 팝업을 등록한다. Lab 화면 상단 **Default Popup Test**는 드롭다운 선택 + **Show Popup**으로 재현한다.
 
