@@ -11,10 +11,9 @@ import '../config/app_config.dart';
 import '../routes/series_router.dart';
 import '../utils/language_util.dart';
 import '../utils/suda_json_util.dart';
-import '../widgets/energy_info_popup.dart';
 import '../widgets/app_scaffold.dart';
+import '../widgets/energy_header_badge.dart';
 import '../widgets/gnb_bar.dart';
-import '../services/effect_anchor_registry.dart';
 
 class HomeScreen extends StatefulWidget {
   final VoidCallback? onNavigateToAlarm;
@@ -54,40 +53,18 @@ class _HomeScreenState extends State<HomeScreen> {
   Timer? _bannerTimer;
   bool _bannerTimerStarted = false; // 타이머 시작 여부 플래그
   int _visibleCategoryCount = 0; // 현재 렌더링 허용된 카테고리 개수
-  UserEnergyDto? _energy;
-  Timer? _unlimitedTimer;
-  final GlobalKey _ticketBadgeKey = GlobalKey();
-
-  @override
-  void didUpdateWidget(HomeScreen oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.homeTabSelectedCounter != null &&
-        widget.homeTabSelectedCounter != oldWidget.homeTabSelectedCounter) {
-      _fetchEnergy();
-    }
-  }
 
   @override
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: 0);
-    EffectAnchorRegistry.instance.registerKey(
-      EffectAnchorId.ticketBadge,
-      _ticketBadgeKey,
-    );
-    // 초기화 작업 (한 번만 실행)
     _performInitialization();
   }
 
   @override
   void dispose() {
     _bannerTimer?.cancel();
-    _unlimitedTimer?.cancel();
     _pageController.dispose();
-    EffectAnchorRegistry.instance.unregister(
-      EffectAnchorId.ticketBadge,
-      _ticketBadgeKey,
-    );
     super.dispose();
   }
 
@@ -104,58 +81,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
     // 3. 홈 콘텐츠 조회 (배너 + 시리즈 통합 API)
     await _fetchHomeContents();
-    // 4. 에너지 조회
-    await _fetchEnergy();
-  }
-
-  Future<void> _fetchEnergy() async {
-    if (_accessToken == null) return;
-    try {
-      final dto = await SudaApiClient.getUserEnergy(accessToken: _accessToken!);
-      if (!mounted) return;
-      setState(() => _energy = dto);
-      _syncUnlimitedTimer();
-    } catch (_) {
-      // 실패 시 표시값 유지
-    }
-  }
-
-  void _syncUnlimitedTimer() {
-    _unlimitedTimer?.cancel();
-    _unlimitedTimer = null;
-
-    final energy = _energy;
-    if (energy == null || !energy.isUnlimitedActiveAt(DateTime.now().toUtc())) {
-      return;
-    }
-
-    _unlimitedTimer = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (!mounted) return;
-      final endsAt = _energy?.unlimitedEndsAt;
-      if (endsAt == null || !endsAt.isAfter(DateTime.now().toUtc())) {
-        _unlimitedTimer?.cancel();
-        _unlimitedTimer = null;
-        _fetchEnergy();
-        return;
-      }
-      setState(() {});
-    });
-  }
-
-  String _formatUnlimitedRemaining(DateTime endsAt) {
-    final nowUtc = DateTime.now().toUtc();
-    var remaining = endsAt.difference(nowUtc);
-    if (remaining.isNegative) remaining = Duration.zero;
-    final totalSeconds = remaining.inSeconds;
-    final minutes = totalSeconds ~/ 60;
-    final seconds = totalSeconds % 60;
-    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-  }
-
-  Future<void> _onEnergyBadgeTap() async {
-    await showEnergyInfoPopup(context);
-    if (!mounted) return;
-    await _fetchEnergy();
   }
 
   /// 홈 콘텐츠 조회 (배너 + 시리즈 통합 API)
@@ -298,19 +223,9 @@ class _HomeScreenState extends State<HomeScreen> {
       ).textTheme.headlineSmall?.copyWith(color: Colors.white),
       usePadding: false, // 배너 풀-폭 유지를 위해 본문 패딩 제거
       actions: [
-        KeyedSubtree(
-          key: _ticketBadgeKey,
-          child: GestureDetector(
-            onTap: _onEnergyBadgeTap,
-            behavior: HitTestBehavior.opaque,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
-              child: Align(
-                alignment: Alignment.topRight,
-                child: _buildEnergyBadge(context),
-              ),
-            ),
-          ),
+        EnergyHeaderBadge(
+          refreshCounter: widget.homeTabSelectedCounter,
+          registerEnergyBadgeAnchor: true,
         ),
       ],
       bottomNavigationBar: GnbBar(
@@ -576,50 +491,6 @@ class _HomeScreenState extends State<HomeScreen> {
   /// 언어 설정에 맞는 오버레이 텍스트 반환
   String _getOverlayText(MainHomeBannerDto banner) {
     return SudaJsonUtil.localizedText(banner.overlayText);
-  }
-
-  /// 상단 우측 에너지 배지 (아이콘 24×24 + bodyMedium w700 흰색 텍스트)
-  Widget _buildEnergyBadge(BuildContext context) {
-    final textStyle = Theme.of(
-      context,
-    ).textTheme.bodyMedium?.copyWith(
-          color: Colors.white,
-          fontWeight: FontWeight.w700,
-          fontVariations: const [FontVariation('wght', 700)],
-        );
-    final energy = _energy;
-    final nowUtc = DateTime.now().toUtc();
-
-    if (energy != null && energy.isUnlimitedActiveAt(nowUtc)) {
-      return Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Image.asset(
-            'assets/images/icons/unlimited.png',
-            width: 24,
-            height: 24,
-          ),
-          const SizedBox(width: 5),
-          Text(
-            _formatUnlimitedRemaining(energy.unlimitedEndsAt!),
-            style: textStyle,
-          ),
-        ],
-      );
-    }
-
-    final count = energy?.energyCount ?? 0;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Image.asset(
-          'assets/images/icons/energy.png',
-          width: 24,
-          height: 24,
-        ),
-        Text('$count', style: textStyle),
-      ],
-    );
   }
 }
 

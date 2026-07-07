@@ -16,6 +16,10 @@ class RpS2SessionNotFoundException implements Exception {
   String toString() => message;
 }
 
+class RpS2InsufficientEnergyException implements Exception {
+  const RpS2InsufficientEnergyException();
+}
+
 class SeriesApi {
   static void _throwIfRpS2SessionNotFound(
     http.Response response,
@@ -23,6 +27,15 @@ class SeriesApi {
   ) {
     if (response.statusCode == 404) {
       throw RpS2SessionNotFoundException('$operation: HTTP 404');
+    }
+  }
+
+  static void _throwIfRpS2InsufficientEnergy(
+    http.Response response,
+    String operation,
+  ) {
+    if (response.statusCode == 402) {
+      throw const RpS2InsufficientEnergyException();
     }
   }
   static Future<RpS2SeriesOverviewDto> getSeriesOverview({
@@ -537,6 +550,10 @@ class SeriesApi {
     if (response.statusCode == 401) {
       throw UnauthorizedException('Access token expired');
     }
+    _throwIfRpS2InsufficientEnergy(
+      response,
+      'POST /rps2/sessions/$rpSessionId/user-message/audio',
+    );
     _throwIfRpS2SessionNotFound(
       response,
       'POST /rps2/sessions/$rpSessionId/user-message/audio',
@@ -590,6 +607,10 @@ class SeriesApi {
     if (response.statusCode == 401) {
       throw UnauthorizedException('Access token expired');
     }
+    _throwIfRpS2InsufficientEnergy(
+      response,
+      'POST /rps2/sessions/$rpSessionId/user-message/text',
+    );
     _throwIfRpS2SessionNotFound(
       response,
       'POST /rps2/sessions/$rpSessionId/user-message/text',

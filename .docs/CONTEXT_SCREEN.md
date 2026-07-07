@@ -427,7 +427,7 @@
 - 본문: width 100%, 배경 #353535, 모서리 둥근 박스. 좌측 설명(pushNotifications 흰색, pushNotificationsDesc caption·#80D7CF), 우측 토글(56×24 트랙, 20×20 흰 원). OFF: 원 좌측, 트랙 #8C8C8C. ON: 원 우측, 트랙 #80D7CF. 200 응답 후 전환 애니메이션.
 - API: ON 시 `PUT /v1/users/push-agreement?agreementYn=Y`, OFF 시 `PUT /v1/users/push-agreement?agreementYn=N`
 - 응답: `QuestResultDto { completeYn }`
-  - `completeYn == 'Y'`: 티켓 보상 지급으로 간주, `surveySuccessToast` 노출 후 `Navigator.pop()`으로 자동 복귀
+  - `completeYn == 'Y'`: `Navigator.pop()`으로 자동 복귀
   - `completeYn != 'Y'`(N 포함): 추가 토스트 없이 기존처럼 토글 상태만 반영
 
 ---
@@ -660,10 +660,6 @@
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
 - **RoleplayPlayingScreen** (Full Screen): 중앙 "Start" 텍스트 클릭 시
   - `Navigator.pushReplacement()`로 전환 (opening screen 삭제, 돌아올 일 없음)
-- **RoleplaySurveyScreen** (Sub Screen): `sessionId == '-10'` 분기 팝업의 "Answer now ✅" 버튼 클릭 시
-  - `RoleplayRouter.pushSurvey()` → SubScreenRoute로 우측에서 슬라이드 인
-- **PushAgreementScreen** (Sub Screen): `sessionId == '-20'` 분기 팝업의 "Turn on 🔔" 버튼 클릭 시
-  - 팝업 닫힘 후 SubScreenRoute로 우측에서 슬라이드 인
 
 ### 스크린 내부 구현 특이사항
 - `RoleplayDto.overviewImgPath`가 있으면 전면 배경: `lib/widgets/roleplay_overview_backdrop.dart`의 `RoleplayOverviewBackdrop`(URL·연출은 Overview 상단과 동일·디스크 캐시 공유). 없으면 `RoleplayScaffold` 기본 배경 `#121212`.
@@ -671,50 +667,10 @@
 - 시스템 뒤로가기 버튼 클릭 시: opening screen 삭제, 이전 overview 노출
 - 별도 X 버튼 제공 안 함
 - 중앙에 "Start" 텍스트 (임시, 향후 오프닝 콘텐츠로 대체 예정)
-- 세션 초기화 응답 분기:
-  - `sessionId == '-20'`: 3단 팝업(타이틀 + `surveyPromptLine1` + `pushTicketPromptLine2` + `pushTicketTurnOnButton`)
-  - `sessionId == '-30'`: 3단 팝업(타이틀 + `surveyPromptLine1` + `shareTicketPromptLine2` + `shareTicketButton`)
-    - "Share link 💬" 탭 시 팝업 닫고 OS 공유시트 노출(Play Store 링크 공유)
-    - 공유시트 닫힘 감지 후 `POST /v1/users/quests/{questId}` 호출 (`questId = sessionId`)
-    - 응답 `QuestResultDto.completeYn == 'Y'`일 때만 `surveySuccessToast` 토스트 노출
-  - `sessionId == '-40'`: 3단 팝업(타이틀 + `surveyPromptLine1` + `reviewTicketPromptLine2` + `reviewTicketButton`)
-    - "Leave Stars ⭐" 탭 시 팝업 닫고 OS 인앱리뷰 API 호출
-    - 인앱리뷰 호출 성공 반환 시 `POST /v1/users/quests/{questId}` 호출 (`questId = sessionId`)
-    - 응답 `QuestResultDto.completeYn == 'Y'`일 때만 `surveySuccessToast` 토스트 노출
-
----
-
-## 12.1 RoleplaySurveyScreen
-
-### 스크린 관련 정의 파일
-- **파일 경로**: `lib/screens/roleplay/survey.dart`
-- **클래스명**: `RoleplaySurveyScreen` (StatefulWidget)
-- **스크린 타입**: **Sub Screen**
-- **appPath**: 해당 없음 (Opening -10 분기 전용)
-
-### 스크린 용도
-- Opening에서 세션 초기화 응답 `sessionId == '-10'`인 경우 진입하는 3단계 선택형 설문 화면.
-
-### 이전 스크린 정보 (진입점)
-- **RoleplayOpeningScreen**: `sessionId == '-10'` 팝업의 "Answer now ✅" 버튼 클릭 시
-
-### 이후 스크린 정보 (이동 가능한 다른 스크린)
-- **RoleplayOpeningScreen**: X 버튼 또는 시스템 뒤로가기 시 `Navigator.pop()`으로 복귀
-
-### 스크린 내부 구현 특이사항
-- 헤더: 타이틀 없이 닫기(X) 버튼만 노출.
-- 상단 진행바: width 100% 기준 3분할(각 32%, height 8, radius 4). 단계 활성 바는 좌→우 그라데이션(`#076766`→`#0CABA8`), 비활성은 `#353535`.
-- 단계 진행:
-  - 1단계(연령): `Under 18`, `18-24`, `25-34`, `35-44`, `45+` (값 1~5)
-  - 2단계(성별): `Female`, `Male`, `Prefer not to say` (l10n, 값 1~3)
-  - 3단계(유입경로): `Facebook`, `Instagram`, `TikTok`, `Friends`, `Others` (값 1~5)
-- 레이아웃: 진행바 아래 `gap 50` → title(h2, 흰색, 중앙) → `gap 50` → 선택지 세로 나열(gap 10).
-- 선택지 버튼: `width=디스플레이 40%`, `height=60`, `radius=30`, 배경 투명, 테두리 `#635F5F`(1), 텍스트는 ElevatedButton 스타일(흰색).
-- 3단계 선택 시 `POST /v1/users/survey` 호출:
-  - body: `{ "age": "<1~5>", "gender": "<1~3>", "source": "<1~5>" }` (문자열 숫자)
-  - 응답 `200 + body == 'Y'`: 성공 토스트(`surveySuccessToast`) 후 `pop`
-  - 그 외 응답/예외(4xx/5xx/timeout 포함): 경고 토스트 `"Survey Failed"` 후 `pop`
-- 제출 중에는 모든 선택지 버튼 비활성화.
+- 우상단 `EnergyHeaderBadge` — Home과 동일(충전·무제한 타이머 포함)
+- 세션 초기화 응답 분기 (`POST /rps2/sessions`):
+  - `sessionId == '0'`: `showEnergyInsufficientPopup`(l10n `energyInsufficient`) → Opening 유지, 재시도 가능
+  - 정상 sessionId: Playing 진입(에너지 소비는 Playing 발화 처리 시)
 
 ---
 
@@ -730,7 +686,7 @@
 - S2 Roleplay 진행 중 화면. AI 선시작 후 힌트 조건 처리, 사용자 발화, 나레이션, 후속 AI 말풍선, 턴바/미션 효과를 반복한다.
 
 ### 이전 스크린 정보 (진입점)
-- **RoleplayOpeningScreen**: 정상 `POST /rps2/sessions` 후 `SeriesStateService.session` 저장 및 티켓 consume 이펙트 완료 시
+- **RoleplayOpeningScreen**: 정상 `POST /rps2/sessions` 후 `SeriesStateService.session` 저장 → `replaceWithPlaying`
   - `RoleplayRouter.replaceWithPlaying()`로 전환 (opening screen 삭제)
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
@@ -743,11 +699,7 @@
 - `RoleplayScaffold.belowHeader`에 S2 턴바 영역 표시. `requiredSpeechCount`개 턴박스를 렌더링하고, 사용자 발화 응답 `userGrade` A/B/C/D에 따라 색상·라벨 효과 후 40% opacity 상태로 남긴다.
 - 본문은 상단 고정 미션 패널 + 스크롤 대화 영역. 대화 entry는 AI/User/Narration 타입이며 힌트는 별도 bubble로 append된다. 힌트 텍스트 조회 `GET /rps2/sessions/{id}/hint/{rpMsgId}`는 202 not-ready 시 S1 delay 패턴으로 최대 15회 재시도한다. AI 말풍선은 번역 아이콘과 `GET /rps2/sessions/{id}/translation?index=`를 사용한다.
 - 미션 패널은 접힘/펼침을 지원한다. 접힘 상태 우측 숫자는 달성 수가 아니라 현재 노출 미션 순서(`activeMissionIndex + 1`) 기준이다. `missionCompletedIndex` 수신 시 해당 미션 row 또는 접힘 좌측 아이콘 위치에서 `mission_complete_effect.png` fade/회전 효과를 재생하고, 아이콘을 즉시 `rps2_mission_on.png`로 전환한다. 이미 완료 처리한 index가 재수신되면 무시한다. 접힘 상태 배경은 `#9E0067`로 300ms 전환되며, 다음 사용자 턴에 잔여 미션을 노출하기 전까지 유지된다. 잔여 미션으로의 표시 전환은 다음 사용자 턴 활성화 시점에 수행한다.
-- 푸터는 서비스 메시지 24px, 녹음/타이핑 입력, 하단 mic/keyboard·hint 아이콘 3층 구조. **세션당 첫 사용자 발화 턴**에만 `holdMicrophoneToSpeak` fade-in/out, 마지막 턴 도달 시 `roleplayAnalyzing` blink. 오토힌트 ON으로 힌트박스가 자동 노출된 턴은 사용자 턴 활성 후에도 힌트 버튼 disabled를 유지한다. 녹음 시작 완료 전 release/cancel이 들어오면 pending action으로 보관해 start 완료 직후 finish/cancel을 이어서 처리한다.
-- `RoleplayScaffold.belowHeader`에 S2 턴바 영역 표시. `requiredSpeechCount`개 턴박스를 렌더링하고, 사용자 발화 응답 `userGrade` A/B/C/D에 따라 bar 색·라벨 즉시 100% pop-in(320ms) 후 **2초 뒤** 라벨 150ms fade-out·bar 등급색 20% dim.
-- 본문은 상단 고정 미션 패널 + 스크롤 대화 영역. 스크롤 상단~미션 패널 하단에 `#121212`→투명 세로 페이드(말풍선이 패널 뒤로 지나갈 때 겹침 완화). 헤더·턴바·미션 패널은 페이드 위에 노출. 대화 entry는 AI/User/Narration 타입이며 모두 1부터 시작하는 전체 대화 순번 `conversationIndex`를 가진다. 힌트는 별도 bubble로 append되며, 힌트 텍스트 조회 `GET /rps2/sessions/{id}/hint/{rpMsgId}`의 `rpMsgId`는 마지막 AI entry의 `conversationIndex`를 그대로 사용한다. 힌트 조회는 202 not-ready 시 S1 delay 패턴으로 최대 15회 재시도한다. 새 대화 entry 또는 힌트 bubble이 추가될 때만 본문 스크롤을 최하단으로 250ms 이동하고, 사용자가 과거 메시지를 보는 중에는 새 요소 추가가 없는 한 강제 하단 고정하지 않는다. AI 말풍선은 번역 아이콘과 `GET /rps2/sessions/{id}/translation?rpMsgId=`(값 = 해당 AI entry `conversationIndex`)를 사용한다.
-- 미션 패널은 접힘/펼침을 지원한다. 접힘·펼침 모두 설정패널과 동일 **글래스 프레임**(blur 12·white gradient border·shadow). `missionCompletedIndex` 수신 시 **`MissionCompleteEffect`** shine + 패널 배경 `#9E0067` **1.5초** 후 글래스 복귀(300ms)·다음 미완료 미션 전환. **전 미션 달성 시** 동일 시점에 패널 300ms fade-out. 아이콘 즉시 `rps2_mission_on.png` 전환.
-- 푸터는 서비스 메시지 24px, 녹음/타이핑 입력, 하단 mic/keyboard·hint 아이콘 3층 구조. **세션당 첫 사용자 발화 턴**에만 `holdMicrophoneToSpeak` fade-in/out, 마지막 턴 나레이션·후속 AI 종료 후 서버 `serviceMessage`(없으면 `roleplayAnalyzing`) blink. 오토힌트 ON으로 힌트박스가 자동 노출된 턴은 사용자 턴 활성 후에도 힌트 버튼 disabled를 유지한다. 녹음 시작 완료 전 release/cancel이 들어오면 pending action으로 보관해 start 완료 직후 finish/cancel을 이어서 처리한다.
+- 푸터는 서비스 메시지 24px, 녹음/타이핑 입력, 하단 mic/keyboard·에너지·hint 아이콘 3층 구조. 녹음 영역 높이 140(`roleplayMicFooterStackHeight`). 중앙 `PlayingEnergyIndicator`(일반: energy+숫자, 무제한: unlimited 아이콘만). 30분 충전 00:00 시 서버 재조회. 발화 성공 시 로컬 -1. 에너지 0에서 **녹음 또는 타이핑 send** 또는 user-message `402` 시 `showPlayingEnergyInsufficientPopup`(버튼 `endRoleplay`) → Wait 레이어 후 Overview 이탈. **세션당 첫 사용자 발화 턴**에만 `holdMicrophoneToSpeak` fade-in/out, 마지막 턴 나레이션·후속 AI 종료 후 서버 `serviceMessage`(없으면 `roleplayAnalyzing`) blink. 오토힌트 ON으로 힌트박스가 자동 노출된 턴은 사용자 턴 활성 후에도 힌트 버튼 disabled를 유지한다. 녹음 시작 완료 전 release/cancel이 들어오면 pending action으로 보관해 start 완료 직후 finish/cancel을 이어서 처리한다.
 - API: 사용자 음성 `POST /rps2/sessions/{id}/user-message/audio`(octet-stream), 텍스트 `POST /rps2/sessions/{id}/user-message/text`(raw string), 후속 AI 음성 `GET /rps2/sessions/{id}/ai-message/audio`.
 - 사용자 발화 응답 후 타이밍: 사용자 말풍선 노출 직후 후속 AI 음성을 미리 준비하고, 500ms 후 나레이션을 한 줄씩 fade-in(최소 1초 단계 보장)한 뒤 500ms 대기한다. 이 시점과 AI 음성 준비 완료 중 늦은 시점에 AI 말풍선을 노출하고 준비된 음성을 재생한다.
 
@@ -995,7 +947,6 @@
 [NotificationBoxScreen] ←→ [HomeScreen] ←→ [ProfileScreen] (GNB Alarm/Home/Profile 3탭 전환)
   ├─ [HomeScreen] → [RoleplayOverviewScreen] (중앙 "Roleplay" 텍스트)
   │   └─ [RoleplayOpeningScreen] (중앙 "Play" 텍스트)
-  │       ├─ [RoleplaySurveyScreen] (sessionId == '-10' 팝업의 "Answer now ✅")
   │       └─ [RoleplayPlayingScreen] (중앙 "Start" 텍스트)
   │           ├─ [RoleplayEndingScreen] (중앙 "Ending" 텍스트)
   │           │   └─ [RoleplayResultScreen]

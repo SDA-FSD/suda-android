@@ -325,72 +325,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get seriesOverviewEpisodeLockedToast => '이전 에피소드를 먼저 플레이하세요.';
 
   @override
-  String get noTicketsTitle => '티켓이 없습니다...';
-
-  @override
-  String get noTicketsBody => '오늘의 티켓을 모두 소진했습니다.\n내일 다시 만나요!';
-
-  @override
-  String get surveyPromptLine1 => '티켓을 모두 소진했습니다.';
-
-  @override
-  String get surveyPromptLine2 => '짧은 설문을 마치고 티켓을 받으세요!';
-
-  @override
-  String get pushTicketPromptLine2 => '푸시 알림을 켜고, 티켓을 받으세요!';
-
-  @override
-  String get surveyAnswerNowButton => '설문 시작하기 ✅';
-
-  @override
-  String get pushTicketTurnOnButton => '알림 켜기 🔔';
-
-  @override
-  String get shareTicketPromptLine2 => '앱 링크를 공유하고 티켓을 받으세요!';
-
-  @override
-  String get shareTicketButton => '공유하기💬';
-
-  @override
-  String get reviewTicketPromptLine2 => '리뷰를 남기고 티켓을 받으세요!';
-
-  @override
-  String get reviewTicketButton => '리뷰하기 ⭐';
-
-  @override
-  String get surveyMaybeLater => '다음에 하기';
-
-  @override
-  String get surveyStep1Title => '연령대를 선택해주세요';
-
-  @override
-  String get surveyStep2Title => '성별을 알려주세요';
-
-  @override
-  String get surveyStep3Title => 'SUDA를 어디에서 보셨나요?';
-
-  @override
-  String get surveyGenderFemale => '여성';
-
-  @override
-  String get surveyGenderMale => '남성';
-
-  @override
-  String get surveyGenderPreferNotToSay => '응답 거부';
-
-  @override
-  String get surveySuccessToast => '티켓 1장이 추가되었습니다! 🎉';
-
-  @override
-  String get dailyTicketTitle => '출석 보상 도착!';
-
-  @override
-  String get dailyTicketContent => '데일리 무료 티켓을 받으세요!\n오늘 사용하지 않으면 사라집니다.';
-
-  @override
-  String get dailyTicketButton => '티켓 받기';
-
-  @override
   String get notificationPermissionBlockedTitle => '알림이 꺼져 있습니다';
 
   @override
@@ -444,31 +378,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get roleplayResultScoreGrammar => '문법';
 
   @override
-  String get ticketInfoTitle => '티켓';
-
-  @override
-  String get ticketInfoBody1 => '티켓은 롤플레이 입장 시 사용됩니다';
-
-  @override
-  String get ticketInfoHowToPrefix => '획득방법: ';
-
-  @override
-  String get ticketInfoDailyCheckIn => '데일리 출석';
-
-  @override
-  String get ticketInfoHowToOr => ' 또는 ';
-
-  @override
-  String get ticketInfoLevelUp => '레벨업';
-
-  @override
-  String get ticketInfoLikesPrefix => '레벨업까지 ';
-
-  @override
-  String get ticketInfoLikesSuffix => ' 가 필요해요!';
-
-  @override
-  String get ticketInfoButtonOkay => 'Okay';
+  String get closePopup => '닫기';
 
   @override
   String get reviewChatTapHint => '채팅 말풍선을 눌러 오디오를 재생하세요.';
@@ -492,5 +402,11 @@ class AppLocalizationsKo extends AppLocalizations {
   String get energyInfoFull => '에너지가 가득 찼습니다.';
 
   @override
-  String get energyInfoUnlimitedEndsIn => '무제한 에너지 종료까지 @@TIME@@';
+  String get energyInfoUnlimitedEndsIn => '무제한 모드 이용 중';
+
+  @override
+  String get energyInsufficient => '에너지가 부족해요.';
+
+  @override
+  String get endRoleplay => '롤플레이 종료하기';
 }

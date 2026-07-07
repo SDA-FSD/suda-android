@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:vibration/vibration.dart';
 import 'package:vibration/vibration_presets.dart';
 
-import '../../services/effect_anchor_registry.dart';
 import '../../effects/like_progress_effect.dart';
 
 class LikeProgressOverlay extends StatefulWidget {
@@ -30,7 +29,6 @@ class _LikeProgressOverlayState extends State<LikeProgressOverlay>
 
   static const _bgAsset = 'assets/images/like_progress_bg.png';
   static const _thumbAsset = 'assets/images/like_at_result.png';
-  static const _ticketAsset = 'assets/images/icons/ticket.png';
   static const _sparkleAsset = 'assets/images/like_progress_star.png';
 
   /// phase1(500ms) 중 이 비율까지 엄지·BG 알파 0→1 (≈300ms)
@@ -54,7 +52,6 @@ class _LikeProgressOverlayState extends State<LikeProgressOverlay>
   int _displayLevel = 0;
   double _displayProgress = 0;
 
-  final List<_FlyingTicket> _tickets = [];
   final List<_Sparkle> _sparkles = [];
   final List<Timer> _sparkleTimers = [];
   final math.Random _random = math.Random();
@@ -109,9 +106,6 @@ class _LikeProgressOverlayState extends State<LikeProgressOverlay>
   @override
   void dispose() {
     _stopPhase6Haptics();
-    for (final t in _tickets) {
-      t.controller.dispose();
-    }
     _disposeSparkles();
     _phase1Ctrl.dispose();
     _phase5Ctrl.dispose();
@@ -160,7 +154,7 @@ class _LikeProgressOverlayState extends State<LikeProgressOverlay>
 
     final levelUps = math.max(0, afterLevel - beforeLevel);
 
-    int lastTicketLevel = beforeLevel;
+    int lastLevelUpLevel = beforeLevel;
 
     _phase6Ctrl.addListener(() {
       final t = _phase6Ctrl.value;
@@ -185,11 +179,11 @@ class _LikeProgressOverlayState extends State<LikeProgressOverlay>
       if (levelUps <= 0) return;
 
       final currentLevel = lp.$1;
-      if (currentLevel > lastTicketLevel) {
-        for (var lv = lastTicketLevel + 1; lv <= currentLevel; lv++) {
-          _spawnTicket();
+      if (currentLevel > lastLevelUpLevel) {
+        for (var lv = lastLevelUpLevel + 1; lv <= currentLevel; lv++) {
+          _pausePhase6HapticsForTicket();
         }
-        lastTicketLevel = currentLevel;
+        lastLevelUpLevel = currentLevel;
       }
     });
 
@@ -237,51 +231,6 @@ class _LikeProgressOverlayState extends State<LikeProgressOverlay>
     }
     final p = (remaining - 100 * (levelDiff - 1)) / segmentLast * afterProgress;
     return (afterLevel, p.clamp(0, 100));
-  }
-
-  void _spawnTicket() {
-    _pausePhase6HapticsForTicket();
-    unawaited(_playLevelUpTicketHaptic(_phase6HapticGeneration));
-
-    final startRect = _rectOf(_lvLabelKey) ?? _fallbackTicketStartRect();
-    final targetRect = EffectAnchorRegistry.instance.getRect(
-      EffectAnchorId.ticketBadge,
-    );
-
-    final start = startRect.center;
-    final end = (targetRect?.center) ?? _fallbackTicketTargetOffset();
-
-    final ctrl = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 1),
-    );
-    final curve = CurvedAnimation(parent: ctrl, curve: Curves.easeInOutCubic);
-    final offsetTween = Tween<Offset>(begin: start, end: end).animate(curve);
-    final scaleTween = Tween<double>(begin: 1.0, end: 0.2).animate(curve);
-    final opacityTween = Tween<double>(
-      begin: 1.0,
-      end: 0.0,
-    ).animate(CurvedAnimation(parent: ctrl, curve: const Interval(0.7, 1.0)));
-
-    final ticket = _FlyingTicket(
-      controller: ctrl,
-      offset: offsetTween,
-      scale: scaleTween,
-      opacity: opacityTween,
-    );
-
-    setState(() => _tickets.add(ticket));
-
-    ctrl.addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        if (!mounted) return;
-        setState(() {
-          _tickets.remove(ticket);
-        });
-        ctrl.dispose();
-      }
-    });
-    ctrl.forward();
   }
 
   void _startPhase6Haptics() {
@@ -508,31 +457,6 @@ class _LikeProgressOverlayState extends State<LikeProgressOverlay>
     return null;
   }
 
-  Rect? _rectOf(GlobalKey key) {
-    final ctx = key.currentContext;
-    if (ctx == null) return null;
-    final renderObject = ctx.findRenderObject();
-    if (renderObject is! RenderBox || !renderObject.hasSize) return null;
-    final topLeft = renderObject.localToGlobal(Offset.zero);
-    return topLeft & renderObject.size;
-  }
-
-  Rect _fallbackTicketStartRect() {
-    final size = MediaQuery.sizeOf(context);
-    return Rect.fromCenter(
-      center: Offset(size.width * 0.5, size.height * 0.6),
-      width: 38,
-      height: 20,
-    );
-  }
-
-  Offset _fallbackTicketTargetOffset() {
-    final mq = MediaQuery.of(context);
-    final size = mq.size;
-    final pad = mq.padding;
-    return Offset(size.width - 24, pad.top + 24);
-  }
-
   /// [ShaderMask]는 [maskRect] 밖을 그리지 않아 글리프 상단이 잘릴 수 있음.
   /// [TextStyle.foreground]로 세로 그라데이션을 적용하면 동일 레이어 클리핑을 피함.
   Widget _buildLikePointGradientText(
@@ -751,31 +675,6 @@ class _LikeProgressOverlayState extends State<LikeProgressOverlay>
                 ),
               ),
 
-              // tickets
-              for (final t in _tickets)
-                AnimatedBuilder(
-                  animation: t.controller,
-                  builder: (context, child) {
-                    final pos = t.offset.value;
-                    return Positioned(
-                      left: pos.dx - 19,
-                      top: pos.dy - 10,
-                      child: Opacity(
-                        opacity: t.opacity.value,
-                        child: Transform.scale(
-                          scale: t.scale.value,
-                          child: child,
-                        ),
-                      ),
-                    );
-                  },
-                  child: Image.asset(
-                    _ticketAsset,
-                    width: 38,
-                    height: 20,
-                    fit: BoxFit.cover,
-                  ),
-                ),
             ],
           ),
         );
@@ -817,20 +716,6 @@ class _LikeProgressBar extends StatelessWidget {
       ),
     );
   }
-}
-
-class _FlyingTicket {
-  final AnimationController controller;
-  final Animation<Offset> offset;
-  final Animation<double> scale;
-  final Animation<double> opacity;
-
-  _FlyingTicket({
-    required this.controller,
-    required this.offset,
-    required this.scale,
-    required this.opacity,
-  });
 }
 
 class _Sparkle {

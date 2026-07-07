@@ -139,6 +139,8 @@ class DefaultPopup extends StatelessWidget {
     final hasBody = body != null;
     final hasButtons = buttons.isNotEmpty;
 
+    const overlayColor = Color(0x66000000); // black 40%
+
     final cardContent = Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -186,14 +188,15 @@ class DefaultPopup extends StatelessWidget {
       canPop: barrierDismissible,
       child: Stack(
         children: [
-          if (barrierDismissible)
-            Positioned.fill(
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () => Navigator.of(context).pop(),
-                child: const SizedBox.expand(),
-              ),
+          Positioned.fill(
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: barrierDismissible
+                  ? () => Navigator.of(context).pop()
+                  : null,
+              child: const ColoredBox(color: overlayColor),
             ),
+          ),
           Center(
             child: ConstrainedBox(
               constraints: BoxConstraints(
@@ -223,23 +226,16 @@ class DefaultPopup extends StatelessWidget {
                           color: Colors.white.withValues(alpha: 0.36),
                           width: 1,
                         ),
-                        color: Colors.black.withValues(alpha: 0.50),
-                      ),
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          borderRadius:
-                              BorderRadius.circular(cardBorderRadius),
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              Colors.white.withValues(alpha: 0.18),
-                              Colors.white.withValues(alpha: 0.10),
-                            ],
-                          ),
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Colors.white.withValues(alpha: 0.18),
+                            Colors.white.withValues(alpha: 0.10),
+                          ],
                         ),
-                        child: cardContent,
                       ),
+                      child: cardContent,
                     ),
                   ),
                 ),

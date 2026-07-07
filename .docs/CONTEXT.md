@@ -69,14 +69,14 @@
   - `SudaApiClient.logout()`: refreshToken과 deviceId로 서버 로그아웃 통지
   - `SudaApiClient.getCurrentUser()`: JWT를 사용하여 사용자 정보 조회 (`/v1/users`)
     - 메인 라우트가 서브에서 pop으로 다시 보일 때 `lib/main.dart` `_syncUserOnMainRouteReturn`에서 호출해 `_user` 전역 동기화(GNB·탭 공통). 레벨·진행률은 `getUserProfile`이 담당.
-  - `SudaApiClient.getUserProfile()`: 프로필 부가 정보 조회 (`GET /v1/users/profile`, 응답: ProfileDto(userDto, currentLevel, progressPercentage, likesToNextLevel?)). `likesToNextLevel`은 레벨업까지 남은 Like 수(티켓 설명 팝업 등). 백엔드 `suda-api`의 `LevelService.getLikesToNextLevel`·`ProfileDto`에서 계산·직렬화. 최대 레벨이면 JSON null → 미포함 시 클라이언트에서 해당 문구 미노출.
+  - `SudaApiClient.getUserProfile()`: 프로필 부가 정보 조회 (`GET /v1/users/profile`, 응답: ProfileDto(userDto, currentLevel, progressPercentage, likesToNextLevel?)). `likesToNextLevel`은 레벨업까지 남은 Like 수. 백엔드 `suda-api`의 `LevelService.getLikesToNextLevel`·`ProfileDto`에서 계산·직렬화. 최대 레벨이면 JSON null → 미포함 시 클라이언트에서 해당 문구 미노출.
   - `SudaApiClient.getUserEnergy()`: 에너지 조회 (`GET /v1/users/energy`, 파라메터 없음, 응답: UserEnergyDto(energyCount, maxEnergyCount, lastAutoChargedAt?, unlimitedEndsAt?)). HomeScreen 초기화·홈 탭 재진입(`homeTabSelectedCounter`) 시 호출해 우상단 배지 갱신.
+    - **재화 정책(에너지)**: 롤플레이 **Playing 중 사용자 발화 처리마다** 소비(Start 시점 소비 없음). 1회 플레이당 약 5~6 소비를 목표. 향후 최대 용량 확대·무제한 이용시간 등 유료화 계획.
     - **무제한 모드**: `unlimitedEndsAt`이 현재(UTC) 이후이면 `unlimited.png`(24×24) + 5dp gap + 남은 시간 `MM:SS`(bodyMedium w700, 흰색). 1초 주기 타이머로 갱신, 만료 시 자동 재조회 후 일반 모드 전환.
-    - **일반 모드**: `unlimitedEndsAt`이 null 또는 과거이면 `energy.png`(24×24) + `energyCount`(bodyMedium w700, 흰색).
-    - 배지는 `GestureDetector`로 탭 시 `showEnergyInfoPopup` (`lib/widgets/energy_info_popup.dart`) → `GET /v1/users/energy` 재조회 후 `DefaultPopup` 노출(프로그레스바·충전/무제한 타이머·가득 참 문구).
-  - `SudaApiClient.getUserTicket()`: 티켓 개수 조회 (`GET /v1/users/ticket`, 파라메터 없음, 응답: UserTicketDto(beforeTicketCount, finalTicketCount, dailyTicketGrantYn?)). HomeScreen 배지·데일리 출석 팝업 트리거에는 **더 이상 사용하지 않음**(에너지 전환).
-  - `SudaApiClient.claimDailyTicket()`: 데일리 티켓 수령 (`PUT /v1/users/tickets/daily`, 응답: QuestResultDto). `completeYn == 'Y'`이면 `surveySuccessToast` 노출 + 티켓 재조회.
-    - 따닥 방지: `daily_ticket_popup.dart` 팝업 호출부에서 클로저 스코프 `isClaiming` 플래그로 primary 버튼의 중복 탭 가드(동일 프레임 멀티터치 대비). `DefaultPopup._popThenCallback`의 "pop 선행 → post-frame 콜백" 패턴과 이중으로 보호.
+    - **일반 모드**: `unlimitedEndsAt`이 null 또는 과거이면 `energy.png`(24×24) + `energyCount`(bodyMedium w700, 흰색). `lastAutoChargedAt` 기준 30분마다 1 충전(최대 `maxEnergyCount`). 가득 차지 않았을 때 충전 타이머 `00:00` 도달 시 `GET /v1/users/energy` 재조회.
+    - 배지는 `EnergyHeaderBadge`(`lib/widgets/energy_header_badge.dart`). Home·Opening 우상단 공통. 탭 시 `showEnergyInfoPopup`. Home은 `registerEnergyBadgeAnchor: true`·`refreshCounter: homeTabSelectedCounter`(탭 재선택·메인 복귀 시 `main.dart` `homeTabSelectedCounter` 증가로 재조회). Opening·Playing도 화면 체류 중 충전·무제한 만료 시 자동 갱신.
+    - **Playing 푸터 에너지**: `PlayingEnergyIndicator` — 녹음 모드 하단 아이콘 행 중앙. 일반 `energy.png`+숫자, 무제한 `unlimited.png`만(타이머 없음). `user-message` 성공 시 로컬 -1. 에너지 0에서 녹음 시작 또는 API **402** 시 `showPlayingEnergyInsufficientPopup` → `endRoleplay` 탭 시 Wait 나가기 레이어(세션 유지).
+    - **에너지 부족 팝업(Opening)**: Start 응답 `sessionId == '0'` 시 `showEnergyInsufficientPopup` — `closePopup`으로 닫기.
   - `SudaApiClient.getRpS2UserHistories()`: Profile History 목록 페이징 (`GET /rps2/user-histories?pageNum=0`, 0-based, 응답: SudaAppPage\<RpS2SimpleHistoryDto\> — `id`, `imgPath`, `starResult`, `cefrLevel`, `createdAt`)
     - 롤플레이 스택 `popToOverview` 직후 `markProfileHistoryRefreshPending` → 이후 Profile 탭 활성 시 0페이지 재조회(기존 스크롤·페이징 조건 우회). 그 외 탭 재진입은 `ProfileScreen._shouldRefetchHistoryFromStart` 조건부.
   - `SudaApiClient.updateName()`: 사용자 이름 변경 (`PUT /v1/users?name=...`)
@@ -198,7 +198,7 @@
 - Roleplay 관련 스크린 흐름 및 데이터 정책은 `.docs/CONTEXT_ROLEPLAY.md`를 참조한다.
 - **S2 (Season 2) Roleplay 마이그레이션 진행상황**은 `.docs/CONTEXT_ROLEPLAY_S2.md`를 참조한다.
 - Roleplay 세션 `sessionId`는 인메모리 공통 상태로 보관하고 롤플레이 종료 시 삭제됩니다.
-- **RoleplayOpeningScreen** (S2): `SeriesStateService.selectedEpisode`의 `thumbnailImgPath` 배경·`title`/`briefing`·`aiCharacter.name` 본문. duration 헤더 없음. Start 시 `POST /rps2/sessions` (`seriesId`, `episodeId`) → `RpS2SessionDto`(`sessionId`, `aiSound`)를 `SeriesStateService`에 보관. 퀘스트 분기 sessionId 규칙은 S1과 동일.
+- **RoleplayOpeningScreen** (S2): `SeriesStateService.selectedEpisode`의 `thumbnailImgPath` 배경·`title`/`briefing`·`aiCharacter.name` 본문. duration 헤더 없음. Start 시 `POST /rps2/sessions` (`seriesId`, `episodeId`) → `sessionId == '0'`이면 에너지 부족 팝업·Opening 유지, 정상 ID면 `SeriesStateService.setSession` 후 Playing(에너지 소비는 Playing 발화 처리 시).
 - **RoleplayPlayingScreen** (S2): `lib/screens/roleplay/playing.dart`. S1 `playing_backup.dart`·세션/결과 API 클라이언트는 **삭제됨**(2026-06). 헤더: `RoleplayScaffold`·episode `title`(로컬 언어)·X→나가기 확인 레이어·우측 `kebab.png` 설정패널. 상세는 `.docs/CONTEXT_SCREEN.md` §13.
 - **S1 Roleplay 잔여 코드 정리**(2026-06): `review_chat.dart`·`review_ending.dart`·`playing_backup.dart` 삭제. `result.dart`/`ending.dart`/`result_report.dart` S2 전용화. `RoleplayApi`는 `getRoleplayOverview`(딥링크 overview)·`updateSpeedRate`(Playing 속도)만 유지. Profile Saved는 `GET/DELETE /v1/users/expressions` + S2 TTS sound.
 
@@ -217,8 +217,8 @@
 - **표준 팝업 (DefaultPopup)**: `lib/widgets/default_popup.dart`
   - 목적: 기존의 자유로운 콘텐츠 구성 패턴을 유지하되, **표준 슬롯(topWidget/title/body/buttons)**과 **표준 프레임 규격**을 제공한다.
   - 재사용: `DefaultPopup.show(context, { topWidget, titleText, bodyWidget, buttons, barrierDismissible })`.
-  - 배경/테두리/블러(glassy): radius 16, blur sigma 12, 테두리 흰색 36%·1px, 내부 배경 검정 50% + frost 그라데이션 흰색 18%→10%, 그림자 검정 14%·blur 10·offset (0,2). **dim 오버레이 없음**.
-  - 닫기 UX: 좌상단 닫기 아이콘은 사용하지 않으며, 필요 시 `buttons`에 **text 타입의 닫기 버튼**을 포함한다(라벨은 하드코딩 금지, 예: `l10n.surveyMaybeLater`). 탭 시 팝업 닫힘 후 콜백 실행 규칙은 동일.
+  - 배경/테두리/블러(glassy): radius 16, blur sigma 12, 테두리 흰색 36%·1px, frost 그라데이션 흰색 18%→10%, 그림자 검정 14%·blur 10·offset (0,2). **전체 dim** 검정 40%.
+  - 닫기 UX: 좌상단 닫기 아이콘은 사용하지 않으며, 필요 시 `buttons`에 **text 타입의 닫기 버튼**을 포함한다(라벨은 하드코딩 금지, 예: `l10n.closePopup`). 탭 시 팝업 닫힘 후 콜백 실행 규칙은 동일.
   - 카드 높이: 고정 높이 없이 내용에 따라 결정되되, **최대 높이는 화면 높이의 80%**로 캡되며 초과 시 **`topWidget + titleText + bodyWidget + buttons` 영역만 스크롤**(닫기 아이콘은 스크롤 미포함).
   - 본문 영역 패딩: 상 20 / 좌·우·하 16. `bodyWidget` 내부 레이아웃은 호출부 자율이며, `DefaultPopup`은 **topWidget ↔ title ↔ body ↔ buttons 사이**에만 세로 20 간격을 보장한다.
   - 버튼: `primary`(스펙상 이름은 `default`이나 Dart 예약어 회피, height 44, 라벨 너비 shrink-wrap·가운데 정렬, #0CABA8, Stadium, `ElevatedButtonTheme` 병합) / `text`(`TextButtonTheme` 병합, 흰색 텍스트, shrink-wrap·가운데 정렬). 버튼 탭 시 **항상 팝업을 닫은 뒤** 콜백을 호출한다.
@@ -308,12 +308,12 @@
   - 효과가 끝나면 `EffectOverlayService.complete()`로 `OverlayEntry`를 제거하고 `Future`를 resolve한다.
   - 기본 정책은 **동시 재생 1개(새 호출 시 replace)** 로 단순하게 유지한다.
 - **앵커(목표 좌표) 레지스트리**: `lib/services/effect_anchor_registry.dart`
-  - UI 요소의 화면상 좌표(Rect)가 필요할 때(예: 티켓이 “홈 티켓 배지” 위치로 날아감) `GlobalKey` 기반으로 `Rect`를 조회한다.
-  - 현재 앵커: `EffectAnchorId.ticketBadge` → Home 헤더의 티켓 배지 위치(`lib/screens/home.dart`).
+  - UI 요소의 화면상 좌표(Rect)가 필요할 때 `GlobalKey` 기반으로 `Rect`를 조회한다.
+  - 현재 앵커: `EffectAnchorId.energyBadge` → Home 헤더 `EnergyHeaderBadge` 위치(`lib/screens/home.dart`, `registerEnergyBadgeAnchor: true`).
 - **개별 효과 API**: `lib/effects/like_progress_effect.dart`
   - `LikeProgressEffect.play(context, params, onCompleted?)` 형태로 호출한다.
   - Phase 1(500ms): 딤은 알파 0→1. **BG(`like_progress_bg.png`)·엄지(`like_at_result.png`)** 는 동일 구간에서 스케일 2.0→0.7·Y 0→-50과 함께, **앞쪽 약 300ms(phase1 진행 `t` 0~0.6)** 에 알파 0→1(`Curves.easeOut`) 페이드인하며 **`t=0`(스케일 2.0)에서는 완전 투명**이다.
   - 파라미터/연출은 효과별 위젯(오버레이)에서 구현하며, 종료 콜백은 fade-out 등 정상화까지 완료된 뒤 1회 호출한다.
   - `LikeProgressOverlay`의 Phase 6 카운터 구간 시작 시 엄지 아이콘 주변에 `like_progress_star.png` 반짝임이 동시 3~5개 생성된다. 각 별은 시작 시점·위치 후보 4곳·크기(width 20~30)·주기를 미세하게 달리하며, 빠른 fade-in 후 soft fade-out(+소폭 scale-up) 1cycle을 반복한다. 활성 반짝임끼리는 최소 거리 검사를 적용해 겹침을 줄인다.
-  - Phase 6 프로그레스바 진행 중에는 `VibrationPreset.rapidTapFeedback`를 반복 재생한다. 레벨업으로 티켓 이미지가 생성될 때의 진동은 앞뒤로 짧게 쉰 뒤 `VibrationPreset.doubleBuzz`로 재생하고, 이후 프로그레스 진동을 다시 이어간다.
+  - Phase 6 프로그레스바 진행 중에는 `VibrationPreset.rapidTapFeedback`를 반복 재생한다. 레벨업 시 진동은 앞뒤로 짧게 쉰 뒤 `VibrationPreset.doubleBuzz`로 재생하고, 이후 프로그레스 진동을 다시 이어간다.
   - 반짝임은 Phase 8 진입 전까지 재생되며, Phase 8에서는 dim, 엄지, 반짝임, 수치 영역이 함께 전체 fade-out 된다. bg 이미지는 Phase 7 종료와 동시에 즉시 화면에서 제거한다.

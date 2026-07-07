@@ -179,8 +179,6 @@ class _PushAgreementScreenState extends State<PushAgreementScreen> {
         });
         _updateAppUserMetaInfo(nextOn);
         if (result.completeYn == 'Y') {
-          final l10n = AppLocalizations.of(context)!;
-          DefaultToast.show(context, l10n.surveySuccessToast);
           Navigator.of(context).pop();
         }
       }

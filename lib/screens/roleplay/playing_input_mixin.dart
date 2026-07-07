@@ -13,6 +13,7 @@ import '../../services/series_state_service.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
 import '../../utils/default_toast.dart';
+import '../../widgets/energy_info_popup.dart';
 import '../../widgets/roleplay_mic_button_area.dart';
 import '../../widgets/roleplay_mission_panel.dart';
 import 'playing_conversation_mixin.dart';
@@ -62,6 +63,12 @@ mixin PlayingInputMixin<T extends StatefulWidget>
   bool _holdToSpeakMessageShown = false;
   double _missionPanelHeight = RoleplayMissionPanel.collapsedHeight;
   final GlobalKey _missionPanelSizeKey = GlobalKey();
+  void Function()? onPlayingEnergyExitRequested;
+
+  bool Function()? checkCanSpendPlayingEnergy;
+  void Function()? onPlayingEnergySpent;
+  Widget Function()? playingEnergyFooterBuilder;
+
   Future<void> Function(RpS2UserMessageResponseDto response)?
   handleRpS2UserMessageResponse;
 
@@ -438,11 +445,11 @@ mixin PlayingInputMixin<T extends StatefulWidget>
     });
   }
 
-  Widget _buildFooterIconRow() {
+  Widget _buildFooterIconRow({Widget? center}) {
     return Padding(
       padding: const EdgeInsets.only(left: 16, right: 16),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           GestureDetector(
             onTap: _isInputLocked
@@ -476,7 +483,9 @@ mixin PlayingInputMixin<T extends StatefulWidget>
               ),
             ),
           ),
-          const Spacer(),
+          Expanded(
+            child: Center(child: center ?? const SizedBox.shrink()),
+          ),
           IgnorePointer(
             ignoring: !_isHintEnabled || _isInputLocked,
             child: AnimatedBuilder(
@@ -516,6 +525,8 @@ mixin PlayingInputMixin<T extends StatefulWidget>
 
   Widget buildPlayingFooter() {
     final l10n = AppLocalizations.of(context)!;
+    final energyIndicator =
+        playingEnergyFooterBuilder?.call() ?? const SizedBox.shrink();
 
     return SafeArea(
       top: false,
@@ -563,7 +574,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
                     right: 0,
                     bottom: 0,
                     height: roleplayFooterIconRowHeight,
-                    child: _buildFooterIconRow(),
+                    child: _buildFooterIconRow(center: energyIndicator),
                   ),
                   Positioned.fill(
                     child: RoleplayMicButtonArea(
@@ -656,7 +667,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
           if (_inputMode != _PlayingInputMode.recording)
             SizedBox(
               height: roleplayFooterIconRowHeight,
-              child: _buildFooterIconRow(),
+              child: _buildFooterIconRow(center: energyIndicator),
             ),
         ],
       ),
@@ -737,7 +748,23 @@ mixin PlayingInputMixin<T extends StatefulWidget>
   }
 
   void _onMicPressStart() {
+    if (_isUserTurn &&
+        checkCanSpendPlayingEnergy != null &&
+        !checkCanSpendPlayingEnergy!()) {
+      unawaited(_showPlayingEnergyBlockedPopup());
+      return;
+    }
     unawaited(_beginRecording());
+  }
+
+  Future<void> _showPlayingEnergyBlockedPopup() async {
+    if (!mounted) return;
+    await showPlayingEnergyInsufficientPopup(
+      context,
+      onEndRoleplay: () {
+        onPlayingEnergyExitRequested?.call();
+      },
+    );
   }
 
   void _onMicPressEnd(bool cancel) {
@@ -754,6 +781,11 @@ mixin PlayingInputMixin<T extends StatefulWidget>
 
   void _handleSend() {
     if (!_isTypingEnabled || !_isUserTurn || _isInputLocked) return;
+    if (checkCanSpendPlayingEnergy != null &&
+        !checkCanSpendPlayingEnergy!()) {
+      unawaited(_showPlayingEnergyBlockedPopup());
+      return;
+    }
     final text = _typingController.text.trim();
     if (text.isEmpty) return;
     _typingController.clear();
@@ -912,6 +944,11 @@ mixin PlayingInputMixin<T extends StatefulWidget>
         rpSessionId: sessionId,
         audioData: audioData,
       );
+    } on RpS2InsufficientEnergyException catch (_) {
+      if (!mounted) return;
+      await _showPlayingEnergyBlockedPopup();
+      _restoreUserTurnAfterSendFailure();
+      return;
     } on RpS2SessionNotFoundException catch (_) {
       if (!mounted) return;
       playingSessionNotFoundHandler?.call();
@@ -923,6 +960,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
       return;
     }
     if (!mounted) return;
+    onPlayingEnergySpent?.call();
     _setMicState(_PlayingMicButtonState.disabled);
     try {
       await handleRpS2UserMessageResponse?.call(response);
@@ -947,6 +985,11 @@ mixin PlayingInputMixin<T extends StatefulWidget>
         rpSessionId: sessionId,
         text: text,
       );
+    } on RpS2InsufficientEnergyException catch (_) {
+      if (!mounted) return;
+      await _showPlayingEnergyBlockedPopup();
+      _restoreUserTurnAfterSendFailure();
+      return;
     } on RpS2SessionNotFoundException catch (_) {
       if (!mounted) return;
       playingSessionNotFoundHandler?.call();
@@ -958,6 +1001,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
       return;
     }
     if (!mounted) return;
+    onPlayingEnergySpent?.call();
     try {
       await handleRpS2UserMessageResponse?.call(response);
     } catch (e, st) {

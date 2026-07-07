@@ -4,16 +4,19 @@ import 'package:flutter_svg/flutter_svg.dart';
 const double roleplayMicDefaultSize = 100;
 const double roleplayMicPressedSize = 115;
 
-/// 푸터 하단 mic↔keyboard·hint 아이콘 행 높이.
+/// 푸터 하단 mic↔keyboard·hint·에너지 행 높이.
 const double roleplayFooterIconRowHeight = 40;
 
-/// 아이콘 행 세로 중앙(푸터 하단 기준). 마이크 이미지 하단을 여기에 맞춘다.
+/// 마이크 이미지 하단 = 아이콘/에너지 행 상단(스택 하단 기준).
+const double roleplayMicBottomInsetFromStackBottom = roleplayFooterIconRowHeight;
+
+/// 녹음 모드: 마이크가 에너지 행 위에 오도록 하는 스택 높이.
+const double roleplayMicFooterStackHeight =
+    roleplayMicDefaultSize + roleplayMicBottomInsetFromStackBottom;
+
+@Deprecated('Use roleplayMicBottomInsetFromStackBottom')
 const double roleplayFooterIconRowCenterFromBottom =
     roleplayFooterIconRowHeight / 2;
-
-/// 녹음 모드: 마이크 이미지 하단이 아이콘 행 세로 중앙에 오도록 하는 스택 높이.
-const double roleplayMicFooterStackHeight =
-    roleplayMicDefaultSize + roleplayFooterIconRowCenterFromBottom;
 
 class _SlidingGradientTransform extends GradientTransform {
   final double slidePercent;
@@ -315,7 +318,7 @@ class _RoleplayMicButtonAreaState extends State<RoleplayMicButtonArea>
 
         final areaHeight = constraints.maxHeight;
         final micImageBottomFromTop =
-            areaHeight - roleplayFooterIconRowCenterFromBottom;
+            areaHeight - roleplayMicBottomInsetFromStackBottom;
         final micRowTop = micImageBottomFromTop - roleplayMicPressedSize;
         final micRowHeight = roleplayMicPressedSize;
 

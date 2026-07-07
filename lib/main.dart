@@ -103,7 +103,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   UserDto? _user;
   bool _isLoading = true;
   String _currentMainScreen = 'home'; // 'alarm' | 'home' | 'profile'
-  int _homeTabSelectedCounter = 0; // 홈 탭 선택 시 증가 → HomeScreen 티켓 갱신
+  int _homeTabSelectedCounter = 0; // 홈 탭 선택 시 증가 → HomeScreen 에너지 배지 갱신
   int _profileReturnCounter =
       0; // Profile 탭 활성 상태에서 서브 스크린 pop 복귀 시 증가 → ProfileScreen 프로필 재조회
   bool _hasCheckedVersion = false; // 버전 체크 실행 여부

@@ -42,27 +42,6 @@ class UserEnergyDto {
   }
 }
 
-/// GET /v1/users/ticket 응답
-class UserTicketDto {
-  final int beforeTicketCount;
-  final int finalTicketCount;
-  final String? dailyTicketGrantYn;
-
-  const UserTicketDto({
-    required this.beforeTicketCount,
-    required this.finalTicketCount,
-    this.dailyTicketGrantYn,
-  });
-
-  factory UserTicketDto.fromJson(Map<String, dynamic> json) {
-    return UserTicketDto(
-      beforeTicketCount: json['beforeTicketCount'] as int? ?? 0,
-      finalTicketCount: json['finalTicketCount'] as int? ?? 0,
-      dailyTicketGrantYn: json['dailyTicketGrantYn'] as String?,
-    );
-  }
-}
-
 /// PUT /v1/users/push-agreement 응답
 class QuestResultDto {
   final String completeYn;

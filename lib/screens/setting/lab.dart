@@ -15,20 +15,17 @@ import '../../widgets/main_reregistration_restricted_popup.dart'
     show
         showMainReregistrationRestrictedAuthCheckDefaultPopupForLab,
         showMainReregistrationRestrictedSignInDefaultPopupForLab;
-import '../../widgets/daily_ticket_popup.dart'
-    show showDailyTicketDefaultPopupForLab;
+import '../../widgets/energy_info_popup.dart'
+    show
+        showEnergyInfoEmpty0of5DefaultPopupForLab,
+        showEnergyInfoFullDefaultPopupForLab,
+        showEnergyInfoRecharging2of5DefaultPopupForLab,
+        showEnergyInfoUnlimited15mDefaultPopupForLab;
 import '../../widgets/app_scaffold.dart';
 import '../profile.dart'
     show showProfileDeleteSavedExpressionDefaultPopupForLab;
 import 'announcements.dart'
     show showAnnouncementsPostNoLongerAvailableDefaultPopupForLab;
-import '../roleplay/opening.dart'
-    show
-        showRoleplayOpeningNoTicketsDefaultPopupForLab,
-        showRoleplayOpeningSurveyQuestDefaultPopupForLab,
-        showRoleplayOpeningPushNotificationQuestDefaultPopupForLab,
-        showRoleplayOpeningShareQuestDefaultPopupForLab,
-        showRoleplayOpeningInAppReviewQuestDefaultPopupForLab;
 import '../roleplay/ending.dart';
 import '../roleplay/try_again.dart';
 import '../first_cefr_level.dart';
@@ -38,41 +35,6 @@ import '../first_cefr_level.dart';
 ///
 /// 라벨 규칙: 괄호로 분기/sessionId를 붙이지 않는다.
 final List<LabDefaultPopupOption> kLabDefaultPopupOptions = [
-  LabDefaultPopupOption(
-    id: 'roleplay_opening_daily_ticket',
-    label: 'Roleplay opening: Daily ticket',
-    show: showDailyTicketDefaultPopupForLab,
-  ),
-  LabDefaultPopupOption(
-    id: 'home_daily_ticket',
-    label: 'Home: Daily ticket',
-    show: showDailyTicketDefaultPopupForLab,
-  ),
-  LabDefaultPopupOption(
-    id: 'roleplay_opening_no_tickets',
-    label: 'Roleplay opening: No tickets',
-    show: showRoleplayOpeningNoTicketsDefaultPopupForLab,
-  ),
-  LabDefaultPopupOption(
-    id: 'roleplay_opening_survey_quest',
-    label: 'Roleplay opening: Survey quest',
-    show: showRoleplayOpeningSurveyQuestDefaultPopupForLab,
-  ),
-  LabDefaultPopupOption(
-    id: 'roleplay_opening_push_notification_quest',
-    label: 'Roleplay opening: Push notification quest',
-    show: showRoleplayOpeningPushNotificationQuestDefaultPopupForLab,
-  ),
-  LabDefaultPopupOption(
-    id: 'roleplay_opening_share_quest',
-    label: 'Roleplay opening: Share quest',
-    show: showRoleplayOpeningShareQuestDefaultPopupForLab,
-  ),
-  LabDefaultPopupOption(
-    id: 'roleplay_opening_in_app_review_quest',
-    label: 'Roleplay opening: In-app review quest',
-    show: showRoleplayOpeningInAppReviewQuestDefaultPopupForLab,
-  ),
   LabDefaultPopupOption(
     id: 'profile_delete_saved_expression',
     label: 'Profile: Delete saved expression',
@@ -92,6 +54,26 @@ final List<LabDefaultPopupOption> kLabDefaultPopupOptions = [
     id: 'main_reregistration_restricted_sign_in',
     label: 'Main: Re-registration restricted — sign-in',
     show: showMainReregistrationRestrictedSignInDefaultPopupForLab,
+  ),
+  LabDefaultPopupOption(
+    id: 'energy_info_recharging_2_5',
+    label: 'Energy: 2/5 recharging (15:00)',
+    show: showEnergyInfoRecharging2of5DefaultPopupForLab,
+  ),
+  LabDefaultPopupOption(
+    id: 'energy_info_empty_0_5',
+    label: 'Energy: 0/5 recharging (15:00)',
+    show: showEnergyInfoEmpty0of5DefaultPopupForLab,
+  ),
+  LabDefaultPopupOption(
+    id: 'energy_info_full_5_5',
+    label: 'Energy: 5/5 full',
+    show: showEnergyInfoFullDefaultPopupForLab,
+  ),
+  LabDefaultPopupOption(
+    id: 'energy_info_unlimited_15m',
+    label: 'Energy: Unlimited (15:00)',
+    show: showEnergyInfoUnlimited15mDefaultPopupForLab,
   ),
 ];
 

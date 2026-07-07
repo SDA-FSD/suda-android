@@ -20,6 +20,7 @@ import '../../utils/language_util.dart';
 import '../../widgets/roleplay_mission_panel.dart';
 import '../../widgets/roleplay_turn_bar_area.dart';
 import 'playing_conversation_mixin.dart';
+import 'playing_energy_mixin.dart';
 import 'playing_finish_mixin.dart';
 import 'playing_hint_mixin.dart';
 import 'playing_input_mixin.dart';
@@ -42,7 +43,8 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
         PlayingConversationMixin,
         PlayingHintMixin,
         PlayingInputMixin,
-        PlayingFinishMixin {
+        PlayingFinishMixin,
+        PlayingEnergyMixin {
   static const List<int> _speedRateSteps = [70, 100, 120, 150];
   static const double _playingHeaderTopSpacing = 60;
 
@@ -72,6 +74,13 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
   void initState() {
     super.initState();
     initPlayingInput();
+    initPlayingEnergy();
+    checkCanSpendPlayingEnergy = hasSpendablePlayingEnergy;
+    onPlayingEnergySpent = decrementPlayingEnergyCount;
+    playingEnergyFooterBuilder = buildPlayingEnergyFooterIndicator;
+    onPlayingEnergyExitRequested = () {
+      if (mounted) setState(() => _showExitLayer = true);
+    };
     _autoHintEnabled = _resolveDefaultAutoHint();
     _speedIndex = _resolveInitialSpeedIndex();
     _turnCount = _resolveRequiredSpeechCount();
@@ -379,6 +388,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     disposePlayingHint();
     disposePlayingConversation();
     disposePlayingInput();
+    disposePlayingEnergy();
     super.dispose();
   }
 

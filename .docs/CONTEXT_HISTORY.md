@@ -6,6 +6,8 @@
 
 ## 최근 작업 메모
 
+- **Playing 에너지 연동**: `PlayingEnergyMixin`·`PlayingEnergyIndicator` — 푸터 중앙 표시·30분 충전 재조회·발화 성공 시 -1·0/402 시 `showPlayingEnergyInsufficientPopup`→Wait 레이어. `EffectAnchorId.energyBadge`.
+- **Opening·홈 에너지 배지**: `EnergyHeaderBadge` — 충전 타이머(30분)·무제한 만료 재조회. 홈 복귀 시 `homeTabSelectedCounter` 증가로 `GET /v1/users/energy` 재조회(GNB 홈 탭·서브 pop 복귀·물리 뒤로가기). 문서: `.docs/CONTEXT.md` §4, `.docs/CONTEXT_ROLEPLAY_S2.md` §4-3·§4-4.
 - **Series Overview 복귀 시 bestScore 갱신**: `RouteAware.didPopNext`에서 `consumeBestScoreRefreshPending` 후 `GET .../best-score` 재조회·`SeriesStateService` 동기화. `popToOverview`의 `markBestScoreRefreshPending`과 연결. 구현: `lib/screens/series/overview.dart`. 문서: `.docs/CONTEXT_ROLEPLAY_S2.md` §4-1.
 - **Result Speech Feedback 카드 탭 동작**: Result·History 공통(`RoleplayResultScreen`) — 카드 영역 탭 → 펼침/접힘, 좌하단 메가폰 탭 → 사용자 음성 재생만. View Chat USER 말풍선도 동일. 구현: `lib/screens/roleplay/result.dart` `_SpeechFeedbackRowState`, `lib/screens/roleplay/view_chat.dart` `_ViewChatUserCardState`. 문서: `.docs/CONTEXT_ROLEPLAY_S2.md` §4-5.
 - **Key Expression 명칭 통일**: `ExpressionUpgradeDto` → `RpResultKeyExpressionDto`, `RoleplayResultDto.expressionUpgrades` → Dart `keyExpressions`(JSON `expressionUpgrades` 유지). Result·History V2 UI·변수·주석을 Key Expression 기준으로 정리. 구현: `lib/models/roleplay_models.dart`, `lib/screens/roleplay/result.dart`, `lib/screens/roleplay/history_v2.dart`. 문서: `.docs/CONTEXT_SCREEN.md` §17·§19, `.docs/CONTEXT_ROLEPLAY.md` §6-9, `.docs/CONTEXT_ROLEPLAY_S2.md` §4-5.
@@ -102,7 +104,7 @@
 - **GNB 아이콘화**: GNB 메뉴 3종을 텍스트에서 아이콘으로 전환. 공통 위젯 `lib/widgets/gnb_bar.dart`(GnbBar). Alarm: gnb_alarm.png / gnb_alarm_pressed.png, 높이 24, 좌측 33. Home: gnb_home.png / gnb_home_pressed.png, 너비 24, 정중앙. Profile: userDto.profileImgUrl 원형 28x28(비활성)·24x24+흰 테두리 2(활성), 우측 33. profileImgUrl이 null/empty면 `assets/images/icons/default_profile_image.png` 사용. 탭 영역: 좌 30% / 중앙 30% / 우 30%.
 - **Roleplay Ending 스크린 개선**: 닫기 버튼 없음. role.endingList 첫 요소(RoleplayEndingDto) 기반 title/content/이미지. Playing에서 ending 전환 확정 시 imgPath+CDN으로 이미지 preload. 이미지 있으면 1.5x→1x 2초 축소 후 80% 검정 레이어·콘텐츠 fade-in; 없으면 바로 레이어·콘텐츠. 상단 50% title+content, 하단 50% endingHowWas+별 5개(40×40 gap 5)+Next 버튼. Next 탭 시 버튼 텍스트 fade-out과 동시에 버튼에서 #0CABA8 풍선 확장(2s) 후 Result 전환. `PUT /v1/roleplays/results/{rpResultId}?star={star}` 호출(응답 무시). Result 진입 시 박스레이어에 별점·mainTitle·subTitle 순차 노출(각 300ms 후) 후 박스 축소. 본문레이어 추후 지침. `.docs/CONTEXT_SCREEN.md` 14·17, `.docs/CONTEXT_ROLEPLAY.md` 참조.
 - **RoleplayResultDto·Result 스크린 박스레이어**: DTO에 mainTitle·subTitle 필드 추가(서버 non-null). Result 박스레이어: 별점·mainTitle·subTitle 순차 노출 후 박스 축소. **Result 본문레이어**: like_at_result·likePoint(그라데이션)·Mission(missionResult 아이콘)·Words·Lv 프로그레스바(getUserProfile)·Good Points·To Improve·Got it! 버튼(Overview). `.docs/CONTEXT_SCREEN.md` §17 참조.
-- **Result 본문 애니메이션 5~8단계**: 박스 축소(4단계) 완료 후 300ms 대기 → 5·7·8 동시 시작. 5: Mission 아이콘 N*n→missionResult 한 번에 전환(Y 있으면 진동). 7: likePoint 0→결과 500ms. 8: beforeLevel/beforeProgress→afterLevel/afterProgress 500ms(레벨업 시 surveySuccessToast). 5 후 300ms → 6: words 0→결과 300ms(words>0이면 진동). 초기값: Mission N*n, words 0, likePoint 0, Lv/진행률 before*.
+- **Result 본문 애니메이션 5~8단계**: 박스 축소(4단계) 완료 후 300ms 대기 → 5·7·8 동시 시작. 5: Mission 아이콘 N*n→missionResult 한 번에 전환(Y 있으면 진동). 7: likePoint 0→결과 500ms. 8: beforeLevel/beforeProgress→afterLevel/afterProgress 500ms. 5 후 300ms → 6: words 0→결과 300ms(words>0이면 진동). 초기값: Mission N*n, words 0, likePoint 0, Lv/진행률 before*.
 - **Main Screen 물리 뒤로가기**: Home 탭에서만 앱 종료, Alarm/Profile 탭에서는 Home으로 이동. `lib/main.dart`에서 IndexedStack을 `PopScope`(canPop: home일 때만 true)로 감싸 처리. `.docs/CONTEXT_SCREEN.md` Main Screen·비교표 반영.
 - **Profile 롤플레이 히스토리**: Progress box 아래 세로 스크롤 영역에 롤플레이 결과 썸네일 그리드. `GET /v1/roleplays/results?pageNum=0` 페이징(0부터 9개씩), 3열 32%·CDN prepend·캐시·shimmer 로딩·스크롤 시 append. 썸네일 탭 시 HistoryScreen(Sub) 진입(resultId 전달). History에서 ReviewChatScreen/ReviewEndingScreen 진입. 상세는 `.docs/CONTEXT_SCREEN.md` §19·20·21.
   - 프로필 탭 재진입·서브 복귀 시 `GET /v1/users/profile`는 항상 호출. 히스토리 0페이지 재조회는 **마지막 API 페이지까지 로드했고** 스크롤이 목록 하단(끝에서 200px 이내)일 때만 수행해, 중간 페이지 열람·스크롤 위치를 유지한다. 최초 마운트(`initState`)는 목록 비어 있으므로 0페이지 로드 유지.
@@ -112,26 +114,7 @@
 - **ReviewChatScreen 구현**: History/Result V2에서 RoleplayResultDto 전달·채팅 이력 표시. 배경 그라데이션 `#054544`→`#0CABA8`+검정 40% 오버레이. 헤더 "Chat History" 아래 l10n 안내(스피커 아이콘+말풍선 탭 안내). chatHistory key별 말풍선·나레이션·미션(Playing 동일). `GET …/review-chat/audio-meta` 후 USER·AI_CHARACTER 말풍선 탭 재생(재생 중 `#80D7CF`/`#054544`, 완료·stop 시 복귀). USER bytes·AI CDN. 재생 불가·실패 시 `reviewChatNoAudioToPlay` 토스트.
 - **ReviewEndingScreen 구현**: History "View Ending" 탭 시 `GET /v1/roleplays/{rpId}/roles/{rpRoleId}/endings/{endingId}` 호출, 응답 RoleplayEndingDto·이미지 프리로드 후 진입(버튼에 Opening과 동일 뱅글 로딩). Sub Screen. 헤더 "View Ending"+뒤로가기. 본문: 이미지(BoxFit.cover·높이 100%·비율 유지·좌우 잘림 가능) → 2s 후 레이어·타이틀(상단 25%)·콘텐츠(하단 75%) 페이드인. 버튼 없음.
 - **엔딩 API**: `SudaApiClient.getRoleplayEnding(accessToken, rpId, rpRoleId, endingId)` → RoleplayEndingDto.
-- **세션 초기화 응답 분기**: Opening→Playing 세션 초기화(`POST /v1/roleplay-sessions`) 200 응답의 `sessionId` 기준: '0'=티켓 부족(기존 공통 팝업+외부 Okay 버튼, Opening 유지), '-10'=추가 티켓 설문 유도 팝업(내부 버튼형, Opening 유지), '-20'=푸시 동의 유도 팝업, '-30'=앱 링크 공유 유도 팝업(공유시트 닫힘 후 `POST /v1/users/quests/{questId}`), '-40'=스토어 리뷰 유도 팝업(인앱리뷰 성공 반환 후 `POST /v1/users/quests/{questId}`), 그 외=Playing 진입. `.docs/CONTEXT_ROLEPLAY.md` 6-3 참조.
-- **-10 분기 Survey 진입**: Opening의 `sessionId == '-10'` 팝업에서 "Answer now ✅" 탭 시 `RoleplayRouter.pushSurvey()`로 Sub Screen `RoleplaySurveyScreen`(`lib/screens/roleplay/survey.dart`) 진입. "Maybe later" 탭 시 팝업만 닫음.
-- **Survey 3단계 구현**:
-  - 헤더는 타이틀 없이 닫기(X)만 사용. 진입 시 1단계부터 시작.
-  - 진행바: 3분할(각 32%, h8, radius4), 활성 바 그라데이션 `#076766 -> #0CABA8`, 비활성 `#353535`.
-  - 단계/값 매핑: 1단계 연령(1~5), 2단계 성별(1~3), 3단계 유입경로(1~5).
-  - 3단계 선택 시 `POST /v1/users/survey` 호출(body: age/gender/source 문자열 숫자).
-  - 응답 `200 + 'Y'`면 성공 토스트(l10n), 그 외(200의 N 포함·4xx·5xx·timeout) `"Survey Failed"` 경고 토스트 후 화면 닫기.
-  - 제출 중 선택지 버튼 비활성화.
-- **홈 화면 티켓 배지**: 상단 우측에 티켓 아이콘(`assets/images/icons/ticket.png` 38×20) + finalTicketCount 표시(body-caption 흰색). 앱 구동 후 첫 노출 시·GNB 홈 탭 선택 시·물리 뒤로가기로 홈 복귀 시·**서브 스크린에서 pop으로 복귀 시** `GET /v1/users/ticket` 갱신. 서브 복귀 감지는 `RouteObserver` + `MainRouteAwareWrapper`(lib/widgets/main_route_aware_wrapper.dart)의 `didPopNext`로 처리. 응답 `finalTicketCount`를 티켓 수치에 바로 반영.
-- **PushAgreementScreen**: 설정 > Notification 진입. 푸시 알림 ON/OFF 토글. `PUT /v1/users/push-agreement?agreementYn=Y|N` 호출 후 `QuestResultDto(completeYn)` 응답 처리.
-  - `completeYn == 'Y'`: 티켓 보상 지급으로 간주, `surveySuccessToast` 토스트 노출 후 PushAgreementScreen 자동 닫기.
-  - 그 외(`N` 포함): 기존처럼 토글 상태만 반영(추가 토스트/자동 닫기 없음).
-  - Opening `sessionId == '-20'` 분기에서 PushAgreementScreen으로 진입할 수 있음. `.docs/CONTEXT_SCREEN.md` §5.1.
-- **-30 분기 공유 퀘스트**: Opening의 `sessionId == '-30'` 팝업에서 "Share link 💬" 탭 시 Play Store 링크(`https://play.google.com/store/apps/details?id=kr.sudatalk.app`) 공유시트를 노출.
-  - 공유시트 닫힘 감지 후 `POST /v1/users/quests/{questId}` 호출 (`questId = sessionId`)
-  - 응답 `QuestResultDto.completeYn == 'Y'`인 경우에만 `surveySuccessToast` 토스트 노출, 그 외 별도 처리 없음.
-- **-40 분기 리뷰 퀘스트**: Opening의 `sessionId == '-40'` 팝업에서 "Leave Stars ⭐" 탭 시 OS 인앱리뷰 API를 호출.
-  - 인앱리뷰 호출 성공 반환 시 `POST /v1/users/quests/{questId}` 호출 (`questId = sessionId`)
-  - 응답 `QuestResultDto.completeYn == 'Y'`인 경우에만 `surveySuccessToast` 토스트 노출, 그 외 별도 처리 없음.
+- **PushAgreementScreen**: 설정 > Notification 진입. 푸시 알림 ON/OFF 토글. `PUT /v1/users/push-agreement?agreementYn=Y|N` 호출 후 응답 처리. `completeYn == 'Y'`이면 PushAgreementScreen 자동 닫기.
 - **앱 버전 1.0.10**: `pubspec.yaml`의 `version` 값(예: 1.0.10+14)을 단일 사실 기준으로 사용. Setting 화면 하단: 개인정보·이용약관·오픈소스 블록 위로 조정, 그 아래 버전 텍스트 `v x.x.x` (fontSize 11, 흰색, 중앙 정렬) 노출.
 - **앱 버전 1.0.13**: `pubspec.yaml` 버전을 `1.0.12+18`에서 `1.0.13+20`으로 변경.
 - 버전 비교 및 강제 업데이트 로직은 `VersionCheckService`에서 `AppVersionService.getAppVersion()` 결과와 서버 응답 `latestVersion`를 비교하여 처리.

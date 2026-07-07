@@ -712,138 +712,6 @@ abstract class AppLocalizations {
   /// **'Complete the previous episode to unlock.'**
   String get seriesOverviewEpisodeLockedToast;
 
-  /// No description provided for @noTicketsTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'No tickets left…'**
-  String get noTicketsTitle;
-
-  /// No description provided for @noTicketsBody.
-  ///
-  /// In en, this message translates to:
-  /// **'You\'ve reached today\'s limit.\nCome back tomorrow!'**
-  String get noTicketsBody;
-
-  /// No description provided for @surveyPromptLine1.
-  ///
-  /// In en, this message translates to:
-  /// **'You\'ve reached today\'s limit.'**
-  String get surveyPromptLine1;
-
-  /// No description provided for @surveyPromptLine2.
-  ///
-  /// In en, this message translates to:
-  /// **'Answer a quick question to earn 1 extra ticket!'**
-  String get surveyPromptLine2;
-
-  /// No description provided for @pushTicketPromptLine2.
-  ///
-  /// In en, this message translates to:
-  /// **'Turn on notifications and get 1 extra ticket!'**
-  String get pushTicketPromptLine2;
-
-  /// No description provided for @surveyAnswerNowButton.
-  ///
-  /// In en, this message translates to:
-  /// **'Answer now ✅'**
-  String get surveyAnswerNowButton;
-
-  /// No description provided for @pushTicketTurnOnButton.
-  ///
-  /// In en, this message translates to:
-  /// **'Turn on 🔔'**
-  String get pushTicketTurnOnButton;
-
-  /// No description provided for @shareTicketPromptLine2.
-  ///
-  /// In en, this message translates to:
-  /// **'Share the app link with a friend to get 1 extra ticket!'**
-  String get shareTicketPromptLine2;
-
-  /// No description provided for @shareTicketButton.
-  ///
-  /// In en, this message translates to:
-  /// **'Share link 💬'**
-  String get shareTicketButton;
-
-  /// No description provided for @reviewTicketPromptLine2.
-  ///
-  /// In en, this message translates to:
-  /// **'Leave a store review to get 1 extra ticket!'**
-  String get reviewTicketPromptLine2;
-
-  /// No description provided for @reviewTicketButton.
-  ///
-  /// In en, this message translates to:
-  /// **'Leave Stars ⭐'**
-  String get reviewTicketButton;
-
-  /// No description provided for @surveyMaybeLater.
-  ///
-  /// In en, this message translates to:
-  /// **'Maybe later'**
-  String get surveyMaybeLater;
-
-  /// No description provided for @surveyStep1Title.
-  ///
-  /// In en, this message translates to:
-  /// **'Which age group are you in?'**
-  String get surveyStep1Title;
-
-  /// No description provided for @surveyStep2Title.
-  ///
-  /// In en, this message translates to:
-  /// **'What is your gender?'**
-  String get surveyStep2Title;
-
-  /// No description provided for @surveyStep3Title.
-  ///
-  /// In en, this message translates to:
-  /// **'How did you find SUDA?'**
-  String get surveyStep3Title;
-
-  /// No description provided for @surveyGenderFemale.
-  ///
-  /// In en, this message translates to:
-  /// **'Female'**
-  String get surveyGenderFemale;
-
-  /// No description provided for @surveyGenderMale.
-  ///
-  /// In en, this message translates to:
-  /// **'Male'**
-  String get surveyGenderMale;
-
-  /// No description provided for @surveyGenderPreferNotToSay.
-  ///
-  /// In en, this message translates to:
-  /// **'Prefer not to say'**
-  String get surveyGenderPreferNotToSay;
-
-  /// No description provided for @surveySuccessToast.
-  ///
-  /// In en, this message translates to:
-  /// **'1 Ticket added! 🎉'**
-  String get surveySuccessToast;
-
-  /// No description provided for @dailyTicketTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Thanks for Checking In!'**
-  String get dailyTicketTitle;
-
-  /// No description provided for @dailyTicketContent.
-  ///
-  /// In en, this message translates to:
-  /// **'Claim your daily free ticket!\nIt expires if you don\'t use it today.'**
-  String get dailyTicketContent;
-
-  /// No description provided for @dailyTicketButton.
-  ///
-  /// In en, this message translates to:
-  /// **'Claim Ticket'**
-  String get dailyTicketButton;
-
   /// No description provided for @notificationPermissionBlockedTitle.
   ///
   /// In en, this message translates to:
@@ -940,59 +808,11 @@ abstract class AppLocalizations {
   /// **'Grammar'**
   String get roleplayResultScoreGrammar;
 
-  /// No description provided for @ticketInfoTitle.
+  /// No description provided for @closePopup.
   ///
   /// In en, this message translates to:
-  /// **'Ticket'**
-  String get ticketInfoTitle;
-
-  /// No description provided for @ticketInfoBody1.
-  ///
-  /// In en, this message translates to:
-  /// **'Tickets are used to play Roleplay'**
-  String get ticketInfoBody1;
-
-  /// No description provided for @ticketInfoHowToPrefix.
-  ///
-  /// In en, this message translates to:
-  /// **'How to get them: '**
-  String get ticketInfoHowToPrefix;
-
-  /// No description provided for @ticketInfoDailyCheckIn.
-  ///
-  /// In en, this message translates to:
-  /// **'Daily Check-in'**
-  String get ticketInfoDailyCheckIn;
-
-  /// No description provided for @ticketInfoHowToOr.
-  ///
-  /// In en, this message translates to:
-  /// **' or '**
-  String get ticketInfoHowToOr;
-
-  /// No description provided for @ticketInfoLevelUp.
-  ///
-  /// In en, this message translates to:
-  /// **'Level up'**
-  String get ticketInfoLevelUp;
-
-  /// No description provided for @ticketInfoLikesPrefix.
-  ///
-  /// In en, this message translates to:
-  /// **'You need '**
-  String get ticketInfoLikesPrefix;
-
-  /// No description provided for @ticketInfoLikesSuffix.
-  ///
-  /// In en, this message translates to:
-  /// **' to level up!'**
-  String get ticketInfoLikesSuffix;
-
-  /// No description provided for @ticketInfoButtonOkay.
-  ///
-  /// In en, this message translates to:
-  /// **'Okay'**
-  String get ticketInfoButtonOkay;
+  /// **'Close'**
+  String get closePopup;
 
   /// No description provided for @reviewChatTapHint.
   ///
@@ -1027,7 +847,7 @@ abstract class AppLocalizations {
   /// No description provided for @energyInfoRechargeUntil.
   ///
   /// In en, this message translates to:
-  /// **'@@TIME@@ until your next recharge!'**
+  /// **'Next recharge in @@TIME@@'**
   String get energyInfoRechargeUntil;
 
   /// No description provided for @energyInfoFull.
@@ -1039,8 +859,20 @@ abstract class AppLocalizations {
   /// No description provided for @energyInfoUnlimitedEndsIn.
   ///
   /// In en, this message translates to:
-  /// **'Unlimited Energy ends in @@TIME@@'**
+  /// **'Unlimited Mode Active'**
   String get energyInfoUnlimitedEndsIn;
+
+  /// No description provided for @energyInsufficient.
+  ///
+  /// In en, this message translates to:
+  /// **'You don\'t have enough energy.'**
+  String get energyInsufficient;
+
+  /// No description provided for @endRoleplay.
+  ///
+  /// In en, this message translates to:
+  /// **'End Roleplay'**
+  String get endRoleplay;
 }
 
 class _AppLocalizationsDelegate

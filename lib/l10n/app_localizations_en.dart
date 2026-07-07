@@ -338,78 +338,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Complete the previous episode to unlock.';
 
   @override
-  String get noTicketsTitle => 'No tickets left…';
-
-  @override
-  String get noTicketsBody =>
-      'You\'ve reached today\'s limit.\nCome back tomorrow!';
-
-  @override
-  String get surveyPromptLine1 => 'You\'ve reached today\'s limit.';
-
-  @override
-  String get surveyPromptLine2 =>
-      'Answer a quick question to earn 1 extra ticket!';
-
-  @override
-  String get pushTicketPromptLine2 =>
-      'Turn on notifications and get 1 extra ticket!';
-
-  @override
-  String get surveyAnswerNowButton => 'Answer now ✅';
-
-  @override
-  String get pushTicketTurnOnButton => 'Turn on 🔔';
-
-  @override
-  String get shareTicketPromptLine2 =>
-      'Share the app link with a friend to get 1 extra ticket!';
-
-  @override
-  String get shareTicketButton => 'Share link 💬';
-
-  @override
-  String get reviewTicketPromptLine2 =>
-      'Leave a store review to get 1 extra ticket!';
-
-  @override
-  String get reviewTicketButton => 'Leave Stars ⭐';
-
-  @override
-  String get surveyMaybeLater => 'Maybe later';
-
-  @override
-  String get surveyStep1Title => 'Which age group are you in?';
-
-  @override
-  String get surveyStep2Title => 'What is your gender?';
-
-  @override
-  String get surveyStep3Title => 'How did you find SUDA?';
-
-  @override
-  String get surveyGenderFemale => 'Female';
-
-  @override
-  String get surveyGenderMale => 'Male';
-
-  @override
-  String get surveyGenderPreferNotToSay => 'Prefer not to say';
-
-  @override
-  String get surveySuccessToast => '1 Ticket added! 🎉';
-
-  @override
-  String get dailyTicketTitle => 'Thanks for Checking In!';
-
-  @override
-  String get dailyTicketContent =>
-      'Claim your daily free ticket!\nIt expires if you don\'t use it today.';
-
-  @override
-  String get dailyTicketButton => 'Claim Ticket';
-
-  @override
   String get notificationPermissionBlockedTitle => 'Notifications are off';
 
   @override
@@ -463,31 +391,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get roleplayResultScoreGrammar => 'Grammar';
 
   @override
-  String get ticketInfoTitle => 'Ticket';
-
-  @override
-  String get ticketInfoBody1 => 'Tickets are used to play Roleplay';
-
-  @override
-  String get ticketInfoHowToPrefix => 'How to get them: ';
-
-  @override
-  String get ticketInfoDailyCheckIn => 'Daily Check-in';
-
-  @override
-  String get ticketInfoHowToOr => ' or ';
-
-  @override
-  String get ticketInfoLevelUp => 'Level up';
-
-  @override
-  String get ticketInfoLikesPrefix => 'You need ';
-
-  @override
-  String get ticketInfoLikesSuffix => ' to level up!';
-
-  @override
-  String get ticketInfoButtonOkay => 'Okay';
+  String get closePopup => 'Close';
 
   @override
   String get reviewChatTapHint => 'Tap the chat bubble to play the audio.';
@@ -505,11 +409,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get energyInfoTitle => 'Energy';
 
   @override
-  String get energyInfoRechargeUntil => '@@TIME@@ until your next recharge!';
+  String get energyInfoRechargeUntil => 'Next recharge in @@TIME@@';
 
   @override
   String get energyInfoFull => 'Your energy is full.';
 
   @override
-  String get energyInfoUnlimitedEndsIn => 'Unlimited Energy ends in @@TIME@@';
+  String get energyInfoUnlimitedEndsIn => 'Unlimited Mode Active';
+
+  @override
+  String get energyInsufficient => 'You don\'t have enough energy.';
+
+  @override
+  String get endRoleplay => 'End Roleplay';
 }

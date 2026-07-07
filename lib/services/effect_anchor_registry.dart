@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 enum EffectAnchorId {
-  ticketBadge,
+  energyBadge,
 }
 
 class EffectAnchorRegistry {

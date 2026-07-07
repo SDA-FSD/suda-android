@@ -183,14 +183,17 @@ S1 턴 정책은 `.docs/CONTEXT_ROLEPLAY.md`만 본다. **S2는 아래가 단일
 - **렌더**
   - 배경: episode `thumbnailImgPath` → `RoleplayOverviewBackdrop`
   - 헤더 타이틀: episode `title` (`SudaJsonUtil.localizedMapText`) · `bodySmall` **w700** · **1줄** 말줄임 — X 밴드(top 16·height 40) 세로 중앙(`centerTitleInHeaderActionRow`, `RoleplayScaffold.episodeTitleStyle`)
+  - **우상단 에너지 배지**: `EnergyHeaderBadge` (`SafeArea top + 16`, `right: 16`) — Home과 동일 스펙·탭 시 `showEnergyInfoPopup`
   - **duration 없음** (S2)
   - AI 캐릭터: l10n `roleplayOpeningAiCharacter`(en AI Character / ko AI 캐릭터 / pt Personagem IA) + `selectedEpisode.aiCharacter.name` (`headlineLarge` `#0CABA8`)
   - 시나리오: l10n `roleplayOpeningScenario`(en Scenario / ko 시나리오 / pt Cenário) + episode `briefing` (`DefaultMarkdown`)
 - **Start (`Let's Start`)**
   1. 마이크 권한
   2. `POST /rps2/sessions` `{seriesId, episodeId}`
-  3. `sessionId` 분기 (S1과 **동일 의미**): `-99` 데일리 티켓, `0` 티켓 없음, `-10` 설문, `-20` 푸시, `-30` 공유, `-40` 리뷰 → 각 DefaultPopup / Survey
-  4. 정상 sessionId → 티켓 consume 이펙트 → `SeriesStateService.setSession(session)` → `replaceWithPlaying`
+  3. `sessionId == '0'`: `showEnergyInsufficientPopup`(에너지 바 + l10n `energyInsufficient`) → Opening 유지, 재시도 가능
+  4. `sessionId`가 `-`로 시작: "Cannot start roleplay" 토스트 → Opening 유지
+  5. 정상 sessionId → `SeriesStateService.setSession(session)` → `replaceWithPlaying` (에너지 소비는 Playing 발화 처리 시, Start 시점 소비 없음)
+  6. **우상단 `EnergyHeaderBadge`**: Home과 동일 충전·무제한 타이머 — 화면 체류 중 30분 충전·무제한 만료 시 서버 재조회
 
 ### 4-4. RoleplayPlayingScreen 🚧 (S2 재구현 중 — **핵심**)
 
@@ -268,7 +271,7 @@ S1 턴 정책은 `.docs/CONTEXT_ROLEPLAY.md`만 본다. **S2는 아래가 단일
 
 1. **서비스메시지 영역**: height **24**, `bodyMedium` 중앙. **세션당 첫 사용자 발화 턴**에만 `holdMicrophoneToSpeak` fade-in/out. **마지막 턴** `POST user-message` 응답 **직후** 서버 `serviceMessage`(없으면 `roleplayAnalyzing`) blink(이후 나레이션·후속 AI 계속 노출).
 2. **입력 영역**: S1과 동일 UX
-   - **녹음**: gap **10** + height **120** (`roleplayMicFooterStackHeight` = mic 100px + 아이콘 행 중앙 20px), `RoleplayMicButtonArea` — 마이크 **이미지 하단**이 하단 아이콘 행(40px) 세로 중앙에 정렬·Cancel 드래그 영역 포함. hold·Cancel 드래그·500ms 미만 거절·loading 회전. `AudioRecorder.start` 완료 전 손을 떼거나 cancel되면 pending action으로 저장 후 start 완료 시 finish/cancel을 이어서 처리한다.
+   - **녹음**: gap **10** + height **140** (`roleplayMicFooterStackHeight` = mic 100px + 에너지/아이콘 행 40px). 마이크 **이미지 하단**이 에너지·아이콘 행 **상단**에 정렬. 하단 행 중앙 `PlayingEnergyIndicator`(일반: energy+숫자, 무제한: unlimited 아이콘만). 좌 mic/keyboard·우 hint 아이콘과 동일 세로 높이.
    - **타이핑**: gap 10 + 입력 height **44** (`#353535` stadium) + Send 44×44 + gap 10
 3. **하단 아이콘**: height **40**, 좌 mic↔keyboard(30×30)·우 hint lightball(24×24) — S1과 동일 토글·힌트 idle 3s 후 blink
 
@@ -309,9 +312,9 @@ S1 턴 정책은 `.docs/CONTEXT_ROLEPLAY.md`만 본다. **S2는 아래가 단일
 4. `lib/services/series_state_service.dart` — session·episode·user  
 5. RpS2 Playing API 지침 (미수령 시 사용자에게 확인)
 
-### 4-5. Ending / Try Again / Result / Survey 🚧
+### 4-5. Ending / Try Again / Result 🚧
 
-- **파일**: `ending.dart`, `try_again.dart`, `result.dart`, `survey.dart` 등
+- **파일**: `ending.dart`, `try_again.dart`, `result.dart` 등
 
 #### RoleplayEndingScreen 🚧 (S2 분기 추가)
 

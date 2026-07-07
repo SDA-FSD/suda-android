@@ -13,7 +13,6 @@ import '../screens/roleplay/try_again.dart';
 import '../screens/roleplay/result.dart';
 import '../screens/roleplay/try_again_report.dart';
 import '../screens/roleplay/result_report.dart';
-import '../screens/roleplay/survey.dart';
 import '../screens/roleplay/tutorial.dart';
 import '../services/series_state_service.dart';
 
@@ -42,17 +41,6 @@ class RoleplayRouter {
         settings: const RouteSettings(
           name: RoleplayResultReportScreen.routeName,
         ),
-      ),
-    );
-  }
-
-  /// Survey 스크린을 push (Opening -10 분기에서 진입).
-  static Future<T?> pushSurvey<T>(BuildContext context) {
-    return Navigator.push<T>(
-      context,
-      SubScreenRoute(
-        page: const RoleplaySurveyScreen(),
-        settings: const RouteSettings(name: RoleplaySurveyScreen.routeName),
       ),
     );
   }

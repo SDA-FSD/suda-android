@@ -6,14 +6,61 @@ import '../l10n/app_localizations.dart';
 import '../services/suda_api_client.dart';
 import '../services/token_refresh_service.dart';
 import '../services/token_storage.dart';
+import '../utils/energy_timer_refetch.dart';
 import 'default_popup.dart';
 
 const _pink = Color(0xFFFF00A6);
+const _energyZeroColor = Color(0xFFE60000);
 const _progressBg = Color(0xFF635F5F);
 const _progressFill = Color(0xFF0CABA8);
 
 /// 홈 에너지 배지 탭 시 `GET /v1/users/energy` 후 에너지 안내 팝업.
 Future<void> showEnergyInfoPopup(BuildContext context) async {
+  await TokenRefreshService.instance.refreshIfNeeded();
+  if (!context.mounted) return;
+  final accessToken = await TokenStorage.loadAccessToken();
+  if (!context.mounted || accessToken == null) return;
+
+  UserEnergyDto energy;
+  try {
+    energy = await SudaApiClient.getUserEnergy(accessToken: accessToken);
+  } catch (_) {
+    return;
+  }
+  if (!context.mounted) return;
+
+  await _showEnergyInfoPopupWithEnergy(context, energy, accessToken: accessToken);
+}
+
+/// Opening `sessionId == '0'` 등 에너지 부족 시 에너지 정보 팝업(본문 문구만 교체).
+Future<void> showEnergyInsufficientPopup(BuildContext context) async {
+  await TokenRefreshService.instance.refreshIfNeeded();
+  if (!context.mounted) return;
+  final accessToken = await TokenStorage.loadAccessToken();
+  if (!context.mounted || accessToken == null) return;
+
+  UserEnergyDto energy;
+  try {
+    energy = await SudaApiClient.getUserEnergy(accessToken: accessToken);
+  } catch (_) {
+    return;
+  }
+  if (!context.mounted) return;
+
+  final l10n = AppLocalizations.of(context)!;
+  await _showEnergyInfoPopupWithEnergy(
+    context,
+    energy,
+    accessToken: accessToken,
+    messageOverride: l10n.energyInsufficient,
+  );
+}
+
+/// Playing 에너지 부족(0·402) — 본문은 Opening과 동일, 버튼은 롤플레이 종료.
+Future<void> showPlayingEnergyInsufficientPopup(
+  BuildContext context, {
+  required VoidCallback onEndRoleplay,
+}) async {
   await TokenRefreshService.instance.refreshIfNeeded();
   if (!context.mounted) return;
   final accessToken = await TokenStorage.loadAccessToken();
@@ -34,25 +81,139 @@ Future<void> showEnergyInfoPopup(BuildContext context) async {
     bodyWidget: EnergyInfoPopupBody(
       initialEnergy: energy,
       accessToken: accessToken,
+      messageOverride: l10n.energyInsufficient,
     ),
     buttons: [
       DefaultPopupButton(
         type: DefaultPopupButtonType.primary,
-        label: l10n.ticketInfoButtonOkay,
+        label: l10n.endRoleplay,
+        onPressed: () {
+          onEndRoleplay();
+        },
+      ),
+    ],
+  );
+}
+
+Future<void> _showEnergyInfoPopupWithEnergy(
+  BuildContext context,
+  UserEnergyDto energy, {
+  required String accessToken,
+  bool labMode = false,
+  String? messageOverride,
+}) async {
+  final l10n = AppLocalizations.of(context)!;
+  await DefaultPopup.show(
+    context,
+    titleText: l10n.energyInfoTitle,
+    bodyWidget: EnergyInfoPopupBody(
+      initialEnergy: energy,
+      accessToken: accessToken,
+      labMode: labMode,
+      messageOverride: messageOverride,
+    ),
+    buttons: [
+      DefaultPopupButton(
+        type: DefaultPopupButtonType.primary,
+        label: l10n.closePopup,
         onPressed: () {},
       ),
     ],
   );
 }
 
+/// Lab: 2/5, 충전 타이머 15:00부터 감소.
+Future<void> showEnergyInfoRecharging2of5DefaultPopupForLab(
+  BuildContext context,
+) {
+  return _showEnergyInfoPopupWithEnergy(
+    context,
+    _labEnergyRecharging2of5(),
+    accessToken: '',
+    labMode: true,
+  );
+}
+
+/// Lab: 5/5 가득 참.
+Future<void> showEnergyInfoFullDefaultPopupForLab(BuildContext context) {
+  return _showEnergyInfoPopupWithEnergy(
+    context,
+    _labEnergyFull(),
+    accessToken: '',
+    labMode: true,
+  );
+}
+
+/// Lab: 무제한, 종료까지 15:00부터 감소.
+Future<void> showEnergyInfoUnlimited15mDefaultPopupForLab(
+  BuildContext context,
+) {
+  return _showEnergyInfoPopupWithEnergy(
+    context,
+    _labEnergyUnlimited15m(),
+    accessToken: '',
+    labMode: true,
+  );
+}
+
+/// Lab: 0/5, 충전 타이머 15:00부터 감소.
+Future<void> showEnergyInfoEmpty0of5DefaultPopupForLab(
+  BuildContext context,
+) {
+  return _showEnergyInfoPopupWithEnergy(
+    context,
+    _labEnergyEmpty0of5(),
+    accessToken: '',
+    labMode: true,
+  );
+}
+
+UserEnergyDto _labEnergyRecharging2of5() {
+  final nowUtc = DateTime.now().toUtc();
+  return UserEnergyDto(
+    energyCount: 2,
+    maxEnergyCount: 5,
+    lastAutoChargedAt: nowUtc.subtract(const Duration(minutes: 15)),
+  );
+}
+
+UserEnergyDto _labEnergyFull() {
+  return const UserEnergyDto(
+    energyCount: 5,
+    maxEnergyCount: 5,
+  );
+}
+
+UserEnergyDto _labEnergyEmpty0of5() {
+  final nowUtc = DateTime.now().toUtc();
+  return UserEnergyDto(
+    energyCount: 0,
+    maxEnergyCount: 5,
+    lastAutoChargedAt: nowUtc.subtract(const Duration(minutes: 15)),
+  );
+}
+
+UserEnergyDto _labEnergyUnlimited15m() {
+  final nowUtc = DateTime.now().toUtc();
+  return UserEnergyDto(
+    energyCount: 3,
+    maxEnergyCount: 5,
+    unlimitedEndsAt: nowUtc.add(const Duration(minutes: 15)),
+  );
+}
+
 class EnergyInfoPopupBody extends StatefulWidget {
   final UserEnergyDto initialEnergy;
   final String accessToken;
+  final bool labMode;
+  final String? messageOverride;
 
   const EnergyInfoPopupBody({
     super.key,
     required this.initialEnergy,
     required this.accessToken,
+    this.labMode = false,
+    this.messageOverride,
   });
 
   @override
@@ -63,11 +224,13 @@ class _EnergyInfoPopupBodyState extends State<EnergyInfoPopupBody> {
   late UserEnergyDto _energy;
   Timer? _timer;
   bool _isRefetching = false;
+  final EnergyTimerRefetchTracker _refetchTracker = EnergyTimerRefetchTracker();
 
   @override
   void initState() {
     super.initState();
     _energy = widget.initialEnergy;
+    _refetchTracker.syncFrom(_energy, DateTime.now().toUtc());
     _timer = Timer.periodic(const Duration(seconds: 1), (_) => _onTick());
   }
 
@@ -79,11 +242,13 @@ class _EnergyInfoPopupBodyState extends State<EnergyInfoPopupBody> {
 
   Future<void> _onTick() async {
     if (!mounted || _isRefetching) return;
+    if (widget.labMode) {
+      setState(() {});
+      return;
+    }
     final nowUtc = DateTime.now().toUtc();
 
-    final shouldRefetch = _energy.isUnlimitedActiveAt(nowUtc)
-        ? !_isUnlimitedStillActive(nowUtc)
-        : (!_energy.isEnergyFull && _energy.rechargeRemaining(nowUtc) == Duration.zero);
+    final shouldRefetch = _refetchTracker.shouldRefetch(_energy, nowUtc);
 
     if (shouldRefetch) {
       await _refetchEnergy();
@@ -92,13 +257,8 @@ class _EnergyInfoPopupBodyState extends State<EnergyInfoPopupBody> {
     setState(() {});
   }
 
-  bool _isUnlimitedStillActive(DateTime nowUtc) {
-    final endsAt = _energy.unlimitedEndsAt;
-    return endsAt != null && endsAt.isAfter(nowUtc);
-  }
-
   Future<void> _refetchEnergy() async {
-    if (_isRefetching || !mounted) return;
+    if (widget.labMode || _isRefetching || !mounted) return;
     _isRefetching = true;
     try {
       final dto = await SudaApiClient.getUserEnergy(
@@ -106,6 +266,7 @@ class _EnergyInfoPopupBodyState extends State<EnergyInfoPopupBody> {
       );
       if (!mounted) return;
       setState(() => _energy = dto);
+      _refetchTracker.syncFrom(dto, DateTime.now().toUtc());
     } catch (_) {
       // 표시값 유지
     } finally {
@@ -150,22 +311,31 @@ class _EnergyInfoPopupBodyState extends State<EnergyInfoPopupBody> {
           builder: (context, constraints) {
             final contentWidth = constraints.maxWidth;
             final rowWidth = contentWidth - 24;
-            final barWidth = rowWidth - 24;
+            final iconGap = isUnlimited ? 5.0 : 0.0;
+            final barWidth = rowWidth - 24 - iconGap;
             return Center(
               child: SizedBox(
                 width: rowWidth,
                 child: Row(
                   children: [
                     Image.asset(
-                      'assets/images/icons/energy.png',
+                      isUnlimited
+                          ? 'assets/images/icons/unlimited.png'
+                          : 'assets/images/icons/energy.png',
                       width: 24,
                       height: 24,
                     ),
+                    if (isUnlimited) const SizedBox(width: 5),
                     SizedBox(
                       width: barWidth,
                       height: 20,
                       child: isUnlimited
-                          ? _UnlimitedEnergyBar()
+                          ? _UnlimitedEnergyBar(
+                              remainingLabel: _formatMmSs(
+                                _energy.unlimitedEndsAt!.difference(nowUtc),
+                              ),
+                              labelStyle: fractionStyle,
+                            )
                           : _EnergyFractionBar(
                               energy: _energy,
                               fractionStyle: fractionStyle,
@@ -196,6 +366,15 @@ class _EnergyInfoPopupBodyState extends State<EnergyInfoPopupBody> {
     required DateTime nowUtc,
     required bool isUnlimited,
   }) {
+    final override = widget.messageOverride;
+    if (override != null && override.isNotEmpty) {
+      return Text(
+        override,
+        style: baseStyle,
+        textAlign: TextAlign.center,
+      );
+    }
+
     if (isUnlimited) {
       final time = _formatMmSs(
         _energy.unlimitedEndsAt!.difference(nowUtc),
@@ -287,7 +466,21 @@ class _EnergyFractionBar extends StatelessWidget {
           ),
           Positioned.fill(
             child: Center(
-              child: Text(label, style: fractionStyle),
+              child: count == 0
+                  ? Text.rich(
+                      TextSpan(
+                        children: [
+                          TextSpan(
+                            text: '0',
+                            style: fractionStyle?.copyWith(
+                              color: _energyZeroColor,
+                            ),
+                          ),
+                          TextSpan(text: '/$max', style: fractionStyle),
+                        ],
+                      ),
+                    )
+                  : Text(label, style: fractionStyle),
             ),
           ),
         ],
@@ -297,18 +490,32 @@ class _EnergyFractionBar extends StatelessWidget {
 }
 
 class _UnlimitedEnergyBar extends StatelessWidget {
+  final String remainingLabel;
+  final TextStyle? labelStyle;
+
+  const _UnlimitedEnergyBar({
+    required this.remainingLabel,
+    required this.labelStyle,
+  });
+
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: _progressFill, width: 2),
-      ),
-      child: Center(
-        child: Image.asset(
-          'assets/images/icons/unlimited.png',
-          width: 18,
-          height: 18,
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(10),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          gradient: const LinearGradient(
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+            colors: [
+              Color(0xFF80D7CF),
+              Color(0xFF8A38F5),
+            ],
+          ),
+        ),
+        child: Center(
+          child: Text(remainingLabel, style: labelStyle),
         ),
       ),
     );

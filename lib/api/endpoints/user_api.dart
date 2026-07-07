@@ -340,57 +340,6 @@ class UserApi {
     );
   }
 
-  static Future<UserTicketDto> getUserTicket({
-    required String accessToken,
-  }) async {
-    return await SudaHttpClient.executeWithRefresh(
-      () => _getUserTicketInternal(accessToken),
-      retryWithNewToken: (newToken) => _getUserTicketInternal(newToken),
-    );
-  }
-
-  static Future<QuestResultDto> claimDailyTicket({
-    required String accessToken,
-  }) async {
-    return await SudaHttpClient.executeWithRefresh(
-      () => _claimDailyTicketInternal(accessToken),
-      retryWithNewToken: (newToken) => _claimDailyTicketInternal(newToken),
-    );
-  }
-
-  static Future<QuestResultDto> _claimDailyTicketInternal(
-      String accessToken) async {
-    final uri = SudaHttpClient.buildUri('/v1/users/tickets/daily');
-
-    late final http.Response response;
-    try {
-      response = await SudaHttpClient.client
-          .put(
-            uri,
-            headers: {
-              'Authorization': 'Bearer $accessToken',
-            },
-          )
-          .timeout(const Duration(seconds: 10));
-    } on TimeoutException {
-      rethrow;
-    }
-
-    if (response.statusCode == 401) {
-      throw UnauthorizedException('Access token expired');
-    }
-
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      final Map<String, dynamic> data =
-          jsonDecode(response.body) as Map<String, dynamic>;
-      return QuestResultDto.fromJson(data);
-    }
-
-    throw Exception(
-      'PUT /v1/users/tickets/daily failed: HTTP ${response.statusCode} ${response.body}',
-    );
-  }
-
   static Future<UserEnergyDto> _getUserEnergyInternal(String accessToken) async {
     final uri = SudaHttpClient.buildUri('/v1/users/energy');
 
@@ -420,38 +369,6 @@ class UserApi {
 
     throw Exception(
       'GET /v1/users/energy failed: HTTP ${response.statusCode} ${response.body}',
-    );
-  }
-
-  static Future<UserTicketDto> _getUserTicketInternal(String accessToken) async {
-    final uri = SudaHttpClient.buildUri('/v1/users/ticket');
-
-    late final http.Response response;
-    try {
-      response = await SudaHttpClient.client
-          .get(
-            uri,
-            headers: {
-              'Authorization': 'Bearer $accessToken',
-            },
-          )
-          .timeout(const Duration(seconds: 10));
-    } on TimeoutException {
-      rethrow;
-    }
-
-    if (response.statusCode == 401) {
-      throw UnauthorizedException('Access token expired');
-    }
-
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      final Map<String, dynamic> data =
-          jsonDecode(response.body) as Map<String, dynamic>;
-      return UserTicketDto.fromJson(data);
-    }
-
-    throw Exception(
-      'GET /v1/users/ticket failed: HTTP ${response.statusCode} ${response.body}',
     );
   }
 
@@ -491,39 +408,6 @@ class UserApi {
     );
   }
 
-  static Future<QuestResultDto> postUserQuest({
-    required String accessToken,
-    required String questId,
-  }) async {
-    final uri = SudaHttpClient.buildUri('/v1/users/quests/$questId');
-
-    late final http.Response response;
-    try {
-      response = await SudaHttpClient.client
-          .post(
-            uri,
-            headers: {
-              'Authorization': 'Bearer $accessToken',
-            },
-          )
-          .timeout(const Duration(seconds: 10));
-    } on TimeoutException {
-      rethrow;
-    }
-
-    if (response.statusCode == 401) {
-      throw UnauthorizedException('Access token expired');
-    }
-
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      return _parseQuestResultResponse(response.body);
-    }
-
-    throw Exception(
-      'POST /v1/users/quests/$questId failed: HTTP ${response.statusCode} ${response.body}',
-    );
-  }
-
   static QuestResultDto _parseQuestResultResponse(String body) {
     try {
       final decoded = jsonDecode(body);
@@ -537,69 +421,6 @@ class UserApi {
       // Fall back to plain text response.
     }
     return QuestResultDto(completeYn: body);
-  }
-
-  static Future<String> submitSurvey({
-    required String accessToken,
-    required int age,
-    required int gender,
-    required int source,
-  }) async {
-    return await SudaHttpClient.executeWithRefresh(
-      () => _submitSurveyInternal(
-        accessToken: accessToken,
-        age: age,
-        gender: gender,
-        source: source,
-      ),
-      retryWithNewToken: (newToken) => _submitSurveyInternal(
-        accessToken: newToken,
-        age: age,
-        gender: gender,
-        source: source,
-      ),
-    );
-  }
-
-  static Future<String> _submitSurveyInternal({
-    required String accessToken,
-    required int age,
-    required int gender,
-    required int source,
-  }) async {
-    final uri = SudaHttpClient.buildUri('/v1/users/survey');
-
-    late final http.Response response;
-    try {
-      response = await SudaHttpClient.client
-          .post(
-            uri,
-            headers: {
-              'Authorization': 'Bearer $accessToken',
-              'Content-Type': 'application/json',
-            },
-            body: jsonEncode({
-              'age': age.toString(),
-              'gender': gender.toString(),
-              'source': source.toString(),
-            }),
-          )
-          .timeout(const Duration(seconds: 10));
-    } on TimeoutException {
-      rethrow;
-    }
-
-    if (response.statusCode == 401) {
-      throw UnauthorizedException('Access token expired');
-    }
-
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      return _parseStringResponse(response.body);
-    }
-
-    throw Exception(
-      'POST /v1/users/survey failed: HTTP ${response.statusCode} ${response.body}',
-    );
   }
 
   static Future<QuestResultDto> markNotificationRead({
