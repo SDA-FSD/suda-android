@@ -30,16 +30,7 @@ class PlayingConversationLayout {
   /// 미션 패널 하단까지 본문 상단 페이드 (`#121212` 100% → 0%).
   static const Color topContentFadeColor = Color(0xFF121212);
 
-  /// 본문 하단 페이드 — 디스플레이 하단~서비스메시지 상단. 배경·말풍선만 가림, 푸터 UI는 위에 노출.
-  static const Color bottomContentFadeColor = Color(0xFF121212);
-
-  /// 하단 페이드가 본문 스크롤 영역으로 침범하는 높이.
-  static const double bottomContentFadeBodyExtent = 48;
-
-  /// `RoleplayScaffold` 푸터 하단 `SizedBox` (playing 하단 여백).
-  static const double scaffoldFooterBottomGap = 24;
-
-  /// `RoleplayScaffold` 본문·푸터 좌우 `Padding` — 페이드 레이어는 이 inset을 상쇄해 디스플레이 전폭으로 확장.
+  /// `RoleplayScaffold` 본문·푸터 좌우 `Padding` — 상단 페이드 레이어는 이 inset을 상쇄해 디스플레이 전폭으로 확장.
   static const double scaffoldBodyHorizontalInset = 24;
 }
 

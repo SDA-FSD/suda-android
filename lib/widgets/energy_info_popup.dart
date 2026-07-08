@@ -77,7 +77,7 @@ Future<void> showPlayingEnergyInsufficientPopup(
   final l10n = AppLocalizations.of(context)!;
   await DefaultPopup.show(
     context,
-    titleText: l10n.energyInfoTitle,
+    titleText: _resolveEnergyPopupTitle(l10n, energy),
     bodyWidget: EnergyInfoPopupBody(
       initialEnergy: energy,
       accessToken: accessToken,
@@ -105,7 +105,7 @@ Future<void> _showEnergyInfoPopupWithEnergy(
   final l10n = AppLocalizations.of(context)!;
   await DefaultPopup.show(
     context,
-    titleText: l10n.energyInfoTitle,
+    titleText: _resolveEnergyPopupTitle(l10n, energy),
     bodyWidget: EnergyInfoPopupBody(
       initialEnergy: energy,
       accessToken: accessToken,
@@ -122,84 +122,86 @@ Future<void> _showEnergyInfoPopupWithEnergy(
   );
 }
 
-/// Lab: 2/5, 충전 타이머 15:00부터 감소.
-Future<void> showEnergyInfoRecharging2of5DefaultPopupForLab(
-  BuildContext context,
-) {
-  return _showEnergyInfoPopupWithEnergy(
+/// Lab: playing·무제한·에너지 수(0~5) 조합으로 에너지 팝업 재현.
+Future<void> showEnergyPopupForLab(
+  BuildContext context, {
+  required bool playing,
+  required bool unlimited,
+  required int energyCount,
+}) async {
+  final energy = _buildLabEnergyDto(
+    unlimited: unlimited,
+    energyCount: energyCount,
+  );
+  final l10n = AppLocalizations.of(context)!;
+  final isPlayingBlocked = playing && !unlimited && energyCount == 0;
+
+  if (isPlayingBlocked) {
+    await DefaultPopup.show(
+      context,
+      titleText: _resolveEnergyPopupTitle(l10n, energy),
+      bodyWidget: EnergyInfoPopupBody(
+        initialEnergy: energy,
+        accessToken: '',
+        labMode: true,
+        messageOverride: l10n.energyInsufficient,
+      ),
+      buttons: [
+        DefaultPopupButton(
+          type: DefaultPopupButtonType.primary,
+          label: l10n.endRoleplay,
+          onPressed: () {},
+        ),
+      ],
+    );
+    return;
+  }
+
+  await _showEnergyInfoPopupWithEnergy(
     context,
-    _labEnergyRecharging2of5(),
+    energy,
     accessToken: '',
     labMode: true,
   );
 }
 
-/// Lab: 5/5 가득 참.
-Future<void> showEnergyInfoFullDefaultPopupForLab(BuildContext context) {
-  return _showEnergyInfoPopupWithEnergy(
-    context,
-    _labEnergyFull(),
-    accessToken: '',
-    labMode: true,
-  );
-}
-
-/// Lab: 무제한, 종료까지 15:00부터 감소.
-Future<void> showEnergyInfoUnlimited15mDefaultPopupForLab(
-  BuildContext context,
-) {
-  return _showEnergyInfoPopupWithEnergy(
-    context,
-    _labEnergyUnlimited15m(),
-    accessToken: '',
-    labMode: true,
-  );
-}
-
-/// Lab: 0/5, 충전 타이머 15:00부터 감소.
-Future<void> showEnergyInfoEmpty0of5DefaultPopupForLab(
-  BuildContext context,
-) {
-  return _showEnergyInfoPopupWithEnergy(
-    context,
-    _labEnergyEmpty0of5(),
-    accessToken: '',
-    labMode: true,
-  );
-}
-
-UserEnergyDto _labEnergyRecharging2of5() {
+UserEnergyDto _buildLabEnergyDto({
+  required bool unlimited,
+  required int energyCount,
+}) {
+  const maxEnergyCount = 5;
+  final count = energyCount.clamp(0, maxEnergyCount);
   final nowUtc = DateTime.now().toUtc();
+
+  if (unlimited) {
+    return UserEnergyDto(
+      energyCount: count,
+      maxEnergyCount: maxEnergyCount,
+      unlimitedEndsAt: nowUtc.add(const Duration(minutes: 15)),
+    );
+  }
+  if (count >= maxEnergyCount) {
+    return UserEnergyDto(
+      energyCount: maxEnergyCount,
+      maxEnergyCount: maxEnergyCount,
+    );
+  }
   return UserEnergyDto(
-    energyCount: 2,
-    maxEnergyCount: 5,
+    energyCount: count,
+    maxEnergyCount: maxEnergyCount,
     lastAutoChargedAt: nowUtc.subtract(const Duration(minutes: 15)),
   );
 }
 
-UserEnergyDto _labEnergyFull() {
-  return const UserEnergyDto(
-    energyCount: 5,
-    maxEnergyCount: 5,
-  );
-}
-
-UserEnergyDto _labEnergyEmpty0of5() {
+String _resolveEnergyPopupTitle(
+  AppLocalizations l10n,
+  UserEnergyDto energy,
+) {
   final nowUtc = DateTime.now().toUtc();
-  return UserEnergyDto(
-    energyCount: 0,
-    maxEnergyCount: 5,
-    lastAutoChargedAt: nowUtc.subtract(const Duration(minutes: 15)),
-  );
-}
-
-UserEnergyDto _labEnergyUnlimited15m() {
-  final nowUtc = DateTime.now().toUtc();
-  return UserEnergyDto(
-    energyCount: 3,
-    maxEnergyCount: 5,
-    unlimitedEndsAt: nowUtc.add(const Duration(minutes: 15)),
-  );
+  if (!energy.isUnlimitedActiveAt(nowUtc) && energy.energyCount == 0) {
+    return l10n.energyOutOfEnergyTitle;
+  }
+  return l10n.energyInfoTitle;
 }
 
 class EnergyInfoPopupBody extends StatefulWidget {

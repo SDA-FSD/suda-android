@@ -844,6 +844,12 @@ abstract class AppLocalizations {
   /// **'Energy'**
   String get energyInfoTitle;
 
+  /// No description provided for @energyOutOfEnergyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Out of Energy'**
+  String get energyOutOfEnergyTitle;
+
   /// No description provided for @energyInfoRechargeUntil.
   ///
   /// In en, this message translates to:

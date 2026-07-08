@@ -162,6 +162,7 @@
   "seriesInformationTopicDifficulty": "Dificuldade do Tópico",
   "seriesInformationLearningGoals": "Metas de aprendizado",
   "energyInfoTitle": "Energia",
+  "energyOutOfEnergyTitle": "Sem energia",
   "energyInfoRechargeUntil": "Faltam @@TIME@@ para a próxima recarga!",
   "energyInfoFull": "Sua energia está cheia.",
   "energyInfoUnlimitedEndsIn": "Modo Temporariamente Ilimitado Ativo",

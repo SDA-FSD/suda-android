@@ -412,6 +412,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get energyInfoTitle => 'Energia';
 
   @override
+  String get energyOutOfEnergyTitle => 'Sem energia';
+
+  @override
   String get energyInfoRechargeUntil =>
       'Faltam @@TIME@@ para a próxima recarga!';
 

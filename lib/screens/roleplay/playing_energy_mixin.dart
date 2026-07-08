@@ -5,10 +5,13 @@ import 'package:flutter/material.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
 import '../../utils/energy_timer_refetch.dart';
+import '../../widgets/energy_info_popup.dart';
 import '../../widgets/playing_energy_indicator.dart';
 
 /// Playing 화면 에너지 상태·충전 타이머·로컬 차감.
 mixin PlayingEnergyMixin<T extends StatefulWidget> on State<T> {
+  VoidCallback? onPlayingEnergyIndicatorEndRoleplay;
+
   UserEnergyDto? _playingEnergy;
   Timer? _playingEnergyTimer;
   bool _playingEnergyRefetching = false;
@@ -27,7 +30,36 @@ mixin PlayingEnergyMixin<T extends StatefulWidget> on State<T> {
   }
 
   Widget buildPlayingEnergyFooterIndicator() {
-    return PlayingEnergyIndicator(energy: _playingEnergy);
+    return GestureDetector(
+      onTap: _onPlayingEnergyIndicatorTap,
+      behavior: HitTestBehavior.opaque,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+        child: Center(
+          child: PlayingEnergyIndicator(energy: _playingEnergy),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _onPlayingEnergyIndicatorTap() async {
+    final energy = _playingEnergy;
+    if (energy == null) return;
+
+    final nowUtc = DateTime.now().toUtc();
+    final isUnlimited = energy.isUnlimitedActiveAt(nowUtc);
+    if (!isUnlimited && energy.energyCount == 0) {
+      await showPlayingEnergyInsufficientPopup(
+        context,
+        onEndRoleplay: () {
+          onPlayingEnergyIndicatorEndRoleplay?.call();
+        },
+      );
+    } else {
+      await showEnergyInfoPopup(context);
+    }
+    if (!mounted) return;
+    await _fetchPlayingEnergy();
   }
 
   bool hasSpendablePlayingEnergy() {

@@ -19,18 +19,15 @@
     - 재설치 명령: `adb -s R59T901DRQV install -r build/app/outputs/flutter-apk/app-{flavor}-release.apk`
   - **A16** (추가 테스트 디바이스): 갤럭시 모델 (Android 15 / SDK 35, 디바이스 ID: RF9XB00CX9J)
     - 재설치 명령: `adb -s RF9XB00CX9J install -r build/app/outputs/flutter-apk/app-{flavor}-release.apk`
-  - **Q51** (추가 테스트 디바이스): LM-Q510N (Android 11 / SDK 30, 디바이스 ID: LMQ510NDYLFEIQCL76)
-    - 재설치 명령: `adb -s LMQ510NDYLFEIQCL76 install -r build/app/outputs/flutter-apk/app-{flavor}-release.apk`
   - **S8** (추가 테스트 디바이스): 갤럭시 모델 (SM G955N, Android 9 / SDK 28, 디바이스 ID: ce041714d2f6348e0d)
     - 재설치 명령: `adb -s ce041714d2f6348e0d install -r build/app/outputs/flutter-apk/app-{flavor}-release.apk`
-  - **참고**: 앞으로 이 문서에서 "A30", "A23", "A16", "Q51", "S8"이라는 별칭으로 각 기기를 지칭할 수 있습니다.
+  - **참고**: 앞으로 이 문서에서 "A30", "A23", "A16", "S8"이라는 별칭으로 각 기기를 지칭할 수 있습니다.
   - **ADB 팁**:
     - `adb`가 인식되지 않으면 `export PATH=$PATH:~/Library/Android/sdk/platform-tools`로 경로 추가
     - 다중 기기 설치 예시:
       - `adb -s R59M801MDFM install -r build/app/outputs/flutter-apk/app-dev-debug.apk`
       - `adb -s R59T901DRQV install -r build/app/outputs/flutter-apk/app-dev-debug.apk`
       - `adb -s RF9XB00CX9J install -r build/app/outputs/flutter-apk/app-dev-debug.apk`
-      - `adb -s LMQ510NDYLFEIQCL76 install -r build/app/outputs/flutter-apk/app-dev-debug.apk`
       - `adb -s ce041714d2f6348e0d install -r build/app/outputs/flutter-apk/app-dev-debug.apk`
 
 ## 3. 환경별 설정 관리
@@ -75,7 +72,8 @@
     - **무제한 모드**: `unlimitedEndsAt`이 현재(UTC) 이후이면 `unlimited.png`(24×24) + 5dp gap + 남은 시간 `MM:SS`(bodyMedium w700, 흰색). 1초 주기 타이머로 갱신, 만료 시 자동 재조회 후 일반 모드 전환.
     - **일반 모드**: `unlimitedEndsAt`이 null 또는 과거이면 `energy.png`(24×24) + `energyCount`(bodyMedium w700, 흰색). `lastAutoChargedAt` 기준 30분마다 1 충전(최대 `maxEnergyCount`). 가득 차지 않았을 때 충전 타이머 `00:00` 도달 시 `GET /v1/users/energy` 재조회.
     - 배지는 `EnergyHeaderBadge`(`lib/widgets/energy_header_badge.dart`). Home·Opening 우상단 공통. 탭 시 `showEnergyInfoPopup`. Home은 `registerEnergyBadgeAnchor: true`·`refreshCounter: homeTabSelectedCounter`(탭 재선택·메인 복귀 시 `main.dart` `homeTabSelectedCounter` 증가로 재조회). Opening·Playing도 화면 체류 중 충전·무제한 만료 시 자동 갱신.
-    - **Playing 푸터 에너지**: `PlayingEnergyIndicator` — 녹음 모드 하단 아이콘 행 중앙. 일반 `energy.png`+숫자, 무제한 `unlimited.png`만(타이머 없음). `user-message` 성공 시 로컬 -1. 에너지 0에서 녹음 시작 또는 API **402** 시 `showPlayingEnergyInsufficientPopup` → `endRoleplay` 탭 시 Wait 나가기 레이어(세션 유지).
+    - **Playing 푸터 에너지**: `PlayingEnergyIndicator` — 녹음 모드 하단 아이콘 행 중앙·타이핑 모드 하단 동일. 일반 `energy.png`+숫자, 무제한 `unlimited.png`만(타이머 없음). 탭 영역 48×48 중앙 정렬. 탭 시 무제한 또는 `energyCount > 0`이면 `showEnergyInfoPopup`(닫기), 일반 모드·0이면 `showPlayingEnergyInsufficientPopup`(종료). `user-message` 성공 시 로컬 -1. 에너지 0에서 녹음/타이핑 send 또는 API **402** 시에도 `showPlayingEnergyInsufficientPopup` → `endRoleplay` 탭 시 Wait 나가기 레이어(세션 유지).
+    - **에너지 팝업 타이틀**: 무제한 모드 또는 일반 모드·에너지 > 0 → l10n `energyInfoTitle`. 일반 모드·에너지 0 → `energyOutOfEnergyTitle`(en Out of Energy / ko 에너지 부족 / pt Sem energia). Home·Opening·Playing 공통.
     - **에너지 부족 팝업(Opening)**: Start 응답 `sessionId == '0'` 시 `showEnergyInsufficientPopup` — `closePopup`으로 닫기.
   - `SudaApiClient.getRpS2UserHistories()`: Profile History 목록 페이징 (`GET /rps2/user-histories?pageNum=0`, 0-based, 응답: SudaAppPage\<RpS2SimpleHistoryDto\> — `id`, `imgPath`, `starResult`, `cefrLevel`, `createdAt`)
     - 롤플레이 스택 `popToOverview` 직후 `markProfileHistoryRefreshPending` → 이후 Profile 탭 활성 시 0페이지 재조회(기존 스크롤·페이징 조건 우회). 그 외 탭 재진입은 `ProfileScreen._shouldRefetchHistoryFromStart` 조건부.
@@ -223,7 +221,7 @@
   - 본문 영역 패딩: 상 20 / 좌·우·하 16. `bodyWidget` 내부 레이아웃은 호출부 자율이며, `DefaultPopup`은 **topWidget ↔ title ↔ body ↔ buttons 사이**에만 세로 20 간격을 보장한다.
   - 버튼: `primary`(스펙상 이름은 `default`이나 Dart 예약어 회피, height 44, 라벨 너비 shrink-wrap·가운데 정렬, #0CABA8, Stadium, `ElevatedButtonTheme` 병합) / `text`(`TextButtonTheme` 병합, 흰색 텍스트, shrink-wrap·가운데 정렬). 버튼 탭 시 **항상 팝업을 닫은 뒤** 콜백을 호출한다.
   - 마이그레이션: 팝업 UI는 **점진적으로** `DefaultPopup`으로 옮긴다(동시 대량 치환 금지).
-  - Dev 확인(Lab): `lib/screens/setting/lab.dart`의 `kLabDefaultPopupOptions`에 전환 완료 팝업을 등록한다. Lab 화면 상단 **Default Popup Test**는 드롭다운 선택 + **Show Popup**으로 재현한다.
+  - Dev 확인(Lab): `lib/screens/setting/lab.dart`의 `kLabDefaultPopupOptions`에 전환 완료 팝업을 등록한다. Lab **Default Popup Test**는 드롭다운 선택 + **Show Popup**으로 재현한다. 에너지 팝업은 별도 **Energy Popup Test**(playing·무제한·0~5) 섹션에서 재현한다.
 
 - **텍스트 언어 규칙**
   - **기본 원칙**: 사용자에게 표시되는 모든 기본 텍스트는 영어로 작성

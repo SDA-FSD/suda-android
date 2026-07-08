@@ -8,25 +8,17 @@ import '../../l10n/app_localizations.dart';
 import '../../models/series_models.dart';
 import '../../routes/roleplay_router.dart';
 import '../../services/series_state_service.dart';
-import '../../services/suda_api_client.dart';
-import '../../services/token_storage.dart';
 import '../../utils/default_toast.dart';
 import '../../widgets/main_reregistration_restricted_popup.dart'
     show
         showMainReregistrationRestrictedAuthCheckDefaultPopupForLab,
         showMainReregistrationRestrictedSignInDefaultPopupForLab;
-import '../../widgets/energy_info_popup.dart'
-    show
-        showEnergyInfoEmpty0of5DefaultPopupForLab,
-        showEnergyInfoFullDefaultPopupForLab,
-        showEnergyInfoRecharging2of5DefaultPopupForLab,
-        showEnergyInfoUnlimited15mDefaultPopupForLab;
+import '../../widgets/energy_info_popup.dart' show showEnergyPopupForLab;
 import '../../widgets/app_scaffold.dart';
 import '../profile.dart'
     show showProfileDeleteSavedExpressionDefaultPopupForLab;
 import 'announcements.dart'
     show showAnnouncementsPostNoLongerAvailableDefaultPopupForLab;
-import '../roleplay/ending.dart';
 import '../roleplay/try_again.dart';
 import '../first_cefr_level.dart';
 
@@ -55,26 +47,6 @@ final List<LabDefaultPopupOption> kLabDefaultPopupOptions = [
     label: 'Main: Re-registration restricted — sign-in',
     show: showMainReregistrationRestrictedSignInDefaultPopupForLab,
   ),
-  LabDefaultPopupOption(
-    id: 'energy_info_recharging_2_5',
-    label: 'Energy: 2/5 recharging (15:00)',
-    show: showEnergyInfoRecharging2of5DefaultPopupForLab,
-  ),
-  LabDefaultPopupOption(
-    id: 'energy_info_empty_0_5',
-    label: 'Energy: 0/5 recharging (15:00)',
-    show: showEnergyInfoEmpty0of5DefaultPopupForLab,
-  ),
-  LabDefaultPopupOption(
-    id: 'energy_info_full_5_5',
-    label: 'Energy: 5/5 full',
-    show: showEnergyInfoFullDefaultPopupForLab,
-  ),
-  LabDefaultPopupOption(
-    id: 'energy_info_unlimited_15m',
-    label: 'Energy: Unlimited (15:00)',
-    show: showEnergyInfoUnlimited15mDefaultPopupForLab,
-  ),
 ];
 
 class LabDefaultPopupOption {
@@ -100,10 +72,18 @@ class _LabScreenState extends State<LabScreen> {
   bool _guarded = false;
   bool _toastIsWarning = false;
   String? _selectedLabDefaultPopupId;
+  bool _energyPopupPlaying = false;
+  bool _energyPopupUnlimited = false;
+  final TextEditingController _energyPopupCountController =
+      TextEditingController(text: '3');
   static const _longToastTestMessage = 'Test Popup, Test Toast, 가나다라마바사아자차카타파하';
   static const _stylePreviewLines = ['말해요!?', 'Talk', 'E sua vez primeiro!'];
-  bool _endingTestLoading = false;
-  static const int _labEndingSeriesId = 2;
+
+  @override
+  void dispose() {
+    _energyPopupCountController.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -194,54 +174,48 @@ class _LabScreenState extends State<LabScreen> {
     );
   }
 
-  Future<void> _openEndingScreen() async {
-    if (_endingTestLoading) return;
-
-    setState(() => _endingTestLoading = true);
-    try {
-      final token = await TokenStorage.loadAccessToken();
-      if (token == null) {
-        if (!mounted) return;
-        DefaultToast.show(context, 'Not signed in', isError: true);
-        return;
-      }
-
-      final overview = await SudaApiClient.getSeriesOverview(
-        accessToken: token,
-        seriesId: _labEndingSeriesId,
-      );
-      SeriesStateService.instance.setSeriesOverview(
-        seriesId: _labEndingSeriesId,
-        overview: overview,
-      );
-      final episodes = overview.episodes;
-      if (episodes.isNotEmpty) {
-        SeriesStateService.instance.setSelectedEpisodeId(episodes.last.id);
-      }
-      SeriesStateService.instance.setCachedUserHistory(
-        const RpS2UserHistoryDto(
-          id: -1,
-          userStarRating: 0,
-        ),
-      );
-
-      if (!mounted) return;
-      await Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => const RoleplayEndingScreen()),
-      );
-    } catch (e) {
-      if (mounted) {
-        DefaultToast.show(context, 'Open Ending failed: $e', isError: true);
-      }
-    } finally {
-      if (mounted) setState(() => _endingTestLoading = false);
-    }
-  }
-
   Future<void> _openTryAgainReportScreen() async {
     if (!mounted) return;
     await RoleplayRouter.pushTryAgainReport(context);
+  }
+
+  int _parseEnergyPopupCount() {
+    final parsed = int.tryParse(_energyPopupCountController.text.trim());
+    if (parsed == null) return 0;
+    return parsed.clamp(0, 5);
+  }
+
+  Future<void> _showEnergyPopupTest() async {
+    final count = _parseEnergyPopupCount();
+    if (_energyPopupCountController.text.trim() != '$count') {
+      _energyPopupCountController.text = '$count';
+    }
+    await showEnergyPopupForLab(
+      context,
+      playing: _energyPopupPlaying,
+      unlimited: _energyPopupUnlimited,
+      energyCount: count,
+    );
+  }
+
+  Widget _buildLabCheckbox({
+    required String label,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
+    final theme = Theme.of(context).textTheme;
+    return CheckboxListTile(
+      value: value,
+      onChanged: (v) => onChanged(v ?? false),
+      contentPadding: EdgeInsets.zero,
+      controlAffinity: ListTileControlAffinity.leading,
+      activeColor: const Color(0xFF0CABA8),
+      checkColor: Colors.white,
+      title: Text(
+        label,
+        style: theme.bodyLarge?.copyWith(color: Colors.white),
+      ),
+    );
   }
 
   Widget _buildLabScreenButton({
@@ -334,16 +308,6 @@ class _LabScreenState extends State<LabScreen> {
             ),
             _buildSectionDivider(),
             Text(
-              'Roleplay Ending',
-              style: theme.headlineSmall?.copyWith(color: Colors.white),
-            ),
-            const SizedBox(height: 12),
-            _buildLabScreenButton(
-              label: _endingTestLoading ? 'Loading…' : 'Open Ending',
-              onPressed: () => unawaited(_openEndingScreen()),
-            ),
-            _buildSectionDivider(),
-            Text(
               'Roleplay Try Again',
               style: theme.headlineSmall?.copyWith(color: Colors.white),
             ),
@@ -433,6 +397,57 @@ class _LabScreenState extends State<LabScreen> {
                 ),
                 child: const Text('Show Popup'),
               ),
+            ),
+            _buildSectionDivider(),
+            Text(
+              'Energy Popup Test',
+              style: theme.headlineSmall?.copyWith(color: Colors.white),
+            ),
+            const SizedBox(height: 12),
+            _buildLabCheckbox(
+              label: 'playing',
+              value: _energyPopupPlaying,
+              onChanged: (v) => setState(() => _energyPopupPlaying = v),
+            ),
+            _buildLabCheckbox(
+              label: '무제한 모드',
+              value: _energyPopupUnlimited,
+              onChanged: (v) => setState(() => _energyPopupUnlimited = v),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _energyPopupCountController,
+              keyboardType: TextInputType.number,
+              style: theme.bodyLarge?.copyWith(color: Colors.white),
+              decoration: InputDecoration(
+                labelText: 'Energy count (0~5)',
+                labelStyle: theme.bodyMedium?.copyWith(
+                  color: const Color(0xFF9E9E9E),
+                ),
+                filled: true,
+                fillColor: const Color(0xFF1E1E1E),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: const BorderSide(color: Color(0xFF353535)),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: const BorderSide(color: Color(0xFF353535)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: const BorderSide(color: Color(0xFF80D7CF)),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            _buildLabScreenButton(
+              label: 'Show Energy Popup',
+              onPressed: () => unawaited(_showEnergyPopupTest()),
             ),
             _buildSectionDivider(),
             Text(
@@ -551,37 +566,37 @@ class _LabScreenState extends State<LabScreen> {
             const SizedBox(height: 16),
             _buildStylePreview(
               context,
-              label: 'headlineLarge',
+              label: 'heading1 (headlineLarge)',
               style: theme.headlineLarge,
             ),
             _buildStylePreview(
               context,
-              label: 'headlineMedium',
+              label: 'heading2 (headlineMedium)',
               style: theme.headlineMedium,
             ),
             _buildStylePreview(
               context,
-              label: 'headlineSmall',
+              label: 'heading3 (headlineSmall)',
               style: theme.headlineSmall,
             ),
             _buildStylePreview(
               context,
-              label: 'bodyLarge',
+              label: 'body-default (bodyLarge)',
               style: theme.bodyLarge,
             ),
             _buildStylePreview(
               context,
-              label: 'bodyMedium',
+              label: 'body-secondary (bodyMedium)',
               style: theme.bodyMedium,
             ),
             _buildStylePreview(
               context,
-              label: 'bodySmall',
+              label: 'body-caption (bodySmall)',
               style: theme.bodySmall,
             ),
             _buildStylePreview(
               context,
-              label: 'labelSmall',
+              label: 'body-tiny (labelSmall)',
               style: theme.labelSmall,
             ),
             const SizedBox(height: 24),

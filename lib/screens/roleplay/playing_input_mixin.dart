@@ -165,7 +165,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
     });
   }
 
-  /// 본문: 스크롤 영역 + 상·하단 페이드 + 미션 패널 오버레이.
+  /// 본문: 스크롤 영역 + 상단 페이드 + 미션 패널 오버레이.
   Widget buildPlayingBody({
     required double scaffoldBodyLeadHeight,
     required Widget topOverlay,
@@ -177,16 +177,6 @@ mixin PlayingInputMixin<T extends StatefulWidget>
         scaffoldBodyLeadHeight +
         PlayingConversationLayout.missionPanelTop +
         missionPanelFadeExtent;
-    final footerLowerHeight = _inputMode == _PlayingInputMode.recording
-        ? roleplayMicFooterStackHeight
-        : 10 + 44 + 10 + roleplayFooterIconRowHeight;
-    final bottomFadeExtension =
-        footerLowerHeight +
-        PlayingConversationLayout.scaffoldFooterBottomGap +
-        MediaQuery.paddingOf(context).bottom;
-    final bottomFadeHeight =
-        PlayingConversationLayout.bottomContentFadeBodyExtent +
-        bottomFadeExtension;
     final fadeHorizontalBleed =
         PlayingConversationLayout.scaffoldBodyHorizontalInset;
 
@@ -236,27 +226,6 @@ mixin PlayingInputMixin<T extends StatefulWidget>
                         colors: [
                           PlayingConversationLayout.topContentFadeColor,
                           PlayingConversationLayout.topContentFadeColor
-                              .withValues(alpha: 0),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              Positioned(
-                bottom: -bottomFadeExtension,
-                left: -fadeHorizontalBleed,
-                right: -fadeHorizontalBleed,
-                height: bottomFadeHeight,
-                child: IgnorePointer(
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.bottomCenter,
-                        end: Alignment.topCenter,
-                        colors: [
-                          PlayingConversationLayout.bottomContentFadeColor,
-                          PlayingConversationLayout.bottomContentFadeColor
                               .withValues(alpha: 0),
                         ],
                       ),
@@ -339,12 +308,11 @@ mixin PlayingInputMixin<T extends StatefulWidget>
     Future<void>.delayed(const Duration(milliseconds: 480), performScroll);
   }
 
-  /// 번역 펼침 등 말풍선 확장 시, 가려질 때만 최소 스크롤(하단 페이드 위까지).
+  /// 번역 펼침 등 말풍선 확장 시, 가려질 때만 최소 스크롤.
   void scrollToRevealBubbleIfNeeded({required GlobalKey anchorKey}) {
     const animatedSizeMs = 220;
     const settleBufferMs = 30;
-    final bottomInset =
-        PlayingConversationLayout.bottomContentFadeBodyExtent + 8;
+    const bottomInset = 8;
 
     void performScroll() {
       if (!mounted) return;

@@ -81,6 +81,9 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     onPlayingEnergyExitRequested = () {
       if (mounted) setState(() => _showExitLayer = true);
     };
+    onPlayingEnergyIndicatorEndRoleplay = () {
+      if (mounted) setState(() => _showExitLayer = true);
+    };
     _autoHintEnabled = _resolveDefaultAutoHint();
     _speedIndex = _resolveInitialSpeedIndex();
     _turnCount = _resolveRequiredSpeechCount();

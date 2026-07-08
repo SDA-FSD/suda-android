@@ -409,6 +409,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get energyInfoTitle => 'Energy';
 
   @override
+  String get energyOutOfEnergyTitle => 'Out of Energy';
+
+  @override
   String get energyInfoRechargeUntil => 'Next recharge in @@TIME@@';
 
   @override

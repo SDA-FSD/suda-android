@@ -396,6 +396,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get energyInfoTitle => '에너지';
 
   @override
+  String get energyOutOfEnergyTitle => '에너지 부족';
+
+  @override
   String get energyInfoRechargeUntil => '다음 충전까지 @@TIME@@ 남았어요!';
 
   @override
