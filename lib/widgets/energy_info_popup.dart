@@ -56,7 +56,7 @@ Future<void> showEnergyInsufficientPopup(BuildContext context) async {
   );
 }
 
-/// Playing 에너지 부족(0·402) — 본문은 Opening과 동일, 버튼은 롤플레이 종료.
+/// Playing 에너지 부족(0·402) — 본문은 Home과 동일(충전 타이머), 버튼은 롤플레이 종료.
 Future<void> showPlayingEnergyInsufficientPopup(
   BuildContext context, {
   required VoidCallback onEndRoleplay,
@@ -81,7 +81,6 @@ Future<void> showPlayingEnergyInsufficientPopup(
     bodyWidget: EnergyInfoPopupBody(
       initialEnergy: energy,
       accessToken: accessToken,
-      messageOverride: l10n.energyInsufficient,
     ),
     buttons: [
       DefaultPopupButton(
@@ -144,7 +143,6 @@ Future<void> showEnergyPopupForLab(
         initialEnergy: energy,
         accessToken: '',
         labMode: true,
-        messageOverride: l10n.energyInsufficient,
       ),
       buttons: [
         DefaultPopupButton(
