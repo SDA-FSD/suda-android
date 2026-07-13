@@ -7,8 +7,13 @@ import '../../models/version_models.dart';
 import '../client/suda_http_client.dart';
 
 class VersionApi {
-  static Future<VersionDto> getLatestVersion() async {
-    final uri = SudaHttpClient.buildUri('/v1/latest-version');
+  static Future<VersionDto> getLatestVersion({
+    required String clientVersion,
+  }) async {
+    final uri = SudaHttpClient.buildUri(
+      '/v1/latest-version',
+      {'clientVersion': clientVersion},
+    );
     late final http.Response response;
     try {
       response = await SudaHttpClient.client.get(uri).timeout(const Duration(seconds: 10));

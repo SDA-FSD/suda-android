@@ -282,8 +282,10 @@ class SudaApiClient {
     );
   }
 
-  static Future<VersionDto> getLatestVersion() {
-    return VersionApi.getLatestVersion();
+  static Future<VersionDto> getLatestVersion({
+    required String clientVersion,
+  }) {
+    return VersionApi.getLatestVersion(clientVersion: clientVersion);
   }
 
   static Future<SudaAuthTokens> loginWithGoogle({

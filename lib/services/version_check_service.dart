@@ -40,7 +40,9 @@ class VersionCheckService {
       // 0) 현재 앱 버전 조회
       final currentVersion = await AppVersionService.getAppVersion();
       // 1) 버전 체크 API 호출
-      final versionInfo = await SudaApiClient.getLatestVersion();
+      final versionInfo = await SudaApiClient.getLatestVersion(
+        clientVersion: currentVersion,
+      );
       
       // 최신 버전 정보를 영구 저장 영역에 저장
       await TokenStorage.saveLatestVersion(versionInfo.latestVersion);
