@@ -424,8 +424,9 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     if (mounted) setState(() => _showExitLayer = false);
   }
 
-  void _confirmExit(BuildContext context) {
+  Future<void> _confirmExit(BuildContext context) async {
     _dismissExitLayer();
+    await teardownPlayingRecording();
     if (context.mounted) RoleplayRouter.popToOverview(context);
   }
 
@@ -518,7 +519,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
                   child: Text(l10n.roleplayExitKeepPlaying),
                 ),
                 GestureDetector(
-                  onTap: () => _confirmExit(context),
+                  onTap: () => unawaited(_confirmExit(context)),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     child: Text(

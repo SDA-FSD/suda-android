@@ -41,6 +41,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
   bool _isRecording = false;
   bool _isRecordingStarting = false;
   _PendingRecordingAction? _pendingRecordingAction;
+  Future<void> _recordingTail = Future<void>.value();
   bool _isUserTurn = false;
   bool _isHintEnabled = false;
   bool _hintUsedThisTurn = false;
@@ -96,7 +97,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
     _hintIdleTimer?.cancel();
     _serviceMessageTimer?.cancel();
     _bodyScrollController.dispose();
-    _recorder.dispose();
+    unawaited(_disposeRecorderSafely());
     _typingFocusNode.dispose();
     _typingController.dispose();
     _loadingRotationController.dispose();
@@ -379,7 +380,48 @@ mixin PlayingInputMixin<T extends StatefulWidget>
     _setTypingEnabled(false);
     _setHintEnabled(false);
     if (_isRecording || _isRecordingStarting) {
-      unawaited(_cancelRecording());
+      unawaited(teardownPlayingRecording());
+    }
+  }
+
+  /// 녹음 중 화면 이탈·dispose 전 cancel 완료 대기 (MediaMuxer race 완화).
+  Future<void> teardownPlayingRecording() async {
+    if (_isRecordingStarting && !_isRecording) {
+      _pendingRecordingAction = _PendingRecordingAction.cancel;
+    }
+    await _enqueueRecording(_teardownRecordingImpl);
+    await _recordingTail;
+  }
+
+  Future<R> _enqueueRecording<R>(Future<R> Function() action) {
+    final run = _recordingTail.then((_) => action());
+    _recordingTail = run.then((_) {}, onError: (_) {});
+    return run;
+  }
+
+  Future<void> _teardownRecordingImpl() async {
+    if (_isRecording) {
+      _recordingStartedAt = null;
+      await _stopRecording(discard: true);
+      removePlayingRecordingEntry();
+      if (mounted) {
+        setState(() => _isRecording = false);
+        _setMicState(_PlayingMicButtonState.defaultState);
+      } else {
+        _isRecording = false;
+      }
+    }
+    _pendingRecordingAction = null;
+    _isRecordingStarting = false;
+    _recordingStartedAt = null;
+  }
+
+  Future<void> _disposeRecorderSafely() async {
+    await teardownPlayingRecording();
+    try {
+      _recorder.dispose();
+    } catch (e, st) {
+      debugPrint('[DEBUG] S2 recorder dispose error: $e\n$st');
     }
   }
 
@@ -782,6 +824,10 @@ mixin PlayingInputMixin<T extends StatefulWidget>
   bool _isFetchingHintForTap = false;
 
   Future<void> _beginRecording() async {
+    return _enqueueRecording(_beginRecordingImpl);
+  }
+
+  Future<void> _beginRecordingImpl() async {
     if (_isRecording || _isRecordingStarting) return;
     _cancelHintIdleAndBlink();
 
@@ -821,13 +867,17 @@ mixin PlayingInputMixin<T extends StatefulWidget>
     final pendingAction = _pendingRecordingAction;
     _pendingRecordingAction = null;
     if (pendingAction == _PendingRecordingAction.cancel) {
-      unawaited(_cancelRecording());
+      await _cancelRecordingImpl();
     } else if (pendingAction == _PendingRecordingAction.finish) {
-      unawaited(_finishRecording());
+      await _finishRecordingImpl();
     }
   }
 
   Future<void> _cancelRecording() async {
+    return _enqueueRecording(_cancelRecordingImpl);
+  }
+
+  Future<void> _cancelRecordingImpl() async {
     if (_isRecordingStarting && !_isRecording) {
       _pendingRecordingAction = _PendingRecordingAction.cancel;
       return;
@@ -841,6 +891,10 @@ mixin PlayingInputMixin<T extends StatefulWidget>
   }
 
   Future<void> _finishRecording() async {
+    return _enqueueRecording(_finishRecordingImpl);
+  }
+
+  Future<void> _finishRecordingImpl() async {
     if (_isRecordingStarting && !_isRecording) {
       _pendingRecordingAction = _PendingRecordingAction.finish;
       return;
@@ -883,11 +937,16 @@ mixin PlayingInputMixin<T extends StatefulWidget>
 
   Future<String?> _stopRecording({bool discard = false}) async {
     if (!_isRecording) return null;
-    if (discard) {
-      await _recorder.cancel();
+    try {
+      if (discard) {
+        await _recorder.cancel();
+        return null;
+      }
+      return await _recorder.stop();
+    } catch (e, st) {
+      debugPrint('[DEBUG] S2 recording stop error: $e\n$st');
       return null;
     }
-    return _recorder.stop();
   }
 
   void _deleteRecordingFile(String? path) {
