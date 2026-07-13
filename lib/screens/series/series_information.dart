@@ -214,7 +214,12 @@ class SeriesInformationScreen extends StatelessWidget {
     if (cefr == null) return const [];
 
     return cefr.missions
-        .map((mission) => SudaJsonUtil.localizedMapText(mission.keyExpression))
+        .map(
+          (mission) => SudaJsonUtil.localizedMapText(
+            mission.keyExpression,
+            languageCode: 'en',
+          ),
+        )
         .where((text) => text.isNotEmpty)
         .toList();
   }
