@@ -951,9 +951,10 @@
 ### 스크린 내부 구현 특이사항
 - **배경**: 세로 그라데이션 `#8A38F5` → `#80D7CF`
 - **문구**: pt 하드코딩 (l10n 추후). 폰트 `ChironHeiHK` (`Pratique Mais`, `Aprenda Conversando`)
-- **PREMIUM 카드**: `#48069D`, drop shadow (20,20) blur 20 black 30%, `paywall_star_badge`·`paywall_check_Icon`
-- **PREMIUM 배지 배치**: `paywall_star_badge`는 카드 좌상단 모서리에 겹치며(카드 좌상단 꼭짓점 = 배지 정중앙 좌표), 원형 외곽선 `#51218F` 1.5dp + 바깥 그림자(X:0, Y:4, blur:4, spread:0, `#000000` 25%) 적용. 배지 크기는 카드 폭 비율로 스케일(`cardWidth * 34 / 342`)하고 `30~40` clamp
-- **히어로 캐릭터 배치**: 외곽 `Stack`에서 X 버튼과 같은 `top`(statusBar + 8)에 고정 배치해 모자 상단이 X 밴드와 맞도록 한다. `width = size.width * 0.50`, `right = size.width * -0.03`. 스크롤 본문과 무관(오버레이).
+- **PREMIUM 카드**: `#48069D`, radius **15**, 내부 padding `fromLTRB(20, 2, 20, 18)`, drop shadow (20,20) blur 20 black 30%, `paywall_star_badge`·`paywall_check_Icon`. 콘텐츠 영역(좌우 패딩 24) 안 **가운데 정렬**, 폭 = `(width - 48) * 0.763`(Figma 299/392). 높이는 내용(타이틀+체크 3줄+여백) 기준 자동(Figma H:193은 참고만).
+- **PREMIUM 배지 배치**: 카드 `Stack`(clipBehavior: **Clip.none**) 기준 상대 위치. `badgeSize = cardWidth * 0.11`, `left = -cardWidth * 0.023`, `top = cardTopInset - cardWidth * 0.0134`(세로 오버행도 카드폭 기준). 외곽선: 선형 그라데이션 `#51218F`→`#8A38F5`(좌→우), 굵기 1.5·**inside**(원 그라데이션 + 안쪽 padding). 바깥 그림자(X:0, Y:4, blur:4, spread:0, `#000000` **33%** — Figma 25%이나 보라 카드 위 가시성 보정).
+- **히어로 캐릭터·X 배치**: 히어로+PREMIUM과 **같은 `Stack`**에 두고 캐릭터를 **마지막 child**로 렌더링한다. X는 `top: topPad + 8`(SafeArea 하단) 고정. 캐릭터 `width = size.width * 0.50`, 높이 = width×(1096/804), `right = size.width * -0.03`. 캐릭터 `top`은 텍스트 블록 기준이 아니라 **PREMIUM 카드 실측 top(GlobalKey 측정)** 에 종속해 계산(`cardTop - (characterHeight - overlapHeight)`), 발이 카드 상단에 일정하게 걸치도록 유지.
+- **상단 간격 보정(기기별 status inset 차이 대응)**: `heroTopGap`은 `max((12 + size.height*0.01)*0.8, X하단+8dp 보장식)`으로 계산해 X와 텍스트 겹침만 제어하고, 캐릭터 세로 위치는 카드 실측 좌표 종속으로 분리한다.
 - **타이틀 그라데이션 텍스트**: `ShaderMask` 대신 `TextStyle.foreground` 셰이더로 그려 글리프 하단 잘림 방지.
 - **설명 ↔ PREMIUM 카드 간격**: Hero 설명문단과 PREMIUM 카드 간격은 `size.height * 0.035`
 - **플랜**: 기본 Annual 선택. 선택 카드 `#0CABA8`→`#8A38F5` + 흰 테두리 80%·3px + shadow(X:0, Y:4, blur:4, spread:0, `#000000` 25%). 미선택 `#80D7CF`→`#8A38F5` + `#8A38F5` 30% 오버레이 + 테두리 `#8A38F5` 1px + 공용 카드 shadow(카드 클리핑 antiAlias). 가격 텍스트(`R$16,66/mês`, `R$24,99/mês`, `R$199,99/ano`)는 `#FFFFFF`. 라디오 `paywall_radio_selected`/`unselected`
