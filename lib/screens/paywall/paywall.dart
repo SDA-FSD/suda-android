@@ -494,7 +494,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
         ),
         Positioned(
           right: 12,
-          top: -10,
+          top: 12,
           child: _melhorBadge(),
         ),
       ],
