@@ -35,7 +35,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
   /// 캐릭터 너비(화면 대비). 0.56에서 소폭 축소.
   static const _heroCharacterWidthRatio = 0.50;
   /// 값이 커질수록 왼쪽으로 이동(음수면 화면 우측으로 더 삐져나감).
-  static const _heroCharacterRightRatio = -0.05;
+  static const _heroCharacterRightRatio = -0.03;
   static const _premiumCard = Color(0xFF48069D);
   static const _premiumCardTopInset = 10.0;
   static const _premiumBadgeDesignSize = 34.0;

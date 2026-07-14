@@ -953,7 +953,7 @@
 - **문구**: pt 하드코딩 (l10n 추후). 폰트 `ChironHeiHK` (`Pratique Mais`, `Aprenda Conversando`)
 - **PREMIUM 카드**: `#48069D`, drop shadow (20,20) blur 20 black 30%, `paywall_star_badge`·`paywall_check_Icon`
 - **PREMIUM 배지 배치**: `paywall_star_badge`는 카드 좌상단 모서리에 겹치며(카드 좌상단 꼭짓점 = 배지 정중앙 좌표), 원형 외곽선 `#51218F` 1.5dp + 바깥 그림자(X:0, Y:4, blur:4, spread:0, `#000000` 25%) 적용. 배지 크기는 카드 폭 비율로 스케일(`cardWidth * 34 / 342`)하고 `30~40` clamp
-- **히어로 캐릭터 배치**: 외곽 `Stack`에서 X 버튼과 같은 `top`(statusBar + 8)에 고정 배치해 모자 상단이 X 밴드와 맞도록 한다. `width = size.width * 0.50`, `right = size.width * 0.02`. 스크롤 본문과 무관(오버레이).
+- **히어로 캐릭터 배치**: 외곽 `Stack`에서 X 버튼과 같은 `top`(statusBar + 8)에 고정 배치해 모자 상단이 X 밴드와 맞도록 한다. `width = size.width * 0.50`, `right = size.width * -0.03`. 스크롤 본문과 무관(오버레이).
 - **타이틀 그라데이션 텍스트**: `ShaderMask` 대신 `TextStyle.foreground` 셰이더로 그려 글리프 하단 잘림 방지.
 - **설명 ↔ PREMIUM 카드 간격**: Hero 설명문단과 PREMIUM 카드 간격은 `size.height * 0.035`
 - **플랜**: 기본 Annual 선택. 선택 카드 `#0CABA8`→`#8A38F5` + 흰 테두리 80%·3px + shadow(X:0, Y:4, blur:4, spread:0, `#000000` 25%). 미선택 `#80D7CF`→`#8A38F5` + `#8A38F5` 30% 오버레이 + 테두리 `#8A38F5` 1px + 공용 카드 shadow(카드 클리핑 antiAlias). 가격 텍스트(`R$16,66/mês`, `R$24,99/mês`, `R$199,99/ano`)는 `#FFFFFF`. 라디오 `paywall_radio_selected`/`unselected`
