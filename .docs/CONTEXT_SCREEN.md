@@ -957,8 +957,8 @@
 - **상단 간격 보정(기기별 status inset 차이 대응)**: `heroTopGap`은 `max((12 + size.height*0.01)*0.8, X하단+8dp 보장식)`으로 계산해 X와 텍스트 겹침만 제어하고, 캐릭터 세로 위치는 카드 실측 좌표 종속으로 분리한다.
 - **타이틀 그라데이션 텍스트**: `ShaderMask` 대신 `TextStyle.foreground` 셰이더로 그려 글리프 하단 잘림 방지.
 - **설명 ↔ PREMIUM 카드 간격**: Hero 설명문단과 PREMIUM 카드 간격은 `size.height * 0.035`
-- **플랜**: 기본 Annual 선택. 선택 카드 `#0CABA8`→`#8A38F5` + 흰 테두리 80%·3px + shadow(X:0, Y:4, blur:4, spread:0, `#000000` 25%). 미선택 `#80D7CF`→`#8A38F5` + `#8A38F5` 30% 오버레이 + 테두리 `#8A38F5` 1px + 공용 카드 shadow(카드 클리핑 antiAlias). 가격 텍스트(`R$16,66/mês`, `R$24,99/mês`, `R$199,99/ano`)는 `#FFFFFF`. 라디오 `paywall_radio_selected`/`unselected` **20×20**, 제목+설명 텍스트 블록과 세로 중앙(Row `center`). Annual만 우측 컬럼 상단에 MELHOR 뱃지(`showMelhorBadge`) → 6dp 간격 → 가격(카드 테두리 안·높이 자연 증가, 겹침 없음), 하단 padding 25(Monthly 14). MELHOR: fill `#FFFFFF` 3.8%·radius 24만. stroke는 `_MelhorBadgeStrokePainter`로 링만(`PaintingStyle.stroke` + `SweepGradient` shader, Rect를 strokeWidth/2 확장해 Outside 근사, 굵기 1.2, stops 12/37/62/87·opacity 31/0/31/0). 텍스트 Bold 14 letterSpacing -1% + linear `#FFFFFF`→`#FFD8A4` @ 65%
-- **가격**: Anual `R$16,66/mês` + `R$199,99/ano` / Mensal `R$24,99/mês`
+- **플랜**: 기본 Annual 선택. 선택 카드 `#0CABA8`→`#8A38F5` + 흰 테두리 80%·3px. 미선택 `#80D7CF`→`#8A38F5` + `#8A38F5` 30% 오버레이 + 테두리 `#8A38F5` 1px. 플랜 soft shadow `_planCardShadow`(X:0, Y:8, blur:16, `#000000` 25%, Material 바깥). PREMIUM 카드는 기존 `_cardShadow`(offset 20,20, blur 20) 유지. 가격 `R$16,66/mês`·`R$24,99/mês`=`#FFFFFF`, `R$199,99/ano`=`#80D7CF`. 라디오 20×20; Monthly는 카드 세로 중앙, Annual은 제목+설명 블록 기준. Annual MELHOR: fill `#FFFFFF` 3.8%·radius 24; stroke `_MelhorBadgeStrokePainter`; 별 shadow 47% / 텍스트 shadow 27% (Y4 blur4); top padding 6·하단 25(Monthly 14)
+- **가격**: Anual `R$16,66/mês`(`#FFFFFF`) + `R$199,99/ano`(`#80D7CF`) / Mensal `R$24,99/mês`(`#FFFFFF`)
 - **CTA**: Assinar agora 내부 배경은 좌→우 `#8A38F5`→`#280752`, opacity 79%(alpha `0xC9`). Terms/Privacy = no-op. X = pop
 - **에셋**: `assets/images/icons/paywall_character.png`, `assets/images/icons/paywall_*`
 

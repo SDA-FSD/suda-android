@@ -76,10 +76,11 @@ class _PaywallScreenState extends State<PaywallScreen> {
     blurRadius: 20,
     spreadRadius: 0,
   );
-  static const _selectedPlanShadow = BoxShadow(
+  /// 플랜 카드 전용 soft drop (넓고 뿌옇게).
+  static const _planCardShadow = BoxShadow(
     color: Color(0x40000000),
-    offset: Offset(0, 4),
-    blurRadius: 4,
+    offset: Offset(0, 8),
+    blurRadius: 16,
     spreadRadius: 0,
   );
 
@@ -503,6 +504,12 @@ class _PaywallScreenState extends State<PaywallScreen> {
     );
   }
 
+  static const _melhorGlyphShadow = Shadow(
+    color: Color(0x45000000), // #000000 27%
+    offset: Offset(0, 4),
+    blurRadius: 4,
+  );
+
   Widget _melhorBadge() {
     const strokeWidth = 1.2;
     const radius = 24.0;
@@ -523,16 +530,30 @@ class _PaywallScreenState extends State<PaywallScreen> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Image.asset(
-                'assets/images/icons/paywall_small_star.png',
-                width: 12,
-                height: 12,
+              Container(
+                decoration: const BoxDecoration(
+                  boxShadow: [
+                    BoxShadow(
+                      color: Color(0x78000000),
+                      offset: Offset(0, 4),
+                      blurRadius: 4,
+                      spreadRadius: 0,
+                    ),
+                  ],
+                ),
+                child: Image.asset(
+                  'assets/images/icons/paywall_small_star.png',
+                  width: 12,
+                  height: 12,
+                ),
               ),
               const SizedBox(width: 4),
               _gradientText(
                 text: 'MELHOR',
-                style: _style(size: 14, weight: FontWeight.w700)
-                    .copyWith(letterSpacing: 14 * -0.01),
+                style: _style(size: 14, weight: FontWeight.w700).copyWith(
+                  letterSpacing: 14 * -0.01,
+                ),
+                shadows: const [_melhorGlyphShadow],
                 gradient: const LinearGradient(
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
@@ -557,134 +578,156 @@ class _PaywallScreenState extends State<PaywallScreen> {
     bool showMelhorBadge = false,
   }) {
     final radius = BorderRadius.circular(16);
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
+    // 그림자는 Material/Ink 바깥에 둬 clip에 잘리지 않게 함.
+    return Container(
+      decoration: BoxDecoration(
         borderRadius: radius,
-        child: Ink(
-          decoration: BoxDecoration(
-            borderRadius: radius,
-            gradient: selected
-                ? const LinearGradient(
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                    colors: [Color(0xFF0CABA8), Color(0xFF8A38F5)],
-                  )
-                : const LinearGradient(
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                    colors: [Color(0xFF80D7CF), Color(0xFF8A38F5)],
-                  ),
-            border: Border.all(
-              color: selected
-                  ? const Color(0xCCFFFFFF)
-                  : _accentPurple,
-              width: selected ? 3 : 1,
+        boxShadow: const [_planCardShadow],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        clipBehavior: Clip.none,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: radius,
+          child: Ink(
+            decoration: BoxDecoration(
+              borderRadius: radius,
+              gradient: selected
+                  ? const LinearGradient(
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                      colors: [Color(0xFF0CABA8), Color(0xFF8A38F5)],
+                    )
+                  : const LinearGradient(
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                      colors: [Color(0xFF80D7CF), Color(0xFF8A38F5)],
+                    ),
+              border: Border.all(
+                color: selected
+                    ? const Color(0xCCFFFFFF)
+                    : _accentPurple,
+                width: selected ? 3 : 1,
+              ),
             ),
-            boxShadow: selected
-                ? const [_selectedPlanShadow]
-                : const [_cardShadow],
-          ),
-          child: ClipRRect(
-            borderRadius: radius,
-            clipBehavior: Clip.antiAlias,
-            child: Stack(
-              children: [
-                if (!selected)
-                  const Positioned.fill(
-                    child: ColoredBox(color: Color(0x4D8A38F5)),
-                  ),
-                Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    14,
-                    14,
-                    14,
-                    showMelhorBadge ? 25 : 14,
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+            child: ClipRRect(
+              borderRadius: radius,
+              clipBehavior: Clip.antiAlias,
+              child: Stack(
+                children: [
+                  if (!selected)
+                    const Positioned.fill(
+                      child: ColoredBox(color: Color(0x4D8A38F5)),
+                    ),
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      14,
+                      showMelhorBadge ? 6 : 14,
+                      14,
+                      showMelhorBadge ? 25 : 14,
+                    ),
+                    child: Row(
+                      crossAxisAlignment: showMelhorBadge
+                          ? CrossAxisAlignment.start
+                          : CrossAxisAlignment.center,
+                      children: [
+                        if (!showMelhorBadge) ...[
+                          Image.asset(
+                            selected
+                                ? 'assets/images/icons/paywall_radio_selected.png'
+                                : 'assets/images/icons/paywall_radio_unselected.png',
+                            width: 20,
+                            height: 20,
+                          ),
+                          const SizedBox(width: 10),
+                        ],
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (showMelhorBadge) const SizedBox(height: 30),
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  if (showMelhorBadge) ...[
+                                    Transform.translate(
+                                      offset: const Offset(0, -4),
+                                      child: Image.asset(
+                                        selected
+                                            ? 'assets/images/icons/paywall_radio_selected.png'
+                                            : 'assets/images/icons/paywall_radio_unselected.png',
+                                        width: 20,
+                                        height: 20,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                  ],
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          title,
+                                          style: _style(
+                                            size: 20,
+                                            weight: FontWeight.w700,
+                                            color: _planTitle,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          subtitle,
+                                          style: _style(
+                                            size: 14,
+                                            color: _planTitle.withValues(
+                                              alpha: 0.85,
+                                            ),
+                                            height: 1.3,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            if (showMelhorBadge) const SizedBox(height: 16),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Image.asset(
-                                  selected
-                                      ? 'assets/images/icons/paywall_radio_selected.png'
-                                      : 'assets/images/icons/paywall_radio_unselected.png',
-                                  width: 20,
-                                  height: 20,
-                                ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        title,
-                                        style: _style(
-                                          size: 20,
-                                          weight: FontWeight.w700,
-                                          color: _planTitle,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        subtitle,
-                                        style: _style(
-                                          size: 14,
-                                          color: _planTitle.withValues(
-                                            alpha: 0.85,
-                                          ),
-                                          height: 1.3,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
+                            if (showMelhorBadge) ...[
+                              _melhorBadge(),
+                              const SizedBox(height: 6),
+                            ],
+                            Text(
+                              priceMain,
+                              style: _style(
+                                size: 20,
+                                weight: FontWeight.w700,
+                                color: Colors.white,
+                              ),
                             ),
+                            if (priceSub != null) ...[
+                              const SizedBox(height: 2),
+                              Text(
+                                priceSub,
+                                style: _style(size: 15, color: _yearPrice),
+                              ),
+                            ],
                           ],
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (showMelhorBadge) ...[
-                            _melhorBadge(),
-                            const SizedBox(height: 6),
-                          ],
-                          Text(
-                            priceMain,
-                            style: _style(
-                              size: 20,
-                              weight: FontWeight.w700,
-                              color: Colors.white,
-                            ),
-                          ),
-                          if (priceSub != null) ...[
-                            const SizedBox(height: 2),
-                            Text(
-                              priceSub,
-                              style: _style(size: 15, color: Colors.white),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
