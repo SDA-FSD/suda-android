@@ -11,6 +11,7 @@ import 'endpoints/auth_api.dart';
 import 'endpoints/feedback_api.dart';
 import 'endpoints/home_api.dart';
 import 'endpoints/notice_api.dart';
+import 'endpoints/purchase_api.dart';
 import 'endpoints/push_api.dart';
 import 'endpoints/roleplay_api.dart';
 import 'endpoints/series_api.dart';
@@ -411,6 +412,19 @@ class SudaApiClient {
     required String content,
   }) {
     return FeedbackApi.sendFeedback(accessToken: accessToken, content: content);
+  }
+
+  /// POST /v1/purchases/verify — INAPP TEMP 검증(지급 없음, 서버 로그용).
+  static Future<void> verifyPurchase({
+    required String accessToken,
+    required String purchaseToken,
+    required String productId,
+  }) {
+    return PurchaseApi.verifyPurchase(
+      accessToken: accessToken,
+      purchaseToken: purchaseToken,
+      productId: productId,
+    );
   }
 
   /// GET /v1/users/notification?pageNum=… (pageNum은 0부터)

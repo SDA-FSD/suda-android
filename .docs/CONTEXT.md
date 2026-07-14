@@ -189,7 +189,7 @@
 **⚠️ 중요**: 스크린 관련 작업(추가/수정/삭제) 시 반드시 `CONTEXT_SCREEN.md` 문서도 함께 업데이트해야 합니다.
 
 ## 7-0. 인증/동의 플로우 메모
-- 서비스 이용 동의(`SUDA_AGREEMENT`)가 필요할 때는 `LoginScreen` 위에 bottom-up 레이어(blur+dim)로 동의 UI를 노출한다. 동의 완료 시 `POST /v1/users/agreement`와 AppsFlyer `af_complete_registration` 이벤트를 호출한 뒤 **동의 직후 1회** `FirstCefrLevelScreen`(`lib/screens/first_cefr_level.dart`)으로 전환한다. Confirm 시 `PUT /v1/users/language-level` 호출 후 Main(Home) 진입(API 실패여도 Home). Lab(dev): Setting > Lab > **Open First CEFR Level** · **Open Paywall**(`PaywallScreen`, `lib/screens/paywall/paywall.dart`, bottom-up Full Screen). 레이어를 동의 없이 닫을 때(dim 바깥 탭)는 로컬 JWT/refresh 삭제(`TokenStorage.clearTokens`)·`AuthService.signOut()`·메인 상태 초기화로 비로그인 `LoginScreen`으로 돌아간다.
+- 서비스 이용 동의(`SUDA_AGREEMENT`)가 필요할 때는 `LoginScreen` 위에 bottom-up 레이어(blur+dim)로 동의 UI를 노출한다. 동의 완료 시 `POST /v1/users/agreement`와 AppsFlyer `af_complete_registration` 이벤트를 호출한 뒤 **동의 직후 1회** `FirstCefrLevelScreen`(`lib/screens/first_cefr_level.dart`)으로 전환한다. Confirm 시 `PUT /v1/users/language-level` 호출 후 Main(Home) 진입(API 실패여도 Home). Lab 진입: Setting > Lab (`AppConfig.isDev` · **TEMP `isPrd`** · `kDebugMode`). Lab에서 First CEFR / Paywall / IAP 테스트 가능. **IAP 진행상황은 §7-2**. 레이어를 동의 없이 닫을 때(dim 바깥 탭)는 로컬 JWT/refresh 삭제(`TokenStorage.clearTokens`)·`AuthService.signOut()`·메인 상태 초기화로 비로그인 `LoginScreen`으로 돌아간다.
 
 ## 7-1. Roleplay 스크린 컨텍스트
 
@@ -199,6 +199,55 @@
 - **RoleplayOpeningScreen** (S2): `SeriesStateService.selectedEpisode`의 `thumbnailImgPath` 배경·`title`/`briefing`·`aiCharacter.name` 본문. duration 헤더 없음. Start 시 `POST /rps2/sessions` (`seriesId`, `episodeId`) → `sessionId == '0'`이면 에너지 부족 팝업·Opening 유지, 정상 ID면 `SeriesStateService.setSession` 후 Playing(에너지 소비는 Playing 발화 처리 시).
 - **RoleplayPlayingScreen** (S2): `lib/screens/roleplay/playing.dart`. S1 `playing_backup.dart`·세션/결과 API 클라이언트는 **삭제됨**(2026-06). 헤더: `RoleplayScaffold`·episode `title`(로컬 언어)·X→나가기 확인 레이어·우측 `kebab.png` 설정패널. 상세는 `.docs/CONTEXT_SCREEN.md` §13.
 - **S1 Roleplay 잔여 코드 정리**(2026-06): `review_chat.dart`·`review_ending.dart`·`playing_backup.dart` 삭제. `result.dart`/`ending.dart`/`result_report.dart` S2 전용화. `RoleplayApi`는 `getRoleplayOverview`(딥링크 overview)·`updateSpeedRate`(Playing 속도)만 유지. Profile Saved는 `GET/DELETE /v1/users/expressions` + S2 TTS sound.
+
+## 7-2. IAP (앱내결제) — 현재 진행상황 (2026-07)
+
+### 한줄 요약
+- **Lab에서만** Play 상품 조회·구매·(INAPP) 서버 verify TEMP까지 됨. **Paywall/실서비스 결제·지급·구독 verify는 아직 없음.**
+
+### 완료됨
+- 패키지: `in_app_purchase` + `in_app_purchase_android`
+- Lab UI: `lib/screens/setting/lab.dart` — 상품별 **Query / Buy**, 로그 덤프, `purchaseStream` 구독
+- Buy 시 `GooglePlayPurchaseParam.applicationUserName` =
+  `SHA-256(UTF-8("{userId}"))` 소문자 hex (`lib/utils/iap_obfuscated_account_id.dart`).
+  JWT→`getCurrentUser`로 `user.id` 확보. verify body에는 해시 **미포함**.
+- API: `lib/api/endpoints/purchase_api.dart` → `SudaApiClient.verifyPurchase`
+  - `POST /v1/purchases/verify` body `{ purchaseToken, productId }` · JWT 필수
+  - **INAPP·SUBS 동일 전송**(Lab). 서버가 `productId`로 분기. 200 = 호출 처리(지급 아님 TEMP 가능). 응답으로 성공 판단 금지
+- Play Internal에 Billing 포함 prd AAB 업로드함(상품 조회 해금용). 앱 버전: `1.1.1+41` (**TEMP prd Lab 허용**)
+- Paywall UI만: `lib/screens/paywall/paywall.dart` (결제 연동 없음)
+
+### 상품 ID (Play Console / Lab 카탈로그 `_kLabIapSkus`)
+| 구분 | productId | basePlanId / 비고 | Lab Buy | verify |
+|------|-----------|-------------------|---------|--------|
+| INAPP | `unlimited_energy_10_minute` | consumable | O | O |
+| INAPP | `energy_capacity_6` | — | O | O |
+| INAPP | `energy_capacity_7` | — | O | O |
+| SUBS | `subscription_premium` | `bp-premium-monthly` | O | O (서버 분기) |
+| SUBS | `subscription_premium` | `bp-premium-yearly` | O | O (서버 분기) |
+
+- Purchase option ID(`po-…`)는 조회 키가 **아님**. Lab/Billing에는 **productId**만 넣는다.
+- 클라이언트는 Play에서 전 상품 목록을 못 뽑음 → ID는 앱에 하드코딩.
+
+### 반드시 지킬 제약
+1. IAP는 **applicationId(=패키지) 단위**. 상품은 prd `kr.sudatalk.app`에 있음 → **dev/local/stg 패키지로는 조회·구매 불가**.
+2. 서버 verify의 `packageName`은 body에 없고 **ENV 고정** (local→`.local`, dev→`.dev`, stg→`.stg`, prd→`kr.sudatalk.app`). **산 패키지와 API ENV가 같아야** 함.
+3. Lab 메뉴: `AppConfig.isDev || AppConfig.isPrd || kDebugMode` (`setting.dart` / `lab.dart`). **TEMP: prd release에서도 Lab 노출**(IAP Internal 테스트). 끝나면 `isPrd` 조건 제거.
+4. 스토어 설치본 ↔ 유선 설치본은 서로 업데이트 불가(정상). IAP 테스트는 한쪽만 쓰면 됨.
+5. 라이선스 테스터·상품 Active 필요.
+
+### 아직 안 함 (다음 작업 후보)
+- Paywall CTA → 실제 구매 연결
+- 구매 후  entitlement 지급(에너지 무제한/용량 등) · acknowledge 정책 확정
+- 구독(SUBS) 서버 verify 분기·지급 로직 (클라이언트는 이미 동일 endpoint로 전송)
+- restore / 에러 UX / 프로덕션 진입점(에너지 팝업·Profile 등)
+
+### 관련 파일
+- Lab: `lib/screens/setting/lab.dart`
+- obfuscatedAccountId: `lib/utils/iap_obfuscated_account_id.dart`
+- Verify API: `lib/api/endpoints/purchase_api.dart`, `lib/api/suda_api_client.dart`
+- Paywall(UI only): `lib/screens/paywall/paywall.dart`
+- 스크린 문서: `.docs/CONTEXT_SCREEN.md` § PaywallScreen
 
 ## 8. 스타일 / 디자인 / 배치 규칙
 

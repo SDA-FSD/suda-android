@@ -1,14 +1,20 @@
-import 'dart:async' show unawaited;
+import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:in_app_purchase_android/in_app_purchase_android.dart';
 
+import '../../api/suda_api_client.dart';
 import '../../config/app_config.dart';
 import '../../effects/like_progress_effect.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/series_models.dart';
 import '../../routes/roleplay_router.dart';
 import '../../services/series_state_service.dart';
+import '../../services/token_storage.dart';
 import '../../utils/default_toast.dart';
+import '../../utils/iap_obfuscated_account_id.dart';
 import '../../widgets/main_reregistration_restricted_popup.dart'
     show
         showMainReregistrationRestrictedAuthCheckDefaultPopupForLab,
@@ -22,6 +28,65 @@ import 'announcements.dart'
 import '../roleplay/try_again.dart';
 import '../first_cefr_level.dart';
 import '../paywall/paywall.dart';
+
+enum _LabIapKind { inapp, subs }
+
+class _LabIapSku {
+  const _LabIapSku({
+    required this.key,
+    required this.productId,
+    required this.label,
+    required this.kind,
+    this.basePlanId,
+    this.consumable = false,
+  });
+
+  final String key;
+  final String productId;
+  final String label;
+  final _LabIapKind kind;
+  final String? basePlanId;
+  final bool consumable;
+}
+
+const List<_LabIapSku> _kLabIapSkus = [
+  _LabIapSku(
+    key: 'unlimited_energy_10_minute',
+    productId: 'unlimited_energy_10_minute',
+    label: 'Unlimited Energy 10m',
+    kind: _LabIapKind.inapp,
+    consumable: true,
+  ),
+  _LabIapSku(
+    key: 'energy_capacity_6',
+    productId: 'energy_capacity_6',
+    label: 'Energy Capacity 6',
+    kind: _LabIapKind.inapp,
+  ),
+  _LabIapSku(
+    key: 'energy_capacity_7',
+    productId: 'energy_capacity_7',
+    label: 'Energy Capacity 7',
+    kind: _LabIapKind.inapp,
+  ),
+  _LabIapSku(
+    key: 'subscription_premium_monthly',
+    productId: 'subscription_premium',
+    label: 'Premium Monthly',
+    kind: _LabIapKind.subs,
+    basePlanId: 'bp-premium-monthly',
+  ),
+  _LabIapSku(
+    key: 'subscription_premium_yearly',
+    productId: 'subscription_premium',
+    label: 'Premium Yearly',
+    kind: _LabIapKind.subs,
+    basePlanId: 'bp-premium-yearly',
+  ),
+];
+
+Set<String> get _kLabIapProductIds =>
+    {for (final sku in _kLabIapSkus) sku.productId};
 
 /// Lab에서 재현 가능한 `DefaultPopup` 목록.
 /// `DefaultPopup` 전환이 완료될 때마다 여기에 **한 항목씩** 추가한다.
@@ -77,12 +142,19 @@ class _LabScreenState extends State<LabScreen> {
   bool _energyPopupUnlimited = false;
   final TextEditingController _energyPopupCountController =
       TextEditingController(text: '3');
+  final TextEditingController _iapProductIdsController =
+      TextEditingController(text: _kLabIapProductIds.join(', '));
+  bool _iapBusy = false;
+  String _iapLog = '';
+  StreamSubscription<List<PurchaseDetails>>? _iapPurchaseSub;
   static const _longToastTestMessage = 'Test Popup, Test Toast, 가나다라마바사아자차카타파하';
   static const _stylePreviewLines = ['말해요!?', 'Talk', 'E sua vez primeiro!'];
 
   @override
   void dispose() {
+    unawaited(_iapPurchaseSub?.cancel());
     _energyPopupCountController.dispose();
+    _iapProductIdsController.dispose();
     super.dispose();
   }
 
@@ -92,6 +164,13 @@ class _LabScreenState extends State<LabScreen> {
     if (kLabDefaultPopupOptions.isNotEmpty) {
       _selectedLabDefaultPopupId = kLabDefaultPopupOptions.first.id;
     }
+    _iapPurchaseSub = InAppPurchase.instance.purchaseStream.listen(
+      _onIapPurchaseUpdates,
+      onError: (Object e, StackTrace st) {
+        debugPrint('[DEBUG] Lab IAP purchaseStream error: $e\n$st');
+        _appendIapLog('purchaseStream error: $e');
+      },
+    );
   }
 
   @override
@@ -100,7 +179,8 @@ class _LabScreenState extends State<LabScreen> {
     if (_guarded) return;
     _guarded = true;
 
-    if (!AppConfig.isDev) {
+    // TEMP: prd에서도 Lab 허용 (IAP Internal 테스트용). 끝나면 isPrd 제거.
+    if (!AppConfig.isDev && !AppConfig.isPrd && !kDebugMode) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         Navigator.of(context).pop();
@@ -146,6 +226,366 @@ class _LabScreenState extends State<LabScreen> {
   Future<void> _openPaywallScreen() async {
     if (!mounted) return;
     await PaywallScreen.push(context);
+  }
+
+  void _appendIapLog(String message) {
+    final stamped = '[${DateTime.now().toIso8601String()}] $message';
+    debugPrint('[DEBUG] Lab IAP: $stamped');
+    if (!mounted) return;
+    setState(() {
+      _iapLog = _iapLog.isEmpty ? stamped : '$_iapLog\n$stamped';
+    });
+  }
+
+  Set<String> _parseIapProductIds() {
+    return _iapProductIdsController.text
+        .split(RegExp(r'[\s,;]+'))
+        .map((s) => s.trim())
+        .where((s) => s.isNotEmpty)
+        .toSet();
+  }
+
+  String _formatIapProductDetails(ProductDetails product) {
+    final buf = StringBuffer()
+      ..writeln('---')
+      ..writeln('id: ${product.id}')
+      ..writeln('title: ${product.title}')
+      ..writeln('description: ${product.description}')
+      ..writeln('price: ${product.price}')
+      ..writeln('rawPrice: ${product.rawPrice}')
+      ..writeln('currencyCode: ${product.currencyCode}')
+      ..writeln('currencySymbol: ${product.currencySymbol}');
+
+    if (product is GooglePlayProductDetails) {
+      final wrapper = product.productDetails;
+      buf
+        ..writeln('android.productType: ${wrapper.productType}')
+        ..writeln('android.name: ${wrapper.name}')
+        ..writeln('android.subscriptionIndex: ${product.subscriptionIndex}')
+        ..writeln('android.offerToken: ${product.offerToken}');
+
+      final offers = wrapper.subscriptionOfferDetails;
+      if (offers != null) {
+        for (var i = 0; i < offers.length; i++) {
+          final offer = offers[i];
+          buf
+            ..writeln('android.offer[$i].basePlanId: ${offer.basePlanId}')
+            ..writeln('android.offer[$i].offerId: ${offer.offerId}')
+            ..writeln('android.offer[$i].offerTags: ${offer.offerTags}')
+            ..writeln(
+              'android.offer[$i].offerIdToken: ${offer.offerIdToken}',
+            );
+          for (var p = 0; p < offer.pricingPhases.length; p++) {
+            final phase = offer.pricingPhases[p];
+            buf
+              ..writeln(
+                'android.offer[$i].phase[$p].formattedPrice: '
+                '${phase.formattedPrice}',
+              )
+              ..writeln(
+                'android.offer[$i].phase[$p].billingPeriod: '
+                '${phase.billingPeriod}',
+              )
+              ..writeln(
+                'android.offer[$i].phase[$p].billingCycleCount: '
+                '${phase.billingCycleCount}',
+              )
+              ..writeln(
+                'android.offer[$i].phase[$p].priceAmountMicros: '
+                '${phase.priceAmountMicros}',
+              )
+              ..writeln(
+                'android.offer[$i].phase[$p].priceCurrencyCode: '
+                '${phase.priceCurrencyCode}',
+              )
+              ..writeln(
+                'android.offer[$i].phase[$p].recurrenceMode: '
+                '${phase.recurrenceMode}',
+              );
+          }
+        }
+      }
+
+      final oneTime = wrapper.oneTimePurchaseOfferDetails;
+      if (oneTime != null) {
+        buf
+          ..writeln(
+            'android.oneTime.formattedPrice: ${oneTime.formattedPrice}',
+          )
+          ..writeln(
+            'android.oneTime.priceAmountMicros: ${oneTime.priceAmountMicros}',
+          )
+          ..writeln(
+            'android.oneTime.priceCurrencyCode: ${oneTime.priceCurrencyCode}',
+          );
+      }
+    }
+
+    return buf.toString();
+  }
+
+  Future<void> _queryIapProductIds(Set<String> ids, {String? title}) async {
+    if (ids.isEmpty) {
+      _appendIapLog('No productIds to query.');
+      return;
+    }
+    if (_iapBusy) return;
+
+    setState(() => _iapBusy = true);
+    _appendIapLog(
+      '${title ?? 'Query'} start — ENV=${AppConfig.env} ids=${ids.join(',')}',
+    );
+
+    try {
+      final iap = InAppPurchase.instance;
+      final available = await iap.isAvailable();
+      if (!available) {
+        _appendIapLog('Store not available (isAvailable=false).');
+        return;
+      }
+
+      final response = await iap.queryProductDetails(ids);
+      final buf = StringBuffer()
+        ..writeln('requestedIds: ${ids.join(', ')}')
+        ..writeln('found: ${response.productDetails.length}')
+        ..writeln(
+          'notFoundIDs: ${response.notFoundIDs.isEmpty ? '(none)' : response.notFoundIDs.join(', ')}',
+        );
+      if (response.error != null) {
+        buf
+          ..writeln('error.code: ${response.error!.code}')
+          ..writeln('error.message: ${response.error!.message}')
+          ..writeln('error.details: ${response.error!.details}');
+      }
+      for (final product in response.productDetails) {
+        buf.write(_formatIapProductDetails(product));
+      }
+      _appendIapLog(buf.toString().trimRight());
+    } catch (e, st) {
+      debugPrint('[DEBUG] Lab IAP query failed: $e\n$st');
+      _appendIapLog('Query exception: $e');
+    } finally {
+      if (mounted) setState(() => _iapBusy = false);
+    }
+  }
+
+  Future<void> _queryIapProducts() =>
+      _queryIapProductIds(_parseIapProductIds(), title: 'Query freeform');
+
+  Future<void> _queryLabSku(_LabIapSku sku) =>
+      _queryIapProductIds({sku.productId}, title: 'Query ${sku.label}');
+
+  Future<void> _queryAllLabSkus() =>
+      _queryIapProductIds(_kLabIapProductIds, title: 'Query all catalog');
+
+  ProductDetails? _pickProductForSku(
+    _LabIapSku sku,
+    List<ProductDetails> products,
+  ) {
+    final matches = products.where((p) => p.id == sku.productId).toList();
+    if (matches.isEmpty) return null;
+    if (sku.kind != _LabIapKind.subs || sku.basePlanId == null) {
+      return matches.first;
+    }
+    for (final product in matches) {
+      if (product is! GooglePlayProductDetails) continue;
+      final index = product.subscriptionIndex;
+      final offers = product.productDetails.subscriptionOfferDetails;
+      if (index == null || offers == null || index >= offers.length) continue;
+      if (offers[index].basePlanId == sku.basePlanId) {
+        return product;
+      }
+    }
+    return matches.first;
+  }
+
+  Future<void> _buyLabSku(_LabIapSku sku) async {
+    if (_iapBusy) return;
+    setState(() => _iapBusy = true);
+    _appendIapLog(
+      'Buy ${sku.label} start — productId=${sku.productId}'
+      '${sku.basePlanId == null ? '' : ' basePlanId=${sku.basePlanId}'}'
+      ' ENV=${AppConfig.env}',
+    );
+
+    try {
+      final accessToken = await TokenStorage.loadAccessToken();
+      if (accessToken == null || accessToken.isEmpty) {
+        _appendIapLog('Buy aborted — no JWT (login required)');
+        if (mounted) {
+          DefaultToast.show(context, 'Login required for buy', isError: true);
+        }
+        return;
+      }
+
+      final user = await SudaApiClient.getCurrentUser(accessToken: accessToken);
+      if (user.id <= 0) {
+        _appendIapLog('Buy aborted — invalid user.id=${user.id}');
+        if (mounted) {
+          DefaultToast.show(context, 'Invalid user id', isError: true);
+        }
+        return;
+      }
+      final obfuscatedAccountId = iapObfuscatedAccountIdFromUserId(user.id);
+      _appendIapLog(
+        'obfuscatedAccountId set — userId=${user.id} '
+        'sha256_hex=${obfuscatedAccountId.substring(0, 8)}…',
+      );
+
+      final iap = InAppPurchase.instance;
+      if (!await iap.isAvailable()) {
+        _appendIapLog('Store not available.');
+        return;
+      }
+
+      final response = await iap.queryProductDetails({sku.productId});
+      if (response.notFoundIDs.contains(sku.productId) ||
+          response.productDetails.isEmpty) {
+        _appendIapLog(
+          'Buy failed: product not found (${response.notFoundIDs.join(', ')})',
+        );
+        if (mounted) {
+          DefaultToast.show(
+            context,
+            'Product not found: ${sku.productId}',
+            isError: true,
+          );
+        }
+        return;
+      }
+
+      final product = _pickProductForSku(sku, response.productDetails);
+      if (product == null) {
+        _appendIapLog('Buy failed: no matching offer for ${sku.key}');
+        return;
+      }
+
+      _appendIapLog(
+        'Launching purchase UI — price=${product.price}'
+        '${product is GooglePlayProductDetails ? ' offerToken=${product.offerToken}' : ''}',
+      );
+
+      // applicationUserName → Play BillingFlowParams.setObfuscatedAccountId
+      final purchaseParam = GooglePlayPurchaseParam(
+        productDetails: product,
+        applicationUserName: obfuscatedAccountId,
+        offerToken: product is GooglePlayProductDetails
+            ? product.offerToken
+            : null,
+      );
+
+      final bool launched;
+      if (sku.consumable) {
+        launched = await iap.buyConsumable(purchaseParam: purchaseParam);
+      } else {
+        launched = await iap.buyNonConsumable(purchaseParam: purchaseParam);
+      }
+      _appendIapLog('buy* launched=$launched (await purchaseStream)');
+    } catch (e, st) {
+      debugPrint('[DEBUG] Lab IAP buy failed: $e\n$st');
+      _appendIapLog('Buy exception: $e');
+      if (mounted) {
+        DefaultToast.show(context, 'Buy failed: $e', isError: true);
+      }
+    } finally {
+      if (mounted) setState(() => _iapBusy = false);
+    }
+  }
+
+  String _purchaseTokenOf(PurchaseDetails purchase) {
+    if (purchase is GooglePlayPurchaseDetails) {
+      return purchase.billingClientPurchase.purchaseToken;
+    }
+    return purchase.verificationData.serverVerificationData;
+  }
+
+  Future<void> _onIapPurchaseUpdates(List<PurchaseDetails> purchases) async {
+    for (final purchase in purchases) {
+      _appendIapLog(
+        'purchaseStream status=${purchase.status} '
+        'productID=${purchase.productID} '
+        'purchaseID=${purchase.purchaseID} '
+        'pendingComplete=${purchase.pendingCompletePurchase}',
+      );
+
+      if (purchase.status == PurchaseStatus.pending) {
+        continue;
+      }
+
+      if (purchase.status == PurchaseStatus.error) {
+        _appendIapLog(
+          'purchase error: ${purchase.error?.code} ${purchase.error?.message}',
+        );
+        if (mounted) {
+          DefaultToast.show(
+            context,
+            'Purchase error: ${purchase.error?.message ?? purchase.error?.code}',
+            isError: true,
+          );
+        }
+      } else if (purchase.status == PurchaseStatus.canceled) {
+        _appendIapLog('purchase canceled');
+      } else if (purchase.status == PurchaseStatus.purchased ||
+          purchase.status == PurchaseStatus.restored) {
+        final token = _purchaseTokenOf(purchase);
+        _appendIapLog(
+          'purchase ok — productId=${purchase.productID} '
+          'purchaseToken=$token',
+        );
+        // INAPP/SUBS 동일 전송. 서버가 productId로 분기.
+        await _verifyPurchaseWithServer(
+          productId: purchase.productID,
+          purchaseToken: token,
+        );
+      }
+
+      if (purchase.pendingCompletePurchase) {
+        try {
+          await InAppPurchase.instance.completePurchase(purchase);
+          _appendIapLog('completePurchase done for ${purchase.productID}');
+        } catch (e) {
+          _appendIapLog('completePurchase failed: $e');
+        }
+      }
+    }
+  }
+
+  Future<void> _verifyPurchaseWithServer({
+    required String productId,
+    required String purchaseToken,
+  }) async {
+    final accessToken = await TokenStorage.loadAccessToken();
+    if (accessToken == null || accessToken.isEmpty) {
+      _appendIapLog('verify skipped — no JWT (login required)');
+      if (mounted) {
+        DefaultToast.show(context, 'Login required for verify', isError: true);
+      }
+      return;
+    }
+
+    _appendIapLog(
+      'POST /v1/purchases/verify — ENV=${AppConfig.env} '
+      'productId=$productId (server packageName follows ENV)',
+    );
+    try {
+      await SudaApiClient.verifyPurchase(
+        accessToken: accessToken,
+        purchaseToken: purchaseToken,
+        productId: productId,
+      );
+      _appendIapLog(
+        'verify HTTP OK (TEMP: log-only on server, not entitlement grant)',
+      );
+      if (mounted) {
+        DefaultToast.show(context, 'Verify called (TEMP OK)');
+      }
+    } catch (e, st) {
+      debugPrint('[DEBUG] Lab IAP verify failed: $e\n$st');
+      _appendIapLog('verify failed: $e');
+      if (mounted) {
+        DefaultToast.show(context, 'Verify failed: $e', isError: true);
+      }
+    }
   }
 
   void _seedLabS2TryAgainState() {
@@ -322,6 +762,125 @@ class _LabScreenState extends State<LabScreen> {
               label: 'Open Paywall',
               onPressed: () => unawaited(_openPaywallScreen()),
             ),
+            _buildSectionDivider(),
+            Text(
+              'IAP Products',
+              style: theme.headlineSmall?.copyWith(color: Colors.white),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'INAPP/SUBS buy → POST /v1/purchases/verify (서버가 productId 분기).\n'
+              'ENV=${AppConfig.env} (server packageName follows ENV).',
+              style: theme.bodySmall?.copyWith(color: const Color(0xFF9E9E9E)),
+            ),
+            const SizedBox(height: 12),
+            _buildLabScreenButton(
+              label: _iapBusy ? 'IAP busy…' : 'Query All Catalog',
+              onPressed: _iapBusy
+                  ? () {}
+                  : () => unawaited(_queryAllLabSkus()),
+            ),
+            const SizedBox(height: 12),
+            for (final sku in _kLabIapSkus) ...[
+              Text(
+                '${sku.label}  (${sku.productId}'
+                '${sku.basePlanId == null ? '' : ' / ${sku.basePlanId}'}'
+                '${sku.kind == _LabIapKind.inapp ? ', INAPP' : ', SUBS'})',
+                style: theme.bodyMedium?.copyWith(color: Colors.white),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildLabScreenButton(
+                      label: 'Query',
+                      onPressed: _iapBusy
+                          ? () {}
+                          : () => unawaited(_queryLabSku(sku)),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: _buildLabScreenButton(
+                      label: 'Buy',
+                      onPressed: _iapBusy
+                          ? () {}
+                          : () => unawaited(_buyLabSku(sku)),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+            ],
+            TextField(
+              controller: _iapProductIdsController,
+              style: theme.bodyLarge?.copyWith(color: Colors.white),
+              maxLines: 2,
+              decoration: InputDecoration(
+                labelText: 'productIds (comma / space separated)',
+                labelStyle: theme.bodyMedium?.copyWith(
+                  color: const Color(0xFF9E9E9E),
+                ),
+                hintText: 'manual override',
+                hintStyle: theme.bodyMedium?.copyWith(
+                  color: const Color(0xFF635F5F),
+                ),
+                filled: true,
+                fillColor: const Color(0xFF1E1E1E),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: const BorderSide(color: Color(0xFF353535)),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: const BorderSide(color: Color(0xFF353535)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: const BorderSide(color: Color(0xFF80D7CF)),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            _buildLabScreenButton(
+              label: 'Query Freeform IDs',
+              onPressed: _iapBusy
+                  ? () {}
+                  : () => unawaited(_queryIapProducts()),
+            ),
+            if (_iapLog.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () => setState(() => _iapLog = ''),
+                  child: const Text('Clear log'),
+                ),
+              ),
+              Container(
+                width: double.infinity,
+                constraints: const BoxConstraints(maxHeight: 360),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1E1E1E),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: const Color(0xFF353535)),
+                ),
+                child: SingleChildScrollView(
+                  child: SelectableText(
+                    _iapLog,
+                    style: theme.bodySmall?.copyWith(
+                      color: const Color(0xFF80D7CF),
+                      fontFamily: 'monospace',
+                    ),
+                  ),
+                ),
+              ),
+            ],
             _buildSectionDivider(),
             Text(
               'Roleplay Try Again',
