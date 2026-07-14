@@ -930,6 +930,39 @@
 
 ---
 
+## 22. PaywallScreen
+
+### 스크린 관련 정의 파일
+- **파일 경로**: `lib/screens/paywall/paywall.dart`
+- **클래스명**: `PaywallScreen` (StatefulWidget)
+- **스크린 타입**: **Full Screen** (optional bottom-up)
+- **전환 방식**: `FullScreenRoute` + `FullScreenTransition.bottomUp` (450ms / reverse 280ms). `PaywallScreen.push(context)`
+- **appPath**: 해당 없음 (구독 플로우·선행 조건 의존. 향후 진입점: 에너지 팝업 Premium 카드, Result Feedback, Profile Premium 버튼, Account Free 요금제 카드)
+
+### 스크린 용도
+- Premium 구독 Paywall UI. 현재는 **화면만** (결제/약관 연동 없음).
+
+### 이전 스크린 정보 (진입점)
+- **LabScreen** (dev): Setting > Lab > **Open Paywall**
+
+### 이후 스크린 정보 (이동 가능한 다른 스크린)
+- **이전 스크린**: 좌상단 X 또는 시스템 뒤로가기 시 `Navigator.pop()`
+
+### 스크린 내부 구현 특이사항
+- **배경**: 세로 그라데이션 `#8A38F5` → `#80D7CF`
+- **문구**: pt 하드코딩 (l10n 추후). 폰트 `ChironHeiHK` (`Pratique Mais`, `Aprenda Conversando`)
+- **PREMIUM 카드**: `#48069D`, drop shadow (20,20) blur 20 black 30%, `paywall_star_badge`·`paywall_check_Icon`
+- **PREMIUM 배지 배치**: `paywall_star_badge`는 카드 좌상단 모서리에 겹치며(카드 좌상단 꼭짓점 = 배지 정중앙 좌표), 원형 외곽선 `#51218F` 1.5dp + 바깥 그림자(X:0, Y:4, blur:4, spread:0, `#000000` 25%) 적용. 배지 크기는 카드 폭 비율로 스케일(`cardWidth * 34 / 342`)하고 `30~40` clamp
+- **히어로 캐릭터 배치**: 외곽 `Stack`에서 X 버튼과 같은 `top`(statusBar + 8)에 고정 배치해 모자 상단이 X 밴드와 맞도록 한다. `width = size.width * 0.50`, `right = size.width * 0.02`. 스크롤 본문과 무관(오버레이).
+- **타이틀 그라데이션 텍스트**: `ShaderMask` 대신 `TextStyle.foreground` 셰이더로 그려 글리프 하단 잘림 방지.
+- **설명 ↔ PREMIUM 카드 간격**: Hero 설명문단과 PREMIUM 카드 간격은 `size.height * 0.035`
+- **플랜**: 기본 Annual 선택. 선택 카드 `#0CABA8`→`#8A38F5` + 흰 테두리 80%·3px + shadow(X:0, Y:4, blur:4, spread:0, `#000000` 25%). 미선택 `#80D7CF`→`#8A38F5` + `#8A38F5` 30% 오버레이 + 테두리 `#8A38F5` 1px + 공용 카드 shadow(카드 클리핑 antiAlias). 가격 텍스트(`R$16,66/mês`, `R$24,99/mês`, `R$199,99/ano`)는 `#FFFFFF`. 라디오 `paywall_radio_selected`/`unselected`
+- **가격**: Anual `R$16,66/mês` + `R$199,99/ano` / Mensal `R$24,99/mês`
+- **CTA**: Assinar agora 내부 배경은 좌→우 `#8A38F5`→`#280752`, opacity 79%(alpha `0xC9`). Terms/Privacy = no-op. X = pop
+- **에셋**: `assets/images/icons/paywall_character.png`, `assets/images/icons/paywall_*`
+
+---
+
 ## 스크린 네비게이션 흐름도
 
 ```

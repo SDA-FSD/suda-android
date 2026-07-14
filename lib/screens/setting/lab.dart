@@ -21,6 +21,7 @@ import 'announcements.dart'
     show showAnnouncementsPostNoLongerAvailableDefaultPopupForLab;
 import '../roleplay/try_again.dart';
 import '../first_cefr_level.dart';
+import '../paywall/paywall.dart';
 
 /// Lab에서 재현 가능한 `DefaultPopup` 목록.
 /// `DefaultPopup` 전환이 완료될 때마다 여기에 **한 항목씩** 추가한다.
@@ -140,6 +141,11 @@ class _LabScreenState extends State<LabScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _openPaywallScreen() async {
+    if (!mounted) return;
+    await PaywallScreen.push(context);
   }
 
   void _seedLabS2TryAgainState() {
@@ -305,6 +311,16 @@ class _LabScreenState extends State<LabScreen> {
                 ),
                 child: const Text('Open First CEFR Level'),
               ),
+            ),
+            _buildSectionDivider(),
+            Text(
+              'Paywall',
+              style: theme.headlineSmall?.copyWith(color: Colors.white),
+            ),
+            const SizedBox(height: 12),
+            _buildLabScreenButton(
+              label: 'Open Paywall',
+              onPressed: () => unawaited(_openPaywallScreen()),
             ),
             _buildSectionDivider(),
             Text(
