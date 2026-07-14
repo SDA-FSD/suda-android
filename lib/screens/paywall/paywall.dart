@@ -481,23 +481,14 @@ class _PaywallScreenState extends State<PaywallScreen> {
 
   Widget _buildAnnualPlan() {
     final selected = _selected == _PaywallPlan.annual;
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        _planCard(
-          selected: selected,
-          onTap: () => setState(() => _selected = _PaywallPlan.annual),
-          title: 'Plano Anual',
-          subtitle: 'Economize 33% em relação ao plano mensal.',
-          priceMain: 'R\$16,66/mês',
-          priceSub: 'R\$199,99/ano',
-        ),
-        Positioned(
-          right: 12,
-          top: 12,
-          child: _melhorBadge(),
-        ),
-      ],
+    return _planCard(
+      selected: selected,
+      onTap: () => setState(() => _selected = _PaywallPlan.annual),
+      title: 'Plano Anual',
+      subtitle: 'Economize 33% em relação ao plano mensal.',
+      priceMain: 'R\$16,66/mês',
+      priceSub: 'R\$199,99/ano',
+      showMelhorBadge: true,
     );
   }
 
@@ -551,6 +542,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
     required String subtitle,
     required String priceMain,
     String? priceSub,
+    bool showMelhorBadge = false,
   }) {
     final radius = BorderRadius.circular(16);
     return Material(
@@ -631,6 +623,10 @@ class _PaywallScreenState extends State<PaywallScreen> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
+                          if (showMelhorBadge) ...[
+                            _melhorBadge(),
+                            const SizedBox(height: 6),
+                          ],
                           Text(
                             priceMain,
                             style: _style(
