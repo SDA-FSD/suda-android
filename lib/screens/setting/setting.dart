@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../config/app_config.dart';
 import '../../l10n/app_localizations.dart';
@@ -112,7 +113,7 @@ class SettingScreen extends StatelessWidget {
             l10n.settingsSignOut,
             () => _handleLogout(context),
           ),
-          if (AppConfig.isDev)
+          if (AppConfig.isDev || AppConfig.isPrd || kDebugMode)
             _buildMenuItem(
               context,
               l10n.settingsFsdLaboratory,
