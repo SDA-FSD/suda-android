@@ -39,6 +39,14 @@ class _PaywallScreenState extends State<PaywallScreen> {
   static const _bgTop = Color(0xFF8A38F5);
   static const _bgBottom = Color(0xFF80D7CF);
   static const _heroToPremiumGapWidthRatio = 0.08;
+  /// 배경 보라 glow (PaywallCompleted와 동일: 부모 size 대비 반응형 + blur 고정).
+  static const _purpleGlowWidthRatio = 1.086;
+  static const _purpleGlowHeightRatio = 0.707;
+  static const _purpleGlowLeftRatio = -0.355;
+  static const _purpleGlowTopRatio = -0.004;
+  static const _purpleGlowColor = Color(0xFFAB6AFF);
+  static const _purpleGlowOpacity = 0.57;
+  static const _purpleGlowBlurSigma = 88.7;
   /// 배경 청록 glow (Figma 440×956 기준).
   static const _glowLeftRatio = 100 / 440;
   static const _glowTopRatio = 600 / 956;
@@ -270,7 +278,47 @@ class _PaywallScreenState extends State<PaywallScreen> {
         child: Stack(
           clipBehavior: Clip.none,
           children: [
-            // 최하단 레이어: "Escolha seu plano" 근처 좌측 청록 glow
+            // 그라디언트 위 · 콘텐츠 아래 보라 glow (캐릭터/그림자 clip 방지를 위해 이 레이어만 ClipRect)
+            Positioned.fill(
+              child: IgnorePointer(
+                child: ClipRect(
+                  child: Stack(
+                    clipBehavior: Clip.hardEdge,
+                    children: [
+                      Positioned(
+                        left: size.width * _purpleGlowLeftRatio -
+                            _purpleGlowBlurSigma * 2,
+                        top: size.height * _purpleGlowTopRatio -
+                            _purpleGlowBlurSigma * 2,
+                        child: ImageFiltered(
+                          imageFilter: ImageFilter.blur(
+                            sigmaX: _purpleGlowBlurSigma,
+                            sigmaY: _purpleGlowBlurSigma,
+                            tileMode: TileMode.decal,
+                          ),
+                          child: Padding(
+                            padding:
+                                const EdgeInsets.all(_purpleGlowBlurSigma * 2),
+                            child: Opacity(
+                              opacity: _purpleGlowOpacity,
+                              child: Container(
+                                width: size.width * _purpleGlowWidthRatio,
+                                height: size.height * _purpleGlowHeightRatio,
+                                decoration: const BoxDecoration(
+                                  color: _purpleGlowColor,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            // "Escolha seu plano" 근처 좌측 청록 glow
             Positioned(
               left: size.width * _glowLeftRatio - _glowBlurSigma * 2,
               top: size.height * _glowTopRatio - _glowBlurSigma * 2,
@@ -845,35 +893,40 @@ class _PaywallScreenState extends State<PaywallScreen> {
   }
 
   Widget _buildCta() {
-    return GestureDetector(
-      onTap: () {},
-      child: Container(
-        height: 52,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(26),
-          gradient: const LinearGradient(
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
-            colors: [Color(0xFF80D7CF), Color(0xFF8A38F5)],
-          ),
-        ),
-        padding: const EdgeInsets.all(2),
-        child: Container(
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(24),
-            gradient: const LinearGradient(
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-              colors: [Color(0xC98A38F5), Color(0xC9280752)],
+    return Center(
+      child: IntrinsicWidth(
+        child: GestureDetector(
+          onTap: () {},
+          child: Container(
+            height: 52,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(26),
+              gradient: const LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: [Color(0xFF80D7CF), Color(0xFF8A38F5)],
+              ),
             ),
-          ),
-          child: Text(
-            'Assinar agora',
-            style: _style(
-              size: 18,
-              weight: FontWeight.w700,
-              color: Colors.white,
+            padding: const EdgeInsets.all(2),
+            child: Container(
+              alignment: Alignment.center,
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(24),
+                gradient: const LinearGradient(
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                  colors: [Color(0xC98A38F5), Color(0xC9280752)],
+                ),
+              ),
+              child: Text(
+                'Assinar agora',
+                style: _style(
+                  size: 18,
+                  weight: FontWeight.w700,
+                  color: Colors.white,
+                ),
+              ),
             ),
           ),
         ),

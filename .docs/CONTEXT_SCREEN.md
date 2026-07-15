@@ -949,7 +949,7 @@
 - **이전 스크린**: 좌상단 X 또는 시스템 뒤로가기 시 `Navigator.pop()`
 
 ### 스크린 내부 구현 특이사항
-- **배경**: 세로 그라데이션 `#8A38F5` → `#80D7CF`. "Escolha seu plano" 근처 좌측에 청록 glow 원(`#04E7E2`, Figma 440×956 기준 left 8.2%·top 60.5%·폭 108.6%, `ImageFiltered` sigma 44, `IgnorePointer`, 콘텐츠 뒤 레이어)
+- **배경**: 세로 그라데이션 `#8A38F5` → `#80D7CF`. 그라디언트 위·콘텐츠 아래에 보라 glow(완료 화면과 동일: `#AB6AFF` opacity `0.57`, blur sigma **88.7**, width `108.6%`·height `70.7%`·left `-35.5%`·top `-0.4%`, 이 레이어만 `ClipRect`로 overflow 클립 — 캐릭터/카드 shadow `Clip.none` 유지). "Escolha seu plano" 근처 좌측에 청록 glow 원(`#04E7E2`, Figma 440×956 기준 left 8.2%·top 60.5%·폭 108.6%, `ImageFiltered` sigma 44/50, `IgnorePointer`, 콘텐츠 뒤 레이어)
 - **문구**: pt 하드코딩 (l10n 추후). 폰트 `ChironHeiHK` (`Pratique Mais`, `Aprenda Conversando`)
 - **PREMIUM 카드**: `#48069D`, radius **15**, 내부 padding `fromLTRB(20, 2, 20, 18)`, drop shadow (20,20) blur 20 black 30%, `paywall_star_badge`·`paywall_check_Icon`. 콘텐츠 영역(좌우 패딩 24) 안 **가운데 정렬**, 폭 = `(width - 48) * 0.763`(Figma 299/392). 높이는 내용(타이틀+체크 3줄+여백) 기준 자동(Figma H:193은 참고만).
 - **PREMIUM 배지 배치**: 카드 `Stack`(clipBehavior: **Clip.none**) 기준 상대 위치. `badgeSize = cardWidth * 0.11`, `left = -cardWidth * 0.023`, `top = cardTopInset - cardWidth * 0.0134`(세로 오버행도 카드폭 기준). 외곽선: 선형 그라데이션 `#51218F`→`#8A38F5`(좌→우), 굵기 1.5·**inside**(원 그라데이션 + 안쪽 padding). 바깥 그림자(X:0, Y:4, blur:4, spread:0, `#000000` **33%** — Figma 25%이나 보라 카드 위 가시성 보정).
@@ -961,6 +961,32 @@
 - **가격**: Anual `R$16,66/mês`(`#FFFFFF`) + `R$199,99/ano`(`#80D7CF`) / Mensal `R$24,99/mês`(`#FFFFFF`)
 - **CTA**: Assinar agora 내부 배경은 좌→우 `#8A38F5`→`#280752`, opacity 79%(alpha `0xC9`). Assinar = no-op. Terms/Privacy 각각 탭 → `WebViewScreen` (`https://sudatalk.kr/public/app/terms` / `privacy`, 타이틀 l10n `settingsTerms`/`settingsPrivacy`, Login·Setting과 동일). X = pop
 - **에셋**: `assets/images/icons/paywall_character.png`, `assets/images/icons/paywall_*`
+
+---
+
+## 23. PaywallCompletedScreen
+
+### 스크린 관련 정의 파일
+- **파일 경로**: `lib/screens/paywall/paywall_completed.dart`
+- **클래스명**: `PaywallCompletedScreen` (StatelessWidget)
+- **스크린 타입**: **Full Screen** (optional bottom-up)
+- **전환 방식**: `FullScreenRoute` + `FullScreenTransition.bottomUp`. `PaywallCompletedScreen.push(context)`
+- **appPath**: 해당 없음 (Lab 확인용)
+
+### 스크린 용도
+- 결제 완료 후 사용자에게 노출할 완료 화면을 Lab에서 사전 확인하기 위한 Preview 스크린.
+
+### 이전 스크린 정보 (진입점)
+- **LabScreen**: Setting > Lab > **Open Paywall Completed**
+
+### 이후 스크린 정보 (이동 가능한 다른 스크린)
+- **이전 스크린**: 좌상단 X 또는 하단 Done 버튼 또는 시스템 뒤로가기 시 `Navigator.pop()`
+
+### 스크린 내부 구현 특이사항
+- **배경 그라디언트**: `PaywallScreen`과 동일 값 하드코딩. 0% `#8A38F5`(상단) → 100% `#80D7CF`(하단)
+- **배경 glow**: 그라디언트 위·콘텐츠 아래. 부모 `ClipRect`+`Stack clipBehavior: hardEdge`로 overflow 클립. 원형 `#AB6AFF` opacity `0.57`, blur sigma **88.7**(고정), 크기/위치 부모 대비 반응형(width `108.6%`, height `70.7%`, left `-35.5%`, top `-0.4%`) — `PaywallScreen` 보라 glow와 동일 위치
+- **아이콘**: `assets/images/icons/premium_unlocked_check.png`
+- **문구/버튼**: PT 하드코딩(테스트용, l10n 추후). 타이틀 `Parabéns!`, 본문 `Seus benefícios Premium já estão ativos.`, 혜택 3줄(`Mais prática todos os dias` / `Energia máxima de 30` / `Feedback da IA sobre frases`), CTA `Continuar`
 
 ---
 

@@ -216,6 +216,10 @@
   - **INAPP·SUBS 동일 전송**(Lab). 서버가 `productId`로 분기. 200 = 호출 처리(지급 아님 TEMP 가능). 응답으로 성공 판단 금지
 - Play Internal에 Billing 포함 prd AAB 업로드함(상품 조회 해금용). 앱 버전: `1.1.1+41` (**TEMP prd Lab 허용**)
 - Paywall UI만: `lib/screens/paywall/paywall.dart` (결제 연동 없음)
+- Lab 확인용 결제 완료 Preview 스크린: `lib/screens/paywall/paywall_completed.dart`
+  - Lab 진입: Setting > Lab > **Open Paywall Completed**
+  - 배경 그라디언트는 Paywall과 동일 값 하드코딩(상단 `#8A38F5` → 하단 `#80D7CF`)
+  - 문구는 현재 PT 하드코딩(테스트용): `Parabéns!`, `Seus benefícios Premium já estão ativos.`, 혜택 3줄, CTA `Continuar` (en/ko 추후)
 
 ### 상품 ID (Play Console / Lab 카탈로그 `_kLabIapSkus`)
 | 구분 | productId | basePlanId / 비고 | Lab Buy | verify |
@@ -247,6 +251,7 @@
 - obfuscatedAccountId: `lib/utils/iap_obfuscated_account_id.dart`
 - Verify API: `lib/api/endpoints/purchase_api.dart`, `lib/api/suda_api_client.dart`
 - Paywall(UI only): `lib/screens/paywall/paywall.dart`
+- Paywall Completed preview: `lib/screens/paywall/paywall_completed.dart`
 - 스크린 문서: `.docs/CONTEXT_SCREEN.md` § PaywallScreen
 
 ## 8. 스타일 / 디자인 / 배치 규칙

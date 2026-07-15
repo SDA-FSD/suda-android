@@ -28,6 +28,7 @@ import 'announcements.dart'
 import '../roleplay/try_again.dart';
 import '../first_cefr_level.dart';
 import '../paywall/paywall.dart';
+import '../paywall/paywall_completed.dart';
 
 enum _LabIapKind { inapp, subs }
 
@@ -226,6 +227,11 @@ class _LabScreenState extends State<LabScreen> {
   Future<void> _openPaywallScreen() async {
     if (!mounted) return;
     await PaywallScreen.push(context);
+  }
+
+  Future<void> _openPaywallCompletedScreen() async {
+    if (!mounted) return;
+    await PaywallCompletedScreen.push(context);
   }
 
   void _appendIapLog(String message) {
@@ -761,6 +767,11 @@ class _LabScreenState extends State<LabScreen> {
             _buildLabScreenButton(
               label: 'Open Paywall',
               onPressed: () => unawaited(_openPaywallScreen()),
+            ),
+            const SizedBox(height: 8),
+            _buildLabScreenButton(
+              label: 'Open Paywall Completed',
+              onPressed: () => unawaited(_openPaywallCompletedScreen()),
             ),
             _buildSectionDivider(),
             Text(
