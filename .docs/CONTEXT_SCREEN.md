@@ -949,7 +949,7 @@
 - **이전 스크린**: 좌상단 X 또는 시스템 뒤로가기 시 `Navigator.pop()`
 
 ### 스크린 내부 구현 특이사항
-- **배경**: 세로 그라데이션 `#8A38F5` → `#80D7CF`
+- **배경**: 세로 그라데이션 `#8A38F5` → `#80D7CF`. "Escolha seu plano" 근처 좌측에 청록 glow 원(`#04E7E2`, Figma 440×956 기준 left 8.2%·top 60.5%·폭 108.6%, `ImageFiltered` sigma 44, `IgnorePointer`, 콘텐츠 뒤 레이어)
 - **문구**: pt 하드코딩 (l10n 추후). 폰트 `ChironHeiHK` (`Pratique Mais`, `Aprenda Conversando`)
 - **PREMIUM 카드**: `#48069D`, radius **15**, 내부 padding `fromLTRB(20, 2, 20, 18)`, drop shadow (20,20) blur 20 black 30%, `paywall_star_badge`·`paywall_check_Icon`. 콘텐츠 영역(좌우 패딩 24) 안 **가운데 정렬**, 폭 = `(width - 48) * 0.763`(Figma 299/392). 높이는 내용(타이틀+체크 3줄+여백) 기준 자동(Figma H:193은 참고만).
 - **PREMIUM 배지 배치**: 카드 `Stack`(clipBehavior: **Clip.none**) 기준 상대 위치. `badgeSize = cardWidth * 0.11`, `left = -cardWidth * 0.023`, `top = cardTopInset - cardWidth * 0.0134`(세로 오버행도 카드폭 기준). 외곽선: 선형 그라데이션 `#51218F`→`#8A38F5`(좌→우), 굵기 1.5·**inside**(원 그라데이션 + 안쪽 padding). 바깥 그림자(X:0, Y:4, blur:4, spread:0, `#000000` **33%** — Figma 25%이나 보라 카드 위 가시성 보정).
@@ -957,9 +957,9 @@
 - **상단 간격 보정(기기별 status inset 차이 대응)**: `heroTopGap`은 `max((12 + size.height*0.01)*0.8, X하단+8dp 보장식)`으로 계산해 X와 텍스트 겹침만 제어하고, 캐릭터 세로 위치는 카드 실측 좌표 종속으로 분리한다.
 - **타이틀 그라데이션 텍스트**: `ShaderMask` 대신 `TextStyle.foreground` 셰이더로 그려 글리프 하단 잘림 방지.
 - **설명 ↔ PREMIUM 카드 간격**: Hero 설명문단과 PREMIUM 카드 간격은 `size.height * 0.035`
-- **플랜**: 기본 Annual 선택. 선택 카드 `#0CABA8`→`#8A38F5` + 흰 테두리 80%·3px. 미선택 `#80D7CF`→`#8A38F5` + `#8A38F5` 30% 오버레이 + 테두리 `#8A38F5` 1px. 플랜 soft shadow `_planCardShadow`(X:0, Y:8, blur:16, `#000000` 25%, Material 바깥). PREMIUM 카드는 기존 `_cardShadow`(offset 20,20, blur 20) 유지. 가격 `R$16,66/mês`·`R$24,99/mês`=`#FFFFFF`, `R$199,99/ano`=`#80D7CF`. 라디오 20×20; Monthly는 카드 세로 중앙, Annual은 제목+설명 블록 기준. Annual MELHOR: fill `#FFFFFF` 3.8%·radius 24; stroke `_MelhorBadgeStrokePainter`; 별 shadow 47% / 텍스트 shadow 27% (Y4 blur4); top padding 6·하단 25(Monthly 14)
+- **플랜**: 기본 Annual 선택. 선택 카드 `#0CABA8`→`#8A38F5` + 흰 테두리 80%·3px. 미선택(Monthly) 배경은 `#8A38F5` 30% 고정(fill), 테두리는 `_PlanCardOutsideStrokePainter`로 1px linear gradient(좌 `#80D7CF`→우 `#8A38F5`)를 **outside stroke**로 렌더링해 내부 fill 번짐을 방지한다. 플랜 soft shadow `_planCardShadow`(X:0, Y:8, blur:12, `#000000` 40%, Material 바깥; 카드 `RepaintBoundary` 금지—overflow 잘림). 배경 ImageFiltered glow만 `RepaintBoundary`로 분리해 형제 boxShadow 합성 유지. PREMIUM 카드는 기존 `_cardShadow`(offset 20,20, blur 20) 유지. 가격 `R$16,66/mês`·`R$24,99/mês`=`#FFFFFF`, `R$199,99/ano`=`#80D7CF`. 라디오 20×20; Monthly는 카드 세로 중앙, Annual은 제목+설명 블록 기준. Annual MELHOR: fill `#FFFFFF` 3.8%·radius 24; stroke `_MelhorBadgeStrokePainter` (SweepGradient stops `0/0.12/0.37/0.62/0.87/1`, 양끝 opacity 동일로 seam 제거); 별 shadow 47% / 텍스트 shadow 27% (Y4 blur4); top padding 6·하단 25(Monthly 14)
 - **가격**: Anual `R$16,66/mês`(`#FFFFFF`) + `R$199,99/ano`(`#80D7CF`) / Mensal `R$24,99/mês`(`#FFFFFF`)
-- **CTA**: Assinar agora 내부 배경은 좌→우 `#8A38F5`→`#280752`, opacity 79%(alpha `0xC9`). Terms/Privacy = no-op. X = pop
+- **CTA**: Assinar agora 내부 배경은 좌→우 `#8A38F5`→`#280752`, opacity 79%(alpha `0xC9`). Assinar = no-op. Terms/Privacy 각각 탭 → `WebViewScreen` (`https://sudatalk.kr/public/app/terms` / `privacy`, 타이틀 l10n `settingsTerms`/`settingsPrivacy`, Login·Setting과 동일). X = pop
 - **에셋**: `assets/images/icons/paywall_character.png`, `assets/images/icons/paywall_*`
 
 ---

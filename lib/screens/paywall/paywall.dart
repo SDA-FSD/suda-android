@@ -1,11 +1,18 @@
+import 'dart:ui';
+
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../utils/full_screen_route.dart';
+import '../../utils/sub_screen_route.dart';
+import '../webview_screen.dart';
 
 /// Premium 구독 Paywall (Full Screen, UI only).
 ///
 /// 진입: Lab 등에서 [PaywallScreen.push] 사용 (bottom-up 450ms).
-/// X = pop / Assinar agora·약관 = no-op. 플랜 선택은 로컬 UI 상태만.
+/// X = pop / Assinar agora = no-op.
+/// Terms/Privacy → WebView(Login·Setting과 동일 URL). 플랜 선택은 로컬 UI 상태만.
 class PaywallScreen extends StatefulWidget {
   const PaywallScreen({super.key});
 
@@ -32,6 +39,13 @@ class _PaywallScreenState extends State<PaywallScreen> {
   static const _bgTop = Color(0xFF8A38F5);
   static const _bgBottom = Color(0xFF80D7CF);
   static const _heroToPremiumGapWidthRatio = 0.08;
+  /// 배경 청록 glow (Figma 440×956 기준).
+  static const _glowLeftRatio = 100 / 440;
+  static const _glowTopRatio = 600 / 956;
+  static const _glowWidthRatio = 478 / 440;
+  static const _glowHeightWidthRatio = 521 / 440;
+  static const _glowColor = Color(0xFF04E7E2);
+  static const _glowBlurSigma = 50.0;
   /// 캐릭터 너비(화면 대비). 0.56에서 소폭 축소.
   static const _heroCharacterWidthRatio = 0.50;
   /// 값이 커질수록 왼쪽으로 이동(음수면 화면 우측으로 더 삐져나감).
@@ -68,7 +82,6 @@ class _PaywallScreenState extends State<PaywallScreen> {
   static const _planTitle = Color(0xFF2A0060);
   static const _yearPrice = Color(0xFF80D7CF);
   static const _legal = Color(0xFF054544);
-  static const _accentPurple = Color(0xFF8A38F5);
 
   static const _cardShadow = BoxShadow(
     color: Color(0x4D000000),
@@ -76,11 +89,11 @@ class _PaywallScreenState extends State<PaywallScreen> {
     blurRadius: 20,
     spreadRadius: 0,
   );
-  /// 플랜 카드 전용 soft drop (넓고 뿌옇게).
+  /// 플랜 카드 전용 soft drop (glow 위에서도 또렷하게).
   static const _planCardShadow = BoxShadow(
-    color: Color(0x40000000),
+    color: Color(0x66000000), // #000000 40%
     offset: Offset(0, 8),
-    blurRadius: 16,
+    blurRadius: 12,
     spreadRadius: 0,
   );
 
@@ -88,6 +101,46 @@ class _PaywallScreenState extends State<PaywallScreen> {
   final GlobalKey _heroStackKey = GlobalKey();
   final GlobalKey _premiumCardKey = GlobalKey();
   double? _premiumCardTopInStack;
+  late final TapGestureRecognizer _termsRecognizer;
+  late final TapGestureRecognizer _privacyRecognizer;
+
+  @override
+  void initState() {
+    super.initState();
+    _termsRecognizer = TapGestureRecognizer()..onTap = _openTerms;
+    _privacyRecognizer = TapGestureRecognizer()..onTap = _openPrivacy;
+  }
+
+  @override
+  void dispose() {
+    _termsRecognizer.dispose();
+    _privacyRecognizer.dispose();
+    super.dispose();
+  }
+
+  void _openTerms() {
+    final l10n = AppLocalizations.of(context)!;
+    Navigator.of(context).push(
+      SubScreenRoute(
+        page: WebViewScreen(
+          url: 'https://sudatalk.kr/public/app/terms',
+          title: l10n.settingsTerms,
+        ),
+      ),
+    );
+  }
+
+  void _openPrivacy() {
+    final l10n = AppLocalizations.of(context)!;
+    Navigator.of(context).push(
+      SubScreenRoute(
+        page: WebViewScreen(
+          url: 'https://sudatalk.kr/public/app/privacy',
+          title: l10n.settingsPrivacy,
+        ),
+      ),
+    );
+  }
 
   TextStyle _style({
     required double size,
@@ -214,7 +267,38 @@ class _PaywallScreenState extends State<PaywallScreen> {
             colors: [_bgTop, _bgBottom],
           ),
         ),
-        child: SingleChildScrollView(
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            // 최하단 레이어: "Escolha seu plano" 근처 좌측 청록 glow
+            Positioned(
+              left: size.width * _glowLeftRatio - _glowBlurSigma * 2,
+              top: size.height * _glowTopRatio - _glowBlurSigma * 2,
+              child: IgnorePointer(
+                // ImageFiltered를 별 레이어로 분리해야 형제 위젯 boxShadow가 합성에서 살아남음.
+                child: RepaintBoundary(
+                  child: ImageFiltered(
+                    imageFilter: ImageFilter.blur(
+                      sigmaX: _glowBlurSigma,
+                      sigmaY: _glowBlurSigma,
+                      tileMode: TileMode.decal,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(_glowBlurSigma * 2),
+                      child: Container(
+                        width: size.width * _glowWidthRatio,
+                        height: size.width * _glowHeightWidthRatio,
+                        decoration: const BoxDecoration(
+                          color: _glowColor,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            SingleChildScrollView(
           clipBehavior: Clip.none,
           padding: EdgeInsets.only(bottom: bottomPad + 24),
           child: Column(
@@ -296,19 +380,38 @@ class _PaywallScreenState extends State<PaywallScreen> {
                       style: _style(size: 12, color: _legal, height: 1.35),
                     ),
                     const SizedBox(height: 10),
-                    GestureDetector(
-                      onTap: () {},
-                      child: Text(
-                        'Termos de Serviço  •  Política de Privacidade',
-                        textAlign: TextAlign.center,
+                    Text.rich(
+                      TextSpan(
                         style: _style(size: 10, color: _legal),
+                        children: [
+                          TextSpan(
+                            text: 'Termos de Serviço',
+                            style: _style(size: 10, color: _legal).copyWith(
+                              decoration: TextDecoration.underline,
+                              decorationColor: _legal,
+                            ),
+                            recognizer: _termsRecognizer,
+                          ),
+                          const TextSpan(text: '  •  '),
+                          TextSpan(
+                            text: 'Política de Privacidade',
+                            style: _style(size: 10, color: _legal).copyWith(
+                              decoration: TextDecoration.underline,
+                              decorationColor: _legal,
+                            ),
+                            recognizer: _privacyRecognizer,
+                          ),
+                        ],
                       ),
+                      textAlign: TextAlign.center,
                     ),
                   ],
                 ),
               ),
             ],
           ),
+        ),
+          ],
         ),
       ),
     );
@@ -578,7 +681,144 @@ class _PaywallScreenState extends State<PaywallScreen> {
     bool showMelhorBadge = false,
   }) {
     final radius = BorderRadius.circular(16);
+    const unselectedBorderWidth = 1.0;
+    final innerRadius = BorderRadius.circular(16 - unselectedBorderWidth);
     // 그림자는 Material/Ink 바깥에 둬 clip에 잘리지 않게 함.
+    final cardBody = Ink(
+      decoration: BoxDecoration(
+        borderRadius: selected ? radius : innerRadius,
+        gradient: selected
+            ? const LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: [Color(0xFF0CABA8), Color(0xFF8A38F5)],
+              )
+            : const LinearGradient(
+                colors: [Color(0x4D8A38F5), Color(0x4D8A38F5)],
+              ),
+        border: selected
+            ? Border.all(
+                color: const Color(0xCCFFFFFF),
+                width: 3,
+              )
+            : null,
+      ),
+      child: ClipRRect(
+        borderRadius: selected ? radius : innerRadius,
+        clipBehavior: Clip.antiAlias,
+        child: Stack(
+          children: [
+            Padding(
+              padding: EdgeInsets.fromLTRB(
+                14,
+                showMelhorBadge ? 6 : 14,
+                14,
+                showMelhorBadge ? 25 : 14,
+              ),
+              child: Row(
+                crossAxisAlignment: showMelhorBadge
+                    ? CrossAxisAlignment.start
+                    : CrossAxisAlignment.center,
+                children: [
+                  if (!showMelhorBadge) ...[
+                    Image.asset(
+                      selected
+                          ? 'assets/images/icons/paywall_radio_selected.png'
+                          : 'assets/images/icons/paywall_radio_unselected.png',
+                      width: 20,
+                      height: 20,
+                    ),
+                    const SizedBox(width: 10),
+                  ],
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (showMelhorBadge) const SizedBox(height: 30),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            if (showMelhorBadge) ...[
+                              Transform.translate(
+                                offset: const Offset(0, -4),
+                                child: Image.asset(
+                                  selected
+                                      ? 'assets/images/icons/paywall_radio_selected.png'
+                                      : 'assets/images/icons/paywall_radio_unselected.png',
+                                  width: 20,
+                                  height: 20,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                            ],
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    title,
+                                    style: _style(
+                                      size: 20,
+                                      weight: FontWeight.w700,
+                                      color: _planTitle,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    subtitle,
+                                    style: _style(
+                                      size: 14,
+                                      color: _planTitle.withValues(
+                                        alpha: 0.85,
+                                      ),
+                                      height: 1.3,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (showMelhorBadge) ...[
+                        _melhorBadge(),
+                        const SizedBox(height: 6),
+                      ],
+                      Text(
+                        priceMain,
+                        style: _style(
+                          size: 20,
+                          weight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      ),
+                      if (priceSub != null) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          priceSub,
+                          style: _style(size: 15, color: _yearPrice),
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    // 그림자는 Material/Ink 바깥. (카드에 RepaintBoundary 금지 — soft shadow overflow가 잘림)
     return Container(
       decoration: BoxDecoration(
         borderRadius: radius,
@@ -590,146 +830,15 @@ class _PaywallScreenState extends State<PaywallScreen> {
         child: InkWell(
           onTap: onTap,
           borderRadius: radius,
-          child: Ink(
-            decoration: BoxDecoration(
-              borderRadius: radius,
-              gradient: selected
-                  ? const LinearGradient(
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                      colors: [Color(0xFF0CABA8), Color(0xFF8A38F5)],
-                    )
-                  : const LinearGradient(
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                      colors: [Color(0xFF80D7CF), Color(0xFF8A38F5)],
-                    ),
-              border: Border.all(
-                color: selected
-                    ? const Color(0xCCFFFFFF)
-                    : _accentPurple,
-                width: selected ? 3 : 1,
-              ),
-            ),
-            child: ClipRRect(
-              borderRadius: radius,
-              clipBehavior: Clip.antiAlias,
-              child: Stack(
-                children: [
-                  if (!selected)
-                    const Positioned.fill(
-                      child: ColoredBox(color: Color(0x4D8A38F5)),
-                    ),
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(
-                      14,
-                      showMelhorBadge ? 6 : 14,
-                      14,
-                      showMelhorBadge ? 25 : 14,
-                    ),
-                    child: Row(
-                      crossAxisAlignment: showMelhorBadge
-                          ? CrossAxisAlignment.start
-                          : CrossAxisAlignment.center,
-                      children: [
-                        if (!showMelhorBadge) ...[
-                          Image.asset(
-                            selected
-                                ? 'assets/images/icons/paywall_radio_selected.png'
-                                : 'assets/images/icons/paywall_radio_unselected.png',
-                            width: 20,
-                            height: 20,
-                          ),
-                          const SizedBox(width: 10),
-                        ],
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              if (showMelhorBadge) const SizedBox(height: 30),
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  if (showMelhorBadge) ...[
-                                    Transform.translate(
-                                      offset: const Offset(0, -4),
-                                      child: Image.asset(
-                                        selected
-                                            ? 'assets/images/icons/paywall_radio_selected.png'
-                                            : 'assets/images/icons/paywall_radio_unselected.png',
-                                        width: 20,
-                                        height: 20,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 10),
-                                  ],
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(
-                                          title,
-                                          style: _style(
-                                            size: 20,
-                                            weight: FontWeight.w700,
-                                            color: _planTitle,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          subtitle,
-                                          style: _style(
-                                            size: 14,
-                                            color: _planTitle.withValues(
-                                              alpha: 0.85,
-                                            ),
-                                            height: 1.3,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (showMelhorBadge) ...[
-                              _melhorBadge(),
-                              const SizedBox(height: 6),
-                            ],
-                            Text(
-                              priceMain,
-                              style: _style(
-                                size: 20,
-                                weight: FontWeight.w700,
-                                color: Colors.white,
-                              ),
-                            ),
-                            if (priceSub != null) ...[
-                              const SizedBox(height: 2),
-                              Text(
-                                priceSub,
-                                style: _style(size: 15, color: _yearPrice),
-                              ),
-                            ],
-                          ],
-                        ),
-                      ],
-                    ),
+          child: selected
+              ? cardBody
+              : CustomPaint(
+                  foregroundPainter: const _PlanCardOutsideStrokePainter(
+                    strokeWidth: unselectedBorderWidth,
+                    radius: 16,
                   ),
-                ],
-              ),
-            ),
-          ),
+                  child: cardBody,
+                ),
         ),
       ),
     );
@@ -786,12 +895,14 @@ class _MelhorBadgeStrokePainter extends CustomPainter {
 
   static const _sweep = SweepGradient(
     colors: [
-      Color(0x4FFFFFFF), // #FFFFFF 31%
-      Color(0x00FFFFFF), // #FFFFFF 0%
-      Color(0x4FFFFFFF),
-      Color(0x00FFFFFF),
+      Color(0x29FFFFFF), // #FFFFFF ~16.1% (0.0 == 1.0, seam 맞춤)
+      Color(0x4FFFFFFF), // #FFFFFF 31% @ 0.12
+      Color(0x00FFFFFF), // #FFFFFF 0%  @ 0.37
+      Color(0x4FFFFFFF), // #FFFFFF 31% @ 0.62
+      Color(0x00FFFFFF), // #FFFFFF 0%  @ 0.87
+      Color(0x29FFFFFF), // #FFFFFF ~16.1% @ 1.0
     ],
-    stops: [0.12, 0.37, 0.62, 0.87],
+    stops: [0.0, 0.12, 0.37, 0.62, 0.87, 1.0],
   );
 
   @override
@@ -818,5 +929,48 @@ class _MelhorBadgeStrokePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _MelhorBadgeStrokePainter oldDelegate) =>
+      strokeWidth != oldDelegate.strokeWidth || radius != oldDelegate.radius;
+}
+
+/// 미선택 플랜 카드용 1px outside gradient stroke.
+/// 내부 fill(보라 30%)에 경계색이 번지지 않도록 테두리를 바깥쪽으로만 그린다.
+class _PlanCardOutsideStrokePainter extends CustomPainter {
+  const _PlanCardOutsideStrokePainter({
+    required this.strokeWidth,
+    required this.radius,
+  });
+
+  final double strokeWidth;
+  final double radius;
+
+  static const _strokeGradient = LinearGradient(
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
+    colors: [Color(0xFF80D7CF), Color(0xFF8A38F5)],
+  );
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final half = strokeWidth / 2;
+    final rect = Rect.fromLTWH(
+      -half,
+      -half,
+      size.width + strokeWidth,
+      size.height + strokeWidth,
+    );
+    final rrect = RRect.fromRectAndRadius(
+      rect,
+      Radius.circular(radius + half),
+    );
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..isAntiAlias = true
+      ..shader = _strokeGradient.createShader(rect);
+    canvas.drawRRect(rrect, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _PlanCardOutsideStrokePainter oldDelegate) =>
       strokeWidth != oldDelegate.strokeWidth || radius != oldDelegate.radius;
 }
