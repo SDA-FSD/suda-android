@@ -406,14 +406,14 @@ class _PaywallScreenState extends State<PaywallScreen> {
                   ),
                 ],
               ),
+              SizedBox(height: size.height * 0.028),
+              _buildPlanDivider(),
+              const SizedBox(height: 14),
               Padding(
                 padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    SizedBox(height: size.height * 0.028),
-                    _buildPlanDivider(),
-                    const SizedBox(height: 14),
                     _buildAnnualPlan(),
                     const SizedBox(height: 12),
                     _buildMonthlyPlan(),
@@ -616,9 +616,39 @@ class _PaywallScreenState extends State<PaywallScreen> {
   }
 
   Widget _buildPlanDivider() {
+    const lineColor = Color(0x80816CE8);
+    const lineThickness = 1.0;
+    const lineGap = 3.0;
+    const lineRadius = 20.0;
+
+    Widget roundedLine() {
+      return Container(
+        height: lineThickness,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: lineColor,
+          borderRadius: BorderRadius.circular(lineRadius),
+        ),
+      );
+    }
+
+    Widget doubleLine() {
+      return Expanded(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            roundedLine(),
+            const SizedBox(height: lineGap),
+            roundedLine(),
+          ],
+        ),
+      );
+    }
+
+    // 좌우 Expanded 동일 → 텍스트 화면 중앙, 선은 화면 가장자리까지.
     return Row(
       children: [
-        const Expanded(child: Divider(color: Colors.white54, thickness: 1)),
+        doubleLine(),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           child: Text(
@@ -626,7 +656,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
             style: _style(size: 16, color: Colors.white),
           ),
         ),
-        const Expanded(child: Divider(color: Colors.white54, thickness: 1)),
+        doubleLine(),
       ],
     );
   }
