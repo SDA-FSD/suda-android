@@ -19,6 +19,7 @@ import '../../services/roleplay_state_service.dart';
 import '../../services/series_state_service.dart';
 import '../../services/token_storage.dart';
 import '../../utils/default_toast.dart';
+import '../../utils/speech_feedback_premium.dart';
 import '../../utils/sub_screen_route.dart';
 import '../../utils/suda_json_util.dart';
 import 'view_chat.dart';
@@ -1559,8 +1560,14 @@ class _SpeechFeedbackRowState extends State<_SpeechFeedbackRow> {
 
   bool _expanded = false;
 
-  void _onFeedbackTap() {
-    setState(() => _expanded = !_expanded);
+  Future<void> _onFeedbackTap() async {
+    if (_expanded) {
+      setState(() => _expanded = false);
+      return;
+    }
+    final allowed = await ensureSubscribedForSpeechFeedback(context);
+    if (!mounted || !allowed) return;
+    setState(() => _expanded = true);
   }
 
   Widget _buildMegaphoneAudioIcon({
@@ -1703,7 +1710,7 @@ class _SpeechFeedbackRowState extends State<_SpeechFeedbackRow> {
                     ),
                   ),
                 _SpeechFeedbackFeedbackButton(
-                  onTap: _onFeedbackTap,
+                  onTap: () => unawaited(_onFeedbackTap()),
                   expanded: _expanded,
                 ),
               ],
@@ -1714,7 +1721,7 @@ class _SpeechFeedbackRowState extends State<_SpeechFeedbackRow> {
     );
 
     return GestureDetector(
-      onTap: _onFeedbackTap,
+      onTap: () => unawaited(_onFeedbackTap()),
       behavior: HitTestBehavior.opaque,
       child: card,
     );

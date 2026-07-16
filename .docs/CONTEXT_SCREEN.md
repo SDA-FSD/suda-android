@@ -817,7 +817,8 @@
 - **별 애니메이션**: silver → `starResult`/`starScore` 개수만큼 gold 전환 + 진동.
 - **후속 타이밍**: fully shown 1초 후 박스레이어 상단 이동 + `LikeProgressEffect.play()` (before/after like·level·progress).
 - **effect 이후 본문 (S1)**: Feedback + Key Expression + Got it!/Report. Feedback 즉시, Key Expression 500ms 후, footer 1s 후 fade-in.
-- **effect 이후 본문 (S2)**: Feedback **없음**. Key Expression + Speech Feedback(본문 추후) + Got it!/Report. Key Expression·Speech Feedback 동시 슬라이드, footer 1s 후 fade-in.
+- **effect 이후 본문 (S2)**: Feedback **없음**. Key Expression + Speech Feedback + Got it!/Report. Key Expression·Speech Feedback 동시 슬라이드, footer 1s 후 fade-in.
+- **Speech Feedback 펼침**: 구독자만. 비구독 Feedback 탭 → `PaywallScreen`. 결제 후 복귀 시 자동 펼침 없음·재탭 시 펼침 (`ensureSubscribedForSpeechFeedback`). History도 동일 본문.
 - **Expression/Key Expression 카드**: 가로 70% 캐러셀, 카드 탭 시 TTS(S1 API 연동 완료, S2 메가폰·북마크 UI만·API 추후), 북마크(S1 API 연동 완료).
 - **Got it! (S1)**: `GET /v1/users` + `GET /v1/roleplays/{roleplayId}/overview` best-effort 후 Overview pop.
 - **Got it! (S2)**: 동일 경로로 Overview pop (Series Overview).
@@ -874,7 +875,7 @@
 
 ### 스크린 내부 구현 특이사항
 - **로드**: `GET /rps2/user-histories/{rpUserHistoryId}` → `SeriesStateService.setCachedUserHistory`
-- **표시**: `RoleplayResultScreen(skipEntranceAnimation: true, exitViaPop: true, showReportLink: false)` — LikeProgressEffect·패널 이동·별 순차 애니 생략, effect 완료 상태 본문 즉시 노출. **Report 링크 미노출**.
+- **표시**: `RoleplayResultScreen(skipEntranceAnimation: true, exitViaPop: true, showReportLink: false)` — LikeProgressEffect·패널 이동·별 순차 애니 생략, effect 완료 상태 본문 즉시 노출. **Report 링크 미노출**. Speech Feedback 구독 가드는 Result와 동일.
 - **종료**: dispose 시 `SeriesStateService.cachedUserHistory` clear
 - S1 `GET /v1/roleplays/results`·`history_v2.dart`·version 분기 **삭제**
 
@@ -937,7 +938,7 @@
 - **클래스명**: `PaywallScreen` (StatefulWidget)
 - **스크린 타입**: **Full Screen** (optional bottom-up)
 - **전환 방식**: `FullScreenRoute` + `FullScreenTransition.bottomUp` (450ms / reverse 280ms). `PaywallScreen.push(context)`
-- **appPath**: 해당 없음 (구독 플로우·선행 조건 의존. 향후 진입점: 에너지 팝업 Premium 카드, Result Feedback, Profile Premium 버튼, Account Free 요금제 카드)
+- **appPath**: 해당 없음 (구독 플로우. 진입: 에너지 팝업 Go Premium, Result/History/View Chat Speech Feedback, Lab)
 
 ### 스크린 용도
 - Premium 구독 Paywall. 월/연 선택 후 Play Billing SUBS → verify.

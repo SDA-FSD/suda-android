@@ -73,7 +73,7 @@
     - **구독 만료 재조회**: `subscriptionExpiredAt` 경과 시 1회 `GET /v1/users/energy/detail` 재조회 (`EnergyTimerRefetchTracker`). 충전(`lastAutoChargedAt`)처럼 1초마다 API를 치지는 않음.
     - **무제한 모드**: `unlimitedEndsAt`이 현재(UTC) 이후이면 unlimited 아이콘(구독 시 `_sub`)(24×24) + 5dp gap + 남은 시간 `MM:SS`(bodyMedium w700, 흰색). 1초 주기 타이머로 갱신, 만료 시 자동 재조회 후 일반 모드 전환.
     - **일반 모드**: `unlimitedEndsAt`이 null 또는 과거이면 energy 아이콘(구독 시 `_sub`)(24×24) + `energyCount`(bodyMedium w700, 흰색). `lastAutoChargedAt` 기준 30분마다 1 충전(최대 `maxEnergyCount`). 가득 차지 않았을 때 충전 타이머 `00:00` 도달 시 detail 재조회.
-    - 배지는 `EnergyHeaderBadge`(`lib/widgets/energy_header_badge.dart`). Home·Opening 우상단 공통. 탭 시 `showEnergyInfoPopup`. Home은 `registerEnergyBadgeAnchor: true`·`refreshCounter: homeTabSelectedCounter`(탭 재선택·메인 복귀 시 `main.dart` `homeTabSelectedCounter` 증가로 재조회). Opening·Playing도 화면 체류 중 충전·무제한·구독 만료 시 자동 갱신. 팝업 내 결제 성공 시 `EnergyRefreshBus`로 배지·Playing도 재조회. **에너지 팝업 오픈은 전역 lock**(`energy_info_popup.dart` `_withEnergyPopupLock`)으로 따닥 시 이중 팝업 방지(info/부족/Playing/Lab 공통).
+    - 배지는 `EnergyHeaderBadge`(`lib/widgets/energy_header_badge.dart`). Home·Opening 우상단 공통. 탭 시 `showEnergyInfoPopup`. Home은 `registerEnergyBadgeAnchor: true`·`refreshCounter: homeTabSelectedCounter`·**`active: 홈 탭 선택 중`**. Opening·Playing 체류 중 충전·무제한·구독 만료 시 자동 갱신. **비가시 pause**: IndexedStack 비활성 탭·위 라우트/다이얼로그(`ModalRoute.isCurrent==false`)에서는 타이머·GET 중단(DTO bus는 수신·캐시). 팝업 결제 성공 시 `EnergyRefreshBus.notify(dto)`로 배지·Playing은 **추가 GET 없이** 반영. **detail GET in-flight coalesce**(`UserApi.getUserEnergy`). 팝업 오픈 전역 lock(`_withEnergyPopupLock`).
     - **Playing 푸터 에너지**: `PlayingEnergyIndicator` — 녹음 모드 하단 아이콘 행 중앙·타이핑 모드 하단 동일. 일반 energy 아이콘+숫자, 무제한 unlimited 아이콘만(타이머 없음, 구독 시 `_sub`). 탭 영역 48×48 중앙 정렬. 탭 시 무제한 또는 `energyCount > 0`이면 `showEnergyInfoPopup`(닫기), 일반 모드·0이면 `showPlayingEnergyInsufficientPopup`(본문 l10n `energyInfoRechargeUntil`·Home과 동일, 버튼 `endRoleplay`). `user-message` 성공 시 로컬 -1. 에너지 0에서 녹음/타이핑 send 또는 API **402** 시에도 `showPlayingEnergyInsufficientPopup` → `endRoleplay` 탭 시 Wait 나가기 레이어(세션 유지).
     - **에너지 팝업 구매 영역** (`lib/widgets/energy_purchase_section.dart`): 안내문구와 닫기(또는 endRoleplay) 버튼 사이. 노출 순서 — Unlimited Pass(`showUnlimitedPurchaseYn`) → Capacity6 → Capacity7 → Go Premium(`subscribedYn!=Y`, Lab은 force 가능). 버튼 갭 10·radius 20. INAPP 제목(bodyMedium w600)은 폭 부족 시 `marquee` 루프, 부제 `labelSmall`. INAPP 배경은 `#121212` 베이스 레이어 + 테마색 오버레이 레이어(평소 5% / 결제 진행 중 30%, 250ms). Lab에서 스토어 가격 없으면 `R$2,99` 폴백. INAPP은 `IapPurchaseService`(`lib/services/iap_purchase_service.dart`)로 단건 구매·verify·가격 영속 캐시(`IapPriceCache`). 결제 중 다른 구매 버튼 비활성. verify `successYn=Y`면 해당 버튼 1000ms 페이드/축소 후 제거·detail 재조회·배지 동기화(`pendingYn=Y`면 승인대기 토스트). `successYn=N`이면 실패 토스트만. 스토어 취소/실패는 토스트 없이 테마 틴트 5% 복귀. Go Premium → `PaywallScreen.push`(팝업 유지).
     - **에너지 팝업 타이틀**: 무제한 모드 또는 일반 모드·에너지 > 0 → l10n `energyInfoTitle`. 일반 모드·에너지 0 → `energyOutOfEnergyTitle`(en Out of Energy / ko 에너지 부족 / pt Sem energia). Home·Opening·Playing 공통.
@@ -217,6 +217,7 @@
 - 응답 `successYn`/`pendingYn`.
 - 에너지 팝업: INAPP 구매 + Go Premium → Paywall. pop(true) 시 Go Premium 1000ms 제거 + detail 재조회.
 - Paywall: 스토어 가격(연간 raw/12 `/mês` + yearly `/ano`), Assinar agora 결제. 성공 → Completed → pop(true). pending → 토스트+pop(true). N → 실패 토스트.
+- **Speech Feedback 펼침(구독 전용)**: Result·History(본문 동일)·View Chat. `ensureSubscribedForSpeechFeedback` — `SubscriptionStatusCache`(`energy/detail`·bus로 유지). 비구독 탭 → Paywall. 결제 복귀 후 캐시 갱신·**자동 펼침 없음**, 재탭 시 펼침. 접기는 구독 검사 없음.
 - Completed: `paywall_completed.dart` (Continuar/X → pop(true)). Lab Preview 유지.
 - 앱 버전: `1.2.0+48`
 
@@ -249,6 +250,7 @@
 - Verify API: `lib/api/endpoints/purchase_api.dart`, `lib/api/suda_api_client.dart`
 - 에너지 구매 UI: `lib/widgets/energy_purchase_section.dart`, `lib/widgets/energy_info_popup.dart`
 - Paywall: `lib/screens/paywall/paywall.dart`, `lib/screens/paywall/paywall_completed.dart`
+- 구독 캐시·Feedback 가드: `lib/services/subscription_status_cache.dart`, `lib/utils/speech_feedback_premium.dart`
 - 스크린 문서: `.docs/CONTEXT_SCREEN.md` § PaywallScreen / PaywallCompletedScreen
 
 ## 8. 스타일 / 디자인 / 배치 규칙

@@ -11,6 +11,7 @@ import '../../l10n/app_localizations.dart';
 import '../../models/series_models.dart';
 import '../../services/token_storage.dart';
 import '../../utils/default_toast.dart';
+import '../../utils/speech_feedback_premium.dart';
 import '../../widgets/app_scaffold.dart';
 
 const String _kRoleUser = 'USER';
@@ -598,7 +599,17 @@ class _ViewChatUserCardState extends State<_ViewChatUserCard> {
 
   void _onFeedbackTap() {
     if (!_hasFeedbackContent && !_hasScore) return;
-    setState(() => _expanded = !_expanded);
+    unawaited(_onFeedbackTapAsync());
+  }
+
+  Future<void> _onFeedbackTapAsync() async {
+    if (_expanded) {
+      setState(() => _expanded = false);
+      return;
+    }
+    final allowed = await ensureSubscribedForSpeechFeedback(context);
+    if (!mounted || !allowed) return;
+    setState(() => _expanded = true);
   }
 
   Widget _buildExpandedFeedbackText(BuildContext context) {

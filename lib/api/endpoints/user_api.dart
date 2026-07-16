@@ -331,13 +331,26 @@ class UserApi {
     );
   }
 
+  static Future<UserEnergyDto>? _inflightEnergyDetail;
+
   static Future<UserEnergyDto> getUserEnergy({
     required String accessToken,
   }) async {
-    return await SudaHttpClient.executeWithRefresh(
+    final existing = _inflightEnergyDetail;
+    if (existing != null) return existing;
+
+    final future = SudaHttpClient.executeWithRefresh(
       () => _getUserEnergyInternal(accessToken),
       retryWithNewToken: (newToken) => _getUserEnergyInternal(newToken),
     );
+    _inflightEnergyDetail = future;
+    try {
+      return await future;
+    } finally {
+      if (identical(_inflightEnergyDetail, future)) {
+        _inflightEnergyDetail = null;
+      }
+    }
   }
 
   static Future<UserEnergyDto> _getUserEnergyInternal(String accessToken) async {

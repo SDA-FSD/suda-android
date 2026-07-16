@@ -888,6 +888,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                           onNavigateToProfile: _navigateToProfile,
                           user: _user,
                           homeTabSelectedCounter: _homeTabSelectedCounter,
+                          isActive: _currentMainScreen == 'home',
                           showNotiboxUnreadBadge: _showNotiboxUnreadBadge,
                           onHomeContentsLoaded: _onHomeContentsLoadedForBadge,
                           onOpenAppPath: (path) {

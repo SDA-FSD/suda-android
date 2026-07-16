@@ -17,6 +17,7 @@ import 'endpoints/roleplay_api.dart';
 import 'endpoints/series_api.dart';
 import 'endpoints/user_api.dart';
 import 'endpoints/version_api.dart';
+import '../services/subscription_status_cache.dart';
 
 class SudaApiClient {
   static Future<HomeDto> getHomeContents({required String accessToken}) {
@@ -318,8 +319,10 @@ class SudaApiClient {
     return UserApi.getUserProfile(accessToken: accessToken);
   }
 
-  static Future<UserEnergyDto> getUserEnergy({required String accessToken}) {
-    return UserApi.getUserEnergy(accessToken: accessToken);
+  static Future<UserEnergyDto> getUserEnergy({required String accessToken}) async {
+    final dto = await UserApi.getUserEnergy(accessToken: accessToken);
+    SubscriptionStatusCache.apply(dto);
+    return dto;
   }
 
   static Future<void> updateName({

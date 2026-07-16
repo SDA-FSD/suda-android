@@ -39,7 +39,14 @@ mixin PlayingEnergyMixin<T extends StatefulWidget> on State<T> {
     _playingEnergyTimer = null;
   }
 
-  void _onEnergyRefreshBus() {
+  void _onEnergyRefreshBus(UserEnergyDto? energy) {
+    if (energy != null) {
+      if (!mounted) return;
+      setState(() => _playingEnergy = energy);
+      _playingRefetchTracker.syncFrom(energy, DateTime.now().toUtc());
+      _syncPlayingEnergyTimer();
+      return;
+    }
     unawaited(_fetchPlayingEnergy());
   }
 
@@ -127,6 +134,9 @@ mixin PlayingEnergyMixin<T extends StatefulWidget> on State<T> {
 
   Future<void> _onPlayingEnergyTick() async {
     if (!mounted || _playingEnergyRefetching) return;
+    final route = ModalRoute.of(context);
+    if (route != null && !route.isCurrent) return;
+
     final energy = _playingEnergy;
     if (energy == null) return;
     final nowUtc = DateTime.now().toUtc();

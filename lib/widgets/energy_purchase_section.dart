@@ -191,7 +191,7 @@ class _EnergyPurchaseSectionState extends State<EnergyPurchaseSection> {
     if (refreshed != null) {
       setState(() => _energy = refreshed);
     }
-    EnergyRefreshBus.instance.notify();
+    EnergyRefreshBus.instance.notify(refreshed);
   }
 
   Future<void> _onGoPremiumTap() async {
@@ -213,7 +213,7 @@ class _EnergyPurchaseSectionState extends State<EnergyPurchaseSection> {
     if (refreshed != null) {
       setState(() => _energy = refreshed);
     }
-    EnergyRefreshBus.instance.notify();
+    EnergyRefreshBus.instance.notify(refreshed);
   }
 
   @override

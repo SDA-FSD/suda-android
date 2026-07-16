@@ -20,10 +20,15 @@ class EnergyHeaderBadge extends StatefulWidget {
   /// true면 `EffectAnchorId.energyBadge` 앵커로 등록 (Home Like 이펙트 등).
   final bool registerEnergyBadgeAnchor;
 
+  /// IndexedStack 비가시·백그라운드일 때 false → 타이머/GET pause.
+  /// DTO bus 알림은 받아 두었다가 표시에 쓴다.
+  final bool active;
+
   const EnergyHeaderBadge({
     super.key,
     this.refreshCounter,
     this.registerEnergyBadgeAnchor = false,
+    this.active = true,
   });
 
   @override
@@ -38,6 +43,13 @@ class _EnergyHeaderBadgeState extends State<EnergyHeaderBadge> {
   String? _accessToken;
   final EnergyTimerRefetchTracker _refetchTracker = EnergyTimerRefetchTracker();
 
+  /// 탭 활성 + 현재 라우트(위 스크린/다이얼로그 없음).
+  bool get _isLive {
+    if (!widget.active) return false;
+    final route = ModalRoute.of(context);
+    return route == null || route.isCurrent;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -48,15 +60,29 @@ class _EnergyHeaderBadgeState extends State<EnergyHeaderBadge> {
       );
     }
     EnergyRefreshBus.instance.addListener(_onEnergyRefreshBus);
-    _loadAndFetch();
+    unawaited(_bootstrap());
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncPeriodicTimer();
   }
 
   @override
   void didUpdateWidget(EnergyHeaderBadge oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.refreshCounter != null &&
-        widget.refreshCounter != oldWidget.refreshCounter) {
-      _fetchEnergy();
+    final becameActive = widget.active && !oldWidget.active;
+    final counterChanged = widget.refreshCounter != null &&
+        widget.refreshCounter != oldWidget.refreshCounter;
+
+    if (becameActive || (counterChanged && widget.active)) {
+      unawaited(_fetchEnergy());
+    } else if (!widget.active && oldWidget.active) {
+      _periodicTimer?.cancel();
+      _periodicTimer = null;
+    } else {
+      _syncPeriodicTimer();
     }
   }
 
@@ -73,24 +99,38 @@ class _EnergyHeaderBadgeState extends State<EnergyHeaderBadge> {
     super.dispose();
   }
 
-  void _onEnergyRefreshBus() {
+  Future<void> _bootstrap() async {
+    _accessToken = await TokenStorage.loadAccessToken();
+    if (!mounted) return;
+    if (widget.active) {
+      await _fetchEnergy();
+    }
+  }
+
+  void _onEnergyRefreshBus(UserEnergyDto? energy) {
+    if (energy != null) {
+      _applyEnergy(energy);
+      return;
+    }
+    if (!_isLive) return;
     unawaited(_fetchEnergy());
   }
 
-  Future<void> _loadAndFetch() async {
-    _accessToken = await TokenStorage.loadAccessToken();
-    await _fetchEnergy();
+  void _applyEnergy(UserEnergyDto dto) {
+    if (!mounted) return;
+    setState(() => _energy = dto);
+    _refetchTracker.syncFrom(dto, DateTime.now().toUtc());
+    _syncPeriodicTimer();
   }
 
   Future<void> _fetchEnergy() async {
-    final token = _accessToken;
+    final token = _accessToken ?? await TokenStorage.loadAccessToken();
     if (token == null) return;
+    _accessToken = token;
     try {
       final dto = await SudaApiClient.getUserEnergy(accessToken: token);
       if (!mounted) return;
-      setState(() => _energy = dto);
-      _refetchTracker.syncFrom(dto, DateTime.now().toUtc());
-      _syncPeriodicTimer();
+      _applyEnergy(dto);
     } catch (_) {
       // 실패 시 표시값 유지
     }
@@ -99,6 +139,8 @@ class _EnergyHeaderBadgeState extends State<EnergyHeaderBadge> {
   void _syncPeriodicTimer() {
     _periodicTimer?.cancel();
     _periodicTimer = null;
+
+    if (!_isLive) return;
 
     final energy = _energy;
     if (energy == null) return;
@@ -115,6 +157,11 @@ class _EnergyHeaderBadgeState extends State<EnergyHeaderBadge> {
 
   Future<void> _onPeriodicTick() async {
     if (!mounted || _isRefetching) return;
+    if (!_isLive) {
+      _periodicTimer?.cancel();
+      _periodicTimer = null;
+      return;
+    }
     final energy = _energy;
     if (energy == null) return;
     final nowUtc = DateTime.now().toUtc();

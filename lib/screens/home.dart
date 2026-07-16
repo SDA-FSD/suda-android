@@ -22,6 +22,8 @@ class HomeScreen extends StatefulWidget {
 
   /// 홈 탭이 선택될 때마다 증가. didUpdateWidget에서 변경 시 에너지 갱신.
   final int? homeTabSelectedCounter;
+  /// IndexedStack에서 홈 탭이 선택된 경우 true (에너지 배지 타이머/GET).
+  final bool isActive;
   final ValueChanged<HomeDto>? onHomeContentsLoaded;
   final ValueChanged<String>? onOpenAppPath;
   final bool showNotiboxUnreadBadge;
@@ -32,6 +34,7 @@ class HomeScreen extends StatefulWidget {
     this.onNavigateToProfile,
     this.user,
     this.homeTabSelectedCounter,
+    this.isActive = true,
     this.onHomeContentsLoaded,
     this.onOpenAppPath,
     this.showNotiboxUnreadBadge = false,
@@ -226,6 +229,7 @@ class _HomeScreenState extends State<HomeScreen> {
         EnergyHeaderBadge(
           refreshCounter: widget.homeTabSelectedCounter,
           registerEnergyBadgeAnchor: true,
+          active: widget.isActive,
         ),
       ],
       bottomNavigationBar: GnbBar(
