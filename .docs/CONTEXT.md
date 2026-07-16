@@ -219,7 +219,7 @@
 - Paywall: 스토어 가격(연간 raw/12 `/mês` + yearly `/ano`), Assinar agora 결제. 성공 → Completed → pop(true). pending → 토스트+pop(true). N → 실패 토스트.
 - **Speech Feedback 펼침(구독 전용)**: Result·History(본문 동일)·View Chat. `ensureSubscribedForSpeechFeedback` — `SubscriptionStatusCache`(`energy/detail`·bus로 유지). 비구독 탭 → Paywall. 결제 복귀 후 캐시 갱신·**자동 펼침 없음**, 재탭 시 펼침. 접기는 구독 검사 없음.
 - Completed: `paywall_completed.dart` (Continuar/X → pop(true)). Lab Preview 유지.
-- 앱 버전: `1.2.0+48`
+- 앱 버전: `1.2.0+49`
 
 ### 상품 ID (Play Console / `IapPurchaseService`)
 | 구분 | productId | basePlanId / 비고 | 진입 | verify |
