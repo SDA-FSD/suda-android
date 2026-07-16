@@ -759,12 +759,15 @@ class _PaywallScreenState extends State<PaywallScreen> {
     bool showMelhorBadge = false,
   }) {
     final radius = BorderRadius.circular(16);
+    // 선택/미선택 모두 outside stroke → 안쪽 콘텐츠 크기 고정(탭 시 밀림 방지).
+    const selectedBorderWidth = 3.0;
     const unselectedBorderWidth = 1.0;
-    final innerRadius = BorderRadius.circular(16 - unselectedBorderWidth);
+    final strokeWidth =
+        selected ? selectedBorderWidth : unselectedBorderWidth;
     // 그림자는 Material/Ink 바깥에 둬 clip에 잘리지 않게 함.
     final cardBody = Ink(
       decoration: BoxDecoration(
-        borderRadius: selected ? radius : innerRadius,
+        borderRadius: radius,
         gradient: selected
             ? const LinearGradient(
                 begin: Alignment.centerLeft,
@@ -774,15 +777,9 @@ class _PaywallScreenState extends State<PaywallScreen> {
             : const LinearGradient(
                 colors: [Color(0x4D8A38F5), Color(0x4D8A38F5)],
               ),
-        border: selected
-            ? Border.all(
-                color: const Color(0xCCFFFFFF),
-                width: 3,
-              )
-            : null,
       ),
       child: ClipRRect(
-        borderRadius: selected ? radius : innerRadius,
+        borderRadius: radius,
         clipBehavior: Clip.antiAlias,
         child: Stack(
           children: [
@@ -908,15 +905,18 @@ class _PaywallScreenState extends State<PaywallScreen> {
         child: InkWell(
           onTap: onTap,
           borderRadius: radius,
-          child: selected
-              ? cardBody
-              : CustomPaint(
-                  foregroundPainter: const _PlanCardOutsideStrokePainter(
-                    strokeWidth: unselectedBorderWidth,
-                    radius: 16,
-                  ),
-                  child: cardBody,
-                ),
+          child: CustomPaint(
+            foregroundPainter: _PlanCardOutsideStrokePainter(
+              strokeWidth: strokeWidth,
+              radius: 16,
+              // 선택: 흰 80% solid / 미선택: 기존 gradient
+              color: selected ? const Color(0xCCFFFFFF) : null,
+              gradient: selected
+                  ? null
+                  : _PlanCardOutsideStrokePainter.unselectedStrokeGradient,
+            ),
+            child: cardBody,
+          ),
         ),
       ),
     );
@@ -1015,18 +1015,22 @@ class _MelhorBadgeStrokePainter extends CustomPainter {
       strokeWidth != oldDelegate.strokeWidth || radius != oldDelegate.radius;
 }
 
-/// 미선택 플랜 카드용 1px outside gradient stroke.
-/// 내부 fill(보라 30%)에 경계색이 번지지 않도록 테두리를 바깥쪽으로만 그린다.
+/// 플랜 카드 outside stroke (선택/미선택 공통).
+/// 내부 fill에 경계색이 번지지 않도록 테두리를 바깥쪽으로만 그린다.
 class _PlanCardOutsideStrokePainter extends CustomPainter {
   const _PlanCardOutsideStrokePainter({
     required this.strokeWidth,
     required this.radius,
+    this.color,
+    this.gradient,
   });
 
   final double strokeWidth;
   final double radius;
+  final Color? color;
+  final Gradient? gradient;
 
-  static const _strokeGradient = LinearGradient(
+  static const unselectedStrokeGradient = LinearGradient(
     begin: Alignment.centerLeft,
     end: Alignment.centerRight,
     colors: [Color(0xFF80D7CF), Color(0xFF8A38F5)],
@@ -1048,12 +1052,19 @@ class _PlanCardOutsideStrokePainter extends CustomPainter {
     final paint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
-      ..isAntiAlias = true
-      ..shader = _strokeGradient.createShader(rect);
+      ..isAntiAlias = true;
+    if (gradient != null) {
+      paint.shader = gradient!.createShader(rect);
+    } else if (color != null) {
+      paint.color = color!;
+    }
     canvas.drawRRect(rrect, paint);
   }
 
   @override
   bool shouldRepaint(covariant _PlanCardOutsideStrokePainter oldDelegate) =>
-      strokeWidth != oldDelegate.strokeWidth || radius != oldDelegate.radius;
+      strokeWidth != oldDelegate.strokeWidth ||
+      radius != oldDelegate.radius ||
+      color != oldDelegate.color ||
+      gradient != oldDelegate.gradient;
 }
