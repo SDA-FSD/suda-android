@@ -2,6 +2,7 @@ import 'dart:async' show Timer, unawaited;
 
 import 'package:flutter/material.dart';
 
+import '../../services/energy_refresh_bus.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
 import '../../utils/energy_timer_refetch.dart';
@@ -17,16 +18,29 @@ mixin PlayingEnergyMixin<T extends StatefulWidget> on State<T> {
   bool _playingEnergyRefetching = false;
   final EnergyTimerRefetchTracker _playingRefetchTracker =
       EnergyTimerRefetchTracker();
+  bool _energyRefreshBusAttached = false;
 
   UserEnergyDto? get playingEnergy => _playingEnergy;
 
   void initPlayingEnergy() {
+    if (!_energyRefreshBusAttached) {
+      EnergyRefreshBus.instance.addListener(_onEnergyRefreshBus);
+      _energyRefreshBusAttached = true;
+    }
     unawaited(_fetchPlayingEnergy());
   }
 
   void disposePlayingEnergy() {
+    if (_energyRefreshBusAttached) {
+      EnergyRefreshBus.instance.removeListener(_onEnergyRefreshBus);
+      _energyRefreshBusAttached = false;
+    }
     _playingEnergyTimer?.cancel();
     _playingEnergyTimer = null;
+  }
+
+  void _onEnergyRefreshBus() {
+    unawaited(_fetchPlayingEnergy());
   }
 
   Widget buildPlayingEnergyFooterIndicator() {
@@ -75,12 +89,7 @@ mixin PlayingEnergyMixin<T extends StatefulWidget> on State<T> {
     if (energy.isUnlimitedActiveAt(DateTime.now().toUtc())) return;
     if (energy.energyCount <= 0) return;
     setState(() {
-      _playingEnergy = UserEnergyDto(
-        energyCount: energy.energyCount - 1,
-        maxEnergyCount: energy.maxEnergyCount,
-        lastAutoChargedAt: energy.lastAutoChargedAt,
-        unlimitedEndsAt: energy.unlimitedEndsAt,
-      );
+      _playingEnergy = energy.copyWith(energyCount: energy.energyCount - 1);
     });
     _syncPlayingEnergyTimer();
   }
@@ -106,8 +115,9 @@ mixin PlayingEnergyMixin<T extends StatefulWidget> on State<T> {
     final energy = _playingEnergy;
     if (energy == null) return;
     final nowUtc = DateTime.now().toUtc();
-    final needsTimer =
-        energy.isUnlimitedActiveAt(nowUtc) || !_isPlayingEnergyFull(energy);
+    final needsTimer = energy.isUnlimitedActiveAt(nowUtc) ||
+        !_isPlayingEnergyFull(energy) ||
+        energy.needsSubscriptionExpiryWatch(nowUtc);
     if (!needsTimer) return;
 
     _playingEnergyTimer = Timer.periodic(const Duration(seconds: 1), (_) {

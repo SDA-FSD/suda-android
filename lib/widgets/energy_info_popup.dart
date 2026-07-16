@@ -6,92 +6,117 @@ import '../l10n/app_localizations.dart';
 import '../services/suda_api_client.dart';
 import '../services/token_refresh_service.dart';
 import '../services/token_storage.dart';
+import '../utils/energy_icon.dart';
 import '../utils/energy_timer_refetch.dart';
 import 'default_popup.dart';
+import 'energy_purchase_section.dart';
 
 const _pink = Color(0xFFFF00A6);
 const _energyZeroColor = Color(0xFFE60000);
 const _progressBg = Color(0xFF635F5F);
 const _progressFill = Color(0xFF0CABA8);
 
-/// 홈 에너지 배지 탭 시 `GET /v1/users/energy` 후 에너지 안내 팝업.
-Future<void> showEnergyInfoPopup(BuildContext context) async {
-  await TokenRefreshService.instance.refreshIfNeeded();
-  if (!context.mounted) return;
-  final accessToken = await TokenStorage.loadAccessToken();
-  if (!context.mounted || accessToken == null) return;
+/// 에너지 팝업 전역 따닥 방지 (배지·Playing·부족 팝업·Lab 공통).
+bool _energyPopupBusy = false;
 
-  UserEnergyDto energy;
+Future<void> _withEnergyPopupLock(Future<void> Function() action) async {
+  if (_energyPopupBusy) return;
+  _energyPopupBusy = true;
   try {
-    energy = await SudaApiClient.getUserEnergy(accessToken: accessToken);
-  } catch (_) {
-    return;
+    await action();
+  } finally {
+    _energyPopupBusy = false;
   }
-  if (!context.mounted) return;
+}
 
-  await _showEnergyInfoPopupWithEnergy(context, energy, accessToken: accessToken);
+/// 홈 에너지 배지 탭 시 `GET /v1/users/energy/detail` 후 에너지 안내 팝업.
+Future<void> showEnergyInfoPopup(BuildContext context) {
+  return _withEnergyPopupLock(() async {
+    await TokenRefreshService.instance.refreshIfNeeded();
+    if (!context.mounted) return;
+    final accessToken = await TokenStorage.loadAccessToken();
+    if (!context.mounted || accessToken == null) return;
+
+    UserEnergyDto energy;
+    try {
+      energy = await SudaApiClient.getUserEnergy(accessToken: accessToken);
+    } catch (_) {
+      return;
+    }
+    if (!context.mounted) return;
+
+    await _showEnergyInfoPopupWithEnergy(
+      context,
+      energy,
+      accessToken: accessToken,
+    );
+  });
 }
 
 /// Opening `sessionId == '0'` 등 에너지 부족 시 에너지 정보 팝업(본문 문구만 교체).
-Future<void> showEnergyInsufficientPopup(BuildContext context) async {
-  await TokenRefreshService.instance.refreshIfNeeded();
-  if (!context.mounted) return;
-  final accessToken = await TokenStorage.loadAccessToken();
-  if (!context.mounted || accessToken == null) return;
+Future<void> showEnergyInsufficientPopup(BuildContext context) {
+  return _withEnergyPopupLock(() async {
+    await TokenRefreshService.instance.refreshIfNeeded();
+    if (!context.mounted) return;
+    final accessToken = await TokenStorage.loadAccessToken();
+    if (!context.mounted || accessToken == null) return;
 
-  UserEnergyDto energy;
-  try {
-    energy = await SudaApiClient.getUserEnergy(accessToken: accessToken);
-  } catch (_) {
-    return;
-  }
-  if (!context.mounted) return;
+    UserEnergyDto energy;
+    try {
+      energy = await SudaApiClient.getUserEnergy(accessToken: accessToken);
+    } catch (_) {
+      return;
+    }
+    if (!context.mounted) return;
 
-  final l10n = AppLocalizations.of(context)!;
-  await _showEnergyInfoPopupWithEnergy(
-    context,
-    energy,
-    accessToken: accessToken,
-    messageOverride: l10n.energyInsufficient,
-  );
+    final l10n = AppLocalizations.of(context)!;
+    await _showEnergyInfoPopupWithEnergy(
+      context,
+      energy,
+      accessToken: accessToken,
+      messageOverride: l10n.energyInsufficient,
+    );
+  });
 }
 
 /// Playing 에너지 부족(0·402) — 본문은 Home과 동일(충전 타이머), 버튼은 롤플레이 종료.
 Future<void> showPlayingEnergyInsufficientPopup(
   BuildContext context, {
   required VoidCallback onEndRoleplay,
-}) async {
-  await TokenRefreshService.instance.refreshIfNeeded();
-  if (!context.mounted) return;
-  final accessToken = await TokenStorage.loadAccessToken();
-  if (!context.mounted || accessToken == null) return;
+}) {
+  return _withEnergyPopupLock(() async {
+    await TokenRefreshService.instance.refreshIfNeeded();
+    if (!context.mounted) return;
+    final accessToken = await TokenStorage.loadAccessToken();
+    if (!context.mounted || accessToken == null) return;
 
-  UserEnergyDto energy;
-  try {
-    energy = await SudaApiClient.getUserEnergy(accessToken: accessToken);
-  } catch (_) {
-    return;
-  }
-  if (!context.mounted) return;
+    UserEnergyDto energy;
+    try {
+      energy = await SudaApiClient.getUserEnergy(accessToken: accessToken);
+    } catch (_) {
+      return;
+    }
+    if (!context.mounted) return;
 
-  final l10n = AppLocalizations.of(context)!;
-  await DefaultPopup.show(
-    context,
-    titleText: _resolveEnergyPopupTitle(l10n, energy),
-    bodyWidget: EnergyInfoPopupBody(
-      initialEnergy: energy,
-      accessToken: accessToken,
-    ),
-    buttons: [
-      DefaultPopupButton(
-        type: DefaultPopupButtonType.primary,
-        label: l10n.endRoleplay,
-        onPressed: () {
-          onEndRoleplay();
-        },
+    final l10n = AppLocalizations.of(context)!;
+    await DefaultPopup.show(
+      context,
+      titleText: _resolveEnergyPopupTitle(l10n, energy),
+      bodyWidget: EnergyInfoPopupBody(
+        initialEnergy: energy,
+        accessToken: accessToken,
       ),
-    ],
-  );
+      buttons: [
+        DefaultPopupButton(
+          type: DefaultPopupButtonType.primary,
+          label: l10n.endRoleplay,
+          onPressed: () {
+            onEndRoleplay();
+          },
+        ),
+      ],
+    );
+  });
 }
 
 Future<void> _showEnergyInfoPopupWithEnergy(
@@ -99,6 +124,7 @@ Future<void> _showEnergyInfoPopupWithEnergy(
   UserEnergyDto energy, {
   required String accessToken,
   bool labMode = false,
+  bool forceShowGoPremium = false,
   String? messageOverride,
 }) async {
   final l10n = AppLocalizations.of(context)!;
@@ -109,6 +135,7 @@ Future<void> _showEnergyInfoPopupWithEnergy(
       initialEnergy: energy,
       accessToken: accessToken,
       labMode: labMode,
+      forceShowGoPremium: forceShowGoPremium,
       messageOverride: messageOverride,
     ),
     buttons: [
@@ -121,73 +148,112 @@ Future<void> _showEnergyInfoPopupWithEnergy(
   );
 }
 
-/// Lab: playing·무제한·에너지 수(0~5) 조합으로 에너지 팝업 재현.
+/// Lab: playing·무제한·구독·구매버튼 강제 노출 조합으로 에너지 팝업 재현.
 Future<void> showEnergyPopupForLab(
   BuildContext context, {
   required bool playing,
   required bool unlimited,
   required int energyCount,
-}) async {
-  final energy = _buildLabEnergyDto(
-    unlimited: unlimited,
-    energyCount: energyCount,
-  );
-  final l10n = AppLocalizations.of(context)!;
-  final isPlayingBlocked = playing && !unlimited && energyCount == 0;
-
-  if (isPlayingBlocked) {
-    await DefaultPopup.show(
-      context,
-      titleText: _resolveEnergyPopupTitle(l10n, energy),
-      bodyWidget: EnergyInfoPopupBody(
-        initialEnergy: energy,
-        accessToken: '',
-        labMode: true,
-      ),
-      buttons: [
-        DefaultPopupButton(
-          type: DefaultPopupButtonType.primary,
-          label: l10n.endRoleplay,
-          onPressed: () {},
-        ),
-      ],
+  bool subscribed = false,
+  bool showUnlimitedPurchase = false,
+  bool showCapacity6Purchase = false,
+  bool showCapacity7Purchase = false,
+  bool forceShowGoPremium = false,
+}) {
+  return _withEnergyPopupLock(() async {
+    final energy = _buildLabEnergyDto(
+      unlimited: unlimited,
+      energyCount: energyCount,
+      subscribed: subscribed,
+      showUnlimitedPurchase: showUnlimitedPurchase,
+      showCapacity6Purchase: showCapacity6Purchase,
+      showCapacity7Purchase: showCapacity7Purchase,
     );
-    return;
-  }
+    final l10n = AppLocalizations.of(context)!;
+    final isPlayingBlocked = playing && !unlimited && energyCount == 0;
 
-  await _showEnergyInfoPopupWithEnergy(
-    context,
-    energy,
-    accessToken: '',
-    labMode: true,
-  );
+    if (isPlayingBlocked) {
+      await DefaultPopup.show(
+        context,
+        titleText: _resolveEnergyPopupTitle(l10n, energy),
+        bodyWidget: EnergyInfoPopupBody(
+          initialEnergy: energy,
+          accessToken: '',
+          labMode: true,
+          forceShowGoPremium: forceShowGoPremium,
+        ),
+        buttons: [
+          DefaultPopupButton(
+            type: DefaultPopupButtonType.primary,
+            label: l10n.endRoleplay,
+            onPressed: () {},
+          ),
+        ],
+      );
+      return;
+    }
+
+    await _showEnergyInfoPopupWithEnergy(
+      context,
+      energy,
+      accessToken: '',
+      labMode: true,
+      forceShowGoPremium: forceShowGoPremium,
+    );
+  });
 }
 
 UserEnergyDto _buildLabEnergyDto({
   required bool unlimited,
   required int energyCount,
+  bool subscribed = false,
+  bool showUnlimitedPurchase = false,
+  bool showCapacity6Purchase = false,
+  bool showCapacity7Purchase = false,
 }) {
   const maxEnergyCount = 5;
   final count = energyCount.clamp(0, maxEnergyCount);
   final nowUtc = DateTime.now().toUtc();
+  final yn = subscribed ? 'Y' : 'N';
+  final showU = showUnlimitedPurchase ? 'Y' : 'N';
+  final show6 = showCapacity6Purchase ? 'Y' : 'N';
+  final show7 = showCapacity7Purchase ? 'Y' : 'N';
 
   if (unlimited) {
     return UserEnergyDto(
       energyCount: count,
       maxEnergyCount: maxEnergyCount,
       unlimitedEndsAt: nowUtc.add(const Duration(minutes: 15)),
+      subscribedYn: yn,
+      subscriptionExpiredAt:
+          subscribed ? nowUtc.add(const Duration(days: 30)) : null,
+      showUnlimitedPurchaseYn: showU,
+      showCapacity6PurchaseYn: show6,
+      showCapacity7PurchaseYn: show7,
     );
   }
   if (count >= maxEnergyCount) {
     return UserEnergyDto(
       energyCount: maxEnergyCount,
       maxEnergyCount: maxEnergyCount,
+      subscribedYn: yn,
+      subscriptionExpiredAt:
+          subscribed ? nowUtc.add(const Duration(days: 30)) : null,
+      showUnlimitedPurchaseYn: showU,
+      showCapacity6PurchaseYn: show6,
+      showCapacity7PurchaseYn: show7,
     );
   }
   return UserEnergyDto(
     energyCount: count,
     maxEnergyCount: maxEnergyCount,
     lastAutoChargedAt: nowUtc.subtract(const Duration(minutes: 15)),
+    subscribedYn: yn,
+    subscriptionExpiredAt:
+        subscribed ? nowUtc.add(const Duration(days: 30)) : null,
+    showUnlimitedPurchaseYn: showU,
+    showCapacity6PurchaseYn: show6,
+    showCapacity7PurchaseYn: show7,
   );
 }
 
@@ -206,6 +272,7 @@ class EnergyInfoPopupBody extends StatefulWidget {
   final UserEnergyDto initialEnergy;
   final String accessToken;
   final bool labMode;
+  final bool forceShowGoPremium;
   final String? messageOverride;
 
   const EnergyInfoPopupBody({
@@ -213,6 +280,7 @@ class EnergyInfoPopupBody extends StatefulWidget {
     required this.initialEnergy,
     required this.accessToken,
     this.labMode = false,
+    this.forceShowGoPremium = false,
     this.messageOverride,
   });
 
@@ -257,18 +325,20 @@ class _EnergyInfoPopupBodyState extends State<EnergyInfoPopupBody> {
     setState(() {});
   }
 
-  Future<void> _refetchEnergy() async {
-    if (widget.labMode || _isRefetching || !mounted) return;
+  Future<UserEnergyDto?> _refetchEnergy() async {
+    if (widget.labMode || _isRefetching || !mounted) return null;
+    if (widget.accessToken.isEmpty) return null;
     _isRefetching = true;
     try {
       final dto = await SudaApiClient.getUserEnergy(
         accessToken: widget.accessToken,
       );
-      if (!mounted) return;
+      if (!mounted) return dto;
       setState(() => _energy = dto);
       _refetchTracker.syncFrom(dto, DateTime.now().toUtc());
+      return dto;
     } catch (_) {
-      // 표시값 유지
+      return null;
     } finally {
       _isRefetching = false;
     }
@@ -319,9 +389,7 @@ class _EnergyInfoPopupBodyState extends State<EnergyInfoPopupBody> {
                 child: Row(
                   children: [
                     Image.asset(
-                      isUnlimited
-                          ? 'assets/images/icons/unlimited.png'
-                          : 'assets/images/icons/energy.png',
+                      energyIconAssetPath(_energy, nowUtc),
                       width: 24,
                       height: 24,
                     ),
@@ -354,6 +422,13 @@ class _EnergyInfoPopupBodyState extends State<EnergyInfoPopupBody> {
           timeStyle: timeStyle,
           nowUtc: nowUtc,
           isUnlimited: isUnlimited,
+        ),
+        EnergyPurchaseSection(
+          energy: _energy,
+          accessToken: widget.accessToken,
+          labMode: widget.labMode,
+          forceShowGoPremium: widget.forceShowGoPremium,
+          onRefetchEnergy: _refetchEnergy,
         ),
       ],
     );

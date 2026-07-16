@@ -167,5 +167,13 @@
   "energyInfoFull": "Sua energia está cheia.",
   "energyInfoUnlimitedEndsIn": "Modo Temporariamente Ilimitado Ativo",
   "energyInsufficient": "Você não tem energia suficiente.",
-  "endRoleplay": "Encerrar roleplay"
+  "endRoleplay": "Encerrar roleplay",
+  "energyPurchaseUnlimitedTitle": "Passe Temporariamente Ilimitado",
+  "energyPurchaseUnlimitedSubtitle": "Ativado imediatamente após a compra. Válido por 10 minutos.",
+  "energyPurchaseCapacityTitle": "Upgrade de Energia Máxima",
+  "energyPurchaseCapacitySubtitle": "+1 de Energia Máxima recarregável para sempre.",
+  "energyGoPremiumTitle": "Seja Premium",
+  "energyGoPremiumExplore": "Explorar",
+  "energyPurchasePendingApproval": "Seu pagamento está pendente.",
+  "energyPurchaseNotCompleted": "A compra não foi concluída."
 }

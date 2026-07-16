@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/user_models.dart';
+import '../utils/energy_icon.dart';
 
 const _energyZeroColor = Color(0xFFE60000);
 
@@ -18,7 +19,7 @@ class PlayingEnergyIndicator extends StatelessWidget {
     final nowUtc = DateTime.now().toUtc();
     if (dto.isUnlimitedActiveAt(nowUtc)) {
       return Image.asset(
-        'assets/images/icons/unlimited.png',
+        energyIconAssetPath(dto, nowUtc),
         width: 24,
         height: 24,
       );
@@ -35,7 +36,7 @@ class PlayingEnergyIndicator extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Image.asset(
-          'assets/images/icons/energy.png',
+          energyIconAssetPath(dto, nowUtc),
           width: 24,
           height: 24,
         ),

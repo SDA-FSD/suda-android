@@ -82,7 +82,7 @@ class PaywallCompletedScreen extends StatelessWidget {
                 left: 8,
                 top: topPad + 8,
                 child: IconButton(
-                  onPressed: () => Navigator.of(context).maybePop(),
+                  onPressed: () => Navigator.of(context).pop(true),
                   icon: const Icon(Icons.close, color: Colors.white, size: 28),
                   padding: const EdgeInsets.all(8),
                   constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
@@ -146,7 +146,7 @@ class PaywallCompletedScreen extends StatelessWidget {
                           ],
                         ),
                         child: ElevatedButton(
-                          onPressed: () => Navigator.of(context).maybePop(),
+                          onPressed: () => Navigator.of(context).pop(true),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF0CABA8),
                             foregroundColor: Colors.white,

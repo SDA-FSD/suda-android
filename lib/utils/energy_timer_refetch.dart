@@ -1,12 +1,16 @@
 import '../models/user_models.dart';
 
 /// 에너지 1초 타이머 tick마다 서버 재조회 필요 여부 판단.
-/// 무제한 활성 → 비활성 전환 시 1회 refetch, 일반 모드는 충전 00:00 시 refetch.
+/// - 무제한 활성 → 비활성 전환 시 1회 refetch
+/// - 일반 모드 충전 00:00 시 refetch
+/// - 구독 만료 시각 경과 시 1회 refetch (`subscriptionExpiredAt`)
 class EnergyTimerRefetchTracker {
   bool _wasUnlimitedActive = false;
+  bool _wasSubscriptionActive = false;
 
   void syncFrom(UserEnergyDto energy, DateTime nowUtc) {
     _wasUnlimitedActive = energy.isUnlimitedActiveAt(nowUtc);
+    _wasSubscriptionActive = energy.isSubscribedActiveAt(nowUtc);
   }
 
   bool shouldRefetch(UserEnergyDto energy, DateTime nowUtc) {
@@ -14,7 +18,12 @@ class EnergyTimerRefetchTracker {
     final unlimitedJustEnded = _wasUnlimitedActive && !isUnlimitedNow;
     _wasUnlimitedActive = isUnlimitedNow;
 
-    if (unlimitedJustEnded) return true;
+    final isSubscribedNow = energy.isSubscribedActiveAt(nowUtc);
+    final subscriptionJustExpired =
+        _wasSubscriptionActive && !isSubscribedNow;
+    _wasSubscriptionActive = isSubscribedNow;
+
+    if (unlimitedJustEnded || subscriptionJustExpired) return true;
 
     if (isUnlimitedNow) return false;
 

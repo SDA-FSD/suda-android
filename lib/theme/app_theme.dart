@@ -1,12 +1,21 @@
 import 'package:flutter/material.dart';
 
 /// 앱 전역 테마 설정
-/// 
+///
 /// MaterialApp에서 사용할 ThemeData를 정의
 class AppTheme {
   static const List<FontVariation> _wght400 = [FontVariation('wght', 400)];
   static const List<FontVariation> _wght600 = [FontVariation('wght', 600)];
   static const List<FontVariation> _wght700 = [FontVariation('wght', 700)];
+
+  /// body-tiny2 (`labelMini`). Material `TextTheme` 슬롯이 아니므로 extension으로 제공.
+  static const TextStyle labelMini = TextStyle(
+    fontSize: 10,
+    fontWeight: FontWeight.w400,
+    fontVariations: _wght400,
+    letterSpacing: -0.4,
+    height: 1.2,
+  );
 
   /// 기본 테마 데이터
   static ThemeData get themeData {
@@ -32,6 +41,7 @@ class AppTheme {
       // - body-secondary-> bodyMedium
       // - body-caption  -> bodySmall
       // - body-tiny     -> labelSmall
+      // - body-tiny2    -> TextTheme.labelMini (extension, Material 슬롯 아님)
       textTheme: const TextTheme(
         // heading1: default font, fontsize 32, w700
         headlineLarge: TextStyle(
@@ -128,3 +138,8 @@ class AppTheme {
   }
 }
 
+/// Material `TextTheme`에 없는 body-tiny2 슬롯.
+/// 사용: `Theme.of(context).textTheme.labelMini`
+extension AppTextThemeX on TextTheme {
+  TextStyle get labelMini => AppTheme.labelMini;
+}

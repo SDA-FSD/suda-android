@@ -425,4 +425,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get endRoleplay => 'End Roleplay';
+
+  @override
+  String get energyPurchaseUnlimitedTitle => 'Unlimited Pass';
+
+  @override
+  String get energyPurchaseUnlimitedSubtitle =>
+      'Starts immediately after purchase. Valid for 10 minutes.';
+
+  @override
+  String get energyPurchaseCapacityTitle => 'Max Energy Upgrade';
+
+  @override
+  String get energyPurchaseCapacitySubtitle =>
+      'Permanently increase your max rechargeable Energy by 1.';
+
+  @override
+  String get energyGoPremiumTitle => 'Go Premium';
+
+  @override
+  String get energyGoPremiumExplore => 'Explore';
+
+  @override
+  String get energyPurchasePendingApproval =>
+      'Your payment is pending approval';
+
+  @override
+  String get energyPurchaseNotCompleted => 'The purchase was not completed.';
 }

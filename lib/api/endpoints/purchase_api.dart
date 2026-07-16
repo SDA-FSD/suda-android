@@ -3,12 +3,13 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../../models/user_models.dart';
 import '../client/suda_http_client.dart';
 
 class PurchaseApi {
-  /// `POST /v1/purchases/verify` — Play 구매 TEMP 검증(INAPP/SUBS 동일 body).
-  /// 200이어도 지급 성공이 아님(서버 분기·로그/지급은 서버 책임).
-  static Future<void> verifyPurchase({
+  /// `POST /v1/purchases/verify` — Play 구매 검증.
+  /// 응답의 `successYn`/`pendingYn`으로 지급·승인대기 여부를 판단한다.
+  static Future<PurchaseVerifyResultDto> verifyPurchase({
     required String accessToken,
     required String purchaseToken,
     required String productId,
@@ -27,7 +28,7 @@ class PurchaseApi {
     );
   }
 
-  static Future<void> _verifyPurchaseInternal(
+  static Future<PurchaseVerifyResultDto> _verifyPurchaseInternal(
     String accessToken,
     String purchaseToken,
     String productId,
@@ -58,7 +59,12 @@ class PurchaseApi {
     }
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
-      return;
+      if (response.body.isEmpty) {
+        return const PurchaseVerifyResultDto(successYn: 'N', pendingYn: 'N');
+      }
+      final Map<String, dynamic> data =
+          jsonDecode(response.body) as Map<String, dynamic>;
+      return PurchaseVerifyResultDto.fromJson(data);
     }
 
     throw Exception(

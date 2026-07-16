@@ -1,23 +1,30 @@
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import '../../l10n/app_localizations.dart';
+import '../../services/iap_purchase_service.dart';
+import '../../services/token_storage.dart';
+import '../../utils/default_toast.dart';
 import '../../utils/full_screen_route.dart';
+import '../../utils/iap_busy_overlay.dart';
 import '../../utils/sub_screen_route.dart';
 import '../webview_screen.dart';
+import 'paywall_completed.dart';
 
-/// Premium 구독 Paywall (Full Screen, UI only).
+/// Premium 구독 Paywall (Full Screen).
 ///
-/// 진입: Lab 등에서 [PaywallScreen.push] 사용 (bottom-up 450ms).
-/// X = pop / Assinar agora = no-op.
-/// Terms/Privacy → WebView(Login·Setting과 동일 URL). 플랜 선택은 로컬 UI 상태만.
+/// 진입: 에너지 팝업 Go Premium / Lab 등에서 [PaywallScreen.push].
+/// 결제 성공 → [PaywallCompletedScreen] → pop(true).
+/// `pendingYn=Y` → 토스트 후 pop(true). `successYn=N` → 실패 토스트·유지.
 class PaywallScreen extends StatefulWidget {
   const PaywallScreen({super.key});
 
   static const String routeName = '/paywall';
 
+  /// `true` = 구독 성공 또는 승인대기(에너지 팝업에서 Go Premium 숨김·detail 재조회).
   static Future<T?> push<T>(BuildContext context) {
     return Navigator.of(context).push<T>(
       FullScreenRoute<T>(
@@ -111,19 +118,105 @@ class _PaywallScreenState extends State<PaywallScreen> {
   double? _premiumCardTopInStack;
   late final TapGestureRecognizer _termsRecognizer;
   late final TapGestureRecognizer _privacyRecognizer;
+  PremiumSubscriptionPrices? _prices;
+  bool _purchasing = false;
 
   @override
   void initState() {
     super.initState();
     _termsRecognizer = TapGestureRecognizer()..onTap = _openTerms;
     _privacyRecognizer = TapGestureRecognizer()..onTap = _openPrivacy;
+    unawaited(_loadPrices());
   }
 
   @override
   void dispose() {
+    if (_purchasing) {
+      IapPurchaseService.instance.abandonPendingPurchase();
+    }
     _termsRecognizer.dispose();
     _privacyRecognizer.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadPrices() async {
+    final prices =
+        await IapPurchaseService.instance.loadPremiumSubscriptionPrices();
+    if (!mounted) return;
+    setState(() => _prices = prices);
+  }
+
+  String get _annualPriceMain {
+    final v = _prices?.yearlyPerMonthFormatted;
+    if (v != null && v.isNotEmpty) return '$v/mês';
+    return 'R\$16,66/mês';
+  }
+
+  String get _annualPriceSub {
+    final v = _prices?.yearlyFormatted;
+    if (v != null && v.isNotEmpty) return '$v/ano';
+    return 'R\$199,99/ano';
+  }
+
+  String get _monthlyPriceMain {
+    final v = _prices?.monthlyFormatted;
+    if (v != null && v.isNotEmpty) return '$v/mês';
+    return 'R\$24,99/mês';
+  }
+
+  Future<void> _onSubscribeTap() async {
+    if (_purchasing || IapPurchaseService.instance.isBusy) return;
+    setState(() => _purchasing = true);
+
+    try {
+      final accessToken = await TokenStorage.loadAccessToken();
+      if (!mounted) return;
+      if (accessToken == null || accessToken.isEmpty) {
+        setState(() => _purchasing = false);
+        return;
+      }
+
+      final basePlanId = _selected == _PaywallPlan.annual
+          ? IapPurchaseService.basePlanYearly
+          : IapPurchaseService.basePlanMonthly;
+
+      final result = await IapBusyOverlay.run(
+        context,
+        () => IapPurchaseService.instance.purchaseSubscription(
+          basePlanId: basePlanId,
+          accessToken: accessToken,
+        ),
+      );
+      if (!mounted) return;
+
+      if (!result.isSuccess) {
+        if (result.outcome == IapPurchaseOutcome.verifyFailed) {
+          final l10n = AppLocalizations.of(context)!;
+          DefaultToast.show(
+            context,
+            l10n.energyPurchaseNotCompleted,
+            isError: true,
+          );
+        }
+        setState(() => _purchasing = false);
+        return;
+      }
+
+      if (result.pendingApproval) {
+        final l10n = AppLocalizations.of(context)!;
+        DefaultToast.show(context, l10n.energyPurchasePendingApproval);
+        Navigator.of(context).pop(true);
+        return;
+      }
+
+      setState(() => _purchasing = false);
+      await PaywallCompletedScreen.push(context);
+      if (!mounted) return;
+      Navigator.of(context).pop(true);
+    } catch (e, st) {
+      debugPrint('[DEBUG] Paywall subscribe failed: $e\n$st');
+      if (mounted) setState(() => _purchasing = false);
+    }
   }
 
   void _openTerms() {
@@ -665,11 +758,13 @@ class _PaywallScreenState extends State<PaywallScreen> {
     final selected = _selected == _PaywallPlan.annual;
     return _planCard(
       selected: selected,
-      onTap: () => setState(() => _selected = _PaywallPlan.annual),
+      onTap: _purchasing
+          ? () {}
+          : () => setState(() => _selected = _PaywallPlan.annual),
       title: 'Plano Anual',
       subtitle: 'Economize 33% em relação ao plano mensal.',
-      priceMain: 'R\$16,66/mês',
-      priceSub: 'R\$199,99/ano',
+      priceMain: _annualPriceMain,
+      priceSub: _annualPriceSub,
       showMelhorBadge: true,
     );
   }
@@ -678,10 +773,12 @@ class _PaywallScreenState extends State<PaywallScreen> {
     final selected = _selected == _PaywallPlan.monthly;
     return _planCard(
       selected: selected,
-      onTap: () => setState(() => _selected = _PaywallPlan.monthly),
+      onTap: _purchasing
+          ? () {}
+          : () => setState(() => _selected = _PaywallPlan.monthly),
       title: 'Plano Mensal',
       subtitle: 'Acesso mensal com flexibilidade.',
-      priceMain: 'R\$24,99/mês',
+      priceMain: _monthlyPriceMain,
     );
   }
 
@@ -925,36 +1022,39 @@ class _PaywallScreenState extends State<PaywallScreen> {
   Widget _buildCta() {
     return Center(
       child: IntrinsicWidth(
-        child: GestureDetector(
-          onTap: () {},
-          child: Container(
-            height: 52,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(26),
-              gradient: const LinearGradient(
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-                colors: [Color(0xFF80D7CF), Color(0xFF8A38F5)],
-              ),
-            ),
-            padding: const EdgeInsets.all(2),
+        child: Opacity(
+          opacity: _purchasing ? 0.7 : 1,
+          child: GestureDetector(
+            onTap: _purchasing ? null : () => unawaited(_onSubscribeTap()),
             child: Container(
-              alignment: Alignment.center,
-              padding: const EdgeInsets.symmetric(horizontal: 32),
+              height: 52,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(24),
+                borderRadius: BorderRadius.circular(26),
                 gradient: const LinearGradient(
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
-                  colors: [Color(0xC98A38F5), Color(0xC9280752)],
+                  colors: [Color(0xFF80D7CF), Color(0xFF8A38F5)],
                 ),
               ),
-              child: Text(
-                'Assinar agora',
-                style: _style(
-                  size: 18,
-                  weight: FontWeight.w700,
-                  color: Colors.white,
+              padding: const EdgeInsets.all(2),
+              child: Container(
+                alignment: Alignment.center,
+                padding: const EdgeInsets.symmetric(horizontal: 32),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(24),
+                  gradient: const LinearGradient(
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                    colors: [Color(0xC98A38F5), Color(0xC9280752)],
+                  ),
+                ),
+                child: Text(
+                  'Assinar agora',
+                  style: _style(
+                    size: 18,
+                    weight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ),

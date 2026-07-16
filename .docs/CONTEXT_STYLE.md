@@ -79,9 +79,17 @@ Flutter의 `TextTheme`와 매핑하여 전역으로 사용합니다.
   - 크기 / 굵기: `fontSize: 12`, `fontWeight: w600`
   - 용도: 매우 작은 라벨/배지/보조 설명(공간이 극도로 제한된 경우)
 
+- **body-tiny2**
+  - 매핑: `textTheme.labelMini` (`AppTextThemeX` extension — Material `TextTheme` 슬롯 아님)
+  - 폰트: 기본 폰트
+  - 크기 / 굵기: `fontSize: 10`, `fontWeight: w400`
+  - 용도: tiny보다 더 작은 보조 설명(구매 버튼 서브카피 등)
+  - 구현: `lib/theme/app_theme.dart`의 `AppTheme.labelMini` / `extension AppTextThemeX`
+
 ### 2.3 사용 예시 (위젯 코드 관점)
 
-Material 표준 `TextTheme` 이름을 그대로 사용합니다.
+Material 표준 `TextTheme` 이름을 그대로 사용합니다.  
+`labelMini`만 extension이므로 `app_theme.dart` import가 필요합니다(앱 전역에서 이미 theme를 쓰면 동일 파일/의존으로 접근).
 
 ```dart
 final theme = Theme.of(context).textTheme;
@@ -94,6 +102,7 @@ Text('본문', style: theme.bodyLarge);         // body-default
 Text('보조 본문', style: theme.bodyMedium);     // body-secondary
 Text('캡션', style: theme.bodySmall);         // body-caption
 Text('아주 작은 라벨', style: theme.labelSmall); // body-tiny
+Text('더 작은 보조', style: theme.labelMini);   // body-tiny2 (extension)
 ```
 
 ---

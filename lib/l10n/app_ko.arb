@@ -167,5 +167,13 @@
   "energyInfoFull": "에너지가 가득 찼습니다.",
   "energyInfoUnlimitedEndsIn": "무제한 모드 이용 중",
   "energyInsufficient": "에너지가 부족해요.",
-  "endRoleplay": "롤플레이 종료하기"
+  "endRoleplay": "롤플레이 종료하기",
+  "energyPurchaseUnlimitedTitle": "무제한 패스",
+  "energyPurchaseUnlimitedSubtitle": "구매 즉시 10분 무제한 모드가 시작됩니다.",
+  "energyPurchaseCapacityTitle": "최대 에너지 확장",
+  "energyPurchaseCapacitySubtitle": "최대 에너지 보유량이 영구적으로 1 증가합니다.",
+  "energyGoPremiumTitle": "프리미엄 구독",
+  "energyGoPremiumExplore": "혜택 보기",
+  "energyPurchasePendingApproval": "결제 승인 대기중입니다.",
+  "energyPurchaseNotCompleted": "결제가 이루어지지 않았습니다."
 }

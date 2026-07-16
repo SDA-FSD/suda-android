@@ -3,8 +3,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../services/effect_anchor_registry.dart';
+import '../services/energy_refresh_bus.dart';
 import '../services/suda_api_client.dart';
 import '../services/token_storage.dart';
+import '../utils/energy_icon.dart';
 import '../utils/energy_timer_refetch.dart';
 import 'energy_info_popup.dart';
 
@@ -12,7 +14,7 @@ const _energyZeroColor = Color(0xFFE60000);
 
 /// 홈·Opening 등 우상단 에너지/무제한 배지. 탭 시 에너지 정보 팝업.
 class EnergyHeaderBadge extends StatefulWidget {
-  /// 변경 시 `GET /v1/users/energy` 재조회 (예: Home 탭 재진입).
+  /// 변경 시 `GET /v1/users/energy/detail` 재조회 (예: Home 탭 재진입).
   final int? refreshCounter;
 
   /// true면 `EffectAnchorId.energyBadge` 앵커로 등록 (Home Like 이펙트 등).
@@ -45,6 +47,7 @@ class _EnergyHeaderBadgeState extends State<EnergyHeaderBadge> {
         _anchorKey,
       );
     }
+    EnergyRefreshBus.instance.addListener(_onEnergyRefreshBus);
     _loadAndFetch();
   }
 
@@ -59,6 +62,7 @@ class _EnergyHeaderBadgeState extends State<EnergyHeaderBadge> {
 
   @override
   void dispose() {
+    EnergyRefreshBus.instance.removeListener(_onEnergyRefreshBus);
     _periodicTimer?.cancel();
     if (widget.registerEnergyBadgeAnchor) {
       EffectAnchorRegistry.instance.unregister(
@@ -67,6 +71,10 @@ class _EnergyHeaderBadgeState extends State<EnergyHeaderBadge> {
       );
     }
     super.dispose();
+  }
+
+  void _onEnergyRefreshBus() {
+    unawaited(_fetchEnergy());
   }
 
   Future<void> _loadAndFetch() async {
@@ -95,8 +103,9 @@ class _EnergyHeaderBadgeState extends State<EnergyHeaderBadge> {
     final energy = _energy;
     if (energy == null) return;
     final nowUtc = DateTime.now().toUtc();
-    final needsTimer =
-        energy.isUnlimitedActiveAt(nowUtc) || !_isEnergyFull(energy);
+    final needsTimer = energy.isUnlimitedActiveAt(nowUtc) ||
+        !_isEnergyFull(energy) ||
+        energy.needsSubscriptionExpiryWatch(nowUtc);
     if (!needsTimer) return;
 
     _periodicTimer = Timer.periodic(const Duration(seconds: 1), (_) {
@@ -179,7 +188,7 @@ class _EnergyHeaderBadgeState extends State<EnergyHeaderBadge> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Image.asset(
-            'assets/images/icons/unlimited.png',
+            energyIconAssetPath(energy, nowUtc),
             width: 24,
             height: 24,
           ),
@@ -197,7 +206,9 @@ class _EnergyHeaderBadgeState extends State<EnergyHeaderBadge> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Image.asset(
-          'assets/images/icons/energy.png',
+          energy == null
+              ? 'assets/images/icons/energy.png'
+              : energyIconAssetPath(energy, nowUtc),
           width: 24,
           height: 24,
         ),

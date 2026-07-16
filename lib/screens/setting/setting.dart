@@ -113,7 +113,7 @@ class SettingScreen extends StatelessWidget {
             l10n.settingsSignOut,
             () => _handleLogout(context),
           ),
-          if (AppConfig.isDev || AppConfig.isPrd || kDebugMode)
+          if (AppConfig.isDev || kDebugMode)
             _buildMenuItem(
               context,
               l10n.settingsFsdLaboratory,

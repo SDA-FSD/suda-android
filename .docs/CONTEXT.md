@@ -67,14 +67,17 @@
   - `SudaApiClient.getCurrentUser()`: JWT를 사용하여 사용자 정보 조회 (`/v1/users`)
     - 메인 라우트가 서브에서 pop으로 다시 보일 때 `lib/main.dart` `_syncUserOnMainRouteReturn`에서 호출해 `_user` 전역 동기화(GNB·탭 공통). 레벨·진행률은 `getUserProfile`이 담당.
   - `SudaApiClient.getUserProfile()`: 프로필 부가 정보 조회 (`GET /v1/users/profile`, 응답: ProfileDto(userDto, currentLevel, progressPercentage, likesToNextLevel?)). `likesToNextLevel`은 레벨업까지 남은 Like 수. 백엔드 `suda-api`의 `LevelService.getLikesToNextLevel`·`ProfileDto`에서 계산·직렬화. 최대 레벨이면 JSON null → 미포함 시 클라이언트에서 해당 문구 미노출.
-  - `SudaApiClient.getUserEnergy()`: 에너지 조회 (`GET /v1/users/energy`, 파라메터 없음, 응답: UserEnergyDto(energyCount, maxEnergyCount, lastAutoChargedAt?, unlimitedEndsAt?)). HomeScreen 초기화·홈 탭 재진입(`homeTabSelectedCounter`) 시 호출해 우상단 배지 갱신.
+  - `SudaApiClient.getUserEnergy()`: 에너지 상세 조회 (`GET /v1/users/energy/detail`, 파라메터 없음, 응답: UserEnergyDto — energyCount, maxEnergyCount, lastAutoChargedAt?, unlimitedEndsAt?, **subscribedYn**, **subscriptionExpiredAt?**, **showUnlimitedPurchaseYn**, **showCapacity6PurchaseYn**, **showCapacity7PurchaseYn**). HomeScreen 초기화·홈 탭 재진입(`homeTabSelectedCounter`) 시 호출해 우상단 배지 갱신.
     - **재화 정책(에너지)**: 롤플레이 **Playing 중 사용자 발화 처리마다** 소비(Start 시점 소비 없음). 1회 플레이당 약 5~6 소비를 목표. 향후 최대 용량 확대·무제한 이용시간 등 유료화 계획.
-    - **무제한 모드**: `unlimitedEndsAt`이 현재(UTC) 이후이면 `unlimited.png`(24×24) + 5dp gap + 남은 시간 `MM:SS`(bodyMedium w700, 흰색). 1초 주기 타이머로 갱신, 만료 시 자동 재조회 후 일반 모드 전환.
-    - **일반 모드**: `unlimitedEndsAt`이 null 또는 과거이면 `energy.png`(24×24) + `energyCount`(bodyMedium w700, 흰색). `lastAutoChargedAt` 기준 30분마다 1 충전(최대 `maxEnergyCount`). 가득 차지 않았을 때 충전 타이머 `00:00` 도달 시 `GET /v1/users/energy` 재조회.
-    - 배지는 `EnergyHeaderBadge`(`lib/widgets/energy_header_badge.dart`). Home·Opening 우상단 공통. 탭 시 `showEnergyInfoPopup`. Home은 `registerEnergyBadgeAnchor: true`·`refreshCounter: homeTabSelectedCounter`(탭 재선택·메인 복귀 시 `main.dart` `homeTabSelectedCounter` 증가로 재조회). Opening·Playing도 화면 체류 중 충전·무제한 만료 시 자동 갱신.
-    - **Playing 푸터 에너지**: `PlayingEnergyIndicator` — 녹음 모드 하단 아이콘 행 중앙·타이핑 모드 하단 동일. 일반 `energy.png`+숫자, 무제한 `unlimited.png`만(타이머 없음). 탭 영역 48×48 중앙 정렬. 탭 시 무제한 또는 `energyCount > 0`이면 `showEnergyInfoPopup`(닫기), 일반 모드·0이면 `showPlayingEnergyInsufficientPopup`(본문 l10n `energyInfoRechargeUntil`·Home과 동일, 버튼 `endRoleplay`). `user-message` 성공 시 로컬 -1. 에너지 0에서 녹음/타이핑 send 또는 API **402** 시에도 `showPlayingEnergyInsufficientPopup` → `endRoleplay` 탭 시 Wait 나가기 레이어(세션 유지).
+    - **구독 아이콘**: `subscribedYn==Y`이고 `subscriptionExpiredAt` 미경과면 무제한→`unlimited_sub.png`, 일반→`energy_sub.png`. 비구독은 기존 `unlimited.png`/`energy.png`. 공통 헬퍼 `lib/utils/energy_icon.dart`. 적용처: `EnergyHeaderBadge`·팝업 본문·`PlayingEnergyIndicator`.
+    - **구독 만료 재조회**: `subscriptionExpiredAt` 경과 시 1회 `GET /v1/users/energy/detail` 재조회 (`EnergyTimerRefetchTracker`). 충전(`lastAutoChargedAt`)처럼 1초마다 API를 치지는 않음.
+    - **무제한 모드**: `unlimitedEndsAt`이 현재(UTC) 이후이면 unlimited 아이콘(구독 시 `_sub`)(24×24) + 5dp gap + 남은 시간 `MM:SS`(bodyMedium w700, 흰색). 1초 주기 타이머로 갱신, 만료 시 자동 재조회 후 일반 모드 전환.
+    - **일반 모드**: `unlimitedEndsAt`이 null 또는 과거이면 energy 아이콘(구독 시 `_sub`)(24×24) + `energyCount`(bodyMedium w700, 흰색). `lastAutoChargedAt` 기준 30분마다 1 충전(최대 `maxEnergyCount`). 가득 차지 않았을 때 충전 타이머 `00:00` 도달 시 detail 재조회.
+    - 배지는 `EnergyHeaderBadge`(`lib/widgets/energy_header_badge.dart`). Home·Opening 우상단 공통. 탭 시 `showEnergyInfoPopup`. Home은 `registerEnergyBadgeAnchor: true`·`refreshCounter: homeTabSelectedCounter`(탭 재선택·메인 복귀 시 `main.dart` `homeTabSelectedCounter` 증가로 재조회). Opening·Playing도 화면 체류 중 충전·무제한·구독 만료 시 자동 갱신. 팝업 내 결제 성공 시 `EnergyRefreshBus`로 배지·Playing도 재조회. **에너지 팝업 오픈은 전역 lock**(`energy_info_popup.dart` `_withEnergyPopupLock`)으로 따닥 시 이중 팝업 방지(info/부족/Playing/Lab 공통).
+    - **Playing 푸터 에너지**: `PlayingEnergyIndicator` — 녹음 모드 하단 아이콘 행 중앙·타이핑 모드 하단 동일. 일반 energy 아이콘+숫자, 무제한 unlimited 아이콘만(타이머 없음, 구독 시 `_sub`). 탭 영역 48×48 중앙 정렬. 탭 시 무제한 또는 `energyCount > 0`이면 `showEnergyInfoPopup`(닫기), 일반 모드·0이면 `showPlayingEnergyInsufficientPopup`(본문 l10n `energyInfoRechargeUntil`·Home과 동일, 버튼 `endRoleplay`). `user-message` 성공 시 로컬 -1. 에너지 0에서 녹음/타이핑 send 또는 API **402** 시에도 `showPlayingEnergyInsufficientPopup` → `endRoleplay` 탭 시 Wait 나가기 레이어(세션 유지).
+    - **에너지 팝업 구매 영역** (`lib/widgets/energy_purchase_section.dart`): 안내문구와 닫기(또는 endRoleplay) 버튼 사이. 노출 순서 — Unlimited Pass(`showUnlimitedPurchaseYn`) → Capacity6 → Capacity7 → Go Premium(`subscribedYn!=Y`, Lab은 force 가능). 버튼 갭 10·radius 20. INAPP 제목(bodyMedium w600)은 폭 부족 시 `marquee` 루프, 부제 `labelSmall`. INAPP 배경은 `#121212` 베이스 레이어 + 테마색 오버레이 레이어(평소 5% / 결제 진행 중 30%, 250ms). Lab에서 스토어 가격 없으면 `R$2,99` 폴백. INAPP은 `IapPurchaseService`(`lib/services/iap_purchase_service.dart`)로 단건 구매·verify·가격 영속 캐시(`IapPriceCache`). 결제 중 다른 구매 버튼 비활성. verify `successYn=Y`면 해당 버튼 1000ms 페이드/축소 후 제거·detail 재조회·배지 동기화(`pendingYn=Y`면 승인대기 토스트). `successYn=N`이면 실패 토스트만. 스토어 취소/실패는 토스트 없이 테마 틴트 5% 복귀. Go Premium → `PaywallScreen.push`(팝업 유지).
     - **에너지 팝업 타이틀**: 무제한 모드 또는 일반 모드·에너지 > 0 → l10n `energyInfoTitle`. 일반 모드·에너지 0 → `energyOutOfEnergyTitle`(en Out of Energy / ko 에너지 부족 / pt Sem energia). Home·Opening·Playing 공통.
-    - **에너지 부족 팝업(Opening)**: Start 응답 `sessionId == '0'` 시 `showEnergyInsufficientPopup` — `closePopup`으로 닫기.
+    - **에너지 부족 팝업(Opening)**: Start 응답 `sessionId == '0'` 시 `showEnergyInsufficientPopup` — `closePopup`으로 닫기. 구매 버튼도 동일 본문에 포함.
   - `SudaApiClient.getRpS2UserHistories()`: Profile History 목록 페이징 (`GET /rps2/user-histories?pageNum=0`, 0-based, 응답: SudaAppPage\<RpS2SimpleHistoryDto\> — `id`, `imgPath`, `starResult`, `cefrLevel`, `createdAt`)
     - 롤플레이 스택 `popToOverview` 직후 `markProfileHistoryRefreshPending` → 이후 Profile 탭 활성 시 0페이지 재조회(기존 스크롤·페이징 조건 우회). 그 외 탭 재진입은 `ProfileScreen._shouldRefetchHistoryFromStart` 조건부.
   - `SudaApiClient.updateName()`: 사용자 이름 변경 (`PUT /v1/users?name=...`)
@@ -189,7 +192,7 @@
 **⚠️ 중요**: 스크린 관련 작업(추가/수정/삭제) 시 반드시 `CONTEXT_SCREEN.md` 문서도 함께 업데이트해야 합니다.
 
 ## 7-0. 인증/동의 플로우 메모
-- 서비스 이용 동의(`SUDA_AGREEMENT`)가 필요할 때는 `LoginScreen` 위에 bottom-up 레이어(blur+dim)로 동의 UI를 노출한다. 동의 완료 시 `POST /v1/users/agreement`와 AppsFlyer `af_complete_registration` 이벤트를 호출한 뒤 **동의 직후 1회** `FirstCefrLevelScreen`(`lib/screens/first_cefr_level.dart`)으로 전환한다. Confirm 시 `PUT /v1/users/language-level` 호출 후 Main(Home) 진입(API 실패여도 Home). Lab 진입: Setting > Lab (`AppConfig.isDev` · **TEMP `isPrd`** · `kDebugMode`). Lab에서 First CEFR / Paywall / IAP 테스트 가능. **IAP 진행상황은 §7-2**. 레이어를 동의 없이 닫을 때(dim 바깥 탭)는 로컬 JWT/refresh 삭제(`TokenStorage.clearTokens`)·`AuthService.signOut()`·메인 상태 초기화로 비로그인 `LoginScreen`으로 돌아간다.
+- 서비스 이용 동의(`SUDA_AGREEMENT`)가 필요할 때는 `LoginScreen` 위에 bottom-up 레이어(blur+dim)로 동의 UI를 노출한다. 동의 완료 시 `POST /v1/users/agreement`와 AppsFlyer `af_complete_registration` 이벤트를 호출한 뒤 **동의 직후 1회** `FirstCefrLevelScreen`(`lib/screens/first_cefr_level.dart`)으로 전환한다. Confirm 시 `PUT /v1/users/language-level` 호출 후 Main(Home) 진입(API 실패여도 Home). Lab 진입: Setting > Lab (`AppConfig.isDev` · `kDebugMode`). Lab에서 First CEFR / Paywall / IAP 테스트 가능. **IAP 진행상황은 §7-2**. 레이어를 동의 없이 닫을 때(dim 바깥 탭)는 로컬 JWT/refresh 삭제(`TokenStorage.clearTokens`)·`AuthService.signOut()`·메인 상태 초기화로 비로그인 `LoginScreen`으로 돌아간다.
 
 ## 7-1. Roleplay 스크린 컨텍스트
 
@@ -203,56 +206,50 @@
 ## 7-2. IAP (앱내결제) — 현재 진행상황 (2026-07)
 
 ### 한줄 요약
-- **Lab에서만** Play 상품 조회·구매·(INAPP) 서버 verify TEMP까지 됨. **Paywall/실서비스 결제·지급·구독 verify는 아직 없음.**
+- **에너지 팝업** INAPP 3종 + **Paywall Premium 구독**(월/연) 결제·verify·성공/승인대기 UX 연동. Lab Query/Buy 콘솔은 제거됨.
 
 ### 완료됨
 - 패키지: `in_app_purchase` + `in_app_purchase_android`
-- Lab UI: `lib/screens/setting/lab.dart` — 상품별 **Query / Buy**, 로그 덤프, `purchaseStream` 구독
-- Buy 시 `GooglePlayPurchaseParam.applicationUserName` =
-  `SHA-256(UTF-8("{userId}"))` 소문자 hex (`lib/utils/iap_obfuscated_account_id.dart`).
-  JWT→`getCurrentUser`로 `user.id` 확보. verify body에는 해시 **미포함**.
-- API: `lib/api/endpoints/purchase_api.dart` → `SudaApiClient.verifyPurchase`
-  - `POST /v1/purchases/verify` body `{ purchaseToken, productId }` · JWT 필수
-  - **INAPP·SUBS 동일 전송**(Lab). 서버가 `productId`로 분기. 200 = 호출 처리(지급 아님 TEMP 가능). 응답으로 성공 판단 금지
-- Play Internal에 Billing 포함 prd AAB 업로드함(상품 조회 해금용). 앱 버전: `1.1.1+41` (**TEMP prd Lab 허용**)
-- Paywall UI만: `lib/screens/paywall/paywall.dart` (결제 연동 없음)
-- Lab 확인용 결제 완료 Preview 스크린: `lib/screens/paywall/paywall_completed.dart`
-  - Lab 진입: Setting > Lab > **Open Paywall Completed**
-  - 배경 그라디언트는 Paywall과 동일 값 하드코딩(상단 `#8A38F5` → 하단 `#80D7CF`)
-  - 문구는 현재 PT 하드코딩(테스트용): `Parabéns!`, `Seus benefícios Premium já estão ativos.`, 혜택 3줄, CTA `Continuar` (en/ko 추후)
+- 공용: `IapPurchaseService` — INAPP·**SUBS**(`subscription_premium` + `bp-premium-monthly`/`bp-premium-yearly` offer 선택)·verify·따닥 방지. 가격 `IapPriceCache`(SUBS는 `productId::basePlanId`). resume 2초 grace(스트림 미수신 시에만)·`abandonPendingPurchase`. 매칭 purchaseStream 수신 후에는 grace 재개 금지(verify 중 `storeDismissed`로 성공 덮어쓰기 방지).
+- **IAP+verify 중**: `IapBusyOverlay`(`lib/utils/iap_busy_overlay.dart`) — rootNavigator 전면 dim+흰 스피너, 뒤로가기 불가. 에너지 팝업 INAPP·Paywall Assinar 공통.
+- **consume/ack는 서버 verify 전담**. 클라이언트 `buyConsumable(autoConsume: false)`, `completePurchase` 미호출(전 상품: Unlimited·Capacity·Premium).
+- Buy 시 obfuscatedAccountId = SHA-256(userId). verify body `{ purchaseToken, productId }` (SUBS도 동일, basePlanId 미포함).
+- 응답 `successYn`/`pendingYn`.
+- 에너지 팝업: INAPP 구매 + Go Premium → Paywall. pop(true) 시 Go Premium 1000ms 제거 + detail 재조회.
+- Paywall: 스토어 가격(연간 raw/12 `/mês` + yearly `/ano`), Assinar agora 결제. 성공 → Completed → pop(true). pending → 토스트+pop(true). N → 실패 토스트.
+- Completed: `paywall_completed.dart` (Continuar/X → pop(true)). Lab Preview 유지.
+- 앱 버전: `1.2.0+48`
 
-### 상품 ID (Play Console / Lab 카탈로그 `_kLabIapSkus`)
-| 구분 | productId | basePlanId / 비고 | Lab Buy | verify |
-|------|-----------|-------------------|---------|--------|
-| INAPP | `unlimited_energy_10_minute` | consumable | O | O |
-| INAPP | `energy_capacity_6` | — | O | O |
-| INAPP | `energy_capacity_7` | — | O | O |
-| SUBS | `subscription_premium` | `bp-premium-monthly` | O | O (서버 분기) |
-| SUBS | `subscription_premium` | `bp-premium-yearly` | O | O (서버 분기) |
+### 상품 ID (Play Console / `IapPurchaseService`)
+| 구분 | productId | basePlanId / 비고 | 진입 | verify |
+|------|-----------|-------------------|------|--------|
+| INAPP | `unlimited_energy_10_minute` | consumable | 에너지 팝업 | O |
+| INAPP | `energy_capacity_6` | — | 에너지 팝업 | O |
+| INAPP | `energy_capacity_7` | — | 에너지 팝업 | O |
+| SUBS | `subscription_premium` | `bp-premium-monthly` | Paywall | O |
+| SUBS | `subscription_premium` | `bp-premium-yearly` | Paywall | O |
 
-- Purchase option ID(`po-…`)는 조회 키가 **아님**. Lab/Billing에는 **productId**만 넣는다.
+- Purchase option ID(`po-…`)는 조회 키가 **아님**. Billing에는 **productId**만 넣는다.
 - 클라이언트는 Play에서 전 상품 목록을 못 뽑음 → ID는 앱에 하드코딩.
 
 ### 반드시 지킬 제약
 1. IAP는 **applicationId(=패키지) 단위**. 상품은 prd `kr.sudatalk.app`에 있음 → **dev/local/stg 패키지로는 조회·구매 불가**.
 2. 서버 verify의 `packageName`은 body에 없고 **ENV 고정** (local→`.local`, dev→`.dev`, stg→`.stg`, prd→`kr.sudatalk.app`). **산 패키지와 API ENV가 같아야** 함.
-3. Lab 메뉴: `AppConfig.isDev || AppConfig.isPrd || kDebugMode` (`setting.dart` / `lab.dart`). **TEMP: prd release에서도 Lab 노출**(IAP Internal 테스트). 끝나면 `isPrd` 조건 제거.
+3. Lab 메뉴: `AppConfig.isDev || kDebugMode` (`setting.dart` / `lab.dart`). **prd release에서는 Lab 미노출**.
 4. 스토어 설치본 ↔ 유선 설치본은 서로 업데이트 불가(정상). IAP 테스트는 한쪽만 쓰면 됨.
 5. 라이선스 테스터·상품 Active 필요.
 
 ### 아직 안 함 (다음 작업 후보)
-- Paywall CTA → 실제 구매 연결
-- 구매 후  entitlement 지급(에너지 무제한/용량 등) · acknowledge 정책 확정
-- 구독(SUBS) 서버 verify 분기·지급 로직 (클라이언트는 이미 동일 endpoint로 전송)
-- restore / 에러 UX / 프로덕션 진입점(에너지 팝업·Profile 등)
+- Paywall/Completed 문구 l10n
+- restore / 알림 설정 버튼(에너지 팝업 TBD)
 
 ### 관련 파일
-- Lab: `lib/screens/setting/lab.dart`
+- IAP 서비스: `lib/services/iap_purchase_service.dart`, `lib/services/iap_price_cache.dart`
 - obfuscatedAccountId: `lib/utils/iap_obfuscated_account_id.dart`
 - Verify API: `lib/api/endpoints/purchase_api.dart`, `lib/api/suda_api_client.dart`
-- Paywall(UI only): `lib/screens/paywall/paywall.dart`
-- Paywall Completed preview: `lib/screens/paywall/paywall_completed.dart`
-- 스크린 문서: `.docs/CONTEXT_SCREEN.md` § PaywallScreen
+- 에너지 구매 UI: `lib/widgets/energy_purchase_section.dart`, `lib/widgets/energy_info_popup.dart`
+- Paywall: `lib/screens/paywall/paywall.dart`, `lib/screens/paywall/paywall_completed.dart`
+- 스크린 문서: `.docs/CONTEXT_SCREEN.md` § PaywallScreen / PaywallCompletedScreen
 
 ## 8. 스타일 / 디자인 / 배치 규칙
 
@@ -275,7 +272,7 @@
   - 본문 영역 패딩: 상 20 / 좌·우·하 16. `bodyWidget` 내부 레이아웃은 호출부 자율이며, `DefaultPopup`은 **topWidget ↔ title ↔ body ↔ buttons 사이**에만 세로 20 간격을 보장한다.
   - 버튼: `primary`(스펙상 이름은 `default`이나 Dart 예약어 회피, height 44, 라벨 너비 shrink-wrap·가운데 정렬, #0CABA8, Stadium, `ElevatedButtonTheme` 병합) / `text`(`TextButtonTheme` 병합, 흰색 텍스트, shrink-wrap·가운데 정렬). 버튼 탭 시 **항상 팝업을 닫은 뒤** 콜백을 호출한다.
   - 마이그레이션: 팝업 UI는 **점진적으로** `DefaultPopup`으로 옮긴다(동시 대량 치환 금지).
-  - Dev 확인(Lab): `lib/screens/setting/lab.dart`의 `kLabDefaultPopupOptions`에 전환 완료 팝업을 등록한다. Lab **Default Popup Test**는 드롭다운 선택 + **Show Popup**으로 재현한다. 에너지 팝업은 별도 **Energy Popup Test**(playing·무제한·0~5) 섹션에서 재현한다.
+  - Dev 확인(Lab): `lib/screens/setting/lab.dart`의 `kLabDefaultPopupOptions`에 전환 완료 팝업을 등록한다. Lab **Default Popup Test**는 드롭다운 선택 + **Show Popup**으로 재현한다. 에너지 팝업은 별도 **Energy Popup Test**(playing·무제한·구독·show Unlimited/6/7·force Go Premium·0~5) 섹션에서 재현한다.
 
 - **텍스트 언어 규칙**
   - **기본 원칙**: 사용자에게 표시되는 모든 기본 텍스트는 영어로 작성

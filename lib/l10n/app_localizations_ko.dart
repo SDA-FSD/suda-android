@@ -412,4 +412,28 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get endRoleplay => '롤플레이 종료하기';
+
+  @override
+  String get energyPurchaseUnlimitedTitle => '무제한 패스';
+
+  @override
+  String get energyPurchaseUnlimitedSubtitle => '구매 즉시 10분 무제한 모드가 시작됩니다.';
+
+  @override
+  String get energyPurchaseCapacityTitle => '최대 에너지 확장';
+
+  @override
+  String get energyPurchaseCapacitySubtitle => '최대 에너지 보유량이 영구적으로 1 증가합니다.';
+
+  @override
+  String get energyGoPremiumTitle => '프리미엄 구독';
+
+  @override
+  String get energyGoPremiumExplore => '혜택 보기';
+
+  @override
+  String get energyPurchasePendingApproval => '결제 승인 대기중입니다.';
+
+  @override
+  String get energyPurchaseNotCompleted => '결제가 이루어지지 않았습니다.';
 }

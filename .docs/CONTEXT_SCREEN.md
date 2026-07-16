@@ -940,28 +940,22 @@
 - **appPath**: 해당 없음 (구독 플로우·선행 조건 의존. 향후 진입점: 에너지 팝업 Premium 카드, Result Feedback, Profile Premium 버튼, Account Free 요금제 카드)
 
 ### 스크린 용도
-- Premium 구독 Paywall UI. 현재는 **화면만** (결제/약관 연동 없음).
+- Premium 구독 Paywall. 월/연 선택 후 Play Billing SUBS → verify.
 
 ### 이전 스크린 정보 (진입점)
+- **에너지 팝업** Go Premium (`EnergyPurchaseSection`)
 - **LabScreen** (dev): Setting > Lab > **Open Paywall**
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
-- **이전 스크린**: 좌상단 X 또는 시스템 뒤로가기 시 `Navigator.pop()`
+- **PaywallCompletedScreen**: verify 성공(비 pending)
+- **이전 스크린**: X/`pop()`, 또는 성공·승인대기 후 `pop(true)`
 
 ### 스크린 내부 구현 특이사항
-- **배경**: 세로 그라데이션 `#8A38F5` → `#80D7CF`. 그라디언트 위·콘텐츠 아래에 보라 glow(완료 화면과 동일: `#AB6AFF` opacity `0.57`, blur sigma **88.7**, width `108.6%`·height `70.7%`·left `-35.5%`·top `-0.4%`, 이 레이어만 `ClipRect`로 overflow 클립 — 캐릭터/카드 shadow `Clip.none` 유지). "Escolha seu plano" 근처 좌측에 청록 glow 원(`#04E7E2`, Figma 440×956 기준 left 8.2%·top 60.5%·폭 108.6%, `ImageFiltered` sigma 44/50, `IgnorePointer`, 콘텐츠 뒤 레이어)
-- **문구**: pt 하드코딩 (l10n 추후). 폰트 `ChironHeiHK` (`Pratique Mais`, `Aprenda Conversando`)
-- **PREMIUM 카드**: `#48069D`, radius **15**, 내부 padding `fromLTRB(20, 2, 20, 18)`, drop shadow (20,20) blur 20 black 30%, `paywall_star_badge`·`paywall_check_Icon`. 콘텐츠 영역(좌우 패딩 24) 안 **가운데 정렬**, 폭 = `(width - 48) * 0.763`(Figma 299/392). 높이는 내용(타이틀+체크 3줄+여백) 기준 자동(Figma H:193은 참고만).
-- **PREMIUM 배지 배치**: 카드 `Stack`(clipBehavior: **Clip.none**) 기준 상대 위치. `badgeSize = cardWidth * 0.11`, `left = -cardWidth * 0.023`, `top = cardTopInset - cardWidth * 0.0134`(세로 오버행도 카드폭 기준). 외곽선: 선형 그라데이션 `#51218F`→`#8A38F5`(좌→우), 굵기 1.5·**inside**(원 그라데이션 + 안쪽 padding). 바깥 그림자(X:0, Y:4, blur:4, spread:0, `#000000` **33%** — Figma 25%이나 보라 카드 위 가시성 보정).
-- **히어로 캐릭터·X 배치**: 히어로+PREMIUM과 **같은 `Stack`**에 두고 캐릭터를 **마지막 child**로 렌더링한다. X는 `top: topPad + 8`(SafeArea 하단) 고정. 캐릭터 `width = size.width * 0.50`, 높이 = width×(1096/804), `right = size.width * -0.03`. 캐릭터 `top`은 텍스트 블록 기준이 아니라 **PREMIUM 카드 실측 top(GlobalKey 측정)** 에 종속해 계산(`cardTop - (characterHeight - overlapHeight)`), 발이 카드 상단에 일정하게 걸치도록 유지.
-- **상단 간격 보정(기기별 status inset 차이 대응)**: `heroTopGap`은 `max((12 + size.height*0.01)*0.8, X하단+8dp 보장식)`으로 계산해 X와 텍스트 겹침만 제어하고, 캐릭터 세로 위치는 카드 실측 좌표 종속으로 분리한다.
-- **타이틀 그라데이션 텍스트**: `ShaderMask` 대신 `TextStyle.foreground` 셰이더로 그려 글리프 하단 잘림 방지.
-- **설명 ↔ PREMIUM 카드 간격**: Hero 설명문단과 PREMIUM 카드 간격은 `size.height * 0.035`
-- **플랜 divider**: "Escolha seu plano" 텍스트 유지·화면 중앙. 양옆 구분선 `#816CE8` **opacity 50%**(`0x80816CE8`)·두께 1·**2줄**(간격 3)·모서리 반경 **20**. divider는 좌우 패딩(24) **밖**에 두어 **화면 좌우 가장자리까지** 연장(좌우 `Expanded` 동일 비율).
-- **플랜**: 기본 Annual 선택. 선택 카드 `#0CABA8`→`#8A38F5` + 흰 테두리 80%·3px. 미선택 배경은 `#8A38F5` 30% 고정(fill), 테두리는 1px linear gradient(좌 `#80D7CF`→우 `#8A38F5`). **선택/미선택 모두** `_PlanCardOutsideStrokePainter` **outside stroke**(안쪽 `Border.all` 미사용) → 탭 시 콘텐츠 밀림 없음. 플랜 soft shadow `_planCardShadow`(X:0, Y:8, blur:12, `#000000` 40%, Material 바깥; 카드 `RepaintBoundary` 금지—overflow 잘림). 배경 ImageFiltered glow만 `RepaintBoundary`로 분리해 형제 boxShadow 합성 유지. PREMIUM 카드는 기존 `_cardShadow`(offset 20,20, blur 20) 유지. 가격 `R$16,66/mês`·`R$24,99/mês`=`#FFFFFF`, `R$199,99/ano`=`#80D7CF`. 라디오 20×20; Monthly는 카드 세로 중앙, Annual은 제목+설명 블록 기준. Annual MELHOR: fill `#FFFFFF` 3.8%·radius 24; stroke `_MelhorBadgeStrokePainter` (SweepGradient stops `0/0.12/0.37/0.62/0.87/1`, 양끝 opacity 동일로 seam 제거); 별 shadow 47% / 텍스트 shadow 27% (Y4 blur4); top padding 6·하단 25(Monthly 14)
-- **가격**: Anual `R$16,66/mês`(`#FFFFFF`) + `R$199,99/ano`(`#80D7CF`) / Mensal `R$24,99/mês`(`#FFFFFF`)
-- **CTA**: Assinar agora 내부 배경은 좌→우 `#8A38F5`→`#280752`, opacity 79%(alpha `0xC9`). Assinar = no-op. Terms/Privacy 각각 탭 → `WebViewScreen` (`https://sudatalk.kr/public/app/terms` / `privacy`, 타이틀 l10n `settingsTerms`/`settingsPrivacy`, Login·Setting과 동일). X = pop
-- **에셋**: `assets/images/icons/paywall_character.png`, `assets/images/icons/paywall_*`
+- **결제**: `IapPurchaseService.purchaseSubscription` (`bp-premium-monthly`/`bp-premium-yearly`). CTA `_purchasing` lock. dispose 시 `abandonPendingPurchase`.
+- **가격**: 스토어. 월간 `price/mês`. 연간 메인 `rawPrice/12` 포맷+`/mês`, 서브 yearly+`/ano`. 미조회 시 하드코딩 폴백.
+- **verify N**: 실패 토스트·유지. **pending Y**: 승인대기 토스트+`pop(true)`. **성공**: Completed push 후 Paywall `pop(true)`.
+- **CTA**: Assinar agora → 결제. Terms/Privacy → WebView. X = pop
+- **UI**: 배경 그라데이션·glow·PREMIUM 카드·플랜 카드·MELHOR 등 기존 레이아웃 유지.
 
 ---
 
@@ -975,19 +969,19 @@
 - **appPath**: 해당 없음 (Lab 확인용)
 
 ### 스크린 용도
-- 결제 완료 후 사용자에게 노출할 완료 화면을 Lab에서 사전 확인하기 위한 Preview 스크린.
+- Premium 구독 결제 성공 화면. Lab Preview + Paywall 실결제 성공 후 진입.
 
 ### 이전 스크린 정보 (진입점)
-- **LabScreen**: Setting > Lab > **Open Paywall Completed**
+- **PaywallScreen**: verify `successYn=Y` (비 pending)
+- **LabScreen**: Open Paywall Completed (preview)
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
-- **이전 스크린**: 좌상단 X 또는 하단 Done 버튼 또는 시스템 뒤로가기 시 `Navigator.pop()`
+- Continuar/X → `pop(true)` → Paywall이 `pop(true)` → 에너지 팝업 Go Premium 제거 애니 + detail 재조회
 
 ### 스크린 내부 구현 특이사항
-- **배경 그라디언트**: `PaywallScreen`과 동일 값 하드코딩. 0% `#8A38F5`(상단) → 100% `#80D7CF`(하단)
-- **배경 glow**: 그라디언트 위·콘텐츠 아래. 부모 `ClipRect`+`Stack clipBehavior: hardEdge`로 overflow 클립. 원형 `#AB6AFF` opacity `0.57`, blur sigma **88.7**(고정), 크기/위치 부모 대비 반응형(width `108.6%`, height `70.7%`, left `-35.5%`, top `-0.4%`) — `PaywallScreen` 보라 glow와 동일 위치
-- **아이콘**: `assets/images/icons/premium_unlocked_check.png`
-- **문구/버튼**: PT 하드코딩(테스트용, l10n 추후). 타이틀 `Parabéns!`, 본문 `Seus benefícios Premium já estão ativos.`, 혜택 3줄(`Mais prática todos os dias` / `Energia máxima de 30` / `Feedback da IA sobre frases`), CTA `Continuar`
+- **배경 그라디언트**: Paywall과 동일. glow `#AB6AFF` 등 기존 스펙 유지.
+- **아이콘**: `premium_unlocked_check.png` / 혜택 `white_check_icon.png`
+- **문구/버튼**: PT 하드코딩(l10n 추후). CTA `Continuar`
 
 ---
 

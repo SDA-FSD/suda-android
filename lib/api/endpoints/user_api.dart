@@ -341,7 +341,7 @@ class UserApi {
   }
 
   static Future<UserEnergyDto> _getUserEnergyInternal(String accessToken) async {
-    final uri = SudaHttpClient.buildUri('/v1/users/energy');
+    final uri = SudaHttpClient.buildUri('/v1/users/energy/detail');
 
     late final http.Response response;
     try {
@@ -368,7 +368,7 @@ class UserApi {
     }
 
     throw Exception(
-      'GET /v1/users/energy failed: HTTP ${response.statusCode} ${response.body}',
+      'GET /v1/users/energy/detail failed: HTTP ${response.statusCode} ${response.body}',
     );
   }
 

@@ -167,5 +167,13 @@
   "energyInfoFull": "Your energy is full.",
   "energyInfoUnlimitedEndsIn": "Unlimited Mode Active",
   "energyInsufficient": "You don't have enough energy.",
-  "endRoleplay": "End Roleplay"
+  "endRoleplay": "End Roleplay",
+  "energyPurchaseUnlimitedTitle": "Unlimited Pass",
+  "energyPurchaseUnlimitedSubtitle": "Starts immediately after purchase. Valid for 10 minutes.",
+  "energyPurchaseCapacityTitle": "Max Energy Upgrade",
+  "energyPurchaseCapacitySubtitle": "Permanently increase your max rechargeable Energy by 1.",
+  "energyGoPremiumTitle": "Go Premium",
+  "energyGoPremiumExplore": "Explore",
+  "energyPurchasePendingApproval": "Your payment is pending approval",
+  "energyPurchaseNotCompleted": "The purchase was not completed."
 }

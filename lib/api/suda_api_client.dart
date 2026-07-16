@@ -414,8 +414,8 @@ class SudaApiClient {
     return FeedbackApi.sendFeedback(accessToken: accessToken, content: content);
   }
 
-  /// POST /v1/purchases/verify — INAPP TEMP 검증(지급 없음, 서버 로그용).
-  static Future<void> verifyPurchase({
+  /// POST /v1/purchases/verify — 구매 검증 (`successYn` / `pendingYn`).
+  static Future<PurchaseVerifyResultDto> verifyPurchase({
     required String accessToken,
     required String purchaseToken,
     required String productId,

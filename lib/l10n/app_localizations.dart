@@ -879,6 +879,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'End Roleplay'**
   String get endRoleplay;
+
+  /// No description provided for @energyPurchaseUnlimitedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited Pass'**
+  String get energyPurchaseUnlimitedTitle;
+
+  /// No description provided for @energyPurchaseUnlimitedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Starts immediately after purchase. Valid for 10 minutes.'**
+  String get energyPurchaseUnlimitedSubtitle;
+
+  /// No description provided for @energyPurchaseCapacityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Max Energy Upgrade'**
+  String get energyPurchaseCapacityTitle;
+
+  /// No description provided for @energyPurchaseCapacitySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Permanently increase your max rechargeable Energy by 1.'**
+  String get energyPurchaseCapacitySubtitle;
+
+  /// No description provided for @energyGoPremiumTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Go Premium'**
+  String get energyGoPremiumTitle;
+
+  /// No description provided for @energyGoPremiumExplore.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore'**
+  String get energyGoPremiumExplore;
+
+  /// No description provided for @energyPurchasePendingApproval.
+  ///
+  /// In en, this message translates to:
+  /// **'Your payment is pending approval'**
+  String get energyPurchasePendingApproval;
+
+  /// No description provided for @energyPurchaseNotCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'The purchase was not completed.'**
+  String get energyPurchaseNotCompleted;
 }
 
 class _AppLocalizationsDelegate

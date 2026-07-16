@@ -1,17 +1,27 @@
 import 'common_models.dart';
 
-/// GET /v1/users/energy 응답
+/// GET /v1/users/energy/detail 응답
 class UserEnergyDto {
   final int energyCount;
   final int maxEnergyCount;
   final DateTime? lastAutoChargedAt;
   final DateTime? unlimitedEndsAt;
+  final String subscribedYn;
+  final DateTime? subscriptionExpiredAt;
+  final String showUnlimitedPurchaseYn;
+  final String showCapacity6PurchaseYn;
+  final String showCapacity7PurchaseYn;
 
   const UserEnergyDto({
     required this.energyCount,
     required this.maxEnergyCount,
     this.lastAutoChargedAt,
     this.unlimitedEndsAt,
+    this.subscribedYn = 'N',
+    this.subscriptionExpiredAt,
+    this.showUnlimitedPurchaseYn = 'N',
+    this.showCapacity6PurchaseYn = 'N',
+    this.showCapacity7PurchaseYn = 'N',
   });
 
   factory UserEnergyDto.fromJson(Map<String, dynamic> json) {
@@ -32,6 +42,39 @@ class UserEnergyDto {
       maxEnergyCount: json['maxEnergyCount'] as int? ?? 0,
       lastAutoChargedAt: parseInstant(json['lastAutoChargedAt']),
       unlimitedEndsAt: parseInstant(json['unlimitedEndsAt']),
+      subscribedYn: json['subscribedYn'] as String? ?? 'N',
+      subscriptionExpiredAt: parseInstant(json['subscriptionExpiredAt']),
+      showUnlimitedPurchaseYn: json['showUnlimitedPurchaseYn'] as String? ?? 'N',
+      showCapacity6PurchaseYn: json['showCapacity6PurchaseYn'] as String? ?? 'N',
+      showCapacity7PurchaseYn: json['showCapacity7PurchaseYn'] as String? ?? 'N',
+    );
+  }
+
+  UserEnergyDto copyWith({
+    int? energyCount,
+    int? maxEnergyCount,
+    DateTime? lastAutoChargedAt,
+    DateTime? unlimitedEndsAt,
+    String? subscribedYn,
+    DateTime? subscriptionExpiredAt,
+    String? showUnlimitedPurchaseYn,
+    String? showCapacity6PurchaseYn,
+    String? showCapacity7PurchaseYn,
+  }) {
+    return UserEnergyDto(
+      energyCount: energyCount ?? this.energyCount,
+      maxEnergyCount: maxEnergyCount ?? this.maxEnergyCount,
+      lastAutoChargedAt: lastAutoChargedAt ?? this.lastAutoChargedAt,
+      unlimitedEndsAt: unlimitedEndsAt ?? this.unlimitedEndsAt,
+      subscribedYn: subscribedYn ?? this.subscribedYn,
+      subscriptionExpiredAt:
+          subscriptionExpiredAt ?? this.subscriptionExpiredAt,
+      showUnlimitedPurchaseYn:
+          showUnlimitedPurchaseYn ?? this.showUnlimitedPurchaseYn,
+      showCapacity6PurchaseYn:
+          showCapacity6PurchaseYn ?? this.showCapacity6PurchaseYn,
+      showCapacity7PurchaseYn:
+          showCapacity7PurchaseYn ?? this.showCapacity7PurchaseYn,
     );
   }
 
@@ -40,6 +83,46 @@ class UserEnergyDto {
     if (endsAt == null) return false;
     return endsAt.isAfter(nowUtc);
   }
+
+  /// 서버 `subscribedYn` + 로컬 만료 시각. 만료 후 재조회 전까지도 아이콘을 바로 전환.
+  bool isSubscribedActiveAt(DateTime nowUtc) {
+    if (subscribedYn != 'Y') return false;
+    final exp = subscriptionExpiredAt;
+    if (exp == null) return true;
+    return exp.isAfter(nowUtc);
+  }
+
+  bool needsSubscriptionExpiryWatch(DateTime nowUtc) {
+    if (subscribedYn != 'Y') return false;
+    final exp = subscriptionExpiredAt;
+    if (exp == null) return false;
+    return exp.isAfter(nowUtc);
+  }
+
+  bool get showUnlimitedPurchase => showUnlimitedPurchaseYn == 'Y';
+  bool get showCapacity6Purchase => showCapacity6PurchaseYn == 'Y';
+  bool get showCapacity7Purchase => showCapacity7PurchaseYn == 'Y';
+}
+
+/// POST /v1/purchases/verify 응답
+class PurchaseVerifyResultDto {
+  final String successYn;
+  final String pendingYn;
+
+  const PurchaseVerifyResultDto({
+    required this.successYn,
+    required this.pendingYn,
+  });
+
+  factory PurchaseVerifyResultDto.fromJson(Map<String, dynamic> json) {
+    return PurchaseVerifyResultDto(
+      successYn: json['successYn'] as String? ?? 'N',
+      pendingYn: json['pendingYn'] as String? ?? 'N',
+    );
+  }
+
+  bool get isSuccess => successYn == 'Y';
+  bool get isPending => pendingYn == 'Y';
 }
 
 /// PUT /v1/users/push-agreement 응답
