@@ -228,7 +228,9 @@
   - S1 단일 롤플레이 Overview. 홈 v2 이후 홈 썸네일 탭은 S2 `SeriesOverviewScreen`으로 진입.
 - **SeriesOverviewScreen** (Sub Screen, **S2**): Home 시리즈 썸네일 탭 시 `SeriesRouter.pushOverview`로 진입. `lib/screens/series/overview.dart`.
   - 진입 시 `GET /rps2/series/{seriesId}/overview` (`SudaApiClient.getSeriesOverview`) → `RpS2SeriesOverviewDto` 파싱.
-  - **레이아웃**(rp overview와 동일 골격): `Scaffold`+`Stack` — 상단 배경 `thumbnailImgPath`(CDN, 너비×**60%** 높이)·히어로 그라데이션·스크롤 본문(`information.png` 24×24(타이틀 **상단** 좌측·탭 → `SeriesInformationScreen`) → 타이틀 `headlineSmall` → gap 4 → `synopsisComplexityLevel` 태그 → 진행률 바 → gap 8 → `synopsis`)·**플로팅 헤더**(좌 뒤로가기 / 우 언어레벨 pill: liquid glass 24h — `ClipRRect` pill, `BackdropFilter` blur 12, white α0.14~0.22 gradient(좌상 밝음/우하 어두움), border white α0.36, shadow blur 10 offset (0,2), `ENGLISH_LEVEL` l10n 라벨, 탭 → `CefrLevelScreen`) 스크롤 시 타이틀 상단 도달하면 fade-out. §5 이후(에피소드 등) 추후.
+  - **레이아웃**(rp overview와 동일 골격): `Scaffold`+`Stack` — 상단 배경 `thumbnailImgPath`(CDN, 너비×**60%** 높이)·히어로 그라데이션·스크롤 본문(`information.png` 24×24(타이틀 **상단** 좌측·탭 → `SeriesInformationScreen`) → 타이틀 `headlineSmall` → gap 4 → `synopsisComplexityLevel` 태그 → 진행률 바 → gap 8 → `synopsis`)·**플로팅 헤더**(좌 뒤로가기 / 우 언어레벨 pill: liquid glass 24h — `ClipRRect` pill, `BackdropFilter` blur 12, white α0.14~0.22 gradient(좌상 밝음/우하 어두움), border white α0.36, shadow blur 10 offset (0,2), `ENGLISH_LEVEL` l10n 라벨, 탭 → `CefrLevelScreen`) 스크롤 시 타이틀 상단 도달하면 fade-out.
+  - **탭**: Episodes(`SeriesEpisodeTabContent`) / Similar Topic(`SeriesSimilarTopicTabContent`, `lib/screens/series/widgets/series_similar_topic_tab_content.dart`). `SudaLabelTabs(maintainState: true)`.
+  - **Similar Topic**: overview `category`로 `GET /v2/home/series?category=&pageNum=` (서버 size≈4). 초기 0·1·2 순차 로드 후 부모 스크롤 하단 근접 시 추가 페이징. 현재 `seriesId` 제외. 3열·gap 10·비율 1.5 cover(Profile History형) + 하단 음영 제목/Marquee(Home형). 탭 → `SeriesRouter.pushOverview`.
 - **SeriesInformationScreen** (Sub Screen, **S2**): Overview information 탭 → `SubScreenRoute` (`lib/screens/series/series_information.dart`). 부모가 로드한 `RpS2SeriesOverviewDto`·`UserDto` 전달(API 재호출 없음). 헤더: Setting 계열 `AppScaffold`(좌 뒤로가기·우측 없음)+커스텀 중앙 title(`headlineSmall`·좌우 inset 40·max 2줄·`bodyTopPadding` 타이틀 높이 연동). 배경: `RoleplayOverviewBackdrop`(thumbnail CDN·Opening과 동일 blur/dim). 본문: synopsis(bodySmall·justify) → gap10 → blockquote(좌 #353535 3px)·언어레벨·주제난이도(scl) → gap20 → 학습목표(headlineSmall) → gap10 → 에피소드별 learningFunction+#N title(gap10)·핵심 표현 불릿(`missions[].keyExpression` **en** 고정, 사용자 언어 미사용).
 
 ### 스크린 내부 구현 특이사항
@@ -262,6 +264,12 @@
     - Firebase Messaging 토큰 획득 후 서버에 전송 (`POST /users/push-token`)
 - **초기화 작업**: `initState()`에서 `_performInitialization()` 호출 (한 번만 실행)
   - `_isInitialized` 플래그로 중복 실행 방지
+- **WelcomeGiftLayer** (`lib/widgets/welcome_gift_layer.dart`):
+  - 조건: `UserDto.metaInfo`에 `WELCOME_GIFT_RECEIVED == 'Y'`가 아니면 노출 (`hasMetaInfoValue`)
+  - 시점: 앱 기동당 1회 (`WelcomeGiftLayerGate.shownThisLaunch`)
+  - UI: 풀스크린. blur(sigma 12)+dim(`0x4D000000`) opacity 0→1(500ms) 후 상·하단 콘텐츠 동시 1s 연출. 상단 반 4등분(맨위 공백·타이틀·이미지×2), 하단 반 3등분(텍스트·버튼·맨아래 공백). 닫기 불가.
+  - Start Now → `PUT /v1/users/grant-welcome-gift` (중복탭 방지·로딩). 200이면 `getCurrentUser`+`MainUserSync`·`getUserEnergy`+`EnergyRefreshBus` 후 숨김. 비-200이면 숨김만(다음 기동 시 재노출).
+  - Lab: Setting > Lab > **Show Welcome Gift Layer** (`previewOnly`, API 미호출)
 - **Props**:
   - `onNavigateToAlarm`: Alarm 화면으로 이동 시 호출되는 콜백
   - `onNavigateToProfile`: Profile 화면으로 이동 시 호출되는 콜백

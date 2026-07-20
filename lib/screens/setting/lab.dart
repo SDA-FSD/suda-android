@@ -17,6 +17,7 @@ import '../../widgets/main_reregistration_restricted_popup.dart'
         showMainReregistrationRestrictedSignInDefaultPopupForLab;
 import '../../widgets/energy_info_popup.dart' show showEnergyPopupForLab;
 import '../../widgets/app_scaffold.dart';
+import '../../widgets/welcome_gift_layer.dart';
 import '../profile.dart'
     show showProfileDeleteSavedExpressionDefaultPopupForLab;
 import 'announcements.dart'
@@ -154,6 +155,22 @@ class _LabScreenState extends State<LabScreen> {
   Future<void> _openPaywallScreen() async {
     if (!mounted) return;
     await PaywallScreen.push(context);
+  }
+
+  Future<void> _showWelcomeGiftLayer() async {
+    if (!mounted) return;
+    await Navigator.of(context, rootNavigator: true).push<void>(
+      PageRouteBuilder<void>(
+        opaque: false,
+        barrierDismissible: false,
+        pageBuilder: (routeContext, animation, secondaryAnimation) {
+          return WelcomeGiftLayer(
+            previewOnly: true,
+            onClosed: () => Navigator.of(routeContext).pop(),
+          );
+        },
+      ),
+    );
   }
 
   Future<void> _openPaywallCompletedScreen() async {
@@ -344,6 +361,16 @@ class _LabScreenState extends State<LabScreen> {
             _buildLabScreenButton(
               label: 'Open Paywall Completed',
               onPressed: () => unawaited(_openPaywallCompletedScreen()),
+            ),
+            _buildSectionDivider(),
+            Text(
+              'Welcome Gift',
+              style: theme.headlineSmall?.copyWith(color: Colors.white),
+            ),
+            const SizedBox(height: 12),
+            _buildLabScreenButton(
+              label: 'Show Welcome Gift Layer',
+              onPressed: () => unawaited(_showWelcomeGiftLayer()),
             ),
             _buildSectionDivider(),
             Text(

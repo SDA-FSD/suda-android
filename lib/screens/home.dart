@@ -14,6 +14,7 @@ import '../utils/suda_json_util.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/energy_header_badge.dart';
 import '../widgets/gnb_bar.dart';
+import '../widgets/welcome_gift_layer.dart';
 
 class HomeScreen extends StatefulWidget {
   final VoidCallback? onNavigateToAlarm;
@@ -56,12 +57,37 @@ class _HomeScreenState extends State<HomeScreen> {
   Timer? _bannerTimer;
   bool _bannerTimerStarted = false; // 타이머 시작 여부 플래그
   int _visibleCategoryCount = 0; // 현재 렌더링 허용된 카테고리 개수
+  bool _showWelcomeGift = false;
 
   @override
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: 0);
     _performInitialization();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _maybeShowWelcomeGift();
+    });
+  }
+
+  @override
+  void didUpdateWidget(covariant HomeScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.user != widget.user) {
+      _maybeShowWelcomeGift();
+    }
+  }
+
+  /// 앱 기동당 1회. `WELCOME_GIFT_RECEIVED != Y`이면 WelcomeGiftLayer 노출.
+  void _maybeShowWelcomeGift() {
+    if (!mounted) return;
+    if (WelcomeGiftLayerGate.shownThisLaunch) return;
+    final user = widget.user;
+    if (user == null) return;
+    if (user.hasMetaInfoValue(key: 'WELCOME_GIFT_RECEIVED', value: 'Y')) {
+      return;
+    }
+    WelcomeGiftLayerGate.shownThisLaunch = true;
+    setState(() => _showWelcomeGift = true);
   }
 
   @override
@@ -218,41 +244,53 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return AppScaffold(
-      showBackButton: false,
-      title: 'Hi, ${widget.user?.name ?? 'User'}!',
-      titleStyle: Theme.of(
-        context,
-      ).textTheme.headlineSmall?.copyWith(color: Colors.white),
-      usePadding: false, // 배너 풀-폭 유지를 위해 본문 패딩 제거
-      actions: [
-        EnergyHeaderBadge(
-          refreshCounter: widget.homeTabSelectedCounter,
-          registerEnergyBadgeAnchor: true,
-          active: widget.isActive,
-        ),
-      ],
-      bottomNavigationBar: GnbBar(
-        isAlarmActive: false,
-        isHomeActive: true,
-        isProfileActive: false,
-        showNotiboxUnreadBadge: widget.showNotiboxUnreadBadge,
-        onAlarmTap: widget.onNavigateToAlarm,
-        onHomeTap: () {},
-        onProfileTap: widget.onNavigateToProfile,
-        user: widget.user,
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            _buildBannerSection(),
-            const SizedBox(height: 10), // 배너 하단 gap 10 추가
-            const SizedBox(height: 32), // 배너와 첫 카테고리 사이 간격 (표준화)
-            _buildSeriesGroupsSection(),
-            const SizedBox(height: 40), // 하단 여백
+    return Stack(
+      children: [
+        AppScaffold(
+          showBackButton: false,
+          title: 'Hi, ${widget.user?.name ?? 'User'}!',
+          titleStyle: Theme.of(
+            context,
+          ).textTheme.headlineSmall?.copyWith(color: Colors.white),
+          usePadding: false, // 배너 풀-폭 유지를 위해 본문 패딩 제거
+          actions: [
+            EnergyHeaderBadge(
+              refreshCounter: widget.homeTabSelectedCounter,
+              registerEnergyBadgeAnchor: true,
+              active: widget.isActive,
+            ),
           ],
+          bottomNavigationBar: GnbBar(
+            isAlarmActive: false,
+            isHomeActive: true,
+            isProfileActive: false,
+            showNotiboxUnreadBadge: widget.showNotiboxUnreadBadge,
+            onAlarmTap: widget.onNavigateToAlarm,
+            onHomeTap: () {},
+            onProfileTap: widget.onNavigateToProfile,
+            user: widget.user,
+          ),
+          body: SingleChildScrollView(
+            child: Column(
+              children: [
+                _buildBannerSection(),
+                const SizedBox(height: 10), // 배너 하단 gap 10 추가
+                const SizedBox(height: 32), // 배너와 첫 카테고리 사이 간격 (표준화)
+                _buildSeriesGroupsSection(),
+                const SizedBox(height: 40), // 하단 여백
+              ],
+            ),
+          ),
         ),
-      ),
+        if (_showWelcomeGift)
+          Positioned.fill(
+            child: WelcomeGiftLayer(
+              onClosed: () {
+                if (mounted) setState(() => _showWelcomeGift = false);
+              },
+            ),
+          ),
+      ],
     );
   }
 

@@ -390,6 +390,10 @@ class SudaApiClient {
     return UserApi.updateAgreement(accessToken: accessToken);
   }
 
+  static Future<void> grantWelcomeGift({required String accessToken}) {
+    return UserApi.grantWelcomeGift(accessToken: accessToken);
+  }
+
   static Future<void> updateLanguageLevel({
     required String accessToken,
     required String languageLevel,

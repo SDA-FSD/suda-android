@@ -24,6 +24,7 @@ import '../../routes/roleplay_router.dart';
 import '../setting/cefr_level.dart';
 import 'series_information.dart';
 import 'widgets/series_episode_tab_content.dart';
+import 'widgets/series_similar_topic_tab_content.dart';
 
 /// Series Overview Screen (Sub Screen, S2)
 class SeriesOverviewScreen extends StatefulWidget {
@@ -54,6 +55,7 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
   int _episodeContentKey = 0;
   int _scrollToUnlockToken = 0;
   bool _isSynopsisExpanded = false;
+  int _overviewTabIndex = 0;
 
   static const _heroHeightFactor = 0.6;
   static const _infoIconSize = 24.0;
@@ -523,6 +525,9 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
   ) {
     return SudaLabelTabs(
       contentGap: 24,
+      maintainState: true,
+      selectedIndex: _overviewTabIndex,
+      onTabChanged: (index) => setState(() => _overviewTabIndex = index),
       tabs: [
         SudaLabelTab(
           label: SudaTabLabel.l10n((l10n) => l10n.seriesOverviewTabEpisodes),
@@ -535,7 +540,13 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
         ),
         SudaLabelTab(
           label: SudaTabLabel.l10n((l10n) => l10n.seriesOverviewTabSimilarTopic),
-          child: const SizedBox.shrink(),
+          child: SeriesSimilarTopicTabContent(
+            category: overview.category,
+            excludeSeriesId: widget.seriesId,
+            parentScrollController: _scrollController,
+            isActive: _overviewTabIndex == 1,
+            user: widget.user,
+          ),
         ),
       ],
     );

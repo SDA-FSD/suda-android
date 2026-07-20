@@ -456,4 +456,19 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get energyPurchaseNotCompleted => 'A compra não foi concluída.';
+
+  @override
+  String get welcomeGiftTitle => 'Tem um presente de boas-vindas para você!';
+
+  @override
+  String get welcomeGiftBenefitLead => 'Aproveite grátis por 10 minutos!';
+
+  @override
+  String get welcomeGiftLine2 => 'Recursos Premium liberados';
+
+  @override
+  String get welcomeGiftLine3 => 'Jogo Ilimitado liberado';
+
+  @override
+  String get welcomeGiftStartNow => 'Começar Agora';
 }

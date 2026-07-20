@@ -175,5 +175,10 @@
   "energyGoPremiumTitle": "Go Premium",
   "energyGoPremiumExplore": "Explore",
   "energyPurchasePendingApproval": "Your payment is pending approval",
-  "energyPurchaseNotCompleted": "The purchase was not completed."
+  "energyPurchaseNotCompleted": "The purchase was not completed.",
+  "welcomeGiftTitle": "Your Welcome Gift Has Arrived!",
+  "welcomeGiftBenefitLead": "Enjoy unlimited play for 10 minutes!",
+  "welcomeGiftLine2": "Premium features unlocked",
+  "welcomeGiftLine3": "Unlimited play unlocked",
+  "welcomeGiftStartNow": "Start Now"
 }

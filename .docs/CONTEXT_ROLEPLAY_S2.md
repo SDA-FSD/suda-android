@@ -165,10 +165,11 @@ S1 턴 정책은 `.docs/CONTEXT_ROLEPLAY.md`만 본다. **S2는 아래가 단일
 ### 4-1. SeriesOverviewScreen ✅ (S2 본流)
 
 - **파일**: `lib/screens/series/overview.dart`
-- **API**: `GET /rps2/series/{seriesId}/overview`, `GET /rps2/series/{seriesId}/best-score`
+- **API**: `GET /rps2/series/{seriesId}/overview`(`category` 포함), `GET /rps2/series/{seriesId}/best-score`
 - **복귀 시 bestScore 갱신**: `RoleplayRouter.popToOverview` 직전 `markBestScoreRefreshPending` → Overview `RouteAware.didPopNext`에서 `GET .../best-score` 재조회(현재 CEFR 기준). CEFR 변경 후와 동일 API.
 - **로드 시**: `SeriesStateService.setSeriesOverview`, **`FIRST_OVERVIEW`** 통계 (`POST /v1/users/first-overview`, metaInfo `FIRST_OVERVIEW=Y` 가드)
 - **에피소드 Play**: `setSelectedEpisodeId(episode.id)` → `RoleplayRouter.pushTutorial` (S1 `getRoleplayOverview` **호출 안 함**)
+- **Similar Topic 탭**: `SeriesSimilarTopicTabContent` — `GET /v2/home/series?category=` 초기 0–2페이지 로드·스크롤 추가 페이징, 현재 series 제외, 3열 썸네일 탭 시 Overview push
 
 ### 4-2. RoleplayTutorialScreen ✅ (S2 경로 연동)
 

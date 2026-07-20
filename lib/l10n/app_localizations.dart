@@ -927,6 +927,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The purchase was not completed.'**
   String get energyPurchaseNotCompleted;
+
+  /// No description provided for @welcomeGiftTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Welcome Gift Has Arrived!'**
+  String get welcomeGiftTitle;
+
+  /// No description provided for @welcomeGiftBenefitLead.
+  ///
+  /// In en, this message translates to:
+  /// **'Enjoy unlimited play for 10 minutes!'**
+  String get welcomeGiftBenefitLead;
+
+  /// No description provided for @welcomeGiftLine2.
+  ///
+  /// In en, this message translates to:
+  /// **'Premium features unlocked'**
+  String get welcomeGiftLine2;
+
+  /// No description provided for @welcomeGiftLine3.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited play unlocked'**
+  String get welcomeGiftLine3;
+
+  /// No description provided for @welcomeGiftStartNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Now'**
+  String get welcomeGiftStartNow;
 }
 
 class _AppLocalizationsDelegate

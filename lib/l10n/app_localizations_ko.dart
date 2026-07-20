@@ -436,4 +436,19 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get energyPurchaseNotCompleted => '결제가 이루어지지 않았습니다.';
+
+  @override
+  String get welcomeGiftTitle => '웰컴 기프트 도착!';
+
+  @override
+  String get welcomeGiftBenefitLead => '10분동안 무료로 즐겨보세요!';
+
+  @override
+  String get welcomeGiftLine2 => '무제한 플레이 모드';
+
+  @override
+  String get welcomeGiftLine3 => '프리미엄 기능 전체 오픈';
+
+  @override
+  String get welcomeGiftStartNow => '지금 시작하기';
 }

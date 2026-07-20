@@ -45,6 +45,9 @@ class SudaLabelTabs extends StatefulWidget {
   final double contentGap;
   final EdgeInsetsGeometry labelPadding;
 
+  /// true면 비선택 탭 child도 [IndexedStack]으로 유지(상태·초기 로드 보존).
+  final bool maintainState;
+
   const SudaLabelTabs({
     super.key,
     required this.tabs,
@@ -54,6 +57,7 @@ class SudaLabelTabs extends StatefulWidget {
     this.tabSpacing = 24,
     this.contentGap = 20,
     this.labelPadding = EdgeInsets.zero,
+    this.maintainState = false,
   }) : assert(tabs.length >= 2, 'SudaLabelTabs requires at least 2 tabs');
 
   @override
@@ -153,7 +157,23 @@ class _SudaLabelTabsState extends State<SudaLabelTabs> {
           ),
         ),
         SizedBox(height: widget.contentGap),
-        widget.tabs[_effectiveIndex].child,
+        if (widget.maintainState)
+          // Offstage: 비선택 탭은 레이아웃 높이 0, 상태는 유지
+          Stack(
+            alignment: Alignment.topCenter,
+            children: [
+              for (var i = 0; i < widget.tabs.length; i++)
+                Offstage(
+                  offstage: i != _effectiveIndex,
+                  child: TickerMode(
+                    enabled: i == _effectiveIndex,
+                    child: widget.tabs[i].child,
+                  ),
+                ),
+            ],
+          )
+        else
+          widget.tabs[_effectiveIndex].child,
       ],
     );
   }

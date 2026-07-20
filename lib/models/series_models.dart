@@ -6,6 +6,8 @@ import '../utils/suda_json_util.dart';
 /// GET /rps2/series/{seriesId}/overview 응답 DTO
 class RpS2SeriesOverviewDto {
   final Map<String, String> title;
+  /// Home `GET /v2/home/series?category=` 에 쓰는 카테고리 enum 값.
+  final String? category;
   final String? synopsisComplexityLevel;
   final Map<String, String> synopsis;
   final String? thumbnailImgPath;
@@ -17,6 +19,7 @@ class RpS2SeriesOverviewDto {
 
   const RpS2SeriesOverviewDto({
     required this.title,
+    this.category,
     this.synopsisComplexityLevel,
     required this.synopsis,
     this.thumbnailImgPath,
@@ -40,6 +43,7 @@ class RpS2SeriesOverviewDto {
 
     return RpS2SeriesOverviewDto(
       title: SudaJsonUtil.localizedMapFromJson(json['title']),
+      category: json['category'] as String?,
       synopsisComplexityLevel: json['synopsisComplexityLevel'] as String?,
       synopsis: SudaJsonUtil.localizedMapFromJson(json['synopsis']),
       thumbnailImgPath: json['thumbnailImgPath'] as String?,
@@ -54,6 +58,7 @@ class RpS2SeriesOverviewDto {
   RpS2SeriesOverviewDto copyWith({Map<int, int>? bestScoreMap}) {
     return RpS2SeriesOverviewDto(
       title: title,
+      category: category,
       synopsisComplexityLevel: synopsisComplexityLevel,
       synopsis: synopsis,
       thumbnailImgPath: thumbnailImgPath,

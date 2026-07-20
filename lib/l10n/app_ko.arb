@@ -175,5 +175,10 @@
   "energyGoPremiumTitle": "프리미엄 구독",
   "energyGoPremiumExplore": "혜택 보기",
   "energyPurchasePendingApproval": "결제 승인 대기중입니다.",
-  "energyPurchaseNotCompleted": "결제가 이루어지지 않았습니다."
+  "energyPurchaseNotCompleted": "결제가 이루어지지 않았습니다.",
+  "welcomeGiftTitle": "웰컴 기프트 도착!",
+  "welcomeGiftBenefitLead": "10분동안 무료로 즐겨보세요!",
+  "welcomeGiftLine2": "무제한 플레이 모드",
+  "welcomeGiftLine3": "프리미엄 기능 전체 오픈",
+  "welcomeGiftStartNow": "지금 시작하기"
 }
