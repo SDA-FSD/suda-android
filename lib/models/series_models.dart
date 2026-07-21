@@ -333,7 +333,10 @@ class RpS2UserHistoryDto {
   final int? words;
   final int? likePoint;
   final List<RpS2KeyExpressionVo> keyExpressions;
-  final Map<int, RpS2UserFeedbackVo> speechFeedback;
+  /// `feedbackLockedYn == 'Y'`이면 서버가 null로 내려줌.
+  final Map<int, RpS2UserFeedbackVo>? speechFeedback;
+  /// `'Y'`면 Speech Feedback 잠금(Feedback 탭 → Paywall). 미수신 시 `'N'`.
+  final String feedbackLockedYn;
   final int? userStarRating;
   final String? mainTitle;
   final String? subTitle;
@@ -352,7 +355,8 @@ class RpS2UserHistoryDto {
     this.words,
     this.likePoint,
     this.keyExpressions = const [],
-    this.speechFeedback = const {},
+    this.speechFeedback,
+    this.feedbackLockedYn = 'N',
     this.userStarRating,
     this.mainTitle,
     this.subTitle,
@@ -374,6 +378,7 @@ class RpS2UserHistoryDto {
       likePoint: _optionalInt(json['likePoint']),
       keyExpressions: _keyExpressionsFromJson(json['keyExpressions']),
       speechFeedback: _speechFeedbackMapFromJson(json['speechFeedback']),
+      feedbackLockedYn: json['feedbackLockedYn'] as String? ?? 'N',
       userStarRating: _optionalInt(json['userStarRating']),
       mainTitle: json['mainTitle'] as String?,
       subTitle: json['subTitle'] as String?,
@@ -527,8 +532,9 @@ List<RpS2KeyExpressionVo> _keyExpressionsFromJson(dynamic raw) {
       .toList();
 }
 
-Map<int, RpS2UserFeedbackVo> _speechFeedbackMapFromJson(dynamic raw) {
-  if (raw is! Map) return const {};
+Map<int, RpS2UserFeedbackVo>? _speechFeedbackMapFromJson(dynamic raw) {
+  if (raw == null) return null;
+  if (raw is! Map) return null;
   final result = <int, RpS2UserFeedbackVo>{};
   raw.forEach((key, value) {
     final intKey = int.tryParse(key.toString());
