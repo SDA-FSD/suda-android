@@ -829,7 +829,7 @@
 - **후속 타이밍**: fully shown 1초 후 박스레이어 상단 이동 + `LikeProgressEffect.play()` (before/after like·level·progress).
 - **effect 이후 본문 (S1)**: Feedback + Key Expression + Got it!/Report. Feedback 즉시, Key Expression 500ms 후, footer 1s 후 fade-in.
 - **effect 이후 본문 (S2)**: Feedback **없음**. Key Expression + Speech Feedback + Got it!/Report. Key Expression·Speech Feedback 동시 슬라이드, footer 1s 후 fade-in.
-- **Speech Feedback 펼침**: 구독자만. 비구독 Feedback 탭 → `PaywallScreen`. 결제 후 복귀 시 자동 펼침 없음·재탭 시 펼침 (`ensureSubscribedForSpeechFeedback`). History도 동일 본문.
+- **Speech Feedback 펼침**: 서버 `feedbackLockedYn` 기준. `'Y'` → Feedback 탭 시 `PaywallScreen`; `'N'` → 즉시 펼침. lock 시 Result/History는 USER placeholder 카드 유지·View Chat은 Feedback 버튼 미노출. 결제 후 history 재조회·자동 펼침 없음·재탭 시 펼침 (`ensureSpeechFeedbackUnlocked`). History(Profile)도 동일 본문.
 - **Expression/Key Expression 카드**: 가로 70% 캐러셀, 카드 탭 시 TTS(S1 API 연동 완료, S2 메가폰·북마크 UI만·API 추후), 북마크(S1 API 연동 완료).
 - **Got it! (S1)**: `GET /v1/users` + `GET /v1/roleplays/{roleplayId}/overview` best-effort 후 Overview pop.
 - **Got it! (S2)**: 동일 경로로 Overview pop (Series Overview).
@@ -886,7 +886,7 @@
 
 ### 스크린 내부 구현 특이사항
 - **로드**: `GET /rps2/user-histories/{rpUserHistoryId}` → `SeriesStateService.setCachedUserHistory`
-- **표시**: `RoleplayResultScreen(skipEntranceAnimation: true, exitViaPop: true, showReportLink: false)` — LikeProgressEffect·패널 이동·별 순차 애니 생략, effect 완료 상태 본문 즉시 노출. **Report 링크 미노출**. Speech Feedback 구독 가드는 Result와 동일.
+- **표시**: `RoleplayResultScreen(skipEntranceAnimation: true, exitViaPop: true, showReportLink: false)` — LikeProgressEffect·패널 이동·별 순차 애니 생략, effect 완료 상태 본문 즉시 노출. **Report 링크 미노출**. Speech Feedback `feedbackLockedYn` 가드는 Result와 동일(동일 `RoleplayResultScreen`).
 - **종료**: dispose 시 `SeriesStateService.cachedUserHistory` clear
 - S1 `GET /v1/roleplays/results`·`history_v2.dart`·version 분기 **삭제**
 

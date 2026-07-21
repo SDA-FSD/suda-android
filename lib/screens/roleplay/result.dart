@@ -1004,9 +1004,58 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
     );
   }
 
+  Future<void> _refreshUserHistoryAfterSpeechFeedbackUnlock() async {
+    final historyId = _s2History?.id;
+    if (historyId == null) return;
+    final token = await TokenStorage.loadAccessToken();
+    if (token == null || token.isEmpty) return;
+    final history = await SudaApiClient.getRpS2UserHistory(
+      accessToken: token,
+      rpUserHistoryId: historyId,
+    );
+    SeriesStateService.instance.setCachedUserHistory(history);
+    if (mounted) setState(() {});
+  }
+
   List<Widget> _buildSpeechFeedbackRows(BuildContext context) {
     final history = _s2History;
-    if (history == null || history.speechFeedback.isEmpty) {
+    if (history == null) return const [];
+
+    final feedbackLocked = history.feedbackLockedYn == 'Y';
+    final speechFeedback = history.speechFeedback;
+
+    if (feedbackLocked) {
+      final userMessages = history.messages
+          .where(
+            (m) =>
+                m.role == 'USER' &&
+                m.id != null &&
+                (m.content?.trim().isNotEmpty ?? false),
+          )
+          .toList()
+        ..sort((a, b) => a.id!.compareTo(b.id!));
+      if (userMessages.isEmpty) return const [];
+
+      return [
+        for (final message in userMessages)
+          _SpeechFeedbackRow(
+            feedback: null,
+            feedbackLockedYn: history.feedbackLockedYn,
+            onUnlockedAfterPaywall: _refreshUserHistoryAfterSpeechFeedbackUnlock,
+            userSpeech: message.content ?? '',
+            audioInputEnabled: message.audioInputYn == 'Y',
+            fetchingActive:
+                _speechFeedbackActiveMsgId == message.id &&
+                !_speechFeedbackIsPlaying,
+            playingActive:
+                _speechFeedbackActiveMsgId == message.id &&
+                _speechFeedbackIsPlaying,
+            onAudioTap: () => unawaited(_onSpeechFeedbackAudioTap(message.id!)),
+          ),
+      ];
+    }
+
+    if (speechFeedback == null || speechFeedback.isEmpty) {
       return const [];
     }
 
@@ -1015,11 +1064,11 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
         if (message.id != null) message.id!: message,
     };
 
-    final sortedIds = history.speechFeedback.keys.toList()..sort();
+    final sortedIds = speechFeedback.keys.toList()..sort();
     final rows = <Widget>[];
     for (final messageId in sortedIds) {
       final message = messageById[messageId];
-      final feedback = history.speechFeedback[messageId];
+      final feedback = speechFeedback[messageId];
       if (message == null || feedback == null) {
         continue;
       }
@@ -1027,6 +1076,8 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
       rows.add(
         _SpeechFeedbackRow(
           feedback: feedback,
+          feedbackLockedYn: history.feedbackLockedYn,
+          onUnlockedAfterPaywall: _refreshUserHistoryAfterSpeechFeedbackUnlock,
           userSpeech: message.content ?? '',
           audioInputEnabled: message.audioInputYn == 'Y',
           fetchingActive:
@@ -1529,6 +1580,8 @@ class _SpeechFeedbackFeedbackButton extends StatelessWidget {
 class _SpeechFeedbackRow extends StatefulWidget {
   const _SpeechFeedbackRow({
     required this.feedback,
+    required this.feedbackLockedYn,
+    required this.onUnlockedAfterPaywall,
     required this.userSpeech,
     required this.audioInputEnabled,
     required this.fetchingActive,
@@ -1536,7 +1589,9 @@ class _SpeechFeedbackRow extends StatefulWidget {
     required this.onAudioTap,
   });
 
-  final RpS2UserFeedbackVo feedback;
+  final RpS2UserFeedbackVo? feedback;
+  final String feedbackLockedYn;
+  final Future<void> Function() onUnlockedAfterPaywall;
   final String userSpeech;
   final bool audioInputEnabled;
   final bool fetchingActive;
@@ -1565,7 +1620,11 @@ class _SpeechFeedbackRowState extends State<_SpeechFeedbackRow> {
       setState(() => _expanded = false);
       return;
     }
-    final allowed = await ensureSubscribedForSpeechFeedback(context);
+    final allowed = await ensureSpeechFeedbackUnlocked(
+      context,
+      feedbackLockedYn: widget.feedbackLockedYn,
+      onUnlockedAfterPaywall: widget.onUnlockedAfterPaywall,
+    );
     if (!mounted || !allowed) return;
     setState(() => _expanded = true);
   }
@@ -1602,7 +1661,7 @@ class _SpeechFeedbackRowState extends State<_SpeechFeedbackRow> {
 
   Widget _buildExpandedFeedbackText(BuildContext context) {
     final theme = Theme.of(context).textTheme;
-    final feedbackText = widget.feedback.feedback?.trim();
+    final feedbackText = widget.feedback?.feedback?.trim();
     final hasFeedback =
         feedbackText != null && feedbackText.isNotEmpty;
 
@@ -1622,22 +1681,23 @@ class _SpeechFeedbackRowState extends State<_SpeechFeedbackRow> {
   }
 
   Widget _buildExpandedScorePanel(BuildContext context) {
-    final gradeStyle = _SpeechFeedbackGradeStyle.resolve(widget.feedback.grade);
-    if (!_expanded || widget.feedback.score == null) {
+    final gradeStyle =
+        _SpeechFeedbackGradeStyle.resolve(widget.feedback?.grade);
+    if (!_expanded || widget.feedback?.score == null) {
       return const SizedBox(width: double.infinity);
     }
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
       child: _SpeechFeedbackScorePanel(
-        score: widget.feedback.score,
+        score: widget.feedback!.score,
         barColor: gradeStyle?.color ?? _SpeechFeedbackGradeStyle.gradeA,
       ),
     );
   }
 
   Widget _buildScoreSpeechDivider() {
-    if (!_expanded || widget.feedback.score == null) {
+    if (!_expanded || widget.feedback?.score == null) {
       return const SizedBox.shrink();
     }
 
@@ -1653,7 +1713,7 @@ class _SpeechFeedbackRowState extends State<_SpeechFeedbackRow> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context).textTheme;
-    final showScorePanel = _expanded && widget.feedback.score != null;
+    final showScorePanel = _expanded && widget.feedback?.score != null;
 
     final card = AnimatedSize(
       duration: _expandDuration,
@@ -1665,7 +1725,7 @@ class _SpeechFeedbackRowState extends State<_SpeechFeedbackRow> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisSize: MainAxisSize.min,
           children: [
-            _SpeechFeedbackGradeBadge(grade: widget.feedback.grade),
+            _SpeechFeedbackGradeBadge(grade: widget.feedback?.grade),
             AnimatedSize(
               duration: _expandDuration,
               curve: _expandCurve,

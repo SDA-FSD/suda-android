@@ -62,7 +62,7 @@ class _ViewChatScreenState extends State<ViewChatScreen> {
   List<RpS2UserHistoryMsgDto> get _messages => widget.history.messages;
 
   Map<int, RpS2UserFeedbackVo> get _speechFeedback =>
-      widget.history.speechFeedback;
+      widget.history.speechFeedback ?? const {};
 
   @override
   void dispose() {
@@ -366,6 +366,7 @@ class _ViewChatScreenState extends State<ViewChatScreen> {
         return _ViewChatUserCard(
           message: message,
           feedback: message.id == null ? null : _speechFeedback[message.id],
+          feedbackLockedYn: widget.history.feedbackLockedYn,
           audioInputEnabled: message.audioInputYn == 'Y',
           isActive: _isMessageActive(message.id),
           isLoading: message.id != null && _loadingMsgId == message.id,
@@ -558,6 +559,7 @@ class _ViewChatUserCard extends StatefulWidget {
   const _ViewChatUserCard({
     required this.message,
     required this.feedback,
+    required this.feedbackLockedYn,
     required this.audioInputEnabled,
     required this.isActive,
     required this.isLoading,
@@ -567,6 +569,7 @@ class _ViewChatUserCard extends StatefulWidget {
 
   final RpS2UserHistoryMsgDto message;
   final RpS2UserFeedbackVo? feedback;
+  final String feedbackLockedYn;
   final bool audioInputEnabled;
   final bool isActive;
   final bool isLoading;
@@ -607,7 +610,12 @@ class _ViewChatUserCardState extends State<_ViewChatUserCard> {
       setState(() => _expanded = false);
       return;
     }
-    final allowed = await ensureSubscribedForSpeechFeedback(context);
+    // View Chat: feedback null이면 버튼 미노출. lock 시 speechFeedback null.
+    // 잠금 엣지 시 Paywall만(히스토리 재조회는 Result/History에서 처리).
+    final allowed = await ensureSpeechFeedbackUnlocked(
+      context,
+      feedbackLockedYn: widget.feedbackLockedYn,
+    );
     if (!mounted || !allowed) return;
     setState(() => _expanded = true);
   }

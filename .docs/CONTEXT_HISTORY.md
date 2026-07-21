@@ -6,6 +6,7 @@
 
 ## 최근 작업 메모
 
+- **Speech Feedback 잠금 서버 제어**: `RpS2UserHistoryDto.feedbackLockedYn` + nullable `speechFeedback`. Result·History(Profile)·View Chat Feedback 탭은 `ensureSpeechFeedbackUnlocked`. lock 시 Result/History USER placeholder·Paywall→history 재조회(자동 펼침 없음). View Chat은 feedback null 시 버튼 미노출. 구현: `series_models.dart`, `speech_feedback_premium.dart`, `result.dart`, `view_chat.dart`.
 - **Playing 에너지 연동**: `PlayingEnergyMixin`·`PlayingEnergyIndicator` — 푸터 중앙 표시·30분 충전 재조회·발화 성공 시 -1·0/402 시 `showPlayingEnergyInsufficientPopup`→Wait 레이어. `EffectAnchorId.energyBadge`.
 - **Opening·홈 에너지 배지**: `EnergyHeaderBadge` — 충전 타이머(30분)·무제한 만료 재조회. 홈 복귀 시 `homeTabSelectedCounter` 증가로 `GET /v1/users/energy` 재조회(GNB 홈 탭·서브 pop 복귀·물리 뒤로가기). 문서: `.docs/CONTEXT.md` §4, `.docs/CONTEXT_ROLEPLAY_S2.md` §4-3·§4-4.
 - **Series Overview 복귀 시 bestScore 갱신**: `RouteAware.didPopNext`에서 `consumeBestScoreRefreshPending` 후 `GET .../best-score` 재조회·`SeriesStateService` 동기화. `popToOverview`의 `markBestScoreRefreshPending`과 연결. 구현: `lib/screens/series/overview.dart`. 문서: `.docs/CONTEXT_ROLEPLAY_S2.md` §4-1.
