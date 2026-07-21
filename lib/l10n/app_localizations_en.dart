@@ -447,6 +447,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get energyGoPremiumExplore => 'Explore';
 
   @override
+  String get profileGoPremiumTitle => 'Get SUDA Premium';
+
+  @override
+  String get profileGoPremiumExplore => 'Explore';
+
+  @override
   String get energyPurchasePendingApproval =>
       'Your payment is pending approval';
 

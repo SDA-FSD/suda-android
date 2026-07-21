@@ -12,8 +12,11 @@ import '../l10n/app_localizations.dart';
 import '../models/series_models.dart';
 import '../services/auth_service.dart';
 import '../services/series_state_service.dart';
+import '../services/subscription_status_cache.dart';
 import '../services/token_storage.dart';
 import '../services/suda_api_client.dart';
+import '../widgets/profile_go_premium_button.dart';
+import 'paywall/paywall.dart';
 import '../utils/default_toast.dart';
 import '../utils/sub_screen_route.dart';
 import '../widgets/default_popup.dart';
@@ -58,6 +61,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   int? _currentLevel;
   double? _progressPercentage;
   bool _isRefreshing = false;
+  bool _showPremiumCta = true;
 
   _ProfileContentTab _activeTab = _ProfileContentTab.history;
 
@@ -95,6 +99,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _scrollController.addListener(_onContentScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _refreshProfile();
+      unawaited(_refreshSubscriptionStatus());
       _fetchHistoryPage(0);
     });
   }
@@ -130,6 +135,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   static const double _historyRefetchBottomThreshold = 200;
+  static const double _profileHorizontalMargin = 20;
 
   /// 탭 재진입·복귀 시 히스토리를 0페이지부터 다시 받을지.
   /// 서버에 더 불러올 페이지가 남아 있거나(`!_isHistoryLastPage`), 스크롤이 목록 끝이 아니면
@@ -273,6 +279,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     // 활성 상태로 전환될 때마다 프로필 갱신. 롤플레이 복귀 후면 History 0페이지 재조회.
     if (!oldWidget.isActive && widget.isActive) {
       _refreshProfile();
+      unawaited(_refreshSubscriptionStatus());
       if (_activeTab == _ProfileContentTab.history) {
         if (SeriesStateService.instance.consumeProfileHistoryRefreshPending()) {
           _fetchHistoryPage(0);
@@ -286,11 +293,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
         widget.profileReturnCounter != null &&
         widget.profileReturnCounter != oldWidget.profileReturnCounter) {
       _refreshProfile();
+      unawaited(_refreshSubscriptionStatus());
       if (_activeTab == _ProfileContentTab.history &&
           _shouldRefetchHistoryFromStart()) {
         _fetchHistoryPage(0);
       }
     }
+  }
+
+  Future<void> _refreshSubscriptionStatus() async {
+    try {
+      final token = await TokenStorage.loadAccessToken();
+      if (token == null) return;
+
+      await SudaApiClient.getUserEnergy(accessToken: token);
+      if (!mounted) return;
+
+      setState(() {
+        _showPremiumCta = !SubscriptionStatusCache.isSubscribedActive;
+      });
+    } catch (_) {
+      // 실패 시 기존 CTA 노출 상태 유지
+    }
+  }
+
+  Future<void> _onPremiumCtaTap() async {
+    final subscribed = await PaywallScreen.push<bool>(context);
+    if (!mounted || subscribed != true) return;
+    await _refreshSubscriptionStatus();
   }
 
   Future<void> _refreshProfile() async {
@@ -860,6 +890,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context).textTheme;
+    final l10n = AppLocalizations.of(context)!;
     final user = _user ?? widget.user;
     final name = user?.name ?? '';
     final profileImgUrl = user?.profileImgUrl;
@@ -1005,6 +1036,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ],
                   ),
                 ),
+
+                if (_showPremiumCta) ...[
+                  const SizedBox(height: 24),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: _profileHorizontalMargin,
+                    ),
+                    child: ProfileGoPremiumButton(
+                      title: l10n.profileGoPremiumTitle,
+                      exploreLabel: l10n.profileGoPremiumExplore,
+                      onTap: () => unawaited(_onPremiumCtaTap()),
+                    ),
+                  ),
+                ],
 
                 const SizedBox(height: 35),
 

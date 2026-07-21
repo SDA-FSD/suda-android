@@ -432,6 +432,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get energyGoPremiumExplore => '혜택 보기';
 
   @override
+  String get profileGoPremiumTitle => 'SUDA Premium 구독';
+
+  @override
+  String get profileGoPremiumExplore => '혜택보기';
+
+  @override
   String get energyPurchasePendingApproval => '결제 승인 대기중입니다.';
 
   @override

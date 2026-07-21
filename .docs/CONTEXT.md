@@ -91,10 +91,10 @@
     - banners: `List<MainHomeBannerDto>` (imgPath, overlayText, appPath?)
       - `appPath`가 있으면 Home 배너 탭 시 기존 appPath 규칙(`_applyPendingPushNavigation`)으로 화면 이동한다.
     - seriesList: `List<HomeSeriesGroupDto>` (`category`: `HomeCategoryDto` — `enumValue`, `name` Map; `seriesList`: `List<HomeSeriesDto>` — `id`, `title` Map, `thumbnailImgPath`)
-      - 홈 화면 카테고리별 가로 썸네일: `lib/screens/home.dart` `CategorySeriesRow`에서 `ListView.separated` 구분 폭 **8**dp. 썸네일 탭 → `SeriesRouter.pushOverview` → `SeriesOverviewScreen`(S2).
+      - 홈 화면 카테고리별 가로 썸네일: `lib/screens/home.dart` `CategorySeriesRow`에서 `ListView.separated` 구분 폭 **8**dp. 썸네일 탭 → `SeriesRouter.pushOverview` → `SeriesOverviewScreen`(S2, placeholder).
     - restYn/restStartsAt/restEndsAt·notiboxUnreadYn은 `GET /v2/home/contents` 처리 시 `RestStatusService.instance.update()`로 보관 (어떤 스크린에서도 접근 가능)
   - `SudaApiClient.getSeriesByCategory()`: 홈 카테고리별 시리즈 페이징 (`GET /v2/home/series?category={enumValue}&pageNum=…`, 0-based, size 4 가정). 응답 `SudaAppPage<HomeSeriesDto>`.
-  - `SudaApiClient.getSeriesOverview()`: S2 시리즈 Overview (`GET /rps2/series/{seriesId}/overview`, 응답 `RpS2SeriesOverviewDto` — `category` String 포함). `SeriesOverviewScreen` 진입 시 호출. Similar Topic 탭은 `category`로 `GET /v2/home/series` 페이징(초기 page 0–2, 이후 스크롤 추가; 현재 seriesId 제외; 3열 그리드).
+  - `SudaApiClient.getSeriesOverview()`: S2 시리즈 Overview (`GET /rps2/series/{seriesId}/overview`, 응답 `RpS2SeriesOverviewDto`). `SeriesOverviewScreen` 진입 시 호출.
   - `SudaApiClient.getSeriesBestScore()`: S2 시리즈 CEFR별 best score (`GET /rps2/series/{seriesId}/best-score`, 응답 `Map<int,int>`). `SeriesOverviewScreen`에서 언어레벨 변경 후 `bestScoreMap` 갱신.
   - `SudaApiClient.getNotifications()`: 알림함 목록 페이징 (`GET /v1/users/notification?pageNum=…`, `UserApi.getNotifications`) — 응답 원소 `NotificationDto`에 **readYn**(`Y`/`N`) 포함. 서버는 `sendFinishedAt` 기준 30일 초과 알림을 내려주지 않으며(배지·목록 일치), 카드 하단 상대 날짜도 동일 필드(`sendFinishedAt`)를 UTC로 파싱 후 로컬 달력 일 단위로 표시(`notification_box.dart`).
   - `SudaApiClient.markNotificationRead()`: 알림 읽음 처리 (`POST /v1/users/notification/{notificationId}/read`, `UserApi.markNotificationRead`) — 응답 `QuestResultDto`. GET에서 30일 초과로 빠진 항목도 서버가 ZSET에 남겨 둔 경우 POST 읽음은 성공할 수 있어, 재진입 시 `readYn`이 되돌아가지 않도록 한다.
@@ -141,7 +141,6 @@
   - `SudaJson`: `key`, `value` 필드를 가진 구조체
   - `UserDto.upsertMetaInfo(key, value)`: metaInfo의 key/value를 upsert(키 중복 제거 후 1개로 유지)
   - `UserDto.hasMetaInfoValue(key, value)`: metaInfo에 특정 key/value가 존재하는지 체크
-  - **Welcome Gift**: metaInfo `WELCOME_GIFT_RECEIVED == 'Y'`가 아니면 Home에 `WelcomeGiftLayer`(`lib/widgets/welcome_gift_layer.dart`) 노출(앱 기동당 1회). Start Now → `PUT /v1/users/grant-welcome-gift`(`SudaApiClient.grantWelcomeGift`) → 200 시 `getCurrentUser`+`MainUserSync`·`getUserEnergy`+`EnergyRefreshBus`로 현행화 후 숨김. 비-200은 숨김만(다음 기동 재노출). Lab에서 미리보기 가능.
 
 - **스크린 노출 통계(클라이언트 best-effort 호출)**
   - Tutorial 스크린이 실제로 노출되는 경우(완료 상태가 아니어서 화면을 보여주기로 확정된 경우): `POST /v1/users/tutorial-shown`
@@ -193,7 +192,7 @@
 **⚠️ 중요**: 스크린 관련 작업(추가/수정/삭제) 시 반드시 `CONTEXT_SCREEN.md` 문서도 함께 업데이트해야 합니다.
 
 ## 7-0. 인증/동의 플로우 메모
-- 서비스 이용 동의(`SUDA_AGREEMENT`)가 필요할 때는 `LoginScreen` 위에 bottom-up 레이어(blur+dim)로 동의 UI를 노출한다. 동의 완료 시 `POST /v1/users/agreement`와 AppsFlyer `af_complete_registration` 이벤트를 호출한 뒤 **동의 직후 1회** `FirstCefrLevelScreen`(`lib/screens/first_cefr_level.dart`)으로 전환한다. Confirm 시 `PUT /v1/users/language-level` 호출 후 Main(Home) 진입(API 실패여도 Home). Lab 진입: Setting > Lab (`AppConfig.isDev` · `kDebugMode`). Lab에서 First CEFR / Paywall / Welcome Gift Layer / IAP 테스트 가능. **IAP 진행상황은 §7-2**. 레이어를 동의 없이 닫을 때(dim 바깥 탭)는 로컬 JWT/refresh 삭제(`TokenStorage.clearTokens`)·`AuthService.signOut()`·메인 상태 초기화로 비로그인 `LoginScreen`으로 돌아간다.
+- 서비스 이용 동의(`SUDA_AGREEMENT`)가 필요할 때는 `LoginScreen` 위에 bottom-up 레이어(blur+dim)로 동의 UI를 노출한다. 동의 완료 시 `POST /v1/users/agreement`와 AppsFlyer `af_complete_registration` 이벤트를 호출한 뒤 **동의 직후 1회** `FirstCefrLevelScreen`(`lib/screens/first_cefr_level.dart`)으로 전환한다. Confirm 시 `PUT /v1/users/language-level` 호출 후 Main(Home) 진입(API 실패여도 Home). Lab 진입: Setting > Lab (`AppConfig.isDev` · `kDebugMode`). Lab에서 First CEFR / Paywall / IAP 테스트 가능. **IAP 진행상황은 §7-2**. 레이어를 동의 없이 닫을 때(dim 바깥 탭)는 로컬 JWT/refresh 삭제(`TokenStorage.clearTokens`)·`AuthService.signOut()`·메인 상태 초기화로 비로그인 `LoginScreen`으로 돌아간다.
 
 ## 7-1. Roleplay 스크린 컨텍스트
 

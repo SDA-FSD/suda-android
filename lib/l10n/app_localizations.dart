@@ -916,6 +916,18 @@ abstract class AppLocalizations {
   /// **'Explore'**
   String get energyGoPremiumExplore;
 
+  /// No description provided for @profileGoPremiumTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Get SUDA Premium'**
+  String get profileGoPremiumTitle;
+
+  /// No description provided for @profileGoPremiumExplore.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore'**
+  String get profileGoPremiumExplore;
+
   /// No description provided for @energyPurchasePendingApproval.
   ///
   /// In en, this message translates to:
