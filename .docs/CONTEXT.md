@@ -331,7 +331,7 @@
 - **프로젝트 분리**: flavor별 `google-services.json`(dev/prd)로 각 Firebase 프로젝트에 적재. `flutterfire configure` 미사용(수동 Gradle).
 - **Android**: `com.google.firebase.firebase-perf` Gradle 플러그인 `2.0.2` (`android/settings.gradle.kts` apply false, `android/app/build.gradle.kts` apply).
 - **iOS**: 이번 범위 미포함. Dart 헬퍼·패키지는 iOS 연동 시 재사용 가능(plist·Firebase iOS 앱은 추후).
-- **자동 수집**: 앱 시작·HTTP(네이티브 스택) 등. Flutter 개별 스크린 렌더는 자동 불가 → 커스텀 트레이스 사용.
+- **자동 수집**: 앱 시작 등. Flutter `package:http` API는 네이티브 자동수집 대상이 아님 → `SudaHttpClient`의 `_PerfMetricHttpClient`(`HttpMetric`)로 Network 탭 수집(dev/prd). URL은 query 제외(엔드포인트 집계용). CDN `CachedNetworkImage` 등은 네이티브 경로면 별도 자동 수집될 수 있음.
 - **커스텀 트레이스**:
   | 이름 | 구간 |
   |------|------|
