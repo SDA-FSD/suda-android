@@ -9,6 +9,7 @@ import '../../config/app_config.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/series_models.dart';
 import '../../services/main_user_sync.dart';
+import '../../services/perf_monitoring_service.dart';
 import '../../services/roleplay_state_service.dart';
 import '../../services/series_state_service.dart';
 import '../../services/suda_api_client.dart';
@@ -107,44 +108,46 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
       return;
     }
 
-    try {
-      setState(() {
-        _isLoading = true;
-        _errorMessage = null;
-        _overview = null;
-        _isSynopsisExpanded = false;
-      });
+    await PerfMonitoringService.instance.trace('series_overview_load', () async {
+      try {
+        setState(() {
+          _isLoading = true;
+          _errorMessage = null;
+          _overview = null;
+          _isSynopsisExpanded = false;
+        });
 
-      if (widget.user != null) {
-        SeriesStateService.instance.setUser(widget.user);
+        if (widget.user != null) {
+          SeriesStateService.instance.setUser(widget.user);
+        }
+
+        _handleFirstOverviewBestEffort(accessToken);
+
+        final overview = await SudaApiClient.getSeriesOverview(
+          accessToken: accessToken,
+          seriesId: widget.seriesId,
+        );
+        if (!mounted) return;
+
+        SeriesStateService.instance.setSeriesOverview(
+          seriesId: widget.seriesId,
+          overview: overview,
+          user: widget.user,
+        );
+
+        setState(() {
+          _overview = overview;
+          _isLoading = false;
+          _scrollToUnlockToken++;
+        });
+      } catch (_) {
+        if (!mounted) return;
+        setState(() {
+          _isLoading = false;
+          _errorMessage = 'Failed to load series overview.';
+        });
       }
-
-      _handleFirstOverviewBestEffort(accessToken);
-
-      final overview = await SudaApiClient.getSeriesOverview(
-        accessToken: accessToken,
-        seriesId: widget.seriesId,
-      );
-      if (!mounted) return;
-
-      SeriesStateService.instance.setSeriesOverview(
-        seriesId: widget.seriesId,
-        overview: overview,
-        user: widget.user,
-      );
-
-      setState(() {
-        _overview = overview;
-        _isLoading = false;
-        _scrollToUnlockToken++;
-      });
-    } catch (_) {
-      if (!mounted) return;
-      setState(() {
-        _isLoading = false;
-        _errorMessage = 'Failed to load series overview.';
-      });
-    }
+    });
   }
 
   String? _complexityIconAsset(String? level) {

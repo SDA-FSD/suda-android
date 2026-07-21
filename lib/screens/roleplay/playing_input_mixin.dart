@@ -12,6 +12,7 @@ import '../../models/series_models.dart';
 import '../../services/series_state_service.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
+import '../../services/perf_monitoring_service.dart';
 import '../../utils/default_toast.dart';
 import '../../widgets/energy_info_popup.dart';
 import '../../widgets/roleplay_mic_button_area.dart';
@@ -107,6 +108,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
 
   /// S2 턴 흐름에서 사용자 발화 준비 시점에 호출 (S1 `_activateUserTurn` 이식).
   void activateUserTurn({bool enableHintButton = true}) {
+    unawaited(PerfMonitoringService.instance.stop('roleplay_screen_ready'));
     _hintUsedThisTurn = !enableHintButton;
     _isInputLocked = false;
     _setUserTurn(true);
@@ -964,38 +966,43 @@ mixin PlayingInputMixin<T extends StatefulWidget>
       _restoreUserTurnAfterSendFailure();
       return;
     }
-    late final RpS2UserMessageResponseDto response;
-    try {
-      response = await SudaApiClient.sendRpS2UserMessageAudio(
-        accessToken: accessToken,
-        rpSessionId: sessionId,
-        audioData: audioData,
-      );
-    } on RpS2InsufficientEnergyException catch (_) {
+    await PerfMonitoringService.instance.trace('roleplay_turn_total', () async {
+      late final RpS2UserMessageResponseDto response;
+      try {
+        response = await PerfMonitoringService.instance.trace(
+          'audio_upload',
+          () => SudaApiClient.sendRpS2UserMessageAudio(
+            accessToken: accessToken,
+            rpSessionId: sessionId,
+            audioData: audioData,
+          ),
+        );
+      } on RpS2InsufficientEnergyException catch (_) {
+        if (!mounted) return;
+        await _showPlayingEnergyBlockedPopup();
+        _restoreUserTurnAfterSendFailure();
+        return;
+      } on RpS2SessionNotFoundException catch (_) {
+        if (!mounted) return;
+        playingSessionNotFoundHandler?.call();
+        return;
+      } catch (e, st) {
+        debugPrint('[DEBUG] S2 user audio request error: $e\n$st');
+        if (!mounted) return;
+        _restoreUserTurnAfterSendFailure();
+        return;
+      }
       if (!mounted) return;
-      await _showPlayingEnergyBlockedPopup();
-      _restoreUserTurnAfterSendFailure();
-      return;
-    } on RpS2SessionNotFoundException catch (_) {
-      if (!mounted) return;
-      playingSessionNotFoundHandler?.call();
-      return;
-    } catch (e, st) {
-      debugPrint('[DEBUG] S2 user audio request error: $e\n$st');
-      if (!mounted) return;
-      _restoreUserTurnAfterSendFailure();
-      return;
-    }
-    if (!mounted) return;
-    onPlayingEnergySpent?.call();
-    _setMicState(_PlayingMicButtonState.disabled);
-    try {
-      await handleRpS2UserMessageResponse?.call(response);
-    } catch (e, st) {
-      debugPrint('[DEBUG] S2 user audio response handling error: $e\n$st');
-      if (!mounted) return;
-      _restoreUserTurnAfterSendFailure();
-    }
+      onPlayingEnergySpent?.call();
+      _setMicState(_PlayingMicButtonState.disabled);
+      try {
+        await handleRpS2UserMessageResponse?.call(response);
+      } catch (e, st) {
+        debugPrint('[DEBUG] S2 user audio response handling error: $e\n$st');
+        if (!mounted) return;
+        _restoreUserTurnAfterSendFailure();
+      }
+    });
   }
 
   Future<void> _sendUserMessageText(String text) async {
@@ -1005,37 +1012,39 @@ mixin PlayingInputMixin<T extends StatefulWidget>
       _restoreUserTurnAfterSendFailure();
       return;
     }
-    late final RpS2UserMessageResponseDto response;
-    try {
-      response = await SudaApiClient.sendRpS2UserMessageText(
-        accessToken: accessToken,
-        rpSessionId: sessionId,
-        text: text,
-      );
-    } on RpS2InsufficientEnergyException catch (_) {
+    await PerfMonitoringService.instance.trace('roleplay_turn_total', () async {
+      late final RpS2UserMessageResponseDto response;
+      try {
+        response = await SudaApiClient.sendRpS2UserMessageText(
+          accessToken: accessToken,
+          rpSessionId: sessionId,
+          text: text,
+        );
+      } on RpS2InsufficientEnergyException catch (_) {
+        if (!mounted) return;
+        await _showPlayingEnergyBlockedPopup();
+        _restoreUserTurnAfterSendFailure();
+        return;
+      } on RpS2SessionNotFoundException catch (_) {
+        if (!mounted) return;
+        playingSessionNotFoundHandler?.call();
+        return;
+      } catch (e, st) {
+        debugPrint('[DEBUG] S2 user text request error: $e\n$st');
+        if (!mounted) return;
+        _restoreUserTurnAfterSendFailure();
+        return;
+      }
       if (!mounted) return;
-      await _showPlayingEnergyBlockedPopup();
-      _restoreUserTurnAfterSendFailure();
-      return;
-    } on RpS2SessionNotFoundException catch (_) {
-      if (!mounted) return;
-      playingSessionNotFoundHandler?.call();
-      return;
-    } catch (e, st) {
-      debugPrint('[DEBUG] S2 user text request error: $e\n$st');
-      if (!mounted) return;
-      _restoreUserTurnAfterSendFailure();
-      return;
-    }
-    if (!mounted) return;
-    onPlayingEnergySpent?.call();
-    try {
-      await handleRpS2UserMessageResponse?.call(response);
-    } catch (e, st) {
-      debugPrint('[DEBUG] S2 user text response handling error: $e\n$st');
-      if (!mounted) return;
-      _restoreUserTurnAfterSendFailure();
-    }
+      onPlayingEnergySpent?.call();
+      try {
+        await handleRpS2UserMessageResponse?.call(response);
+      } catch (e, st) {
+        debugPrint('[DEBUG] S2 user text response handling error: $e\n$st');
+        if (!mounted) return;
+        _restoreUserTurnAfterSendFailure();
+      }
+    });
   }
 
   void _restoreUserTurnAfterSendFailure() {

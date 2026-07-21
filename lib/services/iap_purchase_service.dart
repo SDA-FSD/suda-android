@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import '../api/suda_api_client.dart';
 import '../utils/iap_obfuscated_account_id.dart';
 import 'iap_price_cache.dart';
+import 'perf_monitoring_service.dart';
 
 /// INAPP/SUBS 단건 구매 + 서버 verify.
 ///
@@ -261,6 +262,9 @@ class IapPurchaseService with WidgetsBindingObserver {
       return IapPurchaseResult.storeDismissed;
     }
 
+    // token 확보 전 구간 (스토어 UI·구매 응답까지)
+    await PerfMonitoringService.instance.start('purchase_before_token');
+
     ensureListening();
     final completer = Completer<IapPurchaseResult>();
     _pending = completer;
@@ -273,6 +277,7 @@ class IapPurchaseService with WidgetsBindingObserver {
       final user = await SudaApiClient.getCurrentUser(accessToken: accessToken);
       if (user.id <= 0) {
         _clearPending();
+        await PerfMonitoringService.instance.stop('purchase_before_token');
         return IapPurchaseResult.storeDismissed;
       }
       final obfuscatedAccountId = iapObfuscatedAccountIdFromUserId(user.id);
@@ -280,6 +285,7 @@ class IapPurchaseService with WidgetsBindingObserver {
       final iap = InAppPurchase.instance;
       if (!await iap.isAvailable()) {
         _clearPending();
+        await PerfMonitoringService.instance.stop('purchase_before_token');
         return IapPurchaseResult.unavailable;
       }
 
@@ -287,12 +293,14 @@ class IapPurchaseService with WidgetsBindingObserver {
       if (response.notFoundIDs.contains(productId) ||
           response.productDetails.isEmpty) {
         _clearPending();
+        await PerfMonitoringService.instance.stop('purchase_before_token');
         return IapPurchaseResult.unavailable;
       }
 
       final product = resolveProduct(response.productDetails);
       if (product == null) {
         _clearPending();
+        await PerfMonitoringService.instance.stop('purchase_before_token');
         return IapPurchaseResult.unavailable;
       }
 
@@ -325,11 +333,13 @@ class IapPurchaseService with WidgetsBindingObserver {
 
       if (!launched) {
         _clearPending();
+        await PerfMonitoringService.instance.stop('purchase_before_token');
         return IapPurchaseResult.storeDismissed;
       }
     } catch (e, st) {
       debugPrint('[DEBUG] IapPurchaseService buy failed: $e\n$st');
       _clearPending();
+      await PerfMonitoringService.instance.stop('purchase_before_token');
       return IapPurchaseResult.storeDismissed;
     }
 
@@ -362,6 +372,9 @@ class IapPurchaseService with WidgetsBindingObserver {
           purchase.status == PurchaseStatus.restored) {
         final accessToken = _pendingAccessToken;
         final purchaseToken = _purchaseTokenOf(purchase);
+        // token 확보: before 종료 → after(verify) 시작
+        await PerfMonitoringService.instance.stop('purchase_before_token');
+        await PerfMonitoringService.instance.start('purchase_after_token');
         if (accessToken == null || accessToken.isEmpty) {
           _failPending(IapPurchaseResult.storeDismissed);
           continue;
@@ -398,6 +411,8 @@ class IapPurchaseService with WidgetsBindingObserver {
   void _completePending(IapPurchaseResult result) {
     final completer = _pending;
     _clearPending();
+    unawaited(PerfMonitoringService.instance.stop('purchase_before_token'));
+    unawaited(PerfMonitoringService.instance.stop('purchase_after_token'));
     if (completer != null && !completer.isCompleted) {
       completer.complete(result);
     }

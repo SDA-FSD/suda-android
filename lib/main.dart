@@ -21,6 +21,7 @@ import 'services/version_check_service.dart';
 import 'services/token_refresh_service.dart';
 import 'services/appsflyer_service.dart';
 import 'services/main_user_sync.dart';
+import 'services/perf_monitoring_service.dart';
 import 'screens/login.dart';
 import 'screens/first_cefr_level.dart';
 import 'screens/home.dart';
@@ -75,6 +76,7 @@ void main() async {
 
   // Firebase 초기화 (FlutterNativeSplash 이전에 실행)
   await Firebase.initializeApp();
+  await PerfMonitoringService.instance.configure();
   await AppsflyerService.initialize();
 
   // 푸시 알림으로 앱이 켜진 경우 appPath·notificationId 보관 (로그인/동의 후 Main 진입 시 적용)

@@ -7,6 +7,7 @@ import 'package:marquee/marquee.dart';
 import '../services/rest_status_service.dart';
 import '../services/token_storage.dart';
 import '../services/suda_api_client.dart';
+import '../services/perf_monitoring_service.dart';
 import '../config/app_config.dart';
 import '../routes/series_router.dart';
 import '../utils/language_util.dart';
@@ -122,50 +123,52 @@ class _HomeScreenState extends State<HomeScreen> {
       return;
     }
 
-    try {
-      final home = await SudaApiClient.getHomeContents(
-        accessToken: _accessToken!,
-      );
-      if (!mounted) return;
+    await PerfMonitoringService.instance.trace('home_load', () async {
+      try {
+        final home = await SudaApiClient.getHomeContents(
+          accessToken: _accessToken!,
+        );
+        if (!mounted) return;
 
-      RestStatusService.instance.update(
-        restYn: home.restYn,
-        restStartsAt: home.restStartsAt,
-        restEndsAt: home.restEndsAt,
-        notiboxUnreadYn: home.notiboxUnreadYn,
-      );
+        RestStatusService.instance.update(
+          restYn: home.restYn,
+          restStartsAt: home.restStartsAt,
+          restEndsAt: home.restEndsAt,
+          notiboxUnreadYn: home.notiboxUnreadYn,
+        );
 
-      widget.onHomeContentsLoaded?.call(home);
+        widget.onHomeContentsLoaded?.call(home);
 
-      final banners = home.banners;
-      final groups = home.seriesList;
+        final banners = home.banners;
+        final groups = home.seriesList;
 
-      setState(() {
-        _banners = banners;
-        _seriesGroups = groups;
-        _isLoadingBanners = false;
-        _isLoadingSeriesGroups = false;
-        if (banners.isNotEmpty) {
-          final int initialPage = banners.length * 500;
-          _pageController = PageController(initialPage: initialPage);
-          _currentPage = initialPage % banners.length;
-        }
-        if (groups.isNotEmpty) {
-          _visibleCategoryCount = 1;
-        }
-      });
-
-      if (banners.isNotEmpty) {
-        _preloadAllBanners(banners);
-      }
-    } catch (e) {
-      if (mounted) {
         setState(() {
+          _banners = banners;
+          _seriesGroups = groups;
           _isLoadingBanners = false;
           _isLoadingSeriesGroups = false;
+          if (banners.isNotEmpty) {
+            final int initialPage = banners.length * 500;
+            _pageController = PageController(initialPage: initialPage);
+            _currentPage = initialPage % banners.length;
+          }
+          if (groups.isNotEmpty) {
+            _visibleCategoryCount = 1;
+          }
         });
+
+        if (banners.isNotEmpty) {
+          _preloadAllBanners(banners);
+        }
+      } catch (e) {
+        if (mounted) {
+          setState(() {
+            _isLoadingBanners = false;
+            _isLoadingSeriesGroups = false;
+          });
+        }
       }
-    }
+    });
   }
 
   /// 모든 배너 이미지를 미리 로드

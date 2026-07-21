@@ -15,6 +15,7 @@ import '../../l10n/app_localizations.dart';
 import '../../models/series_models.dart';
 import '../../routes/roleplay_router.dart';
 import '../../services/main_user_sync.dart';
+import '../../services/perf_monitoring_service.dart';
 import '../../services/roleplay_state_service.dart';
 import '../../services/series_state_service.dart';
 import '../../services/token_storage.dart';
@@ -118,6 +119,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
   @override
   void initState() {
     super.initState();
+    unawaited(PerfMonitoringService.instance.start('feedback_screen_ready'));
     _panelMoveController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 700),
@@ -159,6 +161,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
       _keyExpressionSectionEntranceController.value = 1.0;
       _footerFadeController.value = 1.0;
     });
+    unawaited(PerfMonitoringService.instance.stop('feedback_screen_ready'));
   }
 
   @override
@@ -229,6 +232,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
 
     final history = _s2History;
     if (history == null) {
+      unawaited(PerfMonitoringService.instance.stop('feedback_screen_ready'));
       return;
     }
     _playLikeProgressEffect(
@@ -269,6 +273,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
           _effectDone = true;
           _showFooterActions = false;
         });
+        unawaited(PerfMonitoringService.instance.stop('feedback_screen_ready'));
         onEffectCompleted?.call();
       },
     );
@@ -310,6 +315,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
 
   @override
   void dispose() {
+    unawaited(PerfMonitoringService.instance.stop('feedback_screen_ready'));
     _keyExpressionAudioSub?.cancel();
     _keyExpressionAudioSub = null;
     unawaited(_keyExpressionAudioPlayer.dispose());

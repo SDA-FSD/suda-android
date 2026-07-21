@@ -324,6 +324,28 @@
   - `/profile/history/{rpUserHistoryId}`는 `HistoryScreen`으로 진입하며, `GET /rps2/user-histories/{rpUserHistoryId}`로 상세를 조회한다.
   - 지원 경로·정의·신규 스크린 시 확인 절차는 `.docs/CONTEXT_SCREEN.md`의 **appPath (푸시 딥링크 경로)** 섹션을 따른다.
 
+## 10-1. Firebase Performance Monitoring (FPM)
+- **패키지**: `firebase_performance` (`pubspec.yaml`). 초기화: `Firebase.initializeApp()` 직후 `PerfMonitoringService.instance.configure()` (`lib/main.dart`).
+- **헬퍼**: `lib/services/perf_monitoring_service.dart` — `start`/`stop`/`trace`, attribute `env`=`AppConfig.env`. 실패해도 앱 흐름 미차단.
+- **수집 ON/OFF**: **dev·prd만 ON**. **local·stg는 OFF** (`setPerformanceCollectionEnabled(false)`) — 수집·분석 불필요, 유지보수 단순화.
+- **프로젝트 분리**: flavor별 `google-services.json`(dev/prd)로 각 Firebase 프로젝트에 적재. `flutterfire configure` 미사용(수동 Gradle).
+- **Android**: `com.google.firebase.firebase-perf` Gradle 플러그인 `2.0.2` (`android/settings.gradle.kts` apply false, `android/app/build.gradle.kts` apply).
+- **iOS**: 이번 범위 미포함. Dart 헬퍼·패키지는 iOS 연동 시 재사용 가능(plist·Firebase iOS 앱은 추후).
+- **자동 수집**: 앱 시작·HTTP(네이티브 스택) 등. Flutter 개별 스크린 렌더는 자동 불가 → 커스텀 트레이스 사용.
+- **커스텀 트레이스**:
+  | 이름 | 구간 |
+  |------|------|
+  | `home_load` | Home `getHomeContents` |
+  | `series_overview_load` | Series Overview 로드 |
+  | `roleplay_session_start` | Opening `createRpS2Session` → Playing 진입 |
+  | `roleplay_screen_ready` | Playing mount → 첫 `activateUserTurn` |
+  | `roleplay_turn_total` | 사용자 발화 send → 응답 처리 완료(오디오·텍스트) |
+  | `audio_upload` | `sendRpS2UserMessageAudio` (turn 내부 중첩) |
+  | `feedback_screen_ready` | Result mount → Speech Feedback 레이어 준비(`_effectDone`) |
+  | `purchase_before_token` | IAP 시작 → 스토어 purchaseToken 확보(또는 그 전 실패/취소) |
+  | `purchase_after_token` | purchaseToken 확보 직후 → 서버 verify 종료 |
+- **검증**: logcat 태그 `FirebasePerformance`. 콘솔 반영은 수 분~최대 약 12시간 지연 가능.
+
 ## 11. 코드 구조 및 리팩토링
 
 - **main.dart 크기 관리**: 현재 약 227줄 (리팩토링 전 425줄)
@@ -334,6 +356,7 @@
   - `lib/services/app_dialog_service.dart`: 앱 전역 다이얼로그 관리
   - `lib/theme/app_theme.dart`: 앱 전역 테마 설정
   - `lib/services/token_refresh_service.dart`: Access Token 선제 갱신 타이머 및 동시 refresh 단일화
+  - `lib/services/perf_monitoring_service.dart`: Firebase Performance 수집 ON/OFF·커스텀 트레이스 (§10-1)
 - **공통 UI 유틸**:
   - `lib/utils/default_toast.dart`: Overlay 기반 토스트 공통 처리 (배경 #353535/경고 #E4382A 85% 투명도, body-default 흰색, 좌우 패딩 16·세로 패딩 12·minHeight 없음, 하단 60px, 좌우 반원, 가로는 max 90% 디스플레이 내에서 짧은 문구는 콘텐츠 너비에 맞춤·`Align` widthFactor/heightFactor 1). **토스트 pill 탭** 시 표시 타이머를 끊고 **자동 사라짐과 동일한 fade-out**(동일 1초)으로 닫힘; 배경 UI 히트는 막지 않음.
   - 토스트 전체 목록 및 테스트 가이드: `.docs/TOAST_CATALOG.md`

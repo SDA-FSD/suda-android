@@ -10,6 +10,7 @@ import '../../widgets/roleplay_scaffold.dart';
 import '../../services/series_state_service.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
+import '../../services/perf_monitoring_service.dart';
 import '../../utils/default_toast.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../l10n/app_localizations.dart';
@@ -81,6 +82,7 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen> {
       }
 
       try {
+        await PerfMonitoringService.instance.start('roleplay_session_start');
         final session = await SudaApiClient.createRpS2Session(
           accessToken: accessToken,
           seriesId: seriesId,
@@ -116,6 +118,8 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen> {
         }
         DefaultToast.show(context, 'Cannot start roleplay');
         _restoreButton();
+      } finally {
+        await PerfMonitoringService.instance.stop('roleplay_session_start');
       }
     } else {
       if (!context.mounted) return;

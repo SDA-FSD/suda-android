@@ -9,6 +9,7 @@ import '../../routes/roleplay_router.dart';
 import '../../services/series_state_service.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
+import '../../services/perf_monitoring_service.dart';
 import '../../utils/english_level_util.dart';
 import '../../utils/suda_json_util.dart';
 import '../../effects/mission_complete_effect.dart';
@@ -105,6 +106,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     playingAiVoicePlaybackCompletedHandler = _onAiVoicePlaybackCompleted;
     playingSessionNotFoundHandler = onRpS2SessionNotFound;
     deactivateUserTurn();
+    unawaited(PerfMonitoringService.instance.start('roleplay_screen_ready'));
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) startAiOpeningFlow();
     });
@@ -384,6 +386,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
 
   @override
   void dispose() {
+    unawaited(PerfMonitoringService.instance.stop('roleplay_screen_ready'));
     for (final timer in _turnEffectTimers) {
       timer.cancel();
     }
