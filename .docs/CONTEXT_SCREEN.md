@@ -326,7 +326,7 @@
     - 제목: `textTheme.headlineSmall`(H3)·흰색 `foreground` + `BlendMode.softLight`(버튼 fill `#8A38F5→#280752`와 합성). 공간 부족 시 min 10px까지 축소·말줄임·클립 없음, min에서도 넘치면 `FittedBox.scaleDown`
     - 메인 pill fill `#8A38F5→#280752`·stroke `#80D7CF→#8A38F5` (좌→우, 1px padding border), radius height/2
     - Explorar: fill white 3.8%·12px 흰색·conic stroke·padding 4·radius 12(24h pill)
-    - **글로우 애니메이션**: `Stack` 하단 레이어 2개 — 동일 `AnimationController`(6.3s `repeat`, `TweenSequence` 4s 대기 → 300ms `easeOut` → 1s 대기 → 1s `easeInOut` 복귀). **Glow1** 별 중심 ↔ Explorar `r`(없으면 마지막 글자). **Glow2** 알약 버튼 가로 중앙에서 살짝 왼쪽·하단 ↔ 제목 텍스트 시작 X·세로 중간보다 살짝 위. 글로우 소스: `paywall_star_badge.png` + `ImageFilter.blur` σ18, size 56, opacity ~0.62
+    - **글로우 애니메이션**: 속도 기반 떠다님 + 벽 soft bounce. Glow1 별(왼·우향), Glow2 혜택보기(오른·좌향) spawn. vx ~28–42px/s, vy 비율 높게(상하 bounce), wander + 속도 하한으로 제자리 bob 방지. 소스: `paywall_star_badge.png` blur σ10, opacity ~0.55
     - 탭: pill 전체 → `PaywallScreen.push` → 성공 시 `getUserEnergy` 재조회 후 CTA 숨김
     - Profile 탭 활성·복귀 시 `getUserEnergy`로 구독 상태 갱신
 - **Profile 히스토리 (S2)**: `GET /rps2/user-histories?pageNum=` (0-based 페이징). 썸네일 3열 그리드 — `imgPath`·`starResult`·`createdAt`(dd/mm) 기존과 동일. 상단 좌측 **CEFR 알약** + 우측 별 3개. 탭 시 `HistoryScreen(rpUserHistoryId)` → `GET /rps2/user-histories/{id}` 후 Result 본문(애니메이션 없음).

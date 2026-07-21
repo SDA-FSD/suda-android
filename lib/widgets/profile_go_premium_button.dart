@@ -1,6 +1,8 @@
+import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 
 /// Profile 무료 사용자용 Premium CTA (레벨바 아래).
 class ProfileGoPremiumButton extends StatefulWidget {
@@ -32,204 +34,247 @@ class _ProfileGoPremiumButtonState extends State<ProfileGoPremiumButton>
     colors: [Color(0xFF8A38F5), Color(0xFF280752)],
   );
   static const _titleBlendMode = BlendMode.softLight;
-  // 4s 대기 → 0.3s 이동 → 1s 대기 → 1s 복귀 = 6.3s
-  static const _glowCycleDuration = Duration(milliseconds: 6300);
-  static const _glowOpacity = 0.62;
+  static const _glowOpacity = 0.55;
+  static const _glowBlur = 10.0;
+  /// 가로 기본 속도(px/s). 버튼 폭 ~300이면 약 8~11초 횡단.
+  static const _speedMin = 28.0;
+  static const _speedMax = 42.0;
+  /// 세로 속도 비율(가로 대비). 상하 벽 bounce가 자주 나도록 높게.
+  static const _vyRatioMin = 0.65;
+  static const _vyRatioMax = 1.15;
+  /// 벽 반사 시 속도 유지 비율(soft).
+  static const _restitution = 0.88;
+  /// 속도 하한 — 제자리 bob만 남는 것 방지.
+  static const _minSpeed = 22.0;
+  static const _maxSpeed = 52.0;
+  /// 약한 랜덤 조향(두둥실).
+  static const _wanderAccel = 18.0;
+  static const _bobAmplitude = 2.8;
+  static const _bobHz = 0.45;
 
   final GlobalKey _contentStackKey = GlobalKey();
   final GlobalKey _starKey = GlobalKey();
-  final GlobalKey _titleKey = GlobalKey();
   final GlobalKey _exploreKey = GlobalKey();
+  final math.Random _rng = math.Random();
 
-  late final AnimationController _glowController;
-  late final Animation<double> _glowProgress;
+  late final Ticker _ticker;
+  Duration? _lastElapsed;
+  double _elapsedSec = 0;
 
-  Offset _glow1Start = const Offset(14, 25);
-  Offset _glow1End = const Offset(180, 25);
-  Offset _glow2Start = const Offset(80, 30);
-  Offset _glow2End = const Offset(40, 25);
-  bool _anchorsMeasured = false;
+  /// 글로우 중심이 움직일 수 있는 영역 (stack 로컬 좌표).
+  Rect _floatBounds = Rect.zero;
+  bool _boundsMeasured = false;
+  bool _spawned = false;
+
+  late _GlowMote _glow1;
+  late _GlowMote _glow2;
 
   @override
   void initState() {
     super.initState();
-    _glowController = AnimationController(
-      vsync: this,
-      duration: _glowCycleDuration,
-    )..repeat();
-
-    _glowProgress = TweenSequence<double>([
-      // 0~4000ms: 시작 위치 대기
-      TweenSequenceItem(tween: ConstantTween(0.0), weight: 4000),
-      // 4000~4300ms: 목적지로 빠른 이동
-      TweenSequenceItem(
-        tween: Tween<double>(begin: 0.0, end: 1.0)
-            .chain(CurveTween(curve: Curves.easeOut)),
-        weight: 300,
-      ),
-      // 4300~5300ms: 목적지 대기
-      TweenSequenceItem(tween: ConstantTween(1.0), weight: 1000),
-      // 5300~6300ms: 원위치 복귀
-      TweenSequenceItem(
-        tween: Tween<double>(begin: 1.0, end: 0.0)
-            .chain(CurveTween(curve: Curves.easeInOut)),
-        weight: 1000,
-      ),
-    ]).animate(_glowController);
-
-    WidgetsBinding.instance.addPostFrameCallback((_) => _measureGlowAnchors());
+    _glow1 = _GlowMote.idle();
+    _glow2 = _GlowMote.idle();
+    _ticker = createTicker(_onTick)..start();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _measureFloatBounds());
   }
 
   @override
   void dispose() {
-    _glowController.dispose();
+    _ticker.dispose();
     super.dispose();
   }
 
   @override
   void didUpdateWidget(covariant ProfileGoPremiumButton oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.exploreLabel != widget.exploreLabel ||
-        oldWidget.title != widget.title) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => _measureGlowAnchors());
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) => _measureFloatBounds());
   }
 
-  TextStyle _titleMeasureStyle(double fontSize) {
-    final base = Theme.of(context).textTheme.headlineSmall!.copyWith(
-          height: 1.0,
-          color: Colors.white,
-        );
-    return base.copyWith(fontSize: fontSize);
-  }
-
-  double _resolveTitleFontSize(String title, double maxWidth) {
-    var fontSize = Theme.of(context).textTheme.headlineSmall!.fontSize ?? 20;
-    while (fontSize > _titleMinFontSize) {
-      final painter = TextPainter(
-        text: TextSpan(text: title, style: _titleMeasureStyle(fontSize)),
-        textDirection: TextDirection.ltr,
-        maxLines: 1,
-      )..layout();
-      if (painter.width <= maxWidth) break;
-      fontSize -= 0.5;
-    }
-    return fontSize;
-  }
-
-  void _measureGlowAnchors() {
+  void _measureFloatBounds() {
     if (!mounted) return;
 
     final stackContext = _contentStackKey.currentContext;
     final starContext = _starKey.currentContext;
-    final titleContext = _titleKey.currentContext;
     final exploreContext = _exploreKey.currentContext;
     if (stackContext == null ||
         starContext == null ||
-        titleContext == null ||
         exploreContext == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _measureFloatBounds());
       return;
     }
 
     final stackBox = stackContext.findRenderObject() as RenderBox?;
     final starBox = starContext.findRenderObject() as RenderBox?;
-    final titleBox = titleContext.findRenderObject() as RenderBox?;
     final exploreBox = exploreContext.findRenderObject() as RenderBox?;
     if (stackBox == null ||
         starBox == null ||
-        titleBox == null ||
-        exploreBox == null) {
+        exploreBox == null ||
+        !stackBox.hasSize ||
+        starBox.size.isEmpty ||
+        exploreBox.size.isEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _measureFloatBounds());
       return;
     }
 
-    final starCenter = starBox.localToGlobal(
-      starBox.size.center(Offset.zero),
-      ancestor: stackBox,
+    final size = stackBox.size;
+    final inset = _GlowOrb.size * 0.35;
+    final bounds = Rect.fromLTRB(
+      inset,
+      inset * 0.55,
+      math.max(inset + 1, size.width - inset),
+      math.max(inset * 0.55 + 1, size.height - inset * 0.55),
     );
 
-    final title = widget.title;
-    final titleFontSize = _resolveTitleFontSize(title, titleBox.size.width);
-    final titleStyle = _titleMeasureStyle(titleFontSize);
-
-    // Glow 2 시작: 알약 버튼 전체 가로 중앙에서 살짝 왼쪽 + 하단.
-    // Stack은 content padding(좌 20·우 28) 안이라, 알약 전체 중심을 stack 좌표로 보정.
-    final stackSize = stackBox.size;
-    final pillCenterXInStack =
-        (stackSize.width + _contentPadding.left + _contentPadding.right) / 2 -
-            _contentPadding.left;
-    final glow2Start = Offset(
-      pillCenterXInStack - (stackSize.width * 0.08),
-      stackSize.height * 0.82,
+    final starCenter = _clampPoint(
+      starBox.localToGlobal(
+        starBox.size.center(Offset.zero),
+        ancestor: stackBox,
+      ),
+      bounds,
+    );
+    final exploreCenter = _clampPoint(
+      exploreBox.localToGlobal(
+        exploreBox.size.center(Offset.zero),
+        ancestor: stackBox,
+      ),
+      bounds,
     );
 
-    // Glow 2 끝: 제목 텍스트 시작 X + 세로 중간보다 살짝 위.
-    final titlePainter = TextPainter(
-      text: TextSpan(text: title, style: titleStyle),
-      textDirection: TextDirection.ltr,
-      maxLines: 1,
-    )..layout();
-    final titleTextWidth = titlePainter.width;
-    final titleInsetX = (titleBox.size.width - titleTextWidth) / 2;
-    final titleOrigin = titleBox.localToGlobal(Offset.zero, ancestor: stackBox);
-    final glow2End = titleOrigin + Offset(
-      titleInsetX,
-      titleBox.size.height * 0.38,
-    );
-
-    final exploreStyle = Theme.of(context).textTheme.labelSmall!.copyWith(
-          color: Colors.white,
-          fontWeight: FontWeight.w400,
-          fontVariations: const [FontVariation('wght', 400)],
-          height: 1.0,
-        );
-    final label = widget.exploreLabel;
-    final rIndex = label.toLowerCase().indexOf('r');
-    final anchorIndex = rIndex >= 0 ? rIndex : label.length - 1;
-    final prefix = label.substring(0, anchorIndex + 1);
-
-    final prefixPainter = TextPainter(
-      text: TextSpan(text: prefix, style: exploreStyle),
-      textDirection: TextDirection.ltr,
-      maxLines: 1,
-    )..layout();
-
-    final fullPainter = TextPainter(
-      text: TextSpan(text: label, style: exploreStyle),
-      textDirection: TextDirection.ltr,
-      maxLines: 1,
-    )..layout();
-
-    final pillSize = exploreBox.size;
-    final textStartX = (pillSize.width - fullPainter.width) / 2;
-    final textCenterY = pillSize.height / 2;
-
-    final exploreAnchorLocal = Offset(
-      textStartX + prefixPainter.width,
-      textCenterY,
-    );
-    final exploreAnchor = exploreBox.localToGlobal(
-      exploreAnchorLocal,
-      ancestor: stackBox,
-    );
+    // 아직 좌/우로 벌어지지 않았으면(레이아웃 미완료) 다음 프레임에 재시도.
+    if (exploreCenter.dx - starCenter.dx < 48) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _measureFloatBounds());
+      return;
+    }
 
     setState(() {
-      _glow1Start = starCenter;
-      _glow1End = exploreAnchor;
-      _glow2Start = glow2Start;
-      _glow2End = glow2End;
-      _anchorsMeasured = true;
+      _floatBounds = bounds;
+      _boundsMeasured = true;
+      if (!_spawned) {
+        // Glow1: 별(왼쪽)에서 우향 출발
+        // Glow2: 혜택보기(오른쪽)에서 좌향 출발
+        _glow1 = _GlowMote.spawn(
+          at: starCenter,
+          velocity: _initialVelocity(goingRight: true),
+          bobPhase: 0,
+        );
+        _glow2 = _GlowMote.spawn(
+          at: exploreCenter,
+          velocity: _initialVelocity(goingRight: false),
+          bobPhase: math.pi * 0.9,
+        );
+        _spawned = true;
+      } else {
+        _glow1.clampTo(bounds);
+        _glow2.clampTo(bounds);
+      }
     });
   }
 
-  Widget _buildGlowLayer(Offset center) {
+  Offset _clampPoint(Offset point, Rect bounds) {
+    return Offset(
+      point.dx.clamp(bounds.left, bounds.right),
+      point.dy.clamp(bounds.top, bounds.bottom),
+    );
+  }
+
+  Offset _initialVelocity({required bool goingRight}) {
+    final speed = _speedMin + _rng.nextDouble() * (_speedMax - _speedMin);
+    final vyRatio =
+        _vyRatioMin + _rng.nextDouble() * (_vyRatioMax - _vyRatioMin);
+    final vx = goingRight ? speed : -speed;
+    final vy = (_rng.nextBool() ? 1.0 : -1.0) * speed * vyRatio;
+    return Offset(vx, vy);
+  }
+
+  void _onTick(Duration elapsed) {
+    if (!_boundsMeasured || !_spawned || !mounted) {
+      _lastElapsed = elapsed;
+      return;
+    }
+
+    final rawDt = _lastElapsed == null
+        ? 1 / 60
+        : (elapsed - _lastElapsed!).inMicroseconds / 1e6;
+    _lastElapsed = elapsed;
+    final dt = rawDt.clamp(0.0, 1 / 30);
+    _elapsedSec += dt;
+
+    _stepMote(_glow1, dt);
+    _stepMote(_glow2, dt);
+
+    setState(() {});
+  }
+
+  void _stepMote(_GlowMote mote, double dt) {
+    // 약한 랜덤 조향 — 직선 왕복이 아니라 두둥실 드리프트.
+    mote.velocity += Offset(
+      (_rng.nextDouble() - 0.5) * 2 * _wanderAccel * dt,
+      (_rng.nextDouble() - 0.5) * 2 * _wanderAccel * dt,
+    );
+
+    var next = mote.position + mote.velocity * dt;
+    var vx = mote.velocity.dx;
+    var vy = mote.velocity.dy;
+    final b = _floatBounds;
+
+    // 벽 soft bounce: 해당 축 속도 반전·감쇠 + 소량 직교 킥.
+    if (next.dx <= b.left) {
+      next = Offset(b.left, next.dy);
+      vx = vx.abs() * _restitution;
+      vy += (_rng.nextDouble() - 0.5) * 12;
+    } else if (next.dx >= b.right) {
+      next = Offset(b.right, next.dy);
+      vx = -vx.abs() * _restitution;
+      vy += (_rng.nextDouble() - 0.5) * 12;
+    }
+    if (next.dy <= b.top) {
+      next = Offset(next.dx, b.top);
+      vy = vy.abs() * _restitution;
+      vx += (_rng.nextDouble() - 0.5) * 10;
+    } else if (next.dy >= b.bottom) {
+      next = Offset(next.dx, b.bottom);
+      vy = -vy.abs() * _restitution;
+      vx += (_rng.nextDouble() - 0.5) * 10;
+    }
+
+    mote.position = next;
+    mote.velocity = _clampSpeed(Offset(vx, vy));
+  }
+
+  Offset _clampSpeed(Offset v) {
+    final speed = v.distance;
+    if (speed < 1e-6) {
+      // 정지 방지: 약한 랜덤 재가속
+      return _initialVelocity(goingRight: _rng.nextBool());
+    }
+    if (speed < _minSpeed) {
+      return v * (_minSpeed / speed);
+    }
+    if (speed > _maxSpeed) {
+      return v * (_maxSpeed / speed);
+    }
+    return v;
+  }
+
+  Offset _displayCenter(_GlowMote mote) {
+    final bob = math.sin(
+          (_elapsedSec * _bobHz * 2 * math.pi) + mote.bobPhase,
+        ) *
+        _bobAmplitude;
+    return Offset(mote.position.dx, mote.position.dy + bob);
+  }
+
+  Widget _buildGlowLayer(Offset center, double blurSigma) {
     return Transform.translate(
       offset: Offset(
         center.dx - _GlowOrb.size / 2,
         center.dy - _GlowOrb.size / 2,
       ),
       child: Opacity(
-        opacity: _anchorsMeasured ? _glowOpacity : 0.0,
-        child: const _GlowOrb(),
+        opacity: _spawned ? _glowOpacity : 0.0,
+        child: RepaintBoundary(
+          child: _GlowOrb(blurSigma: blurSigma),
+        ),
       ),
     );
   }
@@ -270,22 +315,12 @@ class _ProfileGoPremiumButtonState extends State<ProfileGoPremiumButton>
                     key: _contentStackKey,
                     clipBehavior: Clip.none,
                     children: [
-                      AnimatedBuilder(
-                        animation: _glowProgress,
-                        builder: (context, child) {
-                          final t = _glowProgress.value;
-                          final glow1Center =
-                              Offset.lerp(_glow1Start, _glow1End, t)!;
-                          final glow2Center =
-                              Offset.lerp(_glow2Start, _glow2End, t)!;
-                          return Stack(
-                            clipBehavior: Clip.none,
-                            children: [
-                              _buildGlowLayer(glow1Center),
-                              _buildGlowLayer(glow2Center),
-                            ],
-                          );
-                        },
+                      Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          _buildGlowLayer(_displayCenter(_glow1), _glowBlur),
+                          _buildGlowLayer(_displayCenter(_glow2), _glowBlur),
+                        ],
                       ),
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
@@ -298,16 +333,13 @@ class _ProfileGoPremiumButtonState extends State<ProfileGoPremiumButton>
                           Expanded(
                             child: Align(
                               alignment: Alignment.centerLeft,
-                              child: KeyedSubtree(
-                                key: _titleKey,
-                                child: _ScaledSingleLineText(
-                                  text: widget.title,
-                                  baseStyle: theme.headlineSmall!.copyWith(
-                                    height: 1.0,
-                                  ),
-                                  minFontSize: _titleMinFontSize,
-                                  blendMode: _titleBlendMode,
+                              child: _ScaledSingleLineText(
+                                text: widget.title,
+                                baseStyle: theme.headlineSmall!.copyWith(
+                                  height: 1.0,
                                 ),
+                                minFontSize: _titleMinFontSize,
+                                blendMode: _titleBlendMode,
                               ),
                             ),
                           ),
@@ -330,20 +362,58 @@ class _ProfileGoPremiumButtonState extends State<ProfileGoPremiumButton>
   }
 }
 
-///글로우
+class _GlowMote {
+  Offset position;
+  Offset velocity;
+  double bobPhase;
+
+  _GlowMote({
+    required this.position,
+    required this.velocity,
+    required this.bobPhase,
+  });
+
+  factory _GlowMote.idle() => _GlowMote(
+        position: Offset.zero,
+        velocity: Offset.zero,
+        bobPhase: 0,
+      );
+
+  factory _GlowMote.spawn({
+    required Offset at,
+    required Offset velocity,
+    required double bobPhase,
+  }) {
+    return _GlowMote(
+      position: at,
+      velocity: velocity,
+      bobPhase: bobPhase,
+    );
+  }
+
+  void clampTo(Rect bounds) {
+    position = Offset(
+      position.dx.clamp(bounds.left, bounds.right),
+      position.dy.clamp(bounds.top, bounds.bottom),
+    );
+  }
+}
+
+/// 별 뱃지 에셋을 블러해 빛처럼 보이게 한 글로우.
 class _GlowOrb extends StatelessWidget {
-  const _GlowOrb();
+  const _GlowOrb({required this.blurSigma});
+
+  final double blurSigma;
 
   static const size = 56.0;
-  static const _blurSigma = 18.0;
   static const _asset = 'assets/images/icons/paywall_star_badge.png';
 
   @override
   Widget build(BuildContext context) {
     return ImageFiltered(
       imageFilter: ImageFilter.blur(
-        sigmaX: _blurSigma,
-        sigmaY: _blurSigma,
+        sigmaX: blurSigma,
+        sigmaY: blurSigma,
         tileMode: TileMode.decal,
       ),
       child: Image.asset(
