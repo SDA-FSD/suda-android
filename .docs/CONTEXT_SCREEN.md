@@ -228,9 +228,7 @@
   - S1 단일 롤플레이 Overview. 홈 v2 이후 홈 썸네일 탭은 S2 `SeriesOverviewScreen`으로 진입.
 - **SeriesOverviewScreen** (Sub Screen, **S2**): Home 시리즈 썸네일 탭 시 `SeriesRouter.pushOverview`로 진입. `lib/screens/series/overview.dart`.
   - 진입 시 `GET /rps2/series/{seriesId}/overview` (`SudaApiClient.getSeriesOverview`) → `RpS2SeriesOverviewDto` 파싱.
-  - **레이아웃**(rp overview와 동일 골격): `Scaffold`+`Stack` — 상단 배경 `thumbnailImgPath`(CDN, 너비×**60%** 높이)·히어로 그라데이션·스크롤 본문(`information.png` 24×24(타이틀 **상단** 좌측·탭 → `SeriesInformationScreen`) → 타이틀 `headlineSmall` → gap 4 → `synopsisComplexityLevel` 태그 → 진행률 바 → gap 8 → `synopsis`)·**플로팅 헤더**(좌 뒤로가기 / 우 언어레벨 pill: liquid glass 24h — `ClipRRect` pill, `BackdropFilter` blur 12, white α0.14~0.22 gradient(좌상 밝음/우하 어두움), border white α0.36, shadow blur 10 offset (0,2), `ENGLISH_LEVEL` l10n 라벨, 탭 → `CefrLevelScreen`) 스크롤 시 타이틀 상단 도달하면 fade-out.
-  - **탭**: Episodes(`SeriesEpisodeTabContent`) / Similar Topic(`SeriesSimilarTopicTabContent`, `lib/screens/series/widgets/series_similar_topic_tab_content.dart`). `SudaLabelTabs(maintainState: true)`.
-  - **Similar Topic**: overview `category`로 `GET /v2/home/series?category=&pageNum=` (서버 size≈4). 초기 0·1·2 순차 로드 후 부모 스크롤 하단 근접 시 추가 페이징. 현재 `seriesId` 제외. 3열·gap 10·비율 1.5 cover(Profile History형) + 하단 음영 제목/Marquee(Home형). 탭 → `SeriesRouter.pushOverview`.
+  - **레이아웃**(rp overview와 동일 골격): `Scaffold`+`Stack` — 상단 배경 `thumbnailImgPath`(CDN, 너비×**60%** 높이)·히어로 그라데이션·스크롤 본문(`information.png` 24×24(타이틀 **상단** 좌측·탭 → `SeriesInformationScreen`) → 타이틀 `headlineSmall` → gap 4 → `synopsisComplexityLevel` 태그 → 진행률 바 → gap 8 → `synopsis`)·**플로팅 헤더**(좌 뒤로가기 / 우 언어레벨 pill: liquid glass 24h — `ClipRRect` pill, `BackdropFilter` blur 12, white α0.14~0.22 gradient(좌상 밝음/우하 어두움), border white α0.36, shadow blur 10 offset (0,2), `ENGLISH_LEVEL` l10n 라벨, 탭 → `CefrLevelScreen`) 스크롤 시 타이틀 상단 도달하면 fade-out. §5 이후(에피소드 등) 추후.
 - **SeriesInformationScreen** (Sub Screen, **S2**): Overview information 탭 → `SubScreenRoute` (`lib/screens/series/series_information.dart`). 부모가 로드한 `RpS2SeriesOverviewDto`·`UserDto` 전달(API 재호출 없음). 헤더: Setting 계열 `AppScaffold`(좌 뒤로가기·우측 없음)+커스텀 중앙 title(`headlineSmall`·좌우 inset 40·max 2줄·`bodyTopPadding` 타이틀 높이 연동). 배경: `RoleplayOverviewBackdrop`(thumbnail CDN·Opening과 동일 blur/dim). 본문: synopsis(bodySmall·justify) → gap10 → blockquote(좌 #353535 3px)·언어레벨·주제난이도(scl) → gap20 → 학습목표(headlineSmall) → gap10 → 에피소드별 learningFunction+#N title(gap10)·핵심 표현 불릿(`missions[].keyExpression` **en** 고정, 사용자 언어 미사용).
 
 ### 스크린 내부 구현 특이사항
@@ -264,12 +262,6 @@
     - Firebase Messaging 토큰 획득 후 서버에 전송 (`POST /users/push-token`)
 - **초기화 작업**: `initState()`에서 `_performInitialization()` 호출 (한 번만 실행)
   - `_isInitialized` 플래그로 중복 실행 방지
-- **WelcomeGiftLayer** (`lib/widgets/welcome_gift_layer.dart`):
-  - 조건: `UserDto.metaInfo`에 `WELCOME_GIFT_RECEIVED == 'Y'`가 아니면 노출 (`hasMetaInfoValue`)
-  - 시점: 앱 기동당 1회 (`WelcomeGiftLayerGate.shownThisLaunch`)
-  - UI: 풀스크린. blur(sigma 12)+dim(`0x4D000000`) opacity 0→1(500ms) 후 상·하단 콘텐츠 동시 1s 연출. 상단 반 4등분(맨위 공백·타이틀·이미지×2), 하단 반 3등분(텍스트·버튼·맨아래 공백). 닫기 불가.
-  - Start Now → `PUT /v1/users/grant-welcome-gift` (중복탭 방지·로딩). 200이면 `getCurrentUser`+`MainUserSync`·`getUserEnergy`+`EnergyRefreshBus` 후 숨김. 비-200이면 숨김만(다음 기동 시 재노출).
-  - Lab: Setting > Lab > **Show Welcome Gift Layer** (`previewOnly`, API 미호출)
 - **Props**:
   - `onNavigateToAlarm`: Alarm 화면으로 이동 시 호출되는 콜백
   - `onNavigateToProfile`: Profile 화면으로 이동 시 호출되는 콜백
@@ -326,6 +318,17 @@
     - 프로그레스 바: height 4, radius 2
       - 바탕: `#635F5F`
       - 진행: `#80D7CF` (progressPercentage / 100)
+  - **무료 사용자 Premium CTA** (`SubscriptionStatusCache.isSubscribedActive == false`):
+    - 위치: Progress Box 아래 gap 24, 좌우 margin 20 (`_profileHorizontalMargin`)
+    - 위젯: `ProfileGoPremiumButton` (`lib/widgets/profile_go_premium_button.dart`)
+    - l10n: `profileGoPremiumTitle` / `profileGoPremiumExplore` (en Get SUDA Premium·Explore / pt Assine o SUDA Premium·Explorar / ko SUDA Premium 구독·혜택보기)
+    - 레이아웃: height 52 pill, 내부 padding 좌 20·우 28, Row(아이콘 28×28 + gap 12 + Expanded 제목 + `SizedBox` gap 20 + Explorar 66×24). 혜택보기는 우측 28px 고정, 제목↔혜택보기 간격은 `SizedBox(width: 20)`로 고정(디바이스 무관)
+    - 제목: `textTheme.headlineSmall`(H3)·흰색 `foreground` + `BlendMode.softLight`(버튼 fill `#8A38F5→#280752`와 합성). 공간 부족 시 min 10px까지 축소·말줄임·클립 없음, min에서도 넘치면 `FittedBox.scaleDown`
+    - 메인 pill fill `#8A38F5→#280752`·stroke `#80D7CF→#8A38F5` (좌→우, 1px padding border), radius height/2
+    - Explorar: fill white 3.8%·12px 흰색·conic stroke·padding 4·radius 12(24h pill)
+    - **글로우 애니메이션**: `Stack` 하단 레이어 2개 — 동일 `AnimationController`(6.3s `repeat`, `TweenSequence` 4s 대기 → 300ms `easeOut` → 1s 대기 → 1s `easeInOut` 복귀). **Glow1** 별 중심 ↔ Explorar `r`(없으면 마지막 글자). **Glow2** 알약 버튼 가로 중앙에서 살짝 왼쪽·하단 ↔ 제목 텍스트 시작 X·세로 중간보다 살짝 위. 글로우 소스: `paywall_star_badge.png` + `ImageFilter.blur` σ18, size 56, opacity ~0.62
+    - 탭: pill 전체 → `PaywallScreen.push` → 성공 시 `getUserEnergy` 재조회 후 CTA 숨김
+    - Profile 탭 활성·복귀 시 `getUserEnergy`로 구독 상태 갱신
 - **Profile 히스토리 (S2)**: `GET /rps2/user-histories?pageNum=` (0-based 페이징). 썸네일 3열 그리드 — `imgPath`·`starResult`·`createdAt`(dd/mm) 기존과 동일. 상단 좌측 **CEFR 알약** + 우측 별 3개. 탭 시 `HistoryScreen(rpUserHistoryId)` → `GET /rps2/user-histories/{id}` 후 Result 본문(애니메이션 없음).
 - **Saved 표현 (Expression 탭)**: 목록 `GET /v1/users/expressions?pageNum=` · 카드 탭 TTS `GET /rps2/user-histories/{rpUserHistoryId}/expressions/{expressionIndex}/sound` (`roleplayResultId` → `rpUserHistoryId`, `TtsResultDto`) · 삭제 `DELETE /v1/users/expressions?rpResultId=…&expressionIndex=…`. 카드 배경 기본·재생 모두 `#FFFFFF`. 오디오 fetch 중 16×16 `CircularProgressIndicator`(strokeWidth 2, `#0CABA8` 70%), 재생 중 `megaphone_fill.png` `#0CABA8`, 기본 `megaphone.png` `#0CABA8`(Result Key Expression 카드와 동일).
 - **Saved 표현 삭제 확인 팝업**: Saved 탭의 expression 카드에서 `bookmark_on` 탭 시 `DefaultPopup`으로 삭제 confirm 팝업을 띄운다. 상단 버튼(삭제/Remove) 탭 시 팝업을 닫고 `DELETE /v1/users/expressions`를 호출해 목록에서 제거, 하단 버튼(Practice more/더 연습할래요) 탭 시 팝업만 닫는다.
