@@ -153,6 +153,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountDeleteAction => 'Delete';
 
   @override
+  String get accountSubscription => 'Subscription';
+
+  @override
+  String get accountFreePlanTitle => 'Free Plan';
+
+  @override
+  String get accountFreePlanSubtitle => 'Get Premium to unlock more features';
+
+  @override
   String get cefrLevelTitle => 'Choose your English level';
 
   @override

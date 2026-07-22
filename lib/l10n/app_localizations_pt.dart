@@ -154,6 +154,16 @@ class AppLocalizationsPt extends AppLocalizations {
   String get accountDeleteAction => 'Excluir';
 
   @override
+  String get accountSubscription => 'Assinatura';
+
+  @override
+  String get accountFreePlanTitle => 'Plano Gratuito';
+
+  @override
+  String get accountFreePlanSubtitle =>
+      'Assine o Premium para desbloquear mais recursos';
+
+  @override
   String get cefrLevelTitle => 'Escolha seu nível de inglês';
 
   @override

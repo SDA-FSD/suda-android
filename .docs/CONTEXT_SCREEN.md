@@ -407,14 +407,11 @@
 - **SettingScreen**: "Account" 클릭 시
 
 ### 스크린 내부 구현 특이사항
-- 배경색: RGB(51, 51, 51) - SettingScreen 대비 10% 밝기 증가
-- 우측 상단 X 버튼 필수
-- 콘텐츠 구성: 서버 공시 페이지와 유사한 섹션형 레이아웃
-  - 상단 안내문: "This page provides information on some of the open-source libraries and their licenses used in the SUDA app."
-  - 라이선스별 섹션 + 라이선스 URL + 패키지/버전 목록 표시
-  - 현재 공시 범위는 앱 코드(Flutter 앱 직접 의존성) 기준
-- 키보드 활성화 시 `AccountScreen`은 `resizeToAvoidBottomInset: false`로 유지  
-  (하단 "계정 삭제" 텍스트 버튼이 키보드와 함께 따라 올라오는 현상 방지)
+- 배경색: Setting Sub Screen 공통. 우측 상단 X / 좌상단 뒤로가기(AppScaffold)
+- 콘텐츠: 프로필 이미지(탭 시 삭제 confirm) → Name 편집 → Account(이메일) → **Subscription(무료만)** → Delete Account
+- **무료 Subscription** (`!SubscriptionStatusCache.isSubscribedActive`): 라벨 `accountSubscription` + 카드(체크 `check_green.svg` fill `#054544`, Free Plan 제목/부제, `closing_angle_bracket.png`). 탭 → `PaywallScreen.push` → `true`면 energy detail 재조회 후 카드 숨김. **프리미엄 구독 UI는 별도 작업.**
+- 키보드 활성화 시 `resizeToAvoidBottomInset: false` (하단 Delete가 키보드와 함께 올라오지 않도록)
+- 계정 삭제 / 프로필 이미지 삭제: bottom-up confirm 레이어
 
 ---
 

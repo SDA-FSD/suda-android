@@ -364,6 +364,24 @@ abstract class AppLocalizations {
   /// **'Delete'**
   String get accountDeleteAction;
 
+  /// No description provided for @accountSubscription.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription'**
+  String get accountSubscription;
+
+  /// No description provided for @accountFreePlanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Free Plan'**
+  String get accountFreePlanTitle;
+
+  /// No description provided for @accountFreePlanSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Get Premium to unlock more features'**
+  String get accountFreePlanSubtitle;
+
   /// No description provided for @cefrLevelTitle.
   ///
   /// In en, this message translates to:
