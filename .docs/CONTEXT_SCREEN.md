@@ -239,7 +239,7 @@
 - **UI 구성**: `AppScaffold`를 사용하여 표준 레이아웃 적용
   - **상단 여백**: 70 (표준)
   - **헤더**:
-    - 좌측: "Hi, {userName}!" 인사말 (`AppScaffold.title` 사용)
+    - 좌측: "Hi, {userName}!" 인사말 (`AppScaffold.title`). 프리미엄만 이름 우측 gap 8 + `premium_verified_badge.png` 18×18 (`titleTrailing`). 판별은 우상단 `EnergyHeaderBadge`와 **동일** `UserEnergyDto.isSubscribedActiveAt` (`onEnergyChanged`)
   - **메인 콘텐츠**:
     - **홈 배너**: 
       - 위치: 상단 여백 70 바로 아래

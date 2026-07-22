@@ -17,7 +17,7 @@ import 'endpoints/roleplay_api.dart';
 import 'endpoints/series_api.dart';
 import 'endpoints/user_api.dart';
 import 'endpoints/version_api.dart';
-import '../services/subscription_status_cache.dart';
+import '../services/energy_refresh_bus.dart';
 
 class SudaApiClient {
   static Future<HomeDto> getHomeContents({required String accessToken}) {
@@ -321,7 +321,8 @@ class SudaApiClient {
 
   static Future<UserEnergyDto> getUserEnergy({required String accessToken}) async {
     final dto = await UserApi.getUserEnergy(accessToken: accessToken);
-    SubscriptionStatusCache.apply(dto);
+    // 캐시 + 리스너(Home 프리미엄 뱃지 등) 동시 갱신
+    EnergyRefreshBus.instance.notify(dto);
     return dto;
   }
 

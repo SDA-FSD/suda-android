@@ -59,6 +59,8 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _bannerTimerStarted = false; // 타이머 시작 여부 플래그
   int _visibleCategoryCount = 0; // 현재 렌더링 허용된 카테고리 개수
   bool _showWelcomeGift = false;
+  /// 우상단 번개(`energy_sub`)와 동일 소스 — EnergyHeaderBadge onEnergyChanged.
+  bool _isPremium = false;
 
   @override
   void initState() {
@@ -68,6 +70,12 @@ class _HomeScreenState extends State<HomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _maybeShowWelcomeGift();
     });
+  }
+
+  void _onHomeEnergyChanged(UserEnergyDto energy) {
+    final premium = energy.isSubscribedActiveAt(DateTime.now().toUtc());
+    if (!mounted || premium == _isPremium) return;
+    setState(() => _isPremium = premium);
   }
 
   @override
@@ -255,12 +263,23 @@ class _HomeScreenState extends State<HomeScreen> {
           titleStyle: Theme.of(
             context,
           ).textTheme.headlineSmall?.copyWith(color: Colors.white),
+          titleTrailing: _isPremium
+              ? Transform.translate(
+                  offset: const Offset(0, 1),
+                  child: Image.asset(
+                    'assets/images/icons/premium_verified_badge.png',
+                    width: 18,
+                    height: 18,
+                  ),
+                )
+              : null,
           usePadding: false, // 배너 풀-폭 유지를 위해 본문 패딩 제거
           actions: [
             EnergyHeaderBadge(
               refreshCounter: widget.homeTabSelectedCounter,
               registerEnergyBadgeAnchor: true,
               active: widget.isActive,
+              onEnergyChanged: _onHomeEnergyChanged,
             ),
           ],
           bottomNavigationBar: GnbBar(

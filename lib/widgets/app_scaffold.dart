@@ -14,6 +14,8 @@ class AppScaffold extends StatelessWidget {
   final Widget body;
   final String? title; // 헤더 좌측 상단에 표시될 보조 타이틀 (caption 스타일)
   final TextStyle? titleStyle; // 헤더 타이틀의 커스텀 스타일
+  /// 타이틀 우측 trailing (예: 프리미엄 뱃지). `title`이 있을 때만 사용.
+  final Widget? titleTrailing;
   final String? centerTitle; // 헤더 중앙에 표시될 메인 타이틀 (h2 스타일)
   final TextStyle? centerTitleStyle; // 헤더 중앙 타이틀 커스텀 스타일
   final double bodyTopPadding; // 본문 시작 상단 패딩
@@ -33,6 +35,7 @@ class AppScaffold extends StatelessWidget {
     required this.body,
     this.title,
     this.titleStyle,
+    this.titleTrailing,
     this.centerTitle,
     this.centerTitleStyle,
     this.bodyTopPadding = 70,
@@ -98,11 +101,32 @@ class AppScaffold extends StatelessWidget {
                   Positioned(
                     top: 16,
                     left: showBackButton || leading != null ? 56 : 16,
-                    child: Text(
-                      title!,
-                      style: titleStyle ??
-                          theme.bodySmall?.copyWith(color: Colors.white),
-                    ),
+                    right: actions != null ? 88 : 16,
+                    child: titleTrailing == null
+                        ? Text(
+                            title!,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: titleStyle ??
+                                theme.bodySmall?.copyWith(color: Colors.white),
+                          )
+                        : Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  title!,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: titleStyle ??
+                                      theme.bodySmall
+                                          ?.copyWith(color: Colors.white),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              titleTrailing!,
+                            ],
+                          ),
                   ),
 
                 // 좌측 상단 버튼
