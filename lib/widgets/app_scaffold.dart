@@ -21,6 +21,8 @@ class AppScaffold extends StatelessWidget {
   final Widget? leading; // 좌측 상단 버튼 (커스텀이 필요할 경우)
   final List<Widget>? actions; // 우측 상단에 표시될 버튼들
   final Color backgroundColor;
+  /// 상태바·헤더 뒤까지 full-bleed. SafeArea **밖**에 그려 시계/배터리 영역까지 확장.
+  final Widget? background;
   final bool usePadding; // 본문 영역에 기본 24 패딩을 적용할지 여부
   final bool showBackButton; // 좌측 상단 뒤로가기 버튼 표시 여부 (기본 true)
   final Widget? bottomNavigationBar; // 하단 네비게이션 바 (메인 스크린용)
@@ -38,6 +40,7 @@ class AppScaffold extends StatelessWidget {
     this.leading,
     this.actions,
     this.backgroundColor = const Color(0xFF121212),
+    this.background,
     this.usePadding = true,
     this.showBackButton = true,
     this.bottomNavigationBar,
@@ -52,76 +55,87 @@ class AppScaffold extends StatelessWidget {
       backgroundColor: backgroundColor,
       resizeToAvoidBottomInset: resizeToAvoidBottomInset,
       // GNB는 body 위에 오버레이로 배치하므로 Scaffold의 bottomNavigationBar는 사용하지 않음
-      body: SafeArea(
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            // 1. 본문 영역 (상단 70, 좌우 24 마진 적용) — GNB 아래까지 확장(본문이 GNB 위를 덮는 구조)
-            Padding(
-              padding: EdgeInsets.only(
-                top: bodyTopPadding,
-                left: usePadding ? 24 : 0,
-                right: usePadding ? 24 : 0,
-              ),
-              child: body,
-            ),
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          // 0. 선택 배경 — SafeArea 밖(상태바 뒤 포함)
+          if (background != null)
+            Positioned.fill(child: background!),
 
-            // 2. 헤더 중앙 제목 (h2 스타일)
-            if (centerTitle != null)
-              Positioned(
-                top: centerTitleTop,
-                left: 0,
-                right: 0,
-                child: Center(
-                  child: Text(
-                    centerTitle!,
-                    style:
-                        centerTitleStyle ??
-                        theme.headlineMedium?.copyWith(color: Colors.white),
+          // 1. 콘텐츠·헤더·GNB (SafeArea)
+          SafeArea(
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                // 본문 영역 (상단 70, 좌우 24 마진 적용) — GNB 아래까지 확장
+                Padding(
+                  padding: EdgeInsets.only(
+                    top: bodyTopPadding,
+                    left: usePadding ? 24 : 0,
+                    right: usePadding ? 24 : 0,
                   ),
+                  child: body,
                 ),
-              ),
 
-            // 3. 헤더 타이틀 (좌측 상단 16, 16 - 뒤로가기 버튼이 없을 때나 보조로 사용)
-            if (title != null)
-              Positioned(
-                top: 16,
-                left: showBackButton || leading != null ? 56 : 16, // 뒤로가기 버튼 공간 고려
-                child: Text(
-                  title!,
-                  style: titleStyle ?? theme.bodySmall?.copyWith(color: Colors.white),
-                ),
-              ),
+                // 헤더 중앙 제목 (h2 스타일)
+                if (centerTitle != null)
+                  Positioned(
+                    top: centerTitleTop,
+                    left: 0,
+                    right: 0,
+                    child: Center(
+                      child: Text(
+                        centerTitle!,
+                        style:
+                            centerTitleStyle ??
+                            theme.headlineMedium?.copyWith(color: Colors.white),
+                      ),
+                    ),
+                  ),
 
-            // 4. 좌측 상단 버튼 (뒤로가기 화살표 등)
-            if (showBackButton || leading != null)
-              Positioned(
-                top: 16,
-                left: 16,
-                child: leading ?? backButton(context),
-              ),
+                // 헤더 타이틀 (좌측 상단)
+                if (title != null)
+                  Positioned(
+                    top: 16,
+                    left: showBackButton || leading != null ? 56 : 16,
+                    child: Text(
+                      title!,
+                      style: titleStyle ??
+                          theme.bodySmall?.copyWith(color: Colors.white),
+                    ),
+                  ),
 
-            // 5. 헤더 액션 버튼들 (우측 상단 16, 16)
-            if (actions != null)
-              Positioned(
-                top: 16,
-                right: 16,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: actions!,
-                ),
-              ),
+                // 좌측 상단 버튼
+                if (showBackButton || leading != null)
+                  Positioned(
+                    top: 16,
+                    left: 16,
+                    child: leading ?? backButton(context),
+                  ),
 
-            // 6. GNB — 본문 위에 덮는 형태 (playing 슬라이더와 동일한 투명+블러는 각 화면 _buildGNB에서 적용)
-            if (bottomNavigationBar != null)
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: bottomNavigationBar!,
-              ),
-          ],
-        ),
+                // 헤더 액션 버튼들
+                if (actions != null)
+                  Positioned(
+                    top: 16,
+                    right: 16,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: actions!,
+                    ),
+                  ),
+
+                // GNB
+                if (bottomNavigationBar != null)
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: bottomNavigationBar!,
+                  ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

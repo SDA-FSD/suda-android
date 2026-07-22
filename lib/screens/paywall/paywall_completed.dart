@@ -95,7 +95,7 @@ class PaywallCompletedScreen extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Image.asset(
-                      'assets/images/icons/premium_unlocked_check.png',
+                      'assets/images/icons/premium_verified_badge.png',
                       width: 130,
                       height: 130,
                     ),

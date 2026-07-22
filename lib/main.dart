@@ -66,9 +66,12 @@ void main() async {
   // 앱 방향을 세로로 고정
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
-  // 시스템 네비게이션 바 색상을 앱 기본 배경(#121212)과 통일
+  // 시스템 네비게이션/상태바 — 앱 기본 배경과 통일, 상태바는 투명(화면 배경이 비치도록)
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.light,
+      statusBarBrightness: Brightness.dark, // iOS: 밝은 아이콘
       systemNavigationBarColor: Color(0xFF121212),
       systemNavigationBarIconBrightness: Brightness.light,
     ),
