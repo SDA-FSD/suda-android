@@ -969,6 +969,144 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Start Now'**
   String get welcomeGiftStartNow;
+
+  /// No description provided for @paywallHeroTitle1.
+  ///
+  /// In en, this message translates to:
+  /// **'Practice More'**
+  String get paywallHeroTitle1;
+
+  /// No description provided for @paywallHeroTitle2.
+  ///
+  /// In en, this message translates to:
+  /// **'Improve Faster'**
+  String get paywallHeroTitle2;
+
+  /// No description provided for @paywallHeroBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Practice longer with Premium and get AI feedback to build your English confidence.'**
+  String get paywallHeroBody;
+
+  /// No description provided for @paywallPremiumLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'PREMIUM'**
+  String get paywallPremiumLabel;
+
+  /// No description provided for @paywallBenefitDailyPractice.
+  ///
+  /// In en, this message translates to:
+  /// **'More Daily Practice'**
+  String get paywallBenefitDailyPractice;
+
+  /// No description provided for @paywallBenefitMaxEnergy.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to 30 Max Energy'**
+  String get paywallBenefitMaxEnergy;
+
+  /// No description provided for @paywallBenefitAiFeedback.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Sentence Feedback'**
+  String get paywallBenefitAiFeedback;
+
+  /// No description provided for @paywallChoosePlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Your Plan'**
+  String get paywallChoosePlan;
+
+  /// No description provided for @paywallAnnualPlanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Annual Plan'**
+  String get paywallAnnualPlanTitle;
+
+  /// No description provided for @paywallAnnualPlanSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Save over 33% compared to the monthly plan.'**
+  String get paywallAnnualPlanSubtitle;
+
+  /// No description provided for @paywallMonthlyPlanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly Plan'**
+  String get paywallMonthlyPlanTitle;
+
+  /// No description provided for @paywallMonthlyPlanSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Flexible monthly access.'**
+  String get paywallMonthlyPlanSubtitle;
+
+  /// No description provided for @paywallBestBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'BEST'**
+  String get paywallBestBadge;
+
+  /// No description provided for @paywallCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Now'**
+  String get paywallCta;
+
+  /// No description provided for @paywallAutoRenewNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscriptions renew automatically unless canceled at least 24 hours before the end of the current billing period.'**
+  String get paywallAutoRenewNotice;
+
+  /// No description provided for @paywallPricePerMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'{price}/month'**
+  String paywallPricePerMonth(String price);
+
+  /// No description provided for @paywallPricePerYear.
+  ///
+  /// In en, this message translates to:
+  /// **'{price}/year'**
+  String paywallPricePerYear(String price);
+
+  /// No description provided for @paywallFallbackAnnualPerMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'\$8.33'**
+  String get paywallFallbackAnnualPerMonth;
+
+  /// No description provided for @paywallFallbackAnnual.
+  ///
+  /// In en, this message translates to:
+  /// **'\$99.99'**
+  String get paywallFallbackAnnual;
+
+  /// No description provided for @paywallFallbackMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'\$13.99'**
+  String get paywallFallbackMonthly;
+
+  /// No description provided for @paywallCompletedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Congratulations!'**
+  String get paywallCompletedTitle;
+
+  /// No description provided for @paywallCompletedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Premium benefits are now active.'**
+  String get paywallCompletedBody;
+
+  /// No description provided for @paywallCompletedContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get paywallCompletedContinue;
 }
 
 class _AppLocalizationsDelegate

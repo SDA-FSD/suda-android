@@ -473,4 +473,80 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get welcomeGiftStartNow => 'Start Now';
+
+  @override
+  String get paywallHeroTitle1 => 'Practice More';
+
+  @override
+  String get paywallHeroTitle2 => 'Improve Faster';
+
+  @override
+  String get paywallHeroBody =>
+      'Practice longer with Premium and get AI feedback to build your English confidence.';
+
+  @override
+  String get paywallPremiumLabel => 'PREMIUM';
+
+  @override
+  String get paywallBenefitDailyPractice => 'More Daily Practice';
+
+  @override
+  String get paywallBenefitMaxEnergy => 'Up to 30 Max Energy';
+
+  @override
+  String get paywallBenefitAiFeedback => 'AI Sentence Feedback';
+
+  @override
+  String get paywallChoosePlan => 'Choose Your Plan';
+
+  @override
+  String get paywallAnnualPlanTitle => 'Annual Plan';
+
+  @override
+  String get paywallAnnualPlanSubtitle =>
+      'Save over 33% compared to the monthly plan.';
+
+  @override
+  String get paywallMonthlyPlanTitle => 'Monthly Plan';
+
+  @override
+  String get paywallMonthlyPlanSubtitle => 'Flexible monthly access.';
+
+  @override
+  String get paywallBestBadge => 'BEST';
+
+  @override
+  String get paywallCta => 'Start Now';
+
+  @override
+  String get paywallAutoRenewNotice =>
+      'Subscriptions renew automatically unless canceled at least 24 hours before the end of the current billing period.';
+
+  @override
+  String paywallPricePerMonth(String price) {
+    return '$price/month';
+  }
+
+  @override
+  String paywallPricePerYear(String price) {
+    return '$price/year';
+  }
+
+  @override
+  String get paywallFallbackAnnualPerMonth => '\$8.33';
+
+  @override
+  String get paywallFallbackAnnual => '\$99.99';
+
+  @override
+  String get paywallFallbackMonthly => '\$13.99';
+
+  @override
+  String get paywallCompletedTitle => 'Congratulations!';
+
+  @override
+  String get paywallCompletedBody => 'Your Premium benefits are now active.';
+
+  @override
+  String get paywallCompletedContinue => 'Continue';
 }

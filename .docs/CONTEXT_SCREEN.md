@@ -967,10 +967,11 @@
 
 ### 스크린 내부 구현 특이사항
 - **결제**: `IapPurchaseService.purchaseSubscription` (`bp-premium-monthly`/`bp-premium-yearly`). CTA `_purchasing` lock. dispose 시 `abandonPendingPurchase`.
-- **가격**: 스토어. 월간 `price/mês`. 연간 메인 `rawPrice/12` 포맷+`/mês`, 서브 yearly+`/ano`. 미조회 시 하드코딩 폴백.
+- **가격**: 스토어. 월간·연간(월환산) `paywallPricePerMonth`(`/month`·`/mês`·`/월`), 연간 총액 `paywallPricePerYear`(`/year`·`/ano`·`/연`). 미조회 시 `paywallFallback*` 금액.
 - **verify N**: 실패 토스트·유지. **pending Y**: 승인대기 토스트+`pop(true)`. **성공**: Completed push 후 Paywall `pop(true)`.
-- **CTA**: Assinar agora → 결제. Terms/Privacy → WebView. X = pop
-- **UI**: 배경 그라데이션·glow·PREMIUM 카드·플랜 카드·MELHOR 등 기존 레이아웃 유지.
+- **CTA**: `paywallCta` → 결제. Terms/Privacy → WebView(`settingsTerms`/`settingsPrivacy`). X = pop
+- **UI**: 배경 그라데이션·glow·PREMIUM 카드·플랜 카드·BEST/MELHOR 뱃지 등 기존 레이아웃 유지.
+- **l10n**: `paywallHero*`·`paywallPremiumLabel`·`paywallBenefit*`·`paywallChoosePlan`·`paywallAnnual*`·`paywallMonthly*`·`paywallBestBadge`·`paywallCta`·`paywallAutoRenewNotice`·가격 suffix/fallback (en/pt/ko).
 
 ---
 
@@ -991,12 +992,12 @@
 - **LabScreen**: Open Paywall Completed (preview)
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
-- Continuar/X → `pop(true)` → Paywall이 `pop(true)` → 에너지 팝업 Go Premium 제거 애니 + detail 재조회
+- Continue/X → `pop(true)` → Paywall이 `pop(true)` → 에너지 팝업 Go Premium 제거 애니 + detail 재조회
 
 ### 스크린 내부 구현 특이사항
 - **배경 그라디언트**: Paywall과 동일. glow `#AB6AFF` 등 기존 스펙 유지.
 - **아이콘**: `premium_verified_badge.png` / 혜택 `white_check_icon.png`
-- **문구/버튼**: PT 하드코딩(l10n 추후). CTA `Continuar`
+- **문구/버튼**: l10n `paywallCompletedTitle`·`paywallCompletedBody`·`paywallCompletedContinue` + 혜택 3줄은 Paywall `paywallBenefit*` 재사용 (en/pt/ko)
 
 ---
 

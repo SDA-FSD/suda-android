@@ -477,4 +477,80 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get welcomeGiftStartNow => 'Começar Agora';
+
+  @override
+  String get paywallHeroTitle1 => 'Pratique Mais';
+
+  @override
+  String get paywallHeroTitle2 => 'Aprenda Conversando';
+
+  @override
+  String get paywallHeroBody =>
+      'Pratique por mais tempo com o Premium e receba feedback da IA para evoluir no inglês.';
+
+  @override
+  String get paywallPremiumLabel => 'PREMIUM';
+
+  @override
+  String get paywallBenefitDailyPractice => 'Mais prática todos os dias';
+
+  @override
+  String get paywallBenefitMaxEnergy => 'Energia máxima de 30';
+
+  @override
+  String get paywallBenefitAiFeedback => 'Feedback da IA sobre frases';
+
+  @override
+  String get paywallChoosePlan => 'Escolha seu plano';
+
+  @override
+  String get paywallAnnualPlanTitle => 'Plano Anual';
+
+  @override
+  String get paywallAnnualPlanSubtitle =>
+      'Economize 33% em relação ao plano mensal.';
+
+  @override
+  String get paywallMonthlyPlanTitle => 'Plano Mensal';
+
+  @override
+  String get paywallMonthlyPlanSubtitle => 'Acesso mensal com flexibilidade.';
+
+  @override
+  String get paywallBestBadge => 'MELHOR';
+
+  @override
+  String get paywallCta => 'Assinar agora';
+
+  @override
+  String get paywallAutoRenewNotice =>
+      'A assinatura é renovada automaticamente, a menos que seja cancelada com pelo menos 24 horas de antecedência do fim do período de cobrança atual.';
+
+  @override
+  String paywallPricePerMonth(String price) {
+    return '$price/mês';
+  }
+
+  @override
+  String paywallPricePerYear(String price) {
+    return '$price/ano';
+  }
+
+  @override
+  String get paywallFallbackAnnualPerMonth => 'R\$16,66';
+
+  @override
+  String get paywallFallbackAnnual => 'R\$199,99';
+
+  @override
+  String get paywallFallbackMonthly => 'R\$24,99';
+
+  @override
+  String get paywallCompletedTitle => 'Parabéns!';
+
+  @override
+  String get paywallCompletedBody => 'Seus benefícios Premium já estão ativos.';
+
+  @override
+  String get paywallCompletedContinue => 'Continuar';
 }

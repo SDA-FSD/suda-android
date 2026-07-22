@@ -182,5 +182,42 @@
   "welcomeGiftBenefitLead": "Enjoy unlimited play for 10 minutes!",
   "welcomeGiftLine2": "Premium features unlocked",
   "welcomeGiftLine3": "Unlimited play unlocked",
-  "welcomeGiftStartNow": "Start Now"
+  "welcomeGiftStartNow": "Start Now",
+  "paywallHeroTitle1": "Practice More",
+  "paywallHeroTitle2": "Improve Faster",
+  "paywallHeroBody": "Practice longer with Premium and get AI feedback to build your English confidence.",
+  "paywallPremiumLabel": "PREMIUM",
+  "paywallBenefitDailyPractice": "More Daily Practice",
+  "paywallBenefitMaxEnergy": "Up to 30 Max Energy",
+  "paywallBenefitAiFeedback": "AI Sentence Feedback",
+  "paywallChoosePlan": "Choose Your Plan",
+  "paywallAnnualPlanTitle": "Annual Plan",
+  "paywallAnnualPlanSubtitle": "Save over 33% compared to the monthly plan.",
+  "paywallMonthlyPlanTitle": "Monthly Plan",
+  "paywallMonthlyPlanSubtitle": "Flexible monthly access.",
+  "paywallBestBadge": "BEST",
+  "paywallCta": "Start Now",
+  "paywallAutoRenewNotice": "Subscriptions renew automatically unless canceled at least 24 hours before the end of the current billing period.",
+  "paywallPricePerMonth": "{price}/month",
+  "@paywallPricePerMonth": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallPricePerYear": "{price}/year",
+  "@paywallPricePerYear": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallFallbackAnnualPerMonth": "$8.33",
+  "paywallFallbackAnnual": "$99.99",
+  "paywallFallbackMonthly": "$13.99",
+  "paywallCompletedTitle": "Congratulations!",
+  "paywallCompletedBody": "Your Premium benefits are now active.",
+  "paywallCompletedContinue": "Continue"
 }

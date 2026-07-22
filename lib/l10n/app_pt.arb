@@ -182,5 +182,42 @@
   "welcomeGiftBenefitLead": "Aproveite grátis por 10 minutos!",
   "welcomeGiftLine2": "Recursos Premium liberados",
   "welcomeGiftLine3": "Jogo Ilimitado liberado",
-  "welcomeGiftStartNow": "Começar Agora"
+  "welcomeGiftStartNow": "Começar Agora",
+  "paywallHeroTitle1": "Pratique Mais",
+  "paywallHeroTitle2": "Aprenda Conversando",
+  "paywallHeroBody": "Pratique por mais tempo com o Premium e receba feedback da IA para evoluir no inglês.",
+  "paywallPremiumLabel": "PREMIUM",
+  "paywallBenefitDailyPractice": "Mais prática todos os dias",
+  "paywallBenefitMaxEnergy": "Energia máxima de 30",
+  "paywallBenefitAiFeedback": "Feedback da IA sobre frases",
+  "paywallChoosePlan": "Escolha seu plano",
+  "paywallAnnualPlanTitle": "Plano Anual",
+  "paywallAnnualPlanSubtitle": "Economize 33% em relação ao plano mensal.",
+  "paywallMonthlyPlanTitle": "Plano Mensal",
+  "paywallMonthlyPlanSubtitle": "Acesso mensal com flexibilidade.",
+  "paywallBestBadge": "MELHOR",
+  "paywallCta": "Assinar agora",
+  "paywallAutoRenewNotice": "A assinatura é renovada automaticamente, a menos que seja cancelada com pelo menos 24 horas de antecedência do fim do período de cobrança atual.",
+  "paywallPricePerMonth": "{price}/mês",
+  "@paywallPricePerMonth": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallPricePerYear": "{price}/ano",
+  "@paywallPricePerYear": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallFallbackAnnualPerMonth": "R$16,66",
+  "paywallFallbackAnnual": "R$199,99",
+  "paywallFallbackMonthly": "R$24,99",
+  "paywallCompletedTitle": "Parabéns!",
+  "paywallCompletedBody": "Seus benefícios Premium já estão ativos.",
+  "paywallCompletedContinue": "Continuar"
 }

@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../utils/full_screen_route.dart';
 
 class PaywallCompletedScreen extends StatelessWidget {
@@ -33,6 +34,7 @@ class PaywallCompletedScreen extends StatelessWidget {
     final size = MediaQuery.sizeOf(context);
     final topPad = MediaQuery.paddingOf(context).top;
     final textTheme = Theme.of(context).textTheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: const Color(0xFF8A38F5),
@@ -89,91 +91,92 @@ class PaywallCompletedScreen extends StatelessWidget {
                 ),
               ),
               Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Image.asset(
-                      'assets/images/icons/premium_verified_badge.png',
-                      width: 130,
-                      height: 130,
-                    ),
-                    const SizedBox(height: 24),
-                    Text(
-                      'Parabéns!',
-                      textAlign: TextAlign.center,
-                      style: textTheme.headlineLarge?.copyWith(
-                        color: Colors.white,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Image.asset(
+                        'assets/images/icons/premium_verified_badge.png',
+                        width: 130,
+                        height: 130,
                       ),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      'Seus benefícios Premium já estão ativos.',
-                      textAlign: TextAlign.center,
-                      style: textTheme.headlineMedium?.copyWith(
-                        color: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(height: 28),
-                    // 블록 자체는 가운데, 내부 체크 아이콘은 동일 세로선 정렬
-                    const Center(
-                      child: IntrinsicWidth(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _BenefitLine('Mais prática todos os dias'),
-                            SizedBox(height: 14),
-                            _BenefitLine('Energia máxima de 30'),
-                            SizedBox(height: 14),
-                            _BenefitLine('Feedback da IA sobre frases'),
-                          ],
+                      const SizedBox(height: 24),
+                      Text(
+                        l10n.paywallCompletedTitle,
+                        textAlign: TextAlign.center,
+                        style: textTheme.headlineLarge?.copyWith(
+                          color: Colors.white,
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 28),
-                    Center(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(26),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Color(0x40000000), // #000000 25%
-                              offset: Offset(0, 4),
-                              blurRadius: 4,
-                              spreadRadius: 0,
-                            ),
-                          ],
+                      const SizedBox(height: 10),
+                      Text(
+                        l10n.paywallCompletedBody,
+                        textAlign: TextAlign.center,
+                        style: textTheme.headlineMedium?.copyWith(
+                          color: Colors.white,
                         ),
-                        child: ElevatedButton(
-                          onPressed: () => Navigator.of(context).pop(true),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF0CABA8),
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(horizontal: 32),
-                            minimumSize: const Size(0, 52),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(26),
-                            ),
-                            elevation: 0,
-                            shadowColor: Colors.transparent,
-                          ),
-                          child: Text(
-                            'Continuar',
-                            style: textTheme.bodyLarge?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
-                            ),
+                      ),
+                      const SizedBox(height: 28),
+                      // 블록 자체는 가운데, 내부 체크 아이콘은 동일 세로선 정렬
+                      Center(
+                        child: IntrinsicWidth(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _BenefitLine(l10n.paywallBenefitDailyPractice),
+                              const SizedBox(height: 14),
+                              _BenefitLine(l10n.paywallBenefitMaxEnergy),
+                              const SizedBox(height: 14),
+                              _BenefitLine(l10n.paywallBenefitAiFeedback),
+                            ],
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 28),
+                      Center(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(26),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Color(0x40000000), // #000000 25%
+                                offset: Offset(0, 4),
+                                blurRadius: 4,
+                                spreadRadius: 0,
+                              ),
+                            ],
+                          ),
+                          child: ElevatedButton(
+                            onPressed: () => Navigator.of(context).pop(true),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF0CABA8),
+                              foregroundColor: Colors.white,
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 32),
+                              minimumSize: const Size(0, 52),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(26),
+                              ),
+                              elevation: 0,
+                              shadowColor: Colors.transparent,
+                            ),
+                            child: Text(
+                              l10n.paywallCompletedContinue,
+                              style: textTheme.bodyLarge?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
+            ],
+          ),
         ),
       ),
     );

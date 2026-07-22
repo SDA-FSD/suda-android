@@ -457,4 +457,78 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get welcomeGiftStartNow => '지금 시작하기';
+
+  @override
+  String get paywallHeroTitle1 => '제한은 줄이고';
+
+  @override
+  String get paywallHeroTitle2 => '더 빠르게\n성장하세요';
+
+  @override
+  String get paywallHeroBody => '에너지 걱정 없이 더 오래 연습하고, AI 상세 피드백으로 실력을 향상시키세요.';
+
+  @override
+  String get paywallPremiumLabel => 'PREMIUM';
+
+  @override
+  String get paywallBenefitDailyPractice => '에너지 걱정 없는 연습';
+
+  @override
+  String get paywallBenefitMaxEnergy => '최대 에너지 30개';
+
+  @override
+  String get paywallBenefitAiFeedback => 'AI 문장 피드백 제공';
+
+  @override
+  String get paywallChoosePlan => '플랜을 선택하세요';
+
+  @override
+  String get paywallAnnualPlanTitle => '연간 플랜';
+
+  @override
+  String get paywallAnnualPlanSubtitle => '월간 플랜 대비 33% 이상 절약';
+
+  @override
+  String get paywallMonthlyPlanTitle => '월간 플랜';
+
+  @override
+  String get paywallMonthlyPlanSubtitle => '월 단위로 부담없이 이용';
+
+  @override
+  String get paywallBestBadge => 'BEST';
+
+  @override
+  String get paywallCta => '구독하기';
+
+  @override
+  String get paywallAutoRenewNotice =>
+      '구독은 현재 결제 기간이 종료되기 최소 24시간 전에 취소하지 않으면\n자동으로 갱신됩니다.';
+
+  @override
+  String paywallPricePerMonth(String price) {
+    return '$price/월';
+  }
+
+  @override
+  String paywallPricePerYear(String price) {
+    return '$price/연';
+  }
+
+  @override
+  String get paywallFallbackAnnualPerMonth => '₩12,500';
+
+  @override
+  String get paywallFallbackAnnual => '₩150,000';
+
+  @override
+  String get paywallFallbackMonthly => '₩21,000';
+
+  @override
+  String get paywallCompletedTitle => '축하합니다!';
+
+  @override
+  String get paywallCompletedBody => '이제 프리미엄 기능을 사용할 수 있어요.';
+
+  @override
+  String get paywallCompletedContinue => '계속하기';
 }
