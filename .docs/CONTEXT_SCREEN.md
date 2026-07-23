@@ -403,15 +403,32 @@
 ### 이전 스크린 정보 (진입점)
 - **SettingScreen**: "Account" 클릭 시
 
+### 이후 스크린 정보 (이동 가능한 다른 스크린)
+- **PaywallScreen**: 무료 사용자 Free Plan 카드 탭 시
+- **ChangePlanScreen** (Sub Screen, stub): 구독 활성 시 Subscription 헤더 우측 `Change Plan >` 탭 시
+
 ### 스크린 내부 구현 특이사항
-- 배경색: RGB(51, 51, 51) - SettingScreen 대비 10% 밝기 증가
-- 우측 상단 X 버튼 필수
-- 콘텐츠 구성: 서버 공시 페이지와 유사한 섹션형 레이아웃
-  - 상단 안내문: "This page provides information on some of the open-source libraries and their licenses used in the SUDA app."
-  - 라이선스별 섹션 + 라이선스 URL + 패키지/버전 목록 표시
-  - 현재 공시 범위는 앱 코드(Flutter 앱 직접 의존성) 기준
-- 키보드 활성화 시 `AccountScreen`은 `resizeToAvoidBottomInset: false`로 유지  
-  (하단 "계정 삭제" 텍스트 버튼이 키보드와 함께 따라 올라오는 현상 방지)
+- 키보드 활성화 시 `resizeToAvoidBottomInset: false` (하단 "계정 삭제"가 키보드와 함께 올라오지 않도록)
+- 진입 시 `GET /v1/users/energy/detail`로 구독 상태 갱신 (`SubscriptionStatusCache`)
+- **Subscription 섹션**
+  - 무료 (`isSubscribedActive == false`): Free Plan 카드(`check_green.svg`) → Paywall. l10n `accountFreePlanTitle` / `accountFreePlanSubtitle`
+  - 구독 활성: Subscription 헤더 좌측. 구독↔카드 간격 **24**(이름/계정 섹션과 동일). `Change Plan >`(l10n `accountChangePlan` + chevron, 텍스트 `bodySmall` 14·**w700**/`wght` 700·흰색)는 그 간격 안 하단 우측(`right: 8`, 카드와 `bottom: 12`) → `ChangePlanScreen`. Premium 카드(`premium_verified_badge.png`) — 제목 `accountPremiumTitle`, 부제 `accountPremiumSubtitle`, 갱신일 `accountPremiumRenewsOn`(`subscriptionExpiredAt`, en/ko `yyyy/MM/dd` · pt `dd/MM/yyyy`)
+
+---
+
+## 5.0 ChangePlanScreen
+
+### 스크린 관련 정의 파일
+- **파일 경로**: `lib/screens/setting/change_plan.dart`
+- **클래스명**: `ChangePlanScreen` (StatelessWidget)
+- **스크린 타입**: **Sub Screen**
+- **appPath**: 해당 없음 (Account 하위)
+
+### 이전 스크린 정보 (진입점)
+- **AccountScreen**: 구독 활성 시 `Change Plan >` 탭
+
+### 스크린 내부 구현 특이사항
+- Phase 4 본문 UI 전 stub: `AppScaffold` + 헤더 `accountChangePlan`만. 플랜 목록·결제 변경은 후속.
 
 ---
 
@@ -1023,6 +1040,7 @@
   │               └─ [RoleplayTryAgainReportScreen] (Report 텍스트 탭 시, 백버튼/X → Try Again 복귀)
   └─ [ProfileScreen] → [SettingScreen] (우측 상단 원형 버튼)
   │       ├─ [AccountScreen]
+  │       │   └─ [ChangePlanScreen] (구독 활성 시 Change Plan, stub)
   │       ├─ [CefrLevelScreen]
   │       ├─ [FeedbackScreen]
   │       ├─ [WebViewScreen] (Privacy policy / Terms of Service)

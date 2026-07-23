@@ -162,6 +162,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountFreePlanSubtitle => 'Get Premium to unlock more features';
 
   @override
+  String get accountPremiumTitle => 'Premium';
+
+  @override
+  String get accountPremiumSubtitle => 'You\'re enjoying Premium benefits';
+
+  @override
+  String accountPremiumRenewsOn(String date) {
+    return 'Renews on $date';
+  }
+
+  @override
+  String get accountChangePlan => 'Change Plan';
+
+  @override
   String get cefrLevelTitle => 'Choose your English level';
 
   @override

@@ -71,6 +71,17 @@
   "accountSubscription": "Subscription",
   "accountFreePlanTitle": "Free Plan",
   "accountFreePlanSubtitle": "Get Premium to unlock more features",
+  "accountPremiumTitle": "Premium",
+  "accountPremiumSubtitle": "You're enjoying Premium benefits",
+  "accountPremiumRenewsOn": "Renews on {date}",
+  "@accountPremiumRenewsOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "accountChangePlan": "Change Plan",
   "cefrLevelTitle": "Choose your English level",
   "cefrLevelAbsoluteBeginner": "Absolute Beginner",
   "cefrLevelBeginner": "Beginner",

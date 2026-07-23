@@ -164,6 +164,20 @@ class AppLocalizationsPt extends AppLocalizations {
       'Assine o Premium para desbloquear mais recursos';
 
   @override
+  String get accountPremiumTitle => 'Premium';
+
+  @override
+  String get accountPremiumSubtitle => 'Benefícios Premium ativos';
+
+  @override
+  String accountPremiumRenewsOn(String date) {
+    return 'Renovação em $date';
+  }
+
+  @override
+  String get accountChangePlan => 'Alterar plano';
+
+  @override
   String get cefrLevelTitle => 'Escolha seu nível de inglês';
 
   @override

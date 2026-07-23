@@ -8,6 +8,8 @@ class UserEnergyDto {
   final DateTime? unlimitedEndsAt;
   final String subscribedYn;
   final DateTime? subscriptionExpiredAt;
+  /// Play Billing base plan id (예: `bp-premium-monthly` / `bp-premium-yearly`).
+  final String? subscriptionBasePlanId;
   final String showUnlimitedPurchaseYn;
   final String showCapacity6PurchaseYn;
   final String showCapacity7PurchaseYn;
@@ -19,6 +21,7 @@ class UserEnergyDto {
     this.unlimitedEndsAt,
     this.subscribedYn = 'N',
     this.subscriptionExpiredAt,
+    this.subscriptionBasePlanId,
     this.showUnlimitedPurchaseYn = 'N',
     this.showCapacity6PurchaseYn = 'N',
     this.showCapacity7PurchaseYn = 'N',
@@ -44,6 +47,7 @@ class UserEnergyDto {
       unlimitedEndsAt: parseInstant(json['unlimitedEndsAt']),
       subscribedYn: json['subscribedYn'] as String? ?? 'N',
       subscriptionExpiredAt: parseInstant(json['subscriptionExpiredAt']),
+      subscriptionBasePlanId: json['subscriptionBasePlanId'] as String?,
       showUnlimitedPurchaseYn: json['showUnlimitedPurchaseYn'] as String? ?? 'N',
       showCapacity6PurchaseYn: json['showCapacity6PurchaseYn'] as String? ?? 'N',
       showCapacity7PurchaseYn: json['showCapacity7PurchaseYn'] as String? ?? 'N',
@@ -57,6 +61,7 @@ class UserEnergyDto {
     DateTime? unlimitedEndsAt,
     String? subscribedYn,
     DateTime? subscriptionExpiredAt,
+    String? subscriptionBasePlanId,
     String? showUnlimitedPurchaseYn,
     String? showCapacity6PurchaseYn,
     String? showCapacity7PurchaseYn,
@@ -69,6 +74,8 @@ class UserEnergyDto {
       subscribedYn: subscribedYn ?? this.subscribedYn,
       subscriptionExpiredAt:
           subscriptionExpiredAt ?? this.subscriptionExpiredAt,
+      subscriptionBasePlanId:
+          subscriptionBasePlanId ?? this.subscriptionBasePlanId,
       showUnlimitedPurchaseYn:
           showUnlimitedPurchaseYn ?? this.showUnlimitedPurchaseYn,
       showCapacity6PurchaseYn:
