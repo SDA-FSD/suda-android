@@ -604,6 +604,12 @@ abstract class AppLocalizations {
   /// **'Scenario'**
   String get roleplayOpeningScenario;
 
+  /// No description provided for @roleplayOpeningAiDisclaimer.
+  ///
+  /// In en, this message translates to:
+  /// **'AI can make mistakes.\nPlease don\'t share personal or sensitive information.'**
+  String get roleplayOpeningAiDisclaimer;
+
   /// No description provided for @endingFailTitle.
   ///
   /// In en, this message translates to:

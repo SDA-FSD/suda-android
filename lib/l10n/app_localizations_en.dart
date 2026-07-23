@@ -279,6 +279,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get roleplayOpeningScenario => 'Scenario';
 
   @override
+  String get roleplayOpeningAiDisclaimer =>
+      'AI can make mistakes.\nPlease don\'t share personal or sensitive information.';
+
+  @override
   String get endingFailTitle => 'You didn\'t complete all the missions!';
 
   @override

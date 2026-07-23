@@ -268,6 +268,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get roleplayOpeningScenario => '시나리오';
 
   @override
+  String get roleplayOpeningAiDisclaimer =>
+      'AI는 실수할 수 있습니다.\n개인정보나 민감한 정보는 입력하지 마세요.';
+
+  @override
   String get endingFailTitle => '모든 미션을 완수하지 못했습니다!';
 
   @override
