@@ -382,6 +382,30 @@ abstract class AppLocalizations {
   /// **'Get Premium to unlock more features'**
   String get accountFreePlanSubtitle;
 
+  /// No description provided for @accountPremiumTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Premium'**
+  String get accountPremiumTitle;
+
+  /// No description provided for @accountPremiumSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re enjoying Premium benefits'**
+  String get accountPremiumSubtitle;
+
+  /// No description provided for @accountPremiumRenewsOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Renews on {date}'**
+  String accountPremiumRenewsOn(String date);
+
+  /// No description provided for @accountChangePlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Plan'**
+  String get accountChangePlan;
+
   /// No description provided for @cefrLevelTitle.
   ///
   /// In en, this message translates to:

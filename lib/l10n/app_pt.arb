@@ -71,6 +71,17 @@
   "accountSubscription": "Assinatura",
   "accountFreePlanTitle": "Plano Gratuito",
   "accountFreePlanSubtitle": "Assine o Premium para desbloquear mais recursos",
+  "accountPremiumTitle": "Premium",
+  "accountPremiumSubtitle": "Benefícios Premium ativos",
+  "accountPremiumRenewsOn": "Renovação em {date}",
+  "@accountPremiumRenewsOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "accountChangePlan": "Alterar plano",
   "cefrLevelTitle": "Escolha seu nível de inglês",
   "cefrLevelAbsoluteBeginner": "Iniciante Absoluto",
   "cefrLevelBeginner": "Iniciante",

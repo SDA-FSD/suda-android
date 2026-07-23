@@ -157,6 +157,20 @@ class AppLocalizationsKo extends AppLocalizations {
   String get accountFreePlanSubtitle => '프리미엄으로 업그레이드하고 더 많은 기능을 이용해 보세요';
 
   @override
+  String get accountPremiumTitle => 'Premium';
+
+  @override
+  String get accountPremiumSubtitle => '현재 프리미엄 혜택을 이용하고 있습니다';
+
+  @override
+  String accountPremiumRenewsOn(String date) {
+    return '갱신일: $date';
+  }
+
+  @override
+  String get accountChangePlan => '플랜 변경';
+
+  @override
   String get cefrLevelTitle => '영어 레벨을 선택하세요';
 
   @override
