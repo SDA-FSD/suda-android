@@ -36,21 +36,11 @@ class _ProfileGoPremiumButtonState extends State<ProfileGoPremiumButton>
   static const _titleBlendMode = BlendMode.softLight;
   static const _glowOpacity = 0.55;
   static const _glowBlur = 10.0;
-  /// 가로 기본 속도(px/s). 버튼 폭 ~300이면 약 8~11초 횡단.
-  static const _speedMin = 28.0;
-  static const _speedMax = 42.0;
-  /// 세로 속도 비율(가로 대비). 상하 벽 bounce가 자주 나도록 높게.
-  static const _vyRatioMin = 0.65;
-  static const _vyRatioMax = 1.15;
-  /// 벽 반사 시 속도 유지 비율(soft).
-  static const _restitution = 0.88;
-  /// 속도 하한 — 제자리 bob만 남는 것 방지.
-  static const _minSpeed = 22.0;
-  static const _maxSpeed = 52.0;
-  /// 약한 랜덤 조향(두둥실).
-  static const _wanderAccel = 18.0;
-  static const _bobAmplitude = 2.8;
-  static const _bobHz = 0.45;
+  /// 한 방향 횡단(홈→끝 또는 끝→홈)에 걸리는 시간 범위.
+  static const _legDurationMin = 2.4;
+  static const _legDurationMax = 3.8;
+  static const _bobAmplitude = 3.5;
+  static const _bobHz = 0.7;
 
   final GlobalKey _contentStackKey = GlobalKey();
   final GlobalKey _starKey = GlobalKey();
@@ -150,20 +140,24 @@ class _ProfileGoPremiumButtonState extends State<ProfileGoPremiumButton>
       _floatBounds = bounds;
       _boundsMeasured = true;
       if (!_spawned) {
-        // Glow1: 별(왼쪽)에서 우향 출발
-        // Glow2: 혜택보기(오른쪽)에서 좌향 출발
-        _glow1 = _GlowMote.spawn(
-          at: starCenter,
-          velocity: _initialVelocity(goingRight: true),
+        // Glow1: 별(왼쪽) → 오른쪽 끝 → 복귀
+        // Glow2: 혜택보기(오른쪽) → 왼쪽 끝 → 복귀
+        _glow1 = _GlowMote.shuttle(
+          home: starCenter,
+          startsOnLeft: true,
           bobPhase: 0,
         );
-        _glow2 = _GlowMote.spawn(
-          at: exploreCenter,
-          velocity: _initialVelocity(goingRight: false),
+        _glow2 = _GlowMote.shuttle(
+          home: exploreCenter,
+          startsOnLeft: false,
           bobPhase: math.pi * 0.9,
         );
+        _startLeg(_glow1, outbound: true);
+        _startLeg(_glow2, outbound: true);
         _spawned = true;
       } else {
+        _glow1.home = _clampPoint(_glow1.home, bounds);
+        _glow2.home = _clampPoint(_glow2.home, bounds);
         _glow1.clampTo(bounds);
         _glow2.clampTo(bounds);
       }
@@ -177,13 +171,30 @@ class _ProfileGoPremiumButtonState extends State<ProfileGoPremiumButton>
     );
   }
 
-  Offset _initialVelocity({required bool goingRight}) {
-    final speed = _speedMin + _rng.nextDouble() * (_speedMax - _speedMin);
-    final vyRatio =
-        _vyRatioMin + _rng.nextDouble() * (_vyRatioMax - _vyRatioMin);
-    final vx = goingRight ? speed : -speed;
-    final vy = (_rng.nextBool() ? 1.0 : -1.0) * speed * vyRatio;
-    return Offset(vx, vy);
+  double _farXFor(_GlowMote mote) =>
+      mote.startsOnLeft ? _floatBounds.right : _floatBounds.left;
+
+  void _startLeg(_GlowMote mote, {required bool outbound}) {
+    mote.goingOutbound = outbound;
+    mote.legElapsed = 0;
+    mote.legDuration =
+        _legDurationMin + _rng.nextDouble() * (_legDurationMax - _legDurationMin);
+    mote.from = mote.position;
+    if (outbound) {
+      mote.midBouncesLeft = _rng.nextInt(4); // 0~3
+      mote.to = Offset(
+        _farXFor(mote),
+        _floatBounds.top + _rng.nextDouble() * _floatBounds.height,
+      );
+    } else {
+      mote.midBouncesLeft = 0;
+      mote.to = Offset(
+        mote.home.dx,
+        mote.home.dy + (_rng.nextDouble() - 0.5) * 6,
+      );
+      mote.to = _clampPoint(mote.to, _floatBounds);
+    }
+    mote._rebuildBouncePoints(_rng, _floatBounds);
   }
 
   void _onTick(Duration elapsed) {
@@ -206,54 +217,29 @@ class _ProfileGoPremiumButtonState extends State<ProfileGoPremiumButton>
   }
 
   void _stepMote(_GlowMote mote, double dt) {
-    // 약한 랜덤 조향 — 직선 왕복이 아니라 두둥실 드리프트.
-    mote.velocity += Offset(
-      (_rng.nextDouble() - 0.5) * 2 * _wanderAccel * dt,
-      (_rng.nextDouble() - 0.5) * 2 * _wanderAccel * dt,
+    mote.legElapsed += dt;
+    var t = (mote.legElapsed / mote.legDuration).clamp(0.0, 1.0);
+    // 두둥실 ease
+    final eased = Curves.easeInOut.transform(t);
+
+    var x = mote.from.dx + (mote.to.dx - mote.from.dx) * eased;
+    var y = mote.from.dy + (mote.to.dy - mote.from.dy) * eased;
+
+    // 중간 튕김: 진행 중 랜덤 지점에서 Y를 짧게 튀김
+    for (final bounce in mote.bouncePoints) {
+      final influence = math.exp(-math.pow((eased - bounce.at) * 14, 2).toDouble());
+      y += bounce.dy * influence;
+    }
+
+    mote.position = Offset(
+      x.clamp(_floatBounds.left, _floatBounds.right),
+      y.clamp(_floatBounds.top, _floatBounds.bottom),
     );
 
-    var next = mote.position + mote.velocity * dt;
-    var vx = mote.velocity.dx;
-    var vy = mote.velocity.dy;
-    final b = _floatBounds;
-
-    // 벽 soft bounce: 해당 축 속도 반전·감쇠 + 소량 직교 킥.
-    if (next.dx <= b.left) {
-      next = Offset(b.left, next.dy);
-      vx = vx.abs() * _restitution;
-      vy += (_rng.nextDouble() - 0.5) * 12;
-    } else if (next.dx >= b.right) {
-      next = Offset(b.right, next.dy);
-      vx = -vx.abs() * _restitution;
-      vy += (_rng.nextDouble() - 0.5) * 12;
+    if (t >= 1.0) {
+      // 끝 도착 → 방향 반전
+      _startLeg(mote, outbound: !mote.goingOutbound);
     }
-    if (next.dy <= b.top) {
-      next = Offset(next.dx, b.top);
-      vy = vy.abs() * _restitution;
-      vx += (_rng.nextDouble() - 0.5) * 10;
-    } else if (next.dy >= b.bottom) {
-      next = Offset(next.dx, b.bottom);
-      vy = -vy.abs() * _restitution;
-      vx += (_rng.nextDouble() - 0.5) * 10;
-    }
-
-    mote.position = next;
-    mote.velocity = _clampSpeed(Offset(vx, vy));
-  }
-
-  Offset _clampSpeed(Offset v) {
-    final speed = v.distance;
-    if (speed < 1e-6) {
-      // 정지 방지: 약한 랜덤 재가속
-      return _initialVelocity(goingRight: _rng.nextBool());
-    }
-    if (speed < _minSpeed) {
-      return v * (_minSpeed / speed);
-    }
-    if (speed > _maxSpeed) {
-      return v * (_maxSpeed / speed);
-    }
-    return v;
   }
 
   Offset _displayCenter(_GlowMote mote) {
@@ -362,39 +348,108 @@ class _ProfileGoPremiumButtonState extends State<ProfileGoPremiumButton>
   }
 }
 
+class _GlowBounce {
+  const _GlowBounce({required this.at, required this.dy});
+  final double at; // 0~1 progress
+  final double dy;
+}
+
 class _GlowMote {
   Offset position;
-  Offset velocity;
+  Offset home;
+  Offset from;
+  Offset to;
+  bool startsOnLeft;
+  bool goingOutbound;
+  double legElapsed;
+  double legDuration;
+  int midBouncesLeft;
   double bobPhase;
+  List<_GlowBounce> bouncePoints;
 
   _GlowMote({
     required this.position,
-    required this.velocity,
+    required this.home,
+    required this.from,
+    required this.to,
+    required this.startsOnLeft,
+    required this.goingOutbound,
+    required this.legElapsed,
+    required this.legDuration,
+    required this.midBouncesLeft,
     required this.bobPhase,
+    required this.bouncePoints,
   });
 
   factory _GlowMote.idle() => _GlowMote(
         position: Offset.zero,
-        velocity: Offset.zero,
+        home: Offset.zero,
+        from: Offset.zero,
+        to: Offset.zero,
+        startsOnLeft: true,
+        goingOutbound: true,
+        legElapsed: 0,
+        legDuration: 1,
+        midBouncesLeft: 0,
         bobPhase: 0,
+        bouncePoints: const [],
       );
 
-  factory _GlowMote.spawn({
-    required Offset at,
-    required Offset velocity,
+  factory _GlowMote.shuttle({
+    required Offset home,
+    required bool startsOnLeft,
     required double bobPhase,
   }) {
     return _GlowMote(
-      position: at,
-      velocity: velocity,
+      position: home,
+      home: home,
+      from: home,
+      to: home,
+      startsOnLeft: startsOnLeft,
+      goingOutbound: true,
+      legElapsed: 0,
+      legDuration: 1,
+      midBouncesLeft: 0,
       bobPhase: bobPhase,
+      bouncePoints: const [],
     );
+  }
+
+  void _rebuildBouncePoints(math.Random rng, Rect bounds) {
+    if (!goingOutbound || midBouncesLeft <= 0) {
+      bouncePoints = const [];
+      return;
+    }
+    final count = midBouncesLeft;
+    final points = <_GlowBounce>[];
+    for (var i = 0; i < count; i++) {
+      points.add(
+        _GlowBounce(
+          at: 0.2 + rng.nextDouble() * 0.6,
+          dy: (rng.nextDouble() - 0.5) * bounds.height * 0.7,
+        ),
+      );
+    }
+    points.sort((a, b) => a.at.compareTo(b.at));
+    bouncePoints = points;
   }
 
   void clampTo(Rect bounds) {
     position = Offset(
       position.dx.clamp(bounds.left, bounds.right),
       position.dy.clamp(bounds.top, bounds.bottom),
+    );
+    home = Offset(
+      home.dx.clamp(bounds.left, bounds.right),
+      home.dy.clamp(bounds.top, bounds.bottom),
+    );
+    from = Offset(
+      from.dx.clamp(bounds.left, bounds.right),
+      from.dy.clamp(bounds.top, bounds.bottom),
+    );
+    to = Offset(
+      to.dx.clamp(bounds.left, bounds.right),
+      to.dy.clamp(bounds.top, bounds.bottom),
     );
   }
 }
