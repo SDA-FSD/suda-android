@@ -219,7 +219,7 @@
 - Paywall: 스토어 가격(연간 raw/12 + yearly, l10n suffix `/month`·`/mês`·`/월` 등), `paywallCta` 결제. 성공 → Completed → pop(true). pending → 토스트+pop(true). N → 실패 토스트. **문구 en/pt/ko l10n 완료**.
 - **Speech Feedback 펼침(`feedbackLockedYn`)**: Result·History(본문 동일)·View Chat. 서버 `RpS2UserHistoryDto.feedbackLockedYn` 기준(`ensureSpeechFeedbackUnlocked`). `'Y'` → Feedback 탭 시 Paywall; `'N'` → 캐시/에너지 재조회 없이 즉시 펼침. `'Y'`일 때 서버는 `speechFeedback`을 null로 내림 — Result/History는 USER message placeholder 카드+Feedback 버튼 유지, View Chat은 feedback null이면 Feedback 버튼 미노출. Paywall 구독 성공 시 Result/History는 `GET /rps2/user-histories/{id}` 재조회·`SeriesStateService` 캐시 갱신, **자동 펼침 없음**(재탭 시 펼침). 접기는 잠금 검사 없음.
 - Completed: `paywall_completed.dart` (l10n Continue/X → pop(true)). Lab Preview 유지.
-- 앱 버전: `1.2.0+49`
+- 앱 버전: `1.2.1+50`
 
 ### 상품 ID (Play Console / `IapPurchaseService`)
 | 구분 | productId | basePlanId / 비고 | 진입 | verify |
