@@ -241,6 +241,14 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen> {
                         )
                       : const Text("Let's Start"),
                 ),
+                const SizedBox(height: 12),
+                Text(
+                  l10n.roleplayOpeningAiDisclaimer,
+                  style: theme.labelSmall?.copyWith(
+                    color: const Color(0xFF8C8C8C),
+                  ),
+                  textAlign: TextAlign.center,
+                ),
                 const SizedBox(height: 50),
               ],
             ),

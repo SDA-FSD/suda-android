@@ -679,6 +679,7 @@
 - 별도 X 버튼 제공 안 함
 - 중앙에 "Start" 텍스트 (임시, 향후 오프닝 콘텐츠로 대체 예정)
 - 우상단 `EnergyHeaderBadge` — Home과 동일(충전·무제한 타이머 포함)
+- footer Start 버튼 아래 AI 안내(`l10n.roleplayOpeningAiDisclaimer`): `labelSmall`·`#8C8C8C`·중앙 정렬·두 문장 줄바꿈(`\n`). 버튼↔문구 12dp, 문구 아래 50dp.
 - 세션 초기화 응답 분기 (`POST /rps2/sessions`):
   - `sessionId == '0'`: `showEnergyInsufficientPopup`(l10n `energyInsufficient`) → Opening 유지, 재시도 가능
   - 정상 sessionId: Playing 진입(에너지 소비는 Playing 발화 처리 시)

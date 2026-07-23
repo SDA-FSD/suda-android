@@ -105,6 +105,7 @@
   "roleplayAnalyzing": "Analyzing your roleplay...",
   "roleplayOpeningAiCharacter": "AI Character",
   "roleplayOpeningScenario": "Scenario",
+  "roleplayOpeningAiDisclaimer": "AI can make mistakes.\nPlease don't share personal or sensitive information.",
   "endingFailTitle": "You didn't complete all the missions!",
   "endingFailSubtitle": "Try again and uncover the full story.",
   "roleplayTryAgainMessage": "Unfortunately, your score wasn't high enough to earn the reward.",
