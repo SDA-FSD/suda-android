@@ -420,7 +420,7 @@
 
 ### 스크린 관련 정의 파일
 - **파일 경로**: `lib/screens/setting/change_plan.dart`
-- **클래스명**: `ChangePlanScreen` (StatelessWidget)
+- **클래스명**: `ChangePlanScreen` (StatefulWidget)
 - **스크린 타입**: **Sub Screen**
 - **appPath**: 해당 없음 (Account 하위)
 
@@ -428,7 +428,12 @@
 - **AccountScreen**: 구독 활성 시 `Change Plan >` 탭
 
 ### 스크린 내부 구현 특이사항
-- Phase 4 본문 UI 전 stub: `AppScaffold` + 헤더 `accountChangePlan`만. 플랜 목록·결제 변경은 후속.
+- 헤더: l10n `changePlanTitle` (en Change Plan / pt Alterar plano / ko **요금제 변경**). Account 버튼 `accountChangePlan`(ko 플랜 변경)과 분리.
+- 진입 시 `GET /v1/users/energy/detail` + `loadPremiumSubscriptionPrices()`.
+- **`subscriptionBasePlanId` null/미지 값·로드 실패**: 추측 폴백 없음. l10n `changePlanLoadFailed` + `changePlanRetry`로 재시도.
+- **Current Plan**: 섹션 라벨 H2(`headlineMedium`)·`#0CABA8`. 카드 높이 **103**·좌우 패딩 **16**. 좌측 플랜명 20·갱신일 14(`changePlanRenewsOn`), 우측 가격 **H3** 수직 중앙.
+- **Available Plans**: 동일 섹션 라벨. 카드 동일 폭·**minHeight 103**(설명 줄바꿈 시 확장, Text 고정 높이 없음)·좌우 16. 라디오 **24×24**·플랜명 20·설명 14·주 가격 H3·연간 부제 **`#80D7CF` 14**. 탭 토글 선택.
+- **CTA**: l10n `accountChangePlan`. 기본 비활성(`onPressed: null`). Available 선택 시에만 활성. **탭 동작은 Phase 5**(현재 no-op).
 
 ---
 

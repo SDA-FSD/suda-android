@@ -406,13 +406,15 @@ class _AccountScreenState extends State<AccountScreen> with SingleTickerProvider
                             child: Text(_user?.email ?? '', style: theme.bodyLarge?.copyWith(color: Colors.white)),
                           ),
                           if (_showFreePlanCard || _showPremiumCard) ...[
-                            const SizedBox(height: 24),
+                            const SizedBox(height: 32),
                             Align(
                               alignment: Alignment.centerLeft,
                               child: Text(
                                 l10n.accountSubscription,
                                 style: theme.headlineMedium?.copyWith(
                                   color: const Color(0xFF0CABA8),
+                                  // height 1.2면 일부 글리프 하단이 잘려 보임
+                                  height: 1.40,
                                 ),
                               ),
                             ),

@@ -82,6 +82,19 @@
     }
   },
   "accountChangePlan": "Alterar plano",
+  "changePlanTitle": "Alterar plano",
+  "changePlanCurrentPlan": "Plano atual",
+  "changePlanAvailablePlans": "Planos disponíveis",
+  "changePlanRenewsOn": "Renovação em {date}",
+  "@changePlanRenewsOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "changePlanLoadFailed": "Não foi possível carregar as informações. Tente novamente.",
+  "changePlanRetry": "Tentar novamente",
   "cefrLevelTitle": "Escolha seu nível de inglês",
   "cefrLevelAbsoluteBeginner": "Iniciante Absoluto",
   "cefrLevelBeginner": "Iniciante",

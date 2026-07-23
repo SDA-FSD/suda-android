@@ -171,6 +171,26 @@ class AppLocalizationsKo extends AppLocalizations {
   String get accountChangePlan => '플랜 변경';
 
   @override
+  String get changePlanTitle => '요금제 변경';
+
+  @override
+  String get changePlanCurrentPlan => '현재 요금제';
+
+  @override
+  String get changePlanAvailablePlans => '변경 가능한 플랜';
+
+  @override
+  String changePlanRenewsOn(String date) {
+    return 'Renews on $date';
+  }
+
+  @override
+  String get changePlanLoadFailed => '정보를 불러오지 못했습니다. 다시 시도해 주세요.';
+
+  @override
+  String get changePlanRetry => '다시 시도';
+
+  @override
   String get cefrLevelTitle => '영어 레벨을 선택하세요';
 
   @override
@@ -513,7 +533,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get paywallAnnualPlanTitle => '연간 플랜';
 
   @override
-  String get paywallAnnualPlanSubtitle => '월간 플랜 대비 33% 이상 절약';
+  String get paywallAnnualPlanSubtitle => '월간 플랜 대비 33% 이상\n절⁠약';
 
   @override
   String get paywallMonthlyPlanTitle => '월간 플랜';

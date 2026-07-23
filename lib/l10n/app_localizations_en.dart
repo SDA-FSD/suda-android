@@ -176,6 +176,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountChangePlan => 'Change Plan';
 
   @override
+  String get changePlanTitle => 'Change Plan';
+
+  @override
+  String get changePlanCurrentPlan => 'Current Plan';
+
+  @override
+  String get changePlanAvailablePlans => 'Available Plans';
+
+  @override
+  String changePlanRenewsOn(String date) {
+    return 'Renews on $date';
+  }
+
+  @override
+  String get changePlanLoadFailed =>
+      'Couldn\'t load the information. Please try again.';
+
+  @override
+  String get changePlanRetry => 'Try again';
+
+  @override
   String get cefrLevelTitle => 'Choose your English level';
 
   @override

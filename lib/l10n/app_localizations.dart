@@ -406,6 +406,42 @@ abstract class AppLocalizations {
   /// **'Change Plan'**
   String get accountChangePlan;
 
+  /// No description provided for @changePlanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Plan'**
+  String get changePlanTitle;
+
+  /// No description provided for @changePlanCurrentPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Plan'**
+  String get changePlanCurrentPlan;
+
+  /// No description provided for @changePlanAvailablePlans.
+  ///
+  /// In en, this message translates to:
+  /// **'Available Plans'**
+  String get changePlanAvailablePlans;
+
+  /// No description provided for @changePlanRenewsOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Renews on {date}'**
+  String changePlanRenewsOn(String date);
+
+  /// No description provided for @changePlanLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load the information. Please try again.'**
+  String get changePlanLoadFailed;
+
+  /// No description provided for @changePlanRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get changePlanRetry;
+
   /// No description provided for @cefrLevelTitle.
   ///
   /// In en, this message translates to:
