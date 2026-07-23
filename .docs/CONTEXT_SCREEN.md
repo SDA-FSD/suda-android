@@ -405,7 +405,7 @@
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
 - **PaywallScreen**: 무료 사용자 Free Plan 카드 탭 시
-- **ChangePlanScreen** (Sub Screen, stub): 구독 활성 시 Subscription 헤더 우측 `Change Plan >` 탭 시
+- **ChangePlanScreen** (Sub Screen): 구독 활성 시 Subscription 헤더 우측 `Change Plan >` 탭 시
 
 ### 스크린 내부 구현 특이사항
 - 키보드 활성화 시 `resizeToAvoidBottomInset: false` (하단 "계정 삭제"가 키보드와 함께 올라오지 않도록)
@@ -433,7 +433,7 @@
 - **`subscriptionBasePlanId` null/미지 값·로드 실패**: 추측 폴백 없음. l10n `changePlanLoadFailed` + `changePlanRetry`로 재시도.
 - **Current Plan**: 섹션 라벨 H2(`headlineMedium`)·`#0CABA8`. 카드 높이 **103**·좌우 패딩 **16**. 좌측 플랜명 20·갱신일 14(`changePlanRenewsOn`), 우측 가격 **H3** 수직 중앙.
 - **Available Plans**: 동일 섹션 라벨. 카드 동일 폭·**minHeight 103**(설명 줄바꿈 시 확장, Text 고정 높이 없음)·좌우 16. 라디오 **24×24**·플랜명 20·설명 14·주 가격 H3·연간 부제 **`#80D7CF` 14**. 탭 토글 선택.
-- **CTA**: l10n `accountChangePlan`. 기본 비활성(`onPressed: null`). Available 선택 시에만 활성. **탭 동작은 Phase 5**(현재 no-op).
+- **CTA**: l10n `accountChangePlan`. 기본 비활성(`onPressed: null`). Available 선택 시에만 활성. 탭 시 `DefaultPopup.show` 확인 팝업(`titleText` + `bodyWidget` Text bodyLarge·white·center). Primary=`changePlanConfirmOk`(Confirm stub — Phase 5 결제 미연동), Text=`changePlanConfirmCancel`(팝업만 닫힘, 선택 유지). l10n: `changePlanConfirmTitle` / `changePlanConfirmBody` / `changePlanConfirmOk` / `changePlanConfirmCancel`.
 
 ---
 
@@ -1045,7 +1045,7 @@
   │               └─ [RoleplayTryAgainReportScreen] (Report 텍스트 탭 시, 백버튼/X → Try Again 복귀)
   └─ [ProfileScreen] → [SettingScreen] (우측 상단 원형 버튼)
   │       ├─ [AccountScreen]
-  │       │   └─ [ChangePlanScreen] (구독 활성 시 Change Plan, stub)
+  │       │   └─ [ChangePlanScreen] (구독 활성 시 Change Plan; Confirm 결제 Phase 5)
   │       ├─ [CefrLevelScreen]
   │       ├─ [FeedbackScreen]
   │       ├─ [WebViewScreen] (Privacy policy / Terms of Service)

@@ -191,6 +191,18 @@ class AppLocalizationsKo extends AppLocalizations {
   String get changePlanRetry => '다시 시도';
 
   @override
+  String get changePlanConfirmTitle => '플랜을 변경하시겠습니까?';
+
+  @override
+  String get changePlanConfirmBody => '플랜 변경은 다음 결제일부터 적용됩니다';
+
+  @override
+  String get changePlanConfirmOk => '변경하기';
+
+  @override
+  String get changePlanConfirmCancel => '현재 플랜 유지';
+
+  @override
   String get cefrLevelTitle => '영어 레벨을 선택하세요';
 
   @override

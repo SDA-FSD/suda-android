@@ -197,6 +197,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get changePlanRetry => 'Try again';
 
   @override
+  String get changePlanConfirmTitle => 'Change Plan?';
+
+  @override
+  String get changePlanConfirmBody =>
+      'Plan changes take effect on your next billing date.';
+
+  @override
+  String get changePlanConfirmOk => 'Confirm';
+
+  @override
+  String get changePlanConfirmCancel => 'Keep Current Plan';
+
+  @override
   String get cefrLevelTitle => 'Choose your English level';
 
   @override

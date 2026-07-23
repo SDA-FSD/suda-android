@@ -442,6 +442,30 @@ abstract class AppLocalizations {
   /// **'Try again'**
   String get changePlanRetry;
 
+  /// No description provided for @changePlanConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Plan?'**
+  String get changePlanConfirmTitle;
+
+  /// No description provided for @changePlanConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan changes take effect on your next billing date.'**
+  String get changePlanConfirmBody;
+
+  /// No description provided for @changePlanConfirmOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get changePlanConfirmOk;
+
+  /// No description provided for @changePlanConfirmCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep Current Plan'**
+  String get changePlanConfirmCancel;
+
   /// No description provided for @cefrLevelTitle.
   ///
   /// In en, this message translates to:

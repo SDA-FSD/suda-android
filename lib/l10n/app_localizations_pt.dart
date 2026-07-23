@@ -199,6 +199,19 @@ class AppLocalizationsPt extends AppLocalizations {
   String get changePlanRetry => 'Tentar novamente';
 
   @override
+  String get changePlanConfirmTitle => 'Alterar plano?';
+
+  @override
+  String get changePlanConfirmBody =>
+      'Seu novo plano entrará em vigor na próxima data de cobrança.';
+
+  @override
+  String get changePlanConfirmOk => 'Confirmar alteração';
+
+  @override
+  String get changePlanConfirmCancel => 'Manter plano atual';
+
+  @override
   String get cefrLevelTitle => 'Escolha seu nível de inglês';
 
   @override

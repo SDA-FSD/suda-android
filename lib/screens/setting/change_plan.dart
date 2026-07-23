@@ -7,10 +7,11 @@ import '../../services/iap_purchase_service.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
 import '../../widgets/app_scaffold.dart';
+import '../../widgets/default_popup.dart';
 
 enum _PlanKind { monthly, yearly }
 
-/// Change Plan Sub Screen (결제/플랜 변경 확인은 Phase 5).
+/// Change Plan Sub Screen (결제/플랜 변경은 Phase 5; CTA는 확인 팝업까지).
 class ChangePlanScreen extends StatefulWidget {
   const ChangePlanScreen({super.key});
 
@@ -176,7 +177,33 @@ class _ChangePlanScreenState extends State<ChangePlanScreen> {
   }
 
   void _onChangePlanTap() {
-    // Phase 5: 결제/확인 팝업 연동.
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context).textTheme;
+    unawaited(
+      DefaultPopup.show(
+        context,
+        titleText: l10n.changePlanConfirmTitle,
+        bodyWidget: Text(
+          l10n.changePlanConfirmBody,
+          style: theme.bodyLarge?.copyWith(color: Colors.white),
+          textAlign: TextAlign.center,
+        ),
+        buttons: [
+          DefaultPopupButton(
+            type: DefaultPopupButtonType.primary,
+            label: l10n.changePlanConfirmOk,
+            onPressed: () {
+              // Phase 5: changeSubscription / purchase.
+            },
+          ),
+          DefaultPopupButton(
+            type: DefaultPopupButtonType.text,
+            label: l10n.changePlanConfirmCancel,
+            onPressed: () {},
+          ),
+        ],
+      ),
+    );
   }
 
   @override
