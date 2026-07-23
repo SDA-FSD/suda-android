@@ -239,7 +239,7 @@
 - **UI 구성**: `AppScaffold`를 사용하여 표준 레이아웃 적용
   - **상단 여백**: 70 (표준)
   - **헤더**:
-    - 좌측: "Hi, {userName}!" 인사말 (`AppScaffold.title` 사용)
+    - 좌측: "Hi, {userName}!" 인사말 (`AppScaffold.title`). 프리미엄만 이름 우측 gap 8 + `premium_verified_badge.png` 18×18 (`titleTrailing`). 판별은 우상단 `EnergyHeaderBadge`와 **동일** `UserEnergyDto.isSubscribedActiveAt` (`onEnergyChanged`)
   - **메인 콘텐츠**:
     - **홈 배너**: 
       - 위치: 상단 여백 70 바로 아래
@@ -313,6 +313,8 @@
     - 위치: 상단 여백 80 바로 아래
     - 배경: 박스가 위치한 세로 구간에 화면 좌우 끝까지 닿는 full-bleed 그라데이션 적용
     - 구현: `AppScaffold(usePadding: false)`를 적용하여 그라데이션이 화면 끝까지 닿도록 함
+    - **아바타 테두리** (`_ProfileAvatar`, 100×100·두께 4·세로 gradient): 무료 `#80D7CF→#43716D` / 프리미엄(`!_showPremiumCta`) `#80D7CF→#8A38F5`
+    - **이름**: `headlineMedium` 흰색·1줄 말줄임. 프리미엄만 이름 우측 gap 8 + `premium_verified_badge.png` 18×18 (`Flexible(Text)` + 고정 아이콘·`CrossAxisAlignment.center`, 아이콘은 잘리지 않음)
   - Progress Box: Profile Box 아래 gap 50 이후, 가로 중앙 정렬, 너비는 디바이스의 70%
     - 텍스트: `body-tiny` (`textTheme.labelSmall`), 흰색, `Lv. {currentLevel}`
     - 프로그레스 바: height 4, radius 2
@@ -329,6 +331,7 @@
     - **글로우 애니메이션**: 속도 기반 떠다님 + 벽 soft bounce. Glow1 별(왼·우향), Glow2 혜택보기(오른·좌향) spawn. vx ~28–42px/s, vy 비율 높게(상하 bounce), wander + 속도 하한으로 제자리 bob 방지. 소스: `paywall_star_badge.png` blur σ10, opacity ~0.55
     - 탭: pill 전체 → `PaywallScreen.push` → 성공 시 `getUserEnergy` 재조회 후 CTA 숨김
     - Profile 탭 활성·복귀 시 `getUserEnergy`로 구독 상태 갱신
+  - **프리미엄 사용자 배경** (`!_showPremiumCta`): `AppScaffold.background` SafeArea **밖** full-bleed. **`LevelProgressBar` 하단 Y(px)** GlobalKey 실측(스크롤 offset 보정)까지 `Positioned` 그라데이션 — 민트 `#08897D`→mid `#1D7185`/`#32598D`/`#474196`·보라 `#5C299E`(밴드 하단·레벨바 근처)→`#4E2583`…`#1E1629`로 **길게 soft**→`#121212`@하단. **그 아래 `#121212` 솔리드**(1px 오버랩). 상태바는 Profile에서 바꾸지 않음. 무료는 본문 상단 120px blur 스트립 유지.
 - **Profile 히스토리 (S2)**: `GET /rps2/user-histories?pageNum=` (0-based 페이징). 썸네일 3열 그리드 — `imgPath`·`starResult`·`createdAt`(dd/mm) 기존과 동일. 상단 좌측 **CEFR 알약** + 우측 별 3개. 탭 시 `HistoryScreen(rpUserHistoryId)` → `GET /rps2/user-histories/{id}` 후 Result 본문(애니메이션 없음).
 - **Saved 표현 (Expression 탭)**: 목록 `GET /v1/users/expressions?pageNum=` · 카드 탭 TTS `GET /rps2/user-histories/{rpUserHistoryId}/expressions/{expressionIndex}/sound` (`roleplayResultId` → `rpUserHistoryId`, `TtsResultDto`) · 삭제 `DELETE /v1/users/expressions?rpResultId=…&expressionIndex=…`. 카드 배경 기본·재생 모두 `#FFFFFF`. 오디오 fetch 중 16×16 `CircularProgressIndicator`(strokeWidth 2, `#0CABA8` 70%), 재생 중 `megaphone_fill.png` `#0CABA8`, 기본 `megaphone.png` `#0CABA8`(Result Key Expression 카드와 동일).
 - **Saved 표현 삭제 확인 팝업**: Saved 탭의 expression 카드에서 `bookmark_on` 탭 시 `DefaultPopup`으로 삭제 confirm 팝업을 띄운다. 상단 버튼(삭제/Remove) 탭 시 팝업을 닫고 `DELETE /v1/users/expressions`를 호출해 목록에서 제거, 하단 버튼(Practice more/더 연습할래요) 탭 시 팝업만 닫는다.
@@ -404,14 +407,11 @@
 - **SettingScreen**: "Account" 클릭 시
 
 ### 스크린 내부 구현 특이사항
-- 배경색: RGB(51, 51, 51) - SettingScreen 대비 10% 밝기 증가
-- 우측 상단 X 버튼 필수
-- 콘텐츠 구성: 서버 공시 페이지와 유사한 섹션형 레이아웃
-  - 상단 안내문: "This page provides information on some of the open-source libraries and their licenses used in the SUDA app."
-  - 라이선스별 섹션 + 라이선스 URL + 패키지/버전 목록 표시
-  - 현재 공시 범위는 앱 코드(Flutter 앱 직접 의존성) 기준
-- 키보드 활성화 시 `AccountScreen`은 `resizeToAvoidBottomInset: false`로 유지  
-  (하단 "계정 삭제" 텍스트 버튼이 키보드와 함께 따라 올라오는 현상 방지)
+- 배경색: Setting Sub Screen 공통. 우측 상단 X / 좌상단 뒤로가기(AppScaffold)
+- 콘텐츠: 프로필 이미지(탭 시 삭제 confirm) → Name 편집 → Account(이메일) → **Subscription(무료만)** → Delete Account
+- **무료 Subscription** (`!SubscriptionStatusCache.isSubscribedActive`): 라벨 `accountSubscription` + 카드(체크 `check_green.svg` fill `#054544`, Free Plan 제목/부제, `closing_angle_bracket.png`). 탭 → `PaywallScreen.push` → `true`면 energy detail 재조회 후 카드 숨김. **프리미엄 구독 UI는 별도 작업.**
+- 키보드 활성화 시 `resizeToAvoidBottomInset: false` (하단 Delete가 키보드와 함께 올라오지 않도록)
+- 계정 삭제 / 프로필 이미지 삭제: bottom-up confirm 레이어
 
 ---
 
@@ -965,10 +965,11 @@
 
 ### 스크린 내부 구현 특이사항
 - **결제**: `IapPurchaseService.purchaseSubscription` (`bp-premium-monthly`/`bp-premium-yearly`). CTA `_purchasing` lock. dispose 시 `abandonPendingPurchase`.
-- **가격**: 스토어. 월간 `price/mês`. 연간 메인 `rawPrice/12` 포맷+`/mês`, 서브 yearly+`/ano`. 미조회 시 하드코딩 폴백.
+- **가격**: 스토어. 월간·연간(월환산) `paywallPricePerMonth`(`/month`·`/mês`·`/월`), 연간 총액 `paywallPricePerYear`(`/year`·`/ano`·`/연`). 미조회 시 `paywallFallback*` 금액.
 - **verify N**: 실패 토스트·유지. **pending Y**: 승인대기 토스트+`pop(true)`. **성공**: Completed push 후 Paywall `pop(true)`.
-- **CTA**: Assinar agora → 결제. Terms/Privacy → WebView. X = pop
-- **UI**: 배경 그라데이션·glow·PREMIUM 카드·플랜 카드·MELHOR 등 기존 레이아웃 유지.
+- **CTA**: `paywallCta` → 결제. Terms/Privacy → WebView(`settingsTerms`/`settingsPrivacy`). X = pop
+- **UI**: 배경 그라데이션·glow·PREMIUM 카드·플랜 카드·BEST/MELHOR 뱃지 등 기존 레이아웃 유지.
+- **l10n**: `paywallHero*`·`paywallPremiumLabel`·`paywallBenefit*`·`paywallChoosePlan`·`paywallAnnual*`·`paywallMonthly*`·`paywallBestBadge`·`paywallCta`·`paywallAutoRenewNotice`·가격 suffix/fallback (en/pt/ko).
 
 ---
 
@@ -989,12 +990,12 @@
 - **LabScreen**: Open Paywall Completed (preview)
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
-- Continuar/X → `pop(true)` → Paywall이 `pop(true)` → 에너지 팝업 Go Premium 제거 애니 + detail 재조회
+- Continue/X → `pop(true)` → Paywall이 `pop(true)` → 에너지 팝업 Go Premium 제거 애니 + detail 재조회
 
 ### 스크린 내부 구현 특이사항
 - **배경 그라디언트**: Paywall과 동일. glow `#AB6AFF` 등 기존 스펙 유지.
-- **아이콘**: `premium_unlocked_check.png` / 혜택 `white_check_icon.png`
-- **문구/버튼**: PT 하드코딩(l10n 추후). CTA `Continuar`
+- **아이콘**: `premium_verified_badge.png` / 혜택 `white_check_icon.png`
+- **문구/버튼**: l10n `paywallCompletedTitle`·`paywallCompletedBody`·`paywallCompletedContinue` + 혜택 3줄은 Paywall `paywallBenefit*` 재사용 (en/pt/ko)
 
 ---
 

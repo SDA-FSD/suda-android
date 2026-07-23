@@ -211,14 +211,14 @@
 ### 완료됨
 - 패키지: `in_app_purchase` + `in_app_purchase_android`
 - 공용: `IapPurchaseService` — INAPP·**SUBS**(`subscription_premium` + `bp-premium-monthly`/`bp-premium-yearly` offer 선택)·verify·따닥 방지. 가격 `IapPriceCache`(SUBS는 `productId::basePlanId`). resume 2초 grace(스트림 미수신 시에만)·`abandonPendingPurchase`. 매칭 purchaseStream 수신 후에는 grace 재개 금지(verify 중 `storeDismissed`로 성공 덮어쓰기 방지).
-- **IAP+verify 중**: `IapBusyOverlay`(`lib/utils/iap_busy_overlay.dart`) — rootNavigator 전면 dim+흰 스피너, 뒤로가기 불가. 에너지 팝업 INAPP·Paywall Assinar 공통.
+- **IAP+verify 중**: `IapBusyOverlay`(`lib/utils/iap_busy_overlay.dart`) — rootNavigator 전면 dim+흰 스피너, 뒤로가기 불가. 에너지 팝업 INAPP·Paywall CTA 공통.
 - **consume/ack는 서버 verify 전담**. 클라이언트 `buyConsumable(autoConsume: false)`, `completePurchase` 미호출(전 상품: Unlimited·Capacity·Premium).
 - Buy 시 obfuscatedAccountId = SHA-256(userId). verify body `{ purchaseToken, productId }` (SUBS도 동일, basePlanId 미포함).
 - 응답 `successYn`/`pendingYn`.
 - 에너지 팝업: INAPP 구매 + Go Premium → Paywall. pop(true) 시 Go Premium 1000ms 제거 + detail 재조회.
-- Paywall: 스토어 가격(연간 raw/12 `/mês` + yearly `/ano`), Assinar agora 결제. 성공 → Completed → pop(true). pending → 토스트+pop(true). N → 실패 토스트.
+- Paywall: 스토어 가격(연간 raw/12 + yearly, l10n suffix `/month`·`/mês`·`/월` 등), `paywallCta` 결제. 성공 → Completed → pop(true). pending → 토스트+pop(true). N → 실패 토스트. **문구 en/pt/ko l10n 완료**.
 - **Speech Feedback 펼침(`feedbackLockedYn`)**: Result·History(본문 동일)·View Chat. 서버 `RpS2UserHistoryDto.feedbackLockedYn` 기준(`ensureSpeechFeedbackUnlocked`). `'Y'` → Feedback 탭 시 Paywall; `'N'` → 캐시/에너지 재조회 없이 즉시 펼침. `'Y'`일 때 서버는 `speechFeedback`을 null로 내림 — Result/History는 USER message placeholder 카드+Feedback 버튼 유지, View Chat은 feedback null이면 Feedback 버튼 미노출. Paywall 구독 성공 시 Result/History는 `GET /rps2/user-histories/{id}` 재조회·`SeriesStateService` 캐시 갱신, **자동 펼침 없음**(재탭 시 펼침). 접기는 잠금 검사 없음.
-- Completed: `paywall_completed.dart` (Continuar/X → pop(true)). Lab Preview 유지.
+- Completed: `paywall_completed.dart` (l10n Continue/X → pop(true)). Lab Preview 유지.
 - 앱 버전: `1.2.0+49`
 
 ### 상품 ID (Play Console / `IapPurchaseService`)
@@ -241,7 +241,6 @@
 5. 라이선스 테스터·상품 Active 필요.
 
 ### 아직 안 함 (다음 작업 후보)
-- Paywall/Completed 문구 l10n
 - restore / 알림 설정 버튼(에너지 팝업 TBD)
 
 ### 관련 파일

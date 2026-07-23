@@ -1,12 +1,17 @@
+import 'dart:async';
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+
 import '../../l10n/app_localizations.dart';
-import '../../widgets/app_scaffold.dart';
-import '../../services/suda_api_client.dart';
-import '../../services/token_storage.dart';
 import '../../services/auth_service.dart';
+import '../../services/suda_api_client.dart';
+import '../../services/subscription_status_cache.dart';
+import '../../services/token_storage.dart';
 import '../../utils/default_toast.dart';
+import '../../widgets/app_scaffold.dart';
+import '../paywall/paywall.dart';
 
 class AccountScreen extends StatefulWidget {
   final VoidCallback? onSignOut;
@@ -22,7 +27,9 @@ class _AccountScreenState extends State<AccountScreen> with SingleTickerProvider
   bool _isLoading = true;
   bool _showDeleteConfirm = false;
   bool _showDeleteProfileImgConfirm = false;
-  
+  /// 무료 사용자 Free Plan 카드. 프리미엄 UI는 별도 작업.
+  bool _showFreePlanCard = false;
+
   // 애니메이션 관련
   late AnimationController _animationController;
   late Animation<Offset> _slideAnimation;
@@ -38,8 +45,9 @@ class _AccountScreenState extends State<AccountScreen> with SingleTickerProvider
   void initState() {
     super.initState();
     _nameController = TextEditingController();
-    _loadUserInfo();
-    
+    unawaited(_loadUserInfo());
+    unawaited(_refreshSubscriptionStatus());
+
     // 애니메이션 초기화
     _animationController = AnimationController(
       vsync: this,
@@ -84,17 +92,40 @@ class _AccountScreenState extends State<AccountScreen> with SingleTickerProvider
       final token = await TokenStorage.loadAccessToken();
       if (token != null) {
         final user = await SudaApiClient.getCurrentUser(accessToken: token);
+        if (!mounted) return;
         setState(() {
           _user = user;
           _nameController.text = user.name ?? '';
           _isLoading = false;
         });
+      } else if (mounted) {
+        setState(() => _isLoading = false);
       }
     } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
+  }
+
+  Future<void> _refreshSubscriptionStatus() async {
+    try {
+      final token = await TokenStorage.loadAccessToken();
+      if (token == null) return;
+      await SudaApiClient.getUserEnergy(accessToken: token);
+      if (!mounted) return;
+      setState(() {
+        _showFreePlanCard = !SubscriptionStatusCache.isSubscribedActive;
+      });
+    } catch (_) {
+      // 실패 시 기존 노출 상태 유지
+    }
+  }
+
+  Future<void> _onFreePlanTap() async {
+    final subscribed = await PaywallScreen.push<bool>(context);
+    if (!mounted || subscribed != true) return;
+    await _refreshSubscriptionStatus();
   }
 
   Future<void> _handleUpdateName() async {
@@ -350,6 +381,75 @@ class _AccountScreenState extends State<AccountScreen> with SingleTickerProvider
                             alignment: Alignment.centerLeft,
                             child: Text(_user?.email ?? '', style: theme.bodyLarge?.copyWith(color: Colors.white)),
                           ),
+                          if (_showFreePlanCard) ...[
+                            const SizedBox(height: 24),
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                l10n.accountSubscription,
+                                style: theme.headlineMedium?.copyWith(
+                                  color: const Color(0xFF0CABA8),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                            Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                onTap: () => unawaited(_onFreePlanTap()),
+                                borderRadius: BorderRadius.circular(16),
+                                child: Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 14,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF353535),
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      SvgPicture.asset(
+                                        'assets/images/icons/check_green.svg',
+                                        width: 24,
+                                        height: 24,
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              l10n.accountFreePlanTitle,
+                                              style: theme.headlineSmall
+                                                  ?.copyWith(
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              l10n.accountFreePlanSubtitle,
+                                              style: theme.bodySmall?.copyWith(
+                                                color: Colors.white70,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Image.asset(
+                                        'assets/images/icons/closing_angle_bracket.png',
+                                        height: 13,
+                                        fit: BoxFit.fitHeight,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                           const Spacer(),
                           Padding(
                             padding: const EdgeInsets.only(bottom: 44),

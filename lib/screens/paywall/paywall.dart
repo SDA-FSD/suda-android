@@ -146,22 +146,22 @@ class _PaywallScreenState extends State<PaywallScreen> {
     setState(() => _prices = prices);
   }
 
-  String get _annualPriceMain {
+  String _annualPriceMain(AppLocalizations l10n) {
     final v = _prices?.yearlyPerMonthFormatted;
-    if (v != null && v.isNotEmpty) return '$v/mês';
-    return 'R\$16,66/mês';
+    final amount = (v != null && v.isNotEmpty) ? v : l10n.paywallFallbackAnnualPerMonth;
+    return l10n.paywallPricePerMonth(amount);
   }
 
-  String get _annualPriceSub {
+  String _annualPriceSub(AppLocalizations l10n) {
     final v = _prices?.yearlyFormatted;
-    if (v != null && v.isNotEmpty) return '$v/ano';
-    return 'R\$199,99/ano';
+    final amount = (v != null && v.isNotEmpty) ? v : l10n.paywallFallbackAnnual;
+    return l10n.paywallPricePerYear(amount);
   }
 
-  String get _monthlyPriceMain {
+  String _monthlyPriceMain(AppLocalizations l10n) {
     final v = _prices?.monthlyFormatted;
-    if (v != null && v.isNotEmpty) return '$v/mês';
-    return 'R\$24,99/mês';
+    final amount = (v != null && v.isNotEmpty) ? v : l10n.paywallFallbackMonthly;
+    return l10n.paywallPricePerMonth(amount);
   }
 
   Future<void> _onSubscribeTap() async {
@@ -440,9 +440,9 @@ class _PaywallScreenState extends State<PaywallScreen> {
               ),
             ),
             SingleChildScrollView(
-          clipBehavior: Clip.none,
-          padding: EdgeInsets.only(bottom: bottomPad + 24),
-          child: Column(
+              clipBehavior: Clip.none,
+              padding: EdgeInsets.only(bottom: bottomPad + 24),
+              child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               SizedBox(height: headerBandTop),
@@ -514,9 +514,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
                     _buildCta(),
                     const SizedBox(height: 12),
                     Text(
-                      'A assinatura é renovada automaticamente, a menos que '
-                      'seja cancelada com pelo menos 24 horas de antecedência '
-                      'do fim do período de cobrança atual.',
+                      AppLocalizations.of(context)!.paywallAutoRenewNotice,
                       textAlign: TextAlign.center,
                       style: _style(size: 12, color: _legal, height: 1.35),
                     ),
@@ -526,7 +524,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
                         style: _style(size: 10, color: _legal),
                         children: [
                           TextSpan(
-                            text: 'Termos de Serviço',
+                            text: AppLocalizations.of(context)!.settingsTerms,
                             style: _style(size: 10, color: _legal).copyWith(
                               decoration: TextDecoration.underline,
                               decorationColor: _legal,
@@ -535,7 +533,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
                           ),
                           const TextSpan(text: '  •  '),
                           TextSpan(
-                            text: 'Política de Privacidade',
+                            text: AppLocalizations.of(context)!.settingsPrivacy,
                             style: _style(size: 10, color: _legal).copyWith(
                               decoration: TextDecoration.underline,
                               decorationColor: _legal,
@@ -570,13 +568,14 @@ class _PaywallScreenState extends State<PaywallScreen> {
   }
 
   Widget _buildHero(double characterWidth) {
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: EdgeInsets.only(right: characterWidth * 0.62, top: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Pratique Mais',
+            l10n.paywallHeroTitle1,
             style: _style(
               size: 20,
               weight: FontWeight.w600,
@@ -585,7 +584,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
           ),
           const SizedBox(height: 4),
           _gradientText(
-            text: 'Aprenda Conversando',
+            text: l10n.paywallHeroTitle2,
             style: _style(size: 32, weight: FontWeight.w700),
             gradient: const LinearGradient(
               begin: Alignment.centerLeft,
@@ -594,17 +593,59 @@ class _PaywallScreenState extends State<PaywallScreen> {
             ),
           ),
           const SizedBox(height: 10),
-          Text(
-            'Pratique por mais tempo com o Premium e receba feedback '
-            'da IA para evoluir no inglês.',
-            style: _style(size: 14, color: Colors.white, height: 1.35),
-          ),
+          _buildHeroBody(l10n.paywallHeroBody),
         ],
       ),
     );
   }
 
+  /// 히어로 본문: 기본 14px, 넘치면 축소해 최대 2줄로 맞춤.
+  Widget _buildHeroBody(String text) {
+    const maxLines = 2;
+    const baseSize = 14.0;
+    const minSize = 12.0;
+    const lineHeight = 1.35;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final maxWidth = constraints.maxWidth.isFinite
+            ? constraints.maxWidth
+            : MediaQuery.sizeOf(context).width;
+
+        var fontSize = baseSize;
+        TextPainter painterFor(double size) {
+          return TextPainter(
+            text: TextSpan(
+              text: text,
+              style: _style(size: size, color: Colors.white, height: lineHeight),
+            ),
+            textDirection: TextDirection.ltr,
+            maxLines: maxLines,
+          )..layout(maxWidth: maxWidth);
+        }
+
+        while (fontSize > minSize) {
+          final painter = painterFor(fontSize);
+          if (!painter.didExceedMaxLines) break;
+          fontSize -= 0.5;
+        }
+
+        return Text(
+          text,
+          maxLines: maxLines,
+          overflow: TextOverflow.ellipsis,
+          style: _style(
+            size: fontSize,
+            color: Colors.white,
+            height: lineHeight,
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildPremiumCard() {
+    final l10n = AppLocalizations.of(context)!;
     return LayoutBuilder(
       builder: (context, constraints) {
         // Figma: 콘텐츠 폭 392 대비 카드 폭 299 → 0.763, 가운데 정렬.
@@ -639,7 +680,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        'PREMIUM',
+                        l10n.paywallPremiumLabel,
                         style: _style(
                           size: 20,
                           weight: FontWeight.w700,
@@ -647,11 +688,11 @@ class _PaywallScreenState extends State<PaywallScreen> {
                         ),
                       ),
                       const SizedBox(height: 14),
-                      _premiumRow('Mais prática todos os dias'),
+                      _premiumRow(l10n.paywallBenefitDailyPractice),
                       const SizedBox(height: 10),
-                      _premiumRow('Energia máxima de 30'),
+                      _premiumRow(l10n.paywallBenefitMaxEnergy),
                       const SizedBox(height: 10),
-                      _premiumRow('Feedback da IA sobre frases'),
+                      _premiumRow(l10n.paywallBenefitAiFeedback),
                     ],
                   ),
                 ),
@@ -745,7 +786,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           child: Text(
-            'Escolha seu plano',
+            AppLocalizations.of(context)!.paywallChoosePlan,
             style: _style(size: 16, color: Colors.white),
           ),
         ),
@@ -755,30 +796,32 @@ class _PaywallScreenState extends State<PaywallScreen> {
   }
 
   Widget _buildAnnualPlan() {
+    final l10n = AppLocalizations.of(context)!;
     final selected = _selected == _PaywallPlan.annual;
     return _planCard(
       selected: selected,
       onTap: _purchasing
           ? () {}
           : () => setState(() => _selected = _PaywallPlan.annual),
-      title: 'Plano Anual',
-      subtitle: 'Economize 33% em relação ao plano mensal.',
-      priceMain: _annualPriceMain,
-      priceSub: _annualPriceSub,
+      title: l10n.paywallAnnualPlanTitle,
+      subtitle: l10n.paywallAnnualPlanSubtitle,
+      priceMain: _annualPriceMain(l10n),
+      priceSub: _annualPriceSub(l10n),
       showMelhorBadge: true,
     );
   }
 
   Widget _buildMonthlyPlan() {
+    final l10n = AppLocalizations.of(context)!;
     final selected = _selected == _PaywallPlan.monthly;
     return _planCard(
       selected: selected,
       onTap: _purchasing
           ? () {}
           : () => setState(() => _selected = _PaywallPlan.monthly),
-      title: 'Plano Mensal',
-      subtitle: 'Acesso mensal com flexibilidade.',
-      priceMain: _monthlyPriceMain,
+      title: l10n.paywallMonthlyPlanTitle,
+      subtitle: l10n.paywallMonthlyPlanSubtitle,
+      priceMain: _monthlyPriceMain(l10n),
     );
   }
 
@@ -827,7 +870,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
               ),
               const SizedBox(width: 4),
               _gradientText(
-                text: 'MELHOR',
+                text: AppLocalizations.of(context)!.paywallBestBadge,
                 style: _style(size: 14, weight: FontWeight.w700).copyWith(
                   letterSpacing: 14 * -0.01,
                 ),
@@ -1049,7 +1092,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
                   ),
                 ),
                 child: Text(
-                  'Assinar agora',
+                  AppLocalizations.of(context)!.paywallCta,
                   style: _style(
                     size: 18,
                     weight: FontWeight.w700,

@@ -24,11 +24,15 @@ class EnergyHeaderBadge extends StatefulWidget {
   /// DTO bus 알림은 받아 두었다가 표시에 쓴다.
   final bool active;
 
+  /// 에너지 DTO 적용 시 (번개 아이콘과 동일 소스). Home 프리미엄 뱃지 등.
+  final ValueChanged<UserEnergyDto>? onEnergyChanged;
+
   const EnergyHeaderBadge({
     super.key,
     this.refreshCounter,
     this.registerEnergyBadgeAnchor = false,
     this.active = true,
+    this.onEnergyChanged,
   });
 
   @override
@@ -119,6 +123,7 @@ class _EnergyHeaderBadgeState extends State<EnergyHeaderBadge> {
   void _applyEnergy(UserEnergyDto dto) {
     if (!mounted) return;
     setState(() => _energy = dto);
+    widget.onEnergyChanged?.call(dto);
     _refetchTracker.syncFrom(dto, DateTime.now().toUtc());
     _syncPeriodicTimer();
   }

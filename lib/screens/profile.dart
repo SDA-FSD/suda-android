@@ -137,6 +137,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   static const double _historyRefetchBottomThreshold = 200;
   static const double _profileHorizontalMargin = 20;
 
+  final GlobalKey _premiumLevelKey = GlobalKey();
+  /// LevelProgressBar 세로 중앙 Y (레이아웃 기준 px) — 그라데이션 하단 = 여기.
+  double? _gradLevelY;
+
   /// 탭 재진입·복귀 시 히스토리를 0페이지부터 다시 받을지.
   /// 서버에 더 불러올 페이지가 남아 있거나(`!_isHistoryLastPage`), 스크롤이 목록 끝이 아니면
   /// 기존에 불러온 페이지·스크롤 위치를 유지한다.
@@ -311,7 +315,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       setState(() {
         _showPremiumCta = !SubscriptionStatusCache.isSubscribedActive;
+        if (_showPremiumCta) {
+          _gradLevelY = null;
+        }
       });
+      if (!_showPremiumCta) {
+        _schedulePremiumGradientMeasure();
+      }
     } catch (_) {
       // 실패 시 기존 CTA 노출 상태 유지
     }
@@ -321,6 +331,89 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final subscribed = await PaywallScreen.push<bool>(context);
     if (!mounted || subscribed != true) return;
     await _refreshSubscriptionStatus();
+  }
+
+  void _schedulePremiumGradientMeasure() {
+    if (_showPremiumCta) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _measurePremiumLevelAnchor();
+    });
+  }
+
+  void _measurePremiumLevelAnchor() {
+    if (!mounted || _showPremiumCta) return;
+
+    final box = _premiumLevelKey.currentContext?.findRenderObject() as RenderBox?;
+    if (box == null || !box.hasSize) {
+      _schedulePremiumGradientMeasure();
+      return;
+    }
+
+    // 레벨바 하단까지 밴드를 잡아, 보라가 바 위치에 오고 그 아래부터 검정
+    final scrollDy =
+        _scrollController.hasClients ? _scrollController.offset : 0.0;
+    final levelY =
+        box.localToGlobal(Offset(0, box.size.height)).dy + scrollDy;
+    if (_gradLevelY != null && (_gradLevelY! - levelY).abs() < 1.0) {
+      return;
+    }
+
+    setState(() => _gradLevelY = levelY);
+  }
+
+  Widget? _buildPremiumBackground() {
+    if (_showPremiumCta) return null;
+
+    final screenH = MediaQuery.sizeOf(context).height;
+    // 그라데이션 하단 = 레벨바 하단. 밴드 안에서 보라를 하단에 두고 검정으로 soft fade.
+    final levelY = (_gradLevelY ?? screenH * 0.32).clamp(80.0, screenH * 0.7);
+
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        const ColoredBox(color: Color(0xFF121212)),
+        // +1px 오버랩: 그라데이션 하단과 솔리드 사이 헤어라인 방지
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          height: levelY + 1,
+          child: const DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                // 민트→보라 mid로 밴딩 완화, 보라는 하단(레벨바) 근처, 검정은 길게 soft
+                colors: [
+                  Color(0xFF08897D), // mint
+                  Color(0xFF1D7185), // mint→purple 25%
+                  Color(0xFF32598D), // 50%
+                  Color(0xFF474196), // 75%
+                  Color(0xFF5C299E), // purple — 레벨바 근처
+                  Color(0xFF4E2583),
+                  Color(0xFF361D56),
+                  Color(0xFF2A1A3F),
+                  Color(0xFF1E1629),
+                  Color(0xFF121212),
+                ],
+                stops: [
+                  0.0,
+                  0.16,
+                  0.32,
+                  0.46,
+                  0.68,
+                  0.78,
+                  0.86,
+                  0.92,
+                  0.97,
+                  1.0,
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   Future<void> _refreshProfile() async {
@@ -898,6 +991,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final wordsSpokenCount = user?.wordsSpokenCount ?? 0;
     final likePoint = user?.likePoint ?? 0;
 
+    if (!_showPremiumCta) {
+      _schedulePremiumGradientMeasure();
+    }
+
     return AppScaffold(
       showBackButton: false,
       actions: [
@@ -917,6 +1014,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       ],
       usePadding: false, // 풀-폭 그라데이션을 위해 본문 패딩 제거
+      // 구독: LevelProgressBar 중앙 Y까지 그라데이션, 아래는 #121212 솔리드
+      background: _buildPremiumBackground(),
       bottomNavigationBar: GnbBar(
         isAlarmActive: false,
         isHomeActive: false,
@@ -929,32 +1028,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
       body: Stack(
         children: [
-          // 1) 프로필 박스 배경 그라데이션 (상단 80 지점부터 시작)
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            height: 120,
-            child: ImageFiltered(
-              imageFilter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
-              child: Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.black,
-                      Color(0xFF43716D),
-                      Colors.black,
-                    ],
-                    stops: [0.0, 0.5, 1.0],
+          // 무료: 기존 상단 blur 스트립 (본문 영역 기준)
+          if (_showPremiumCta)
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 120,
+              child: ImageFiltered(
+                imageFilter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
+                child: Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.black,
+                        Color(0xFF43716D),
+                        Colors.black,
+                      ],
+                      stops: [0.0, 0.5, 1.0],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
 
-          // 2) 실제 콘텐츠
+          // 실제 콘텐츠
           SingleChildScrollView(
             controller: _scrollController,
             child: Column(
@@ -968,19 +1068,48 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     width: double.infinity,
                     child: Row(
                       children: [
-                        _ProfileAvatar(profileImgUrl: profileImgUrl),
+                        _ProfileAvatar(
+                          profileImgUrl: profileImgUrl,
+                          isPremium: !_showPremiumCta,
+                        ),
                         Expanded(
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  name,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: theme.headlineMedium?.copyWith(color: Colors.white),
-                                ),
+                                if (!_showPremiumCta)
+                                  Row(
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      Flexible(
+                                        child: Text(
+                                          name,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: theme.headlineMedium
+                                              ?.copyWith(color: Colors.white),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Transform.translate(
+                                        offset: const Offset(0, 1),
+                                        child: Image.asset(
+                                          'assets/images/icons/premium_verified_badge.png',
+                                          width: 18,
+                                          height: 18,
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                                else
+                                  Text(
+                                    name,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: theme.headlineMedium
+                                        ?.copyWith(color: Colors.white),
+                                  ),
                                 const SizedBox(height: 8),
                                 Row(
                                   children: [
@@ -1030,6 +1159,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       const SizedBox(width: 10),
                       Expanded(
                         child: LevelProgressBar(
+                          key: _premiumLevelKey,
                           progressPercentage: _progressPercentage ?? 0.0,
                         ),
                       ),
@@ -1207,13 +1337,34 @@ class _SavedExpressionCard extends StatelessWidget {
 }
 
 class _ProfileAvatar extends StatelessWidget {
-// ... (이후 클래스들 유지)
   final String? profileImgUrl;
+  final bool isPremium;
 
-  const _ProfileAvatar({required this.profileImgUrl});
+  const _ProfileAvatar({
+    required this.profileImgUrl,
+    required this.isPremium,
+  });
 
   static const String _defaultProfileImage =
       'assets/images/icons/default_profile_image.png';
+
+  static const _freeBorderGradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [
+      Color(0xFF80D7CF),
+      Color(0xFF43716D),
+    ],
+  );
+
+  static const _premiumBorderGradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [
+      Color(0xFF80D7CF),
+      Color(0xFF8A38F5),
+    ],
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -1225,16 +1376,9 @@ class _ProfileAvatar extends StatelessWidget {
           width: 100,
           height: 100,
           padding: const EdgeInsets.all(4), // border thickness = 4
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             shape: BoxShape.circle,
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Color(0xFF80D7CF),
-                Color(0xFF43716D),
-              ],
-            ),
+            gradient: isPremium ? _premiumBorderGradient : _freeBorderGradient,
           ),
           child: ClipOval(
             child: (profileImgUrl != null && profileImgUrl!.isNotEmpty)
