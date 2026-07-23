@@ -33,7 +33,6 @@ class _ProfileGoPremiumButtonState extends State<ProfileGoPremiumButton>
     end: Alignment.centerRight,
     colors: [Color(0xFF8A38F5), Color(0xFF280752)],
   );
-  static const _titleBlendMode = BlendMode.softLight;
   static const _glowOpacity = 0.55;
   static const _glowBlur = 10.0;
   /// 가로 기본 속도(px/s). 버튼 폭 ~300이면 약 8~11초 횡단.
@@ -336,10 +335,10 @@ class _ProfileGoPremiumButtonState extends State<ProfileGoPremiumButton>
                               child: _ScaledSingleLineText(
                                 text: widget.title,
                                 baseStyle: theme.headlineSmall!.copyWith(
+                                  color: Colors.white,
                                   height: 1.0,
                                 ),
                                 minFontSize: _titleMinFontSize,
-                                blendMode: _titleBlendMode,
                               ),
                             ),
                           ),

@@ -40,6 +40,11 @@ android {
         jvmTarget = "17"
     }
 
+    // AGP 9: flavor resValue("string", "app_name", …) 사용을 위해 명시 opt-in
+    buildFeatures {
+        resValues = true
+    }
+
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "kr.sudatalk.app"
@@ -96,7 +101,15 @@ android {
     }
 
     buildTypes {
-        release {}
+        release {
+            // Phase 1: R8 코드/리소스 축소 실험 (AGP 8.11)
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
+        }
     }
 }
 

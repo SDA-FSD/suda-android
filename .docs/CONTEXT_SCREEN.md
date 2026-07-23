@@ -325,7 +325,7 @@
     - 위젯: `ProfileGoPremiumButton` (`lib/widgets/profile_go_premium_button.dart`)
     - l10n: `profileGoPremiumTitle` / `profileGoPremiumExplore` (en Get SUDA Premium·Explore / pt Assine o SUDA Premium·Explorar / ko SUDA Premium 구독·혜택보기)
     - 레이아웃: height 52 pill, 내부 padding 좌 20·우 28, Row(아이콘 28×28 + gap 12 + Expanded 제목 + `SizedBox` gap 20 + Explorar 66×24). 혜택보기는 우측 28px 고정, 제목↔혜택보기 간격은 `SizedBox(width: 20)`로 고정(디바이스 무관)
-    - 제목: `textTheme.headlineSmall`(H3)·흰색 `foreground` + `BlendMode.softLight`(버튼 fill `#8A38F5→#280752`와 합성). 공간 부족 시 min 10px까지 축소·말줄임·클립 없음, min에서도 넘치면 `FittedBox.scaleDown`
+    - 제목: `textTheme.headlineSmall`(H3)·불투명 흰색(softLight 미사용 — 글로우와 합성 시 글자 아래 세로 아티팩트 방지). 공간 부족 시 min 10px까지 축소·말줄임·클립 없음, min에서도 넘치면 `FittedBox.scaleDown`
     - 메인 pill fill `#8A38F5→#280752`·stroke `#80D7CF→#8A38F5` (좌→우, 1px padding border), radius height/2
     - Explorar: fill white 3.8%·12px 흰색·conic stroke·padding 4·radius 12(24h pill)
     - **글로우 애니메이션**: 속도 기반 떠다님 + 벽 soft bounce. Glow1 별(왼·우향), Glow2 혜택보기(오른·좌향) spawn. vx ~28–42px/s, vy 비율 높게(상하 bounce), wander + 속도 하한으로 제자리 bob 방지. 소스: `paywall_star_badge.png` blur σ10, opacity ~0.55

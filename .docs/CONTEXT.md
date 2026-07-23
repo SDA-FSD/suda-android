@@ -36,6 +36,7 @@
   - 환경별 Google Client ID: `android/app/src/{env}/res/values/strings.xml`
   - 빌드 방법: `flutter run --flavor {env} -t lib/main.dart --dart-define=ENV={env}`
   - **local 전용**: `android/app/src/local/AndroidManifest.xml`에서 `usesCleartextTraffic=true`를 병합한다. local API가 HTTP(`10.0.2.2:8083`)이므로 Android 9+에서 평문 차단 시 네트워크 오류가 나지 않도록 한다.
+  - **R8 (release)**: `android/app/build.gradle.kts` release에 `isMinifyEnabled`·`isShrinkResources` ON + `proguard-android-optimize.txt`·`proguard-rules.pro`. AGP `9.0.1` + Gradle `9.1.0`(Phase 3). Flutter 호환을 위해 `android/gradle.properties`에 `android.builtInKotlin=false`·`android.newDsl=false` 유지. AGP 9에서 optimized resource shrinking은 `isShrinkResources=true` 시 기본 적용. flavor `resValue`(app_name)용으로 `buildFeatures.resValues = true` 명시.
 - **Dart 환경 설정**: `lib/config/app_config.dart`에서 환경별 설정 관리
   - 환경 변수: `--dart-define=ENV=local|dev|stg|prd` 형태로 전달
   - 환경별 API URL 등 설정값 관리
