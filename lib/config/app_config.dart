@@ -1,7 +1,13 @@
+import 'package:flutter/foundation.dart';
+
 /// 앱 환경 설정 클래스
 /// Flutter run/build 시 --dart-define=ENV=local 형태로 전달
 class AppConfig {
   static const String env = String.fromEnvironment('ENV', defaultValue: 'local');
+  static const String _iosLocalApiUrl = String.fromEnvironment(
+    'IOS_LOCAL_API_URL',
+    defaultValue: 'http://localhost:8083',
+  );
   
   static bool get isLocal => env == 'local';
   static bool get isDev => env == 'dev';
@@ -12,7 +18,11 @@ class AppConfig {
   static String get apiBaseUrl {
     switch (env) {
       case 'local':
-        // Android 에뮬레이터에서 호스트 머신의 localhost에 접속하려면 10.0.2.2 사용
+        // iOS Simulator는 localhost, 실기기는 IOS_LOCAL_API_URL로 Mac의
+        // LAN/.local 주소를 전달한다. Android Emulator는 10.0.2.2를 사용한다.
+        if (defaultTargetPlatform == TargetPlatform.iOS) {
+          return _iosLocalApiUrl;
+        }
         return 'http://10.0.2.2:8083';
       case 'dev':
         return 'https://api.dev-sudatalk.kr';

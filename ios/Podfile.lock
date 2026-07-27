@@ -1,0 +1,39 @@
+PODS:
+  - appsflyer_sdk (6.17.8):
+    - appsflyer_sdk/Core (= 6.17.8)
+  - appsflyer_sdk/Core (6.17.8):
+    - AppsFlyerFramework (= 6.17.8)
+    - Flutter
+  - AppsFlyerFramework (6.17.8):
+    - AppsFlyerFramework/Main (= 6.17.8)
+  - AppsFlyerFramework/Main (6.17.8)
+  - Flutter (1.0.0)
+  - permission_handler_apple (9.3.0):
+    - Flutter
+
+DEPENDENCIES:
+  - appsflyer_sdk (from `.symlinks/plugins/appsflyer_sdk/ios`)
+  - Flutter (from `Flutter`)
+  - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
+
+SPEC REPOS:
+  trunk:
+    - AppsFlyerFramework
+
+EXTERNAL SOURCES:
+  appsflyer_sdk:
+    :path: ".symlinks/plugins/appsflyer_sdk/ios"
+  Flutter:
+    :path: Flutter
+  permission_handler_apple:
+    :path: ".symlinks/plugins/permission_handler_apple/ios"
+
+SPEC CHECKSUMS:
+  appsflyer_sdk: 219a6c5cb0343de60c7f259ecdb202084274359e
+  AppsFlyerFramework: 63577b60d6b9fcdab60135289979e7d1c9ec79b9
+  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+  permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
+
+PODFILE CHECKSUM: 59b9fd398f6ea2d692fe8efd009ea4520b20574c
+
+COCOAPODS: 1.17.0
