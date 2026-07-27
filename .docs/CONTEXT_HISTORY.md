@@ -6,7 +6,9 @@
 
 ## 최근 작업 메모
 
-- **iOS 4환경 빌드 기반 착수(미검증)**: `ios/Podfile`, local/dev/stg/prd shared scheme, `Debug|Profile|Release-{env}` configuration, Android와 대응하는 Bundle ID·앱명·ENV define, iOS 15 minimum target, `Runner.entitlements`(APNs·Sign in with Apple), 마이크 권한·remote notification mode를 추가. 현재 Mac에 전체 Xcode/CocoaPods가 없어 plist·pbxproj·XML 문법만 확인했으며 Apple ID/Team·Firebase plist·signing·실제 빌드는 미완료. 현행 상태는 `.docs/CONTEXT.md` §3 참조.
+- **CONTEXT_APPLE.md:** iOS **dev** 시뮬레이터 사전체크·부팅·`flutter run` 치트시트. 출시 계획은 `CONTEXT_IOS.md`.
+- **iOS dev 시뮬레이터 기동·스플래시 hang 방어(2026-07):** Xcode/시뮬레이터·dev `GoogleService-Info.plist`로 Login까지 확인. `getInitialMessage()` iOS hang으로 `runApp` 전 영구 스플래시 → `main()` 2초 timeout 방어(유지). 근본 원인 규명은 `CONTEXT_IOS.md` 단계 5·「열린 이슈」에 고정. 버전 체크 실패 시 `_isLoading=false`도 보강.
+- **iOS 4환경 빌드 기반 착수(미검증)**: `ios/Podfile`, local/dev/stg/prd shared scheme, `Debug|Profile|Release-{env}` configuration, Android와 대응하는 Bundle ID·앱명·ENV define, iOS 15 minimum target, `Runner.entitlements`(APNs·Sign in with Apple), 마이크 권한·remote notification mode를 추가. 현행은 `.docs/CONTEXT.md` §3·`.docs/CONTEXT_IOS.md` 참조.
 - **Speech Feedback 잠금 서버 제어**: `RpS2UserHistoryDto.feedbackLockedYn` + nullable `speechFeedback`. Result·History(Profile)·View Chat Feedback 탭은 `ensureSpeechFeedbackUnlocked`. lock 시 Result/History USER placeholder·Paywall→history 재조회(자동 펼침 없음). View Chat은 feedback null 시 버튼 미노출. 구현: `series_models.dart`, `speech_feedback_premium.dart`, `result.dart`, `view_chat.dart`.
 - **Playing 에너지 연동**: `PlayingEnergyMixin`·`PlayingEnergyIndicator` — 푸터 중앙 표시·30분 충전 재조회·발화 성공 시 -1·0/402 시 `showPlayingEnergyInsufficientPopup`→Wait 레이어. `EffectAnchorId.energyBadge`.
 - **Opening·홈 에너지 배지**: `EnergyHeaderBadge` — 충전 타이머(30분)·무제한 만료 재조회. 홈 복귀 시 `homeTabSelectedCounter` 증가로 `GET /v1/users/energy` 재조회(GNB 홈 탭·서브 pop 복귀·물리 뒤로가기). 문서: `.docs/CONTEXT.md` §4, `.docs/CONTEXT_ROLEPLAY_S2.md` §4-3·§4-4.

@@ -39,9 +39,13 @@ class VersionCheckService {
     try {
       // 0) 현재 앱 버전 조회
       final currentVersion = await AppVersionService.getAppVersion();
+      debugPrint('[DEBUG] VersionCheckService.checkVersion start: currentVersion=$currentVersion');
       // 1) 버전 체크 API 호출
       final versionInfo = await SudaApiClient.getLatestVersion(
         clientVersion: currentVersion,
+      );
+      debugPrint(
+        '[DEBUG] VersionCheckService.checkVersion fetched: latestVersion=${versionInfo.latestVersion}, forceUpdateYn=${versionInfo.forceUpdateYn}',
       );
       
       // 최신 버전 정보를 영구 저장 영역에 저장
@@ -53,15 +57,21 @@ class VersionCheckService {
           versionInfo.forceUpdateYn.toUpperCase() == 'Y';
       
       if (shouldUpdate) {
+        debugPrint('[DEBUG] VersionCheckService.checkVersion: shouldUpdate=TRUE (force update flow)');
         // 강제 업데이트 필요 시 스플래시 제거 후 팝업 표시 및 앱 종료
         FlutterNativeSplash.remove();
         await AppDialogService.showForceUpdateDialog(navigatorKey);
         return false;
       }
       
+      debugPrint('[DEBUG] VersionCheckService.checkVersion: passed (shouldUpdate=FALSE)');
       // 버전 체크 통과
       return true;
     } catch (error, stackTrace) {
+      debugPrint(
+        '[DEBUG] VersionCheckService.checkVersion failed: ${error.runtimeType} $error',
+      );
+      debugPrint('[DEBUG] VersionCheckService.checkVersion stackTrace: $stackTrace');
       // 버전 체크 실패 시 (모든 예외 포함) 스플래시 제거 후 Network Error 팝업 표시 및 앱 종료
       FlutterNativeSplash.remove();
       try {

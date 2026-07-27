@@ -37,12 +37,10 @@
   - 빌드 방법: `flutter run --flavor {env} -t lib/main.dart --dart-define=ENV={env}`
   - **local 전용**: `android/app/src/local/AndroidManifest.xml`에서 `usesCleartextTraffic=true`를 병합한다. local API가 HTTP(`10.0.2.2:8083`)이므로 Android 9+에서 평문 차단 시 네트워크 오류가 나지 않도록 한다.
   - **R8 (release)**: `android/app/build.gradle.kts` release에 `isMinifyEnabled`·`isShrinkResources` ON + `proguard-android-optimize.txt`·`proguard-rules.pro`. AGP `9.0.1` + Gradle `9.1.0`(Phase 3). Flutter 호환을 위해 `android/gradle.properties`에 `android.builtInKotlin=false`·`android.newDsl=false` 유지. AGP 9에서 optimized resource shrinking은 `isShrinkResources=true` 시 기본 적용. flavor `resValue`(app_name)용으로 `buildFeatures.resValues = true` 명시.
-- **iOS 전환 진행 중 (2026-07, 아직 실행·배포 미검증)**:
-  - local/dev/stg/prd shared scheme과 `Debug|Profile|Release-{env}` build configuration을 추가했다. Bundle ID 목표값은 Android와 동일하게 `kr.sudatalk.app.local`, `.dev`, `.stg`, 운영 `kr.sudatalk.app`; Apple Developer에서 운영 ID 사용 가능 여부와 Team ID는 아직 확인 전이다.
-  - iPhone+iPad(`TARGETED_DEVICE_FAMILY=1,2`), minimum deployment target 15.0. 환경별 표시명과 `ENV` Dart define을 Xcode build setting으로 연결한다.
-  - CocoaPods용 `ios/Podfile`, `Runner.entitlements`(APNs·Sign in with Apple), 마이크 권한·remote notification background mode를 추가했다. Firebase plist·Google URL scheme·실제 signing/capability 등록은 아직 미완료다.
-  - 현재 개발 Mac에는 전체 Xcode와 CocoaPods가 없어 plist/pbxproj/XML 정적 문법만 검증했다. 실제 작업 전 Xcode 26+·iOS 26 SDK·CocoaPods 설치 후 `flutter doctor -v`와 4환경 no-codesign build가 필수다.
-  - App Store 출시 전 Sign in with Apple 서버 인증·계정 생명주기, APNs/FCM, StoreKit 구매/구독/복원·서버 검증, iPad UI와 TestFlight/App Review 작업이 남아 있다.
+- **iOS 전환 진행 중 (2026-07)**: 상세 계획·게이트는 `.docs/CONTEXT_IOS.md`. **dev 시뮬레이터 실행만**은 `.docs/CONTEXT_APPLE.md`.
+  - local/dev/stg/prd scheme·Bundle ID(`kr.sudatalk.app` 계열)·iOS 15·`Podfile`·entitlements·마이크 권한 골격 완료. **dev** `GoogleService-Info.plist` 반영 후 iPhone 시뮬레이터에서 `flutter run --flavor dev`·로그인 화면까지 확인.
+  - **열린 이슈(필수 후속):** `FirebaseMessaging.getInitialMessage()`가 iOS에서 끝나지 않으면 `runApp` 전 스플래시 영구 정지. `lib/main.dart`에 **2초 timeout 방어** 적용(유지). 근본 원인(APNs/FCM iOS)은 `CONTEXT_IOS.md` 단계 5에서 규명. 상세는 해당 문서「열린 이슈」.
+  - 아직: Google URL scheme, 환경별 plist 분기, Sign in with Apple, APNs 실연동, StoreKit, Apple Developer Team/signing, App Store 출시 작업.
 - **Dart 환경 설정**: `lib/config/app_config.dart`에서 환경별 설정 관리
   - 환경 변수: `--dart-define=ENV=local|dev|stg|prd` 형태로 전달
   - 환경별 API URL 등 설정값 관리

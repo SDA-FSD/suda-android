@@ -1,11 +1,20 @@
 # iOS 병행 운영·App Store 출시 계획
 
+**dev 시뮬레이터에 앱만 띄우기:** `.docs/CONTEXT_APPLE.md` (존재 확인·부팅·`flutter run` 치트시트). 이 문서는 출시 단계 계획용.
+
 ## 현재 상태와 확정 범위
 
 - 확정 범위: **iPhone+iPad**, **local/dev/stg/prd 4환경**, **Sign in with Apple 추가**, **에너지 INAPP 3종과 Premium 월/연 구독 전체 지원**.
-- iOS는 기본 골격만 있습니다. `[ios/Runner.xcodeproj/project.pbxproj](ios/Runner.xcodeproj/project.pbxproj)`는 `com.example.suda` 단일 Bundle ID와 Debug/Release/Profile만 사용하고, `[ios/Runner/Info.plist](ios/Runner/Info.plist)`에는 마이크·푸시·Google URL 설정이 없습니다. Podfile, entitlements, 환경별 scheme/xcconfig, `GoogleService-Info.plist`도 없습니다.
-- Dart도 Android 가정이 남아 있습니다. `[lib/config/app_config.dart](lib/config/app_config.dart)`의 local 주소는 Android 전용 `10.0.2.2`, `[lib/api/endpoints/push_api.dart](lib/api/endpoints/push_api.dart)`는 `deviceType: ANDROID`, `[lib/services/iap_purchase_service.dart](lib/services/iap_purchase_service.dart)`는 Google Play 타입·base plan 전용, `[lib/services/app_dialog_service.dart](lib/services/app_dialog_service.dart)`는 Play Store만 엽니다.
-- 현재 Mac에는 Flutter 3.44.0이 있으나 **전체 Xcode와 CocoaPods가 없고 iOS Simulator/실기기도 잡히지 않습니다**. 2026-04-28 이후 업로드는 [Xcode 26 및 iOS/iPadOS 26 SDK 이상](https://developer.apple.com/news/upcoming-requirements/?id=02032026a)이 필요합니다.
+- **골격·dev 시뮬레이터 기동까지 진행됨(2026-07):** `ios/Podfile`, local/dev/stg/prd scheme, Bundle ID `kr.sudatalk.app[.local|.dev|.stg]`, deployment 15.0, `Runner.entitlements`, 마이크 권한, `AppConfig` iOS local API 분기, **dev용** `ios/Runner/GoogleService-Info.plist`(Bundle ID `kr.sudatalk.app.dev`). Xcode 26.3·CocoaPods·iOS Simulator로 `flutter run --flavor dev`까지 확인.
+- 아직 남은 것: Google URL scheme(`REVERSED_CLIENT_ID`), 환경별 plist 자동 선택, Sign in with Apple, APNs 실연동, StoreKit, 강제업데이트 App Store 링크, iPad 회귀 등(아래 단계 4~9).
+- Dart Android 가정도 상당수 남음: `[lib/api/endpoints/push_api.dart](lib/api/endpoints/push_api.dart)` `deviceType: ANDROID`, `[lib/services/iap_purchase_service.dart](lib/services/iap_purchase_service.dart)` Play 전용, `[lib/services/app_dialog_service.dart](lib/services/app_dialog_service.dart)` Play Store 위주.
+
+## 열린 이슈 (잊으면 안 됨)
+
+- **`FirebaseMessaging.getInitialMessage()` iOS hang → 스플래시 영구 정지**
+  - **증상:** `lib/main.dart` `main()`에서 `runApp` 전에 `await getInitialMessage()`가 끝나지 않으면 네이티브 스플래시(`#121212`)만 남고 UI가 안 뜸. iPhone 17 시뮬레이터(dev)에서 재현·로그로 확인함.
+  - **임시 방어(유지):** 동일 호출에 **2초 `timeout`**. 타임아웃/실패 시에도 `runApp` 진행. 앱 기동 차단을 막는 필수 방어이므로 **근본 원인 수정 후에도 유지**한다.
+  - **근본 원인(미해결):** APNs/FCM iOS 연동 미완(시뮬레이터 한계·entitlements·권한·토큰 준비 순서 등 후보). **단계 5에서 원인 규명·실기기 검증**할 것. 닫을 때 이 섹션을 “해결됨”으로 옮기거나 삭제.
 
 ## 단계 0 — 계정·권한·정책 사전 점검
 
@@ -53,8 +62,9 @@
 - **외부:** Apple Developer에서 APNs `.p8` key를 만들고 Key ID/Team ID와 함께 Firebase에 업로드합니다. 운영 App ID에는 Push Notifications를 켭니다.
 - **내부:** entitlements의 `aps-environment`, Background Modes의 remote notification, Firebase swizzling 정책을 설정합니다. 알림 권한 요청과 APNs token 준비 후 FCM token 취득 순서를 구현하고, `[lib/api/endpoints/push_api.dart](lib/api/endpoints/push_api.dart)`는 플랫폼별 `ANDROID`/`IOS`를 보냅니다.
 - **백엔드:** deviceType enum·토큰 저장·발송 경로를 iOS로 확장하고 기존 `appPath`, 알림함, foreground/background/terminated payload를 APNs 제약에 맞춰 시험합니다.
+- **열린 이슈 포함:** 상단「`getInitialMessage` iOS hang」근본 원인을 이 단계에서 규명한다(시뮬레이터 vs 실기기). `main()`의 2초 timeout 방어는 제거하지 않는다.
 - **이유:** Firebase plist만 추가해서는 APNs 권한·키·토큰 등록이 완료되지 않습니다.
-- **완료 조건:** dev/prd 실기기에서 권한 허용/거부, 토큰 갱신, 세 앱 상태, 알림 탭 딥링크, 로그아웃 후 토큰 정책이 통과합니다.
+- **완료 조건:** dev/prd 실기기에서 권한 허용/거부, 토큰 갱신, 세 앱 상태, 알림 탭 딥링크, 로그아웃 후 토큰 정책이 통과합니다. `getInitialMessage`가 실기기에서 합리적 시간 내 완료(또는 null)되는지 확인하고, hang 이슈를 문서에서 닫습니다.
 
 ## 단계 6 — StoreKit 구매·구독·서버 검증
 

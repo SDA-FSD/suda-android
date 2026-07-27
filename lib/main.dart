@@ -1,4 +1,4 @@
-import 'dart:async' show StreamSubscription, unawaited;
+import 'dart:async' show StreamSubscription, TimeoutException, unawaited;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -61,6 +61,8 @@ void _storeFcmNavigationFromData(Map<String, dynamic> data) {
 }
 
 void main() async {
+  // print: iOS 시뮬레이터에서 debugPrint가 터미널에 안 보일 때 대비
+  print('[BOOT] main() start');
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
 
   // 앱 방향을 세로로 고정
@@ -78,18 +80,33 @@ void main() async {
   );
 
   // Firebase 초기화 (FlutterNativeSplash 이전에 실행)
+  print('[BOOT] Firebase.initializeApp() ...');
   await Firebase.initializeApp();
+  print('[BOOT] Firebase.initializeApp() done');
   await PerfMonitoringService.instance.configure();
+  print('[BOOT] PerfMonitoring configure done');
   await AppsflyerService.initialize();
+  print('[BOOT] Appsflyer initialize done');
 
   // 푸시 알림으로 앱이 켜진 경우 appPath·notificationId 보관 (로그인/동의 후 Main 진입 시 적용)
-  final initialMessage = await FirebaseMessaging.instance.getInitialMessage();
-  if (initialMessage?.data != null) {
-    _storeFcmNavigationFromData(initialMessage!.data);
+  // iOS(특히 시뮬레이터)에서 getInitialMessage가 무한 대기하면 네이티브 스플래시만 남는다.
+  print('[BOOT] getInitialMessage() ...');
+  try {
+    final initialMessage = await FirebaseMessaging.instance
+        .getInitialMessage()
+        .timeout(const Duration(seconds: 2));
+    if (initialMessage?.data != null) {
+      _storeFcmNavigationFromData(initialMessage!.data);
+    }
+    print('[BOOT] getInitialMessage() done');
+  } on TimeoutException {
+    print('[BOOT] getInitialMessage() timed out — continuing');
+  } catch (e) {
+    print('[BOOT] getInitialMessage() failed: $e — continuing');
   }
 
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
-
+  print('[BOOT] runApp()');
   runApp(const MyApp());
 }
 
@@ -340,8 +357,14 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       _navigatorKey,
     );
 
+    debugPrint('[DEBUG] _checkVersionAndAuth: versionCheckPassed=$versionCheckPassed');
     if (!versionCheckPassed) {
       // 버전 체크 실패 또는 강제 업데이트 필요 시 JWT 처리 진행하지 않음
+      if (!mounted) return;
+      // 버전 체크 실패 시에도 `_StartupSplashFrame`이 무한 유지되지 않도록 처리한다.
+      setState(() {
+        _isLoading = false;
+      });
       return;
     }
 
@@ -377,8 +400,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   /// 로그인 상태 확인 및 자동 로그인 시도
   Future<void> _checkAuthStatus() async {
+    print('[BOOT] _checkAuthStatus start');
     // 1) 저장된 JWT 토큰 확인
     final storedAccessToken = await TokenStorage.loadAccessToken();
+    print('[BOOT] loadAccessToken done: hasToken=${storedAccessToken != null}');
 
     // 언어 코드 저장 (앱 실행 시 항상 최신 언어 코드로 업데이트)
     final languageCode = LanguageUtil.getCurrentLanguageCode();
@@ -386,6 +411,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
     if (storedAccessToken == null) {
       TokenRefreshService.instance.stop();
+      print('[BOOT] precache login assets...');
       await _precacheLoginSplashAssets();
       if (!mounted) return;
       setState(() {
@@ -394,7 +420,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         _user = null;
         _isLoading = false;
       });
+      print('[BOOT] setState loading=false → LoginScreen');
       await _removeNativeSplashAfterFlutterFrame();
+      print('[BOOT] native splash removed');
       return;
     }
 
