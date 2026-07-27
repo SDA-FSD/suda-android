@@ -203,6 +203,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get changePlanConfirmCancel => '현재 플랜 유지';
 
   @override
+  String get changePlanOldPurchaseMissing =>
+      '변경할 활성 구독을 찾지 못했습니다. 구독이 활성인 상태에서 다시 시도해 주세요.';
+
+  @override
+  String get changePlanChangeRequested => '플랜 변경을 요청했습니다. 다음 결제일부터 적용될 수 있습니다.';
+
+  @override
   String get cefrLevelTitle => '영어 레벨을 선택하세요';
 
   @override

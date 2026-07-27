@@ -6,12 +6,15 @@ import '../../l10n/app_localizations.dart';
 import '../../services/iap_purchase_service.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
+import '../../utils/default_toast.dart';
+import '../../utils/iap_busy_overlay.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../widgets/default_popup.dart';
 
 enum _PlanKind { monthly, yearly }
 
-/// Change Plan Sub Screen (결제/플랜 변경은 Phase 5; CTA는 확인 팝업까지).
+/// Change Plan Sub Screen.
+/// Confirm → [IapPurchaseService.changeSubscription] (DEFERRED 실측; 모드 미확정).
 class ChangePlanScreen extends StatefulWidget {
   const ChangePlanScreen({super.key});
 
@@ -69,11 +72,20 @@ class _ChangePlanScreenState extends State<ChangePlanScreen> {
   UserEnergyDto? _energy;
   PremiumSubscriptionPrices? _prices;
   bool _availableSelected = false;
+  bool _purchasing = false;
 
   @override
   void initState() {
     super.initState();
     unawaited(_load());
+  }
+
+  @override
+  void dispose() {
+    if (_purchasing) {
+      IapPurchaseService.instance.abandonPendingPurchase();
+    }
+    super.dispose();
   }
 
   Future<void> _load() async {
@@ -193,7 +205,7 @@ class _ChangePlanScreenState extends State<ChangePlanScreen> {
             type: DefaultPopupButtonType.primary,
             label: l10n.changePlanConfirmOk,
             onPressed: () {
-              // Phase 5: changeSubscription / purchase.
+              unawaited(_changePlan());
             },
           ),
           DefaultPopupButton(
@@ -204,6 +216,82 @@ class _ChangePlanScreenState extends State<ChangePlanScreen> {
         ],
       ),
     );
+  }
+
+  Future<void> _changePlan() async {
+    if (_purchasing || IapPurchaseService.instance.isBusy) return;
+    final available = _availablePlan;
+    if (available == null) return;
+
+    setState(() => _purchasing = true);
+    final newBasePlanId = available == _PlanKind.yearly
+        ? IapPurchaseService.basePlanYearly
+        : IapPurchaseService.basePlanMonthly;
+
+    try {
+      final accessToken = await TokenStorage.loadAccessToken();
+      if (!mounted) return;
+      if (accessToken == null || accessToken.isEmpty) {
+        setState(() => _purchasing = false);
+        return;
+      }
+
+      debugPrint(
+        '[DEBUG] ChangePlanScreen change start '
+        'newBasePlanId=$newBasePlanId replacementMode=deferred',
+      );
+
+      final result = await IapBusyOverlay.run(
+        context,
+        () => IapPurchaseService.instance.changeSubscription(
+          newBasePlanId: newBasePlanId,
+          accessToken: accessToken,
+        ),
+      );
+      if (!mounted) return;
+
+      debugPrint(
+        '[DEBUG] ChangePlanScreen change done '
+        'outcome=${result.outcome} pending=${result.pendingApproval} '
+        'newBasePlanId=$newBasePlanId',
+      );
+
+      final l10n = AppLocalizations.of(context)!;
+      if (result.outcome == IapPurchaseOutcome.oldPurchaseNotFound) {
+        DefaultToast.show(
+          context,
+          l10n.changePlanOldPurchaseMissing,
+          isError: true,
+        );
+        setState(() => _purchasing = false);
+        return;
+      }
+
+      if (!result.isSuccess) {
+        if (result.outcome == IapPurchaseOutcome.verifyFailed ||
+            result.outcome == IapPurchaseOutcome.unavailable) {
+          DefaultToast.show(
+            context,
+            l10n.energyPurchaseNotCompleted,
+            isError: true,
+          );
+        }
+        setState(() => _purchasing = false);
+        return;
+      }
+
+      if (result.pendingApproval) {
+        DefaultToast.show(context, l10n.energyPurchasePendingApproval);
+      } else {
+        // 실측 단계: 완성 UX 전 — 날짜/예약 안내는 모드 확정 후.
+        DefaultToast.show(context, l10n.changePlanChangeRequested);
+      }
+      setState(() => _purchasing = false);
+      Navigator.of(context).pop(true);
+    } catch (e, st) {
+      debugPrint('[DEBUG] ChangePlanScreen change failed: $e\n$st');
+      if (mounted) setState(() => _purchasing = false);
+    }
   }
 
   @override

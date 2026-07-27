@@ -210,6 +210,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get changePlanConfirmCancel => 'Keep Current Plan';
 
   @override
+  String get changePlanOldPurchaseMissing =>
+      'Couldn\'t find an active subscription to change. Try again after your subscription is active.';
+
+  @override
+  String get changePlanChangeRequested =>
+      'Plan change requested. It may apply on your next billing date.';
+
+  @override
   String get cefrLevelTitle => 'Choose your English level';
 
   @override

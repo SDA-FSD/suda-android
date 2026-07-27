@@ -99,6 +99,8 @@
   "changePlanConfirmBody": "Plan changes take effect on your next billing date.",
   "changePlanConfirmOk": "Confirm",
   "changePlanConfirmCancel": "Keep Current Plan",
+  "changePlanOldPurchaseMissing": "Couldn't find an active subscription to change. Try again after your subscription is active.",
+  "changePlanChangeRequested": "Plan change requested. It may apply on your next billing date.",
   "cefrLevelTitle": "Choose your English level",
   "cefrLevelAbsoluteBeginner": "Absolute Beginner",
   "cefrLevelBeginner": "Beginner",
