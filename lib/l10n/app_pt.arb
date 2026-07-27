@@ -99,6 +99,8 @@
   "changePlanConfirmBody": "Seu novo plano entrará em vigor na próxima data de cobrança.",
   "changePlanConfirmOk": "Confirmar alteração",
   "changePlanConfirmCancel": "Manter plano atual",
+  "changePlanOldPurchaseMissing": "Não encontramos uma assinatura ativa para alterar. Tente novamente com a assinatura ativa.",
+  "changePlanChangeRequested": "Alteração de plano solicitada. Pode valer na próxima data de cobrança.",
   "cefrLevelTitle": "Escolha seu nível de inglês",
   "cefrLevelAbsoluteBeginner": "Iniciante Absoluto",
   "cefrLevelBeginner": "Iniciante",

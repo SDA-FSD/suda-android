@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:in_app_purchase_android/billing_client_wrappers.dart';
 import 'package:in_app_purchase_android/in_app_purchase_android.dart';
 import 'package:intl/intl.dart';
 
@@ -250,6 +251,70 @@ class IapPurchaseService with WidgetsBindingObserver {
     );
   }
 
+  /// Premium base plan 변경 (실측: [ReplacementMode.deferred]).
+  ///
+  /// 기존 활성 구매가 없으면 [IapPurchaseOutcome.oldPurchaseNotFound] (크래시 없음).
+  /// verify는 신규 구독과 동일 경로 — deferred 토큰은 서버 로그 병행 감시 필요.
+  Future<IapPurchaseResult> changeSubscription({
+    required String newBasePlanId,
+    required String accessToken,
+  }) async {
+    if (_pending != null) {
+      return IapPurchaseResult.storeDismissed;
+    }
+
+    ensureListening();
+    try {
+      final addition = InAppPurchase.instance
+          .getPlatformAddition<InAppPurchaseAndroidPlatformAddition>();
+      final past = await addition.queryPastPurchases();
+      GooglePlayPurchaseDetails? oldPurchase;
+      for (final p in past.pastPurchases) {
+        if (p.productID == productPremium) {
+          oldPurchase = p;
+          break;
+        }
+      }
+      if (oldPurchase == null) {
+        debugPrint(
+          '[DEBUG] IapPurchaseService changeSubscription: '
+          'old purchase not found (productId=$productPremium, '
+          'newBasePlanId=$newBasePlanId, '
+          'pastCount=${past.pastPurchases.length}, '
+          'error=${past.error})',
+        );
+        return IapPurchaseResult.oldPurchaseNotFound;
+      }
+
+      debugPrint(
+        '[DEBUG] IapPurchaseService changeSubscription: '
+        'oldTokenLen=${oldPurchase.billingClientPurchase.purchaseToken.length}, '
+        'newBasePlanId=$newBasePlanId, replacementMode=deferred',
+      );
+
+      return _purchase(
+        productId: productPremium,
+        accessToken: accessToken,
+        resolveProduct: (products) => _pickSubscriptionProduct(
+          productPremium,
+          newBasePlanId,
+          products,
+        ),
+        consumable: false,
+        cacheBasePlanId: newBasePlanId,
+        changeSubscriptionParam: ChangeSubscriptionParam(
+          oldPurchaseDetails: oldPurchase,
+          replacementMode: ReplacementMode.deferred,
+        ),
+      );
+    } catch (e, st) {
+      debugPrint(
+        '[DEBUG] IapPurchaseService changeSubscription failed: $e\n$st',
+      );
+      return IapPurchaseResult.storeDismissed;
+    }
+  }
+
   Future<IapPurchaseResult> _purchase({
     required String productId,
     required String accessToken,
@@ -257,6 +322,7 @@ class IapPurchaseService with WidgetsBindingObserver {
         resolveProduct,
     required bool consumable,
     String? cacheBasePlanId,
+    ChangeSubscriptionParam? changeSubscriptionParam,
   }) async {
     if (_pending != null) {
       return IapPurchaseResult.storeDismissed;
@@ -318,6 +384,7 @@ class IapPurchaseService with WidgetsBindingObserver {
         offerToken: product is GooglePlayProductDetails
             ? product.offerToken
             : null,
+        changeSubscriptionParam: changeSubscriptionParam,
       );
 
       // consume/ack는 서버 verify에서 처리. 클라이언트는 호출하지 않음.
@@ -332,12 +399,21 @@ class IapPurchaseService with WidgetsBindingObserver {
       }
 
       if (!launched) {
+        debugPrint(
+          '[DEBUG] IapPurchaseService buy not launched '
+          '(productId=$productId, basePlanId=$cacheBasePlanId, '
+          'change=${changeSubscriptionParam != null})',
+        );
         _clearPending();
         await PerfMonitoringService.instance.stop('purchase_before_token');
         return IapPurchaseResult.storeDismissed;
       }
     } catch (e, st) {
-      debugPrint('[DEBUG] IapPurchaseService buy failed: $e\n$st');
+      debugPrint(
+        '[DEBUG] IapPurchaseService buy failed '
+        '(productId=$productId, basePlanId=$cacheBasePlanId, '
+        'change=${changeSubscriptionParam != null}): $e\n$st',
+      );
       _clearPending();
       await PerfMonitoringService.instance.stop('purchase_before_token');
       return IapPurchaseResult.storeDismissed;
@@ -364,6 +440,13 @@ class IapPurchaseService with WidgetsBindingObserver {
 
       if (purchase.status == PurchaseStatus.error ||
           purchase.status == PurchaseStatus.canceled) {
+        final err = purchase.error;
+        debugPrint(
+          '[DEBUG] IapPurchaseService purchase ${purchase.status}: '
+          'productId=${purchase.productID}, '
+          'errorCode=${err?.code}, errorMessage=${err?.message}, '
+          'errorDetails=${err?.details}',
+        );
         _failPending(IapPurchaseResult.storeDismissed);
         continue;
       }
@@ -394,7 +477,10 @@ class IapPurchaseService with WidgetsBindingObserver {
             );
           }
         } catch (e, st) {
-          debugPrint('[DEBUG] IapPurchaseService verify failed: $e\n$st');
+          debugPrint(
+            '[DEBUG] IapPurchaseService verify failed: '
+            'productId=${purchase.productID}, error=$e\n$st',
+          );
           _failPending(IapPurchaseResult.verifyFailed);
         }
       }
@@ -449,6 +535,8 @@ enum IapPurchaseOutcome {
   verifyFailed,
   storeDismissed,
   unavailable,
+  /// changeSubscription: queryPastPurchases에 활성 Premium 구매 없음.
+  oldPurchaseNotFound,
 }
 
 class IapPurchaseResult {
@@ -469,6 +557,8 @@ class IapPurchaseResult {
       IapPurchaseResult._(IapPurchaseOutcome.storeDismissed);
   static const unavailable =
       IapPurchaseResult._(IapPurchaseOutcome.unavailable);
+  static const oldPurchaseNotFound =
+      IapPurchaseResult._(IapPurchaseOutcome.oldPurchaseNotFound);
 
   bool get isSuccess => outcome == IapPurchaseOutcome.success;
 }

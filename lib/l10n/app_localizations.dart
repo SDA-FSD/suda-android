@@ -466,6 +466,18 @@ abstract class AppLocalizations {
   /// **'Keep Current Plan'**
   String get changePlanConfirmCancel;
 
+  /// No description provided for @changePlanOldPurchaseMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t find an active subscription to change. Try again after your subscription is active.'**
+  String get changePlanOldPurchaseMissing;
+
+  /// No description provided for @changePlanChangeRequested.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan change requested. It may apply on your next billing date.'**
+  String get changePlanChangeRequested;
+
   /// No description provided for @cefrLevelTitle.
   ///
   /// In en, this message translates to:

@@ -212,6 +212,14 @@ class AppLocalizationsPt extends AppLocalizations {
   String get changePlanConfirmCancel => 'Manter plano atual';
 
   @override
+  String get changePlanOldPurchaseMissing =>
+      'Não encontramos uma assinatura ativa para alterar. Tente novamente com a assinatura ativa.';
+
+  @override
+  String get changePlanChangeRequested =>
+      'Alteração de plano solicitada. Pode valer na próxima data de cobrança.';
+
+  @override
   String get cefrLevelTitle => 'Escolha seu nível de inglês';
 
   @override
