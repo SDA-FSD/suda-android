@@ -217,7 +217,6 @@
 				9705A1C41CF9048500538489 /* Embed Frameworks */,
 				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
 				DB46117FA78B3B7EA530631E /* [CP] Copy Pods Resources */,
-				C215C74B7E541182562569C8 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -351,29 +350,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" build";
-		};
-		C10000000000000000000010 /* Copy GoogleService-Info */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${SRCROOT}/Runner/Firebase/GoogleService-Info.local.plist",
-				"${SRCROOT}/Runner/Firebase/GoogleService-Info.dev.plist",
-				"${SRCROOT}/Runner/Firebase/GoogleService-Info.prd.plist",
-				"${SRCROOT}/Runner/Firebase/GoogleSignIn.local.plist",
-				"${SRCROOT}/Runner/Firebase/GoogleSignIn.dev.plist",
-				"${SRCROOT}/scripts/copy_google_service_info.sh",
-			);
-			name = "Copy GoogleService-Info";
-			outputPaths = (
-				"${SRCROOT}/Runner/GoogleService-Info.plist",
-				"${SRCROOT}/../lib/config/generated_google_signin_client.dart",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "/bin/sh \"${SRCROOT}/scripts/copy_google_service_info.sh\"\n";
 		};
 		C215C74B7E541182562569C8 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
