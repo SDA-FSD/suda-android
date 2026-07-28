@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -211,23 +213,61 @@ class _HomeScreenState extends State<HomeScreen> {
 
   /// 푸시 토큰 등록
   Future<void> _registerPushToken() async {
-    if (_accessToken == null) return;
+    // TODO(temp-log): 푸시 등록 진단용 — 확인 후 제거
+    print('[PUSH] _registerPushToken start platform=${Platform.isIOS ? 'IOS' : 'ANDROID'} hasAccessToken=${_accessToken != null}');
+    if (_accessToken == null) {
+      print('[PUSH] abort: accessToken null');
+      return;
+    }
     try {
-      // Firebase Messaging 토큰 획득
       final messaging = FirebaseMessaging.instance;
+
+      // iOS: 알림 권한 → APNs 토큰 준비 후 FCM getToken (필수 순서)
+      if (Platform.isIOS) {
+        final settings = await messaging.requestPermission();
+        print('[PUSH] requestPermission status=${settings.authorizationStatus}');
+        if (settings.authorizationStatus == AuthorizationStatus.denied) {
+          print('[PUSH] abort: permission denied');
+          return;
+        }
+        if (!await _waitForApnsToken(messaging)) {
+          print('[PUSH] abort: APNs token not available');
+          return;
+        }
+      }
+
       final pushToken = await messaging.getToken();
-      if (pushToken == null) return;
+      print('[PUSH] getToken result=${pushToken == null ? 'null' : 'len=${pushToken.length}'}');
+      if (pushToken == null) {
+        print('[PUSH] abort: FCM token null');
+        return;
+      }
       final languageCode = LanguageUtil.getCurrentLanguageCode();
 
       // 서버에 푸시 토큰 전송 (응답 처리하지 않음)
+      print('[PUSH] calling registerPushToken languageCode=$languageCode');
       await SudaApiClient.registerPushToken(
         accessToken: _accessToken!,
         pushToken: pushToken,
         languageCode: languageCode,
       );
-    } catch (_) {
+      print('[PUSH] registerPushToken finished (HTTP errors are swallowed in PushApi)');
+    } catch (e) {
+      print('[PUSH] error: $e');
       // 에러 발생 시에도 무시 (응답 처리하지 않음)
     }
+  }
+
+  /// iOS에서 APNs 토큰이 준비될 때까지 짧게 재시도.
+  /// firebase-ios-sdk 10.4+ / flutterfire는 APNs 없이 getToken()이 실패한다.
+  Future<bool> _waitForApnsToken(FirebaseMessaging messaging) async {
+    for (var attempt = 0; attempt < 5; attempt++) {
+      final apnsToken = await messaging.getAPNSToken();
+      print('[PUSH] getAPNSToken attempt=${attempt + 1}/5 hasToken=${apnsToken != null}');
+      if (apnsToken != null) return true;
+      await Future<void>.delayed(const Duration(seconds: 1));
+    }
+    return false;
   }
 
   /// 배너 자동 슬라이드 타이머 시작

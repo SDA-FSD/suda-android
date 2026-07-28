@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import '../client/suda_http_client.dart';
 
@@ -11,8 +12,11 @@ class PushApi {
   }) async {
     final uri = SudaHttpClient.buildUri('/v1/users/push-token');
 
+    final deviceType = Platform.isIOS ? 'IOS' : 'ANDROID';
+    // TODO(temp-log): 푸시 등록 진단용 — 확인 후 제거
+    print('[PUSH] POST /v1/users/push-token deviceType=$deviceType tokenLen=${pushToken.length}');
     try {
-      await SudaHttpClient.client
+      final response = await SudaHttpClient.client
           .post(
             uri,
             headers: {
@@ -20,13 +24,15 @@ class PushApi {
               'Content-Type': 'application/json',
             },
             body: jsonEncode({
-              'deviceType': 'ANDROID',
+              'deviceType': deviceType,
               'pushToken': pushToken,
               'languageCode': languageCode,
             }),
           )
           .timeout(const Duration(seconds: 10));
-    } catch (_) {
+      print('[PUSH] POST response status=${response.statusCode}');
+    } catch (e) {
+      print('[PUSH] POST error: $e');
       // 무시
     }
   }
