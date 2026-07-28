@@ -9,52 +9,66 @@
 - **S2 (Season 2)**: 신규. 여러 롤플레이(**에피소드**)가 하나의 **시리즈**에 묶임. 홈에는 시리즈 단위로 노출하며, 탭 시 `SeriesOverviewScreen`(Sub, `lib/screens/series/overview.dart`)으로 진입. 에피소드 Play → Tutorial → `RoleplayOpeningScreen` → Playing → … 복귀는 `RoleplayRouter.popToOverview`가 `/series/overview`까지 pop. S2 플레이 컨텍스트는 `SeriesStateService`(`lib/services/series_state_service.dart`)에 `RpS2SeriesOverviewDto`·`selectedEpisodeId`·`user`를 보관(다른 시리즈 Overview 진입 시 refresh). 홈 API: `GET /v2/home/contents`, 카테고리 페이징 `GET /v2/home/series?category={enumValue}&pageNum=…`.
 - **S1 Opening 연결 해제**: `RoleplayOverviewScreen` 역할 Play 버튼은 Opening/Tutorial로 이동하지 않음(fade-out). S1 Overview 상태는 스크린 삭제 단계에서 정리 예정.
 
-## 2. 개발 환경 전제 조건
-- 대부분의 변경 작업 진행 시, IDE 외부에서 에뮬레이터 및 `flutter run` 상태임을 전제로 행동할 것
-- **테스트 디바이스 정보**:
-  - **A30** (기본 테스트 디바이스): 갤럭시 모델 (SM A305N, Android 11 / SDK 30, 디바이스 ID: R59M801MDFM)
-    - 재설치 명령 시 별도 디바이스 지정이 없으면 이 디바이스에 설치
-    - 재설치 명령: `adb -s R59M801MDFM install -r build/app/outputs/flutter-apk/app-{flavor}-release.apk`
-  - **A23** (추가 테스트 디바이스): 갤럭시 모델 (SM A235N, Android 14 / SDK 34, 디바이스 ID: R59T901DRQV)
-    - 재설치 명령: `adb -s R59T901DRQV install -r build/app/outputs/flutter-apk/app-{flavor}-release.apk`
-  - **A16** (추가 테스트 디바이스): 갤럭시 모델 (Android 15 / SDK 35, 디바이스 ID: RF9XB00CX9J)
-    - 재설치 명령: `adb -s RF9XB00CX9J install -r build/app/outputs/flutter-apk/app-{flavor}-release.apk`
-  - **S8** (추가 테스트 디바이스): 갤럭시 모델 (SM G955N, Android 9 / SDK 28, 디바이스 ID: ce041714d2f6348e0d)
-    - 재설치 명령: `adb -s ce041714d2f6348e0d install -r build/app/outputs/flutter-apk/app-{flavor}-release.apk`
-  - **참고**: 앞으로 이 문서에서 "A30", "A23", "A16", "S8"이라는 별칭으로 각 기기를 지칭할 수 있습니다.
-  - **ADB 팁**:
-    - `adb`가 인식되지 않으면 `export PATH=$PATH:~/Library/Android/sdk/platform-tools`로 경로 추가
-    - 다중 기기 설치 예시:
-      - `adb -s R59M801MDFM install -r build/app/outputs/flutter-apk/app-dev-debug.apk`
-      - `adb -s R59T901DRQV install -r build/app/outputs/flutter-apk/app-dev-debug.apk`
-      - `adb -s RF9XB00CX9J install -r build/app/outputs/flutter-apk/app-dev-debug.apk`
-      - `adb -s ce041714d2f6348e0d install -r build/app/outputs/flutter-apk/app-dev-debug.apk`
+## 2. 빌드·실행 명령 (Android / iOS)
 
-## 3. 환경별 설정 관리
-- **Android Flavor**: local/dev/stg/prd 환경별로 분리 관리
-  - 각 환경별 패키지명: `kr.sudatalk.app.{env}` (prd는 suffix 없음)
-  - 환경별 Google Client ID: `android/app/src/{env}/res/values/strings.xml`
-  - 빌드 방법: `flutter run --flavor {env} -t lib/main.dart --dart-define=ENV={env}`
-  - **local 전용**: `android/app/src/local/AndroidManifest.xml`에서 `usesCleartextTraffic=true`를 병합한다. local API가 HTTP(`10.0.2.2:8083`)이므로 Android 9+에서 평문 차단 시 네트워크 오류가 나지 않도록 한다.
-  - **R8 (release)**: `android/app/build.gradle.kts` release에 `isMinifyEnabled`·`isShrinkResources` ON + `proguard-android-optimize.txt`·`proguard-rules.pro`. AGP `9.0.1` + Gradle `9.1.0`(Phase 3). Flutter 호환을 위해 `android/gradle.properties`에 `android.builtInKotlin=false`·`android.newDsl=false` 유지. AGP 9에서 optimized resource shrinking은 `isShrinkResources=true` 시 기본 적용. flavor `resValue`(app_name)용으로 `buildFeatures.resValues = true` 명시.
-- **iOS 전환 진행 중 (2026-07)**: 상세 계획·게이트는 `.docs/CONTEXT_IOS.md`. **dev 시뮬레이터 실행만**은 `.docs/CONTEXT_APPLE.md`.
-  - local/dev/stg/prd scheme·Bundle ID(`kr.sudatalk.app` 계열)·iOS 15·`Podfile`·entitlements·마이크 권한 골격 완료. **dev** `GoogleService-Info.plist` 반영 후 iPhone 시뮬레이터에서 `flutter run --flavor dev`·로그인 화면까지 확인.
-  - **열린 이슈(필수 후속):** `FirebaseMessaging.getInitialMessage()`가 iOS에서 끝나지 않으면 `runApp` 전 스플래시 영구 정지. `lib/main.dart`에 **2초 timeout 방어** 적용(유지). 근본 원인(APNs/FCM iOS)은 `CONTEXT_IOS.md` 단계 5에서 규명. 상세는 해당 문서「열린 이슈」.
-  - 아직: Google URL scheme, 환경별 plist 분기, Sign in with Apple, APNs 실연동, StoreKit, Apple Developer Team/signing, App Store 출시 작업.
-- **Dart 환경 설정**: `lib/config/app_config.dart`에서 환경별 설정 관리
-  - 환경 변수: `--dart-define=ENV=local|dev|stg|prd` 형태로 전달
-  - 환경별 API URL 등 설정값 관리
-    - local: `http://10.0.2.2:8083` (Android 에뮬레이터용)
-    - dev  : `https://api.dev-sudatalk.kr`
-    - stg  : `https://api.stg-sudatalk.kr`
-    - prd  : `https://api.sudatalk.kr`
-  - 환경별 CDN URL 설정값 관리
-    - local/dev/stg: `https://cdn.dev-sudatalk.kr`
-    - prd  : `https://cdn.sudatalk.kr`
-  - 환경별 Google Server Client ID (idToken 발급용)
-    - local: `558349443875-ceevp4cjf86ubp0p066qm5hsujukljg4.apps.googleusercontent.com`
-    - dev  : `558349443875-ceevp4cjf86ubp0p066qm5hsujukljg4.apps.googleusercontent.com`
-    - prd  : `841694444330-g8gn852m4somers2668v46k3mm69p7dg.apps.googleusercontent.com`
+저장소 루트에서 실행. `{env}` = `local` | `dev` | `stg` | `prd` (iOS **stg Firebase 미구현** → stg iOS 빌드는 실패가 정상).
+
+### 2-1. 공통 템플릿
+```bash
+flutter devices
+flutter run --flavor {env} -t lib/main.dart --dart-define=ENV={env} -d <DEVICE_ID>
+```
+- Android·iOS **동일** 플래그. `-d`만 플랫폼 기기 ID로 바꾼다.
+- APK만 다시 깔 때(Android):  
+  `adb -s <DEVICE_ID> install -r build/app/outputs/flutter-apk/app-{env}-release.apk`  
+  (debug면 `app-{env}-debug.apk`)
+
+### 2-2. Android
+```bash
+# 예: A30 + dev
+flutter run --flavor dev -t lib/main.dart --dart-define=ENV=dev -d R59M801MDFM
+```
+| 별칭 | 모델 | DEVICE_ID |
+|------|------|-----------|
+| **A30** (기본) | SM A305N / API 30 | `R59M801MDFM` |
+| A23 | SM A235N / API 34 | `R59T901DRQV` |
+| A16 | API 35 | `RF9XB00CX9J` |
+| S8 | SM G955N / API 28 | `ce041714d2f6348e0d` |
+
+- `adb` 미인식: `export PATH=$PATH:~/Library/Android/sdk/platform-tools`
+- 패키지: `kr.sudatalk.app` + suffix `.local`/`.dev`/`.stg` (prd는 suffix 없음)
+- local HTTP: `android/app/src/local`에서 cleartext 허용
+
+### 2-3. iOS
+```bash
+# 시뮬 부팅·창 띄우기 → CONTEXT_APPLE.md
+flutter run --flavor dev -t lib/main.dart --dart-define=ENV=dev -d 541F3961-8182-4414-9065-678C697363DF
+```
+- Bundle ID: Android와 동일 규칙 (`kr.sudatalk.app` / `.local` / `.dev` ; stg ID는 골격만)
+- Firebase plist·Google URL scheme: **빌드가 자동 처리** (`CONTEXT_APPLE.md`). 수동 스왑 금지
+- `--no-codesign`은 `flutter run`에 없음(시뮬레이터 OK)
+- 출시·Sign in with Apple·APNs·StoreKit: `.docs/CONTEXT_IOS.md`
+- **열린 이슈:** `getInitialMessage` hang → `main()` 2초 timeout 유지 (`CONTEXT_IOS` 「열린 이슈」)
+
+## 3. 환경 값 (`lib/config/app_config.dart`)
+
+| ENV | API | CDN | Google server client (idToken) |
+|-----|-----|-----|--------------------------------|
+| local | `http://10.0.2.2:8083` (Android 에뮬; iOS는 `localhost`/`IOS_LOCAL_API_URL`) | `https://cdn.dev-sudatalk.kr` | local/dev 공용 Web client† |
+| dev | `https://api.dev-sudatalk.kr` | 상동 | † |
+| stg | `https://api.stg-sudatalk.kr` | 상동 | (Android도 미비·당장 빌드 요구 없음) |
+| prd | `https://api.sudatalk.kr` | `https://cdn.sudatalk.kr` | prd Web client |
+
+† local/dev: `558349443875-ceevp4cjf86ubp0p066qm5hsujukljg4…` / prd: `841694444330-g8gn852m4somers2668v46k3mm69p7dg…` (`app_config.dart`가 원천)
+
+- Android Google 문자열: `android/app/src/{env}/res/values/strings.xml`
+- iOS Firebase 원본: `ios/Runner/Firebase/GoogleService-Info.{local,dev,prd}.plist`
+  - 빌드 시 `ios/scripts/copy_google_service_info.sh`가 env별 plist **전체 복사** → `Runner/GoogleService-Info.plist` (필드 치환 없음)
+  - env별 `SERVER_CLIENT_ID`는 원본 plist에 저장·`AppConfig.googleServerClientId`와 동일 값 유지
+  - **회원 이원화:** non-prod idToken aud=558349 Web / prd aud=841694 Web (Android와 동일). Firebase(FCM 등)는 841694(suda-f6884) plist 유지
+  - **iOS Sign-In (local/dev):** `GoogleSignIn.{local,dev}.plist`에 GCP **558349443875** iOS OAuth `CLIENT_ID` 저장됨 → 빌드 시 `generated_google_signin_client.dart` → `AuthService.clientId` (Firebase 841694 CLIENT_ID와 분리)
+  - URL scheme: `Info.plist`에 841694×3 + 558349×2 등록됨 (`register_google_signin_url_schemes.sh`)
+- Android release: R8 minify/shrink ON (`android/app/build.gradle.kts`). AGP 9 호환용 `android.builtInKotlin=false`·`android.newDsl=false` 유지.
 
 ## 4. 인증 및 API 통신
 - **Google 로그인 연동**: `lib/services/auth_service.dart`

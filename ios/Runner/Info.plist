@@ -22,17 +22,34 @@
 	<string>$(FLUTTER_BUILD_NAME)</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>GoogleSignIn</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.841694444330-urr1gr6ns4jfbji8m945m10u3h0jcn25</string>
+				<string>com.googleusercontent.apps.841694444330-klm9b118bkflkparrih5qpmi9pp0gc8e</string>
+				<string>com.googleusercontent.apps.841694444330-46gnpaot1kc33tkae39imk16i5da5ua9</string>
+				<string>com.googleusercontent.apps.558349443875-n542t9u0uald3fn0mfq1ni64be9r07nd</string>
+				<string>com.googleusercontent.apps.558349443875-7quvithfufd1ps0i426vb56sut9s9ku9</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>SUDA uses the microphone so you can practice speaking during roleplay.</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>SUDA uses the microphone so you can practice speaking during roleplay.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

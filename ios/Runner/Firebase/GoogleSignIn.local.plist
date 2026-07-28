@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>BUNDLE_ID</key>
+	<string>kr.sudatalk.app.local</string>
+	<key>CLIENT_ID</key>
+	<string>558349443875-n542t9u0uald3fn0mfq1ni64be9r07nd.apps.googleusercontent.com</string>
+</dict>
+</plist>

@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 
+import 'generated_google_signin_client.dart';
+
 /// 앱 환경 설정 클래스
 /// Flutter run/build 시 --dart-define=ENV=local 형태로 전달
 class AppConfig {
@@ -73,6 +75,18 @@ class AppConfig {
         return '558349443875-ceevp4cjf86ubp0p066qm5hsujukljg4.apps.googleusercontent.com';
       case 'prd':
         return '841694444330-g8gn852m4somers2668v46k3mm69p7dg.apps.googleusercontent.com';
+      default:
+        return null;
+    }
+  }
+
+  /// iOS local/dev: 558349 GCP iOS OAuth client (`GoogleSignIn.{env}.plist` → generated dart).
+  /// prd: null → Firebase plist CLIENT_ID (841694).
+  static String? get googleIosClientId {
+    switch (env) {
+      case 'local':
+      case 'dev':
+        return kGoogleSignInIosClientId;
       default:
         return null;
     }

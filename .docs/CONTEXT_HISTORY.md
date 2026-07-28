@@ -6,9 +6,13 @@
 
 ## 최근 작업 메모
 
-- **CONTEXT_APPLE.md:** iOS **dev** 시뮬레이터 사전체크·부팅·`flutter run` 치트시트. 출시 계획은 `CONTEXT_IOS.md`.
-- **iOS dev 시뮬레이터 기동·스플래시 hang 방어(2026-07):** Xcode/시뮬레이터·dev `GoogleService-Info.plist`로 Login까지 확인. `getInitialMessage()` iOS hang으로 `runApp` 전 영구 스플래시 → `main()` 2초 timeout 방어(유지). 근본 원인 규명은 `CONTEXT_IOS.md` 단계 5·「열린 이슈」에 고정. 버전 체크 실패 시 `_isLoading=false`도 보강.
-- **iOS 4환경 빌드 기반 착수(미검증)**: `ios/Podfile`, local/dev/stg/prd shared scheme, `Debug|Profile|Release-{env}` configuration, Android와 대응하는 Bundle ID·앱명·ENV define, iOS 15 minimum target, `Runner.entitlements`(APNs·Sign in with Apple), 마이크 권한·remote notification mode를 추가. 현행은 `.docs/CONTEXT.md` §3·`.docs/CONTEXT_IOS.md` 참조.
+- **iOS Google Sign-In 558349 선제 배선:** `GoogleSignIn.{local,dev}.plist` + 빌드 시 `generated_google_signin_client.dart` + `AppConfig.googleIosClientId` + `register_google_signin_url_schemes.sh`. Firebase(841694)와 Sign-In(558349 non-prod) 분리.
+- **iOS Google idToken 이원화 정렬:** local/dev/prd Firebase plist에 env별 `SERVER_CLIENT_ID` 추가(AppConfig와 동일). `copy_google_service_info.sh`는 plist 전체 복사·복사 후 `SERVER_CLIENT_ID` 로그. `AuthService` debug 로그. Android와 동일 non-prod aud=558349 / prd aud=841694.
+- **CONTEXT 빌드 명령 정리:** Android/iOS `flutter run`·기기 ID·env를 `CONTEXT.md` §2~3에 통합. `CONTEXT_APPLE.md`는 시뮬 부팅·Firebase 자동장착·실패표만 경량화.
+- **iOS Firebase 자동 장착:** `ios/scripts/copy_google_service_info.sh` + Xcode `Copy GoogleService-Info` 페이즈. 원본 `Runner/Firebase/*.plist`, 장착본 `Runner/GoogleService-Info.plist`(gitignore). `Info.plist`에 local/dev/prd Google URL scheme 3종. agent는 flavor 빌드만 하면 됨.
+- **CONTEXT_APPLE.md:** iOS 시뮬 전용 주의점(부팅·Firebase·실패표). 빌드 명령은 `CONTEXT.md` §2.
+- **iOS dev 시뮬레이터 기동·스플래시 hang 방어(2026-07):** `getInitialMessage()` 2초 timeout 방어(유지). 근본 원인 → `CONTEXT_IOS.md` 단계 5·「열린 이슈」.
+- **iOS 4환경 빌드 기반:** scheme/Bundle ID/Podfile/entitlements 등. 현행 `.docs/CONTEXT.md` §2~3·`CONTEXT_IOS.md`.
 - **Speech Feedback 잠금 서버 제어**: `RpS2UserHistoryDto.feedbackLockedYn` + nullable `speechFeedback`. Result·History(Profile)·View Chat Feedback 탭은 `ensureSpeechFeedbackUnlocked`. lock 시 Result/History USER placeholder·Paywall→history 재조회(자동 펼침 없음). View Chat은 feedback null 시 버튼 미노출. 구현: `series_models.dart`, `speech_feedback_premium.dart`, `result.dart`, `view_chat.dart`.
 - **Playing 에너지 연동**: `PlayingEnergyMixin`·`PlayingEnergyIndicator` — 푸터 중앙 표시·30분 충전 재조회·발화 성공 시 -1·0/402 시 `showPlayingEnergyInsufficientPopup`→Wait 레이어. `EffectAnchorId.energyBadge`.
 - **Opening·홈 에너지 배지**: `EnergyHeaderBadge` — 충전 타이머(30분)·무제한 만료 재조회. 홈 복귀 시 `homeTabSelectedCounter` 증가로 `GET /v1/users/energy` 재조회(GNB 홈 탭·서브 pop 복귀·물리 뒤로가기). 문서: `.docs/CONTEXT.md` §4, `.docs/CONTEXT_ROLEPLAY_S2.md` §4-3·§4-4.

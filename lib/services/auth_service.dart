@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '../config/app_config.dart';
 
@@ -20,6 +21,7 @@ class AuthService {
     if (_googleSignInInstance == null) {
       _googleSignInInstance = GoogleSignIn(
         scopes: const ['email', 'profile'],
+        clientId: AppConfig.googleIosClientId,
         serverClientId: AppConfig.googleServerClientId,
       );
     }
@@ -35,6 +37,14 @@ class AuthService {
   /// - 사용자가 취소한 경우: null 반환
   static Future<GoogleSignInResult?> signInWithGoogle() async {
     try {
+      if (kDebugMode) {
+        debugPrint(
+          '[Auth] signIn env=${AppConfig.env} '
+          'iosClientId=${AppConfig.googleIosClientId ?? "(plist)"} '
+          'serverClientId=${AppConfig.googleServerClientId}',
+        );
+      }
+
       final GoogleSignInAccount? account = await _googleSignIn.signIn();
       if (account == null) {
         // 사용자가 로그인 플로우를 취소한 경우
@@ -43,6 +53,12 @@ class AuthService {
 
       final auth = await account.authentication;
       final idToken = auth.idToken;
+
+      if (kDebugMode) {
+        debugPrint(
+          '[Auth] signIn ok email=${account.email} hasIdToken=${idToken != null}',
+        );
+      }
 
       return GoogleSignInResult(
         account: account,
