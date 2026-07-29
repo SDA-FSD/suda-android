@@ -48,7 +48,7 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   bool _isInitialized = false; // 초기화 작업 한 번만 실행 플래그
   List<MainHomeBannerDto>? _banners;
   bool _isLoadingBanners = true;
@@ -63,15 +63,26 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _showWelcomeGift = false;
   /// 우상단 번개(`energy_sub`)와 동일 소스 — EnergyHeaderBadge onEnergyChanged.
   bool _isPremium = false;
+  bool _pushRegisterInFlight = false;
+  StreamSubscription<String>? _pushRefreshSub;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _pageController = PageController(initialPage: 0);
     _performInitialization();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _maybeShowWelcomeGift();
     });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // 설정 앱에서 알림을 나중에 켠 뒤 복귀해도 토큰 등록을 다시 시도한다.
+    if (state == AppLifecycleState.resumed) {
+      unawaited(_registerPushToken());
+    }
   }
 
   void _onHomeEnergyChanged(UserEnergyDto energy) {
@@ -103,6 +114,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    unawaited(_pushRefreshSub?.cancel());
+    _pushRefreshSub = null;
     _bannerTimer?.cancel();
     _pageController.dispose();
     super.dispose();
@@ -211,75 +225,67 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  /// 푸시 토큰 등록
+  /// 푸시 토큰 등록.
+  /// 홈 최초 진입 + 앱이 다시 foreground로 올 때 호출된다.
+  /// (iOS: 처음 '허용 안 함' 후 설정에서 나중에 켠 경우를 커버)
   Future<void> _registerPushToken() async {
-    // TODO(temp-log): 푸시 등록 진단용 — 확인 후 제거
-    print(
-      '[PUSH] _registerPushToken start platform=${Platform.isIOS ? 'IOS' : 'ANDROID'} hasAccessToken=${_accessToken != null}',
-    );
-    if (_accessToken == null) {
-      print('[PUSH] abort: accessToken null');
-      return;
-    }
+    if (_pushRegisterInFlight) return;
+    _pushRegisterInFlight = true;
     try {
+      _accessToken ??= await TokenStorage.loadAccessToken();
+      if (_accessToken == null) return;
+
       final messaging = FirebaseMessaging.instance;
 
       // iOS: 알림 권한 → APNs 토큰 준비 후 FCM getToken (필수 순서)
       if (Platform.isIOS) {
-        final settings = await messaging.requestPermission();
-        print('[PUSH] iOS permission=${settings.authorizationStatus}');
-        if (settings.authorizationStatus == AuthorizationStatus.denied) {
-          print('[PUSH] abort: notification permission denied');
-          return;
+        var settings = await messaging.getNotificationSettings();
+        if (settings.authorizationStatus == AuthorizationStatus.notDetermined) {
+          settings = await messaging.requestPermission();
         }
-        if (!await _waitForApnsToken(messaging)) {
-          print('[PUSH] abort: APNs token not ready');
-          return;
-        }
+        final allowed =
+            settings.authorizationStatus == AuthorizationStatus.authorized ||
+            settings.authorizationStatus == AuthorizationStatus.provisional;
+        if (!allowed) return;
+        if (!await _waitForApnsToken(messaging)) return;
       }
 
       final pushToken = await messaging.getToken();
-      if (pushToken == null) {
-        print('[PUSH] abort: FCM getToken() returned null');
-        return;
-      }
-      print('[PUSH] FCM token acquired len=${pushToken.length}');
+      if (pushToken == null) return;
       final languageCode = LanguageUtil.getCurrentLanguageCode();
 
-      // 서버에 푸시 토큰 전송 (응답 처리하지 않음)
       await SudaApiClient.registerPushToken(
         accessToken: _accessToken!,
         pushToken: pushToken,
         languageCode: languageCode,
       );
 
-      // 토큰 갱신 시 재등록 (최초 등록이 APNs 지연으로 실패한 뒤에도 복구)
-      FirebaseMessaging.instance.onTokenRefresh.listen((token) async {
+      // 토큰 갱신 시 재등록 (리스너는 세션당 1회만 연결)
+      _pushRefreshSub ??= FirebaseMessaging.instance.onTokenRefresh.listen((
+        token,
+      ) async {
         final access = await TokenStorage.loadAccessToken();
         if (access == null) return;
-        print('[PUSH] onTokenRefresh len=${token.length}');
         await SudaApiClient.registerPushToken(
           accessToken: access,
           pushToken: token,
           languageCode: LanguageUtil.getCurrentLanguageCode(),
         );
       });
-    } catch (e) {
-      print('[PUSH] _registerPushToken error: $e');
+    } catch (_) {
+      // 푸시 등록 실패는 UX를 막지 않음
+    } finally {
+      _pushRegisterInFlight = false;
     }
   }
 
   /// iOS에서 APNs 토큰이 준비될 때까지 재시도.
   /// firebase-ios-sdk 10.4+ / flutterfire는 APNs 없이 getToken()이 실패한다.
   Future<bool> _waitForApnsToken(FirebaseMessaging messaging) async {
-    // 첫 설치·권한 직후에는 APNs가 5초보다 늦게 오는 경우가 많음
-    for (var attempt = 1; attempt <= 20; attempt++) {
+    // 첫 설치·권한 직후에는 APNs가 수 초 늦게 오는 경우가 많음
+    for (var attempt = 0; attempt < 20; attempt++) {
       final apnsToken = await messaging.getAPNSToken();
-      if (apnsToken != null) {
-        print('[PUSH] APNs ready attempt=$attempt len=${apnsToken.length}');
-        return true;
-      }
-      print('[PUSH] APNs waiting attempt=$attempt/20');
+      if (apnsToken != null) return true;
       await Future<void>.delayed(const Duration(seconds: 1));
     }
     return false;

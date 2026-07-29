@@ -13,10 +13,8 @@ class PushApi {
     final uri = SudaHttpClient.buildUri('/v1/users/push-token');
 
     final deviceType = Platform.isIOS ? 'IOS' : 'ANDROID';
-    // TODO(temp-log): 푸시 등록 진단용 — 확인 후 제거
-    print('[PUSH] POST /v1/users/push-token deviceType=$deviceType tokenLen=${pushToken.length}');
     try {
-      final response = await SudaHttpClient.client
+      await SudaHttpClient.client
           .post(
             uri,
             headers: {
@@ -30,9 +28,7 @@ class PushApi {
             }),
           )
           .timeout(const Duration(seconds: 10));
-      print('[PUSH] POST response status=${response.statusCode}');
-    } catch (e) {
-      print('[PUSH] POST error: $e');
+    } catch (_) {
       // 무시
     }
   }
