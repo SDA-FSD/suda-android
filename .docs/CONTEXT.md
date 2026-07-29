@@ -239,7 +239,7 @@ flutter run --flavor dev -t lib/main.dart --dart-define=ENV=dev -d 541F3961-8182
 - **Change Plan (실측 중)**: `IapPurchaseService.changeSubscription` — `queryPastPurchases` + `ReplacementMode.deferred`. 모드 미확정(같은 구독 base plan에 DEFERRED 허용 여부 실측). old purchase 없으면 `oldPurchaseNotFound`. verify는 기존 경로 — **실측 시 서버 로그 병행**.
 - **Speech Feedback 펼침(`feedbackLockedYn`)**: Result·History(본문 동일)·View Chat. 서버 `RpS2UserHistoryDto.feedbackLockedYn` 기준(`ensureSpeechFeedbackUnlocked`). `'Y'` → Feedback 탭 시 Paywall; `'N'` → 캐시/에너지 재조회 없이 즉시 펼침. `'Y'`일 때 서버는 `speechFeedback`을 null로 내림 — Result/History는 USER message placeholder 카드+Feedback 버튼 유지, View Chat은 feedback null이면 Feedback 버튼 미노출. Paywall 구독 성공 시 Result/History는 `GET /rps2/user-histories/{id}` 재조회·`SeriesStateService` 캐시 갱신, **자동 펼침 없음**(재탭 시 펼침). 접기는 잠금 검사 없음.
 - Completed: `paywall_completed.dart` (l10n Continue/X → pop(true)). Lab Preview 유지.
-- 앱 버전: `1.2.1+50`
+- 앱 버전: `1.2.2+51`
 
 ### 상품 ID (Play Console / `IapPurchaseService`)
 | 구분 | productId | basePlanId / 비고 | 진입 | verify |
