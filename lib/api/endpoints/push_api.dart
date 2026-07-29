@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import '../client/suda_http_client.dart';
 
@@ -11,6 +12,7 @@ class PushApi {
   }) async {
     final uri = SudaHttpClient.buildUri('/v1/users/push-token');
 
+    final deviceType = Platform.isIOS ? 'IOS' : 'ANDROID';
     try {
       await SudaHttpClient.client
           .post(
@@ -20,7 +22,7 @@ class PushApi {
               'Content-Type': 'application/json',
             },
             body: jsonEncode({
-              'deviceType': 'ANDROID',
+              'deviceType': deviceType,
               'pushToken': pushToken,
               'languageCode': languageCode,
             }),
