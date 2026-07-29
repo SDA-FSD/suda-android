@@ -214,7 +214,9 @@ class _HomeScreenState extends State<HomeScreen> {
   /// 푸시 토큰 등록
   Future<void> _registerPushToken() async {
     // TODO(temp-log): 푸시 등록 진단용 — 확인 후 제거
-    print('[PUSH] _registerPushToken start platform=${Platform.isIOS ? 'IOS' : 'ANDROID'} hasAccessToken=${_accessToken != null}');
+    print(
+      '[PUSH] _registerPushToken start platform=${Platform.isIOS ? 'IOS' : 'ANDROID'} hasAccessToken=${_accessToken != null}',
+    );
     if (_accessToken == null) {
       print('[PUSH] abort: accessToken null');
       return;
@@ -225,46 +227,59 @@ class _HomeScreenState extends State<HomeScreen> {
       // iOS: 알림 권한 → APNs 토큰 준비 후 FCM getToken (필수 순서)
       if (Platform.isIOS) {
         final settings = await messaging.requestPermission();
-        print('[PUSH] requestPermission status=${settings.authorizationStatus}');
+        print('[PUSH] iOS permission=${settings.authorizationStatus}');
         if (settings.authorizationStatus == AuthorizationStatus.denied) {
-          print('[PUSH] abort: permission denied');
+          print('[PUSH] abort: notification permission denied');
           return;
         }
         if (!await _waitForApnsToken(messaging)) {
-          print('[PUSH] abort: APNs token not available');
+          print('[PUSH] abort: APNs token not ready');
           return;
         }
       }
 
       final pushToken = await messaging.getToken();
-      print('[PUSH] getToken result=${pushToken == null ? 'null' : 'len=${pushToken.length}'}');
       if (pushToken == null) {
-        print('[PUSH] abort: FCM token null');
+        print('[PUSH] abort: FCM getToken() returned null');
         return;
       }
+      print('[PUSH] FCM token acquired len=${pushToken.length}');
       final languageCode = LanguageUtil.getCurrentLanguageCode();
 
       // 서버에 푸시 토큰 전송 (응답 처리하지 않음)
-      print('[PUSH] calling registerPushToken languageCode=$languageCode');
       await SudaApiClient.registerPushToken(
         accessToken: _accessToken!,
         pushToken: pushToken,
         languageCode: languageCode,
       );
-      print('[PUSH] registerPushToken finished (HTTP errors are swallowed in PushApi)');
+
+      // 토큰 갱신 시 재등록 (최초 등록이 APNs 지연으로 실패한 뒤에도 복구)
+      FirebaseMessaging.instance.onTokenRefresh.listen((token) async {
+        final access = await TokenStorage.loadAccessToken();
+        if (access == null) return;
+        print('[PUSH] onTokenRefresh len=${token.length}');
+        await SudaApiClient.registerPushToken(
+          accessToken: access,
+          pushToken: token,
+          languageCode: LanguageUtil.getCurrentLanguageCode(),
+        );
+      });
     } catch (e) {
-      print('[PUSH] error: $e');
-      // 에러 발생 시에도 무시 (응답 처리하지 않음)
+      print('[PUSH] _registerPushToken error: $e');
     }
   }
 
-  /// iOS에서 APNs 토큰이 준비될 때까지 짧게 재시도.
+  /// iOS에서 APNs 토큰이 준비될 때까지 재시도.
   /// firebase-ios-sdk 10.4+ / flutterfire는 APNs 없이 getToken()이 실패한다.
   Future<bool> _waitForApnsToken(FirebaseMessaging messaging) async {
-    for (var attempt = 0; attempt < 5; attempt++) {
+    // 첫 설치·권한 직후에는 APNs가 5초보다 늦게 오는 경우가 많음
+    for (var attempt = 1; attempt <= 20; attempt++) {
       final apnsToken = await messaging.getAPNSToken();
-      print('[PUSH] getAPNSToken attempt=${attempt + 1}/5 hasToken=${apnsToken != null}');
-      if (apnsToken != null) return true;
+      if (apnsToken != null) {
+        print('[PUSH] APNs ready attempt=$attempt len=${apnsToken.length}');
+        return true;
+      }
+      print('[PUSH] APNs waiting attempt=$attempt/20');
       await Future<void>.delayed(const Duration(seconds: 1));
     }
     return false;
@@ -497,9 +512,7 @@ class _HomeScreenState extends State<HomeScreen> {
       if (i < _visibleCategoryCount) {
         categories.add(
           CategorySeriesRow(
-            key: ValueKey(
-              'category_${_seriesGroups![i].category.enumValue}',
-            ),
+            key: ValueKey('category_${_seriesGroups![i].category.enumValue}'),
             group: _seriesGroups![i],
             accessToken: _accessToken!,
             onSeriesTap: (item) => _navigateToSeriesOverview(item.id),
