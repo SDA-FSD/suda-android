@@ -74,6 +74,12 @@ flutter run --flavor dev -t lib/main.dart --dart-define=ENV=dev -d 541F3961-8182
 - **Google 로그인 연동**: `lib/services/auth_service.dart`
   - Google Sign-In을 통해 idToken 추출
   - `AuthService.signInWithGoogle()`: Google 로그인 및 idToken 반환
+- **Apple 로그인 연동**: 동일 `AuthService` + `sign_in_with_apple`
+  - `AuthService.signInWithApple()`: identityToken·**raw nonce**·(최초 시) email/fullName 반환. Apple 요청 nonce는 `SHA-256(raw)` hex.
+  - 지원: **iOS** local/dev/prd, **Android** dev/prd only (local·stg Android Apple 미지원).
+  - Android Services ID: dev `kr.sudatalk.android.login.dev` / prd `kr.sudatalk.android.login` (`AppConfig.appleServicesId`)
+  - Android redirectUri: `https://api.{dev-}sudatalk.kr/v1/auth/apple/callback` → 서버가 `intent://callback?...#Intent;package=kr.sudatalk.app[.env];scheme=signinwithapple;end`
+  - Login UI: Google·Apple 통짜 이미지 버튼. **iOS는 Apple 위**, **Android는 Google 위**. Apple 자산 `assets/images/apple_white_rd_SI.png`(공식 로고 기반 white 버튼).
 - **API 서버 연동**: `lib/api/suda_api_client.dart`
   - 구현 분리 구조:
     - HTTP/refresh 공통: `lib/api/client/suda_http_client.dart`
@@ -81,6 +87,7 @@ flutter run --flavor dev -t lib/main.dart --dart-define=ENV=dev -d 541F3961-8182
     - DTO/모델: `lib/models/*`
   - 기존 경로 호환: `lib/services/suda_api_client.dart`는 re-export용 래퍼
   - `SudaApiClient.loginWithGoogle()`: idToken과 deviceId를 서버에 전달하여 JWT 발급
+  - `SudaApiClient.loginWithApple()`: `POST /v1/auth/apple` — body `{ identityToken, deviceId, nonce(raw), fullName?, email?, authorizationCode? }` → JWT. provider=`apple`, 이메일 같아도 provider/sub 다르면 별계정. `authorizationCode`는 로그인 필수 아님(서버 무시·revoke 후속).
   - `SudaApiClient.refreshToken()`: refreshToken과 deviceId로 JWT 갱신 (rotate 반영)
   - `SudaApiClient.logout()`: refreshToken과 deviceId로 서버 로그아웃 통지
   - `SudaApiClient.getCurrentUser()`: JWT를 사용하여 사용자 정보 조회 (`/v1/users`)

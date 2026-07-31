@@ -1,11 +1,14 @@
 import 'dart:async' show unawaited;
+import 'dart:io' show Platform;
 import 'dart:math' show max;
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../config/app_config.dart';
 import '../l10n/app_localizations.dart';
 import '../services/auth_service.dart';
 import '../services/appsflyer_service.dart';
@@ -16,7 +19,7 @@ import '../utils/sub_screen_route.dart';
 import 'webview_screen.dart';
 
 class LoginScreen extends StatefulWidget {
-  final Function(GoogleSignInResult)? onSignIn;
+  final Future<void> Function()? onSignIn;
   final String? accessToken;
   final bool showAgreementLayerOnStart;
   final VoidCallback? onAgreementComplete;
@@ -45,6 +48,7 @@ class _LoginScreenState extends State<LoginScreen>
   static const _logoWidth = 40.0;
   static const _logoHeight = 36.0;
   static const _loginButtonHeight = 50.0;
+  static const _loginButtonGap = 12.0;
 
   static const _posterRows = [
     [
@@ -326,7 +330,67 @@ class _LoginScreenState extends State<LoginScreen>
         refreshToken: tokens.refreshToken,
       );
 
-      widget.onSignIn?.call(result);
+      await widget.onSignIn?.call();
+
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      final l10n = AppLocalizations.of(context)!;
+      DefaultToast.show(
+        context,
+        l10n.loginErrorFailed(error.toString()),
+        isError: true,
+      );
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _handleAppleSignIn() async {
+    if (_isLoading) {
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final result = await AuthService.signInWithApple();
+      if (!mounted) {
+        return;
+      }
+      if (result == null) {
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
+
+      final deviceId = await TokenStorage.getDeviceId();
+      final tokens = await SudaApiClient.loginWithApple(
+        identityToken: result.identityToken,
+        deviceId: deviceId,
+        nonce: result.rawNonce,
+        fullName: result.fullName,
+        email: result.email,
+        authorizationCode: result.authorizationCode,
+      );
+
+      await TokenStorage.saveTokens(
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+      );
+
+      await widget.onSignIn?.call();
 
       if (mounted) {
         setState(() {
@@ -481,26 +545,7 @@ class _LoginScreenState extends State<LoginScreen>
     );
   }
 
-  Widget _buildLoginButton(double screenWidth) {
-    final buttonWidth = screenWidth * 0.4;
-
-    if (_isLoading) {
-      return SizedBox(
-        width: buttonWidth,
-        height: _loginButtonHeight,
-        child: const Center(
-          child: SizedBox(
-            width: 20,
-            height: 20,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-            ),
-          ),
-        ),
-      );
-    }
-
+  Widget _buildGoogleLoginButton(double buttonWidth) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: _handleGoogleSignIn,
@@ -518,6 +563,84 @@ class _LoginScreenState extends State<LoginScreen>
         ),
       ),
     );
+  }
+
+  Widget _buildAppleLoginButton(double buttonWidth) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: _handleAppleSignIn,
+      child: SizedBox(
+        width: buttonWidth,
+        height: _loginButtonHeight,
+        child: Image.asset(
+          'assets/images/apple_white_rd_SI.png',
+          fit: BoxFit.contain,
+          errorBuilder: (context, error, stackTrace) {
+            return const Center(
+              child: Icon(Icons.apple, size: 24, color: Colors.white),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoginButtons(double screenWidth) {
+    // Apple 문구가 더 길어 Google(0.4)보다 넓게 — 동일 폭으로 시각 균형
+    final buttonWidth = (screenWidth * 0.55).clamp(200.0, screenWidth - 48);
+    final showApple = AppConfig.isAppleSignInSupported;
+    final isIos = !kIsWeb && Platform.isIOS;
+
+    if (_isLoading) {
+      final loadingHeight = showApple
+          ? (_loginButtonHeight * 2 + _loginButtonGap)
+          : _loginButtonHeight;
+      return SizedBox(
+        width: buttonWidth,
+        height: loadingHeight,
+        child: const Center(
+          child: SizedBox(
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+            ),
+          ),
+        ),
+      );
+    }
+
+    final google = _buildGoogleLoginButton(buttonWidth);
+    if (!showApple) {
+      return google;
+    }
+
+    final apple = _buildAppleLoginButton(buttonWidth);
+    // iOS: Apple 위 / Android: Google 위
+    final children = isIos
+        ? <Widget>[
+            apple,
+            const SizedBox(height: _loginButtonGap),
+            google,
+          ]
+        : <Widget>[
+            google,
+            const SizedBox(height: _loginButtonGap),
+            apple,
+          ];
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: children,
+    );
+  }
+
+  double get _loginButtonsBlockHeight {
+    if (!AppConfig.isAppleSignInSupported) {
+      return _loginButtonHeight;
+    }
+    return _loginButtonHeight * 2 + _loginButtonGap;
   }
 
   Widget _buildTermsText(BuildContext context) {
@@ -605,12 +728,12 @@ class _LoginScreenState extends State<LoginScreen>
             left: 0,
             right: 0,
             top: dividerY,
-            child: Center(child: _buildLoginButton(width)),
+            child: Center(child: _buildLoginButtons(width)),
           ),
           Positioned(
             left: width * 0.15,
             right: width * 0.15,
-            top: dividerY + _loginButtonHeight,
+            top: dividerY + _loginButtonsBlockHeight,
             height: contentHeight / 3,
             child: Center(child: _buildTermsText(context)),
           ),

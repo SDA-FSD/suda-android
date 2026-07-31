@@ -65,6 +65,7 @@ dependencies:
   in_app_purchase_android: ^0.5.0
   crypto: ^3.0.7
   firebase_performance: ^0.10.1+10
+  sign_in_with_apple: ^7.0.1
 
 dev_dependencies:
   flutter_test:

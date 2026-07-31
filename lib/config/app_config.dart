@@ -92,5 +92,47 @@ class AppConfig {
     }
   }
 
+  /// Android Sign in with Apple Services ID (`WebAuthenticationOptions.clientId`).
+  /// local Android Apple 로그인은 범위 밖(미지원). stg 미구현.
+  static String? get appleServicesId {
+    switch (env) {
+      case 'dev':
+        return 'kr.sudatalk.android.login.dev';
+      case 'prd':
+        return 'kr.sudatalk.android.login';
+      default:
+        return null;
+    }
+  }
+
+  /// Android Apple 웹 로그인 후 서버 콜백 (`WebAuthenticationOptions.redirectUri`).
+  /// local Android는 미지원. local iOS는 native라 불필요.
+  static Uri? get appleRedirectUri {
+    switch (env) {
+      case 'dev':
+        return Uri.parse(
+          'https://api.dev-sudatalk.kr/v1/auth/apple/callback',
+        );
+      case 'prd':
+        return Uri.parse('https://api.sudatalk.kr/v1/auth/apple/callback');
+      default:
+        return null;
+    }
+  }
+
+  /// Sign in with Apple 노출·호출 가능 여부.
+  /// iOS: local/dev/prd. Android: dev/prd only (local·stg 제외).
+  static bool get isAppleSignInSupported {
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      return isLocal || isDev || isPrd;
+    }
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      return (isDev || isPrd) &&
+          appleServicesId != null &&
+          appleRedirectUri != null;
+    }
+    return false;
+  }
+
 }
 

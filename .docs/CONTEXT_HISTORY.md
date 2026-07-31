@@ -6,6 +6,7 @@
 
 ## 최근 작업 메모
 
+- **Sign in with Apple 클라 골격(2026-07):** `sign_in_with_apple` + `POST /v1/auth/apple`(`AuthApi`/`AuthService`/`AppConfig`). Login Google·Apple 통짜 버튼(iOS Apple↑ / Android Google↑). Android Manifest `signinwithapple` callback. local Android·stg Apple 미지원. 실연동은 dev API 배포 후. 문서: `CONTEXT.md` §4, `CONTEXT_SCREEN.md` Login, `CONTEXT_IOS.md`.
 - **iOS Google Sign-In 558349 선제 배선:** `GoogleSignIn.{local,dev}.plist` + 빌드 시 `generated_google_signin_client.dart` + `AppConfig.googleIosClientId` + `register_google_signin_url_schemes.sh`. Firebase(841694)와 Sign-In(558349 non-prod) 분리.
 - **iOS Google idToken 이원화 정렬:** local/dev/prd Firebase plist에 env별 `SERVER_CLIENT_ID` 추가(AppConfig와 동일). `copy_google_service_info.sh`는 plist 전체 복사·복사 후 `SERVER_CLIENT_ID` 로그. `AuthService` debug 로그. Android와 동일 non-prod aud=558349 / prd aud=841694.
 - **CONTEXT 빌드 명령 정리:** Android/iOS `flutter run`·기기 ID·env를 `CONTEXT.md` §2~3에 통합. `CONTEXT_APPLE.md`는 시뮬 부팅·Firebase 자동장착·실패표만 경량화.

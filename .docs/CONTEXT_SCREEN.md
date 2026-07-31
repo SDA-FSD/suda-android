@@ -194,7 +194,8 @@
 - **노출 영역**: 최종 고정 로고 아래부터 화면 끝까지를 사용한다. 상단에는 12px 갭 뒤 환영 문구 첫줄(`headlineLarge`, `#0CABA8`)과 둘째줄(`bodyMedium`, 흰색), 중간 가상선(`dividerY`)에는 Google 로그인 버튼 **상단**이 맞도록 배치, 그 아래(`dividerY + 버튼 높이`)부터 높이 **`contentHeight/3`** 인 영역 중앙에 약관 문구를 둔다. 등장 연출 시 `Transform.translate` Y가 **노출 최상단(`contentTop+12`)이 뷰포트 하단 밖**으로 나가도록 거리를 `height`·`contentTop`에서 역산한다(여유 ~40px).
 - **Google 로그인 버튼**: 기존 `assets/images/android_dark_rd_SI.png` 버튼 이미지를 사용하고, 로딩 중에는 같은 영역에 `CircularProgressIndicator`를 표시한다.
 - **약관 문구**: 하단 영역 좌우 15% 패딩 안에서 `labelSmall` 기반으로 표시한다. 링크 색상/밑줄은 기존 `#80D7CF` 규칙 유지. 이용약관·개인정보처리방침 탭 시 각각 WebView로 이동한다.
-- **로그인 플로우**: `AuthService.signInWithGoogle()` → idToken 검증 → `SudaApiClient.loginWithGoogle()` → `TokenStorage.saveTokens()` → `onSignIn` 콜백 순서. 에러는 `DefaultToast`로 표시한다.
+- **로그인 플로우**: Google — `AuthService.signInWithGoogle()` → `SudaApiClient.loginWithGoogle()` → `TokenStorage.saveTokens()` → `onSignIn`. Apple — `AuthService.signInWithApple()` → `SudaApiClient.loginWithApple()` → 동일. 에러는 `DefaultToast`.
+- **로그인 버튼**: Google `android_dark_rd_SI.png`, Apple `apple_white_rd_SI.png`(높이 50). 폭 `screenWidth*0.55`(clamp). **iOS: Apple↑ Google↓**, **Android: Google↑ Apple↓**. Apple 버튼은 `AppConfig.isAppleSignInSupported`일 때만(Android local/stg 제외).
 
 ---
 

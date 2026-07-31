@@ -42,6 +42,57 @@ class AuthApi {
     );
   }
 
+  static Future<SudaAuthTokens> loginWithApple({
+    required String identityToken,
+    required String deviceId,
+    required String nonce,
+    String? fullName,
+    String? email,
+    String? authorizationCode,
+  }) async {
+    final uri = SudaHttpClient.buildUri('/v1/auth/apple');
+
+    late final http.Response response;
+    try {
+      final body = <String, dynamic>{
+        'identityToken': identityToken,
+        'deviceId': deviceId,
+        'nonce': nonce,
+      };
+      if (fullName != null && fullName.isNotEmpty) {
+        body['fullName'] = fullName;
+      }
+      if (email != null && email.isNotEmpty) {
+        body['email'] = email;
+      }
+      if (authorizationCode != null && authorizationCode.isNotEmpty) {
+        body['authorizationCode'] = authorizationCode;
+      }
+
+      response = await SudaHttpClient.client
+          .post(
+            uri,
+            headers: const {
+              'Content-Type': 'application/json',
+            },
+            body: jsonEncode(body),
+          )
+          .timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      rethrow;
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final Map<String, dynamic> data =
+          jsonDecode(response.body) as Map<String, dynamic>;
+      return SudaAuthTokens.fromJson(data);
+    }
+
+    throw Exception(
+      'SUDA Apple auth failed: HTTP ${response.statusCode} ${response.body}',
+    );
+  }
+
   static Future<SudaAuthTokens> refreshToken({
     required String refreshToken,
     required String deviceId,

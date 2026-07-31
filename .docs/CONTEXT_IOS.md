@@ -8,7 +8,8 @@
 
 - 확정 범위: **iPhone+iPad**, **local/dev/stg/prd 4환경**, **Sign in with Apple 추가**, **에너지 INAPP 3종과 Premium 월/연 구독 전체 지원**.
 - **골격·dev 시뮬레이터 기동까지 진행됨(2026-07):** `ios/Podfile`, local/dev/stg/prd scheme, Bundle ID `kr.sudatalk.app[.local|.dev|.stg]`, deployment 15.0, `Runner.entitlements`, 마이크 권한, `AppConfig` iOS local API 분기. Firebase 원본 `ios/Runner/Firebase/GoogleService-Info.{local,dev,prd}.plist` + 빌드 페이즈 `Copy GoogleService-Info`(`ios/scripts/copy_google_service_info.sh`)로 장착본 자동 생성. `Info.plist`에 Google URL scheme 3종 등록. Xcode·시뮬레이터로 `flutter run --flavor dev`·로그인 화면까지 확인.
-- 아직 남은 것: Sign in with Apple, APNs 실연동, StoreKit, 강제업데이트 App Store 링크, iPad 회귀 등(아래 단계 4~9). stg Firebase plist는 미구현.
+- **Sign in with Apple 클라 골격(2026-07):** `sign_in_with_apple`, `POST /v1/auth/apple`, Login 플랫폼별 버튼 순서, Android Manifest callback, entitlements `com.apple.developer.applesignin` 이미 포함. Console(dev/prd) 등록 완료. **실연동 검증은 dev API 배포 후**. local Android Apple·stg는 미지원.
+- 아직 남은 것: Apple 로그인 **실기기 E2E(dev 배포 후)**, APNs 실연동, StoreKit, 강제업데이트 App Store 링크, iPad 회귀 등(아래 단계 4~9). stg Firebase plist는 미구현.
 - Dart Android 가정도 상당수 남음: `[lib/api/endpoints/push_api.dart](lib/api/endpoints/push_api.dart)` `deviceType: ANDROID`, `[lib/services/iap_purchase_service.dart](lib/services/iap_purchase_service.dart)` Play 전용, `[lib/services/app_dialog_service.dart](lib/services/app_dialog_service.dart)` Play Store 위주.
 
 ## 열린 이슈 (잊으면 안 됨)

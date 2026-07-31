@@ -501,11 +501,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   /// 로그인 성공 시 호출
   ///
-  /// Google 로그인 후 JWT 토큰을 로드하고 사용자 정보를 조회한 뒤 화면 전환
-  Future<void> _onSignIn(GoogleSignInResult result) async {
-    // 1) Google 계정 정보 저장
+  /// Google/Apple 로그인 후 JWT 토큰을 로드하고 사용자 정보를 조회한 뒤 화면 전환
+  Future<void> _onSignIn() async {
+    // 1) Google 계정 캐시(있을 때만) — Apple 로그인 시 null일 수 있음
     setState(() {
-      _googleUser = result.account;
+      _googleUser = AuthService.currentUser;
     });
 
     // 2) 저장된 JWT 토큰 로드 (LoginScreen에서 이미 저장됨)
