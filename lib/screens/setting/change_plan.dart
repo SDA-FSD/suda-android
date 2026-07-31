@@ -14,7 +14,7 @@ import '../../widgets/default_popup.dart';
 enum _PlanKind { monthly, yearly }
 
 /// Change Plan Sub Screen.
-/// Confirm → [IapPurchaseService.changeSubscription] (DEFERRED 실측; 모드 미확정).
+/// Confirm → [IapPurchaseService.changeSubscription] (WITHOUT_PRORATION 실측).
 class ChangePlanScreen extends StatefulWidget {
   const ChangePlanScreen({super.key});
 
@@ -238,7 +238,7 @@ class _ChangePlanScreenState extends State<ChangePlanScreen> {
 
       debugPrint(
         '[DEBUG] ChangePlanScreen change start '
-        'newBasePlanId=$newBasePlanId replacementMode=deferred',
+        'newBasePlanId=$newBasePlanId replacementMode=withoutProration',
       );
 
       final result = await IapBusyOverlay.run(

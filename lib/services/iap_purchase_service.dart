@@ -251,10 +251,10 @@ class IapPurchaseService with WidgetsBindingObserver {
     );
   }
 
-  /// Premium base plan 변경 (실측: [ReplacementMode.deferred]).
+  /// Premium base plan 변경 (실측: [ReplacementMode.withoutProration]).
   ///
   /// 기존 활성 구매가 없으면 [IapPurchaseOutcome.oldPurchaseNotFound] (크래시 없음).
-  /// verify는 신규 구독과 동일 경로 — deferred 토큰은 서버 로그 병행 감시 필요.
+  /// verify는 신규 구독과 동일 경로 — 서버 로그 병행 감시 필요.
   Future<IapPurchaseResult> changeSubscription({
     required String newBasePlanId,
     required String accessToken,
@@ -289,7 +289,7 @@ class IapPurchaseService with WidgetsBindingObserver {
       debugPrint(
         '[DEBUG] IapPurchaseService changeSubscription: '
         'oldTokenLen=${oldPurchase.billingClientPurchase.purchaseToken.length}, '
-        'newBasePlanId=$newBasePlanId, replacementMode=deferred',
+        'newBasePlanId=$newBasePlanId, replacementMode=withoutProration',
       );
 
       return _purchase(
@@ -304,7 +304,7 @@ class IapPurchaseService with WidgetsBindingObserver {
         cacheBasePlanId: newBasePlanId,
         changeSubscriptionParam: ChangeSubscriptionParam(
           oldPurchaseDetails: oldPurchase,
-          replacementMode: ReplacementMode.deferred,
+          replacementMode: ReplacementMode.withoutProration,
         ),
       );
     } catch (e, st) {
