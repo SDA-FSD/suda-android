@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import '../config/app_config.dart';
 import '../l10n/app_localizations.dart';
@@ -47,8 +48,11 @@ class _LoginScreenState extends State<LoginScreen>
   static const _stillHeight = 36.0;
   static const _logoWidth = 40.0;
   static const _logoHeight = 36.0;
-  static const _loginButtonHeight = 50.0;
+  static const _loginButtonHeight = 48.0;
   static const _loginButtonGap = 12.0;
+  /// 로고·환영과의 간격을 줄이기 위한 추가 상향(버튼·약관 함께 이동).
+  static const _loginButtonsExtraLift = 36.0;
+  static const _loginButtonWidthFactor = 0.8;
 
   static const _posterRows = [
     [
@@ -546,19 +550,24 @@ class _LoginScreenState extends State<LoginScreen>
   }
 
   Widget _buildGoogleLoginButton(double buttonWidth) {
+    // Apple과 동일 슬롯(폭·높이·radius 8)을 클릭 영역으로 두고, 이미지는 중앙·높이 90%.
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: _handleGoogleSignIn,
-      child: SizedBox(
+      child: Container(
         width: buttonWidth,
         height: _loginButtonHeight,
+        alignment: Alignment.center,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.all(Radius.circular(8)),
+        ),
         child: Image.asset(
-          'assets/images/android_dark_rd_SI.png',
+          'assets/images/sign_in_with_google.png',
+          height: _loginButtonHeight * 0.9,
           fit: BoxFit.contain,
           errorBuilder: (context, error, stackTrace) {
-            return const Center(
-              child: Icon(Icons.login, size: 24, color: Colors.white),
-            );
+            return const Icon(Icons.login, size: 24, color: Colors.black87);
           },
         ),
       ),
@@ -566,28 +575,22 @@ class _LoginScreenState extends State<LoginScreen>
   }
 
   Widget _buildAppleLoginButton(double buttonWidth) {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: _handleAppleSignIn,
-      child: SizedBox(
-        width: buttonWidth,
+    // Login 배경(#121212)용 — white = 흰 배경·검정 로고/문구
+    // borderRadius 8 = 라이브러리 기본(둥근 사각형, 알약 아님)
+    return SizedBox(
+      width: buttonWidth,
+      height: _loginButtonHeight,
+      child: SignInWithAppleButton(
+        onPressed: _handleAppleSignIn,
         height: _loginButtonHeight,
-        child: Image.asset(
-          'assets/images/apple_white_rd_SI.png',
-          fit: BoxFit.contain,
-          errorBuilder: (context, error, stackTrace) {
-            return const Center(
-              child: Icon(Icons.apple, size: 24, color: Colors.white),
-            );
-          },
-        ),
+        style: SignInWithAppleButtonStyle.white,
+        borderRadius: const BorderRadius.all(Radius.circular(8)),
       ),
     );
   }
 
   Widget _buildLoginButtons(double screenWidth) {
-    // Apple 문구가 더 길어 Google(0.4)보다 넓게 — 동일 폭으로 시각 균형
-    final buttonWidth = (screenWidth * 0.55).clamp(200.0, screenWidth - 48);
+    final buttonWidth = screenWidth * _loginButtonWidthFactor;
     final showApple = AppConfig.isAppleSignInSupported;
     final isIos = !kIsWeb && Platform.isIOS;
 
@@ -701,6 +704,10 @@ class _LoginScreenState extends State<LoginScreen>
     final contentTop = logoEndTop + _logoHeight;
     final contentHeight = (height - contentTop).clamp(0.0, height);
     final dividerY = contentTop + (contentHeight / 2);
+    // 버튼이 2개일 때 늘어난 높이의 절반 + 추가 lift로 로고에 더 가깝게.
+    final loginButtonsTop = dividerY -
+        (_loginButtonsBlockHeight - _loginButtonHeight) / 2 -
+        _loginButtonsExtraLift;
     // Translate down so the topmost 노출(환영 문구) clears the viewport bottom before animation.
     const minContentLeadY = 12.0;
     const slidePastEdge = 40.0;
@@ -727,13 +734,13 @@ class _LoginScreenState extends State<LoginScreen>
           Positioned(
             left: 0,
             right: 0,
-            top: dividerY,
+            top: loginButtonsTop,
             child: Center(child: _buildLoginButtons(width)),
           ),
           Positioned(
             left: width * 0.15,
             right: width * 0.15,
-            top: dividerY + _loginButtonsBlockHeight,
+            top: loginButtonsTop + _loginButtonsBlockHeight,
             height: contentHeight / 3,
             child: Center(child: _buildTermsText(context)),
           ),

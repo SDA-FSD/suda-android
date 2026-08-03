@@ -191,11 +191,11 @@
 - **스크린 타입 특성**: Full Screen, GNB 없음
 - **진입 애니메이션**: 초기 **1000ms** 무대 세팅 후, 스틸(`splash_still_260513.png`, 165×36) **500ms** fade-out, 로고 파트(`splash_still_logo_part.png`, 40×36) **1000ms** 이동, 하단 노출 요소는 **fade-in 없이** 화면 아래 밖→최종 위치 **1000ms** 슬라이드(`easeOutCubic`). 로고 파트 opacity는 유지한다.
 - **포스터 배경**: 스크린 상단 50%를 포스터 노출 영역으로 사용한다. 영역을 세로 3행으로 나눈다. 각 행은 **1000ms** 슬라인 등장(`easeOutCubic`: 화면 밖→노출, 1·3행은 왼쪽 밖, 2행은 오른쪽 밖) 후 무한 마키: **1행** 우측 흐름 **60s** 주기, **2행** 좌측 **70s**, **3행** 우측 **66s**. `assets/images/small_posters/*.png`를 3개 그룹으로 쓰며 `pubspec.yaml` assets 등록. 포스터당 4px 패딩, 썸네일은 Home `RoleplayThumbnail`과 동일하게 **`ClipRRect` radius 10**. 상·하 1/6 높이 검정 그라데이션 오버레이.
-- **노출 영역**: 최종 고정 로고 아래부터 화면 끝까지를 사용한다. 상단에는 12px 갭 뒤 환영 문구 첫줄(`headlineLarge`, `#0CABA8`)과 둘째줄(`bodyMedium`, 흰색), 중간 가상선(`dividerY`)에는 Google 로그인 버튼 **상단**이 맞도록 배치, 그 아래(`dividerY + 버튼 높이`)부터 높이 **`contentHeight/3`** 인 영역 중앙에 약관 문구를 둔다. 등장 연출 시 `Transform.translate` Y가 **노출 최상단(`contentTop+12`)이 뷰포트 하단 밖**으로 나가도록 거리를 `height`·`contentTop`에서 역산한다(여유 ~40px).
-- **Google 로그인 버튼**: 기존 `assets/images/android_dark_rd_SI.png` 버튼 이미지를 사용하고, 로딩 중에는 같은 영역에 `CircularProgressIndicator`를 표시한다.
+- **노출 영역**: 최종 고정 로고 아래부터 화면 끝까지를 사용한다. 상단에는 12px 갭 뒤 환영 문구 첫줄(`headlineLarge`, `#0CABA8`)과 둘째줄(`bodyMedium`, 흰색). 중간 가상선(`dividerY = contentTop + contentHeight/2`) 기준 로그인 버튼 블록 `top`은 `dividerY - (블록높이 − 단버튼높이)/2 - _loginButtonsExtraLift(36)`로 올려 로고·환영과의 간격을 줄인다. 약관은 `loginButtonsTop + 블록높이`부터 높이 **`contentHeight/3`** 영역 중앙. 등장 연출 시 `Transform.translate` Y가 **노출 최상단(`contentTop+12`)이 뷰포트 하단 밖**으로 나가도록 거리를 `height`·`contentTop`에서 역산한다(여유 ~40px).
+- **Google 로그인 버튼**: Apple과 동일 슬롯(높이 48·폭 디스플레이 80%·radius 8·흰 배경)을 **전체 클릭 영역**으로 두고, 그 중앙에 `sign_in_with_google.png`를 슬롯 높이의 **90%**·`BoxFit.contain`으로 배치. 로딩 중에는 같은 영역에 `CircularProgressIndicator`를 표시한다.
 - **약관 문구**: 하단 영역 좌우 15% 패딩 안에서 `labelSmall` 기반으로 표시한다. 링크 색상/밑줄은 기존 `#80D7CF` 규칙 유지. 이용약관·개인정보처리방침 탭 시 각각 WebView로 이동한다.
 - **로그인 플로우**: Google — `AuthService.signInWithGoogle()` → `SudaApiClient.loginWithGoogle()` → `TokenStorage.saveTokens()` → `onSignIn`. Apple — `AuthService.signInWithApple()` → `SudaApiClient.loginWithApple()` → 동일. 에러는 `DefaultToast`.
-- **로그인 버튼**: Google `android_dark_rd_SI.png`, Apple `apple_white_rd_SI.png`(높이 50). 폭 `screenWidth*0.55`(clamp). **iOS: Apple↑ Google↓**, **Android: Google↑ Apple↓**. Apple 버튼은 `AppConfig.isAppleSignInSupported`일 때만(Android local/stg 제외).
+- **로그인 버튼**: Google·Apple 공통 슬롯 높이 **48**·폭 **디스플레이 80%**. Apple은 `SignInWithAppleButton`(`style: white`·`borderRadius` 8). **iOS: Apple↑ Google↓**, **Android: Google↑ Apple↓**. Apple 버튼은 `AppConfig.isAppleSignInSupported`일 때만(Android local/stg 제외).
 
 ---
 

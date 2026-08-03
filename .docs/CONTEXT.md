@@ -79,7 +79,7 @@ flutter run --flavor dev -t lib/main.dart --dart-define=ENV=dev -d 541F3961-8182
   - 지원: **iOS** local/dev/prd, **Android** dev/prd only (local·stg Android Apple 미지원).
   - Android Services ID: dev `kr.sudatalk.android.login.dev` / prd `kr.sudatalk.android.login` (`AppConfig.appleServicesId`)
   - Android redirectUri: `https://api.{dev-}sudatalk.kr/v1/auth/apple/callback` → 서버가 `intent://callback?...#Intent;package=kr.sudatalk.app[.env];scheme=signinwithapple;end`
-  - Login UI: Google·Apple 통짜 이미지 버튼. **iOS는 Apple 위**, **Android는 Google 위**. Apple 자산 `assets/images/apple_white_rd_SI.png`(공식 로고 기반 white 버튼).
+  - Login UI: Google는 폭 화면 80%·높이 48·radius 8 흰 클릭 영역 중앙에 `sign_in_with_google.png`(높이 슬롯의 90%·`BoxFit.contain`). Apple은 `SignInWithAppleButton`(`style: white`, radius 8). **iOS는 Apple 위**, **Android는 Google 위**.
 - **API 서버 연동**: `lib/api/suda_api_client.dart`
   - 구현 분리 구조:
     - HTTP/refresh 공통: `lib/api/client/suda_http_client.dart`
