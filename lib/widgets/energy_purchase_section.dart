@@ -174,6 +174,9 @@ class _EnergyPurchaseSectionState extends State<EnergyPurchaseSection> {
         productId: productId,
         consumable: _isConsumable(kind),
         accessToken: widget.accessToken,
+        // 탭 시점 세션 고정(스토어 체류 중 detail refetch로 id가 바뀌어도 유지).
+        offerSessionId:
+            offerSessionId.isNotEmpty ? offerSessionId : null,
       ),
     );
     if (!mounted) return;

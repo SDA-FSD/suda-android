@@ -472,15 +472,18 @@ class SudaApiClient {
   }
 
   /// POST /v1/purchases/verify — 구매 검증 (`successYn` / `pendingYn`).
+  /// 에너지 팝업 INAPP은 탭 시점 `offerSessionId`를 함께 전달(비어 있으면 생략).
   static Future<PurchaseVerifyResultDto> verifyPurchase({
     required String accessToken,
     required String purchaseToken,
     required String productId,
+    String? offerSessionId,
   }) {
     return PurchaseApi.verifyPurchase(
       accessToken: accessToken,
       purchaseToken: purchaseToken,
       productId: productId,
+      offerSessionId: offerSessionId,
     );
   }
 

@@ -13,17 +13,20 @@ class PurchaseApi {
     required String accessToken,
     required String purchaseToken,
     required String productId,
+    String? offerSessionId,
   }) async {
     return await SudaHttpClient.executeWithRefresh(
       () => _verifyPurchaseInternal(
         accessToken,
         purchaseToken,
         productId,
+        offerSessionId,
       ),
       retryWithNewToken: (newToken) => _verifyPurchaseInternal(
         newToken,
         purchaseToken,
         productId,
+        offerSessionId,
       ),
     );
   }
@@ -32,8 +35,18 @@ class PurchaseApi {
     String accessToken,
     String purchaseToken,
     String productId,
+    String? offerSessionId,
   ) async {
     final uri = SudaHttpClient.buildUri('/v1/purchases/verify');
+
+    final body = <String, dynamic>{
+      'purchaseToken': purchaseToken,
+      'productId': productId,
+    };
+    final sessionId = offerSessionId?.trim();
+    if (sessionId != null && sessionId.isNotEmpty) {
+      body['offerSessionId'] = sessionId;
+    }
 
     late final http.Response response;
     try {
@@ -44,10 +57,7 @@ class PurchaseApi {
               'Authorization': 'Bearer $accessToken',
               'Content-Type': 'application/json',
             },
-            body: jsonEncode({
-              'purchaseToken': purchaseToken,
-              'productId': productId,
-            }),
+            body: jsonEncode(body),
           )
           .timeout(const Duration(seconds: 15));
     } on TimeoutException {

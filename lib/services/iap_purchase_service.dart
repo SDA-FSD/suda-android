@@ -42,6 +42,8 @@ class IapPurchaseService with WidgetsBindingObserver {
   Completer<IapPurchaseResult>? _pending;
   String? _pendingProductId;
   String? _pendingAccessToken;
+  /// 에너지 팝업 INAPP: 탭 시점 offerSessionId(verify 어트리뷰션). refetch로 바뀌어도 유지.
+  String? _pendingOfferSessionId;
   Timer? _resumeGraceTimer;
   bool _lifecycleObserving = false;
   /// 매칭 purchaseStream 수신 후 true. resume grace가 verify 중 storeDismissed로
@@ -220,16 +222,19 @@ class IapPurchaseService with WidgetsBindingObserver {
   }
 
   /// INAPP 구매 → verify.
+  /// [offerSessionId]: 에너지 팝업 탭 시점 세션(verify body). 비어 있으면 미포함.
   Future<IapPurchaseResult> purchaseInApp({
     required String productId,
     required bool consumable,
     required String accessToken,
+    String? offerSessionId,
   }) {
     return _purchase(
       productId: productId,
       accessToken: accessToken,
       resolveProduct: (products) => products.isEmpty ? null : products.first,
       consumable: consumable,
+      offerSessionId: offerSessionId,
     );
   }
 
@@ -323,6 +328,7 @@ class IapPurchaseService with WidgetsBindingObserver {
     required bool consumable,
     String? cacheBasePlanId,
     ChangeSubscriptionParam? changeSubscriptionParam,
+    String? offerSessionId,
   }) async {
     if (_pending != null) {
       return IapPurchaseResult.storeDismissed;
@@ -336,6 +342,9 @@ class IapPurchaseService with WidgetsBindingObserver {
     _pending = completer;
     _pendingProductId = productId;
     _pendingAccessToken = accessToken;
+    final trimmedOffer = offerSessionId?.trim();
+    _pendingOfferSessionId =
+        (trimmedOffer != null && trimmedOffer.isNotEmpty) ? trimmedOffer : null;
     _purchaseUpdateReceived = false;
     _cancelResumeGrace();
 
@@ -468,6 +477,7 @@ class IapPurchaseService with WidgetsBindingObserver {
             accessToken: accessToken,
             purchaseToken: purchaseToken,
             productId: purchase.productID,
+            offerSessionId: _pendingOfferSessionId,
           );
           if (!verify.isSuccess) {
             _failPending(IapPurchaseResult.verifyFailed);
@@ -513,6 +523,7 @@ class IapPurchaseService with WidgetsBindingObserver {
     _pending = null;
     _pendingProductId = null;
     _pendingAccessToken = null;
+    _pendingOfferSessionId = null;
     _purchaseUpdateReceived = false;
   }
 }
