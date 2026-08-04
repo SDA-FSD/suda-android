@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 import '../client/suda_http_client.dart';
 
 class ImpressionApi {
-  /// `POST /v1/users/impression/product` — offerSessionId + productId product 탭 impression 수집.
+  /// `POST /v1/impressions/products` — offerSessionId + productId product 탭 impression 수집.
   static Future<void> impressProduct({
     required String accessToken,
     required String offerSessionId,
@@ -31,7 +31,7 @@ class ImpressionApi {
     required String offerSessionId,
     required String productId,
   }) async {
-    final uri = SudaHttpClient.buildUri('/v1/users/impression/product');
+    final uri = SudaHttpClient.buildUri('/v1/impressions/products');
 
     late final http.Response response;
     try {
@@ -62,7 +62,7 @@ class ImpressionApi {
     }
 
     throw Exception(
-      'POST /v1/users/impression/product failed: HTTP ${response.statusCode} ${response.body}',
+      'POST /v1/impressions/products failed: HTTP ${response.statusCode} ${response.body}',
     );
   }
 }

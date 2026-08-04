@@ -352,7 +352,7 @@ class SudaApiClient {
     return dto;
   }
 
-  /// `POST /v1/users/impression/product` — 에너지 팝업 내 INAPP 상품 탭 impression.
+  /// `POST /v1/impressions/products` — 에너지 팝업 내 INAPP 상품 탭 impression.
   /// 응답은 사용하지 않으므로(서버 저장) Future 완료만 기다린다.
   static Future<void> impressProduct({
     required String accessToken,
