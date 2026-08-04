@@ -1,6 +1,8 @@
 import 'common_models.dart';
 
-/// GET /v1/users/energy/detail 응답
+/// 에너지 API 응답 공용 모델.
+/// - `GET /v1/users/energy/simple`: 레이블/상태(잔량·구독). `show*PurchaseYn`은 응답에 없어 `N`.
+/// - `GET /v1/users/energy/detail`: 팝업용. 상품 노출 플래그 포함.
 class UserEnergyDto {
   final int energyCount;
   final int maxEnergyCount;
@@ -10,6 +12,7 @@ class UserEnergyDto {
   final DateTime? subscriptionExpiredAt;
   /// Play Billing base plan id (예: `bp-premium-monthly` / `bp-premium-yearly`).
   final String? subscriptionBasePlanId;
+  /// detail 전용. simple 응답에는 없음 → 기본 `N`.
   final String showUnlimitedPurchaseYn;
   final String showCapacity6PurchaseYn;
   final String showCapacity7PurchaseYn;

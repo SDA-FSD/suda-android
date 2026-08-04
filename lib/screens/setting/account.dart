@@ -117,7 +117,7 @@ class _AccountScreenState extends State<AccountScreen> with SingleTickerProvider
     try {
       final token = await TokenStorage.loadAccessToken();
       if (token == null) return;
-      final energy = await SudaApiClient.getUserEnergy(accessToken: token);
+      final energy = await SudaApiClient.getUserEnergySimple(accessToken: token);
       if (!mounted) return;
       final subscribed = SubscriptionStatusCache.isSubscribedActive;
       setState(() {

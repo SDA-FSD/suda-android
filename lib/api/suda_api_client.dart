@@ -337,9 +337,19 @@ class SudaApiClient {
     return UserApi.getUserProfile(accessToken: accessToken);
   }
 
+  /// 에너지 팝업(상품 플래그 필요). 레이블/배지 갱신은 [getUserEnergySimple].
   static Future<UserEnergyDto> getUserEnergy({required String accessToken}) async {
     final dto = await UserApi.getUserEnergy(accessToken: accessToken);
     // 캐시 + 리스너(Home 프리미엄 뱃지 등) 동시 갱신
+    EnergyRefreshBus.instance.notify(dto);
+    return dto;
+  }
+
+  /// 배지·Playing·구독 상태 등 레이블/상태 갱신 (`GET /v1/users/energy/simple`).
+  static Future<UserEnergyDto> getUserEnergySimple({
+    required String accessToken,
+  }) async {
+    final dto = await UserApi.getUserEnergySimple(accessToken: accessToken);
     EnergyRefreshBus.instance.notify(dto);
     return dto;
   }

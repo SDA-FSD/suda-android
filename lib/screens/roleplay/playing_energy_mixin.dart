@@ -105,7 +105,7 @@ mixin PlayingEnergyMixin<T extends StatefulWidget> on State<T> {
     final token = await TokenStorage.loadAccessToken();
     if (token == null || !mounted) return;
     try {
-      final dto = await SudaApiClient.getUserEnergy(accessToken: token);
+      final dto = await SudaApiClient.getUserEnergySimple(accessToken: token);
       if (!mounted) return;
       setState(() => _playingEnergy = dto);
       _playingRefetchTracker.syncFrom(dto, DateTime.now().toUtc());

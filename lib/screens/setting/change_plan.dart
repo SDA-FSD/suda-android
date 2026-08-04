@@ -105,7 +105,7 @@ class _ChangePlanScreenState extends State<ChangePlanScreen> {
         });
         return;
       }
-      final energy = await SudaApiClient.getUserEnergy(accessToken: token);
+      final energy = await SudaApiClient.getUserEnergySimple(accessToken: token);
       final prices =
           await IapPurchaseService.instance.loadPremiumSubscriptionPrices();
       if (!mounted) return;

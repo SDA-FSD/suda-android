@@ -93,7 +93,8 @@ class _WelcomeGiftLayerState extends State<WelcomeGiftLayer>
       final user = await SudaApiClient.getCurrentUser(accessToken: accessToken);
       MainUserSync.instance.notifyUserUpdated(user);
 
-      final energy = await SudaApiClient.getUserEnergy(accessToken: accessToken);
+      final energy =
+          await SudaApiClient.getUserEnergySimple(accessToken: accessToken);
       EnergyRefreshBus.instance.notify(energy);
     } catch (_) {
       // 비-200 / 네트워크 오류: meta 유지, 레이어만 숨김

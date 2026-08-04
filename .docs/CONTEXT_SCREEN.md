@@ -328,8 +328,8 @@
     - 메인 pill fill `#8A38F5→#280752`·stroke `#80D7CF→#8A38F5` (좌→우, 1px padding border), radius height/2
     - Explorar: fill white 3.8%·12px 흰색·conic stroke·padding 4·radius 12(24h pill)
     - **글로우 애니메이션**: progress 기반 좌우 왕복(easeInOut 2.4~3.8s/leg). Glow1 별(왼)→오른끝→홈, Glow2 혜택보기(오른)→왼끝→홈. 횡단 중 Y 튕김 0~3회 랜덤 + bob. 소스: `paywall_star_badge.png` blur σ10, opacity ~0.55
-    - 탭: pill 전체 → `PaywallScreen.push` → 성공 시 `getUserEnergy` 재조회 후 CTA 숨김
-    - Profile 탭 활성·복귀 시 `getUserEnergy`로 구독 상태 갱신
+    - 탭: pill 전체 → `PaywallScreen.push` → 성공 시 `getUserEnergySimple` 재조회 후 CTA 숨김
+    - Profile 탭 활성·복귀 시 `getUserEnergySimple`로 구독 상태 갱신
 - **Profile 히스토리 (S2)**: `GET /rps2/user-histories?pageNum=` (0-based 페이징). 썸네일 3열 그리드 — `imgPath`·`starResult`·`createdAt`(dd/mm) 기존과 동일. 상단 좌측 **CEFR 알약** + 우측 별 3개. 탭 시 `HistoryScreen(rpUserHistoryId)` → `GET /rps2/user-histories/{id}` 후 Result 본문(애니메이션 없음).
 - **Saved 표현 (Expression 탭)**: 목록 `GET /v1/users/expressions?pageNum=` · 카드 탭 TTS `GET /rps2/user-histories/{rpUserHistoryId}/expressions/{expressionIndex}/sound` (`roleplayResultId` → `rpUserHistoryId`, `TtsResultDto`) · 삭제 `DELETE /v1/users/expressions?rpResultId=…&expressionIndex=…`. 카드 배경 기본·재생 모두 `#FFFFFF`. 오디오 fetch 중 16×16 `CircularProgressIndicator`(strokeWidth 2, `#0CABA8` 70%), 재생 중 `megaphone_fill.png` `#0CABA8`, 기본 `megaphone.png` `#0CABA8`(Result Key Expression 카드와 동일).
 - **Saved 표현 삭제 확인 팝업**: Saved 탭의 expression 카드에서 `bookmark_on` 탭 시 `DefaultPopup`으로 삭제 confirm 팝업을 띄운다. 상단 버튼(삭제/Remove) 탭 시 팝업을 닫고 `DELETE /v1/users/expressions`를 호출해 목록에서 제거, 하단 버튼(Practice more/더 연습할래요) 탭 시 팝업만 닫는다.
@@ -410,7 +410,7 @@
 
 ### 스크린 내부 구현 특이사항
 - 키보드 활성화 시 `resizeToAvoidBottomInset: false` (하단 "계정 삭제"가 키보드와 함께 올라오지 않도록)
-- 진입 시 `GET /v1/users/energy/detail`로 구독 상태 갱신 (`SubscriptionStatusCache`)
+- 진입 시 `GET /v1/users/energy/simple`로 구독 상태 갱신 (`SubscriptionStatusCache`)
 - **Subscription 섹션**
   - 무료 (`isSubscribedActive == false`): Free Plan 카드(`check_green.svg`) → Paywall. l10n `accountFreePlanTitle` / `accountFreePlanSubtitle`
   - 구독 활성: Subscription 헤더 좌측. 구독↔카드 간격 **24**(이름/계정 섹션과 동일). `Change Plan >`(l10n `accountChangePlan` + chevron, 텍스트 `bodySmall` 14·**w700**/`wght` 700·흰색)는 그 간격 안 하단 우측(`right: 8`, 카드와 `bottom: 12`) → `ChangePlanScreen`. Premium 카드(`premium_verified_badge.png`) — 제목 `accountPremiumTitle`, 부제 `accountPremiumSubtitle`, 갱신일 `accountPremiumRenewsOn`(`subscriptionExpiredAt`, en/ko `yyyy/MM/dd` · pt `dd/MM/yyyy`)
@@ -430,7 +430,7 @@
 
 ### 스크린 내부 구현 특이사항
 - 헤더: l10n `changePlanTitle` (en Change Plan / pt Alterar plano / ko **요금제 변경**). Account 버튼 `accountChangePlan`(ko 플랜 변경)과 분리.
-- 진입 시 `GET /v1/users/energy/detail` + `loadPremiumSubscriptionPrices()`.
+- 진입 시 `GET /v1/users/energy/simple` + `loadPremiumSubscriptionPrices()`.
 - **`subscriptionBasePlanId` null/미지 값·로드 실패**: 추측 폴백 없음. l10n `changePlanLoadFailed` + `changePlanRetry`로 재시도.
 - **Current Plan**: 섹션 라벨 H2(`headlineMedium`)·`#0CABA8`. 카드 높이 **103**·좌우 패딩 **16**. 좌측 플랜명 20·갱신일 14(`changePlanRenewsOn`), 우측 가격 **H3** 수직 중앙.
 - **Available Plans**: 동일 섹션 라벨. 카드 동일 폭·**minHeight 103**(설명 줄바꿈 시 확장, Text 고정 높이 없음)·좌우 16. 라디오 **24×24**·플랜명 20·설명 14·주 가격 H3·연간 부제 **`#80D7CF` 14**. ko 연간 설명 `paywallAnnualPlanSubtitle`는 `월간 플랜 대비`/`33% 이상 절약` 2줄(`\n`); 폭 부족 시 부제 `FittedBox`로 축소해 2줄 유지. 탭 토글 선택.

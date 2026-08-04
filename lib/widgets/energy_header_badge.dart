@@ -14,7 +14,7 @@ const _energyZeroColor = Color(0xFFE60000);
 
 /// 홈·Opening 등 우상단 에너지/무제한 배지. 탭 시 에너지 정보 팝업.
 class EnergyHeaderBadge extends StatefulWidget {
-  /// 변경 시 `GET /v1/users/energy/detail` 재조회 (예: Home 탭 재진입).
+  /// 변경 시 `GET /v1/users/energy/simple` 재조회 (예: Home 탭 재진입).
   final int? refreshCounter;
 
   /// true면 `EffectAnchorId.energyBadge` 앵커로 등록 (Home Like 이펙트 등).
@@ -133,7 +133,7 @@ class _EnergyHeaderBadgeState extends State<EnergyHeaderBadge> {
     if (token == null) return;
     _accessToken = token;
     try {
-      final dto = await SudaApiClient.getUserEnergy(accessToken: token);
+      final dto = await SudaApiClient.getUserEnergySimple(accessToken: token);
       if (!mounted) return;
       _applyEnergy(dto);
     } catch (_) {

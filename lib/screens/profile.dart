@@ -310,7 +310,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final token = await TokenStorage.loadAccessToken();
       if (token == null) return;
 
-      await SudaApiClient.getUserEnergy(accessToken: token);
+      await SudaApiClient.getUserEnergySimple(accessToken: token);
       if (!mounted) return;
 
       setState(() {

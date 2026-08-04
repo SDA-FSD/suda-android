@@ -366,7 +366,9 @@ class UserApi {
   }
 
   static Future<UserEnergyDto>? _inflightEnergyDetail;
+  static Future<UserEnergyDto>? _inflightEnergySimple;
 
+  /// `GET /v1/users/energy/detail` — 상품 노출 플래그 포함. 에너지 팝업 전용.
   static Future<UserEnergyDto> getUserEnergy({
     required String accessToken,
   }) async {
@@ -374,8 +376,9 @@ class UserApi {
     if (existing != null) return existing;
 
     final future = SudaHttpClient.executeWithRefresh(
-      () => _getUserEnergyInternal(accessToken),
-      retryWithNewToken: (newToken) => _getUserEnergyInternal(newToken),
+      () => _getUserEnergyAt('/v1/users/energy/detail', accessToken),
+      retryWithNewToken: (newToken) =>
+          _getUserEnergyAt('/v1/users/energy/detail', newToken),
     );
     _inflightEnergyDetail = future;
     try {
@@ -387,8 +390,33 @@ class UserApi {
     }
   }
 
-  static Future<UserEnergyDto> _getUserEnergyInternal(String accessToken) async {
-    final uri = SudaHttpClient.buildUri('/v1/users/energy/detail');
+  /// `GET /v1/users/energy/simple` — 잔량·구독 등 레이블/상태용(상품 플래그 없음).
+  static Future<UserEnergyDto> getUserEnergySimple({
+    required String accessToken,
+  }) async {
+    final existing = _inflightEnergySimple;
+    if (existing != null) return existing;
+
+    final future = SudaHttpClient.executeWithRefresh(
+      () => _getUserEnergyAt('/v1/users/energy/simple', accessToken),
+      retryWithNewToken: (newToken) =>
+          _getUserEnergyAt('/v1/users/energy/simple', newToken),
+    );
+    _inflightEnergySimple = future;
+    try {
+      return await future;
+    } finally {
+      if (identical(_inflightEnergySimple, future)) {
+        _inflightEnergySimple = null;
+      }
+    }
+  }
+
+  static Future<UserEnergyDto> _getUserEnergyAt(
+    String path,
+    String accessToken,
+  ) async {
+    final uri = SudaHttpClient.buildUri(path);
 
     late final http.Response response;
     try {
@@ -415,7 +443,7 @@ class UserApi {
     }
 
     throw Exception(
-      'GET /v1/users/energy/detail failed: HTTP ${response.statusCode} ${response.body}',
+      'GET $path failed: HTTP ${response.statusCode} ${response.body}',
     );
   }
 
