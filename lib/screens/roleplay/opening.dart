@@ -160,7 +160,10 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen> {
         return;
       }
       if (sessionId == '0') {
-        await showEnergyInsufficientPopup(context);
+        await showEnergyInsufficientPopup(
+          context,
+          screen: EnergyOfferScreen.openingInsufficient,
+        );
         _restoreButton();
         return;
       }
@@ -320,7 +323,9 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen> {
           Positioned(
             top: topInset + 16,
             right: 16,
-            child: const EnergyHeaderBadge(),
+            child: const EnergyHeaderBadge(
+              energyOfferScreen: EnergyOfferScreen.opening,
+            ),
           ),
         ],
       ),

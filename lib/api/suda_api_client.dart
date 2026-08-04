@@ -10,6 +10,7 @@ import '../models/version_models.dart';
 import 'endpoints/auth_api.dart';
 import 'endpoints/feedback_api.dart';
 import 'endpoints/home_api.dart';
+import 'endpoints/impression_api.dart';
 import 'endpoints/notice_api.dart';
 import 'endpoints/purchase_api.dart';
 import 'endpoints/push_api.dart';
@@ -338,11 +339,31 @@ class SudaApiClient {
   }
 
   /// 에너지 팝업(상품 플래그 필요). 레이블/배지 갱신은 [getUserEnergySimple].
-  static Future<UserEnergyDto> getUserEnergy({required String accessToken}) async {
-    final dto = await UserApi.getUserEnergy(accessToken: accessToken);
+  static Future<UserEnergyDto> getUserEnergy({
+    required String accessToken,
+    String? screen,
+  }) async {
+    final dto = await UserApi.getUserEnergy(
+      accessToken: accessToken,
+      screen: screen,
+    );
     // 캐시 + 리스너(Home 프리미엄 뱃지 등) 동시 갱신
     EnergyRefreshBus.instance.notify(dto);
     return dto;
+  }
+
+  /// `POST /v1/users/impression/product` — 에너지 팝업 내 INAPP 상품 탭 impression.
+  /// 응답은 사용하지 않으므로(서버 저장) Future 완료만 기다린다.
+  static Future<void> impressProduct({
+    required String accessToken,
+    required String offerSessionId,
+    required String productId,
+  }) {
+    return ImpressionApi.impressProduct(
+      accessToken: accessToken,
+      offerSessionId: offerSessionId,
+      productId: productId,
+    );
   }
 
   /// 배지·Playing·구독 상태 등 레이블/상태 갱신 (`GET /v1/users/energy/simple`).

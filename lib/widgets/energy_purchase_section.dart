@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:marquee/marquee.dart';
 
 import '../l10n/app_localizations.dart';
+import '../api/suda_api_client.dart';
 import '../models/user_models.dart';
 import '../screens/paywall/paywall.dart';
 import '../services/energy_refresh_bus.dart';
@@ -49,6 +50,8 @@ class _EnergyPurchaseSectionState extends State<EnergyPurchaseSection> {
   double _themeTintOpacity = _themeTintIdle;
   bool _goPremiumDismissed = false;
   bool _goPremiumRemoving = false;
+  /// offerSessionId+productId 단위 impression 중복 전송 방지(팝업 생명주기).
+  final Set<String> _impressedTapKeys = {};
 
   @override
   void initState() {
@@ -139,6 +142,27 @@ class _EnergyPurchaseSectionState extends State<EnergyPurchaseSection> {
     if (_busyKind != null || IapPurchaseService.instance.isBusy) return;
     if (widget.accessToken.isEmpty) return;
 
+    final offerSessionId = _energy.offerSessionId;
+    final productId = _productId(kind);
+    if (offerSessionId.isNotEmpty) {
+      final tapKey = '$offerSessionId::$productId';
+      if (!_impressedTapKeys.contains(tapKey)) {
+        _impressedTapKeys.add(tapKey);
+        // tap 즉시 impression increment만 요청 (응답 무시).
+        unawaited(() async {
+          try {
+            await SudaApiClient.impressProduct(
+              accessToken: widget.accessToken,
+              offerSessionId: offerSessionId,
+              productId: productId,
+            );
+          } catch (_) {
+            // impression 실패는 UX에 영향 없음(미수집 방지).
+          }
+        }());
+      }
+    }
+
     setState(() {
       _busyKind = kind;
       _themeTintOpacity = _themeTintBusy;
@@ -147,7 +171,7 @@ class _EnergyPurchaseSectionState extends State<EnergyPurchaseSection> {
     final result = await IapBusyOverlay.run(
       context,
       () => IapPurchaseService.instance.purchaseInApp(
-        productId: _productId(kind),
+        productId: productId,
         consumable: _isConsumable(kind),
         accessToken: widget.accessToken,
       ),

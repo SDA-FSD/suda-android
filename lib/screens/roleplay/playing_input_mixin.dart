@@ -776,6 +776,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
       onEndRoleplay: () {
         onPlayingEnergyExitRequested?.call();
       },
+      screen: EnergyOfferScreen.playingInsufficient,
     );
   }
 

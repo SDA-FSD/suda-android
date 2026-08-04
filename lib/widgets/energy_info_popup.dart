@@ -16,6 +16,18 @@ const _energyZeroColor = Color(0xFFE60000);
 const _progressBg = Color(0xFF635F5F);
 const _progressFill = Color(0xFF0CABA8);
 
+/// 에너지 팝업 offer impression 통계용 `screen` 쿼리 파라미터 값.
+/// 서버 contract이므로 임의 수정/확장 금지(향후 통계 수집 영향).
+class EnergyOfferScreen {
+  static const String home = 'home';
+  static const String opening = 'opening';
+  static const String openingInsufficient = 'opening_insufficient';
+  static const String playing = 'playing';
+  static const String playingInsufficient = 'playing_insufficient';
+  // Lab은 구현에서 제외(팝업 내 상세 refetch/impression 미호출).
+  static const String lab = 'lab';
+}
+
 /// 에너지 팝업 전역 따닥 방지 (배지·Playing·부족 팝업·Lab 공통).
 bool _energyPopupBusy = false;
 
@@ -29,8 +41,12 @@ Future<void> _withEnergyPopupLock(Future<void> Function() action) async {
   }
 }
 
-/// 홈 에너지 배지 탭 시 `GET /v1/users/energy/detail` 후 에너지 안내 팝업.
-Future<void> showEnergyInfoPopup(BuildContext context) {
+/// 에너지 팝업(상태/구독/잔량 안내) 표시.
+/// `screen`은 서버 통계 수집 contract 용도입니다.
+Future<void> showEnergyInfoPopup(
+  BuildContext context, {
+  required String screen,
+}) {
   return _withEnergyPopupLock(() async {
     await TokenRefreshService.instance.refreshIfNeeded();
     if (!context.mounted) return;
@@ -39,7 +55,10 @@ Future<void> showEnergyInfoPopup(BuildContext context) {
 
     UserEnergyDto energy;
     try {
-      energy = await SudaApiClient.getUserEnergy(accessToken: accessToken);
+      energy = await SudaApiClient.getUserEnergy(
+        accessToken: accessToken,
+        screen: screen,
+      );
     } catch (_) {
       return;
     }
@@ -49,12 +68,16 @@ Future<void> showEnergyInfoPopup(BuildContext context) {
       context,
       energy,
       accessToken: accessToken,
+      screen: screen,
     );
   });
 }
 
 /// Opening `sessionId == '0'` 등 에너지 부족 시 에너지 정보 팝업(본문 문구만 교체).
-Future<void> showEnergyInsufficientPopup(BuildContext context) {
+Future<void> showEnergyInsufficientPopup(
+  BuildContext context, {
+  required String screen,
+}) {
   return _withEnergyPopupLock(() async {
     await TokenRefreshService.instance.refreshIfNeeded();
     if (!context.mounted) return;
@@ -63,7 +86,10 @@ Future<void> showEnergyInsufficientPopup(BuildContext context) {
 
     UserEnergyDto energy;
     try {
-      energy = await SudaApiClient.getUserEnergy(accessToken: accessToken);
+      energy = await SudaApiClient.getUserEnergy(
+        accessToken: accessToken,
+        screen: screen,
+      );
     } catch (_) {
       return;
     }
@@ -74,6 +100,7 @@ Future<void> showEnergyInsufficientPopup(BuildContext context) {
       context,
       energy,
       accessToken: accessToken,
+      screen: screen,
       messageOverride: l10n.energyInsufficient,
     );
   });
@@ -83,6 +110,7 @@ Future<void> showEnergyInsufficientPopup(BuildContext context) {
 Future<void> showPlayingEnergyInsufficientPopup(
   BuildContext context, {
   required VoidCallback onEndRoleplay,
+  required String screen,
 }) {
   return _withEnergyPopupLock(() async {
     await TokenRefreshService.instance.refreshIfNeeded();
@@ -92,7 +120,10 @@ Future<void> showPlayingEnergyInsufficientPopup(
 
     UserEnergyDto energy;
     try {
-      energy = await SudaApiClient.getUserEnergy(accessToken: accessToken);
+      energy = await SudaApiClient.getUserEnergy(
+        accessToken: accessToken,
+        screen: screen,
+      );
     } catch (_) {
       return;
     }
@@ -105,6 +136,7 @@ Future<void> showPlayingEnergyInsufficientPopup(
       bodyWidget: EnergyInfoPopupBody(
         initialEnergy: energy,
         accessToken: accessToken,
+        screen: screen,
       ),
       buttons: [
         DefaultPopupButton(
@@ -123,6 +155,7 @@ Future<void> _showEnergyInfoPopupWithEnergy(
   BuildContext context,
   UserEnergyDto energy, {
   required String accessToken,
+  required String screen,
   bool labMode = false,
   bool forceShowGoPremium = false,
   String? messageOverride,
@@ -134,6 +167,7 @@ Future<void> _showEnergyInfoPopupWithEnergy(
     bodyWidget: EnergyInfoPopupBody(
       initialEnergy: energy,
       accessToken: accessToken,
+      screen: screen,
       labMode: labMode,
       forceShowGoPremium: forceShowGoPremium,
       messageOverride: messageOverride,
@@ -179,6 +213,7 @@ Future<void> showEnergyPopupForLab(
         bodyWidget: EnergyInfoPopupBody(
           initialEnergy: energy,
           accessToken: '',
+          screen: EnergyOfferScreen.lab,
           labMode: true,
           forceShowGoPremium: forceShowGoPremium,
         ),
@@ -197,6 +232,7 @@ Future<void> showEnergyPopupForLab(
       context,
       energy,
       accessToken: '',
+      screen: EnergyOfferScreen.lab,
       labMode: true,
       forceShowGoPremium: forceShowGoPremium,
     );
@@ -271,6 +307,7 @@ String _resolveEnergyPopupTitle(
 class EnergyInfoPopupBody extends StatefulWidget {
   final UserEnergyDto initialEnergy;
   final String accessToken;
+  final String screen;
   final bool labMode;
   final bool forceShowGoPremium;
   final String? messageOverride;
@@ -279,6 +316,7 @@ class EnergyInfoPopupBody extends StatefulWidget {
     super.key,
     required this.initialEnergy,
     required this.accessToken,
+    required this.screen,
     this.labMode = false,
     this.forceShowGoPremium = false,
     this.messageOverride,
@@ -332,6 +370,7 @@ class _EnergyInfoPopupBodyState extends State<EnergyInfoPopupBody> {
     try {
       final dto = await SudaApiClient.getUserEnergy(
         accessToken: widget.accessToken,
+        screen: widget.screen,
       );
       if (!mounted) return dto;
       setState(() => _energy = dto);

@@ -75,9 +75,13 @@ mixin PlayingEnergyMixin<T extends StatefulWidget> on State<T> {
         onEndRoleplay: () {
           onPlayingEnergyIndicatorEndRoleplay?.call();
         },
+        screen: EnergyOfferScreen.playingInsufficient,
       );
     } else {
-      await showEnergyInfoPopup(context);
+      await showEnergyInfoPopup(
+        context,
+        screen: EnergyOfferScreen.playing,
+      );
     }
     if (!mounted) return;
     await _fetchPlayingEnergy();

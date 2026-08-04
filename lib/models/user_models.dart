@@ -16,6 +16,9 @@ class UserEnergyDto {
   final String showUnlimitedPurchaseYn;
   final String showCapacity6PurchaseYn;
   final String showCapacity7PurchaseYn;
+  /// detail 응답에서 내려오는 팝업 offer 묶음 id.
+  /// simple 응답에는 없음 → 기본값은 빈 문자열(=impression 미수집).
+  final String offerSessionId;
 
   const UserEnergyDto({
     required this.energyCount,
@@ -28,6 +31,7 @@ class UserEnergyDto {
     this.showUnlimitedPurchaseYn = 'N',
     this.showCapacity6PurchaseYn = 'N',
     this.showCapacity7PurchaseYn = 'N',
+    this.offerSessionId = '',
   });
 
   factory UserEnergyDto.fromJson(Map<String, dynamic> json) {
@@ -54,6 +58,7 @@ class UserEnergyDto {
       showUnlimitedPurchaseYn: json['showUnlimitedPurchaseYn'] as String? ?? 'N',
       showCapacity6PurchaseYn: json['showCapacity6PurchaseYn'] as String? ?? 'N',
       showCapacity7PurchaseYn: json['showCapacity7PurchaseYn'] as String? ?? 'N',
+      offerSessionId: json['offerSessionId'] as String? ?? '',
     );
   }
 
@@ -68,6 +73,7 @@ class UserEnergyDto {
     String? showUnlimitedPurchaseYn,
     String? showCapacity6PurchaseYn,
     String? showCapacity7PurchaseYn,
+    String? offerSessionId,
   }) {
     return UserEnergyDto(
       energyCount: energyCount ?? this.energyCount,
@@ -85,6 +91,7 @@ class UserEnergyDto {
           showCapacity6PurchaseYn ?? this.showCapacity6PurchaseYn,
       showCapacity7PurchaseYn:
           showCapacity7PurchaseYn ?? this.showCapacity7PurchaseYn,
+      offerSessionId: offerSessionId ?? this.offerSessionId,
     );
   }
 

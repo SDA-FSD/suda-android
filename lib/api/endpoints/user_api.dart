@@ -365,27 +365,41 @@ class UserApi {
     );
   }
 
-  static Future<UserEnergyDto>? _inflightEnergyDetail;
+  static final Map<String, Future<UserEnergyDto>> _inflightEnergyDetail = {};
   static Future<UserEnergyDto>? _inflightEnergySimple;
 
   /// `GET /v1/users/energy/detail` — 상품 노출 플래그 포함. 에너지 팝업 전용.
+  ///
+  /// - `screen` 쿼리 파라미터는 통계 수집 contract 용도입니다. 클라이언트에서 임의 수정/확장 금지.
   static Future<UserEnergyDto> getUserEnergy({
     required String accessToken,
+    String? screen,
   }) async {
-    final existing = _inflightEnergyDetail;
+    final key = screen ?? '';
+    final existing = _inflightEnergyDetail[key];
     if (existing != null) return existing;
 
+    final queryParameters =
+        screen == null ? null : <String, String>{'screen': screen};
+
     final future = SudaHttpClient.executeWithRefresh(
-      () => _getUserEnergyAt('/v1/users/energy/detail', accessToken),
-      retryWithNewToken: (newToken) =>
-          _getUserEnergyAt('/v1/users/energy/detail', newToken),
+      () => _getUserEnergyAt(
+        '/v1/users/energy/detail',
+        accessToken,
+        queryParameters: queryParameters,
+      ),
+      retryWithNewToken: (newToken) => _getUserEnergyAt(
+        '/v1/users/energy/detail',
+        newToken,
+        queryParameters: queryParameters,
+      ),
     );
-    _inflightEnergyDetail = future;
+    _inflightEnergyDetail[key] = future;
     try {
       return await future;
     } finally {
-      if (identical(_inflightEnergyDetail, future)) {
-        _inflightEnergyDetail = null;
+      if (_inflightEnergyDetail[key] == future) {
+        _inflightEnergyDetail.remove(key);
       }
     }
   }
@@ -414,9 +428,10 @@ class UserApi {
 
   static Future<UserEnergyDto> _getUserEnergyAt(
     String path,
-    String accessToken,
-  ) async {
-    final uri = SudaHttpClient.buildUri(path);
+    String accessToken, {
+    Map<String, String>? queryParameters,
+  }) async {
+    final uri = SudaHttpClient.buildUri(path, queryParameters);
 
     late final http.Response response;
     try {
