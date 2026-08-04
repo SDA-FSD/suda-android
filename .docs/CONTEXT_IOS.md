@@ -12,6 +12,17 @@
 - 아직 남은 것: Apple 로그인 **실기기 E2E(dev 배포 후)**, APNs 실연동, StoreKit, 강제업데이트 App Store 링크, iPad 회귀 등(아래 단계 4~9). stg Firebase plist는 미구현.
 - Dart Android 가정도 상당수 남음: `[lib/api/endpoints/push_api.dart](lib/api/endpoints/push_api.dart)` `deviceType: ANDROID`, `[lib/services/iap_purchase_service.dart](lib/services/iap_purchase_service.dart)` Play 전용, `[lib/services/app_dialog_service.dart](lib/services/app_dialog_service.dart)` Play Store 위주.
 
+## 마이크 권한 (Opening Start)
+
+- **요청 시점:** 앱 기동이 아니라 **RoleplayOpeningScreen `Let's Start`** 탭 시 (`lib/screens/roleplay/opening.dart`).
+- **필수 설정 (둘 다 필요)**
+  1. `ios/Runner/Info.plist` — `NSMicrophoneUsageDescription` (사용자에게 보여줄 문구)
+  2. `ios/Podfile` `post_install` — `GCC_PREPROCESSOR_DEFINITIONS`에 **`PERMISSION_MICROPHONE=1`**  
+     (`permission_handler_apple` 기본값이 0이라 없으면 iOS에서 `Permission.microphone.request()`가 빌드에서 빠져 no-op처럼 동작할 수 있음)
+- **흐름:** status 확인 → 필요 시 request → 영구 거부 시 설정 다이얼로그 → (선택) `openAppSettings()` → 앱 복귀 후 Opening(또는 홈) 유지 → 사용자가 **다시 Start**. 자동 재개/스택 복구 없음.
+- **로컬 네트워크 권한 팝업:** 불필요 기능이면 Release(`flutter run --release`)로 재현 확인. Debug의 Flutter VM/mDNS만으로 뜨는 경우가 많음. Release에서도 뜨면 SDK(Firebase/AppsFlyer 등) 원인 조사.
+- **상세 UX:** `.docs/CONTEXT_ROLEPLAY_S2.md` §4-3 Start.
+
 ## 열린 이슈 (잊으면 안 됨)
 
 - **`FirebaseMessaging.getInitialMessage()` iOS hang → 스플래시 영구 정지**

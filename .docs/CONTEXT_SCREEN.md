@@ -433,8 +433,8 @@
 - 진입 시 `GET /v1/users/energy/detail` + `loadPremiumSubscriptionPrices()`.
 - **`subscriptionBasePlanId` null/미지 값·로드 실패**: 추측 폴백 없음. l10n `changePlanLoadFailed` + `changePlanRetry`로 재시도.
 - **Current Plan**: 섹션 라벨 H2(`headlineMedium`)·`#0CABA8`. 카드 높이 **103**·좌우 패딩 **16**. 좌측 플랜명 20·갱신일 14(`changePlanRenewsOn`), 우측 가격 **H3** 수직 중앙.
-- **Available Plans**: 동일 섹션 라벨. 카드 동일 폭·**minHeight 103**(설명 줄바꿈 시 확장, Text 고정 높이 없음)·좌우 16. 라디오 **24×24**·플랜명 20·설명 14·주 가격 H3·연간 부제 **`#80D7CF` 14**. 탭 토글 선택.
-- **CTA**: l10n `accountChangePlan`. 기본 비활성. Available 선택 시에만 활성. 탭 시 `DefaultPopup` 확인 팝업 → Confirm 시 `IapPurchaseService.changeSubscription` (**`ReplacementMode.withoutProration` 실측**). old purchase 없으면 토스트 `changePlanOldPurchaseMissing`(크래시 없음). 성공 시 Account `pop(true)` + `changePlanChangeRequested`(완성 UX 전). verify는 신규 구독과 동일 경로 — **실측 시 서버 verify 로그 병행 감시**. 실패 시 Billing/Purchase error code·message를 debugPrint. l10n confirm 키 + `changePlanOldPurchaseMissing` / `changePlanChangeRequested`.
+- **Available Plans**: 동일 섹션 라벨. 카드 동일 폭·**minHeight 103**(설명 줄바꿈 시 확장, Text 고정 높이 없음)·좌우 16. 라디오 **24×24**·플랜명 20·설명 14·주 가격 H3·연간 부제 **`#80D7CF` 14**. ko 연간 설명 `paywallAnnualPlanSubtitle`는 `월간 플랜 대비`/`33% 이상 절약` 2줄(`\n`); 폭 부족 시 부제 `FittedBox`로 축소해 2줄 유지. 탭 토글 선택.
+- **CTA**: l10n `accountChangePlan`. 기본 비활성. Available 선택 시에만 활성. 탭 시 `DefaultPopup` 확인 팝업(`changePlanConfirmBody`: 즉시 전액 청구·잔여 기간 추가 일수 이월) → Confirm 시 `IapPurchaseService.changeSubscription` (**`ReplacementMode.chargeFullPrice` 실측**). old purchase 없으면 토스트 `changePlanOldPurchaseMissing`(크래시 없음). 성공 시 Account `pop(true)` + `changePlanChangeRequested`(즉시 청구·일수 이월 안내). verify는 신규 구독과 동일 경로 — **실측 시 서버 verify 로그 병행 감시**. 실패 시 Billing/Purchase error code·message를 debugPrint. l10n confirm 키 + `changePlanOldPurchaseMissing` / `changePlanChangeRequested`.
 
 ---
 
@@ -703,6 +703,7 @@
 - 중앙에 "Start" 텍스트 (임시, 향후 오프닝 콘텐츠로 대체 예정)
 - 우상단 `EnergyHeaderBadge` — Home과 동일(충전·무제한 타이머 포함)
 - footer Start 버튼 아래 AI 안내(`l10n.roleplayOpeningAiDisclaimer`): `labelSmall`·`#8C8C8C`·중앙 정렬·두 문장 줄바꿈(`\n`). 버튼↔문구 12dp, 문구 아래 50dp.
+- **Start 마이크 권한**: status→request→영구거부 시 설정 다이얼로그→(선택) `openAppSettings()`→복귀 후 사용자가 다시 Start. 자동 재개/스택 복구 없음. iOS는 `Podfile` `PERMISSION_MICROPHONE=1` + `NSMicrophoneUsageDescription` 필수. 상세 `.docs/CONTEXT_ROLEPLAY_S2.md` §4-3·`.docs/CONTEXT_IOS.md` 「마이크 권한」.
 - 세션 초기화 응답 분기 (`POST /rps2/sessions`):
   - `sessionId == '0'`: `showEnergyInsufficientPopup`(l10n `energyInsufficient`) → Opening 유지, 재시도 가능
   - 정상 sessionId: Playing 진입(에너지 소비는 Playing 발화 처리 시)

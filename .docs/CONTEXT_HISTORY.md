@@ -6,6 +6,8 @@
 
 ## 최근 작업 메모
 
+- **Opening 마이크 권한 단순화(2026-08):** 자동 재개(`PendingMicSettingsResume`·`main` 복구·`autoStart`) 제거. Start→status/request→영구거부 시 설정 안내만. 복귀 후 사용자가 다시 Start. `PERMISSION_MICROPHONE=1` 유지. 문서: `CONTEXT_ROLEPLAY_S2.md` §4-3, `CONTEXT_IOS.md` 「마이크 권한」, `CONTEXT.md` §7-1, `CONTEXT_SCREEN.md` §12.
+- **Opening 마이크 권한 iOS/공통(2026-08):** `ios/Podfile` `PERMISSION_MICROPHONE=1`. Opening Start에서 status→request→영구거부 시 설정 다이얼로그. (이후 자동 재개 경로는 단순화로 제거.) 로컬 네트워크 불필요 권한은 Release로 재현 확인.
 - **Sign in with Apple 클라 골격(2026-07):** `sign_in_with_apple` + `POST /v1/auth/apple`(`AuthApi`/`AuthService`/`AppConfig`). Login Google·Apple 통짜 버튼(iOS Apple↑ / Android Google↑). Android Manifest `signinwithapple` callback. local Android·stg Apple 미지원. 실연동은 dev API 배포 후. 문서: `CONTEXT.md` §4, `CONTEXT_SCREEN.md` Login, `CONTEXT_IOS.md`.
 - **iOS Google Sign-In 558349 선제 배선:** `GoogleSignIn.{local,dev}.plist` + 빌드 시 `generated_google_signin_client.dart` + `AppConfig.googleIosClientId` + `register_google_signin_url_schemes.sh`. Firebase(841694)와 Sign-In(558349 non-prod) 분리.
 - **iOS Google idToken 이원화 정렬:** local/dev/prd Firebase plist에 env별 `SERVER_CLIENT_ID` 추가(AppConfig와 동일). `copy_google_service_info.sh`는 plist 전체 복사·복사 후 `SERVER_CLIENT_ID` 로그. `AuthService` debug 로그. Android와 동일 non-prod aud=558349 / prd aud=841694.

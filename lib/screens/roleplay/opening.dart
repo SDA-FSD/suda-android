@@ -25,7 +25,10 @@ import '../../utils/default_markdown.dart';
 class RoleplayOpeningScreen extends StatefulWidget {
   final bool showCloseButton;
 
-  const RoleplayOpeningScreen({super.key, this.showCloseButton = true});
+  const RoleplayOpeningScreen({
+    super.key,
+    this.showCloseButton = true,
+  });
 
   @override
   State<RoleplayOpeningScreen> createState() => _RoleplayOpeningScreenState();
@@ -42,7 +45,8 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) unawaited(_precacheAiCharacterImage());
+      if (!mounted) return;
+      unawaited(_precacheAiCharacterImage());
     });
   }
 
@@ -59,73 +63,133 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen> {
     }
   }
 
+  /// Start 탭 시 마이크 권한: 허용됨 → true / 요청 후 허용 → true /
+  /// 거부 → 안내 / 영구거부 → 설정 유도(복귀 후 사용자가 다시 Start).
+  Future<bool> _ensureMicrophonePermission(BuildContext context) async {
+    var status = await Permission.microphone.status;
+
+    if (status.isGranted || status.isLimited) {
+      return true;
+    }
+
+    if (status.isDenied) {
+      status = await Permission.microphone.request();
+      if (status.isGranted || status.isLimited) {
+        return true;
+      }
+    }
+
+    if (!context.mounted) return false;
+    final l10n = AppLocalizations.of(context)!;
+
+    // iOS: 한 번 거절하면 시스템 팝업이 다시 안 뜸 → 설정 안내
+    if (status.isPermanentlyDenied || status.isRestricted) {
+      final openSettings = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          content: Text(l10n.microphonePermissionDenied),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: Text(l10n.accountGoBack),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: Text(l10n.openSettings),
+            ),
+          ],
+        ),
+      );
+      if (openSettings == true) {
+        await openAppSettings();
+      }
+      return false;
+    }
+
+    DefaultToast.show(context, l10n.microphonePermissionDenied);
+    return false;
+  }
+
   Future<void> _navigateToPlaying(BuildContext context) async {
     await TokenRefreshService.instance.refreshIfNeeded();
-    final status = await Permission.microphone.request();
 
-    if (status.isGranted) {
-      if (!context.mounted) return;
-      final accessToken = await TokenStorage.loadAccessToken();
-      if (!context.mounted) return;
-      if (accessToken == null) {
-        DefaultToast.show(context, 'Authentication required.');
-        _restoreButton();
-        return;
-      }
-
-      final seriesId = SeriesStateService.instance.seriesId;
-      final episodeId = SeriesStateService.instance.selectedEpisodeId;
-      if (seriesId == null || episodeId == null) {
-        DefaultToast.show(context, 'Cannot start roleplay');
-        _restoreButton();
-        return;
-      }
-
-      try {
-        await PerfMonitoringService.instance.start('roleplay_session_start');
-        final session = await SudaApiClient.createRpS2Session(
-          accessToken: accessToken,
-          seriesId: seriesId,
-          episodeId: episodeId,
-        );
-        if (!context.mounted) return;
-        final sessionId = session.sessionId;
-        if (sessionId == null || sessionId.isEmpty) {
-          DefaultToast.show(context, 'Cannot start roleplay');
-          _restoreButton();
-          return;
-        }
-        if (sessionId == '0') {
-          await showEnergyInsufficientPopup(context);
-          _restoreButton();
-          return;
-        }
-        if (sessionId.startsWith('-')) {
-          DefaultToast.show(context, 'Cannot start roleplay');
-          _restoreButton();
-          return;
-        }
-        SeriesStateService.instance.setSession(session);
-        await _precacheAiCharacterImage();
-        if (!context.mounted) return;
-        RoleplayRouter.replaceWithPlaying(context);
-      } catch (e) {
-        if (!context.mounted) return;
-        if (e.toString().contains('HTTP 500')) {
-          DefaultToast.show(context, 'Cannot start roleplay');
-          _restoreButton();
-          return;
-        }
-        DefaultToast.show(context, 'Cannot start roleplay');
-        _restoreButton();
-      } finally {
-        await PerfMonitoringService.instance.stop('roleplay_session_start');
-      }
-    } else {
-      if (!context.mounted) return;
-      final l10n = AppLocalizations.of(context)!;
-      DefaultToast.show(context, l10n.microphonePermissionDenied);
+    final micOk = await _ensureMicrophonePermission(context);
+    if (!micOk) {
       _restoreButton();
+      return;
+    }
+
+    if (!context.mounted) {
+      _restoreButton();
+      return;
+    }
+    final accessToken = await TokenStorage.loadAccessToken();
+    if (!context.mounted) {
+      _restoreButton();
+      return;
+    }
+    if (accessToken == null) {
+      DefaultToast.show(context, 'Authentication required.');
+      _restoreButton();
+      return;
+    }
+
+    final seriesId = SeriesStateService.instance.seriesId;
+    final episodeId = SeriesStateService.instance.selectedEpisodeId;
+    if (seriesId == null || episodeId == null) {
+      DefaultToast.show(context, 'Cannot start roleplay');
+      _restoreButton();
+      return;
+    }
+
+    try {
+      await PerfMonitoringService.instance.start('roleplay_session_start');
+      final session = await SudaApiClient.createRpS2Session(
+        accessToken: accessToken,
+        seriesId: seriesId,
+        episodeId: episodeId,
+      );
+      if (!context.mounted) {
+        _restoreButton();
+        return;
+      }
+      final sessionId = session.sessionId;
+      if (sessionId == null || sessionId.isEmpty) {
+        DefaultToast.show(context, 'Cannot start roleplay');
+        _restoreButton();
+        return;
+      }
+      if (sessionId == '0') {
+        await showEnergyInsufficientPopup(context);
+        _restoreButton();
+        return;
+      }
+      if (sessionId.startsWith('-')) {
+        DefaultToast.show(context, 'Cannot start roleplay');
+        _restoreButton();
+        return;
+      }
+      SeriesStateService.instance.setSession(session);
+      await _precacheAiCharacterImage();
+      if (!context.mounted) {
+        _restoreButton();
+        return;
+      }
+      RoleplayRouter.replaceWithPlaying(context);
+    } catch (e) {
+      if (!context.mounted) {
+        _restoreButton();
+        return;
+      }
+      if (e.toString().contains('HTTP 500')) {
+        DefaultToast.show(context, 'Cannot start roleplay');
+        _restoreButton();
+        return;
+      }
+      DefaultToast.show(context, 'Cannot start roleplay');
+      _restoreButton();
+    } finally {
+      await PerfMonitoringService.instance.stop('roleplay_session_start');
     }
   }
 

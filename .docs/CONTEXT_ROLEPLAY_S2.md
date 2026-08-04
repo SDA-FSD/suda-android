@@ -189,7 +189,13 @@ S1 턴 정책은 `.docs/CONTEXT_ROLEPLAY.md`만 본다. **S2는 아래가 단일
   - AI 캐릭터: l10n `roleplayOpeningAiCharacter`(en AI Character / ko AI 캐릭터 / pt Personagem IA) + `selectedEpisode.aiCharacter.name` (`headlineLarge` `#0CABA8`)
   - 시나리오: l10n `roleplayOpeningScenario`(en Scenario / ko 시나리오 / pt Cenário) + episode `briefing` (`DefaultMarkdown`)
 - **Start (`Let's Start`)**
-  1. 마이크 권한
+  1. **마이크 권한** (`Permission.microphone`, `permission_handler`, `opening.dart`)
+     - `status` 확인 → 허용/`limited`이면 진행
+     - `denied`이면 `request()` → 허용 시 진행
+     - 거부(일시): l10n `microphonePermissionDenied` 토스트, Opening 유지
+     - **영구 거부/`restricted`**: 다이얼로그(이전으로 / 설정 열기) → 설정 열기 시 `openAppSettings()`만. pending·autoStart·`main` 복구 없음
+     - **설정 복귀 후**: Opening(또는 iOS 스택 리셋 시 홈)에 그대로 두고, 사용자가 **다시 Start**
+     - **iOS 필수:** `ios/Podfile` `PERMISSION_MICROPHONE=1` + `Info.plist` `NSMicrophoneUsageDescription` (없으면 `request()`가 no-op처럼 동작할 수 있음). 상세 `.docs/CONTEXT_IOS.md` 「마이크 권한」
   2. `POST /rps2/sessions` `{seriesId, episodeId}`
   3. `sessionId == '0'`: `showEnergyInsufficientPopup`(에너지 바 + l10n `energyInsufficient`) → Opening 유지, 재시도 가능
   4. `sessionId`가 `-`로 시작: "Cannot start roleplay" 토스트 → Opening 유지
