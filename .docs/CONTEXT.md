@@ -12,6 +12,7 @@
 ## 2. 빌드·실행 명령 (Android / iOS)
 
 저장소 루트에서 실행. `{env}` = `local` | `dev` | `stg` | `prd` (iOS **stg Firebase 미구현** → stg iOS 빌드는 실패가 정상).
+- **용어:** 대화·지시에서 **AOS** = **Android** (Android OS). iOS는 iOS/애플로 표기.
 
 ### 2-1. 공통 템플릿
 ```bash
