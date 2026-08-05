@@ -6,6 +6,7 @@
 
 ## 최근 작업 메모
 
+- **Change Plan 월→연 ONLY + WITHOUT_PRORATION(2026-08):** Account `Change Plan >`는 `subscriptionBasePlanId==bp-premium-monthly`만 노출. `changeSubscription`은 `ReplacementMode.withoutProration`·연간 base plan만. 확인/성공 l10n은 기존 유지. 문서: `CONTEXT.md` §7-2, `CONTEXT_SCREEN.md` ChangePlanScreen·Account.
 - **Opening 마이크 권한 단순화(2026-08):** 자동 재개(`PendingMicSettingsResume`·`main` 복구·`autoStart`) 제거. Start→status/request→영구거부 시 설정 안내만. 복귀 후 사용자가 다시 Start. `PERMISSION_MICROPHONE=1` 유지. 문서: `CONTEXT_ROLEPLAY_S2.md` §4-3, `CONTEXT_IOS.md` 「마이크 권한」, `CONTEXT.md` §7-1, `CONTEXT_SCREEN.md` §12.
 - **Opening 마이크 권한 iOS/공통(2026-08):** `ios/Podfile` `PERMISSION_MICROPHONE=1`. Opening Start에서 status→request→영구거부 시 설정 다이얼로그. (이후 자동 재개 경로는 단순화로 제거.) 로컬 네트워크 불필요 권한은 Release로 재현 확인.
 - **Sign in with Apple 클라 골격(2026-07):** `sign_in_with_apple` + `POST /v1/auth/apple`(`AuthApi`/`AuthService`/`AppConfig`). Login Google·Apple 통짜 버튼(iOS Apple↑ / Android Google↑). Android Manifest `signinwithapple` callback. local Android·stg Apple 미지원. 실연동은 dev API 배포 후. 문서: `CONTEXT.md` §4, `CONTEXT_SCREEN.md` Login, `CONTEXT_IOS.md`.

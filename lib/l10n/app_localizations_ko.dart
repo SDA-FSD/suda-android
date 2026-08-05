@@ -552,7 +552,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get paywallAnnualPlanTitle => '연간 플랜';
 
   @override
-  String get paywallAnnualPlanSubtitle => '월간 플랜 대비 33% 이상\n절⁠약';
+  String get paywallAnnualPlanSubtitle => '월간 플랜 대비\n33% 이상 절약';
 
   @override
   String get paywallMonthlyPlanTitle => '월간 플랜';

@@ -578,7 +578,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get paywallAnnualPlanSubtitle =>
-      'Economize 33% em relação ao plano mensal.';
+      'Economize 33%\nem relação ao plano mensal.';
 
   @override
   String get paywallMonthlyPlanTitle => 'Plano Mensal';

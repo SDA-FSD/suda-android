@@ -6,6 +6,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../services/auth_service.dart';
+import '../../services/iap_purchase_service.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/subscription_status_cache.dart';
 import '../../services/token_storage.dart';
@@ -33,6 +34,8 @@ class _AccountScreenState extends State<AccountScreen> with SingleTickerProvider
   bool _showFreePlanCard = false;
   /// 구독 활성 Premium 카드.
   bool _showPremiumCard = false;
+  /// 월간 구독자만 Change Plan 노출 (월→연).
+  bool _showChangePlan = false;
   DateTime? _subscriptionExpiredAt;
 
   // 애니메이션 관련
@@ -120,9 +123,12 @@ class _AccountScreenState extends State<AccountScreen> with SingleTickerProvider
       final energy = await SudaApiClient.getUserEnergySimple(accessToken: token);
       if (!mounted) return;
       final subscribed = SubscriptionStatusCache.isSubscribedActive;
+      final monthly = energy.subscriptionBasePlanId ==
+          IapPurchaseService.basePlanMonthly;
       setState(() {
         _showFreePlanCard = !subscribed;
         _showPremiumCard = subscribed;
+        _showChangePlan = subscribed && monthly;
         _subscriptionExpiredAt = energy.subscriptionExpiredAt;
       });
     } catch (_) {
@@ -136,10 +142,12 @@ class _AccountScreenState extends State<AccountScreen> with SingleTickerProvider
     await _refreshSubscriptionStatus();
   }
 
-  void _onChangePlanTap() {
-    Navigator.of(context).push(
+  Future<void> _onChangePlanTap() async {
+    final changed = await Navigator.of(context).push<bool>(
       SubScreenRoute(page: const ChangePlanScreen()),
     );
+    if (!mounted || changed != true) return;
+    await _refreshSubscriptionStatus();
   }
 
   /// en/ko: yyyy/MM/dd, pt: dd/MM/yyyy (로컬 시각).
@@ -419,45 +427,50 @@ class _AccountScreenState extends State<AccountScreen> with SingleTickerProvider
                               ),
                             ),
                             if (_showPremiumCard) ...[
-                              // 이름/계정과 동일: 구독↔카드 24.
-                              // Change Plan은 그 간격 안 하단 우측(카드와 bottom 12).
                               SizedBox(
                                 height: 24,
                                 width: double.infinity,
-                                child: Stack(
-                                  clipBehavior: Clip.none,
-                                  children: [
-                                    Positioned(
-                                      right: 8,
-                                      bottom: 12,
-                                      child: GestureDetector(
-                                        onTap: _onChangePlanTap,
-                                        behavior: HitTestBehavior.opaque,
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Text(
-                                              l10n.accountChangePlan,
-                                              style: theme.bodySmall?.copyWith(
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.w700,
-                                                fontVariations: const [
-                                                  FontVariation('wght', 700),
+                                child: _showChangePlan
+                                    ? Stack(
+                                        clipBehavior: Clip.none,
+                                        children: [
+                                          Positioned(
+                                            right: 8,
+                                            bottom: 12,
+                                            child: GestureDetector(
+                                              onTap: _onChangePlanTap,
+                                              behavior: HitTestBehavior.opaque,
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Text(
+                                                    l10n.accountChangePlan,
+                                                    style: theme.bodySmall
+                                                        ?.copyWith(
+                                                      color: Colors.white,
+                                                      fontWeight:
+                                                          FontWeight.w700,
+                                                      fontVariations: const [
+                                                        FontVariation(
+                                                          'wght',
+                                                          700,
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 10),
+                                                  Image.asset(
+                                                    'assets/images/icons/closing_angle_bracket.png',
+                                                    height: 13,
+                                                    fit: BoxFit.fitHeight,
+                                                  ),
                                                 ],
                                               ),
                                             ),
-                                            const SizedBox(width: 10),
-                                            Image.asset(
-                                              'assets/images/icons/closing_angle_bracket.png',
-                                              height: 13,
-                                              fit: BoxFit.fitHeight,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                          ),
+                                        ],
+                                      )
+                                    : null,
                               ),
                               Container(
                                 width: double.infinity,

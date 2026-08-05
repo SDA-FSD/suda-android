@@ -27,6 +27,7 @@ class _ChangePlanScreenState extends State<ChangePlanScreen> {
   static const _priceMint = Color(0xFF80D7CF);
   static const _cardBg = Color(0xFF353535);
   static const _cardHeight = 103.0;
+  static const _availableCardMinHeight = 120.0;
   static const _cardHPad = 16.0;
   static const _radioSize = 24.0;
 
@@ -475,8 +476,8 @@ class _ChangePlanScreenState extends State<ChangePlanScreen> {
         borderRadius: BorderRadius.circular(16),
         child: Container(
           width: double.infinity,
-          constraints: const BoxConstraints(minHeight: _cardHeight),
-          padding: const EdgeInsets.symmetric(horizontal: _cardHPad),
+          constraints: const BoxConstraints(minHeight: _availableCardMinHeight),
+          padding: const EdgeInsets.symmetric(horizontal: 12),
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: _cardBg,
@@ -492,7 +493,7 @@ class _ChangePlanScreenState extends State<ChangePlanScreen> {
                   width: _radioSize,
                   height: _radioSize,
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 8),
                 Expanded(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -516,7 +517,7 @@ class _ChangePlanScreenState extends State<ChangePlanScreen> {
                     ],
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 8),
                 Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.end,
