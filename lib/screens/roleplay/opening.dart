@@ -2,6 +2,7 @@ import 'dart:async' show unawaited;
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:just_audio/just_audio.dart';
 import '../../config/app_config.dart';
 import '../../widgets/energy_header_badge.dart';
 import '../../widgets/energy_info_popup.dart';
@@ -16,6 +17,7 @@ import 'package:permission_handler/permission_handler.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/token_refresh_service.dart';
 import '../../routes/roleplay_router.dart';
+import '../../utils/language_util.dart';
 import '../../utils/suda_json_util.dart';
 import '../../utils/default_markdown.dart';
 
@@ -36,6 +38,7 @@ class RoleplayOpeningScreen extends StatefulWidget {
 
 class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen> {
   bool _isLoading = false;
+  final AudioPlayer _briefingAudioPlayer = AudioPlayer();
 
   void _restoreButton() {
     if (mounted) setState(() => _isLoading = false);
@@ -47,7 +50,51 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       unawaited(_precacheAiCharacterImage());
+      unawaited(_playBriefingAudio());
     });
+  }
+
+  @override
+  void dispose() {
+    unawaited(_stopBriefingAudio());
+    unawaited(_briefingAudioPlayer.dispose());
+    super.dispose();
+  }
+
+  Future<void> _stopBriefingAudio() async {
+    try {
+      await _briefingAudioPlayer.stop();
+    } catch (_) {
+      // ignore
+    }
+  }
+
+  /// 현재 언어 → `en`. 둘 다 없으면 재생하지 않음(다른 언어로 폴백하지 않음).
+  String? _resolveBriefingAudioPath(Map<String, String> briefingAudio) {
+    if (briefingAudio.isEmpty) return null;
+    final lang = LanguageUtil.getCurrentLanguageCode();
+    final localized = briefingAudio[lang];
+    if (localized != null && localized.isNotEmpty) return localized;
+    final english = briefingAudio['en'];
+    if (english != null && english.isNotEmpty) return english;
+    return null;
+  }
+
+  Future<void> _playBriefingAudio() async {
+    final episode = SeriesStateService.instance.selectedEpisode;
+    final path = _resolveBriefingAudioPath(episode?.briefingAudio ?? const {});
+    if (path == null) return;
+
+    final url = path.startsWith('http')
+        ? path
+        : '${AppConfig.cdnBaseUrl}$path';
+    try {
+      await _briefingAudioPlayer.setUrl(url);
+      if (!mounted) return;
+      await _briefingAudioPlayer.play();
+    } catch (_) {
+      // 네트워크/디코드 실패 무시
+    }
   }
 
   Future<void> _precacheAiCharacterImage() async {
@@ -174,6 +221,11 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen> {
       }
       SeriesStateService.instance.setSession(session);
       await _precacheAiCharacterImage();
+      if (!context.mounted) {
+        _restoreButton();
+        return;
+      }
+      await _stopBriefingAudio();
       if (!context.mounted) {
         _restoreButton();
         return;

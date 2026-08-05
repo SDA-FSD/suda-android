@@ -76,6 +76,8 @@ class RpS2SeriesEpisodeDto {
   final Map<String, String> title;
   final Map<String, String> summary;
   final Map<String, String> briefing;
+  /// 언어코드 → 브리핑 TTS CDN path (예: `/rps2/episode/2/briefing/en/...mp3`).
+  final Map<String, String> briefingAudio;
   final Map<String, String> learningFunction;
   final String? thumbnailImgPath;
   final RpS2CharacterDto? aiCharacter;
@@ -86,6 +88,7 @@ class RpS2SeriesEpisodeDto {
     required this.title,
     required this.summary,
     required this.briefing,
+    this.briefingAudio = const {},
     required this.learningFunction,
     this.thumbnailImgPath,
     this.aiCharacter,
@@ -98,6 +101,7 @@ class RpS2SeriesEpisodeDto {
       title: SudaJsonUtil.localizedMapFromJson(json['title']),
       summary: SudaJsonUtil.localizedMapFromJson(json['summary']),
       briefing: SudaJsonUtil.localizedMapFromJson(json['briefing']),
+      briefingAudio: SudaJsonUtil.localizedMapFromJson(json['briefingAudio']),
       learningFunction: SudaJsonUtil.localizedMapFromJson(
         json['learningFunction'],
       ),

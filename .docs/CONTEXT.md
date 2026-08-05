@@ -228,7 +228,7 @@ flutter run --flavor dev -t lib/main.dart --dart-define=ENV=dev -d 541F3961-8182
 - Roleplay 관련 스크린 흐름 및 데이터 정책은 `.docs/CONTEXT_ROLEPLAY.md`를 참조한다.
 - **S2 (Season 2) Roleplay 마이그레이션 진행상황**은 `.docs/CONTEXT_ROLEPLAY_S2.md`를 참조한다.
 - Roleplay 세션 `sessionId`는 인메모리 공통 상태로 보관하고 롤플레이 종료 시 삭제됩니다.
-- **RoleplayOpeningScreen** (S2): `SeriesStateService.selectedEpisode`의 `thumbnailImgPath` 배경·`title`/`briefing`·`aiCharacter.name` 본문. duration 헤더 없음. Start 시 `POST /rps2/sessions` (`seriesId`, `episodeId`) → `sessionId == '0'`이면 에너지 부족 팝업·Opening 유지, 정상 ID면 `SeriesStateService.setSession` 후 Playing(에너지 소비는 Playing 발화 처리 시).
+- **RoleplayOpeningScreen** (S2): `SeriesStateService.selectedEpisode`의 `thumbnailImgPath` 배경·`title`/`briefing`·`aiCharacter.name` 본문. duration 헤더 없음. 진입 시(첫 프레임 후) `briefingAudio`에서 현재 언어→`en` path를 골라 `cdnBaseUrl` prepend 후 `just_audio` 자동재생(둘 다 없으면 스킵·실패 무시). 이탈/Playing 전환 시 즉시 stop. Start 시 `POST /rps2/sessions` (`seriesId`, `episodeId`) → `sessionId == '0'`이면 에너지 부족 팝업·Opening 유지, 정상 ID면 `SeriesStateService.setSession` 후 Playing(에너지 소비는 Playing 발화 처리 시).
 - **RoleplayPlayingScreen** (S2): `lib/screens/roleplay/playing.dart`. S1 `playing_backup.dart`·세션/결과 API 클라이언트는 **삭제됨**(2026-06). 헤더: `RoleplayScaffold`·episode `title`(로컬 언어)·X→나가기 확인 레이어·우측 `kebab.png` 설정패널. 상세는 `.docs/CONTEXT_SCREEN.md` §13.
 - **S1 Roleplay 잔여 코드 정리**(2026-06): `review_chat.dart`·`review_ending.dart`·`playing_backup.dart` 삭제. `result.dart`/`ending.dart`/`result_report.dart` S2 전용화. `RoleplayApi`는 `getRoleplayOverview`(딥링크 overview)·`updateSpeedRate`(Playing 속도)만 유지. Profile Saved는 `GET/DELETE /v1/users/expressions` + S2 TTS sound.
 
