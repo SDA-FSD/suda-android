@@ -161,7 +161,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get accountFreePlanSubtitle =>
-      'Assine o Premium para desbloquear mais recursos';
+      'Assine o Premium para desbloquear \nmais recursos';
 
   @override
   String get accountPremiumTitle => 'Premium';
@@ -203,7 +203,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get changePlanConfirmBody =>
-      'Seu novo plano entrará em vigor na próxima data de cobrança.';
+      'Seu novo plano entrará em vigor\nna próxima data de cobrança.';
 
   @override
   String get changePlanConfirmOk => 'Confirmar alteração';
