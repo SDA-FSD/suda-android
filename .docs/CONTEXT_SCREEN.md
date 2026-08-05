@@ -406,14 +406,14 @@
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
 - **PaywallScreen**: 무료 사용자 Free Plan 카드 탭 시
-- **ChangePlanScreen** (Sub Screen): 구독 활성 시 Subscription 헤더 우측 `Change Plan >` 탭 시
+- **ChangePlanScreen** (Sub Screen): 월간 구독 활성 시 Subscription 헤더 우측 `Change Plan >` 탭 시
 
 ### 스크린 내부 구현 특이사항
 - 키보드 활성화 시 `resizeToAvoidBottomInset: false` (하단 "계정 삭제"가 키보드와 함께 올라오지 않도록)
 - 진입 시 `GET /v1/users/energy/simple`로 구독 상태 갱신 (`SubscriptionStatusCache`)
 - **Subscription 섹션**
   - 무료 (`isSubscribedActive == false`): Free Plan 카드(`check_green.svg`) → Paywall. l10n `accountFreePlanTitle` / `accountFreePlanSubtitle`
-  - 구독 활성: Subscription 헤더 좌측. 구독↔카드 간격 **24**(이름/계정 섹션과 동일). `Change Plan >`(l10n `accountChangePlan` + chevron, 텍스트 `bodySmall` 14·**w700**/`wght` 700·흰색)는 그 간격 안 하단 우측(`right: 8`, 카드와 `bottom: 12`) → `ChangePlanScreen`. Premium 카드(`premium_verified_badge.png`) — 제목 `accountPremiumTitle`, 부제 `accountPremiumSubtitle`, 갱신일 `accountPremiumRenewsOn`(`subscriptionExpiredAt`, en/ko `yyyy/MM/dd` · pt `dd/MM/yyyy`)
+  - 구독 활성: Subscription 헤더 좌측. 구독↔카드 간격 **24**(이름/계정 섹션과 동일). **`Change Plan >`는 월간 구독자만** 노출(`subscriptionBasePlanId==bp-premium-monthly`; 연간·미구독은 미표시). (l10n `accountChangePlan` + chevron, 텍스트 `bodySmall` 14·**w700**/`wght` 700·흰색)는 그 간격 안 하단 우측(`right: 8`, 카드와 `bottom: 12`) → `ChangePlanScreen`. Premium 카드(`premium_verified_badge.png`) — 제목 `accountPremiumTitle`, 부제 `accountPremiumSubtitle`, 갱신일 `accountPremiumRenewsOn`(`subscriptionExpiredAt`, en/ko `yyyy/MM/dd` · pt `dd/MM/yyyy`)
 
 ---
 
@@ -426,15 +426,16 @@
 - **appPath**: 해당 없음 (Account 하위)
 
 ### 이전 스크린 정보 (진입점)
-- **AccountScreen**: 구독 활성 시 `Change Plan >` 탭
+- **AccountScreen**: 월간 Premium 구독 활성 시 `Change Plan >` 탭 (연간은 미노출)
 
 ### 스크린 내부 구현 특이사항
 - 헤더: l10n `changePlanTitle` (en Change Plan / pt Alterar plano / ko **요금제 변경**). Account 버튼 `accountChangePlan`(ko 플랜 변경)과 분리.
 - 진입 시 `GET /v1/users/energy/simple` + `loadPremiumSubscriptionPrices()`.
 - **`subscriptionBasePlanId` null/미지 값·로드 실패**: 추측 폴백 없음. l10n `changePlanLoadFailed` + `changePlanRetry`로 재시도.
 - **Current Plan**: 섹션 라벨 H2(`headlineMedium`)·`#0CABA8`. 카드 높이 **103**·좌우 패딩 **16**. 좌측 플랜명 20·갱신일 14(`changePlanRenewsOn`), 우측 가격 **H3** 수직 중앙.
-- **Available Plans**: 동일 섹션 라벨. 카드 동일 폭·**minHeight 103**(설명 줄바꿈 시 확장, Text 고정 높이 없음)·좌우 16. 라디오 **24×24**·플랜명 20·설명 14·주 가격 H3·연간 부제 **`#80D7CF` 14**. ko 연간 설명 `paywallAnnualPlanSubtitle`는 `월간 플랜 대비`/`33% 이상 절약` 2줄(`\n`); 폭 부족 시 부제 `FittedBox`로 축소해 2줄 유지. 탭 토글 선택.
-- **CTA**: l10n `accountChangePlan`. 기본 비활성. Available 선택 시에만 활성. 탭 시 `DefaultPopup` 확인 팝업(`changePlanConfirmBody`: 즉시 전액 청구·잔여 기간 추가 일수 이월) → Confirm 시 `IapPurchaseService.changeSubscription` (**`ReplacementMode.chargeFullPrice` 실측**). old purchase 없으면 토스트 `changePlanOldPurchaseMissing`(크래시 없음). 성공 시 Account `pop(true)` + `changePlanChangeRequested`(즉시 청구·일수 이월 안내). verify는 신규 구독과 동일 경로 — **실측 시 서버 verify 로그 병행 감시**. 실패 시 Billing/Purchase error code·message를 debugPrint. l10n confirm 키 + `changePlanOldPurchaseMissing` / `changePlanChangeRequested`.
+- **Available Plans**: 동일 섹션 라벨. **월→연만** (연간 카드). 카드 동일 폭·**minHeight 103**(설명 줄바꿈 시 확장)·좌우 16. 라디오 **24×24**·플랜명 20·설명 14·주 가격 H3·연간 부제 **`#80D7CF` 14**. ko 연간 설명 `paywallAnnualPlanSubtitle`는 `월간 플랜 대비`/`33% 이상 절약` 2줄(`\n`); 폭 부족 시 부제 `FittedBox`로 축소해 2줄 유지. 탭 토글 선택.
+- **CTA**: l10n `accountChangePlan`. 기본 비활성. Available 선택 시에만 활성. 탭 시 `DefaultPopup` 확인 팝업(`changePlanConfirmBody`: **다음 결제일부터 적용** — WITHOUT_PRORATION UX) → Confirm 시 `IapPurchaseService.changeSubscription` (**`ReplacementMode.withoutProration`**, 연간 base plan). old purchase 없으면 토스트 `changePlanOldPurchaseMissing`(크래시 없음). 성공 시 Account `pop(true)` + `changePlanChangeRequested`. verify는 신규 구독과 동일 경로. 실패 시 Billing/Purchase error code·message를 debugPrint.
+- **ReplacementMode 실측 메모:** `DEFERRED`=에러·변경 불가. `WITHOUT_PRORATION`=앱 채택(월↔년 가능했으나 제품은 월→연만 노출). `CHARGE_FULL_PRICE`는 미사용.
 
 ---
 
