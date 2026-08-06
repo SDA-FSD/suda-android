@@ -619,7 +619,8 @@ class AppLocalizationsPt extends AppLocalizations {
   String get paywallCompletedTitle => 'Parabéns!';
 
   @override
-  String get paywallCompletedBody => 'Seus benefícios Premium já estão ativos.';
+  String get paywallCompletedBody =>
+      'Seus benefícios Premium\njá estão ativos.';
 
   @override
   String get paywallCompletedContinue => 'Continuar';

@@ -110,9 +110,8 @@ class PaywallCompletedScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 10),
-                      Text(
+                      _PaywallCompletedBodyText(
                         l10n.paywallCompletedBody,
-                        textAlign: TextAlign.center,
                         style: textTheme.headlineMedium?.copyWith(
                           color: Colors.white,
                         ),
@@ -179,6 +178,61 @@ class PaywallCompletedScreen extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _PaywallCompletedBodyText extends StatelessWidget {
+  const _PaywallCompletedBodyText(this.text, {required this.style});
+
+  final String text;
+  final TextStyle? style;
+
+  /// heading2 기본 24. 3줄로 넘칠 때만 축소해 2줄 유지. 바닥 22.
+  static const _minFontSize = 22.0;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final maxWidth = constraints.maxWidth;
+        if (!maxWidth.isFinite || maxWidth <= 0) {
+          return const SizedBox.shrink();
+        }
+
+        final baseStyle = style;
+        var fontSize = baseStyle?.fontSize ?? 24.0;
+
+        TextPainter painterFor(double size) {
+          return TextPainter(
+            text: TextSpan(
+              text: text,
+              style: baseStyle?.copyWith(fontSize: size),
+            ),
+            textAlign: TextAlign.center,
+            textDirection: Directionality.of(context),
+            maxLines: 2,
+          )..layout(maxWidth: maxWidth);
+        }
+
+        if (painterFor(fontSize).didExceedMaxLines) {
+          while (fontSize > _minFontSize) {
+            fontSize = (fontSize - 0.5).clamp(_minFontSize, fontSize);
+            if (!painterFor(fontSize).didExceedMaxLines) break;
+            if (fontSize <= _minFontSize) break;
+          }
+        }
+
+        final fitsTwoLines = !painterFor(fontSize).didExceedMaxLines;
+        return Text(
+          text,
+          textAlign: TextAlign.center,
+          maxLines: fitsTwoLines ? 2 : null,
+          softWrap: true,
+          overflow: TextOverflow.visible,
+          style: baseStyle?.copyWith(fontSize: fontSize),
+        );
+      },
     );
   }
 }

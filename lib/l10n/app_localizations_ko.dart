@@ -593,7 +593,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get paywallCompletedTitle => '축하합니다!';
 
   @override
-  String get paywallCompletedBody => '이제 프리미엄 기능을 사용할 수 있어요.';
+  String get paywallCompletedBody => '이제 프리미엄 기능을\n사용할 수 있어요.';
 
   @override
   String get paywallCompletedContinue => '계속하기';
