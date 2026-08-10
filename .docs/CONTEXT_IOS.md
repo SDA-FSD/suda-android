@@ -105,6 +105,9 @@
 
 ## 단계 9 — Archive·TestFlight·App Store Connect
 
+- **최초 TestFlight 고정값(수집):** ASC 앱 레코드 `kr.sudatalk.app` 존재·스토어 메타는 미완 OK. Apple ID `future.strategy.division@gmail.com`(Admin)·Team `DWBJM357N6`·Apple Distribution 보유. 업로드: `flutter build ipa --flavor prd` 후 `xcodebuild -exportArchive`(`destination=upload`). 버전은 `pubspec.yaml` 공통(AOS 정렬). Export Compliance: `ios/Runner/Info.plist`에 `ITSAppUsesNonExemptEncryption=false`.
+- **최초 업로드 완료(2026-08-07):** `1.2.3 (57)` ASC 업로드 성공·processing. ITMS-90473: `NotificationService.appex` 버전 불일치 경고 메일 수신.
+- **NSE 버전 정렬(2026-08-07):** `NotificationService`에 `NotificationService.xcconfig`(`#include? Generated.xcconfig`) 연결 + `MARKETING_VERSION`/`CURRENT_PROJECT_VERSION`을 `$(FLUTTER_BUILD_NAME)`/`$(FLUTTER_BUILD_NUMBER)`로 Runner와 동기화. `1.2.3 (58)` ASC 재업로드 성공(버전 mismatch 경고 없음).
 - **App Store Connect 외부:** 운영 Bundle ID로 앱 레코드와 SKU를 만들고 이름/부제/설명/키워드/카테고리/연령등급, 지원 URL, 필수 개인정보처리방침 URL, 저작권, 판매 국가, 암호화 수출규정, 콘텐츠 권리, EU 배포 시 DSA trader 정보를 입력합니다.
 - 앱과 Firebase·Google·AppsFlyer·결제 SDK가 수집하는 데이터를 기준으로 [App Privacy Details](https://developer.apple.com/app-store/app-privacy-details/)를 작성합니다. iPhone은 6.5/6.9인치 중 한 규격, iPad는 13인치 스크린샷을 최소 세트로 준비하고 필요 언어를 현지화합니다.
 - `pubspec.yaml`의 version/build를 공통 원천으로 유지하되 Android와 iOS 모두에서 단조 증가하도록 릴리스 규칙을 정합니다. prd Archive를 Validate 후 업로드하고 내부 TestFlight → 외부 TestFlight/Beta Review → 단계적 App Review 순으로 진행합니다.

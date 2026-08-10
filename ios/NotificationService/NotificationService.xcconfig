@@ -1,0 +1,2 @@
+// Flutter pubspec version → CFBundleShortVersionString / CFBundleVersion
+#include? "../Flutter/Generated.xcconfig"
