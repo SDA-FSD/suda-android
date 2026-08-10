@@ -25,6 +25,7 @@ import '../roleplay/try_again.dart';
 import '../first_cefr_level.dart';
 import '../paywall/paywall.dart';
 import '../paywall/paywall_completed.dart';
+import '../../utils/paywall_impression_screen.dart';
 
 /// Lab에서 재현 가능한 `DefaultPopup` 목록.
 /// `DefaultPopup` 전환이 완료될 때마다 여기에 **한 항목씩** 추가한다.
@@ -153,7 +154,10 @@ class _LabScreenState extends State<LabScreen> {
 
   Future<void> _openPaywallScreen() async {
     if (!mounted) return;
-    await PaywallScreen.push(context);
+    await PaywallScreen.push(
+      context,
+      screen: PaywallImpressionScreen.lab,
+    );
   }
 
   Future<void> _openPaywallCompletedScreen() async {

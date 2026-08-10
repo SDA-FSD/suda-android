@@ -6,10 +6,12 @@ import 'package:flutter/material.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../services/iap_purchase_service.dart';
+import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
 import '../../utils/default_toast.dart';
 import '../../utils/full_screen_route.dart';
 import '../../utils/iap_busy_overlay.dart';
+import '../../utils/paywall_impression_screen.dart';
 import '../../utils/sub_screen_route.dart';
 import '../webview_screen.dart';
 import 'paywall_completed.dart';
@@ -20,15 +22,18 @@ import 'paywall_completed.dart';
 /// 결제 성공 → [PaywallCompletedScreen] → pop(true).
 /// `pendingYn=Y` → 토스트 후 pop(true). `successYn=N` → 실패 토스트·유지.
 class PaywallScreen extends StatefulWidget {
-  const PaywallScreen({super.key});
+  const PaywallScreen({super.key, required this.screen});
+
+  /// Paywall mount 통계용 screen (`PaywallImpressionScreen`).
+  final String screen;
 
   static const String routeName = '/paywall';
 
   /// `true` = 구독 성공 또는 승인대기(에너지 팝업에서 Go Premium 숨김·detail 재조회).
-  static Future<T?> push<T>(BuildContext context) {
+  static Future<T?> push<T>(BuildContext context, {required String screen}) {
     return Navigator.of(context).push<T>(
       FullScreenRoute<T>(
-        page: const PaywallScreen(),
+        page: PaywallScreen(screen: screen),
         transition: FullScreenTransition.bottomUp,
         settings: const RouteSettings(name: routeName),
       ),
@@ -120,6 +125,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
   late final TapGestureRecognizer _privacyRecognizer;
   PremiumSubscriptionPrices? _prices;
   bool _purchasing = false;
+  String? _paywallSessionId;
 
   @override
   void initState() {
@@ -127,6 +133,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
     _termsRecognizer = TapGestureRecognizer()..onTap = _openTerms;
     _privacyRecognizer = TapGestureRecognizer()..onTap = _openPrivacy;
     unawaited(_loadPrices());
+    unawaited(_initPaywallSession());
   }
 
   @override
@@ -144,6 +151,38 @@ class _PaywallScreenState extends State<PaywallScreen> {
         await IapPurchaseService.instance.loadPremiumSubscriptionPrices();
     if (!mounted) return;
     setState(() => _prices = prices);
+  }
+
+  Future<void> _initPaywallSession() async {
+    if (!PaywallImpressionScreen.shouldCollect(widget.screen)) return;
+    try {
+      final accessToken = await TokenStorage.loadAccessToken();
+      if (!mounted || accessToken == null || accessToken.isEmpty) return;
+      final sessionId = await SudaApiClient.openSubscriptionPaywallImpression(
+        accessToken: accessToken,
+        screen: widget.screen,
+      );
+      if (!mounted) return;
+      _paywallSessionId = sessionId;
+    } catch (e, st) {
+      debugPrint('[DEBUG] Paywall open impression failed: $e\n$st');
+    }
+  }
+
+  Future<void> _recordSubscriptionTap(String basePlanId) async {
+    final sessionId = _paywallSessionId?.trim();
+    if (sessionId == null || sessionId.isEmpty) return;
+    try {
+      final accessToken = await TokenStorage.loadAccessToken();
+      if (accessToken == null || accessToken.isEmpty) return;
+      await SudaApiClient.recordSubscriptionPaywallTap(
+        accessToken: accessToken,
+        paywallSessionId: sessionId,
+        basePlanId: basePlanId,
+      );
+    } catch (e, st) {
+      debugPrint('[DEBUG] Paywall subscription tap impression failed: $e\n$st');
+    }
   }
 
   String _annualPriceMain(AppLocalizations l10n) {
@@ -180,11 +219,14 @@ class _PaywallScreenState extends State<PaywallScreen> {
           ? IapPurchaseService.basePlanYearly
           : IapPurchaseService.basePlanMonthly;
 
+      await _recordSubscriptionTap(basePlanId);
+
       final result = await IapBusyOverlay.run(
         context,
         () => IapPurchaseService.instance.purchaseSubscription(
           basePlanId: basePlanId,
           accessToken: accessToken,
+          paywallSessionId: _paywallSessionId,
         ),
       );
       if (!mounted) return;

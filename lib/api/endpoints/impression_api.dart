@@ -6,6 +6,43 @@ import 'package:http/http.dart' as http;
 import '../client/suda_http_client.dart';
 
 class ImpressionApi {
+  /// `POST /v1/impressions/subscriptions` — Paywall mount. `paywallSessionId` 발급.
+  static Future<String> openSubscriptionPaywall({
+    required String accessToken,
+    required String screen,
+  }) async {
+    return await SudaHttpClient.executeWithRefresh(
+      () => _openSubscriptionPaywallInternal(
+        accessToken: accessToken,
+        screen: screen,
+      ),
+      retryWithNewToken: (newToken) => _openSubscriptionPaywallInternal(
+        accessToken: newToken,
+        screen: screen,
+      ),
+    );
+  }
+
+  /// `PUT /v1/impressions/subscriptions` — Paywall 구독 CTA 탭(선택 base plan).
+  static Future<void> recordSubscriptionTap({
+    required String accessToken,
+    required String paywallSessionId,
+    required String basePlanId,
+  }) async {
+    await SudaHttpClient.executeWithRefresh(
+      () => _recordSubscriptionTapInternal(
+        accessToken: accessToken,
+        paywallSessionId: paywallSessionId,
+        basePlanId: basePlanId,
+      ),
+      retryWithNewToken: (newToken) => _recordSubscriptionTapInternal(
+        accessToken: newToken,
+        paywallSessionId: paywallSessionId,
+        basePlanId: basePlanId,
+      ),
+    );
+  }
+
   /// `POST /v1/impressions/products` — offerSessionId + productId product 탭 impression 수집.
   static Future<void> impressProduct({
     required String accessToken,
@@ -63,6 +100,86 @@ class ImpressionApi {
 
     throw Exception(
       'POST /v1/impressions/products failed: HTTP ${response.statusCode} ${response.body}',
+    );
+  }
+
+  static Future<String> _openSubscriptionPaywallInternal({
+    required String accessToken,
+    required String screen,
+  }) async {
+    final uri = SudaHttpClient.buildUri('/v1/impressions/subscriptions');
+
+    late final http.Response response;
+    try {
+      response = await SudaHttpClient.client
+          .post(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+              'Content-Type': 'application/json',
+            },
+            body: jsonEncode({'screen': screen}),
+          )
+          .timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      rethrow;
+    }
+
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final Map<String, dynamic> data =
+          jsonDecode(response.body) as Map<String, dynamic>;
+      final sessionId = data['paywallSessionId'] as String? ?? '';
+      if (sessionId.isEmpty) {
+        throw Exception('POST /v1/impressions/subscriptions: empty paywallSessionId');
+      }
+      return sessionId;
+    }
+
+    throw Exception(
+      'POST /v1/impressions/subscriptions failed: HTTP ${response.statusCode} ${response.body}',
+    );
+  }
+
+  static Future<void> _recordSubscriptionTapInternal({
+    required String accessToken,
+    required String paywallSessionId,
+    required String basePlanId,
+  }) async {
+    final uri = SudaHttpClient.buildUri('/v1/impressions/subscriptions');
+
+    late final http.Response response;
+    try {
+      response = await SudaHttpClient.client
+          .put(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+              'Content-Type': 'application/json',
+            },
+            body: jsonEncode({
+              'paywallSessionId': paywallSessionId,
+              'basePlanId': basePlanId,
+            }),
+          )
+          .timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      rethrow;
+    }
+
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return;
+    }
+
+    throw Exception(
+      'PUT /v1/impressions/subscriptions failed: HTTP ${response.statusCode} ${response.body}',
     );
   }
 }

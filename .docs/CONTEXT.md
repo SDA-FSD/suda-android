@@ -242,7 +242,8 @@ flutter run --flavor dev -t lib/main.dart --dart-define=ENV=dev -d 541F3961-8182
 - 공용: `IapPurchaseService` — INAPP·**SUBS**(`subscription_premium` + `bp-premium-monthly`/`bp-premium-yearly` offer 선택)·verify·따닥 방지. 가격 `IapPriceCache`(SUBS는 `productId::basePlanId`). resume 2초 grace(스트림 미수신 시에만)·`abandonPendingPurchase`. 매칭 purchaseStream 수신 후에는 grace 재개 금지(verify 중 `storeDismissed`로 성공 덮어쓰기 방지).
 - **IAP+verify 중**: `IapBusyOverlay`(`lib/utils/iap_busy_overlay.dart`) — rootNavigator 전면 dim+흰 스피너, 뒤로가기 불가. 에너지 팝업 INAPP·Paywall CTA 공통.
 - **consume/ack는 서버 verify 전담**. 클라이언트 `buyConsumable(autoConsume: false)`, `completePurchase` 미호출(전 상품: Unlimited·Capacity·Premium).
-- Buy 시 obfuscatedAccountId = SHA-256(userId). verify body `{ purchaseToken, productId }` (SUBS도 동일, basePlanId 미포함). 에너지 팝업 INAPP은 탭 시점 `offerSessionId`를 추가로 전달(비어 있으면 생략). Paywall/Change Plan SUBS는 offerSessionId 미포함.
+- Buy 시 obfuscatedAccountId = SHA-256(userId). verify body `{ purchaseToken, productId, offerSessionId?, paywallSessionId?, basePlanId? }` — INAPP은 `offerSessionId`(에너지 팝업 탭 시), SUBS(Paywall)는 `paywallSessionId`+`basePlanId`(offerSessionId 없음). Change Plan SUBS는 impression 필드 미포함.
+- **Paywall impression(2026-08):** mount `POST /v1/impressions/subscriptions` `{ screen }` → `{ paywallSessionId }`. 구독 CTA 탭 `PUT /v1/impressions/subscriptions` `{ paywallSessionId, basePlanId }`. screen: `profile`/`account`/`speech_feedback`/`energy_popup_{home|opening|…}`; Lab(`lab`)은 수집 skip. `PaywallImpressionScreen`·`PaywallScreen.push(screen:…)`.
 - 응답 `successYn`/`pendingYn`.
 - 에너지 팝업: INAPP 구매 + Go Premium → Paywall. pop(true) 시 Go Premium 1000ms 제거 + detail 재조회.
 - Paywall: 스토어 가격(연간 raw/12 + yearly, l10n suffix `/month`·`/mês`·`/월` 등), `paywallCta` 결제. 성공 → Completed → pop(true). pending → 토스트+pop(true). N → 실패 토스트. **문구 en/pt/ko l10n 완료**.

@@ -9,6 +9,7 @@ import '../services/token_storage.dart';
 import '../utils/energy_icon.dart';
 import '../utils/energy_timer_refetch.dart';
 import 'default_popup.dart';
+import '../utils/paywall_impression_screen.dart';
 import 'energy_purchase_section.dart';
 
 const _pink = Color(0xFFFF00A6);
@@ -465,6 +466,9 @@ class _EnergyInfoPopupBodyState extends State<EnergyInfoPopupBody> {
         EnergyPurchaseSection(
           energy: _energy,
           accessToken: widget.accessToken,
+          paywallScreen: widget.labMode
+              ? PaywallImpressionScreen.lab
+              : PaywallImpressionScreen.energyPopup(widget.screen),
           labMode: widget.labMode,
           forceShowGoPremium: widget.forceShowGoPremium,
           onRefetchEnergy: _refetchEnergy,

@@ -14,6 +14,7 @@ import '../../utils/default_toast.dart';
 import '../../utils/sub_screen_route.dart';
 import '../../widgets/app_scaffold.dart';
 import '../paywall/paywall.dart';
+import '../../utils/paywall_impression_screen.dart';
 import 'change_plan.dart';
 
 class AccountScreen extends StatefulWidget {
@@ -137,7 +138,10 @@ class _AccountScreenState extends State<AccountScreen> with SingleTickerProvider
   }
 
   Future<void> _onFreePlanTap() async {
-    final subscribed = await PaywallScreen.push<bool>(context);
+    final subscribed = await PaywallScreen.push<bool>(
+      context,
+      screen: PaywallImpressionScreen.account,
+    );
     if (!mounted || subscribed != true) return;
     await _refreshSubscriptionStatus();
   }

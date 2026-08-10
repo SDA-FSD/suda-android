@@ -366,6 +366,30 @@ class SudaApiClient {
     );
   }
 
+  /// `POST /v1/impressions/subscriptions` — Paywall mount (`paywallSessionId` 발급).
+  static Future<String> openSubscriptionPaywallImpression({
+    required String accessToken,
+    required String screen,
+  }) {
+    return ImpressionApi.openSubscriptionPaywall(
+      accessToken: accessToken,
+      screen: screen,
+    );
+  }
+
+  /// `PUT /v1/impressions/subscriptions` — Paywall 구독 CTA 탭.
+  static Future<void> recordSubscriptionPaywallTap({
+    required String accessToken,
+    required String paywallSessionId,
+    required String basePlanId,
+  }) {
+    return ImpressionApi.recordSubscriptionTap(
+      accessToken: accessToken,
+      paywallSessionId: paywallSessionId,
+      basePlanId: basePlanId,
+    );
+  }
+
   /// 배지·Playing·구독 상태 등 레이블/상태 갱신 (`GET /v1/users/energy/simple`).
   static Future<UserEnergyDto> getUserEnergySimple({
     required String accessToken,
@@ -472,18 +496,22 @@ class SudaApiClient {
   }
 
   /// POST /v1/purchases/verify — 구매 검증 (`successYn` / `pendingYn`).
-  /// 에너지 팝업 INAPP은 탭 시점 `offerSessionId`를 함께 전달(비어 있으면 생략).
+  /// INAPP(에너지): `offerSessionId`. SUBS(Paywall): `paywallSessionId` + `basePlanId`.
   static Future<PurchaseVerifyResultDto> verifyPurchase({
     required String accessToken,
     required String purchaseToken,
     required String productId,
     String? offerSessionId,
+    String? paywallSessionId,
+    String? basePlanId,
   }) {
     return PurchaseApi.verifyPurchase(
       accessToken: accessToken,
       purchaseToken: purchaseToken,
       productId: productId,
       offerSessionId: offerSessionId,
+      paywallSessionId: paywallSessionId,
+      basePlanId: basePlanId,
     );
   }
 

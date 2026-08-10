@@ -14,6 +14,8 @@ class PurchaseApi {
     required String purchaseToken,
     required String productId,
     String? offerSessionId,
+    String? paywallSessionId,
+    String? basePlanId,
   }) async {
     return await SudaHttpClient.executeWithRefresh(
       () => _verifyPurchaseInternal(
@@ -21,12 +23,16 @@ class PurchaseApi {
         purchaseToken,
         productId,
         offerSessionId,
+        paywallSessionId,
+        basePlanId,
       ),
       retryWithNewToken: (newToken) => _verifyPurchaseInternal(
         newToken,
         purchaseToken,
         productId,
         offerSessionId,
+        paywallSessionId,
+        basePlanId,
       ),
     );
   }
@@ -36,6 +42,8 @@ class PurchaseApi {
     String purchaseToken,
     String productId,
     String? offerSessionId,
+    String? paywallSessionId,
+    String? basePlanId,
   ) async {
     final uri = SudaHttpClient.buildUri('/v1/purchases/verify');
 
@@ -43,9 +51,17 @@ class PurchaseApi {
       'purchaseToken': purchaseToken,
       'productId': productId,
     };
-    final sessionId = offerSessionId?.trim();
-    if (sessionId != null && sessionId.isNotEmpty) {
-      body['offerSessionId'] = sessionId;
+    final offerId = offerSessionId?.trim();
+    if (offerId != null && offerId.isNotEmpty) {
+      body['offerSessionId'] = offerId;
+    }
+    final paywallId = paywallSessionId?.trim();
+    if (paywallId != null && paywallId.isNotEmpty) {
+      body['paywallSessionId'] = paywallId;
+    }
+    final planId = basePlanId?.trim();
+    if (planId != null && planId.isNotEmpty) {
+      body['basePlanId'] = planId;
     }
 
     late final http.Response response;

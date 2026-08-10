@@ -16,6 +16,7 @@ enum _EnergyPurchaseKind { unlimited, capacity6, capacity7 }
 
 /// 에너지 팝업: 안내문구와 닫기 버튼 사이에 노출되는 구매·Go Premium 영역.
 class EnergyPurchaseSection extends StatefulWidget {
+  final String paywallScreen;
   final UserEnergyDto energy;
   final String accessToken;
   final bool labMode;
@@ -27,6 +28,7 @@ class EnergyPurchaseSection extends StatefulWidget {
     super.key,
     required this.energy,
     required this.accessToken,
+    required this.paywallScreen,
     this.labMode = false,
     this.forceShowGoPremium = false,
     this.onRefetchEnergy,
@@ -223,7 +225,10 @@ class _EnergyPurchaseSectionState extends State<EnergyPurchaseSection> {
 
   Future<void> _onGoPremiumTap() async {
     if (_busyKind != null || _goPremiumRemoving || _goPremiumDismissed) return;
-    final subscribed = await PaywallScreen.push<bool>(context);
+    final subscribed = await PaywallScreen.push<bool>(
+      context,
+      screen: widget.paywallScreen,
+    );
     if (!mounted || subscribed != true) return;
 
     setState(() => _goPremiumRemoving = true);

@@ -44,6 +44,9 @@ class IapPurchaseService with WidgetsBindingObserver {
   String? _pendingAccessToken;
   /// 에너지 팝업 INAPP: 탭 시점 offerSessionId(verify 어트리뷰션). refetch로 바뀌어도 유지.
   String? _pendingOfferSessionId;
+  /// Paywall SUBS: mount `paywallSessionId` + 선택 basePlanId(verify·탭 impression).
+  String? _pendingPaywallSessionId;
+  String? _pendingBasePlanId;
   Timer? _resumeGraceTimer;
   bool _lifecycleObserving = false;
   /// 매칭 purchaseStream 수신 후 true. resume grace가 verify 중 storeDismissed로
@@ -238,10 +241,11 @@ class IapPurchaseService with WidgetsBindingObserver {
     );
   }
 
-  /// SUBS Premium 구매 → verify. body는 INAPP과 동일 (`purchaseToken`, `productId`).
+  /// SUBS Premium 구매 → verify. Paywall 경로는 [paywallSessionId] 포함.
   Future<IapPurchaseResult> purchaseSubscription({
     required String basePlanId,
     required String accessToken,
+    String? paywallSessionId,
   }) {
     return _purchase(
       productId: productPremium,
@@ -253,6 +257,8 @@ class IapPurchaseService with WidgetsBindingObserver {
       ),
       consumable: false,
       cacheBasePlanId: basePlanId,
+      paywallSessionId: paywallSessionId,
+      verifyBasePlanId: basePlanId,
     );
   }
 
@@ -329,6 +335,8 @@ class IapPurchaseService with WidgetsBindingObserver {
     String? cacheBasePlanId,
     ChangeSubscriptionParam? changeSubscriptionParam,
     String? offerSessionId,
+    String? paywallSessionId,
+    String? verifyBasePlanId,
   }) async {
     if (_pending != null) {
       return IapPurchaseResult.storeDismissed;
@@ -345,6 +353,14 @@ class IapPurchaseService with WidgetsBindingObserver {
     final trimmedOffer = offerSessionId?.trim();
     _pendingOfferSessionId =
         (trimmedOffer != null && trimmedOffer.isNotEmpty) ? trimmedOffer : null;
+    final trimmedPaywall = paywallSessionId?.trim();
+    _pendingPaywallSessionId =
+        (trimmedPaywall != null && trimmedPaywall.isNotEmpty)
+            ? trimmedPaywall
+            : null;
+    final trimmedPlan = verifyBasePlanId?.trim();
+    _pendingBasePlanId =
+        (trimmedPlan != null && trimmedPlan.isNotEmpty) ? trimmedPlan : null;
     _purchaseUpdateReceived = false;
     _cancelResumeGrace();
 
@@ -478,6 +494,8 @@ class IapPurchaseService with WidgetsBindingObserver {
             purchaseToken: purchaseToken,
             productId: purchase.productID,
             offerSessionId: _pendingOfferSessionId,
+            paywallSessionId: _pendingPaywallSessionId,
+            basePlanId: _pendingBasePlanId,
           );
           if (!verify.isSuccess) {
             _failPending(IapPurchaseResult.verifyFailed);
@@ -524,6 +542,8 @@ class IapPurchaseService with WidgetsBindingObserver {
     _pendingProductId = null;
     _pendingAccessToken = null;
     _pendingOfferSessionId = null;
+    _pendingPaywallSessionId = null;
+    _pendingBasePlanId = null;
     _purchaseUpdateReceived = false;
   }
 }

@@ -17,6 +17,7 @@ import '../services/token_storage.dart';
 import '../services/suda_api_client.dart';
 import '../widgets/profile_go_premium_button.dart';
 import 'paywall/paywall.dart';
+import '../utils/paywall_impression_screen.dart';
 import '../utils/default_toast.dart';
 import '../utils/sub_screen_route.dart';
 import '../widgets/default_popup.dart';
@@ -328,7 +329,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _onPremiumCtaTap() async {
-    final subscribed = await PaywallScreen.push<bool>(context);
+    final subscribed = await PaywallScreen.push<bool>(
+      context,
+      screen: PaywallImpressionScreen.profile,
+    );
     if (!mounted || subscribed != true) return;
     await _refreshSubscriptionStatus();
   }
