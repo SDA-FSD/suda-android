@@ -84,6 +84,7 @@ class _LabScreenState extends State<LabScreen> {
   bool _energyPopupShowCapacity6 = false;
   bool _energyPopupShowCapacity7 = false;
   bool _energyPopupForceGoPremium = false;
+  bool _energyPopupForceEnablePush = false;
   final TextEditingController _energyPopupCountController =
       TextEditingController(text: '3');
   static const _longToastTestMessage = 'Test Popup, Test Toast, 가나다라마바사아자차카타파하';
@@ -223,6 +224,7 @@ class _LabScreenState extends State<LabScreen> {
       showCapacity6Purchase: _energyPopupShowCapacity6,
       showCapacity7Purchase: _energyPopupShowCapacity7,
       forceShowGoPremium: _energyPopupForceGoPremium,
+      forceShowEnablePush: _energyPopupForceEnablePush,
     );
   }
 
@@ -481,6 +483,12 @@ class _LabScreenState extends State<LabScreen> {
               label: 'force Go Premium',
               value: _energyPopupForceGoPremium,
               onChanged: (v) => setState(() => _energyPopupForceGoPremium = v),
+            ),
+            _buildLabCheckbox(
+              label: 'force Enable Notifications',
+              value: _energyPopupForceEnablePush,
+              onChanged: (v) =>
+                  setState(() => _energyPopupForceEnablePush = v),
             ),
             const SizedBox(height: 8),
             TextField(

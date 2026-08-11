@@ -152,6 +152,12 @@ Future<void> showPlayingEnergyInsufficientPopup(
   });
 }
 
+bool _allowEnablePushOffer(String screen) {
+  return screen == EnergyOfferScreen.home ||
+      screen == EnergyOfferScreen.opening ||
+      screen == EnergyOfferScreen.openingInsufficient;
+}
+
 Future<void> _showEnergyInfoPopupWithEnergy(
   BuildContext context,
   UserEnergyDto energy, {
@@ -159,6 +165,7 @@ Future<void> _showEnergyInfoPopupWithEnergy(
   required String screen,
   bool labMode = false,
   bool forceShowGoPremium = false,
+  bool forceShowEnablePush = false,
   String? messageOverride,
 }) async {
   final l10n = AppLocalizations.of(context)!;
@@ -171,6 +178,7 @@ Future<void> _showEnergyInfoPopupWithEnergy(
       screen: screen,
       labMode: labMode,
       forceShowGoPremium: forceShowGoPremium,
+      forceShowEnablePush: forceShowEnablePush,
       messageOverride: messageOverride,
     ),
     buttons: [
@@ -194,6 +202,7 @@ Future<void> showEnergyPopupForLab(
   bool showCapacity6Purchase = false,
   bool showCapacity7Purchase = false,
   bool forceShowGoPremium = false,
+  bool forceShowEnablePush = false,
 }) {
   return _withEnergyPopupLock(() async {
     final energy = _buildLabEnergyDto(
@@ -217,6 +226,7 @@ Future<void> showEnergyPopupForLab(
           screen: EnergyOfferScreen.lab,
           labMode: true,
           forceShowGoPremium: forceShowGoPremium,
+          forceShowEnablePush: forceShowEnablePush,
         ),
         buttons: [
           DefaultPopupButton(
@@ -236,6 +246,7 @@ Future<void> showEnergyPopupForLab(
       screen: EnergyOfferScreen.lab,
       labMode: true,
       forceShowGoPremium: forceShowGoPremium,
+      forceShowEnablePush: forceShowEnablePush,
     );
   });
 }
@@ -311,6 +322,7 @@ class EnergyInfoPopupBody extends StatefulWidget {
   final String screen;
   final bool labMode;
   final bool forceShowGoPremium;
+  final bool forceShowEnablePush;
   final String? messageOverride;
 
   const EnergyInfoPopupBody({
@@ -320,6 +332,7 @@ class EnergyInfoPopupBody extends StatefulWidget {
     required this.screen,
     this.labMode = false,
     this.forceShowGoPremium = false,
+    this.forceShowEnablePush = false,
     this.messageOverride,
   });
 
@@ -471,6 +484,8 @@ class _EnergyInfoPopupBodyState extends State<EnergyInfoPopupBody> {
               : PaywallImpressionScreen.energyPopup(widget.screen),
           labMode: widget.labMode,
           forceShowGoPremium: widget.forceShowGoPremium,
+          forceShowEnablePush: widget.forceShowEnablePush,
+          allowEnablePushOffer: _allowEnablePushOffer(widget.screen),
           onRefetchEnergy: _refetchEnergy,
         ),
       ],

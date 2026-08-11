@@ -480,6 +480,21 @@ class AppLocalizationsKo extends AppLocalizations {
   String get endRoleplay => '롤플레이 종료하기';
 
   @override
+  String get energyEnablePushTitle => '알림 설정 하기';
+
+  @override
+  String get energyEnablePushSubtitle => '푸시 알림을 켜고 에너지를 가득 리필하세요.';
+
+  @override
+  String get energyEnablePushPrice => '무료';
+
+  @override
+  String get energyEnablePushOfferBadge => '최초 1회 혜택';
+
+  @override
+  String get energyEnablePushCompleted => '완료';
+
+  @override
   String get energyPurchaseUnlimitedTitle => '무제한 패스';
 
   @override

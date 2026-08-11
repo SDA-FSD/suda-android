@@ -179,7 +179,7 @@ class _PushAgreementScreenState extends State<PushAgreementScreen> {
         });
         _updateAppUserMetaInfo(nextOn);
         if (result.completeYn == 'Y') {
-          Navigator.of(context).pop();
+          Navigator.of(context).pop(true);
         }
       }
     } catch (e) {

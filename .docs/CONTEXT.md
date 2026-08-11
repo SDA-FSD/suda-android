@@ -113,6 +113,7 @@ flutter run --flavor dev -t lib/main.dart --dart-define=ENV=dev -d 541F3961-8182
 - Playing 0/402 → `showPlayingEnergyInsufficientPopup` → `endRoleplay`면 Wait 레이어(세션 유지)
 - Opening Start `sessionId=='0'` → 에너지 부족 팝업, Opening 유지
 - 팝업 INAPP 탭: `POST /v1/impressions/products` (팝업 생명주기 내 동일 키 1회)
+- Enable Notifications 슬롯: detail `showEnablePushFreeChargeYn=Y` **그리고** `screen` ∈ {`home`,`opening`,`opening_insufficient`}. 탭 시 impression `productId=enable_push_free_charge` → `GET /v1/users` → PushAgreement Sub Screen. `completeYn=Y`면 토스트(에너지 팝업 경로만) + 제거 애니 + detail 재조회. Setting>Notification 자동닫힘은 토스트 없음
 
 ### 홈·시리즈
 - `GET /v2/home/contents` → banners, seriesList, restYn, notiboxUnreadYn. `RestStatusService`에 rest·배지 동기화
@@ -142,12 +143,13 @@ flutter run --flavor dev -t lib/main.dart --dart-define=ENV=dev -d 541F3961-8182
 
 ## 7-2. IAP (현행)
 
-에너지 팝업 INAPP 3종 + Paywall Premium 월/연. `IapPurchaseService`. consume/ack는 **서버 verify 전담**. Lab Query/Buy 콘솔 없음.
+에너지 팝업 INAPP 3종 + Enable Notifications(비IAP) + Paywall Premium 월/연. `IapPurchaseService`. consume/ack는 **서버 verify 전담**. Lab Query/Buy 콘솔 없음.
 
 | 구분 | productId | basePlanId | 진입 |
 |------|-----------|------------|------|
 | INAPP | `unlimited_energy_10_minute` | consumable | 에너지 팝업 |
 | INAPP | `energy_capacity_6` / `energy_capacity_7` | — | 에너지 팝업 |
+| 비IAP | `enable_push_free_charge` | — | 에너지 팝업(home/opening/opening_insufficient) |
 | SUBS | `subscription_premium` | `bp-premium-monthly` / `bp-premium-yearly` | Paywall |
 
 - Billing 키는 **productId만** (`po-…` 아님). ID는 앱 하드코딩
@@ -156,7 +158,7 @@ flutter run --flavor dev -t lib/main.dart --dart-define=ENV=dev -d 541F3961-8182
 - Change Plan: 월간 구독자만 (`bp-premium-monthly`) → 연간, `ReplacementMode.withoutProration`
 - Speech Feedback: `feedbackLockedYn=='Y'` → Paywall. `'N'` → feedback TTS 준비 후 펼침+재생(실패 시 펼침만). 접기는 잠금 검사 없음. 상세 `CONTEXT_ROLEPLAY_S2.md`
 - **제약:** 상품은 prd 패키지 `kr.sudatalk.app`. verify `packageName`은 ENV 고정 → **산 패키지 = API ENV**. 스토어본↔유선본 상호 업데이트 불가
-- TBD: restore / 에너지 팝업 알림 설정
+- TBD: restore
 - iOS StoreKit: 아직 (`CONTEXT_IOS.md`)
 
 ## 8. 스타일

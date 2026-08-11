@@ -446,9 +446,10 @@
 
 ### 이전 스크린 정보 (진입점)
 - **SettingScreen**: "Notification" 클릭 시
+- **에너지 팝업** Enable Notifications 슬롯: `SubScreenRoute`로 덮음. 팝업은 유지. 열기 전 `GET /v1/users`로 토글 초기값.
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
-- **SettingScreen**: 좌상단 뒤로가기 또는 시스템 뒤로가기 시 `Navigator.pop()`으로 복귀
+- **SettingScreen** / 에너지 팝업: 좌상단 뒤로가기 또는 시스템 뒤로가기 시 `Navigator.pop()`으로 복귀(에너지 팝업은 그대로)
 
 ### 스크린 내부 구현 특이사항
 - 좌상단 뒤로가기: 같은 레벨(Account, Feedback 등)과 동일
@@ -456,7 +457,7 @@
 - 본문: width 100%, 배경 #353535, 모서리 둥근 박스. 좌측 설명(pushNotifications 흰색, pushNotificationsDesc caption·#80D7CF), 우측 토글(56×24 트랙, 20×20 흰 원). OFF: 원 좌측, 트랙 #8C8C8C. ON: 원 우측, 트랙 #80D7CF. 200 응답 후 전환 애니메이션.
 - API: ON 시 `PUT /v1/users/push-agreement?agreementYn=Y`, OFF 시 `PUT /v1/users/push-agreement?agreementYn=N`
 - 응답: `QuestResultDto { completeYn }`
-  - `completeYn == 'Y'`: `Navigator.pop()`으로 자동 복귀
+  - `completeYn == 'Y'`: `Navigator.pop(true)`로 자동 복귀. 에너지 팝업 진입이면 토스트(`energyEnablePushCompleted`) + 슬롯 제거 애니 + detail 재조회. Setting 경로는 토스트 없음
   - `completeYn != 'Y'`(N 포함): 추가 토스트 없이 기존처럼 토글 상태만 반영
 
 ---

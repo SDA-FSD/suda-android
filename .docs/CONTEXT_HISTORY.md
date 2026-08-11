@@ -4,6 +4,7 @@
 
 ---
 
+- **에너지 팝업 Enable Notifications(2026-08-11):** detail `showEnablePushFreeChargeYn` + screen home/opening/opening_insufficient. impression `enable_push_free_charge`. 완료 시 팝업 경로만 토스트 + 제거 애니.
 - **docs 경량화(2026-08-11):** FPM URL → `CONTEXT_FPM_CUSTOM_URL.md`. `CONTEXT_APPLE.md` 삭제(시뮬·실패표는 `CONTEXT.md` §2). `CONTEXT_IOS.md`는 남은 이슈만. S1은 한 줄 요약. HISTORY 아카이브 분리.
 - **Speech Feedback 펼침 TTS(2026-08-11):** `GET …/feedbacks/{rpMsgId}/audio`. 펼침 허용 시 로딩 스피너 후 펼침+재생, 실패 시 펼침만.
 - **Change Plan 월→연 ONLY + WITHOUT_PRORATION(2026-08):** 월간 구독자만. `ReplacementMode.withoutProration`.

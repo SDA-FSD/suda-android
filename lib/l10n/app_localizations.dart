@@ -1000,6 +1000,36 @@ abstract class AppLocalizations {
   /// **'End Roleplay'**
   String get endRoleplay;
 
+  /// No description provided for @energyEnablePushTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable Notifications'**
+  String get energyEnablePushTitle;
+
+  /// No description provided for @energyEnablePushSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on notifications and fully refill your Energy.'**
+  String get energyEnablePushSubtitle;
+
+  /// No description provided for @energyEnablePushPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Free'**
+  String get energyEnablePushPrice;
+
+  /// No description provided for @energyEnablePushOfferBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'ONE-TIME OFFER'**
+  String get energyEnablePushOfferBadge;
+
+  /// No description provided for @energyEnablePushCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get energyEnablePushCompleted;
+
   /// No description provided for @energyPurchaseUnlimitedTitle.
   ///
   /// In en, this message translates to:

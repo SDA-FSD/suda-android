@@ -502,6 +502,22 @@ class AppLocalizationsPt extends AppLocalizations {
   String get endRoleplay => 'Encerrar roleplay';
 
   @override
+  String get energyEnablePushTitle => 'Ativar notificações';
+
+  @override
+  String get energyEnablePushSubtitle =>
+      'Ative as notificações e recarregue sua Energia ao máximo.';
+
+  @override
+  String get energyEnablePushPrice => 'Grátis';
+
+  @override
+  String get energyEnablePushOfferBadge => 'OFERTA ÚNICA';
+
+  @override
+  String get energyEnablePushCompleted => 'concluído';
+
+  @override
   String get energyPurchaseUnlimitedTitle => 'Passe Temporariamente Ilimitado';
 
   @override

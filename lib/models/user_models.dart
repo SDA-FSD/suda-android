@@ -13,6 +13,7 @@ class UserEnergyDto {
   /// Play Billing base plan id (예: `bp-premium-monthly` / `bp-premium-yearly`).
   final String? subscriptionBasePlanId;
   /// detail 전용. simple 응답에는 없음 → 기본 `N`.
+  final String showEnablePushFreeChargeYn;
   final String showUnlimitedPurchaseYn;
   final String showCapacity6PurchaseYn;
   final String showCapacity7PurchaseYn;
@@ -28,6 +29,7 @@ class UserEnergyDto {
     this.subscribedYn = 'N',
     this.subscriptionExpiredAt,
     this.subscriptionBasePlanId,
+    this.showEnablePushFreeChargeYn = 'N',
     this.showUnlimitedPurchaseYn = 'N',
     this.showCapacity6PurchaseYn = 'N',
     this.showCapacity7PurchaseYn = 'N',
@@ -55,6 +57,8 @@ class UserEnergyDto {
       subscribedYn: json['subscribedYn'] as String? ?? 'N',
       subscriptionExpiredAt: parseInstant(json['subscriptionExpiredAt']),
       subscriptionBasePlanId: json['subscriptionBasePlanId'] as String?,
+      showEnablePushFreeChargeYn:
+          json['showEnablePushFreeChargeYn'] as String? ?? 'N',
       showUnlimitedPurchaseYn: json['showUnlimitedPurchaseYn'] as String? ?? 'N',
       showCapacity6PurchaseYn: json['showCapacity6PurchaseYn'] as String? ?? 'N',
       showCapacity7PurchaseYn: json['showCapacity7PurchaseYn'] as String? ?? 'N',
@@ -70,6 +74,7 @@ class UserEnergyDto {
     String? subscribedYn,
     DateTime? subscriptionExpiredAt,
     String? subscriptionBasePlanId,
+    String? showEnablePushFreeChargeYn,
     String? showUnlimitedPurchaseYn,
     String? showCapacity6PurchaseYn,
     String? showCapacity7PurchaseYn,
@@ -85,6 +90,8 @@ class UserEnergyDto {
           subscriptionExpiredAt ?? this.subscriptionExpiredAt,
       subscriptionBasePlanId:
           subscriptionBasePlanId ?? this.subscriptionBasePlanId,
+      showEnablePushFreeChargeYn:
+          showEnablePushFreeChargeYn ?? this.showEnablePushFreeChargeYn,
       showUnlimitedPurchaseYn:
           showUnlimitedPurchaseYn ?? this.showUnlimitedPurchaseYn,
       showCapacity6PurchaseYn:
@@ -116,6 +123,7 @@ class UserEnergyDto {
     return exp.isAfter(nowUtc);
   }
 
+  bool get showEnablePushFreeCharge => showEnablePushFreeChargeYn == 'Y';
   bool get showUnlimitedPurchase => showUnlimitedPurchaseYn == 'Y';
   bool get showCapacity6Purchase => showCapacity6PurchaseYn == 'Y';
   bool get showCapacity7Purchase => showCapacity7PurchaseYn == 'Y';

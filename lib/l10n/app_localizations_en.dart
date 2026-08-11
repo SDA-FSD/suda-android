@@ -496,6 +496,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get endRoleplay => 'End Roleplay';
 
   @override
+  String get energyEnablePushTitle => 'Enable Notifications';
+
+  @override
+  String get energyEnablePushSubtitle =>
+      'Turn on notifications and fully refill your Energy.';
+
+  @override
+  String get energyEnablePushPrice => 'Free';
+
+  @override
+  String get energyEnablePushOfferBadge => 'ONE-TIME OFFER';
+
+  @override
+  String get energyEnablePushCompleted => 'Completed';
+
+  @override
   String get energyPurchaseUnlimitedTitle => 'Unlimited Pass';
 
   @override
