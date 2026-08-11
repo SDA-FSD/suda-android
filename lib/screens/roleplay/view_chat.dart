@@ -58,6 +58,7 @@ class _ViewChatScreenState extends State<ViewChatScreen> {
   bool _isAutoPlaying = false;
   int? _playingMsgId;
   int? _loadingMsgId;
+  int? _feedbackTtsMsgId;
 
   List<RpS2UserHistoryMsgDto> get _messages => widget.history.messages;
 
@@ -102,6 +103,7 @@ class _ViewChatScreenState extends State<ViewChatScreen> {
       _isAutoPlaying = false;
       _playingMsgId = null;
       _loadingMsgId = null;
+      _feedbackTtsMsgId = null;
     });
   }
 
@@ -173,6 +175,7 @@ class _ViewChatScreenState extends State<ViewChatScreen> {
     setState(() {
       _playingMsgId = msgId;
       _loadingMsgId = msgId;
+      _feedbackTtsMsgId = null;
     });
 
     try {
@@ -281,7 +284,74 @@ class _ViewChatScreenState extends State<ViewChatScreen> {
       _isAutoPlaying = false;
       _playingMsgId = null;
       _loadingMsgId = null;
+      _feedbackTtsMsgId = null;
     });
+  }
+
+  Future<void> _stopFeedbackTts(int rpMsgId) async {
+    if (_feedbackTtsMsgId != rpMsgId) return;
+    await _stopPlayback();
+  }
+
+  Future<bool> _loadAndPlayFeedbackAudio(
+    int rpMsgId, {
+    required VoidCallback onReadyToPlay,
+  }) async {
+    if (_isAutoPlaying) {
+      setState(() => _isAutoPlaying = false);
+    }
+    _playSeq++;
+    final seq = _playSeq;
+    _audioSub?.cancel();
+    _audioSub = null;
+    await _audioPlayer.stop();
+
+    if (!mounted || seq != _playSeq) return false;
+    setState(() {
+      _playingMsgId = null;
+      _loadingMsgId = null;
+      _feedbackTtsMsgId = null;
+    });
+
+    final historyId = widget.history.id;
+    final token = await TokenStorage.loadAccessToken();
+    if (!mounted || seq != _playSeq) return false;
+    if (historyId == null || token == null) return false;
+
+    try {
+      final tts = await SudaApiClient.getRpS2UserHistoryFeedbackAudio(
+        accessToken: token,
+        rpUserHistoryId: historyId,
+        rpMsgId: rpMsgId,
+      );
+      if (!mounted || seq != _playSeq) return false;
+
+      final source = await _prepareAudio(
+        cdnYn: tts.cdnYn,
+        cdnPath: tts.cdnPath,
+        soundBytes: tts.sound,
+      );
+      if (!mounted || seq != _playSeq) return false;
+      if (source == null) return false;
+
+      setState(() => _feedbackTtsMsgId = rpMsgId);
+      _audioSub = _audioPlayer.playerStateStream.listen((state) {
+        if (state.processingState == ProcessingState.completed) {
+          _audioSub?.cancel();
+          _audioSub = null;
+          if (!mounted || seq != _playSeq) return;
+          setState(() => _feedbackTtsMsgId = null);
+        }
+      });
+      onReadyToPlay();
+      await _audioPlayer.play();
+      return seq == _playSeq;
+    } catch (_) {
+      _audioSub?.cancel();
+      _audioSub = null;
+      if (!mounted || seq != _playSeq) return false;
+      return false;
+    }
   }
 
   @override
@@ -372,6 +442,8 @@ class _ViewChatScreenState extends State<ViewChatScreen> {
           isLoading: message.id != null && _loadingMsgId == message.id,
           isPlaying: message.id != null && _playingMsgId == message.id,
           onAudioTap: () => unawaited(_onPlayTap(message)),
+          onLoadAndPlayFeedbackAudio: _loadAndPlayFeedbackAudio,
+          onStopFeedbackAudio: _stopFeedbackTts,
         );
       case _kRoleAiCharacter:
         return _buildAiBubble(context, bodyWidth, message, text);
@@ -565,6 +637,8 @@ class _ViewChatUserCard extends StatefulWidget {
     required this.isLoading,
     required this.isPlaying,
     required this.onAudioTap,
+    required this.onLoadAndPlayFeedbackAudio,
+    required this.onStopFeedbackAudio,
   });
 
   final RpS2UserHistoryMsgDto message;
@@ -575,6 +649,11 @@ class _ViewChatUserCard extends StatefulWidget {
   final bool isLoading;
   final bool isPlaying;
   final VoidCallback onAudioTap;
+  final Future<bool> Function(
+    int rpMsgId, {
+    required VoidCallback onReadyToPlay,
+  }) onLoadAndPlayFeedbackAudio;
+  final Future<void> Function(int rpMsgId) onStopFeedbackAudio;
 
   @override
   State<_ViewChatUserCard> createState() => _ViewChatUserCardState();
@@ -590,6 +669,7 @@ class _ViewChatUserCardState extends State<_ViewChatUserCard> {
   static const Curve _expandCurve = Curves.easeInOutCubic;
 
   bool _expanded = false;
+  bool _feedbackAudioLoading = false;
 
   String get _userSpeech => widget.message.content?.trim() ?? '';
 
@@ -606,7 +686,12 @@ class _ViewChatUserCardState extends State<_ViewChatUserCard> {
   }
 
   Future<void> _onFeedbackTapAsync() async {
+    if (_feedbackAudioLoading) return;
     if (_expanded) {
+      final rpMsgId = widget.message.id;
+      if (rpMsgId != null) {
+        unawaited(widget.onStopFeedbackAudio(rpMsgId));
+      }
       setState(() => _expanded = false);
       return;
     }
@@ -617,7 +702,30 @@ class _ViewChatUserCardState extends State<_ViewChatUserCard> {
       feedbackLockedYn: widget.feedbackLockedYn,
     );
     if (!mounted || !allowed) return;
-    setState(() => _expanded = true);
+    if (_feedbackAudioLoading) return;
+
+    final rpMsgId = widget.message.id;
+    if (rpMsgId == null) {
+      setState(() => _expanded = true);
+      return;
+    }
+
+    setState(() => _feedbackAudioLoading = true);
+    await widget.onLoadAndPlayFeedbackAudio(
+      rpMsgId,
+      onReadyToPlay: () {
+        if (!mounted) return;
+        setState(() {
+          _feedbackAudioLoading = false;
+          _expanded = true;
+        });
+      },
+    );
+    if (!mounted) return;
+    setState(() {
+      _feedbackAudioLoading = false;
+      _expanded = true;
+    });
   }
 
   Widget _buildExpandedFeedbackText(BuildContext context) {
@@ -776,6 +884,7 @@ class _ViewChatUserCardState extends State<_ViewChatUserCard> {
                         _ViewChatFeedbackButton(
                           onTap: _onFeedbackTap,
                           expanded: _expanded,
+                          loading: _feedbackAudioLoading,
                         ),
                     ],
                   ),
@@ -1039,10 +1148,12 @@ class _ViewChatFeedbackButton extends StatelessWidget {
   const _ViewChatFeedbackButton({
     required this.onTap,
     required this.expanded,
+    required this.loading,
   });
 
   final VoidCallback onTap;
   final bool expanded;
+  final bool loading;
 
   static const String _clickToFoldPng =
       'assets/images/icons/click_to_fold.png';
@@ -1070,17 +1181,27 @@ class _ViewChatFeedbackButton extends StatelessWidget {
               style: theme.labelSmall?.copyWith(color: _teal),
             ),
             const SizedBox(width: 4),
-            Transform.flip(
-              flipY: !expanded,
-              child: Image.asset(
-                _clickToFoldPng,
-                width: 12,
-                height: 12,
-                fit: BoxFit.contain,
-                color: _teal,
-                colorBlendMode: BlendMode.srcIn,
+            if (loading)
+              SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: _teal.withValues(alpha: 0.7),
+                ),
+              )
+            else
+              Transform.flip(
+                flipY: !expanded,
+                child: Image.asset(
+                  _clickToFoldPng,
+                  width: 12,
+                  height: 12,
+                  fit: BoxFit.contain,
+                  color: _teal,
+                  colorBlendMode: BlendMode.srcIn,
+                ),
               ),
-            ),
           ],
         ),
       ),

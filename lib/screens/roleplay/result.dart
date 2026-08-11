@@ -91,6 +91,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
   bool _keyExpressionBookmarkInFlight = false;
   int? _speechFeedbackActiveMsgId;
   bool _speechFeedbackIsPlaying = false;
+  int? _feedbackTtsMsgId;
 
   RpS2UserHistoryDto? get _s2History =>
       SeriesStateService.instance.cachedUserHistory;
@@ -686,6 +687,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
       _keyExpressionIsPlaying = false;
       _speechFeedbackActiveMsgId = null;
       _speechFeedbackIsPlaying = false;
+      _feedbackTtsMsgId = null;
     });
 
     final historyId = _s2History?.id;
@@ -774,6 +776,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
       _keyExpressionIsPlaying = false;
       _speechFeedbackActiveMsgId = rpMsgId;
       _speechFeedbackIsPlaying = false;
+      _feedbackTtsMsgId = null;
     });
 
     final historyId = _s2History?.id;
@@ -844,6 +847,93 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
         _speechFeedbackActiveMsgId = null;
         _speechFeedbackIsPlaying = false;
       });
+    }
+  }
+
+  Future<void> _stopFeedbackTts(int rpMsgId) async {
+    if (_feedbackTtsMsgId != rpMsgId) return;
+    _keyExpressionMegaphoneSeq++;
+    _keyExpressionAudioSub?.cancel();
+    _keyExpressionAudioSub = null;
+    await _keyExpressionAudioPlayer.stop();
+    if (!mounted) return;
+    setState(() => _feedbackTtsMsgId = null);
+  }
+
+  Future<bool> _loadAndPlayFeedbackAudio(
+    int rpMsgId, {
+    required VoidCallback onReadyToPlay,
+  }) async {
+    _keyExpressionMegaphoneSeq++;
+    final seq = _keyExpressionMegaphoneSeq;
+    _keyExpressionAudioSub?.cancel();
+    _keyExpressionAudioSub = null;
+    await _keyExpressionAudioPlayer.stop();
+
+    if (!mounted || seq != _keyExpressionMegaphoneSeq) {
+      return false;
+    }
+    setState(() {
+      _keyExpressionActiveIndex = null;
+      _keyExpressionIsPlaying = false;
+      _speechFeedbackActiveMsgId = null;
+      _speechFeedbackIsPlaying = false;
+      _feedbackTtsMsgId = null;
+    });
+
+    final historyId = _s2History?.id;
+    final token = await TokenStorage.loadAccessToken();
+    if (!mounted || seq != _keyExpressionMegaphoneSeq) {
+      return false;
+    }
+    if (token == null || historyId == null) {
+      return false;
+    }
+
+    try {
+      final tts = await SudaApiClient.getRpS2UserHistoryFeedbackAudio(
+        accessToken: token,
+        rpUserHistoryId: historyId,
+        rpMsgId: rpMsgId,
+      );
+      if (!mounted || seq != _keyExpressionMegaphoneSeq) {
+        return false;
+      }
+
+      final source = await _prepareKeyExpressionAudio(
+        cdnYn: tts.cdnYn,
+        cdnPath: tts.cdnPath,
+        soundBytes: tts.sound,
+      );
+      if (!mounted || seq != _keyExpressionMegaphoneSeq) {
+        return false;
+      }
+      if (source == null) {
+        return false;
+      }
+
+      setState(() => _feedbackTtsMsgId = rpMsgId);
+      _keyExpressionAudioSub =
+          _keyExpressionAudioPlayer.playerStateStream.listen((state) {
+        if (state.processingState == ProcessingState.completed) {
+          _keyExpressionAudioSub?.cancel();
+          _keyExpressionAudioSub = null;
+          if (!mounted || seq != _keyExpressionMegaphoneSeq) {
+            return;
+          }
+          setState(() => _feedbackTtsMsgId = null);
+        }
+      });
+      onReadyToPlay();
+      await _keyExpressionAudioPlayer.play();
+      return seq == _keyExpressionMegaphoneSeq;
+    } catch (_) {
+      _keyExpressionAudioSub?.cancel();
+      _keyExpressionAudioSub = null;
+      if (!mounted || seq != _keyExpressionMegaphoneSeq) {
+        return false;
+      }
+      return false;
     }
   }
 
@@ -1045,9 +1135,12 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
       return [
         for (final message in userMessages)
           _SpeechFeedbackRow(
+            rpMsgId: message.id,
             feedback: null,
             feedbackLockedYn: history.feedbackLockedYn,
             onUnlockedAfterPaywall: _refreshUserHistoryAfterSpeechFeedbackUnlock,
+            onLoadAndPlayFeedbackAudio: _loadAndPlayFeedbackAudio,
+            onStopFeedbackAudio: _stopFeedbackTts,
             userSpeech: message.content ?? '',
             audioInputEnabled: message.audioInputYn == 'Y',
             fetchingActive:
@@ -1081,9 +1174,12 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
 
       rows.add(
         _SpeechFeedbackRow(
+          rpMsgId: messageId,
           feedback: feedback,
           feedbackLockedYn: history.feedbackLockedYn,
           onUnlockedAfterPaywall: _refreshUserHistoryAfterSpeechFeedbackUnlock,
+          onLoadAndPlayFeedbackAudio: _loadAndPlayFeedbackAudio,
+          onStopFeedbackAudio: _stopFeedbackTts,
           userSpeech: message.content ?? '',
           audioInputEnabled: message.audioInputYn == 'Y',
           fetchingActive:
@@ -1534,10 +1630,12 @@ class _SpeechFeedbackFeedbackButton extends StatelessWidget {
   const _SpeechFeedbackFeedbackButton({
     required this.onTap,
     required this.expanded,
+    required this.loading,
   });
 
   final VoidCallback onTap;
   final bool expanded;
+  final bool loading;
 
   static const String _clickToFoldPng =
       'assets/images/icons/click_to_fold.png';
@@ -1565,17 +1663,27 @@ class _SpeechFeedbackFeedbackButton extends StatelessWidget {
               style: theme.labelSmall?.copyWith(color: _teal),
             ),
             const SizedBox(width: 4),
-            Transform.flip(
-              flipY: !expanded,
-              child: Image.asset(
-                _clickToFoldPng,
-                width: 12,
-                height: 12,
-                fit: BoxFit.contain,
-                color: _teal,
-                colorBlendMode: BlendMode.srcIn,
+            if (loading)
+              SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: _teal.withValues(alpha: 0.7),
+                ),
+              )
+            else
+              Transform.flip(
+                flipY: !expanded,
+                child: Image.asset(
+                  _clickToFoldPng,
+                  width: 12,
+                  height: 12,
+                  fit: BoxFit.contain,
+                  color: _teal,
+                  colorBlendMode: BlendMode.srcIn,
+                ),
               ),
-            ),
           ],
         ),
       ),
@@ -1585,9 +1693,12 @@ class _SpeechFeedbackFeedbackButton extends StatelessWidget {
 
 class _SpeechFeedbackRow extends StatefulWidget {
   const _SpeechFeedbackRow({
+    required this.rpMsgId,
     required this.feedback,
     required this.feedbackLockedYn,
     required this.onUnlockedAfterPaywall,
+    required this.onLoadAndPlayFeedbackAudio,
+    required this.onStopFeedbackAudio,
     required this.userSpeech,
     required this.audioInputEnabled,
     required this.fetchingActive,
@@ -1595,9 +1706,15 @@ class _SpeechFeedbackRow extends StatefulWidget {
     required this.onAudioTap,
   });
 
+  final int? rpMsgId;
   final RpS2UserFeedbackVo? feedback;
   final String feedbackLockedYn;
   final Future<void> Function() onUnlockedAfterPaywall;
+  final Future<bool> Function(
+    int rpMsgId, {
+    required VoidCallback onReadyToPlay,
+  }) onLoadAndPlayFeedbackAudio;
+  final Future<void> Function(int rpMsgId) onStopFeedbackAudio;
   final String userSpeech;
   final bool audioInputEnabled;
   final bool fetchingActive;
@@ -1620,9 +1737,15 @@ class _SpeechFeedbackRowState extends State<_SpeechFeedbackRow> {
   static const Curve _expandCurve = Curves.easeInOutCubic;
 
   bool _expanded = false;
+  bool _feedbackAudioLoading = false;
 
   Future<void> _onFeedbackTap() async {
+    if (_feedbackAudioLoading) return;
     if (_expanded) {
+      final rpMsgId = widget.rpMsgId;
+      if (rpMsgId != null) {
+        unawaited(widget.onStopFeedbackAudio(rpMsgId));
+      }
       setState(() => _expanded = false);
       return;
     }
@@ -1632,7 +1755,30 @@ class _SpeechFeedbackRowState extends State<_SpeechFeedbackRow> {
       onUnlockedAfterPaywall: widget.onUnlockedAfterPaywall,
     );
     if (!mounted || !allowed) return;
-    setState(() => _expanded = true);
+    if (_feedbackAudioLoading) return;
+
+    final rpMsgId = widget.rpMsgId;
+    if (rpMsgId == null) {
+      setState(() => _expanded = true);
+      return;
+    }
+
+    setState(() => _feedbackAudioLoading = true);
+    await widget.onLoadAndPlayFeedbackAudio(
+      rpMsgId,
+      onReadyToPlay: () {
+        if (!mounted) return;
+        setState(() {
+          _feedbackAudioLoading = false;
+          _expanded = true;
+        });
+      },
+    );
+    if (!mounted) return;
+    setState(() {
+      _feedbackAudioLoading = false;
+      _expanded = true;
+    });
   }
 
   Widget _buildMegaphoneAudioIcon({
@@ -1778,6 +1924,7 @@ class _SpeechFeedbackRowState extends State<_SpeechFeedbackRow> {
                 _SpeechFeedbackFeedbackButton(
                   onTap: () => unawaited(_onFeedbackTap()),
                   expanded: _expanded,
+                  loading: _feedbackAudioLoading,
                 ),
               ],
             ),

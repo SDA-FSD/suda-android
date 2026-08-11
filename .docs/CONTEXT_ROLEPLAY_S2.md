@@ -365,9 +365,9 @@ S1 턴 정책은 `.docs/CONTEXT_ROLEPLAY.md`만 본다. **S2는 아래가 단일
   - **Speech Feedback**(신규): 섹션 헤더 + **View Chat** pill → `ViewChatScreen`(`RpS2UserHistoryDto` 전달, `lib/screens/roleplay/view_chat.dart`). Review Chat과 동일 그라데이션 배경. `messages[]` role별 USER/AI_CHARACTER/AI_NARRATOR/SYSTEM_MISSION 렌더. **헤더 우측 메가폰**(기본색, fill은 자동재생 중만): `msgId` 오름차순 재생 가능 메시지 순차 자동재생, 말풍선 간 300ms 휴식, 재생 중 타겟 말풍선 하이라이트(`#80D7CF`). USER 말풍선은 Speech Feedback 카드 형태(grade·score·feedback 펼침/접힘 — **펼침 score·구분선 레이아웃은 Result Speech Feedback 카드와 동일**). USER 카드·AI 말풍선 오디오 fetch 중 메가폰 대신 16×16 `CircularProgressIndicator`(strokeWidth 2; USER·AI 하이라이트 시 `#054544` 70%, Result 카드와 동일 위치는 `#0CABA8` 70%). AI 말풍선은 아바타 없이 전폭. USER(`audioInputYn=='Y'`) 좌하단 메가폰 탭·AI_CHARACTER(`audioPath` 있음) 말풍선 탭 재생 — USER는 `GET …/messages/{rpMsgId}/audio`, AI는 CDN `audioPath`. 안내 문구 영역 없음.
     - **접힘**: 1줄 grade `bodySmall` **w700**(grade색) · 2줄 사용자 발화 `bodyLarge` · 3줄 메가폰 + **Feedback** pill.
     - **펼침**: score 4항목 — 카드 전폭 **50:50** 2열(좌: Meaning·Vocabulary, 우: Relevance·Grammar). score 패널 좌·우 **24** · 열 간격 **24** · 각 행 `labelSmall` label + bar, 4 label 공통 너비로 bar 좌우 길이 균등. score 영역과 사용자 발화 사이 `#D9D9D9` 1px 구분선 · 2·3줄 사이 `feedback` `bodySmall` `#635F5F`.
-    - **펼침/접힘(Result·History)**: Speech Feedback 카드 영역 탭 또는 Feedback pill 탭. `feedbackLockedYn=='Y'`면 Paywall(USER placeholder 카드 유지·grade/score 없음). `'N'`이면 즉시 펼침. `audioInputYn == 'N'`이면 메가폰 미노출·카드·Feedback pill 탭으로 펼침/접힘만.
-    - **펼침/접힘(View Chat USER)**: USER 말풍선 카드 영역 탭 또는 Feedback pill 탭. feedback null이면 Feedback 버튼 미노출.
-    - **재생**: `messages[].audioInputYn == 'Y'`인 행만 좌하단 메가폰 탭 시 재생. API `GET /rps2/user-histories/{rpUserHistoryId}/messages/{rpMsgId}/audio`(`TtsResultDto`, `rpMsgId` = `speechFeedback` 키 = `messages[].id`). fetch 중 16×16 `CircularProgressIndicator`(strokeWidth 2, `#0CABA8` 70%), 재생 중 `megaphone_fill.png` `#0CABA8`. Key Expression 등 다른 재생 중이면 중단 후 우선 적용.
+    - **펼침/접힘(Result·History)**: Speech Feedback 카드 영역 탭 또는 Feedback pill 탭. `feedbackLockedYn=='Y'`면 Paywall(USER placeholder 카드 유지·grade/score 없음). `'N'`이면 `GET /rps2/user-histories/{rpUserHistoryId}/feedbacks/{rpMsgId}/audio` 준비 후 펼침+TTS 재생 동시(실패 시 펼침만). 로딩 중 pill 화살표 자리 16×16 스피너·재탭 무시. 접기 시 해당 행 TTS 정지. `audioInputYn == 'N'`이면 메가폰 미노출·카드·Feedback pill 탭으로 펼침/접힘(+TTS).
+    - **펼침/접힘(View Chat USER)**: USER 말풍선 카드 영역 탭 또는 Feedback pill 탭. feedback null이면 Feedback 버튼 미노출. 펼침 TTS는 Result와 동일 API·스피너.
+    - **재생**: `messages[].audioInputYn == 'Y'`인 행만 좌하단 메가폰 탭 시 재생. API `GET /rps2/user-histories/{rpUserHistoryId}/messages/{rpMsgId}/audio`(`TtsResultDto`, `rpMsgId` = `speechFeedback` 키 = `messages[].id`). fetch 중 16×16 `CircularProgressIndicator`(strokeWidth 2, `#0CABA8` 70%), 재생 중 `megaphone_fill.png` `#0CABA8`. Key Expression·Feedback TTS 등 다른 재생 중이면 중단 후 우선 적용.
   - Footer: Got it! / Report(S1과 동일 UX) — S2는 `POST /rps2/user-histories/{rpUserHistoryId}/report`. **Profile History 진입**(`showReportLink: false`) 시 Report 링크 미노출.
 - **S1 경로**: Feedback + Key Expression + View Chat(헤더) 유지
 
@@ -400,6 +400,7 @@ S1 턴 정책은 `.docs/CONTEXT_ROLEPLAY.md`만 본다. **S2는 아래가 단일
 | POST | `/rps2/user-histories/{rpUserHistoryId}/expressions/{expressionIndex}` | void (200) | Result Key Expression 북마크 저장 | ✅ |
 | DELETE | `/rps2/user-histories/{rpUserHistoryId}/expressions/{expressionIndex}` | void (200) | Result Key Expression 북마크 삭제 | ✅ |
 | GET | `/rps2/user-histories/{rpUserHistoryId}/messages/{rpMsgId}/audio` | `TtsResultDto` (`cdnYn`, `cdnPath`, `sound`) | Result Speech Feedback 카드·메가폰 탭 | ✅ |
+| GET | `/rps2/user-histories/{rpUserHistoryId}/feedbacks/{rpMsgId}/audio` | `TtsResultDto` (`cdnYn`, `cdnPath`, `sound`) | Speech Feedback 펼침 시 TTS (Result·History·View Chat) | ✅ |
 | PUT | `/rps2/user-histories/{rpUserHistoryId}/user-star-rating` | req: `{userStarRating: 0~5}` | Ending 별 탭마다 | ✅ |
 | POST | `/rps2/user-histories/{rpUserHistoryId}/report` | req: `{content: string}` | Result Report Send | ✅ |
 

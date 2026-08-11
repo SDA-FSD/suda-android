@@ -265,6 +265,18 @@ class SudaApiClient {
     );
   }
 
+  static Future<TtsResultDto> getRpS2UserHistoryFeedbackAudio({
+    required String accessToken,
+    required int rpUserHistoryId,
+    required int rpMsgId,
+  }) {
+    return SeriesApi.getUserHistoryFeedbackAudio(
+      accessToken: accessToken,
+      rpUserHistoryId: rpUserHistoryId,
+      rpMsgId: rpMsgId,
+    );
+  }
+
   static Future<RoleplayOverviewDto> getRoleplayOverview({
     required String accessToken,
     required int roleplayId,

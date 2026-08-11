@@ -856,7 +856,7 @@
 - **후속 타이밍**: fully shown 1초 후 박스레이어 상단 이동 + `LikeProgressEffect.play()` (before/after like·level·progress).
 - **effect 이후 본문 (S1)**: Feedback + Key Expression + Got it!/Report. Feedback 즉시, Key Expression 500ms 후, footer 1s 후 fade-in.
 - **effect 이후 본문 (S2)**: Feedback **없음**. Key Expression + Speech Feedback + Got it!/Report. Key Expression·Speech Feedback 동시 슬라이드, footer 1s 후 fade-in.
-- **Speech Feedback 펼침**: 구독자만. 비구독 Feedback 탭 → `PaywallScreen`. 결제 후 복귀 시 자동 펼침 없음·재탭 시 펼침 (`ensureSubscribedForSpeechFeedback`). History도 동일 본문.
+- **Speech Feedback 펼침**: `feedbackLockedYn` 기준(`ensureSpeechFeedbackUnlocked`). `'Y'` → Paywall. `'N'` → `GET …/feedbacks/{rpMsgId}/audio` 준비 후 펼침+TTS(실패 시 펼침만, 로딩 스피너는 Feedback pill). 결제 후 복귀 시 자동 펼침 없음·재탭 시 펼침. History도 동일 본문.
 - **Expression/Key Expression 카드**: 가로 70% 캐러셀, 카드 탭 시 TTS(S1 API 연동 완료, S2 메가폰·북마크 UI만·API 추후), 북마크(S1 API 연동 완료).
 - **Got it! (S1)**: `GET /v1/users` + `GET /v1/roleplays/{roleplayId}/overview` best-effort 후 Overview pop.
 - **Got it! (S2)**: 동일 경로로 Overview pop (Series Overview).

@@ -1050,6 +1050,63 @@ class SeriesApi {
     );
   }
 
+  static Future<TtsResultDto> getUserHistoryFeedbackAudio({
+    required String accessToken,
+    required int rpUserHistoryId,
+    required int rpMsgId,
+  }) async {
+    return await SudaHttpClient.executeWithRefresh(
+      () => _getUserHistoryFeedbackAudioInternal(
+        accessToken,
+        rpUserHistoryId,
+        rpMsgId,
+      ),
+      retryWithNewToken: (newToken) => _getUserHistoryFeedbackAudioInternal(
+        newToken,
+        rpUserHistoryId,
+        rpMsgId,
+      ),
+    );
+  }
+
+  static Future<TtsResultDto> _getUserHistoryFeedbackAudioInternal(
+    String accessToken,
+    int rpUserHistoryId,
+    int rpMsgId,
+  ) async {
+    final uri = SudaHttpClient.buildUri(
+      '/rps2/user-histories/$rpUserHistoryId/feedbacks/$rpMsgId/audio',
+    );
+    late final http.Response response;
+    try {
+      response = await SudaHttpClient.client
+          .get(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+              'Content-Type': 'application/json',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      rethrow;
+    }
+
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final Map<String, dynamic> data =
+          jsonDecode(response.body) as Map<String, dynamic>;
+      return TtsResultDto.fromJson(data);
+    }
+
+    throw Exception(
+      'GET /rps2/user-histories/$rpUserHistoryId/feedbacks/$rpMsgId/audio failed: HTTP ${response.statusCode} ${response.body}',
+    );
+  }
+
   static Future<void> updateUserStarRating({
     required String accessToken,
     required int rpUserHistoryId,
