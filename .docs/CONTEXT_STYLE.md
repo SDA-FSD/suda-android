@@ -109,7 +109,7 @@ Text('더 작은 보조', style: theme.labelMini);   // body-tiny2 (extension)
 
 ## 3. 버튼 텍스트 스타일
 
-- 전역 설정 위치: `lib/main.dart`의
+- 전역 설정 위치: `lib/theme/app_theme.dart`의
   - `elevatedButtonTheme` (w600, 18px)
   - `outlinedButtonTheme` (w400)
   - `textButtonTheme` (w400)

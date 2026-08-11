@@ -44,8 +44,7 @@
 - 시스템 뒤로가기 버튼 클릭 시: Home 탭에서는 앱 종료, Alarm/Profile 탭에서는 Home 탭으로 이동
 
 **GNB 구성**:
-- 현재: Alarm 버튼, Home 버튼, Profile 버튼 (3개)
-- 향후: Profile 버튼 영역을 사용자 이미지 아이콘으로 대체 예정
+- Alarm / Home / Profile. Profile은 `profileImgUrl` 원형(없으면 default)
 
 **사용 예시**:
 - NotificationBoxScreen (알림함 화면) - Main Screen
@@ -75,7 +74,7 @@
 **사용 예시**:
 - 상세 화면
 - 설정 화면
-- AI 대화 화면 (향후 추가 예정)
+- Series Overview, Setting, History 등
 
 **구현 규칙**:
 - `Scaffold` 사용 (GNB 없음)
@@ -140,7 +139,7 @@
 - **클래스명**: `LoginScreen` (StatefulWidget)
 - **스크린 타입**: **Full Screen**
 - **appPath**: 해당 없음 (인증 플로우)
-- **현재 임시 상태**: 로그인 화면 개편 중이며 `#121212` 배경 위 중앙 스틸 이미지에서 시작한다. **1000ms 대기** 후 스틸 500ms fade-out, 로고 파트 1000ms 중앙 이동, 포스터·하단 영역은 fade-in 없이 각각 등장 연출한다. 포스터 1~3행은 행별로 화면 밖→노출 위치 1000ms(`easeOutCubic`) 슬라인 후 마키(1행 좌에서 등장·우로·60s, 2행 우에서 등장·좌로·70s, 3행 좌에서 등장·우로·66s). 하단 노출 영역은 화면 아래 밖에서 1000ms 상승(`easeOutCubic`).
+- **진입 연출**: `#121212` 배경 위 중앙 스틸에서 시작한다. **1000ms 대기** 후 스틸 500ms fade-out, 로고 파트 1000ms 중앙 이동, 포스터·하단 영역은 fade-in 없이 각각 등장 연출한다. 포스터 1~3행은 행별로 화면 밖→노출 위치 1000ms(`easeOutCubic`) 슬라인 후 마키(1행 좌에서 등장·우로·60s, 2행 우에서 등장·좌로·70s, 3행 좌에서 등장·우로·66s). 하단 노출 영역은 화면 아래 밖에서 1000ms 상승(`easeOutCubic`).
 - **서비스 이용 동의(레이어)**: 로그인 후 사용자 metaInfo의 `SUDA_AGREEMENT != 'Y'`인 경우, LoginScreen 위에 **bottom-up 레이어**(배경 blur+dim)로 동의 UI를 노출한다. 레이어 바깥 탭 시 닫힌다. 동의 완료 시 `POST /v1/users/agreement` + AppsFlyer `af_complete_registration` 이벤트를 호출한 뒤 **FirstCefrLevelScreen**(§1.2)으로 전환한다.
 
 ---
@@ -208,10 +207,7 @@
 - **appPath**: `/home`
 
 ### 스크린 용도
-- 로그인 후 메인 화면
-- 앱의 주요 기능 진입점
-- **홈 배너**: 상단에 100% 너비의 정사각형 배너 노출 (스와이프 가능, 무한 루프)
-- 향후 AI 영어 대화 기능이 추가될 예정
+- 로그인 후 메인. 배너 + 시리즈 카테고리 가로 썸네일.
 
 ### 이전 스크린 정보 (진입점)
 - **네이티브 스플래시**: 저장된 JWT 토큰이 유효하고 사용자 정보 조회 성공 시 (스플래시 제거 후 표시)
@@ -225,9 +221,7 @@
   - `onNavigateToAlarm` 콜백 호출 → `_MyAppState._navigateToAlarm()` 실행 → 상태 업데이트로 전환
 - **ProfileScreen**: GNB의 Profile 버튼 클릭 시
   - `onNavigateToProfile` 콜백 호출 → `_MyAppState._navigateToProfile()` 실행 → 상태 업데이트로 전환
-- **RoleplayOverviewScreen** (Sub Screen, **S1**): (현재는 명시적 버튼 없음, 향후 추가 예정)
-  - S1 단일 롤플레이 Overview. 홈 v2 이후 홈 썸네일 탭은 S2 `SeriesOverviewScreen`으로 진입.
-- **SeriesOverviewScreen** (Sub Screen, **S2**): Home 시리즈 썸네일 탭 시 `SeriesRouter.pushOverview`로 진입. `lib/screens/series/overview.dart`.
+- **SeriesOverviewScreen** (Sub): Home 시리즈 썸네일 탭 시 `SeriesRouter.pushOverview`. `lib/screens/series/overview.dart`.
   - 진입 시 `GET /rps2/series/{seriesId}/overview` (`SudaApiClient.getSeriesOverview`) → `RpS2SeriesOverviewDto` 파싱.
   - **레이아웃**(rp overview와 동일 골격): `Scaffold`+`Stack` — 상단 배경 `thumbnailImgPath`(CDN, 너비×**60%** 높이)·히어로 그라데이션·스크롤 본문(`information.png` 24×24(타이틀 **상단** 좌측·탭 → `SeriesInformationScreen`) → 타이틀 `headlineSmall` → gap 4 → `synopsisComplexityLevel` 태그 → 진행률 바 → gap 8 → `synopsis`)·**플로팅 헤더**(좌 뒤로가기 / 우 언어레벨 pill: liquid glass 24h — `ClipRRect` pill, `BackdropFilter` blur 12, white α0.14~0.22 gradient(좌상 밝음/우하 어두움), border white α0.36, shadow blur 10 offset (0,2), `ENGLISH_LEVEL` l10n 라벨, 탭 → `CefrLevelScreen`) 스크롤 시 타이틀 상단 도달하면 fade-out. §5 이후(에피소드 등) 추후.
 - **SeriesInformationScreen** (Sub Screen, **S2**): Overview information 탭 → `SubScreenRoute` (`lib/screens/series/series_information.dart`). 부모가 로드한 `RpS2SeriesOverviewDto`·`UserDto` 전달(API 재호출 없음). 헤더: Setting 계열 `AppScaffold`(좌 뒤로가기·우측 없음)+커스텀 중앙 title(`headlineSmall`·좌우 inset 40·max 2줄·`bodyTopPadding` 타이틀 높이 연동). 배경: `RoleplayOverviewBackdrop`(thumbnail CDN·Opening과 동일 blur/dim). 본문: synopsis(bodySmall·justify) → gap10 → blockquote(좌 #353535 3px)·언어레벨·주제난이도(scl) → gap20 → 학습목표(headlineSmall) → gap10 → 에피소드별 learningFunction+#N title(gap10)·핵심 표현 불릿(`missions[].keyExpression` **en** 고정, 사용자 언어 미사용).
@@ -253,7 +247,7 @@
       - 썸네일: 30% 너비, radius 10, 음영 박스 오버레이 타이틀 (`HomeSeriesDto.title` Map)  
         (텍스트가 영역을 초과할 때만 Marquee 적용)
       - 기능: 레이지 로딩(페이징) 지원, 로딩 중 Shimmer 스켈레톤 노출
-      - 탭: `SeriesOverviewScreen` (Sub, placeholder)
+      - 탭: `SeriesOverviewScreen` (Sub)
 - **API 연동**:
   - **홈 콘텐츠 통합 조회**: `GET /v2/home/contents` (`SudaApiClient.getHomeContents()`)
     - 응답: HomeDto (banners, seriesList, restYn, restStartsAt, restEndsAt, notiboxUnreadYn)
@@ -561,31 +555,10 @@
 
 ---
 
-## 11. RoleplayOverviewScreen
+## 11. RoleplayOverviewScreen (딥링크 잔존)
 
-### 스크린 관련 정의 파일
-- **파일 경로**: `lib/screens/roleplay/overview.dart`
-- **클래스명**: `RoleplayOverviewScreen` (StatelessWidget)
-- **스크린 타입**: **Sub Screen**
-- **appPath**: `/roleplay/overview/{roleplayId}` (예: `/roleplay/overview/12`)
-
-### 스크린 용도
-- Roleplay 목록 및 개요를 표시하는 화면
-- 향후 n개의 롤플레이가 표시될 예정
-
-### 이전 스크린 정보 (진입점)
-- **HomeScreen**: 중앙 "Roleplay" 텍스트 클릭 시
-  - `Navigator.push()`로 iOS 스타일 슬라이드 애니메이션으로 표시
-
-### 이후 스크린 정보 (이동 가능한 다른 스크린)
-- **RoleplayTutorialScreen** (Full Screen): 역할 버튼 탭 시 항상 먼저 진입 (Tutorial 완료 여부에 따라 자동 분기)
-  - `Navigator.push()`로 Full Screen 형태로 전환
-
-### 스크린 내부 구현 특이사항
-- 우측 상단 X 버튼 필수
-- 중앙에 "Play" 텍스트 (임시, 향후 롤플레이 목록으로 대체 예정)
-- Route name: `/roleplay/overview` (뒤로가기 시 overview로 돌아가기 위해 사용)
-- 역할 버튼 탭 시 `RoleplayRouter.pushTutorial()`로 Tutorial 스크린 경유 후 Opening 진입
+- **파일**: `lib/screens/roleplay/overview.dart` · appPath `/roleplay/overview/{roleplayId}`
+- S1 단일 RP Overview. 홈 진입 없음. Play→Opening 연결 없음. 현행 플로우는 `SeriesOverviewScreen`.
 
 ---
 
@@ -603,7 +576,7 @@
 - 완료 조건 충족 시 `POST /v1/users/tutorial` 호출 후 Opening으로 진입
 
 ### 이전 스크린 정보 (진입점)
-- **RoleplayOverviewScreen**: 역할 버튼 탭 시 항상 거치며, 내부에서 조건 판단
+- **SeriesOverviewScreen**: 에피소드 Play (`RoleplayRouter.pushTutorial`)
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
 - **RoleplayOpeningScreen**: 튜토리얼 완료(마지막 이미지에서 탭) 또는 이미 완료된 경우 즉시 replace
@@ -683,29 +656,24 @@
 - **파일 경로**: `lib/screens/roleplay/opening.dart`
 - **클래스명**: `RoleplayOpeningScreen` (StatefulWidget)
 - **스크린 타입**: **Full Screen**
-- **appPath**: 해당 없음 (role 선택 필수)
+- **appPath**: 해당 없음 (에피소드 선택 후)
 
 ### 스크린 용도
-- Roleplay 시작 전 오프닝 화면
+- 에피소드 시작 전 브리핑. 데이터 `SeriesStateService.selectedEpisode`.
 
 ### 이전 스크린 정보 (진입점)
-- **RoleplayOverviewScreen**: 중앙 "Play" 텍스트 클릭 시
-  - `Navigator.push()`로 Full Screen 형태로 전환
+- **RoleplayTutorialScreen** 완료/스킵, 또는 Tutorial 이미 완료면 Series Overview Play에서 바로
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
-- **RoleplayPlayingScreen** (Full Screen): 중앙 "Start" 텍스트 클릭 시
-  - `Navigator.pushReplacement()`로 전환 (opening screen 삭제, 돌아올 일 없음)
+- **RoleplayPlayingScreen**: Start 성공 시 `replaceWithPlaying`
 
 ### 스크린 내부 구현 특이사항
-- `RoleplayDto.overviewImgPath`가 있으면 전면 배경: `lib/widgets/roleplay_overview_backdrop.dart`의 `RoleplayOverviewBackdrop`(URL·연출은 Overview 상단과 동일·디스크 캐시 공유). 없으면 `RoleplayScaffold` 기본 배경 `#121212`.
-- 본문: 선택 역할명은 `headlineLarge`·색 `#0CABA8`만(별도 `fontWeight` 없음). 시나리오 문구는 `localizedText`를 `DefaultMarkdown` 없이 단일 `Text`로, `bodyLarge`·흰색·중앙 정렬.
-- 시스템 뒤로가기 버튼 클릭 시: opening screen 삭제, 이전 overview 노출
-- 별도 X 버튼 제공 안 함
-- 중앙에 "Start" 텍스트 (임시, 향후 오프닝 콘텐츠로 대체 예정)
+- 배경: episode `thumbnailImgPath` → `RoleplayOverviewBackdrop`. 본문: `aiCharacter.name` + briefing(`DefaultMarkdown`). duration 없음.
+- 시스템 뒤로가기: Opening 제거, Series Overview 노출
 - 우상단 `EnergyHeaderBadge` — Home과 동일(충전·무제한 타이머 포함)
 - **Briefing TTS**: episode `briefingAudio`(언어→CDN path). 진입 첫 프레임 후 현재 언어→`en` 순으로 path 선택·`cdnBaseUrl` prepend·`just_audio` 자동재생. 둘 다 없거나 실패 시 스킵. 이탈/Playing 전환 시 즉시 stop. 재진입 시 다시 재생.
 - footer Start 버튼 아래 AI 안내(`l10n.roleplayOpeningAiDisclaimer`): `labelSmall`·`#8C8C8C`·중앙 정렬·두 문장 줄바꿈(`\n`). 버튼↔문구 12dp, 문구 아래 50dp.
-- **Start 마이크 권한**: status→request→영구거부 시 설정 다이얼로그→(선택) `openAppSettings()`→복귀 후 사용자가 다시 Start. 자동 재개/스택 복구 없음. iOS는 `Podfile` `PERMISSION_MICROPHONE=1` + `NSMicrophoneUsageDescription` 필수. 상세 `.docs/CONTEXT_ROLEPLAY_S2.md` §4-3·`.docs/CONTEXT_IOS.md` 「마이크 권한」.
+- **Start 마이크 권한**: status→request→영구거부 시 설정 안내만. 복귀 후 사용자가 다시 Start. iOS `PERMISSION_MICROPHONE=1` + `NSMicrophoneUsageDescription`. 상세 `CONTEXT_ROLEPLAY_S2.md` Opening Start.
 - 세션 초기화 응답 분기 (`POST /rps2/sessions`):
   - `sessionId == '0'`: `showEnergyInsufficientPopup`(l10n `energyInsufficient`) → Opening 유지, 재시도 가능
   - 정상 sessionId: Playing 진입(에너지 소비는 Playing 발화 처리 시)
@@ -735,7 +703,7 @@
 - `SeriesStateService.selectedEpisode` 기반. 배경은 episode `thumbnailImgPath`, 헤더 타이틀은 episode `title`(`bodySmall` w700·1줄 말줄임), 본문은 `briefing`·`aiCharacter.name`. 헤더 슬롯 높이 **60**, duration 없음. 타이틀은 X·kebab과 동일 밴드(top 16·height 40) 세로 중앙(`centerTitleInHeaderActionRow`).
 - 헤더 좌측 X/시스템 뒤로가기: 나가기 확인 레이어 노출, 확인 시 `/series/overview`까지 pop. 우측 `kebab.png`는 설정패널 토글(오토힌트, 음성 속도).
 - `RoleplayScaffold.belowHeader`에 S2 턴바 영역 표시. `requiredSpeechCount`개 턴박스를 렌더링하고, 사용자 발화 응답 `userGrade` A/B/C/D에 따라 색상·라벨 효과 후 40% opacity 상태로 남긴다.
-- 본문은 상단 고정 미션 패널 + 스크롤 대화 영역. 대화 entry는 AI/User/Narration 타입이며 힌트는 별도 bubble로 append된다. 힌트 텍스트 조회 `GET /rps2/sessions/{id}/hint/{rpMsgId}`는 202 not-ready 시 S1 delay 패턴으로 최대 15회 재시도한다. AI 말풍선은 번역 아이콘과 `GET /rps2/sessions/{id}/translation?index=`를 사용한다.
+- 본문은 상단 고정 미션 패널 + 스크롤 대화 영역. 대화 entry는 AI/User/Narration 타입이며 힌트는 별도 bubble로 append된다. 힌트 텍스트 조회 `GET /rps2/sessions/{id}/hint/{rpMsgId}`는 202 not-ready 시 최대 15회 재시도. AI 말풍선은 번역 아이콘과 `GET /rps2/sessions/{id}/translation?index=`를 사용한다.
 - 미션 패널은 접힘/펼침을 지원한다. 접힘 상태 우측 숫자는 달성 수가 아니라 현재 노출 미션 순서(`activeMissionIndex + 1`) 기준이다. `missionCompletedIndex` 수신 시 해당 미션 row 또는 접힘 좌측 아이콘 위치에서 `mission_complete_effect.png` fade/회전 효과를 재생하고, 아이콘을 즉시 `rps2_mission_on.png`로 전환한다. 이미 완료 처리한 index가 재수신되면 무시한다. 접힘 상태 배경은 `#9E0067`로 300ms 전환되며, 다음 사용자 턴에 잔여 미션을 노출하기 전까지 유지된다. 잔여 미션으로의 표시 전환은 다음 사용자 턴 활성화 시점에 수행한다.
 - 푸터는 서비스 메시지 24px, 녹음/타이핑 입력, 하단 mic/keyboard·에너지·hint 아이콘 3층 구조. 녹음 영역 높이 140(`roleplayMicFooterStackHeight`). 중앙 `PlayingEnergyIndicator`(일반: energy+숫자, 무제한: unlimited 아이콘만). 30분 충전 00:00 시 서버 재조회. 발화 성공 시 로컬 -1. 에너지 0에서 **녹음 또는 타이핑 send** 또는 user-message `402` 시 `showPlayingEnergyInsufficientPopup`(버튼 `endRoleplay`) → Wait 레이어 후 Overview 이탈. **세션당 첫 사용자 발화 턴**에만 `holdMicrophoneToSpeak` fade-in/out, 마지막 턴 나레이션·후속 AI 종료 후 서버 `serviceMessage`(없으면 `roleplayAnalyzing`) blink. 오토힌트 ON으로 힌트박스가 자동 노출된 턴은 사용자 턴 활성 후에도 힌트 버튼 disabled를 유지한다. 녹음 시작 완료 전 release/cancel이 들어오면 pending action으로 보관해 start 완료 직후 finish/cancel을 이어서 처리한다. **녹음 가드**(`playing_input_mixin`): begin/cancel/finish/stop 직렬화·stop/cancel try-catch·이탈(`_confirmExit`)/dispose/`lockPlayingInputForSessionEnd` 전 `teardownPlayingRecording()`(cancel 완료 대기) — `record` MediaMuxer race 크래시 완화.
 - API: 사용자 음성 `POST /rps2/sessions/{id}/user-message/audio`(octet-stream), 텍스트 `POST /rps2/sessions/{id}/user-message/text`(raw string), 후속 AI 음성 `GET /rps2/sessions/{id}/ai-message/audio`.
@@ -789,8 +757,8 @@
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
 - **RoleplayTryAgainReportScreen** (Sub Screen): "Report" 텍스트 클릭 시
   - `RoleplayRouter.pushTryAgainReport()` → SubScreenRoute로 진입 (Try Again 위에 쌓임)
-- **Overview**: X·뒤로가기 시 Overview 복귀 (S2: `popToOverview`, S1: `Navigator.pop`)
-- **Retry**: S2 `replaceWithOpeningForRetry` (세션 clear 후 동일 에피소드 Opening) · S1 `Navigator.pop`
+- **Overview**: X·뒤로가기 → `popToOverview`
+- **Retry**: `replaceWithOpeningForRetry` (세션 clear 후 동일 에피소드 Opening)
 
 ### 스크린 내부 구현 특이사항
 - 닫기(X)/시스템 뒤로가기: 확인 다이얼로그 없이 Overview로 복귀 (Opening과 동일).
@@ -835,33 +803,23 @@
 - **appPath**: 해당 없음 (세션·플로우 의존)
 
 ### 스크린 용도
-- Roleplay 종료 후 결과·피드백·보상을 노출하는 기본 Result 화면 (구 레거시 `result.dart` 삭제, 구 `result_v2` 구현을 본 파일로 통합)
+- Playing finish / Ending Next 후 결과. `SeriesStateService.cachedUserHistory` 기준. 상세 `CONTEXT_ROLEPLAY_S2.md` Result.
 
 ### 이전 스크린 정보 (진입점)
-- **RoleplayEndingScreen**: 하단 "Next" 버튼 클릭 시 `RoleplayRouter.replaceWithResult()`로 즉시 전환 (ending screen 삭제)
-- **RoleplayPlayingScreen** (S1): resultId 기반 종료 시 (미션 전부 완수 아님) 분기에서 `roleplayEndedComplete` 3초 노출 후 `replaceWithResult()`로 전환
-- **RoleplayPlayingScreen** (S2): `PUT /rps2/sessions/{id}/finish` 성공·마지막 에피소드 아님 분기에서 `replaceWithResult()`로 전환 (`SeriesStateService.cachedUserHistory` 선저장)
+- **RoleplayEndingScreen**: Next → `replaceWithResult()`
+- **RoleplayPlayingScreen**: finish 성공·마지막 에피소드 아님 → `replaceWithResult()`
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
-- **RoleplayResultReportScreen** (Sub Screen): 본문 "Report" 문구 탭 시
-  - `RoleplayRouter.pushResultReport()` → SubScreenRoute로 진입 (Result 위에 쌓임)
-- **ReviewChatScreen** (Sub Screen): S1 Key Expression 헤더 우측 "View Chat" pill 탭 시 (`RoleplayResultDto` 전달). S2 Speech Feedback 헤더 View Chat은 API 연동 추후.
-- 그 외: Got it! → Overview (`RoleplayRouter.popToOverview`)
+- **RoleplayResultReportScreen** (Sub): Report 문구
+- **ViewChatScreen** (Sub): Speech Feedback 헤더 View Chat
+- Got it! → `popToOverview` (Series Overview)
 
 ### 스크린 내부 구현 특이사항
-- **진입 판별**: `SeriesStateService.cachedUserHistory != null`이면 **S2**, 아니면 **S1** (`RoleplayStateService.cachedResult`).
-- **배경**: 상단 `#054544` → 하단 `#0CABA8` 세로 그라데이션 전체 유지.
-- **초기 박스레이어**: 별 3개 + mainTitle + subTitle(`#80D7CF`) + Mission/Words/Like 3카드. S2 Mission은 `rps2_mission_on/off.png` 20×20(gap 2), S1은 `mission_succeeded`/`mission_failed`.
-- **별 애니메이션**: silver → `starResult`/`starScore` 개수만큼 gold 전환 + 진동.
-- **후속 타이밍**: fully shown 1초 후 박스레이어 상단 이동 + `LikeProgressEffect.play()` (before/after like·level·progress).
-- **effect 이후 본문 (S1)**: Feedback + Key Expression + Got it!/Report. Feedback 즉시, Key Expression 500ms 후, footer 1s 후 fade-in.
-- **effect 이후 본문 (S2)**: Feedback **없음**. Key Expression + Speech Feedback + Got it!/Report. Key Expression·Speech Feedback 동시 슬라이드, footer 1s 후 fade-in.
-- **Speech Feedback 펼침**: `feedbackLockedYn` 기준(`ensureSpeechFeedbackUnlocked`). `'Y'` → Paywall. `'N'` → `GET …/feedbacks/{rpMsgId}/audio` 준비 후 펼침+TTS(실패 시 펼침만, 로딩 스피너는 Feedback pill). 결제 후 복귀 시 자동 펼침 없음·재탭 시 펼침. History도 동일 본문.
-- **Expression/Key Expression 카드**: 가로 70% 캐러셀, 카드 탭 시 TTS(S1 API 연동 완료, S2 메가폰·북마크 UI만·API 추후), 북마크(S1 API 연동 완료).
-- **Got it! (S1)**: `GET /v1/users` + `GET /v1/roleplays/{roleplayId}/overview` best-effort 후 Overview pop.
-- **Got it! (S2)**: 동일 경로로 Overview pop (Series Overview).
-- **Report**: `l10n.endingReport`, 전송 성공 시 숨김, 텍스트 `#054544`.
-- **시스템 뒤로가기**: Got it!과 동일하게 Overview 복귀 (`PopScope`).
+- 박스레이어: 별 + titles + Mission/Words/Like (`rps2_mission_on/off.png`). 1초 후 상단 이동 + `LikeProgressEffect`.
+- 본문: Key Expression + Speech Feedback + Got it!/Report. History는 동일 본문·Report 없음(`showReportLink: false`).
+- Speech Feedback 펼침: `feedbackLockedYn`. `'Y'` Paywall, `'N'` feedback TTS 후 펼침+재생.
+- Key Expression 카드 탭: `GET …/expressions/{i}/sound`. 북마크 POST/DELETE 동일 경로.
+- 시스템 뒤로가기 = Got it! (`PopScope`).
 
 ---
 
@@ -875,8 +833,7 @@
 
 ### 스크린 용도
 - Result 화면에서 진입. 사용자가 느낀 불편함을 수집하는 용도.
-- **S1** Send: `POST /v1/roleplays/results/{roleplayResultId}/report` (body: `{"content": "<string>"}`).
-- **S2** Send: `POST /rps2/user-histories/{rpUserHistoryId}/report` (body 동일). `SeriesStateService.cachedUserHistory.id` 사용.
+- Send: `POST /rps2/user-histories/{rpUserHistoryId}/report`. `SeriesStateService.cachedUserHistory.id`.
 
 ### 이전 스크린 정보 (진입점)
 - **RoleplayResultScreen**: 본문 "Report" 문구 탭 시
@@ -886,7 +843,7 @@
 - **RoleplayResultScreen**: X 버튼 또는 Android 백버튼 시 `Navigator.pop()`으로 Result로 복귀. 전송 성공(200) 시 `feedbackSuccess` 토스트 후 `pop(context, true)`로 Result에서 Report 문구 숨김.
 
 ### 스크린 내부 구현 특이사항
-- 내부 표현·구성은 Try Again Report와 동일 (그라데이션 배경 + 글래스 입력창 + Stadium Send 버튼). S1/S2 분기는 Send API·ID 소스만 다름.
+- Try Again Report와 동일 UI. Send API만 위 경로.
 - Route name: `RoleplayResultReportScreen.routeName` (`/roleplay/result_report`).
 - 다국어: try_again_report 참고 (l10n.reportTitle, endingReport, feedbackPlaceholder, feedbackSend).
 
@@ -915,57 +872,14 @@
 - **로드**: `GET /rps2/user-histories/{rpUserHistoryId}` → `SeriesStateService.setCachedUserHistory`
 - **표시**: `RoleplayResultScreen(skipEntranceAnimation: true, exitViaPop: true, showReportLink: false)` — LikeProgressEffect·패널 이동·별 순차 애니 생략, effect 완료 상태 본문 즉시 노출. **Report 링크 미노출**. Speech Feedback 구독 가드는 Result와 동일.
 - **종료**: dispose 시 `SeriesStateService.cachedUserHistory` clear
-- S1 `GET /v1/roleplays/results`·`history_v2.dart`·version 분기 **삭제**
 
 ---
 
-## 20. ReviewChatScreen
+## 20. ViewChatScreen
 
-### 스크린 관련 정의 파일
-- **파일 경로**: `lib/screens/roleplay/review_chat.dart`
-- **클래스명**: `ReviewChatScreen` (StatelessWidget)
-- **스크린 타입**: **Sub Screen**
-- **appPath**: 해당 없음 (History 전용)
-
-### 스크린 용도
-- History Screen에서 진입. 롤플레이 채팅 내용 열람.
-
-### 이전 스크린 정보 (진입점)
-- **RoleplayResultScreen** (S1 Key Expression View Chat): Key Expression 헤더 우측 "View Chat" pill 탭 시 (RoleplayResultDto 전달)
-
-### 이후 스크린 정보 (이동 가능한 다른 스크린)
-- **이전 스크린**: 좌상단 뒤로가기 또는 시스템 뒤로가기 시 `Navigator.pop()`으로 복귀
-
-### 스크린 내부 구현 특이사항
-- **헤더**: 중앙 "Chat History" (headlineMedium·흰색), Setting 계열 스타일. 좌상단 뒤로가기(header_arrow_back.svg).
-- **배경**: 상→하 선형 그라데이션 `#054544`→`#0CABA8` + 검정 40% 오버레이(`0x66000000`). AppScaffold `backgroundColor: transparent`, showBackButton: true.
-- **안내 문구**: 헤더 아래 `reviewChatTapHint`(l10n·디바이스 언어) + 좌측 `assets/images/icons/speaker.png`(16×16), bodySmall·`#80D7CF`.
-- **본문**: RoleplayResultDto.chatHistory(List\<SudaJson\>)를 순서대로 표시. key로 발화자 구분: USER(사용자 말풍선·우측·흰색), AI_CHARACTER(AI 말풍선·좌측·#0CABA8·avatarImgPath 아바타 40×40), AI_NARRATOR(나레이션·중앙·이탤릭 흰색), SYSTEM_MISSION(미션·중앙·Mission 뱃지+핑크 텍스트). value를 그대로 문구로 표시. USER/AI 말풍선은 네 꼭짓점 동일 반지름(20)·둥근 직사각형 형태.
-- **오디오 재생 UX**: 진입 시 `GET …/review-chat/audio-meta`. USER(음성 입력)·AI_CHARACTER 말풍선 탭으로 재생(별도 스피커 버튼 없음). 재생·로딩 중 말풍선 배경 `#80D7CF`·텍스트 `#054544`(AnimatedContainer 180ms). 동일 라인 재탭 시 stop, 다른 라인 탭 시 전환. 완료 시 기본 색 복귀. 재생 불가·실패·텍스트 입력 라인 탭 시 `reviewChatNoAudioToPlay` 토스트(l10n). USER는 `GET …/lines/{lineIndex}/user-sound` bytes, AI는 meta `aiCdnPath`+CDN.
-
----
-
-## 21. ReviewEndingScreen
-
-### 스크린 관련 정의 파일
-- **파일 경로**: `lib/screens/roleplay/review_ending.dart`
-- **클래스명**: `ReviewEndingScreen` (StatefulWidget)
-- **스크린 타입**: **Sub Screen**
-- **appPath**: 해당 없음 (History 전용)
-
-### 스크린 용도
-- History Screen에서 진입. 롤플레이 엔딩 내용 열람(단순 조회, 버튼 없음).
-
-### 이전 스크린 정보 (진입점)
-- **HistoryScreen**: "View Ending" 버튼 탭 시. API·이미지 프리로드 완료 후 진입.
-
-### 이후 스크린 정보 (이동 가능한 다른 스크린)
-- **HistoryScreen**: 좌상단 뒤로가기 또는 시스템 뒤로가기 시 `Navigator.pop()`으로 복귀
-
-### 스크린 내부 구현 특이사항
-- **헤더**: 중앙 "View Ending", 좌상단 뒤로가기(View Chat과 동일). 배경색 `#121212`.
-- **본문**: 헤더 아래 전체 영역에 엔딩 이미지(비율 유지·높이 100% 채움, BoxFit.cover·좌우 잘림 가능). **2초 후** 검정 레이어(0xCC000000)·타이틀·콘텐츠 페이드인(300ms). 타이틀 위쪽 25%/콘텐츠 아래 75% 비율. title/content는 SudaJsonUtil.localizedText로 사용자 언어에 맞게 표시. 별점·Next 등 버튼 없음.
-- **진입**: History에서 `GET /v1/roleplays/{rpId}/roles/{rpRoleId}/endings/{endingId}` 호출 후 이미지 프리로드 완료 시 SubScreenRoute로 진입. View Ending 버튼은 Opening과 동일한 24×24 뱅글 로딩 표시.
+- **파일**: `lib/screens/roleplay/view_chat.dart` · Sub. Result/History Speech Feedback 헤더 View Chat.
+- `RpS2UserHistoryDto` 전달. USER 카드 펼침/TTS는 Result와 동일 (`feedbackLockedYn`). 상세 `CONTEXT_ROLEPLAY_S2.md` Speech Feedback.
+- S1 ReviewChat/ReviewEnding은 삭제됨.
 
 ---
 
@@ -1020,7 +934,7 @@
 ### 스크린 내부 구현 특이사항
 - **배경 그라디언트**: Paywall과 동일. glow `#AB6AFF` 등 기존 스펙 유지.
 - **아이콘**: `premium_unlocked_check.png` / 혜택 `white_check_icon.png`
-- **문구/버튼**: PT 하드코딩(l10n 추후). CTA `Continuar`
+- **문구/버튼**: l10n Continue/X → `pop(true)`
 
 ---
 
@@ -1038,26 +952,14 @@
   ├─ 로그인 성공 → [HomeScreen] (이미 동의) / [FirstCefrLevelScreen] (동의 직후)
   └─ 로그인 취소/실패 → [LoginScreen] (유지)
 
-[NotificationBoxScreen] ←→ [HomeScreen] ←→ [ProfileScreen] (GNB Alarm/Home/Profile 3탭 전환)
-  ├─ [HomeScreen] → [RoleplayOverviewScreen] (중앙 "Roleplay" 텍스트)
-  │   └─ [RoleplayOpeningScreen] (중앙 "Play" 텍스트)
-  │       └─ [RoleplayPlayingScreen] (중앙 "Start" 텍스트)
-  │           ├─ [RoleplayEndingScreen] (중앙 "Ending" 텍스트)
-  │           │   └─ [RoleplayResultScreen]
-  │           │       └─ [RoleplayResultReportScreen] (Report 문구 탭 시, 백버튼/X → Result 복귀)
-  │           └─ [RoleplayTryAgainScreen]
-  │               └─ [RoleplayTryAgainReportScreen] (Report 텍스트 탭 시, 백버튼/X → Try Again 복귀)
-  └─ [ProfileScreen] → [SettingScreen] (우측 상단 원형 버튼)
-  │       ├─ [AccountScreen]
-  │       │   └─ [ChangePlanScreen] (구독 활성 시 Change Plan; Confirm 결제 Phase 5)
-  │       ├─ [CefrLevelScreen]
-  │       ├─ [FeedbackScreen]
-  │       ├─ [WebViewScreen] (Privacy policy / Terms of Service)
-  │       ├─ [OpenSourceLicenseScreen]
-  │       └─ Log out → [LoginScreen] (곧바로 이동)
-  └─ [ProfileScreen] → [HistoryScreen] (롤플레이 히스토리 썸네일 탭)
-          ├─ [ReviewChatScreen] (채팅 열람)
-          └─ [ReviewEndingScreen] (엔딩 열람)
+[NotificationBoxScreen] ←→ [HomeScreen] ←→ [ProfileScreen] (GNB Alarm/Home/Profile)
+  ├─ [HomeScreen] → [SeriesOverviewScreen] (시리즈 썸네일)
+  │     → Tutorial(미완료 시) → Opening → Playing
+  │           ├─ Ending → Result → ResultReport
+  │           │              └─ ViewChatScreen
+  │           └─ Try Again → TryAgainReport
+  └─ [ProfileScreen] → Setting / Account / ChangePlan / History
+          History → Result 본문(애니 없음) → ViewChatScreen
 ```
 
 ### 네비게이션 흐름 상세 설명
@@ -1105,7 +1007,7 @@
 | `/app/notification/{id}` | NotificationBoxScreen (Main, Alarm 탭) | 푸시: 해당 알림 id 카드 펼침·목록 상단 정렬 |
 | `/profile` | ProfileScreen (Main, Profile 탭) | GNB Profile |
 | `/notice/{noticeId}` | AnnouncementDetailScreen (Sub) | 예: `/notice/123` |
-| `/roleplay/overview/{roleplayId}` | RoleplayOverviewScreen (Sub) | 예: `/roleplay/overview/12` |
+| `/roleplay/overview/{roleplayId}` | RoleplayOverviewScreen (Sub, 딥링크 잔존) | 홈 플로우 아님 |
 | `/profile/history/{rpUserHistoryId}` | HistoryScreen (Sub) | 예: `/profile/history/456`, S2 user-history id |
 | `/profile/setting` | SettingScreen (Sub) | Profile에서 진입 |
 
