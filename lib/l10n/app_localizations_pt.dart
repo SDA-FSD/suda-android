@@ -515,7 +515,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get energyEnablePushOfferBadge => 'OFERTA ÚNICA';
 
   @override
-  String get energyEnablePushCompleted => 'concluído';
+  String get energyEnablePushCompleted => 'Energia recarregada!';
 
   @override
   String get energyPurchaseUnlimitedTitle => 'Passe Temporariamente Ilimitado';

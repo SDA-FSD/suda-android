@@ -492,7 +492,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get energyEnablePushOfferBadge => '최초 1회 혜택';
 
   @override
-  String get energyEnablePushCompleted => '완료';
+  String get energyEnablePushCompleted => '에너지가 가득 채워졌어요!';
 
   @override
   String get energyPurchaseUnlimitedTitle => '무제한 패스';

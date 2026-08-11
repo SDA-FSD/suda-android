@@ -509,7 +509,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get energyEnablePushOfferBadge => 'ONE-TIME OFFER';
 
   @override
-  String get energyEnablePushCompleted => 'Completed';
+  String get energyEnablePushCompleted => 'Energy refilled!';
 
   @override
   String get energyPurchaseUnlimitedTitle => 'Unlimited Pass';

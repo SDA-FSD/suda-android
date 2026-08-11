@@ -1027,7 +1027,7 @@ abstract class AppLocalizations {
   /// No description provided for @energyEnablePushCompleted.
   ///
   /// In en, this message translates to:
-  /// **'Completed'**
+  /// **'Energy refilled!'**
   String get energyEnablePushCompleted;
 
   /// No description provided for @energyPurchaseUnlimitedTitle.
