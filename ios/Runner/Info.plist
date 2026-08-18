@@ -50,13 +50,6 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
-	<key>NSBonjourServices</key>
-	<array>
-		<string>_dartobservatory._tcp</string>
-		<string>_dartVmService._tcp</string>
-	</array>
-	<key>NSLocalNetworkUsageDescription</key>
-	<string>Allow Flutter tools on your computer to connect and debug your application. This prompt will not appear on release builds.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>SUDA uses the microphone so you can practice speaking during roleplay.</string>
 	<key>UIApplicationSceneManifest</key>
