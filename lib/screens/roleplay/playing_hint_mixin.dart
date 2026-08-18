@@ -542,7 +542,7 @@ mixin PlayingHintMixin<T extends StatefulWidget>
 
     _hintPlaybackSub?.cancel();
     _hintPlaybackSub = null;
-    await playingAudioPlayer.stop();
+    await stopPlayingConversationAudio();
 
     late TtsResultDto dto;
     try {

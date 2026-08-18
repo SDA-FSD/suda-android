@@ -77,7 +77,7 @@ Home (시리즈 썸네일)
 | 단계 | 내용 | 데이터/API | 코드 상태 |
 |------|------|------------|-----------|
 | **Opening** | 세션 생성 | `POST /rps2/sessions` → `RpS2SessionDto` | ✅ `opening.dart` |
-| **① AI 시작** | 진입 직후 첫 AI 말풍선·TTS·번역 아이콘 | 텍스트: `cefrMap[ENGLISH_LEVEL].startLine` · 음성: `session.aiSound` · 아바타: `aiCharacter.rpImgPath` · 번역: `GET /rps2/sessions/{id}/translation?rpMsgId=` | ✅ `playing_conversation_mixin.dart` **`startAiOpeningFlow`만** |
+| **① AI 시작** | 진입 직후 첫 AI 말풍선·TTS·번역 아이콘 | 텍스트: `cefrMap[ENGLISH_LEVEL].startLine` · 음성: `session.aiSound` · 아바타: `aiCharacter.rpImgPath` · 번역: `GET /rps2/sessions/{id}/translation?rpMsgId=` | ✅ `playing_conversation_mixin.dart` **`startAiOpeningFlow`만**. iOS: Opening AVPlayer teardown를 `IosAudioTeardown` 큐(job timeout 2s)로 직렬화, CDN을 파일로 받아 `setFilePath`, duration=0을 로드 실패로 보지 않음, `audio_session` speech. |
 | **② 힌트 자동** | AI 발화 후 조건부 | `_autoHintEnabled` + `GET /rps2/sessions/{id}/hint/{rpMsgId}` (`rpMsgId` = 마지막 AI `conversationIndex`) | ✅ `playing_hint_mixin.dart` — 오토힌트 ON 자동 노출 후 사용자 턴·OFF 아이콘 탭+사용자 턴·AI 음성 종료 트리거·3s blink. 힌트 텍스트 202 not-ready 시 최대 15회 재시도 |
 | **③ 사용자 발화** | 마이크/타이핑 전송 | `POST /rps2/sessions/{id}/user-message/audio`, `POST /rps2/sessions/{id}/user-message/text` | ✅ `playing_input_mixin.dart` |
 | **④ 나레이션+후속 AI+턴바** | 사용자 1회 발화 후 서버 처리 | `RpS2UserMessageResponseDto(userText,userGrade,narration,aiText,missionCompletedIndex,serviceMessage?)` + `GET /rps2/sessions/{id}/ai-message/audio` | ✅ 사용자 말풍선·턴바 등급 효과·미션 완료 효과·나레이션·후속 AI 말풍선/음성 |

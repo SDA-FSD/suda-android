@@ -1,9 +1,12 @@
 import 'dart:async' show StreamSubscription, unawaited;
+import 'dart:io';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
+import 'package:audio_session/audio_session.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:just_audio/just_audio.dart';
 
 import '../../api/endpoints/series_api.dart';
@@ -12,6 +15,7 @@ import '../../services/series_state_service.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
 import '../../utils/english_level_util.dart';
+import 'ios_audio_teardown.dart';
 
 /// S2 Playing — **단계 1(AI 시작 말풍선·음성·번역)** 및 힌트 트리거 훅.
 /// 나레이션·사용자 턴·후속 AI는 `.docs/CONTEXT_ROLEPLAY_S2.md` §「S2 Playing 턴 엔진」참조.
@@ -86,10 +90,12 @@ class PlayingConversationEntry {
 mixin PlayingConversationMixin<T extends StatefulWidget> on State<T> {
   final List<PlayingConversationEntry> _conversationEntries = [];
   PlayingConversationEntry? _recordingEntry;
-  final AudioPlayer _audioPlayer = AudioPlayer();
+  AudioPlayer _audioPlayer = AudioPlayer();
   int _nextConversationIndex = 1;
   bool _hasStartedAiOpening = false;
+  int _voiceSeq = 0;
   StreamSubscription<PlayerState>? _aiPlaybackSub;
+  String? _iosAudioPath;
 
   /// AI 음성 재생 완료 시 힌트 트리거.
   VoidCallback? playingAiVoicePlaybackCompletedHandler;
@@ -122,9 +128,26 @@ mixin PlayingConversationMixin<T extends StatefulWidget> on State<T> {
   }
 
   void disposePlayingConversation() {
+    _voiceSeq++;
     _aiPlaybackSub?.cancel();
     _aiPlaybackSub = null;
-    _audioPlayer.dispose();
+    final old = _audioPlayer;
+    final path = _iosAudioPath;
+    _iosAudioPath = null;
+    if (Platform.isIOS) {
+      IosAudioTeardown.enqueue(() async {
+        try {
+          await old.stop();
+        } catch (_) {}
+        try {
+          await old.dispose();
+        } catch (_) {}
+        _deleteAudioFileAt(path);
+      });
+    } else {
+      old.dispose();
+      _deleteAudioFileAt(path);
+    }
   }
 
   void startAiOpeningFlow() {
@@ -239,12 +262,117 @@ mixin PlayingConversationMixin<T extends StatefulWidget> on State<T> {
   }
 
   Future<void> stopPlayingConversationAudio() async {
+    _voiceSeq++;
     _aiPlaybackSub?.cancel();
     _aiPlaybackSub = null;
-    await _audioPlayer.stop();
+    try {
+      await _audioPlayer.stop();
+    } catch (_) {}
+  }
+
+  void _deleteIosAudioFile() {
+    final path = _iosAudioPath;
+    _iosAudioPath = null;
+    _deleteAudioFileAt(path);
+  }
+
+  static void _deleteAudioFileAt(String? path) {
+    if (path == null) return;
+    try {
+      final file = File(path);
+      if (file.existsSync()) {
+        file.deleteSync();
+      }
+    } catch (_) {}
+  }
+
+  static String _detectAudioExt(Uint8List bytes) {
+    if (bytes.length >= 12 &&
+        bytes[0] == 0x52 &&
+        bytes[1] == 0x49 &&
+        bytes[2] == 0x46 &&
+        bytes[3] == 0x46 &&
+        bytes[8] == 0x57 &&
+        bytes[9] == 0x41 &&
+        bytes[10] == 0x56 &&
+        bytes[11] == 0x45) {
+      return 'wav';
+    }
+    return 'mp3';
+  }
+
+  Future<void> _activateIosPlaybackSession() async {
+    try {
+      final session = await AudioSession.instance;
+      await session.configure(const AudioSessionConfiguration.speech());
+      await session.setActive(true);
+    } catch (e) {
+      debugPrint('[DEBUG] RpS2 iOS audio session: $e');
+    }
+  }
+
+  Future<void> _recreateAudioPlayerIos() async {
+    _aiPlaybackSub?.cancel();
+    _aiPlaybackSub = null;
+    final old = _audioPlayer;
+    _audioPlayer = AudioPlayer();
+    IosAudioTeardown.enqueue(() async {
+      try {
+        await old.stop();
+      } catch (_) {}
+      try {
+        await old.dispose();
+      } catch (_) {}
+    });
+    await IosAudioTeardown.wait();
+  }
+
+  Future<Uint8List> _downloadCdnBytes(String url) async {
+    final resp = await http
+        .get(Uri.parse(url))
+        .timeout(const Duration(seconds: 12));
+    if (resp.statusCode != 200 || resp.bodyBytes.isEmpty) {
+      throw StateError(
+        'cdn http ${resp.statusCode} bytes=${resp.bodyBytes.length}',
+      );
+    }
+    return Uint8List.fromList(resp.bodyBytes);
+  }
+
+  Future<AudioSource> _loadIosFromBytes(Uint8List bytes) async {
+    _deleteIosAudioFile();
+    final ext = _detectAudioExt(bytes);
+    final path =
+        '${Directory.systemTemp.path}/suda_ai_${DateTime.now().microsecondsSinceEpoch}.$ext';
+    await File(path).writeAsBytes(bytes, flush: true);
+    _iosAudioPath = path;
+    final source = AudioSource.file(path);
+    // iOS는 setAudioSource 직후 duration이 null/0인 경우가 많다. 0ms로 보고
+    // 실패 처리하면 재생 없이 말풍선·힌트만 나간다.
+    await _audioPlayer.setFilePath(path).timeout(const Duration(seconds: 8));
+    return source;
   }
 
   Future<AudioSource?> _prepareAiVoice({
+    required String? cdnYn,
+    required String? cdnPath,
+    required Uint8List? soundBytes,
+  }) async {
+    if (Platform.isIOS) {
+      return _prepareAiVoiceIos(
+        cdnYn: cdnYn,
+        cdnPath: cdnPath,
+        soundBytes: soundBytes,
+      );
+    }
+    return _prepareAiVoiceAndroid(
+      cdnYn: cdnYn,
+      cdnPath: cdnPath,
+      soundBytes: soundBytes,
+    );
+  }
+
+  Future<AudioSource?> _prepareAiVoiceAndroid({
     required String? cdnYn,
     required String? cdnPath,
     required Uint8List? soundBytes,
@@ -269,10 +397,66 @@ mixin PlayingConversationMixin<T extends StatefulWidget> on State<T> {
     return null;
   }
 
+  Future<AudioSource?> _prepareAiVoiceIos({
+    required String? cdnYn,
+    required String? cdnPath,
+    required Uint8List? soundBytes,
+  }) async {
+    _voiceSeq++;
+    await IosAudioTeardown.wait();
+    await _activateIosPlaybackSession();
+    try {
+      await _audioPlayer.stop().timeout(IosAudioTeardown.jobTimeout);
+    } catch (_) {
+      await _recreateAudioPlayerIos();
+    }
+
+    Future<AudioSource?> load() async {
+      Uint8List? bytes =
+          (soundBytes != null && soundBytes.isNotEmpty) ? soundBytes : null;
+      if (bytes == null && cdnYn == 'Y' && cdnPath != null && cdnPath.isNotEmpty) {
+        final url = '${AppConfig.cdnBaseUrl}$cdnPath';
+        bytes = await _downloadCdnBytes(url);
+      }
+      if (bytes == null || bytes.isEmpty) {
+        debugPrint(
+          '[DEBUG] RpS2 AI voice source empty: cdnYn=$cdnYn cdnPath=$cdnPath bytes=${soundBytes?.length ?? 0}',
+        );
+        return null;
+      }
+      return _loadIosFromBytes(bytes);
+    }
+
+    try {
+      return await load();
+    } catch (e) {
+      debugPrint('[DEBUG] RpS2 iOS AI voice prepare error: $e');
+      await _recreateAudioPlayerIos();
+      await _activateIosPlaybackSession();
+      try {
+        if (cdnYn == 'Y' && cdnPath != null && cdnPath.isNotEmpty) {
+          final url = '${AppConfig.cdnBaseUrl}$cdnPath';
+          final downloaded = await _downloadCdnBytes(url);
+          return await _loadIosFromBytes(downloaded);
+        }
+        return await load();
+      } catch (e2) {
+        debugPrint('[DEBUG] RpS2 iOS AI voice prepare retry error: $e2');
+        return null;
+      }
+    }
+  }
+
   Future<void> _playPreparedAiVoice(
     AudioSource source, {
     required bool notifyOnComplete,
   }) async {
+    if (Platform.isIOS) {
+      await _playPreparedAiVoiceIos(
+        notifyOnComplete: notifyOnComplete,
+      );
+      return;
+    }
     _aiPlaybackSub?.cancel();
     _aiPlaybackSub = null;
     await _audioPlayer.play();
@@ -284,6 +468,53 @@ mixin PlayingConversationMixin<T extends StatefulWidget> on State<T> {
         _notifyAiVoicePlaybackCompleted();
       }
     });
+  }
+
+  Future<void> _playPreparedAiVoiceIos({
+    required bool notifyOnComplete,
+  }) async {
+    final seq = _voiceSeq;
+    _aiPlaybackSub?.cancel();
+    _aiPlaybackSub = null;
+    var notified = false;
+
+    void maybeNotify() {
+      if (!notifyOnComplete || notified || seq != _voiceSeq) return;
+      notified = true;
+      _aiPlaybackSub?.cancel();
+      _aiPlaybackSub = null;
+      _notifyAiVoicePlaybackCompleted();
+    }
+
+    var playStarted = false;
+    var playReturned = false;
+    _aiPlaybackSub = _audioPlayer.playerStateStream.listen((state) {
+      if (!playStarted || seq != _voiceSeq) return;
+      if (state.processingState == ProcessingState.completed) {
+        maybeNotify();
+      } else if (playReturned &&
+          state.processingState == ProcessingState.idle &&
+          !state.playing) {
+        maybeNotify();
+      }
+    });
+
+    playStarted = true;
+    try {
+      await _audioPlayer.play();
+    } catch (e) {
+      debugPrint('[DEBUG] RpS2 iOS AI voice play error: $e');
+      maybeNotify();
+      return;
+    }
+    playReturned = true;
+    if (!mounted || seq != _voiceSeq) return;
+    if (_audioPlayer.processingState == ProcessingState.completed) {
+      maybeNotify();
+    } else if (_audioPlayer.processingState == ProcessingState.idle &&
+        !_audioPlayer.playing) {
+      maybeNotify();
+    }
   }
 
   Future<void> _addEntry(

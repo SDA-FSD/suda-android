@@ -1,4 +1,5 @@
 import 'dart:async' show unawaited;
+import 'dart:io' show Platform;
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -20,6 +21,7 @@ import '../../routes/roleplay_router.dart';
 import '../../utils/language_util.dart';
 import '../../utils/suda_json_util.dart';
 import '../../utils/default_markdown.dart';
+import 'ios_audio_teardown.dart';
 
 /// Roleplay Opening Screen (Full Screen)
 ///
@@ -56,8 +58,20 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen> {
 
   @override
   void dispose() {
-    unawaited(_stopBriefingAudio());
-    unawaited(_briefingAudioPlayer.dispose());
+    if (Platform.isIOS) {
+      final player = _briefingAudioPlayer;
+      IosAudioTeardown.enqueue(() async {
+        try {
+          await player.stop();
+        } catch (_) {}
+        try {
+          await player.dispose();
+        } catch (_) {}
+      });
+    } else {
+      unawaited(_stopBriefingAudio());
+      unawaited(_briefingAudioPlayer.dispose());
+    }
     super.dispose();
   }
 

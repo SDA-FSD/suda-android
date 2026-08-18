@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>841694444330-46gnpaot1kc33tkae39imk16i5da5ua9.apps.googleusercontent.com</string>
+	<string>841694444330-klm9b118bkflkparrih5qpmi9pp0gc8e.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.841694444330-46gnpaot1kc33tkae39imk16i5da5ua9</string>
+	<string>com.googleusercontent.apps.841694444330-klm9b118bkflkparrih5qpmi9pp0gc8e</string>
 	<key>ANDROID_CLIENT_ID</key>
 	<string>841694444330-1ahe1ek5rqms475a6lp1r3cdoe9r23uc.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
@@ -15,7 +15,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>kr.sudatalk.app</string>
+	<string>kr.sudatalk.app.dev</string>
 	<key>PROJECT_ID</key>
 	<string>suda-f6884</string>
 	<key>STORAGE_BUCKET</key>
@@ -31,8 +31,8 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:841694444330:ios:3b904bb99a642cad553c53</string>
+	<string>1:841694444330:ios:d7b7787da1286828553c53</string>
 	<key>SERVER_CLIENT_ID</key>
-	<string>841694444330-g8gn852m4somers2668v46k3mm69p7dg.apps.googleusercontent.com</string>
+	<string>558349443875-ceevp4cjf86ubp0p066qm5hsujukljg4.apps.googleusercontent.com</string>
 </dict>
 </plist>
