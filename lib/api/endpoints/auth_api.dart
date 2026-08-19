@@ -42,6 +42,43 @@ class AuthApi {
     );
   }
 
+  static Future<SudaAuthTokens> loginWithCustom({
+    required String id,
+    required String password,
+    required String deviceId,
+  }) async {
+    final uri = SudaHttpClient.buildUri('/v1/auth/custom');
+
+    late final http.Response response;
+    try {
+      response = await SudaHttpClient.client
+          .post(
+            uri,
+            headers: const {
+              'Content-Type': 'application/json',
+            },
+            body: jsonEncode({
+              'id': id,
+              'password': password,
+              'deviceId': deviceId,
+            }),
+          )
+          .timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      rethrow;
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final Map<String, dynamic> data =
+          jsonDecode(response.body) as Map<String, dynamic>;
+      return SudaAuthTokens.fromJson(data);
+    }
+
+    throw Exception(
+      'SUDA custom auth failed: HTTP ${response.statusCode} ${response.body}',
+    );
+  }
+
   static Future<SudaAuthTokens> loginWithApple({
     required String identityToken,
     required String deviceId,

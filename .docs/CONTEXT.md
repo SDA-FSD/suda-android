@@ -94,6 +94,7 @@ flutter run --flavor dev -t lib/main.dart --dart-define=ENV=dev -d 541F3961-8182
 
 - **Google:** `AuthService.signInWithGoogle()` → idToken → `loginWithGoogle()` JWT
 - **Apple:** `signInWithApple()` — identityToken·**raw nonce**(요청은 SHA-256 hex)·최초 email/fullName. `POST /v1/auth/apple`. provider=`apple`(이메일 같아도 별계정). `authorizationCode`는 로그인 필수 아님
+- **Custom (iOS 심사):** LoginScreen 중앙 로고 **5연타**(진입 애니 완료 후) → Email/Password dialog → `POST /v1/auth/custom` `{ id, password, deviceId }`. **ENV 제한 없음**(local/dev/stg/prd 모두, iOS만). 응답·후처리는 Apple과 동일(`SudaAuthTokens` → `saveTokens` → `onSignIn`)
   - iOS: local/dev/prd. AOS: **dev/prd only** (local·stg AOS 미지원)
   - AOS Services ID: `AppConfig.appleServicesId`. redirect → 서버가 `signinwithapple` intent
   - Login UI: **iOS는 Apple 위**, **AOS는 Google 위**

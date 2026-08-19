@@ -310,6 +310,18 @@ class SudaApiClient {
     return AuthApi.loginWithGoogle(idToken: idToken, deviceId: deviceId);
   }
 
+  static Future<SudaAuthTokens> loginWithCustom({
+    required String id,
+    required String password,
+    required String deviceId,
+  }) {
+    return AuthApi.loginWithCustom(
+      id: id,
+      password: password,
+      deviceId: deviceId,
+    );
+  }
+
   static Future<SudaAuthTokens> loginWithApple({
     required String identityToken,
     required String deviceId,

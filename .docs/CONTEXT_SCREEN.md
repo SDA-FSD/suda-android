@@ -193,8 +193,9 @@
 - **노출 영역**: 최종 고정 로고 아래부터 화면 끝까지를 사용한다. 상단에는 12px 갭 뒤 환영 문구 첫줄(`headlineLarge`, `#0CABA8`)과 둘째줄(`bodyMedium`, 흰색). 중간 가상선(`dividerY = contentTop + contentHeight/2`) 기준 로그인 버튼 블록 `top`은 `dividerY - (블록높이 − 단버튼높이)/2 - _loginButtonsExtraLift(36)`로 올려 로고·환영과의 간격을 줄인다. 약관은 `loginButtonsTop + 블록높이`부터 높이 **`contentHeight/3`** 영역 중앙. 등장 연출 시 `Transform.translate` Y가 **노출 최상단(`contentTop+12`)이 뷰포트 하단 밖**으로 나가도록 거리를 `height`·`contentTop`에서 역산한다(여유 ~40px).
 - **Google 로그인 버튼**: Apple과 동일 슬롯(높이 48·폭 디스플레이 80%·radius 8·흰 배경)을 **전체 클릭 영역**으로 두고, 그 중앙에 `sign_in_with_google.png`를 슬롯 높이의 **90%**·`BoxFit.contain`으로 배치. 로딩 중에는 같은 영역에 `CircularProgressIndicator`를 표시한다.
 - **약관 문구**: 하단 영역 좌우 15% 패딩 안에서 `labelSmall` 기반으로 표시한다. 링크 색상/밑줄은 기존 `#80D7CF` 규칙 유지. 이용약관·개인정보처리방침 탭 시 각각 WebView로 이동한다.
-- **로그인 플로우**: Google — `AuthService.signInWithGoogle()` → `SudaApiClient.loginWithGoogle()` → `TokenStorage.saveTokens()` → `onSignIn`. Apple — `AuthService.signInWithApple()` → `SudaApiClient.loginWithApple()` → 동일. 에러는 `DefaultToast`.
+- **로그인 플로우**: Google — `AuthService.signInWithGoogle()` → `SudaApiClient.loginWithGoogle()` → `TokenStorage.saveTokens()` → `onSignIn`. Apple — `AuthService.signInWithApple()` → `SudaApiClient.loginWithApple()` → 동일. **Custom(iOS 심사)** — 중앙 로고 5연타(600ms 이내 간격) → `ReviewLoginDialog` → `SudaApiClient.loginWithCustom()` → 동일. 에러는 `DefaultToast`.
 - **로그인 버튼**: Google·Apple 공통 슬롯 높이 **48**·폭 **디스플레이 80%**. Apple은 `SignInWithAppleButton`(`style: white`·`borderRadius` 8). **iOS: Apple↑ Google↓**, **Android: Google↑ Apple↓**. Apple 버튼은 `AppConfig.isAppleSignInSupported`일 때만(Android local/stg 제외).
+- **심사용 hidden login (iOS only)**: 진입 애니 완료 후 화면 정중앙 로고(`splash_still_logo_part.png`) **56×56 hit area**를 **5연타**(탭 간격 ≤600ms)하면 glassy dialog(`lib/widgets/review_login_dialog.dart`) 노출. Email/Password + Log in. 우상단 X·배경 탭으로 닫기. `POST /v1/auth/custom`. UI 라벨은 영문(은은한 일반 폼). **ENV 제한 없음**(local/dev/stg/prd).
 
 ---
 

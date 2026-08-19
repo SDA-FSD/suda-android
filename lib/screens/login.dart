@@ -17,6 +17,7 @@ import '../services/suda_api_client.dart';
 import '../services/token_storage.dart';
 import '../utils/default_toast.dart';
 import '../utils/sub_screen_route.dart';
+import '../widgets/review_login_dialog.dart';
 import 'webview_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -53,6 +54,9 @@ class _LoginScreenState extends State<LoginScreen>
   /// 로고·환영과의 간격을 줄이기 위한 추가 상향(버튼·약관 함께 이동).
   static const _loginButtonsExtraLift = 36.0;
   static const _loginButtonWidthFactor = 0.8;
+  static const _logoTapTarget = 5;
+  static const _logoTapMaxGap = Duration(milliseconds: 600);
+  static const _logoTapHitSize = 56.0;
 
   static const _posterRows = [
     [
@@ -121,6 +125,8 @@ class _LoginScreenState extends State<LoginScreen>
   ];
 
   bool _isLoading = false;
+  int _logoTapCount = 0;
+  DateTime? _lastLogoTapAt;
   late final AnimationController _stillFadeController;
   late final AnimationController _logoMoveController;
   late final AnimationController _loginContentSlideController;
@@ -290,6 +296,69 @@ class _LoginScreenState extends State<LoginScreen>
       }
     } finally {
       if (mounted) setState(() => _isAgreementSubmitting = false);
+    }
+  }
+
+  bool get _loginEntranceComplete =>
+      _logoMoveController.status == AnimationStatus.completed &&
+      _loginContentSlideController.status == AnimationStatus.completed;
+
+  bool get _isIos => !kIsWeb && Platform.isIOS;
+
+  void _onCenterLogoTap() {
+    if (!_isIos || !_loginEntranceComplete || _isLoading || _showAgreementLayer) {
+      return;
+    }
+
+    final now = DateTime.now();
+    if (_lastLogoTapAt != null &&
+        now.difference(_lastLogoTapAt!) > _logoTapMaxGap) {
+      _logoTapCount = 0;
+    }
+    _lastLogoTapAt = now;
+    _logoTapCount++;
+
+    if (_logoTapCount >= _logoTapTarget) {
+      _logoTapCount = 0;
+      _lastLogoTapAt = null;
+      unawaited(_openReviewLoginDialog());
+    }
+  }
+
+  Future<void> _openReviewLoginDialog() async {
+    if (!mounted || !_isIos) return;
+
+    await ReviewLoginDialog.show(
+      context,
+      onSubmit: _handleCustomSignIn,
+    );
+  }
+
+  Future<void> _handleCustomSignIn(String id, String password) async {
+    final deviceId = await TokenStorage.getDeviceId();
+    final tokens = await SudaApiClient.loginWithCustom(
+      id: id,
+      password: password,
+      deviceId: deviceId,
+    );
+
+    await TokenStorage.saveTokens(
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+    );
+
+    if (!mounted) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    await widget.onSignIn?.call();
+
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -760,7 +829,12 @@ class _LoginScreenState extends State<LoginScreen>
           final screenCenter = Offset(width / 2, height / 2);
           final logoStartLeft = screenCenter.dx - (_stillWidth / 2);
           final logoStartTop = screenCenter.dy - (_logoHeight / 2);
-          final logoEndLeft = screenCenter.dx - (_logoWidth / 2);
+          final logoHitStartLeft =
+              logoStartLeft + (_logoWidth - _logoTapHitSize) / 2;
+          final logoHitStartTop =
+              logoStartTop + (_logoHeight - _logoTapHitSize) / 2;
+          final logoHitEndLeft = screenCenter.dx - (_logoTapHitSize / 2);
+          final logoHitEndTop = screenCenter.dy - (_logoTapHitSize / 2);
           final logoEndTop = screenCenter.dy - (_logoHeight / 2);
 
           return Stack(
@@ -783,16 +857,27 @@ class _LoginScreenState extends State<LoginScreen>
                 builder: (context, child) {
                   final t = Curves.easeOut.transform(_logoMoveController.value);
                   return Positioned(
-                    left: logoStartLeft + (logoEndLeft - logoStartLeft) * t,
-                    top: logoStartTop + (logoEndTop - logoStartTop) * t,
+                    left: logoHitStartLeft +
+                        (logoHitEndLeft - logoHitStartLeft) * t,
+                    top: logoHitStartTop + (logoHitEndTop - logoHitStartTop) * t,
                     child: child!,
                   );
                 },
-                child: Image.asset(
-                  'assets/images/splash_still_logo_part.png',
-                  width: _logoWidth,
-                  height: _logoHeight,
-                  fit: BoxFit.contain,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: _onCenterLogoTap,
+                  child: SizedBox(
+                    width: _logoTapHitSize,
+                    height: _logoTapHitSize,
+                    child: Center(
+                      child: Image.asset(
+                        'assets/images/splash_still_logo_part.png',
+                        width: _logoWidth,
+                        height: _logoHeight,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ),
                 ),
               ),
 
