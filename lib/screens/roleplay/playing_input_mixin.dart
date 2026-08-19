@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:audio_session/audio_session.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:record/record.dart';
@@ -826,6 +827,24 @@ mixin PlayingInputMixin<T extends StatefulWidget>
 
   bool _isFetchingHintForTap = false;
 
+  /// TTS `playback`이면 마이크가 안 열린다. 녹음 직전에만 호출.
+  Future<void> activateIosRecordingSession() async {
+    if (!Platform.isIOS) return;
+    try {
+      await stopPlayingConversationAudio();
+      final session = await AudioSession.instance;
+      await session.configure(
+        AudioSessionConfiguration.speech().copyWith(
+          avAudioSessionCategory: AVAudioSessionCategory.playAndRecord,
+          avAudioSessionCategoryOptions:
+              AVAudioSessionCategoryOptions.defaultToSpeaker |
+                  AVAudioSessionCategoryOptions.allowBluetooth,
+        ),
+      );
+      await session.setActive(true);
+    } catch (_) {}
+  }
+
   Future<void> _beginRecording() async {
     return _enqueueRecording(_beginRecordingImpl);
   }
@@ -845,13 +864,17 @@ mixin PlayingInputMixin<T extends StatefulWidget>
       return;
     }
 
+    final ext = Platform.isIOS ? 'wav' : 'm4a';
     final path =
-        '${Directory.systemTemp.path}/rps2_record_${DateTime.now().millisecondsSinceEpoch}.m4a';
+        '${Directory.systemTemp.path}/rps2_record_${DateTime.now().millisecondsSinceEpoch}.$ext';
     _recordingStartedAt = DateTime.now();
     _isRecordingStarting = true;
     try {
+      await activateIosRecordingSession();
       await _recorder.start(
-        const RecordConfig(encoder: AudioEncoder.aacLc),
+        RecordConfig(
+          encoder: Platform.isIOS ? AudioEncoder.wav : AudioEncoder.aacLc,
+        ),
         path: path,
       );
     } catch (e) {
