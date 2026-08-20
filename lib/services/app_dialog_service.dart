@@ -1,12 +1,17 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// 앱 전역 다이얼로그 서비스
-/// 
+///
 /// 버전 체크 실패, 강제 업데이트 등 앱 전역에서 사용하는 다이얼로그를 관리
 class AppDialogService {
+  static const _iosAppStoreUrl = 'https://apps.apple.com/app/id6798914572';
+
   static Uri _playStoreDetailsUri(String packageName) {
     return Uri.https('play.google.com', '/store/apps/details', {
       'id': packageName,
@@ -14,11 +19,35 @@ class AppDialogService {
     });
   }
 
+  static bool get _isIos => !kIsWeb && Platform.isIOS;
+
+  static Uri _resolveStoreUri({
+    String? aosMarketLink,
+    String? iosMarketLink,
+    required String packageName,
+  }) {
+    if (_isIos) {
+      if (iosMarketLink != null) {
+        return Uri.parse(iosMarketLink);
+      }
+      return Uri.parse(_iosAppStoreUrl);
+    }
+
+    if (aosMarketLink != null) {
+      return Uri.parse(aosMarketLink);
+    }
+    return _playStoreDetailsUri(packageName);
+  }
+
   /// 강제 업데이트 팝업 표시
-  /// 
+  ///
   /// [navigatorKey]를 사용하여 MaterialApp의 Navigator에 접근
   /// 팝업 표시 실패 시 앱을 종료
-  static Future<void> showForceUpdateDialog(GlobalKey<NavigatorState> navigatorKey) async {
+  static Future<void> showForceUpdateDialog(
+    GlobalKey<NavigatorState> navigatorKey, {
+    String? aosMarketLink,
+    String? iosMarketLink,
+  }) async {
     try {
       return showDialog<void>(
         context: navigatorKey.currentContext!,
@@ -33,8 +62,13 @@ class AppDialogService {
                 onPressed: () async {
                   try {
                     final info = await PackageInfo.fromPlatform();
+                    final storeUri = _resolveStoreUri(
+                      aosMarketLink: aosMarketLink,
+                      iosMarketLink: iosMarketLink,
+                      packageName: info.packageName,
+                    );
                     await launchUrl(
-                      _playStoreDetailsUri(info.packageName),
+                      storeUri,
                       mode: LaunchMode.externalApplication,
                     );
                   } catch (_) {
@@ -54,7 +88,7 @@ class AppDialogService {
   }
 
   /// 네트워크 에러 팝업 표시
-  /// 
+  ///
   /// [navigatorKey]를 사용하여 MaterialApp의 Navigator에 접근
   /// 팝업 표시 실패 시 앱을 종료
   static Future<void> showNetworkErrorDialog(GlobalKey<NavigatorState> navigatorKey) async {
@@ -84,4 +118,3 @@ class AppDialogService {
     }
   }
 }
-

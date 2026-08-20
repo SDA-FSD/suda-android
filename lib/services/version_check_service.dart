@@ -60,7 +60,11 @@ class VersionCheckService {
         debugPrint('[DEBUG] VersionCheckService.checkVersion: shouldUpdate=TRUE (force update flow)');
         // 강제 업데이트 필요 시 스플래시 제거 후 팝업 표시 및 앱 종료
         FlutterNativeSplash.remove();
-        await AppDialogService.showForceUpdateDialog(navigatorKey);
+        await AppDialogService.showForceUpdateDialog(
+          navigatorKey,
+          aosMarketLink: versionInfo.aosMarketLink,
+          iosMarketLink: versionInfo.iosMarketLink,
+        );
         return false;
       }
       

@@ -10,7 +10,6 @@ iOS는 골격·로그인·푸시 토큰 `deviceType=IOS`까지 들어갔고, 이
 ## 아직 안 함
 - **StoreKit** IAP (현재 `IapPurchaseService`는 Play). 월/연 상품 ID 매핑·restore·서버 JWS 검증
 - **stg** Firebase plist / Google iOS OAuth
-- 강제업데이트 iOS: `VersionDto.appleMarketLink` + iOS에서 `SystemNavigator.pop()` 지양
 - iPad 회귀·ATT(필요할 때만)
 - FPM iOS 네이티브 플러그인 (Dart 헬퍼는 있음)
 
