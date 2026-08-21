@@ -109,6 +109,9 @@ mixin PlayingConversationMixin<T extends StatefulWidget> on State<T> {
   /// AI 말풍선 직전 힌트 아이콘 리셋.
   VoidCallback? playingHintResetIconForAiStartHandler;
 
+  /// AI TTS 시작 시 iOS 녹음 세션 ready 플래그 무효화.
+  VoidCallback? invalidateIosRecordingSessionHandler;
+
   /// AI 시작 시 사용자 입력 비활성.
   VoidCallback? deactivateUserTurnHandler;
   void Function({GlobalKey? anchorKey})? scrollPlayingBodyToBottomHandler;
@@ -192,6 +195,7 @@ mixin PlayingConversationMixin<T extends StatefulWidget> on State<T> {
   }) async {
     playingHintPrepareForAiMessageHandler?.call();
     playingHintResetIconForAiStartHandler?.call();
+    invalidateIosRecordingSessionHandler?.call();
     final entry = PlayingConversationEntry.ai(text: text);
     final audioSource = await _prepareAiVoice(
       cdnYn: cdnYn,

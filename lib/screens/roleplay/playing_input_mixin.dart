@@ -44,6 +44,12 @@ mixin PlayingInputMixin<T extends StatefulWidget>
   bool _isRecordingStarting = false;
   _PendingRecordingAction? _pendingRecordingAction;
   Future<void> _recordingTail = Future<void>.value();
+  /// iOS playAndRecord 세션 준비 상태. AI 재생 후에는 false로 되돌린다.
+  bool _iosRecordingSessionReady = false;
+  /// in-flight 세션 전환. 버튼 탭과 prewarm이 겹치면 동일 Future를 await.
+  Future<void>? _iosRecordingSessionPrep;
+  /// 마이크 권한 캐시. start 실패 시 null로 비워 재확인.
+  bool? _cachedMicPermission;
   bool _isUserTurn = false;
   bool _isHintEnabled = false;
   bool _hintUsedThisTurn = false;
@@ -110,6 +116,8 @@ mixin PlayingInputMixin<T extends StatefulWidget>
   /// S2 턴 흐름에서 사용자 발화 준비 시점에 호출 (S1 `_activateUserTurn` 이식).
   void activateUserTurn({bool enableHintButton = true}) {
     unawaited(PerfMonitoringService.instance.stop('roleplay_screen_ready'));
+    // AI 없는 경로·오토힌트 후 공통: 사용자 턴 열릴 때 iOS 녹음 세션 prewarm.
+    unawaited(prepareIosRecordingSession());
     _hintUsedThisTurn = !enableHintButton;
     _isInputLocked = false;
     _setUserTurn(true);
@@ -827,9 +835,42 @@ mixin PlayingInputMixin<T extends StatefulWidget>
 
   bool _isFetchingHintForTap = false;
 
-  /// TTS `playback`이면 마이크가 안 열린다. 녹음 직전에만 호출.
-  Future<void> activateIosRecordingSession() async {
+  /// AI TTS 시작 시 playback으로 돌아갈 수 있으므로 다음 사용자 턴에서 다시 준비.
+  void invalidateIosRecordingSession() {
+    _iosRecordingSessionReady = false;
+  }
+
+  /// iOS playAndRecord 세션 prewarm. 진행 중이면 동일 Future를 재사용.
+  /// [force]: AI TTS 직후처럼 playback으로 바뀐 뒤 다시 전환할 때 true.
+  Future<void> prepareIosRecordingSession({bool force = false}) async {
     if (!Platform.isIOS) return;
+    if (force) {
+      _iosRecordingSessionReady = false;
+    } else if (_iosRecordingSessionReady) {
+      return;
+    }
+
+    final inFlight = _iosRecordingSessionPrep;
+    if (inFlight != null) {
+      await inFlight;
+      if (_iosRecordingSessionReady) return;
+    }
+
+    if (_iosRecordingSessionReady) return;
+
+    final prep = _activateIosRecordingSessionImpl();
+    _iosRecordingSessionPrep = prep;
+    try {
+      await prep;
+    } finally {
+      if (identical(_iosRecordingSessionPrep, prep)) {
+        _iosRecordingSessionPrep = null;
+      }
+    }
+  }
+
+  /// TTS `playback`이면 마이크가 안 열린다. playAndRecord로 전환.
+  Future<void> _activateIosRecordingSessionImpl() async {
     try {
       await stopPlayingConversationAudio();
       final session = await AudioSession.instance;
@@ -842,7 +883,18 @@ mixin PlayingInputMixin<T extends StatefulWidget>
         ),
       );
       await session.setActive(true);
-    } catch (_) {}
+      _iosRecordingSessionReady = true;
+    } catch (e, st) {
+      _iosRecordingSessionReady = false;
+      debugPrint('[DEBUG] S2 iOS recording session prep error: $e\n$st');
+    }
+  }
+
+  Future<bool> _ensureMicPermission() async {
+    if (_cachedMicPermission == true) return true;
+    final granted = await _recorder.hasPermission();
+    _cachedMicPermission = granted;
+    return granted;
   }
 
   Future<void> _beginRecording() async {
@@ -853,7 +905,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
     if (_isRecording || _isRecordingStarting) return;
     _cancelHintIdleAndBlink();
 
-    final hasPermission = await _recorder.hasPermission();
+    final hasPermission = await _ensureMicPermission();
     if (!hasPermission) {
       if (!mounted) return;
       DefaultToast.show(
@@ -867,20 +919,23 @@ mixin PlayingInputMixin<T extends StatefulWidget>
     final ext = Platform.isIOS ? 'wav' : 'm4a';
     final path =
         '${Directory.systemTemp.path}/rps2_record_${DateTime.now().millisecondsSinceEpoch}.$ext';
-    _recordingStartedAt = DateTime.now();
     _isRecordingStarting = true;
     try {
-      await activateIosRecordingSession();
+      // prewarm과 겹치면 in-flight Future를 기다리고, 이미 ready면 즉시 통과.
+      await prepareIosRecordingSession();
       await _recorder.start(
         RecordConfig(
           encoder: Platform.isIOS ? AudioEncoder.wav : AudioEncoder.aacLc,
         ),
         path: path,
       );
+      _recordingStartedAt = DateTime.now();
     } catch (e) {
       debugPrint('[DEBUG] S2 recording start error: $e');
       _isRecordingStarting = false;
       _recordingStartedAt = null;
+      _cachedMicPermission = null;
+      _iosRecordingSessionReady = false;
       _pendingRecordingAction = null;
       if (!mounted) return;
       _setMicState(_PlayingMicButtonState.defaultState);
