@@ -254,8 +254,8 @@
     - 응답: HomeDto (banners, seriesList, restYn, restStartsAt, restEndsAt, notiboxUnreadYn)
     - banners: `MainHomeBannerDto(imgPath, overlayText, appPath?)`
   - **시리즈 페이징 조회**: `GET /v2/home/series?category={enumValue}&pageNum=…` (`SudaApiClient.getSeriesByCategory()`)
-  - **푸시 토큰 등록**: `_registerPushToken()` 메서드로 처리
-    - Firebase Messaging 토큰 획득 후 서버에 전송 (`POST /users/push-token`)
+  - **푸시 토큰 등록**: `_registerPushToken()` (`POST /v1/users/push-token`)
+    - AOS: FCM 토큰 필수. iOS: APNs 최대 3초. 토큰 없어도 `pushToken=""` + `languageCode` 전송
 - **초기화 작업**: `initState()`에서 `_performInitialization()` 호출 (한 번만 실행)
   - `_isInitialized` 플래그로 중복 실행 방지
 - **Props**:
