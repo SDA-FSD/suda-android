@@ -111,6 +111,10 @@ class IapPurchaseService with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state != AppLifecycleState.resumed) return;
+    // iOS는 StoreKit이 purchased/canceled를 스트림으로 줌. Play 시트 dismiss용
+    // resume grace를 쓰면 복귀 후 2초 내 스트림이 늦을 때 성공 구매가
+    // storeDismissed로 떨어져 팝업 숨김 애니가 스킵된다.
+    if (_isIos) return;
     if (_pending == null || _purchaseUpdateReceived) return;
 
     _resumeGraceTimer?.cancel();

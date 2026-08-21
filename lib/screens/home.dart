@@ -240,8 +240,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       if (_accessToken == null) return;
 
       final messaging = FirebaseMessaging.instance;
+      String? pushToken;
 
-      // iOS: 알림 권한 → APNs 토큰 준비 후 FCM getToken (필수 순서)
+      // iOS: 알림 권한 → APNs 토큰 준비 후 FCM getToken.
+      // 토큰이 없어도 languageCode는 보낸다(pushToken은 빈 문자열).
       if (Platform.isIOS) {
         var settings = await messaging.getNotificationSettings();
         if (settings.authorizationStatus == AuthorizationStatus.notDetermined) {
@@ -250,17 +252,19 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         final allowed =
             settings.authorizationStatus == AuthorizationStatus.authorized ||
             settings.authorizationStatus == AuthorizationStatus.provisional;
-        if (!allowed) return;
-        if (!await _waitForApnsToken(messaging)) return;
+        if (allowed && await _waitForApnsToken(messaging)) {
+          pushToken = await messaging.getToken();
+        }
+      } else {
+        pushToken = await messaging.getToken();
+        if (pushToken == null || pushToken.isEmpty) return;
       }
 
-      final pushToken = await messaging.getToken();
-      if (pushToken == null) return;
       final languageCode = LanguageUtil.getCurrentLanguageCode();
 
       await SudaApiClient.registerPushToken(
         accessToken: _accessToken!,
-        pushToken: pushToken,
+        pushToken: pushToken ?? '',
         languageCode: languageCode,
       );
 
@@ -285,14 +289,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   /// iOS에서 APNs 토큰이 준비될 때까지 재시도.
   /// firebase-ios-sdk 10.4+ / flutterfire는 APNs 없이 getToken()이 실패한다.
+  /// Home 로드를 막지 않도록 최대 3초.
   Future<bool> _waitForApnsToken(FirebaseMessaging messaging) async {
-    // 첫 설치·권한 직후에는 APNs가 수 초 늦게 오는 경우가 많음
-    for (var attempt = 0; attempt < 20; attempt++) {
+    final deadline = DateTime.now().add(const Duration(seconds: 3));
+    while (true) {
       final apnsToken = await messaging.getAPNSToken();
       if (apnsToken != null) return true;
-      await Future<void>.delayed(const Duration(seconds: 1));
+      if (!DateTime.now().isBefore(deadline)) return false;
+      await Future<void>.delayed(const Duration(milliseconds: 300));
     }
-    return false;
   }
 
   /// 배너 자동 슬라이드 타이머 시작

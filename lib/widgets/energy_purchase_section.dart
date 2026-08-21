@@ -66,19 +66,28 @@ class _EnergyPurchaseSectionState extends State<EnergyPurchaseSection> {
   bool _goPremiumRemoving = false;
   /// offerSessionId+productId 단위 impression 중복 전송 방지(팝업 생명주기).
   final Set<String> _impressedTapKeys = {};
+  bool _applyingSlotRemoval = false;
+  bool _reconcilingBus = false;
 
   @override
   void initState() {
     super.initState();
     _energy = widget.energy;
+    EnergyRefreshBus.instance.addListener(_onEnergyRefreshBus);
     unawaited(_loadPrices());
+  }
+
+  @override
+  void dispose() {
+    EnergyRefreshBus.instance.removeListener(_onEnergyRefreshBus);
+    super.dispose();
   }
 
   @override
   void didUpdateWidget(EnergyPurchaseSection oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.energy != widget.energy) {
-      _energy = widget.energy;
+      unawaited(_animateSlotsToMatch(widget.energy));
       unawaited(_loadPrices());
     }
   }
@@ -111,6 +120,103 @@ class _EnergyPurchaseSectionState extends State<EnergyPurchaseSection> {
     }
     if (!mounted) return;
     setState(() => _prices.addAll(next));
+  }
+
+  /// simple DTO는 상품 플래그가 없어 팝업 슬롯을 지워 버린다. detail만 슬롯 판단에 쓴다.
+  bool _looksLikeSimple(UserEnergyDto dto) {
+    return dto.offerSessionId.isEmpty &&
+        !dto.showEnablePushFreeCharge &&
+        !dto.showUnlimitedPurchase &&
+        !dto.showCapacity6Purchase &&
+        !dto.showCapacity7Purchase;
+  }
+
+  void _onEnergyRefreshBus(UserEnergyDto? energy) {
+    if (widget.labMode) return;
+    if (_busyKind != null || _applyingSlotRemoval) return;
+    unawaited(_reconcileFromBus(energy));
+  }
+
+  Future<void> _reconcileFromBus(UserEnergyDto? incoming) async {
+    if (_reconcilingBus) return;
+    _reconcilingBus = true;
+    try {
+      UserEnergyDto? next = incoming;
+      if (next == null || _looksLikeSimple(next)) {
+        next = await widget.onRefetchEnergy?.call();
+      }
+      if (!mounted || next == null) return;
+      await _animateSlotsToMatch(next);
+    } finally {
+      _reconcilingBus = false;
+    }
+  }
+
+  List<_EnergyPurchaseKind> _kindsToHide(UserEnergyDto next) {
+    final list = <_EnergyPurchaseKind>[];
+    final nextShowsEnable = widget.forceShowEnablePush ||
+        (widget.allowEnablePushOffer && next.showEnablePushFreeCharge);
+    if (_shouldShowEnablePushSlot && !nextShowsEnable) {
+      list.add(_EnergyPurchaseKind.enablePush);
+    }
+    if (_energy.showUnlimitedPurchase &&
+        !next.showUnlimitedPurchase &&
+        !_hiddenKinds.contains(_EnergyPurchaseKind.unlimited)) {
+      list.add(_EnergyPurchaseKind.unlimited);
+    }
+    if (_energy.showCapacity6Purchase &&
+        !next.showCapacity6Purchase &&
+        !_hiddenKinds.contains(_EnergyPurchaseKind.capacity6)) {
+      list.add(_EnergyPurchaseKind.capacity6);
+    }
+    if (_energy.showCapacity7Purchase &&
+        !next.showCapacity7Purchase &&
+        !_hiddenKinds.contains(_EnergyPurchaseKind.capacity7)) {
+      list.add(_EnergyPurchaseKind.capacity7);
+    }
+    return list;
+  }
+
+  Future<void> _animateSlotsToMatch(UserEnergyDto next) async {
+    if (!mounted || _busyKind != null) return;
+    final toRemove = _kindsToHide(next);
+    final hidePremium = !_goPremiumDismissed &&
+        !_goPremiumRemoving &&
+        !widget.forceShowGoPremium &&
+        _energy.subscribedYn != 'Y' &&
+        next.subscribedYn == 'Y';
+
+    if (toRemove.isEmpty && !hidePremium) {
+      setState(() => _energy = next);
+      return;
+    }
+    if (_applyingSlotRemoval) {
+      setState(() => _energy = next);
+      return;
+    }
+
+    _applyingSlotRemoval = true;
+    setState(() {
+      _removingKinds.addAll(toRemove);
+      if (hidePremium) _goPremiumRemoving = true;
+    });
+    await Future<void>.delayed(_removeDuration);
+    if (!mounted) {
+      _applyingSlotRemoval = false;
+      return;
+    }
+    setState(() {
+      _removingKinds.removeAll(toRemove);
+      _hiddenKinds.addAll(toRemove);
+      if (hidePremium) {
+        _goPremiumRemoving = false;
+        _goPremiumDismissed = true;
+      }
+      _energy = next;
+      _busyKind = null;
+      _themeTintOpacity = _themeTintIdle;
+    });
+    _applyingSlotRemoval = false;
   }
 
   bool get _shouldShowGoPremiumSlot {
