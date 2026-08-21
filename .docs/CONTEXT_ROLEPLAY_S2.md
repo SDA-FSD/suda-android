@@ -319,6 +319,7 @@ Home (시리즈 썸네일)
     - **펼침/접힘(Result·History)**: Speech Feedback 카드 영역 탭 또는 Feedback pill 탭. `feedbackLockedYn=='Y'`면 Paywall(USER placeholder 카드 유지·grade/score 없음). `'N'`이면 `GET /rps2/user-histories/{rpUserHistoryId}/feedbacks/{rpMsgId}/audio` 준비 후 펼침+TTS 재생 동시(실패 시 펼침만). 로딩 중 pill 화살표 자리 16×16 스피너·재탭 무시. 접기 시 해당 행 TTS 정지. `audioInputYn == 'N'`이면 메가폰 미노출·카드·Feedback pill 탭으로 펼침/접힘(+TTS).
     - **펼침/접힘(View Chat USER)**: USER 말풍선 카드 영역 탭 또는 Feedback pill 탭. feedback null이면 Feedback 버튼 미노출. 펼침 TTS는 Result와 동일 API·스피너.
     - **재생**: `messages[].audioInputYn == 'Y'`인 행만 좌하단 메가폰 탭 시 재생. API `GET /rps2/user-histories/{rpUserHistoryId}/messages/{rpMsgId}/audio`(`TtsResultDto`, `rpMsgId` = `speechFeedback` 키 = `messages[].id`). fetch 중 16×16 `CircularProgressIndicator`(strokeWidth 2, `#0CABA8` 70%), 재생 중 `megaphone_fill.png` `#0CABA8`. Key Expression·Feedback TTS 등 다른 재생 중이면 중단 후 우선 적용.
+    - **iOS TTS**: Result Key Expression·Speech Feedback·View Chat·**Profile Saved**는 `SudaTtsAudioPlayer` (`suda_tts_audio_player.dart`). Playing과 같이 byte[]·CDN을 임시 파일로 `setFilePath` + `audio_session` speech. `Uri.dataFromBytes` 미사용(첫 생성 byte[] 무음 방지). AOS는 HTTP/`data:` URI.
   - Footer: Got it! / Report(S1과 동일 UX) — S2는 `POST /rps2/user-histories/{rpUserHistoryId}/report`. **Profile History 진입**(`showReportLink: false`) 시 Report 링크 미노출.
 ### 4-6. RoleplayOverviewScreen (딥링크 잔존)
 

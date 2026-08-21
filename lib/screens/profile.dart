@@ -26,6 +26,7 @@ import '../widgets/gnb_bar.dart';
 import '../widgets/level_progress_bar.dart';
 import '../widgets/suda_label_tabs.dart';
 import 'roleplay/history.dart';
+import 'roleplay/suda_tts_audio_player.dart';
 import 'setting/setting.dart';
 
 enum _ProfileContentTab { history, saved }
@@ -83,7 +84,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   GlobalKey<AnimatedListState> _savedListKey = GlobalKey<AnimatedListState>();
 
   // Saved 오디오 재생(메가폰)
-  final AudioPlayer _savedAudioPlayer = AudioPlayer();
+  final SudaTtsAudioPlayer _savedTtsPlayer = SudaTtsAudioPlayer();
   StreamSubscription<PlayerState>? _savedAudioSub;
   int _savedMegaphoneSeq = 0;
   /// 가장 최근 탭한 카드(흰 배경 유지, 목록에서 하나만).
@@ -109,7 +110,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void dispose() {
     _savedAudioSub?.cancel();
     _savedAudioSub = null;
-    unawaited(_savedAudioPlayer.dispose());
+    _savedTtsPlayer.dispose();
     _scrollController.removeListener(_onContentScroll);
     _scrollController.dispose();
     super.dispose();
@@ -623,7 +624,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _savedMegaphoneSeq++;
       _savedAudioSub?.cancel();
       _savedAudioSub = null;
-      unawaited(_savedAudioPlayer.stop());
+      unawaited(_savedTtsPlayer.stop());
       _savedHighlightedExpressionId = null;
       _savedActiveExpressionId = null;
       _savedIsFetching = false;
@@ -671,22 +672,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     required String? cdnYn,
     required String? cdnPath,
     required Uint8List? soundBytes,
-  }) async {
-    await _savedAudioPlayer.stop();
-    if (cdnYn == 'Y' && cdnPath != null && cdnPath.isNotEmpty) {
-      final url = '${AppConfig.cdnBaseUrl}$cdnPath';
-      final source = AudioSource.uri(Uri.parse(url));
-      await _savedAudioPlayer.setAudioSource(source);
-      return source;
-    }
-    if (soundBytes != null && soundBytes.isNotEmpty) {
-      final source = AudioSource.uri(
-        Uri.dataFromBytes(soundBytes, mimeType: 'audio/mpeg'),
-      );
-      await _savedAudioPlayer.setAudioSource(source);
-      return source;
-    }
-    return null;
+  }) {
+    return _savedTtsPlayer.prepare(
+      cdnYn: cdnYn,
+      cdnPath: cdnPath,
+      soundBytes: soundBytes,
+    );
   }
 
   Future<void> _onSavedExpressionTap(UserExpressionDto item) async {
@@ -697,7 +688,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     _savedAudioSub?.cancel();
     _savedAudioSub = null;
-    await _savedAudioPlayer.stop();
+    await _savedTtsPlayer.stop();
 
     if (!mounted || seq != _savedMegaphoneSeq) return;
     setState(() {
@@ -752,7 +743,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _savedIsPlaying = true;
       });
 
-      _savedAudioSub = _savedAudioPlayer.playerStateStream.listen((state) {
+      _savedAudioSub = _savedTtsPlayer.playerStateStream.listen((state) {
         if (state.processingState == ProcessingState.completed) {
           _savedAudioSub?.cancel();
           _savedAudioSub = null;
@@ -764,7 +755,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           });
         }
       });
-      await _savedAudioPlayer.play();
+      await _savedTtsPlayer.play();
     } catch (_) {
       _savedAudioSub?.cancel();
       _savedAudioSub = null;
@@ -811,7 +802,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _savedMegaphoneSeq++;
         _savedAudioSub?.cancel();
         _savedAudioSub = null;
-        unawaited(_savedAudioPlayer.stop());
+        unawaited(_savedTtsPlayer.stop());
         _savedActiveExpressionId = null;
         _savedIsFetching = false;
         _savedIsPlaying = false;

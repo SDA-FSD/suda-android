@@ -6,13 +6,13 @@ import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 
 import '../../api/suda_api_client.dart';
-import '../../config/app_config.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/series_models.dart';
 import '../../services/token_storage.dart';
 import '../../utils/default_toast.dart';
 import '../../utils/speech_feedback_premium.dart';
 import '../../widgets/app_scaffold.dart';
+import 'suda_tts_audio_player.dart';
 
 const String _kRoleUser = 'USER';
 const String _kRoleAiCharacter = 'AI_CHARACTER';
@@ -51,7 +51,7 @@ class _ViewChatScreenState extends State<ViewChatScreen> {
   static const double _bubbleRadiusMultiLine = 20;
   static const Duration _autoPlayGap = Duration(milliseconds: 300);
 
-  final AudioPlayer _audioPlayer = AudioPlayer();
+  final SudaTtsAudioPlayer _ttsPlayer = SudaTtsAudioPlayer();
   StreamSubscription<PlayerState>? _audioSub;
   int _playSeq = 0;
 
@@ -68,7 +68,7 @@ class _ViewChatScreenState extends State<ViewChatScreen> {
   @override
   void dispose() {
     _audioSub?.cancel();
-    unawaited(_audioPlayer.dispose());
+    _ttsPlayer.dispose();
     super.dispose();
   }
 
@@ -97,7 +97,7 @@ class _ViewChatScreenState extends State<ViewChatScreen> {
     _playSeq++;
     _audioSub?.cancel();
     _audioSub = null;
-    await _audioPlayer.stop();
+    await _ttsPlayer.stop();
     if (!mounted) return;
     setState(() {
       _isAutoPlaying = false;
@@ -111,22 +111,12 @@ class _ViewChatScreenState extends State<ViewChatScreen> {
     required String? cdnYn,
     required String? cdnPath,
     required Uint8List? soundBytes,
-  }) async {
-    await _audioPlayer.stop();
-    if (cdnYn == 'Y' && cdnPath != null && cdnPath.isNotEmpty) {
-      final url = '${AppConfig.cdnBaseUrl}$cdnPath';
-      final source = AudioSource.uri(Uri.parse(url));
-      await _audioPlayer.setAudioSource(source);
-      return source;
-    }
-    if (soundBytes != null && soundBytes.isNotEmpty) {
-      final source = AudioSource.uri(
-        Uri.dataFromBytes(soundBytes, mimeType: 'audio/mpeg'),
-      );
-      await _audioPlayer.setAudioSource(source);
-      return source;
-    }
-    return null;
+  }) {
+    return _ttsPlayer.prepare(
+      cdnYn: cdnYn,
+      cdnPath: cdnPath,
+      soundBytes: soundBytes,
+    );
   }
 
   Future<AudioSource?> _loadMessageSource(
@@ -169,7 +159,7 @@ class _ViewChatScreenState extends State<ViewChatScreen> {
 
     _audioSub?.cancel();
     _audioSub = null;
-    await _audioPlayer.stop();
+    await _ttsPlayer.stop();
 
     if (!mounted || seq != _playSeq) return false;
     setState(() {
@@ -190,7 +180,7 @@ class _ViewChatScreenState extends State<ViewChatScreen> {
       }
 
       final completer = Completer<void>();
-      _audioSub = _audioPlayer.playerStateStream.listen((state) {
+      _audioSub = _ttsPlayer.playerStateStream.listen((state) {
         if (state.processingState == ProcessingState.completed) {
           _audioSub?.cancel();
           _audioSub = null;
@@ -199,7 +189,7 @@ class _ViewChatScreenState extends State<ViewChatScreen> {
           }
         }
       });
-      await _audioPlayer.play();
+      await _ttsPlayer.play();
       await completer.future;
 
       if (!mounted || seq != _playSeq) return false;
@@ -304,7 +294,7 @@ class _ViewChatScreenState extends State<ViewChatScreen> {
     final seq = _playSeq;
     _audioSub?.cancel();
     _audioSub = null;
-    await _audioPlayer.stop();
+    await _ttsPlayer.stop();
 
     if (!mounted || seq != _playSeq) return false;
     setState(() {
@@ -335,7 +325,7 @@ class _ViewChatScreenState extends State<ViewChatScreen> {
       if (source == null) return false;
 
       setState(() => _feedbackTtsMsgId = rpMsgId);
-      _audioSub = _audioPlayer.playerStateStream.listen((state) {
+      _audioSub = _ttsPlayer.playerStateStream.listen((state) {
         if (state.processingState == ProcessingState.completed) {
           _audioSub?.cancel();
           _audioSub = null;
@@ -344,7 +334,7 @@ class _ViewChatScreenState extends State<ViewChatScreen> {
         }
       });
       onReadyToPlay();
-      await _audioPlayer.play();
+      await _ttsPlayer.play();
       return seq == _playSeq;
     } catch (_) {
       _audioSub?.cancel();

@@ -9,7 +9,6 @@ import 'package:just_audio/just_audio.dart';
 import 'package:vibration/vibration.dart';
 
 import '../../api/suda_api_client.dart';
-import '../../config/app_config.dart';
 import '../../effects/like_progress_effect.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/series_models.dart';
@@ -23,6 +22,7 @@ import '../../utils/default_toast.dart';
 import '../../utils/speech_feedback_premium.dart';
 import '../../utils/sub_screen_route.dart';
 import '../../utils/suda_json_util.dart';
+import 'suda_tts_audio_player.dart';
 import 'view_chat.dart';
 
 const Color _exprTextPrimary = Color(0xFF121212);
@@ -82,7 +82,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
   bool _reportSubmitted = false;
   bool _isLeavingToOverview = false;
 
-  final AudioPlayer _keyExpressionAudioPlayer = AudioPlayer();
+  final SudaTtsAudioPlayer _ttsPlayer = SudaTtsAudioPlayer();
   StreamSubscription<PlayerState>? _keyExpressionAudioSub;
   int _keyExpressionMegaphoneSeq = 0;
   int? _keyExpressionActiveIndex;
@@ -319,7 +319,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
     unawaited(PerfMonitoringService.instance.stop('feedback_screen_ready'));
     _keyExpressionAudioSub?.cancel();
     _keyExpressionAudioSub = null;
-    unawaited(_keyExpressionAudioPlayer.dispose());
+    _ttsPlayer.dispose();
     _routeAnimation?.removeStatusListener(_onRouteAnimationStatusChanged);
     _panelMoveController.dispose();
     _keyExpressionSectionEntranceController.dispose();
@@ -654,22 +654,12 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
     required String? cdnYn,
     required String? cdnPath,
     required Uint8List? soundBytes,
-  }) async {
-    await _keyExpressionAudioPlayer.stop();
-    if (cdnYn == 'Y' && cdnPath != null && cdnPath.isNotEmpty) {
-      final url = '${AppConfig.cdnBaseUrl}$cdnPath';
-      final source = AudioSource.uri(Uri.parse(url));
-      await _keyExpressionAudioPlayer.setAudioSource(source);
-      return source;
-    }
-    if (soundBytes != null && soundBytes.isNotEmpty) {
-      final source = AudioSource.uri(
-        Uri.dataFromBytes(soundBytes, mimeType: 'audio/mpeg'),
-      );
-      await _keyExpressionAudioPlayer.setAudioSource(source);
-      return source;
-    }
-    return null;
+  }) {
+    return _ttsPlayer.prepare(
+      cdnYn: cdnYn,
+      cdnPath: cdnPath,
+      soundBytes: soundBytes,
+    );
   }
 
   Future<void> _onKeyExpressionCardTap(int expressionIndex) async {
@@ -677,7 +667,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
     final seq = _keyExpressionMegaphoneSeq;
     _keyExpressionAudioSub?.cancel();
     _keyExpressionAudioSub = null;
-    await _keyExpressionAudioPlayer.stop();
+    await _ttsPlayer.stop();
 
     if (!mounted) {
       return;
@@ -734,7 +724,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
       setState(() => _keyExpressionIsPlaying = true);
 
       _keyExpressionAudioSub =
-          _keyExpressionAudioPlayer.playerStateStream.listen((state) {
+          _ttsPlayer.playerStateStream.listen((state) {
         if (state.processingState == ProcessingState.completed) {
           _keyExpressionAudioSub?.cancel();
           _keyExpressionAudioSub = null;
@@ -747,7 +737,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
           });
         }
       });
-      await _keyExpressionAudioPlayer.play();
+      await _ttsPlayer.play();
     } catch (_) {
       _keyExpressionAudioSub?.cancel();
       _keyExpressionAudioSub = null;
@@ -766,7 +756,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
     final seq = _keyExpressionMegaphoneSeq;
     _keyExpressionAudioSub?.cancel();
     _keyExpressionAudioSub = null;
-    await _keyExpressionAudioPlayer.stop();
+    await _ttsPlayer.stop();
 
     if (!mounted) {
       return;
@@ -823,7 +813,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
       setState(() => _speechFeedbackIsPlaying = true);
 
       _keyExpressionAudioSub =
-          _keyExpressionAudioPlayer.playerStateStream.listen((state) {
+          _ttsPlayer.playerStateStream.listen((state) {
         if (state.processingState == ProcessingState.completed) {
           _keyExpressionAudioSub?.cancel();
           _keyExpressionAudioSub = null;
@@ -836,7 +826,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
           });
         }
       });
-      await _keyExpressionAudioPlayer.play();
+      await _ttsPlayer.play();
     } catch (_) {
       _keyExpressionAudioSub?.cancel();
       _keyExpressionAudioSub = null;
@@ -855,7 +845,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
     _keyExpressionMegaphoneSeq++;
     _keyExpressionAudioSub?.cancel();
     _keyExpressionAudioSub = null;
-    await _keyExpressionAudioPlayer.stop();
+    await _ttsPlayer.stop();
     if (!mounted) return;
     setState(() => _feedbackTtsMsgId = null);
   }
@@ -868,7 +858,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
     final seq = _keyExpressionMegaphoneSeq;
     _keyExpressionAudioSub?.cancel();
     _keyExpressionAudioSub = null;
-    await _keyExpressionAudioPlayer.stop();
+    await _ttsPlayer.stop();
 
     if (!mounted || seq != _keyExpressionMegaphoneSeq) {
       return false;
@@ -914,7 +904,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
 
       setState(() => _feedbackTtsMsgId = rpMsgId);
       _keyExpressionAudioSub =
-          _keyExpressionAudioPlayer.playerStateStream.listen((state) {
+          _ttsPlayer.playerStateStream.listen((state) {
         if (state.processingState == ProcessingState.completed) {
           _keyExpressionAudioSub?.cancel();
           _keyExpressionAudioSub = null;
@@ -925,7 +915,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
         }
       });
       onReadyToPlay();
-      await _keyExpressionAudioPlayer.play();
+      await _ttsPlayer.play();
       return seq == _keyExpressionMegaphoneSeq;
     } catch (_) {
       _keyExpressionAudioSub?.cancel();
