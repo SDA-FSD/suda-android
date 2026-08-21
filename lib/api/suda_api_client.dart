@@ -519,8 +519,9 @@ class SudaApiClient {
     return FeedbackApi.sendFeedback(accessToken: accessToken, content: content);
   }
 
-  /// POST /v1/purchases/verify — 구매 검증 (`successYn` / `pendingYn`).
+  /// POST /v1/purchases/verify — 구매 검증 (`successYn` / `pendingYn` / `finishYn`).
   /// INAPP(에너지): `offerSessionId`. SUBS(Paywall): `paywallSessionId` + `basePlanId`.
+  /// iOS만 [platform] `"IOS"`. 생략하면 Play.
   static Future<PurchaseVerifyResultDto> verifyPurchase({
     required String accessToken,
     required String purchaseToken,
@@ -528,6 +529,7 @@ class SudaApiClient {
     String? offerSessionId,
     String? paywallSessionId,
     String? basePlanId,
+    String? platform,
   }) {
     return PurchaseApi.verifyPurchase(
       accessToken: accessToken,
@@ -536,6 +538,7 @@ class SudaApiClient {
       offerSessionId: offerSessionId,
       paywallSessionId: paywallSessionId,
       basePlanId: basePlanId,
+      platform: platform,
     );
   }
 

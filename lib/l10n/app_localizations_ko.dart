@@ -36,6 +36,15 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settingsAccount => '계정';
 
   @override
+  String get settingsRestorePurchases => '구매 복원';
+
+  @override
+  String get restorePurchasesNothing => '복원할 구매 내역이 없습니다.';
+
+  @override
+  String get restorePurchasesCompleted => '구매가 복원되었습니다.';
+
+  @override
   String get settingsNotification => '알림';
 
   @override

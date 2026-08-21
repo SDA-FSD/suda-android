@@ -154,6 +154,24 @@ abstract class AppLocalizations {
   /// **'Account'**
   String get settingsAccount;
 
+  /// No description provided for @settingsRestorePurchases.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore Purchases'**
+  String get settingsRestorePurchases;
+
+  /// No description provided for @restorePurchasesNothing.
+  ///
+  /// In en, this message translates to:
+  /// **'No purchases to restore.'**
+  String get restorePurchasesNothing;
+
+  /// No description provided for @restorePurchasesCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchases restored.'**
+  String get restorePurchasesCompleted;
+
   /// No description provided for @settingsNotification.
   ///
   /// In en, this message translates to:

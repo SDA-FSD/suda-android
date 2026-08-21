@@ -7,8 +7,9 @@ import '../../models/user_models.dart';
 import '../client/suda_http_client.dart';
 
 class PurchaseApi {
-  /// `POST /v1/purchases/verify` — Play 구매 검증.
-  /// 응답의 `successYn`/`pendingYn`으로 지급·승인대기 여부를 판단한다.
+  /// `POST /v1/purchases/verify` — Play / StoreKit 구매 검증.
+  /// 응답의 `successYn`/`pendingYn`/`finishYn`으로 지급·finish 여부를 판단한다.
+  /// [platform] iOS만 `"IOS"`. 생략하면 Play.
   static Future<PurchaseVerifyResultDto> verifyPurchase({
     required String accessToken,
     required String purchaseToken,
@@ -16,6 +17,7 @@ class PurchaseApi {
     String? offerSessionId,
     String? paywallSessionId,
     String? basePlanId,
+    String? platform,
   }) async {
     return await SudaHttpClient.executeWithRefresh(
       () => _verifyPurchaseInternal(
@@ -25,6 +27,7 @@ class PurchaseApi {
         offerSessionId,
         paywallSessionId,
         basePlanId,
+        platform,
       ),
       retryWithNewToken: (newToken) => _verifyPurchaseInternal(
         newToken,
@@ -33,6 +36,7 @@ class PurchaseApi {
         offerSessionId,
         paywallSessionId,
         basePlanId,
+        platform,
       ),
     );
   }
@@ -44,6 +48,7 @@ class PurchaseApi {
     String? offerSessionId,
     String? paywallSessionId,
     String? basePlanId,
+    String? platform,
   ) async {
     final uri = SudaHttpClient.buildUri('/v1/purchases/verify');
 
@@ -51,6 +56,10 @@ class PurchaseApi {
       'purchaseToken': purchaseToken,
       'productId': productId,
     };
+    final platformId = platform?.trim();
+    if (platformId != null && platformId.isNotEmpty) {
+      body['platform'] = platformId;
+    }
     final offerId = offerSessionId?.trim();
     if (offerId != null && offerId.isNotEmpty) {
       body['offerSessionId'] = offerId;
@@ -86,7 +95,11 @@ class PurchaseApi {
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
       if (response.body.isEmpty) {
-        return const PurchaseVerifyResultDto(successYn: 'N', pendingYn: 'N');
+        return const PurchaseVerifyResultDto(
+          successYn: 'N',
+          pendingYn: 'N',
+          finishYn: 'N',
+        );
       }
       final Map<String, dynamic> data =
           jsonDecode(response.body) as Map<String, dynamic>;

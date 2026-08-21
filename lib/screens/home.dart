@@ -9,6 +9,7 @@ import 'package:marquee/marquee.dart';
 import '../services/rest_status_service.dart';
 import '../services/token_storage.dart';
 import '../services/suda_api_client.dart';
+import '../services/iap_purchase_service.dart';
 import '../services/perf_monitoring_service.dart';
 import '../config/app_config.dart';
 import '../routes/series_router.dart';
@@ -129,6 +130,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     // 1. 토큰 로드
     _accessToken = await TokenStorage.loadAccessToken();
+    if (_accessToken != null && _accessToken!.isNotEmpty) {
+      IapPurchaseService.instance.ensureListening();
+    }
 
     // 2. 푸시 토큰 등록
     await _registerPushToken();

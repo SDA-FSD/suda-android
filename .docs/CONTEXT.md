@@ -62,7 +62,7 @@ flutter run --flavor dev -t lib/main.dart --dart-define=ENV=dev -d 541F3961-8182
 - `--no-codesign`은 `flutter run`에 없음(시뮬 OK)
 - **열린 이슈:** `getInitialMessage` hang → `main()` 2초 timeout 유지. 근본 원인 수정 후에도 timeout은 유지
 - 마이크: Opening Start에서만 요청. iOS `PERMISSION_MICROPHONE=1` + `NSMicrophoneUsageDescription` 필수
-- 남은 작업(StoreKit·stg Firebase 등): `CONTEXT_IOS.md`
+- 남은 작업(stg Firebase 등): `CONTEXT_IOS.md`
 
 | 증상 | 조치 |
 |------|------|
@@ -144,23 +144,25 @@ flutter run --flavor dev -t lib/main.dart --dart-define=ENV=dev -d 541F3961-8182
 
 ## 7-2. IAP (현행)
 
-에너지 팝업 INAPP 3종 + Enable Notifications(비IAP) + Paywall Premium 월/연. `IapPurchaseService`. consume/ack는 **서버 verify 전담**. Lab Query/Buy 콘솔 없음.
+에너지 팝업 INAPP 3종 + Enable Notifications(비IAP) + Paywall Premium 월/연. `IapPurchaseService`. Lab Query/Buy 콘솔 없음.
 
-| 구분 | productId | basePlanId | 진입 |
-|------|-----------|------------|------|
-| INAPP | `unlimited_energy_10_minute` | consumable | 에너지 팝업 |
-| INAPP | `energy_capacity_6` / `energy_capacity_7` | — | 에너지 팝업 |
-| 비IAP | `enable_push_free_charge` | — | 에너지 팝업(home/opening/opening_insufficient) |
-| SUBS | `subscription_premium` | `bp-premium-monthly` / `bp-premium-yearly` | Paywall |
+| 구분 | AOS productId | iOS productId | basePlanId (stat) | 진입 |
+|------|---------------|---------------|-------------------|------|
+| INAPP | `unlimited_energy_10_minute` | 동일 | consumable | 에너지 팝업 |
+| INAPP | `energy_capacity_6` / `energy_capacity_7` | 동일 | — | 에너지 팝업 |
+| 비IAP | `enable_push_free_charge` | 동일 | — | 에너지 팝업(home/opening/opening_insufficient) |
+| SUBS | `subscription_premium` | `premium_monthly` / `premium_yearly` (그룹 `22321554`, level 1) | `bp-premium-monthly` / `bp-premium-yearly` | Paywall |
 
 - Billing 키는 **productId만** (`po-…` 아님). ID는 앱 하드코딩
-- verify: `{ purchaseToken, productId, offerSessionId?, paywallSessionId?, basePlanId? }`
-- Paywall impression: mount `POST /v1/impressions/subscriptions` `{screen}` → sessionId. CTA `PUT` `{paywallSessionId, basePlanId}`. Lab skip
-- Change Plan: 월간 구독자만 (`bp-premium-monthly`) → 연간, `ReplacementMode.withoutProration`
+- verify `POST /v1/purchases/verify`. AOS body 변경 없음 `{ purchaseToken, productId, offerSessionId?, paywallSessionId?, basePlanId? }`. iOS만 `platform:"IOS"` + StoreKit 2 JWS 전체(`serverVerificationData`). 구독 iOS `productId`는 ASC ID. `basePlanId`는 클라가 `bp-premium-*`로 매핑(**stat 전용**, entitlement는 Apple JWS/ASSN)
+- 응답 `{ successYn, pendingYn, finishYn }`. AOS는 `finishYn` 무시(consume/ack 서버). **iOS는 `finishYn=Y`만** `completePurchase`
+- Restore/Change Plan verify: `offerSessionId`/`paywallSessionId` 없음. Restore는 트랜잭션당 1회, **소모품 호출 금지**. 미finish 재시도 = 다음 `purchaseStream` + 같은 verify
+- Paywall impression: mount `POST /v1/impressions/subscriptions` `{screen}` → sessionId. CTA `PUT` `{paywallSessionId, basePlanId}`. Lab skip. Restore/Change Plan은 `store_purchase_completed` 집계 안 함
+- Change Plan: 월간 구독자만 (`subscriptionBasePlanId==bp-premium-monthly`) → 연간. AOS `ReplacementMode.withoutProration`. iOS 같은 그룹 `premium_yearly` 구매(다음 renewal crossgrade). verify 직후 simple은 계속 monthly
+- Restore UI: **Paywall 하단 링크 + Setting Account 다음 행, iOS만**. 에너지 팝업에는 없음
 - Speech Feedback: `feedbackLockedYn=='Y'` → Paywall. `'N'` → feedback TTS 준비 후 펼침+재생(실패 시 펼침만). 접기는 잠금 검사 없음. 상세 `CONTEXT_ROLEPLAY_S2.md`
-- **제약:** 상품은 prd 패키지 `kr.sudatalk.app`. verify `packageName`은 ENV 고정 → **산 패키지 = API ENV**. 스토어본↔유선본 상호 업데이트 불가
-- TBD: restore
-- iOS StoreKit: 아직 (`CONTEXT_IOS.md`)
+- **제약:** 상품은 prd 패키지 `kr.sudatalk.app`. verify `packageName`은 ENV 고정 → **산 패키지 = API ENV**. 스토어본↔유선본 상호 업데이트 불가. iOS IAP 테스트는 **prd + TestFlight**
+- `appAccountToken` 안 보냄. ASSN V2 `POST /v1/billing/webhook` (반영 배치 약 2분)
 
 ## 8. 스타일
 사실 기준: `CONTEXT_STYLE.md`. UI 수정 시 그쪽도 갱신. 테마: `lib/theme/app_theme.dart`.

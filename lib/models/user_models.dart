@@ -133,21 +133,26 @@ class UserEnergyDto {
 class PurchaseVerifyResultDto {
   final String successYn;
   final String pendingYn;
+  /// iOS StoreKit finish. AOS는 무시. 기본 `N`.
+  final String finishYn;
 
   const PurchaseVerifyResultDto({
     required this.successYn,
     required this.pendingYn,
+    this.finishYn = 'N',
   });
 
   factory PurchaseVerifyResultDto.fromJson(Map<String, dynamic> json) {
     return PurchaseVerifyResultDto(
       successYn: json['successYn'] as String? ?? 'N',
       pendingYn: json['pendingYn'] as String? ?? 'N',
+      finishYn: json['finishYn'] as String? ?? 'N',
     );
   }
 
   bool get isSuccess => successYn == 'Y';
   bool get isPending => pendingYn == 'Y';
+  bool get shouldFinish => finishYn == 'Y';
 }
 
 /// PUT /v1/users/push-agreement 응답

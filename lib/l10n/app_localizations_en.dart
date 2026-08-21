@@ -37,6 +37,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsAccount => 'Account';
 
   @override
+  String get settingsRestorePurchases => 'Restore Purchases';
+
+  @override
+  String get restorePurchasesNothing => 'No purchases to restore.';
+
+  @override
+  String get restorePurchasesCompleted => 'Purchases restored.';
+
+  @override
   String get settingsNotification => 'Notification';
 
   @override

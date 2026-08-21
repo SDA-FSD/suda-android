@@ -1,11 +1,16 @@
+import 'dart:async';
+import 'dart:io' show Platform;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../config/app_config.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/token_storage.dart';
 import '../../services/auth_service.dart';
+import '../../services/iap_purchase_service.dart';
 import '../../services/suda_api_client.dart';
 import '../../utils/default_toast.dart';
+import '../../utils/iap_busy_overlay.dart';
 import '../../utils/sub_screen_route.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../services/app_version_service.dart';
@@ -82,6 +87,12 @@ class SettingScreen extends StatelessWidget {
             l10n.settingsAccount,
             () => _navigateToSubScreen(context, AccountScreen(onSignOut: onSignOut)),
           ),
+          if (!kIsWeb && Platform.isIOS)
+            _buildMenuItem(
+              context,
+              l10n.settingsRestorePurchases,
+              () => unawaited(_handleRestore(context)),
+            ),
           _buildMenuItem(
             context,
             l10n.settingsNotification,
@@ -190,6 +201,48 @@ class SettingScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _handleRestore(BuildContext context) async {
+    if (IapPurchaseService.instance.isBusy) return;
+    final accessToken = await TokenStorage.loadAccessToken();
+    if (!context.mounted) return;
+    if (accessToken == null || accessToken.isEmpty) return;
+
+    final l10n = AppLocalizations.of(context)!;
+    final result = await IapBusyOverlay.run(
+      context,
+      () => IapPurchaseService.instance.restorePurchases(
+        accessToken: accessToken,
+      ),
+    );
+    if (!context.mounted) return;
+
+    if (result.outcome == IapPurchaseOutcome.nothingToRestore) {
+      DefaultToast.show(context, l10n.restorePurchasesNothing);
+      return;
+    }
+    if (!result.isSuccess) {
+      if (result.outcome == IapPurchaseOutcome.verifyFailed ||
+          result.outcome == IapPurchaseOutcome.unavailable) {
+        DefaultToast.show(
+          context,
+          l10n.energyPurchaseNotCompleted,
+          isError: true,
+        );
+      }
+      return;
+    }
+    if (result.pendingApproval) {
+      DefaultToast.show(context, l10n.energyPurchasePendingApproval);
+    } else {
+      DefaultToast.show(context, l10n.restorePurchasesCompleted);
+    }
+    try {
+      await SudaApiClient.getUserEnergySimple(accessToken: accessToken);
+    } catch (e, st) {
+      debugPrint('[DEBUG] Setting restore energy refresh failed: $e\n$st');
+    }
   }
 
   Widget _buildMenuItem(BuildContext context, String text, VoidCallback onTap) {

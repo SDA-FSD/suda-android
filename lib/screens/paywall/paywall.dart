@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:io' show Platform;
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
@@ -123,6 +125,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
   double? _premiumCardTopInStack;
   late final TapGestureRecognizer _termsRecognizer;
   late final TapGestureRecognizer _privacyRecognizer;
+  late final TapGestureRecognizer _restoreRecognizer;
   PremiumSubscriptionPrices? _prices;
   bool _purchasing = false;
   String? _paywallSessionId;
@@ -132,6 +135,9 @@ class _PaywallScreenState extends State<PaywallScreen> {
     super.initState();
     _termsRecognizer = TapGestureRecognizer()..onTap = _openTerms;
     _privacyRecognizer = TapGestureRecognizer()..onTap = _openPrivacy;
+    _restoreRecognizer = TapGestureRecognizer()..onTap = () {
+      unawaited(_onRestoreTap());
+    };
     unawaited(_loadPrices());
     unawaited(_initPaywallSession());
   }
@@ -143,6 +149,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
     }
     _termsRecognizer.dispose();
     _privacyRecognizer.dispose();
+    _restoreRecognizer.dispose();
     super.dispose();
   }
 
@@ -257,6 +264,63 @@ class _PaywallScreenState extends State<PaywallScreen> {
       Navigator.of(context).pop(true);
     } catch (e, st) {
       debugPrint('[DEBUG] Paywall subscribe failed: $e\n$st');
+      if (mounted) setState(() => _purchasing = false);
+    }
+  }
+
+  Future<void> _onRestoreTap() async {
+    if (_purchasing || IapPurchaseService.instance.isBusy) return;
+    setState(() => _purchasing = true);
+
+    try {
+      final accessToken = await TokenStorage.loadAccessToken();
+      if (!mounted) return;
+      if (accessToken == null || accessToken.isEmpty) {
+        setState(() => _purchasing = false);
+        return;
+      }
+
+      final result = await IapBusyOverlay.run(
+        context,
+        () => IapPurchaseService.instance.restorePurchases(
+          accessToken: accessToken,
+        ),
+      );
+      if (!mounted) return;
+
+      final l10n = AppLocalizations.of(context)!;
+      if (result.outcome == IapPurchaseOutcome.nothingToRestore) {
+        DefaultToast.show(context, l10n.restorePurchasesNothing);
+        setState(() => _purchasing = false);
+        return;
+      }
+      if (!result.isSuccess) {
+        if (result.outcome == IapPurchaseOutcome.verifyFailed ||
+            result.outcome == IapPurchaseOutcome.unavailable) {
+          DefaultToast.show(
+            context,
+            l10n.energyPurchaseNotCompleted,
+            isError: true,
+          );
+        }
+        setState(() => _purchasing = false);
+        return;
+      }
+
+      if (result.pendingApproval) {
+        DefaultToast.show(context, l10n.energyPurchasePendingApproval);
+      } else {
+        DefaultToast.show(context, l10n.restorePurchasesCompleted);
+      }
+      try {
+        await SudaApiClient.getUserEnergySimple(accessToken: accessToken);
+      } catch (e, st) {
+        debugPrint('[DEBUG] Paywall restore energy refresh failed: $e\n$st');
+      }
+      if (!mounted) return;
+      Navigator.of(context).pop(true);
+    } catch (e, st) {
+      debugPrint('[DEBUG] Paywall restore failed: $e\n$st');
       if (mounted) setState(() => _purchasing = false);
     }
   }
@@ -582,6 +646,18 @@ class _PaywallScreenState extends State<PaywallScreen> {
                             ),
                             recognizer: _privacyRecognizer,
                           ),
+                          if (!kIsWeb && Platform.isIOS) ...[
+                            const TextSpan(text: '  •  '),
+                            TextSpan(
+                              text: AppLocalizations.of(context)!
+                                  .settingsRestorePurchases,
+                              style: _style(size: 10, color: _legal).copyWith(
+                                decoration: TextDecoration.underline,
+                                decorationColor: _legal,
+                              ),
+                              recognizer: _restoreRecognizer,
+                            ),
+                          ],
                         ],
                       ),
                       textAlign: TextAlign.center,

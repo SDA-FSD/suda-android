@@ -8,10 +8,14 @@ iOS는 골격·로그인·푸시 토큰 `deviceType=IOS`까지 들어갔고, 이
 - `FirebaseMessaging.getInitialMessage()` hang → `main()` **2초 timeout**. 근본 원인(APNs/시뮬)은 미해결. timeout은 원인 수정 후에도 유지.
 
 ## 아직 안 함
-- **StoreKit** IAP (현재 `IapPurchaseService`는 Play). 월/연 상품 ID 매핑·restore·서버 JWS 검증
 - **stg** Firebase plist / Google iOS OAuth
 - iPad 회귀·ATT(필요할 때만)
 - FPM iOS 네이티브 플러그인 (Dart 헬퍼는 있음)
+
+## StoreKit IAP
+- `IapPurchaseService`: AOS Play 유지. iOS는 `premium_monthly`/`premium_yearly` + INAPP 동일 ID. `platform:"IOS"`, JWS, `finishYn=Y`만 finish. Restore는 Paywall+Setting(iOS). 상세 **`.docs/CONTEXT.md` §7-2**
+- 테스트: **prd** Bundle `kr.sudatalk.app` · TestFlight. local/dev/stg 상품 없음
+- `appAccountToken` 생략. 시뮬은 StoreKit Configuration 없이 실결제 불가
 
 ## 마이크 (Opening Start)
 앱 기동 시 요청하지 않음. `RoleplayOpeningScreen` Start → status/request → 영구거부 시 설정 안내만, 복귀 후 사용자가 다시 Start.  

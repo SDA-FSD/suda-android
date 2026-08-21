@@ -37,6 +37,15 @@ class AppLocalizationsPt extends AppLocalizations {
   String get settingsAccount => 'Conta';
 
   @override
+  String get settingsRestorePurchases => 'Restaurar compras';
+
+  @override
+  String get restorePurchasesNothing => 'Não há compras para restaurar.';
+
+  @override
+  String get restorePurchasesCompleted => 'Compras restauradas.';
+
+  @override
   String get settingsNotification => 'Notificações';
 
   @override

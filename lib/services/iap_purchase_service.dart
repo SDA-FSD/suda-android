@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:io' show Platform;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:in_app_purchase_android/billing_client_wrappers.dart';
@@ -7,16 +9,20 @@ import 'package:in_app_purchase_android/in_app_purchase_android.dart';
 import 'package:intl/intl.dart';
 
 import '../api/suda_api_client.dart';
+import '../models/user_models.dart';
 import '../utils/iap_obfuscated_account_id.dart';
 import 'iap_price_cache.dart';
 import 'perf_monitoring_service.dart';
+import 'token_storage.dart';
 
 /// INAPP/SUBS 단건 구매 + 서버 verify.
 ///
-/// - 동시에 하나의 구매만 처리 (`isBusy`).
+/// - 동시에 하나의 구매/restore만 처리 (`isBusy`).
 /// - 가격은 [IapPriceCache]에 영속 저장.
 /// - 스토어 UI에서 복귀(resume) 후 [_resumeGrace] 동안 **매칭 스트림이 없으면**
 ///   `storeDismissed`로 UI lock 해제. 스트림 수신 후에는 grace를 다시 걸지 않음.
+/// - AOS: Play consume/ack는 서버. 클라 `completePurchase` 없음.
+/// - iOS: verify `finishYn=Y`일 때만 `completePurchase`.
 class IapPurchaseService with WidgetsBindingObserver {
   IapPurchaseService._();
 
@@ -26,8 +32,11 @@ class IapPurchaseService with WidgetsBindingObserver {
   static const productCapacity6 = 'energy_capacity_6';
   static const productCapacity7 = 'energy_capacity_7';
   static const productPremium = 'subscription_premium';
+  static const productPremiumMonthly = 'premium_monthly';
+  static const productPremiumYearly = 'premium_yearly';
   static const basePlanMonthly = 'bp-premium-monthly';
   static const basePlanYearly = 'bp-premium-yearly';
+  static const verifyPlatformIos = 'IOS';
 
   static const Set<String> inAppProductIds = {
     productUnlimited10Min,
@@ -35,8 +44,25 @@ class IapPurchaseService with WidgetsBindingObserver {
     productCapacity7,
   };
 
+  static bool get _isIos => !kIsWeb && Platform.isIOS;
+
+  /// iOS 구독 ASC productId. AOS는 [productPremium] + basePlan.
+  static String iosSubscriptionProductId(String basePlanId) {
+    return basePlanId == basePlanYearly
+        ? productPremiumYearly
+        : productPremiumMonthly;
+  }
+
+  static String? basePlanIdForProductId(String productId) {
+    if (productId == productPremiumMonthly) return basePlanMonthly;
+    if (productId == productPremiumYearly) return basePlanYearly;
+    return null;
+  }
+
   /// 스토어 복귀 후 스트림 대기 grace.
   static const _resumeGrace = Duration(seconds: 2);
+  static const _restoreInitialGrace = Duration(seconds: 8);
+  static const _restoreIdleGrace = Duration(seconds: 2);
 
   StreamSubscription<List<PurchaseDetails>>? _purchaseSub;
   Completer<IapPurchaseResult>? _pending;
@@ -53,7 +79,15 @@ class IapPurchaseService with WidgetsBindingObserver {
   /// 성공 결과를 덮어쓰지 않도록 한다.
   bool _purchaseUpdateReceived = false;
 
-  bool get isBusy => _pending != null;
+  Completer<IapPurchaseResult>? _restorePending;
+  String? _restoreAccessToken;
+  Timer? _restoreGraceTimer;
+  bool _restoreSawRestorable = false;
+  bool _restoreHadSuccess = false;
+  bool _restoreHadPending = false;
+  bool _restoreHadVerifyFail = false;
+
+  bool get isBusy => _pending != null || _restorePending != null;
 
   void ensureListening() {
     if (_purchaseSub != null) return;
@@ -62,6 +96,7 @@ class IapPurchaseService with WidgetsBindingObserver {
       onError: (Object e, StackTrace st) {
         debugPrint('[DEBUG] IapPurchaseService stream error: $e\n$st');
         _failPending(IapPurchaseResult.storeDismissed);
+        _failRestore(IapPurchaseResult.storeDismissed);
       },
     );
     _ensureLifecycleObserver();
@@ -94,10 +129,14 @@ class IapPurchaseService with WidgetsBindingObserver {
     _resumeGraceTimer = null;
   }
 
-  /// 화면 이탈 등으로 대기 중 구매를 포기할 때.
+  /// 화면 이탈 등으로 대기 중 구매/restore를 포기할 때.
   void abandonPendingPurchase() {
-    if (_pending == null) return;
-    _failPending(IapPurchaseResult.storeDismissed);
+    if (_pending != null) {
+      _failPending(IapPurchaseResult.storeDismissed);
+    }
+    if (_restorePending != null) {
+      _failRestore(IapPurchaseResult.storeDismissed);
+    }
   }
 
   /// 스토어에서 가격을 조회해 캐시. 실패해도 기존 캐시 유지.
@@ -147,18 +186,25 @@ class IapPurchaseService with WidgetsBindingObserver {
         );
       }
 
+      final queryIds = _isIos
+          ? {productPremiumMonthly, productPremiumYearly}
+          : {productPremium};
       final response =
-          await InAppPurchase.instance.queryProductDetails({productPremium});
-      final monthly = _pickSubscriptionProduct(
-        productPremium,
-        basePlanMonthly,
-        response.productDetails,
-      );
-      final yearly = _pickSubscriptionProduct(
-        productPremium,
-        basePlanYearly,
-        response.productDetails,
-      );
+          await InAppPurchase.instance.queryProductDetails(queryIds);
+      final monthly = _isIos
+          ? _productById(productPremiumMonthly, response.productDetails)
+          : _pickSubscriptionProduct(
+              productPremium,
+              basePlanMonthly,
+              response.productDetails,
+            );
+      final yearly = _isIos
+          ? _productById(productPremiumYearly, response.productDetails)
+          : _pickSubscriptionProduct(
+              productPremium,
+              basePlanYearly,
+              response.productDetails,
+            );
 
       if (monthly != null && monthly.price.isNotEmpty) {
         await IapPriceCache.save(
@@ -204,6 +250,13 @@ class IapPurchaseService with WidgetsBindingObserver {
     return formatted;
   }
 
+  ProductDetails? _productById(String productId, List<ProductDetails> products) {
+    for (final product in products) {
+      if (product.id == productId) return product;
+    }
+    return null;
+  }
+
   ProductDetails? _pickSubscriptionProduct(
     String productId,
     String basePlanId,
@@ -247,14 +300,18 @@ class IapPurchaseService with WidgetsBindingObserver {
     required String accessToken,
     String? paywallSessionId,
   }) {
+    final productId =
+        _isIos ? iosSubscriptionProductId(basePlanId) : productPremium;
     return _purchase(
-      productId: productPremium,
+      productId: productId,
       accessToken: accessToken,
-      resolveProduct: (products) => _pickSubscriptionProduct(
-        productPremium,
-        basePlanId,
-        products,
-      ),
+      resolveProduct: (products) => _isIos
+          ? _productById(productId, products)
+          : _pickSubscriptionProduct(
+              productPremium,
+              basePlanId,
+              products,
+            ),
       consumable: false,
       cacheBasePlanId: basePlanId,
       paywallSessionId: paywallSessionId,
@@ -262,16 +319,31 @@ class IapPurchaseService with WidgetsBindingObserver {
     );
   }
 
-  /// Premium base plan 변경 (실측: [ReplacementMode.withoutProration]).
+  /// Premium base plan 변경.
   ///
-  /// 기존 활성 구매가 없으면 [IapPurchaseOutcome.oldPurchaseNotFound] (크래시 없음).
-  /// verify는 신규 구독과 동일 경로 — 서버 로그 병행 감시 필요.
+  /// AOS: [ReplacementMode.withoutProration]. 기존 활성 구매가 없으면
+  /// [IapPurchaseOutcome.oldPurchaseNotFound].
+  /// iOS: 같은 그룹 `premium_yearly` 구매(다음 renewal crossgrade).
   Future<IapPurchaseResult> changeSubscription({
     required String newBasePlanId,
     required String accessToken,
   }) async {
-    if (_pending != null) {
+    if (isBusy) {
       return IapPurchaseResult.storeDismissed;
+    }
+
+    if (_isIos) {
+      return _purchase(
+        productId: iosSubscriptionProductId(newBasePlanId),
+        accessToken: accessToken,
+        resolveProduct: (products) => _productById(
+          iosSubscriptionProductId(newBasePlanId),
+          products,
+        ),
+        consumable: false,
+        cacheBasePlanId: newBasePlanId,
+        verifyBasePlanId: newBasePlanId,
+      );
     }
 
     ensureListening();
@@ -326,6 +398,46 @@ class IapPurchaseService with WidgetsBindingObserver {
     }
   }
 
+  /// iOS Restore. 소모품은 verify하지 않음. 세션 ID 없음.
+  Future<IapPurchaseResult> restorePurchases({
+    required String accessToken,
+  }) async {
+    if (!_isIos) {
+      return IapPurchaseResult.unavailable;
+    }
+    if (isBusy) {
+      return IapPurchaseResult.storeDismissed;
+    }
+
+    ensureListening();
+    try {
+      if (!await InAppPurchase.instance.isAvailable()) {
+        return IapPurchaseResult.unavailable;
+      }
+    } catch (e, st) {
+      debugPrint('[DEBUG] IapPurchaseService restore available failed: $e\n$st');
+      return IapPurchaseResult.storeDismissed;
+    }
+
+    final completer = Completer<IapPurchaseResult>();
+    _restorePending = completer;
+    _restoreAccessToken = accessToken;
+    _restoreSawRestorable = false;
+    _restoreHadSuccess = false;
+    _restoreHadPending = false;
+    _restoreHadVerifyFail = false;
+    _armRestoreGrace(_restoreInitialGrace);
+
+    try {
+      await InAppPurchase.instance.restorePurchases();
+    } catch (e, st) {
+      debugPrint('[DEBUG] IapPurchaseService restorePurchases failed: $e\n$st');
+      _failRestore(IapPurchaseResult.storeDismissed);
+    }
+
+    return completer.future;
+  }
+
   Future<IapPurchaseResult> _purchase({
     required String productId,
     required String accessToken,
@@ -338,7 +450,7 @@ class IapPurchaseService with WidgetsBindingObserver {
     String? paywallSessionId,
     String? verifyBasePlanId,
   }) async {
-    if (_pending != null) {
+    if (isBusy) {
       return IapPurchaseResult.storeDismissed;
     }
 
@@ -403,16 +515,21 @@ class IapPurchaseService with WidgetsBindingObserver {
         );
       }
 
-      final purchaseParam = GooglePlayPurchaseParam(
-        productDetails: product,
-        applicationUserName: obfuscatedAccountId,
-        offerToken: product is GooglePlayProductDetails
-            ? product.offerToken
-            : null,
-        changeSubscriptionParam: changeSubscriptionParam,
-      );
+      final PurchaseParam purchaseParam;
+      if (_isIos) {
+        purchaseParam = PurchaseParam(productDetails: product);
+      } else {
+        purchaseParam = GooglePlayPurchaseParam(
+          productDetails: product,
+          applicationUserName: obfuscatedAccountId,
+          offerToken: product is GooglePlayProductDetails
+              ? product.offerToken
+              : null,
+          changeSubscriptionParam: changeSubscriptionParam,
+        );
+      }
 
-      // consume/ack는 서버 verify에서 처리. 클라이언트는 호출하지 않음.
+      // consume/ack는 서버 verify에서 처리(Play). iOS finish는 verify finishYn.
       final bool launched;
       if (consumable) {
         launched = await iap.buyConsumable(
@@ -449,69 +566,227 @@ class IapPurchaseService with WidgetsBindingObserver {
 
   Future<void> _onPurchaseUpdates(List<PurchaseDetails> purchases) async {
     for (final purchase in purchases) {
-      final pendingProductId = _pendingProductId;
-      // consume/ack는 서버 전담. 클라이언트는 completePurchase 호출하지 않음.
-      if (pendingProductId == null || purchase.productID != pendingProductId) {
+      if (_pending != null && purchase.productID == _pendingProductId) {
+        await _handlePendingPurchaseUpdate(purchase);
         continue;
       }
-
-      // 스토어가 응답했으면 resume grace 영구 차단(verify 중 dismiss 방지).
-      _purchaseUpdateReceived = true;
-      _cancelResumeGrace();
-
-      if (purchase.status == PurchaseStatus.pending) {
+      if (_restorePending != null) {
+        await _handleRestorePurchaseUpdate(purchase);
         continue;
       }
+      if (_isIos) {
+        unawaited(_handleOrphanPurchase(purchase));
+      }
+    }
+  }
 
-      if (purchase.status == PurchaseStatus.error ||
-          purchase.status == PurchaseStatus.canceled) {
-        final err = purchase.error;
-        debugPrint(
-          '[DEBUG] IapPurchaseService purchase ${purchase.status}: '
-          'productId=${purchase.productID}, '
-          'errorCode=${err?.code}, errorMessage=${err?.message}, '
-          'errorDetails=${err?.details}',
-        );
+  Future<void> _handlePendingPurchaseUpdate(PurchaseDetails purchase) async {
+    _purchaseUpdateReceived = true;
+    _cancelResumeGrace();
+
+    if (purchase.status == PurchaseStatus.pending) {
+      return;
+    }
+
+    if (purchase.status == PurchaseStatus.error ||
+        purchase.status == PurchaseStatus.canceled) {
+      final err = purchase.error;
+      debugPrint(
+        '[DEBUG] IapPurchaseService purchase ${purchase.status}: '
+        'productId=${purchase.productID}, '
+        'errorCode=${err?.code}, errorMessage=${err?.message}, '
+        'errorDetails=${err?.details}',
+      );
+      _failPending(IapPurchaseResult.storeDismissed);
+      return;
+    }
+
+    if (purchase.status == PurchaseStatus.purchased ||
+        purchase.status == PurchaseStatus.restored) {
+      final accessToken = _pendingAccessToken;
+      final purchaseToken = _purchaseTokenOf(purchase);
+      await PerfMonitoringService.instance.stop('purchase_before_token');
+      await PerfMonitoringService.instance.start('purchase_after_token');
+      if (accessToken == null || accessToken.isEmpty) {
         _failPending(IapPurchaseResult.storeDismissed);
-        continue;
+        return;
       }
 
-      if (purchase.status == PurchaseStatus.purchased ||
-          purchase.status == PurchaseStatus.restored) {
-        final accessToken = _pendingAccessToken;
-        final purchaseToken = _purchaseTokenOf(purchase);
-        // token 확보: before 종료 → after(verify) 시작
-        await PerfMonitoringService.instance.stop('purchase_before_token');
-        await PerfMonitoringService.instance.start('purchase_after_token');
-        if (accessToken == null || accessToken.isEmpty) {
-          _failPending(IapPurchaseResult.storeDismissed);
-          continue;
-        }
-
-        try {
-          final verify = await SudaApiClient.verifyPurchase(
-            accessToken: accessToken,
-            purchaseToken: purchaseToken,
-            productId: purchase.productID,
-            offerSessionId: _pendingOfferSessionId,
-            paywallSessionId: _pendingPaywallSessionId,
-            basePlanId: _pendingBasePlanId,
+      try {
+        final verify = await _verifyPurchase(
+          accessToken: accessToken,
+          purchase: purchase,
+          purchaseToken: purchaseToken,
+          offerSessionId: _pendingOfferSessionId,
+          paywallSessionId: _pendingPaywallSessionId,
+          basePlanId: _basePlanIdForVerify(
+            purchase.productID,
+            pending: _pendingBasePlanId,
+          ),
+        );
+        await _maybeFinish(purchase, verify);
+        if (!verify.isSuccess) {
+          _failPending(IapPurchaseResult.verifyFailed);
+        } else {
+          _completePending(
+            IapPurchaseResult.success(pendingApproval: verify.isPending),
           );
-          if (!verify.isSuccess) {
-            _failPending(IapPurchaseResult.verifyFailed);
-          } else {
-            _completePending(
-              IapPurchaseResult.success(pendingApproval: verify.isPending),
-            );
-          }
+        }
+      } catch (e, st) {
+        debugPrint(
+          '[DEBUG] IapPurchaseService verify failed: '
+          'productId=${purchase.productID}, error=$e\n$st',
+        );
+        _failPending(IapPurchaseResult.verifyFailed);
+      }
+    }
+  }
+
+  Future<void> _handleRestorePurchaseUpdate(PurchaseDetails purchase) async {
+    if (purchase.status == PurchaseStatus.pending) {
+      _armRestoreGrace(_restoreIdleGrace);
+      return;
+    }
+    if (purchase.status == PurchaseStatus.error ||
+        purchase.status == PurchaseStatus.canceled) {
+      debugPrint(
+        '[DEBUG] IapPurchaseService restore ${purchase.status}: '
+        'productId=${purchase.productID}, '
+        'errorCode=${purchase.error?.code}, '
+        'errorMessage=${purchase.error?.message}',
+      );
+      _armRestoreGrace(_restoreIdleGrace);
+      return;
+    }
+    if (purchase.status != PurchaseStatus.purchased &&
+        purchase.status != PurchaseStatus.restored) {
+      return;
+    }
+
+    _armRestoreGrace(_restoreIdleGrace);
+
+    if (purchase.productID == productUnlimited10Min) {
+      await _finishWithoutVerify(purchase);
+      return;
+    }
+
+    final accessToken = _restoreAccessToken;
+    if (accessToken == null || accessToken.isEmpty) {
+      return;
+    }
+
+    _restoreSawRestorable = true;
+    try {
+      final verify = await _verifyPurchase(
+        accessToken: accessToken,
+        purchase: purchase,
+        purchaseToken: _purchaseTokenOf(purchase),
+        basePlanId: _basePlanIdForVerify(purchase.productID),
+      );
+      await _maybeFinish(purchase, verify);
+      if (verify.isSuccess) {
+        _restoreHadSuccess = true;
+        if (verify.isPending) _restoreHadPending = true;
+      } else {
+        _restoreHadVerifyFail = true;
+      }
+    } catch (e, st) {
+      debugPrint(
+        '[DEBUG] IapPurchaseService restore verify failed: '
+        'productId=${purchase.productID}, error=$e\n$st',
+      );
+      _restoreHadVerifyFail = true;
+    }
+  }
+
+  /// finish 안 한 iOS 트랜잭션 — 앱 재실행 공식 재시도.
+  Future<void> _handleOrphanPurchase(PurchaseDetails purchase) async {
+    if (purchase.status == PurchaseStatus.pending) return;
+    if (purchase.status == PurchaseStatus.error ||
+        purchase.status == PurchaseStatus.canceled) {
+      return;
+    }
+    if (purchase.status != PurchaseStatus.purchased &&
+        purchase.status != PurchaseStatus.restored) {
+      return;
+    }
+    if (!purchase.pendingCompletePurchase) return;
+
+    final accessToken = await TokenStorage.loadAccessToken();
+    if (accessToken == null || accessToken.isEmpty) return;
+
+    try {
+      final verify = await _verifyPurchase(
+        accessToken: accessToken,
+        purchase: purchase,
+        purchaseToken: _purchaseTokenOf(purchase),
+        basePlanId: _basePlanIdForVerify(purchase.productID),
+      );
+      await _maybeFinish(purchase, verify);
+      if (verify.isSuccess) {
+        try {
+          await SudaApiClient.getUserEnergySimple(accessToken: accessToken);
         } catch (e, st) {
           debugPrint(
-            '[DEBUG] IapPurchaseService verify failed: '
-            'productId=${purchase.productID}, error=$e\n$st',
+            '[DEBUG] IapPurchaseService orphan energy refresh failed: $e\n$st',
           );
-          _failPending(IapPurchaseResult.verifyFailed);
         }
       }
+    } catch (e, st) {
+      debugPrint(
+        '[DEBUG] IapPurchaseService orphan verify failed: '
+        'productId=${purchase.productID}, error=$e\n$st',
+      );
+    }
+  }
+
+  Future<PurchaseVerifyResultDto> _verifyPurchase({
+    required String accessToken,
+    required PurchaseDetails purchase,
+    required String purchaseToken,
+    String? offerSessionId,
+    String? paywallSessionId,
+    String? basePlanId,
+  }) {
+    return SudaApiClient.verifyPurchase(
+      accessToken: accessToken,
+      purchaseToken: purchaseToken,
+      productId: purchase.productID,
+      offerSessionId: offerSessionId,
+      paywallSessionId: paywallSessionId,
+      basePlanId: basePlanId,
+      platform: _isIos ? verifyPlatformIos : null,
+    );
+  }
+
+  String? _basePlanIdForVerify(String productId, {String? pending}) {
+    final trimmed = pending?.trim();
+    if (trimmed != null && trimmed.isNotEmpty) return trimmed;
+    return basePlanIdForProductId(productId);
+  }
+
+  Future<void> _maybeFinish(
+    PurchaseDetails purchase,
+    PurchaseVerifyResultDto verify,
+  ) async {
+    if (!_isIos || !verify.shouldFinish) return;
+    await _completeStorePurchase(purchase);
+  }
+
+  Future<void> _finishWithoutVerify(PurchaseDetails purchase) async {
+    if (!_isIos) return;
+    await _completeStorePurchase(purchase);
+  }
+
+  Future<void> _completeStorePurchase(PurchaseDetails purchase) async {
+    if (!purchase.pendingCompletePurchase) return;
+    try {
+      await InAppPurchase.instance.completePurchase(purchase);
+    } catch (e, st) {
+      debugPrint(
+        '[DEBUG] IapPurchaseService completePurchase failed: '
+        'productId=${purchase.productID}, error=$e\n$st',
+      );
     }
   }
 
@@ -520,6 +795,51 @@ class IapPurchaseService with WidgetsBindingObserver {
       return purchase.billingClientPurchase.purchaseToken;
     }
     return purchase.verificationData.serverVerificationData;
+  }
+
+  void _armRestoreGrace(Duration duration) {
+    _restoreGraceTimer?.cancel();
+    _restoreGraceTimer = Timer(duration, _completeRestore);
+  }
+
+  void _completeRestore() {
+    final completer = _restorePending;
+    if (completer == null) return;
+    final IapPurchaseResult result;
+    if (_restoreHadSuccess) {
+      result = IapPurchaseResult.success(pendingApproval: _restoreHadPending);
+    } else if (_restoreHadPending) {
+      result = IapPurchaseResult.success(pendingApproval: true);
+    } else if (_restoreHadVerifyFail) {
+      result = IapPurchaseResult.verifyFailed;
+    } else if (!_restoreSawRestorable) {
+      result = IapPurchaseResult.nothingToRestore;
+    } else {
+      result = IapPurchaseResult.verifyFailed;
+    }
+    _clearRestore();
+    if (!completer.isCompleted) {
+      completer.complete(result);
+    }
+  }
+
+  void _failRestore(IapPurchaseResult result) {
+    final completer = _restorePending;
+    _clearRestore();
+    if (completer != null && !completer.isCompleted) {
+      completer.complete(result);
+    }
+  }
+
+  void _clearRestore() {
+    _restoreGraceTimer?.cancel();
+    _restoreGraceTimer = null;
+    _restorePending = null;
+    _restoreAccessToken = null;
+    _restoreSawRestorable = false;
+    _restoreHadSuccess = false;
+    _restoreHadPending = false;
+    _restoreHadVerifyFail = false;
   }
 
   void _completePending(IapPurchaseResult result) {
@@ -568,6 +888,8 @@ enum IapPurchaseOutcome {
   unavailable,
   /// changeSubscription: queryPastPurchases에 활성 Premium 구매 없음.
   oldPurchaseNotFound,
+  /// iOS restore: restorable 트랜잭션 없음.
+  nothingToRestore,
 }
 
 class IapPurchaseResult {
@@ -590,6 +912,8 @@ class IapPurchaseResult {
       IapPurchaseResult._(IapPurchaseOutcome.unavailable);
   static const oldPurchaseNotFound =
       IapPurchaseResult._(IapPurchaseOutcome.oldPurchaseNotFound);
+  static const nothingToRestore =
+      IapPurchaseResult._(IapPurchaseOutcome.nothingToRestore);
 
   bool get isSuccess => outcome == IapPurchaseOutcome.success;
 }
