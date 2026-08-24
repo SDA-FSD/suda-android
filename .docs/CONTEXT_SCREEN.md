@@ -457,6 +457,7 @@
 - 좌상단 뒤로가기: 같은 레벨(Account, Feedback 등)과 동일
 - 헤더 타이틀: 메뉴명 그대로(l10n.settingsNotification)
 - 본문: width 100%, 배경 #353535, 모서리 둥근 박스. 좌측 설명(pushNotifications 흰색, pushNotificationsDesc caption·#80D7CF), 우측 토글(56×24 트랙, 20×20 흰 원). OFF: 원 좌측, 트랙 #8C8C8C. ON: 원 우측, 트랙 #80D7CF. 200 응답 후 전환 애니메이션.
+- OFF→ON 시 OS 알림 권한 확인. 막혀 있으면 설정 앱 안내, PUT 생략. **iOS는 FCM `getNotificationSettings`**(`authorized`/`provisional`, `notDetermined`면 `requestPermission`). AOS는 기존 `Permission.notification.isGranted`. iOS `permission_handler` 알림 매크로 없음(항상 denied).
 - API: ON 시 `PUT /v1/users/push-agreement?agreementYn=Y`, OFF 시 `PUT /v1/users/push-agreement?agreementYn=N`
 - 응답: `QuestResultDto { completeYn }`
   - `completeYn == 'Y'`: `Navigator.pop(true)`로 자동 복귀. 에너지 팝업 진입이면 토스트(`energyEnablePushCompleted`) + 슬롯 제거 애니 + detail 재조회. Setting 경로는 토스트 없음

@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:vibration/vibration.dart';
@@ -147,7 +150,7 @@ class _PushAgreementScreenState extends State<PushAgreementScreen> {
 
     // OFF → ON: OS 알림 권한 확인 후 막혀 있으면 권한 모달 표시, PUT 생략
     if (nextOn) {
-      final granted = await Permission.notification.isGranted;
+      final granted = await _isOsNotificationAllowed();
       if (!granted) {
         if (mounted) {
           final l10n = AppLocalizations.of(context)!;
@@ -192,6 +195,21 @@ class _PushAgreementScreenState extends State<PushAgreementScreen> {
         );
       }
     }
+  }
+
+  /// iOS: `permission_handler` 알림 매크로가 꺼져 있어 `Permission.notification`이
+  /// 항상 denied. Home과 같이 FCM settings를 쓴다. AOS는 기존 POST_NOTIFICATIONS.
+  Future<bool> _isOsNotificationAllowed() async {
+    if (Platform.isIOS) {
+      final messaging = FirebaseMessaging.instance;
+      var settings = await messaging.getNotificationSettings();
+      if (settings.authorizationStatus == AuthorizationStatus.notDetermined) {
+        settings = await messaging.requestPermission();
+      }
+      return settings.authorizationStatus == AuthorizationStatus.authorized ||
+          settings.authorizationStatus == AuthorizationStatus.provisional;
+    }
+    return Permission.notification.isGranted;
   }
 
   void _showNotificationPermissionDialog({required AppLocalizations l10n}) {

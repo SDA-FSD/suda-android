@@ -114,7 +114,7 @@ flutter run --flavor dev -t lib/main.dart --dart-define=ENV=dev -d 541F3961-8182
 - Playing 0/402 → `showPlayingEnergyInsufficientPopup` → `endRoleplay`면 Wait 레이어(세션 유지)
 - Opening Start `sessionId=='0'` → 에너지 부족 팝업, Opening 유지
 - 팝업 INAPP 탭: `POST /v1/impressions/products` (팝업 생명주기 내 동일 키 1회)
-- Enable Notifications 슬롯: detail `showEnablePushFreeChargeYn=Y` **그리고** `screen` ∈ {`home`,`opening`,`opening_insufficient`}. 탭 시 impression `productId=enable_push_free_charge` → `GET /v1/users` → PushAgreement Sub Screen. `completeYn=Y`면 토스트(에너지 팝업 경로만) + 제거 애니 + detail 재조회. Setting>Notification 자동닫힘은 토스트 없음
+- Enable Notifications 슬롯: detail `showEnablePushFreeChargeYn=Y` **그리고** `screen` ∈ {`home`,`opening`,`opening_insufficient`}. 탭 시 impression `productId=enable_push_free_charge` → `GET /v1/users` → PushAgreement Sub Screen. `completeYn=Y`면 토스트(에너지 팝업 경로만) + 제거 애니 + detail 재조회. Setting>Notification 자동닫힘은 토스트 없음. OFF→ON OS 권한: iOS FCM settings, AOS `Permission.notification`(상세 `CONTEXT_SCREEN.md` PushAgreement)
 
 ### 홈·시리즈
 - `GET /v2/home/contents` → banners, seriesList, restYn, notiboxUnreadYn. `RestStatusService`에 rest·배지 동기화
