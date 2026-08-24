@@ -93,6 +93,7 @@ mixin PlayingConversationMixin<T extends StatefulWidget> on State<T> {
   AudioPlayer _audioPlayer = AudioPlayer();
   int _nextConversationIndex = 1;
   bool _hasStartedAiOpening = false;
+  bool _iosPlayingAudioSessionReady = false;
   int _voiceSeq = 0;
   StreamSubscription<PlayerState>? _aiPlaybackSub;
   String? _iosAudioPath;
@@ -108,9 +109,6 @@ mixin PlayingConversationMixin<T extends StatefulWidget> on State<T> {
 
   /// AI 말풍선 직전 힌트 아이콘 리셋.
   VoidCallback? playingHintResetIconForAiStartHandler;
-
-  /// AI TTS 시작 시 iOS 녹음 세션 ready 플래그 무효화.
-  VoidCallback? invalidateIosRecordingSessionHandler;
 
   /// AI 시작 시 사용자 입력 비활성.
   VoidCallback? deactivateUserTurnHandler;
@@ -195,7 +193,6 @@ mixin PlayingConversationMixin<T extends StatefulWidget> on State<T> {
   }) async {
     playingHintPrepareForAiMessageHandler?.call();
     playingHintResetIconForAiStartHandler?.call();
-    invalidateIosRecordingSessionHandler?.call();
     final entry = PlayingConversationEntry.ai(text: text);
     final audioSource = await _prepareAiVoice(
       cdnYn: cdnYn,
@@ -274,6 +271,20 @@ mixin PlayingConversationMixin<T extends StatefulWidget> on State<T> {
     } catch (_) {}
   }
 
+  /// 녹음 탭 경로 — 재생 중이 아니면 stop을 await하지 않는다.
+  Future<void> stopPlayingConversationAudioForRecording() async {
+    if (!_audioPlayer.playing) {
+      _voiceSeq++;
+      _aiPlaybackSub?.cancel();
+      _aiPlaybackSub = null;
+      return;
+    }
+    try {
+      await stopPlayingConversationAudio()
+          .timeout(const Duration(milliseconds: 150));
+    } catch (_) {}
+  }
+
   void _deleteIosAudioFile() {
     final path = _iosAudioPath;
     _iosAudioPath = null;
@@ -305,11 +316,22 @@ mixin PlayingConversationMixin<T extends StatefulWidget> on State<T> {
     return 'mp3';
   }
 
+  /// Playing iOS는 TTS·녹음 모두 `playAndRecord`를 유지한다.
+  /// `playback`으로 되돌리면 탭 시 category 전환으로 초반 발화가 잘린다.
   Future<void> _activateIosPlaybackSession() async {
+    if (_iosPlayingAudioSessionReady) return;
     try {
       final session = await AudioSession.instance;
-      await session.configure(const AudioSessionConfiguration.speech());
+      await session.configure(
+        AudioSessionConfiguration.speech().copyWith(
+          avAudioSessionCategory: AVAudioSessionCategory.playAndRecord,
+          avAudioSessionCategoryOptions:
+              AVAudioSessionCategoryOptions.defaultToSpeaker |
+                  AVAudioSessionCategoryOptions.allowBluetooth,
+        ),
+      );
       await session.setActive(true);
+      _iosPlayingAudioSessionReady = true;
     } catch (e) {
       debugPrint('[DEBUG] RpS2 iOS audio session: $e');
     }

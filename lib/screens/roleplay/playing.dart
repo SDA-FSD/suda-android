@@ -99,7 +99,6 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     handleRpS2UserMessageResponse = _handleRpS2UserMessageResponse;
     playingHintPrepareForAiMessageHandler = preparePlayingHintForAiMessage;
     playingHintResetIconForAiStartHandler = resetHintIconForAiStart;
-    invalidateIosRecordingSessionHandler = invalidateIosRecordingSession;
     deactivateUserTurnHandler = deactivateUserTurn;
     scrollPlayingBodyToBottomHandler = scrollPlayingBodyToBottom;
     scrollToRevealBubbleIfNeededHandler = scrollToRevealBubbleIfNeeded;
@@ -158,9 +157,6 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
       onLastTurnPresentationComplete();
       return;
     }
-    // 사용자 턴이 열리기 전에 iOS playAndRecord 세션을 미리 전환 (힌트는 무음 텍스트).
-    // AI TTS 직후라 playback→record 재전환이 필요하므로 force.
-    unawaited(prepareIosRecordingSession(force: true));
     if (_autoHintEnabled) {
       unawaited(_showAutoHintThenActivateUserTurn());
     } else {
