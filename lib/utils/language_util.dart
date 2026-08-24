@@ -13,6 +13,14 @@ class LanguageUtil {
     return locale.languageCode;
   }
 
+  /// 현재 디바이스의 BCP 47 language tag 가져오기
+  ///
+  /// 예: 'ko-KR', 'zh-Hans-CN'. region/script가 없으면 languageCode만 (예: 'ko').
+  static String getCurrentLanguageTag() {
+    final locale = WidgetsBinding.instance.platformDispatcher.locale;
+    return locale.toLanguageTag();
+  }
+
   /// 언어 코드가 유효한지 확인
   /// 
   /// ISO 639-1 표준에 맞는 두 글자 언어 코드인지 확인합니다.

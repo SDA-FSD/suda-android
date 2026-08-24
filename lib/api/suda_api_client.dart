@@ -464,11 +464,13 @@ class SudaApiClient {
     required String accessToken,
     required String pushToken,
     required String languageCode,
+    required String languageTag,
   }) {
     return PushApi.registerPushToken(
       accessToken: accessToken,
       pushToken: pushToken,
       languageCode: languageCode,
+      languageTag: languageTag,
     );
   }
 

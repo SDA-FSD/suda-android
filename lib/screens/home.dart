@@ -261,11 +261,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       }
 
       final languageCode = LanguageUtil.getCurrentLanguageCode();
+      final languageTag = LanguageUtil.getCurrentLanguageTag();
 
       await SudaApiClient.registerPushToken(
         accessToken: _accessToken!,
         pushToken: pushToken ?? '',
         languageCode: languageCode,
+        languageTag: languageTag,
       );
 
       // 토큰 갱신 시 재등록 (리스너는 세션당 1회만 연결)
@@ -278,6 +280,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           accessToken: access,
           pushToken: token,
           languageCode: LanguageUtil.getCurrentLanguageCode(),
+          languageTag: LanguageUtil.getCurrentLanguageTag(),
         );
       });
     } catch (_) {

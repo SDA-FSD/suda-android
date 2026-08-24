@@ -240,6 +240,7 @@ class _PushAgreementScreenState extends State<PushAgreementScreen> {
         accessToken: access,
         pushToken: pushToken,
         languageCode: LanguageUtil.getCurrentLanguageCode(),
+        languageTag: LanguageUtil.getCurrentLanguageTag(),
       );
     } catch (_) {}
   }

@@ -175,9 +175,9 @@ flutter run --flavor dev -t lib/main.dart --dart-define=ENV=dev -d 541F3961-8182
 네이티브 스플래시 `#121212` + 중앙 스틸. `FlutterNativeSplash.preserve` → JWT 후 remove. Login은 동일 스틸에서 페이드/로고 이동/포스터 마키(상세 `CONTEXT_SCREEN.md` Login). CustomSplash·LoadingScreen 없음. 로그아웃 → 곧장 Login.
 
 ## 10. 푸시
-`firebase_messaging`. Home `initState`에서 `POST /v1/users/push-token` (`deviceType` ANDROID|IOS, `languageCode`, 실패 무시).
+`firebase_messaging`. Home `initState`에서 `POST /v1/users/push-token` (`deviceType` ANDROID|IOS, `languageCode`, `languageTag` BCP 47 예: `ko-KR`, 실패 무시). `LanguageUtil.getCurrentLanguageTag()` = `platformDispatcher.locale.toLanguageTag()` (region 없으면 languageCode만).
 - AOS: FCM 토큰 없으면 호출 안 함.
-- iOS: APNs 대기 **최대 3초**. 알림 거부·APNs/FCM 실패여도 `pushToken=""` + `languageCode`는 보냄. 이후 토큰이 생기면 같은 API로 재등록.
+- iOS: APNs 대기 **최대 3초**. 알림 거부·APNs/FCM 실패여도 `pushToken=""` + `languageCode`/`languageTag`는 보냄. 이후 토큰이 생기면 같은 API로 재등록.
 
 클릭 `appPath`: 비로그인·동의 전은 `PendingAppPathService`. 경로 표·규칙은 `CONTEXT_SCREEN.md` appPath.
 
