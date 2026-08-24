@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -12,6 +13,7 @@ import '../../services/token_storage.dart';
 import '../../services/suda_api_client.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../utils/default_toast.dart';
+import '../../utils/language_util.dart';
 
 class PushAgreementScreen extends StatefulWidget {
   final UserDto? user;
@@ -181,6 +183,9 @@ class _PushAgreementScreenState extends State<PushAgreementScreen> {
           _isUpdating = false;
         });
         _updateAppUserMetaInfo(nextOn);
+        if (nextOn && Platform.isIOS) {
+          unawaited(_registerIosPushTokenIfPossible());
+        }
         if (result.completeYn == 'Y') {
           Navigator.of(context).pop(true);
         }
@@ -210,6 +215,33 @@ class _PushAgreementScreenState extends State<PushAgreementScreen> {
           settings.authorizationStatus == AuthorizationStatus.provisional;
     }
     return Permission.notification.isGranted;
+  }
+
+  /// iOS ON 직후 FCM 토큰을 한 번 더 올린다. Home 등록이 APNs 타이밍으로
+  /// 빈 토큰일 수 있음. 실토큰이 있을 때만 POST(빈 값으로 덮어쓰지 않음). AOS 없음.
+  Future<void> _registerIosPushTokenIfPossible() async {
+    try {
+      final messaging = FirebaseMessaging.instance;
+      final settings = await messaging.getNotificationSettings();
+      final allowed =
+          settings.authorizationStatus == AuthorizationStatus.authorized ||
+          settings.authorizationStatus == AuthorizationStatus.provisional;
+      if (!allowed) return;
+      final deadline = DateTime.now().add(const Duration(seconds: 3));
+      while (await messaging.getAPNSToken() == null) {
+        if (!DateTime.now().isBefore(deadline)) return;
+        await Future<void>.delayed(const Duration(milliseconds: 300));
+      }
+      final pushToken = await messaging.getToken();
+      if (pushToken == null || pushToken.isEmpty) return;
+      final access = await TokenStorage.loadAccessToken();
+      if (access == null) return;
+      await SudaApiClient.registerPushToken(
+        accessToken: access,
+        pushToken: pushToken,
+        languageCode: LanguageUtil.getCurrentLanguageCode(),
+      );
+    } catch (_) {}
   }
 
   void _showNotificationPermissionDialog({required AppLocalizations l10n}) {
