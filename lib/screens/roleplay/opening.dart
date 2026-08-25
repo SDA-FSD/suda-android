@@ -18,7 +18,6 @@ import 'package:permission_handler/permission_handler.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/token_refresh_service.dart';
 import '../../routes/roleplay_router.dart';
-import '../../utils/language_util.dart';
 import '../../utils/suda_json_util.dart';
 import '../../utils/default_markdown.dart';
 import 'ios_audio_teardown.dart';
@@ -83,15 +82,9 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen> {
     }
   }
 
-  /// 현재 언어 → `en`. 둘 다 없으면 재생하지 않음(다른 언어로 폴백하지 않음).
+  /// language tag → languageCode → `en`. 없으면 재생하지 않음(다른 언어로 폴백하지 않음).
   String? _resolveBriefingAudioPath(Map<String, String> briefingAudio) {
-    if (briefingAudio.isEmpty) return null;
-    final lang = LanguageUtil.getCurrentLanguageCode();
-    final localized = briefingAudio[lang];
-    if (localized != null && localized.isNotEmpty) return localized;
-    final english = briefingAudio['en'];
-    if (english != null && english.isNotEmpty) return english;
-    return null;
+    return SudaJsonUtil.localizedMapTextOrNull(briefingAudio);
   }
 
   Future<void> _playBriefingAudio() async {

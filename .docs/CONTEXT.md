@@ -102,7 +102,7 @@ flutter run --flavor dev -t lib/main.dart --dart-define=ENV=dev -d 541F3961-8182
 - 언어: `LanguageUtil`의 플랫폼 `languageCode` → `TokenStorage` SharedPreferences. 로그아웃 시 토큰과 함께 삭제
 - 정적 UI l10n: `lib/l10n/app_en.arb`가 canonical이고 `flutter gen-l10n` 생성물도 같은 디렉터리에 커밋한다. 지원 locale은 `en`, `ko`, `pt`(ID는 generic `pt`, 문구는 브라질 포르투갈어), `es_419`, `ja`, `zh_Hans`, `zh_Hant`, `fr`, `de`, `it`, `vi`, `th`, `id`, `ms`, `fil`, `hi`, `ar`, `tr`, `ru`, `pl`, `nl`.
   - Flutter fallback 요건으로 `app_es.arb`는 `es_419`, `app_zh.arb`는 `zh_Hans`와 locale ID 외 동일하게 유지한다. `l10n.yaml`은 기본 fallback `en`과 중남미 스페인어 선택을 위해 `es_419`를 우선한다.
-  - `MaterialApp`은 `AppLocalizations.localizationsDelegates`/`supportedLocales`를 사용하며 플랫폼 locale의 region/script를 보존한다. API·동적 콘텐츠는 기존 `LanguageUtil.getCurrentLanguageCode()`를 유지하고 서버 번역이 없으면 영어로 fallback한다.
+  - `MaterialApp`은 `AppLocalizations.localizationsDelegates`/`supportedLocales`를 사용하며 플랫폼 locale의 region/script를 보존한다. API·동적 콘텐츠(`SudaJson`·맵, Opening `briefingAudio`)는 서버 키 대소문자 구분 BCP 47(`ko-KR`) → languageCode(`ko`) → `en` 순으로 조회한다 (`LanguageUtil.localizationLookupKeys`).
   - **[강제] UI 문자열 추가·변경 시 전체 locale 확장:** 사용자/작업 입력이 `en`·`ko`·`pt`만 있어도, agent는 “나머지 언어 번역할까?”를 **묻지 말고** 위 지원 locale **전부(21개)**의 `app_*.arb`에 동일 키를 즉시 작성·저장한다. `en`을 의미 canonical로, `ko`/`pt`를 문맥 참고로 쓰며, 키·`@` metadata·placeholder 이름/타입·`@@TIME@@`·의도된 개행·ICU 형태를 보존한다. `app_es.arb`는 `es_419`와, `app_zh.arb`는 `zh_Hans`와 locale ID 외 동기화한다. 저장 후 `flutter gen-l10n`까지 수행하고, 생성 Dart도 커밋 대상에 포함한다. 부분 locale만 남기는 것은 금지.
 - `UserDto`: provider/sub/name/email/profileImgUrl, 통계, `metaInfo`(`SudaJson`). `upsertMetaInfo` / `hasMetaInfoValue`
 - Main 복귀 시 `_syncUserOnMainRouteReturn` → `GET /v1/users`. 레벨·진행률은 `GET /v1/users/profile`

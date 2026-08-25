@@ -21,6 +21,35 @@ class LanguageUtil {
     return locale.toLanguageTag();
   }
 
+  /// 서버 다국어 키 조회 순서. 대소문자 구분 (`ko-KR`).
+  ///
+  /// 기본: language tag → languageCode → `en`.
+  /// [languageCode]를 넘기면 그 값(태그일 수 있음) → primary subtag → `en`.
+  static List<String> localizationLookupKeys({String? languageCode}) {
+    final keys = <String>[];
+    void add(String? key) {
+      if (key == null || key.isEmpty) return;
+      if (!keys.contains(key)) keys.add(key);
+    }
+
+    if (languageCode != null && languageCode.isNotEmpty) {
+      add(languageCode);
+      add(_primaryLanguageSubtag(languageCode));
+    } else {
+      add(getCurrentLanguageTag());
+      add(getCurrentLanguageCode());
+    }
+    add('en');
+    return keys;
+  }
+
+  /// `ko-KR` → `ko`. 하이픈 없으면 null.
+  static String? _primaryLanguageSubtag(String tagOrCode) {
+    final hyphen = tagOrCode.indexOf('-');
+    if (hyphen <= 0) return null;
+    return tagOrCode.substring(0, hyphen);
+  }
+
   /// 언어 코드가 유효한지 확인
   /// 
   /// ISO 639-1 표준에 맞는 두 글자 언어 코드인지 확인합니다.
