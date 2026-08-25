@@ -174,6 +174,7 @@ flutter run --flavor dev -t lib/main.dart --dart-define=ENV=dev -d 541F3961-8182
 
 - **DefaultPopup** `lib/widgets/default_popup.dart` — 점진 마이그레이션. 라벨 하드코딩 금지
 - 사용자 표시 기본 텍스트는 **영어**. 언어별 동적 문구만 예외
+- **RTL 크롬:** `ar` 등에서 헤더 leading/trailing은 `PositionedDirectional`·`AlignmentDirectional`·`TextAlign.start`. 학습 영어(미션·힌트·채팅)와 마이크 드래그 취소(물리 왼쪽)는 LTR/좌표 유지. 진행 바 fill·장식 절대좌표는 미러하지 않음.
 
 ## 9. 스플래시·Login
 네이티브 스플래시 `#121212` + 중앙 스틸. `FlutterNativeSplash.preserve` → JWT 후 remove. Login은 동일 스틸에서 페이드/로고 이동/포스터 마키(상세 `CONTEXT_SCREEN.md` Login). CustomSplash·LoadingScreen 없음. 로그아웃 → 곧장 Login.
@@ -193,6 +194,7 @@ dev·prd만 ON. `PerfMonitoringService` + `SudaHttpClient` `HttpMetric`(query �
 **URL 패턴 목록·추가 절차:** `CONTEXT_FPM_CUSTOM_URL.md`.
 
 ## 11. 코드 습관
+- 폰트: 풀 가변 `ChironHeiHK` / `ChironGoRoundTC` (`assets/fonts/*-VariableFont_wght.ttf`). 상세 `CONTEXT_STYLE.md`
 - 로그: `debugPrint('[DEBUG] …')` (`print` 금지)
 - 토스트: `lib/utils/default_toast.dart`
 - 서버 마크다운 `***`/`**`/`*`: `lib/utils/default_markdown.dart` (Ending content, 공지, 알림함, Opening briefing)

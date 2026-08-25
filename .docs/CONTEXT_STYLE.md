@@ -8,16 +8,19 @@
 ## 1. 폰트 정의
 
 - **기본 폰트 (default font)**
-  - 파일(등록 기준): `assets/fonts/ChironHeiHK-subset-w400.ttf` / `-w600.ttf` / `-w700.ttf`
-  - 원본(작업/교체용): `assets/fonts/ChironHeiHK-subset.woff2`
-  - `pubspec.yaml` 상의 패밀리명: `ChironHeiHK`
+  - 파일(등록 기준): `assets/fonts/ChironHeiHK-VariableFont_wght.ttf` (풀 가변, `wght` 200–900)
+  - `pubspec.yaml` 상의 패밀리명: `ChironHeiHK` (코드의 `fontFamily`와 동일. 파일 내부 name table의 `Chiron Hei HK ExtraLight`가 아님)
   - 용도: 앱 내 대부분 텍스트 (heading, body, caption)
 
 - **버튼 폰트 (button font)**
-  - 파일(등록 기준): `assets/fonts/ChironGoRoundTC-subset-w400.ttf` / `-w600.ttf` / `-w700.ttf`
-  - 원본(작업/교체용): `assets/fonts/ChironGoRoundTC-subset.woff2`
-  - `pubspec.yaml` 상의 패밀리명: `ChironGoRoundTC`
+  - 파일(등록 기준): `assets/fonts/ChironGoRoundTC-VariableFont_wght.ttf` (풀 가변, `wght` 200–900)
+  - `pubspec.yaml` 상의 패밀리명: `ChironGoRoundTC` (코드의 `fontFamily`와 동일)
   - 용도: 버튼 계열 위젯(TextButton, ElevatedButton 등)의 텍스트
+
+- **등록 방식**
+  - 패밀리당 가변 TTF 1파일. `pubspec`에는 기존과 같이 weight 400/600/700 슬롯을 같은 파일에 매핑 (에셋은 경로 1회 패키징).
+  - subset 정적 파일(`*-subset-w400/600/700.ttf`)은 사용하지 않음.
+  - 커버리지: 라틴·한글·일·한자·키릴·그리스·베트남/폴란드 확장. **아랍·데바나가리(힌디)·태국 글리프는 이 두 패밀리에 없음** → 해당 locale은 시스템 폴백.
 
 - **가변폰트(weight) 적용 규칙**
   - 두 폰트 모두 `fvar`의 `wght` 축(200~900)을 가진 **가변폰트**이므로, `fontWeight`만으로는 체감 굵기가 부족할 수 있다.
@@ -132,7 +135,7 @@ Text('더 작은 보조', style: theme.labelMini);   // body-tiny2 (extension)
 - **GNB 하단 여백**: `SafeArea(bottom: true, top: false)`로 처리하며  
   `MediaQuery.padding.bottom`과 중복 적용하지 않음
 - **헤더 구성 규칙**:
-  - **좌측 상단 아이콘**: 뒤로가기(`assets/images/header_arrow_back.svg`) 아이콘 배치. `Positioned(top: 16, left: 16)`
+  - **leading 아이콘**: 뒤로가기(`assets/images/header_arrow_back.svg`) 아이콘 배치. `PositionedDirectional(top: 16, start: 16)`, SVG `matchTextDirection: true`
   - **중앙 제목**: 페이지 제목 표시 시 `h2` 스타일 사용 및 중앙 정렬.
   - **아이콘 표준 크기**: 모든 헤더 아이콘은 **24x24** 크기를 표준으로 사용함
 

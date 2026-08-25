@@ -695,13 +695,13 @@ class _PurchaseProductButton extends StatelessWidget {
                 ),
               ),
               if (offerBadge != null && offerBadge!.isNotEmpty)
-                Positioned(
+                PositionedDirectional(
                   top: 6,
-                  left: 8,
+                  start: 8,
                   child: Container(
                     height: 25,
                     padding: const EdgeInsets.symmetric(horizontal: 10),
-                    alignment: Alignment.centerLeft,
+                    alignment: AlignmentDirectional.centerStart,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(999),
                       border: Border.all(
@@ -729,9 +729,9 @@ class _PurchaseProductButton extends StatelessWidget {
                   ),
                 ),
               if (price != null && price!.isNotEmpty)
-                Positioned(
+                PositionedDirectional(
                   top: 0,
-                  right: 0,
+                  end: 0,
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -832,7 +832,7 @@ class _PurchaseTitleLine extends StatelessWidget {
                   decelerationCurve: Curves.easeOut,
                 )
               : Align(
-                  alignment: Alignment.centerLeft,
+                  alignment: AlignmentDirectional.centerStart,
                   child: Text(
                     text,
                     maxLines: 1,

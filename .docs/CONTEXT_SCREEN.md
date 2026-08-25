@@ -409,7 +409,7 @@
 - 진입 시 `GET /v1/users/energy/simple`로 구독 상태 갱신 (`SubscriptionStatusCache`)
 - **Subscription 섹션**
   - 무료 (`isSubscribedActive == false`): Free Plan 카드(`check_green.svg`) → Paywall. l10n `accountFreePlanTitle` / `accountFreePlanSubtitle`
-  - 구독 활성: Subscription 헤더 좌측. 구독↔카드 간격 **24**(이름/계정 섹션과 동일). **`Change Plan >`는 월간 구독자만** 노출(`subscriptionBasePlanId==bp-premium-monthly`; 연간·미구독은 미표시). (l10n `accountChangePlan` + chevron, 텍스트 `bodySmall` 14·**w700**/`wght` 700·흰색)는 그 간격 안 하단 우측(`right: 8`, 카드와 `bottom: 12`) → `ChangePlanScreen`. Premium 카드(`premium_verified_badge.png`) — 제목 `accountPremiumTitle`, 부제 `accountPremiumSubtitle`, 갱신일 `accountPremiumRenewsOn`(`subscriptionExpiredAt`, `DateFormat.yMd` 로케일 패턴 · 실패 시 `en`)
+  - 구독 활성: Subscription 헤더 leading. 구독↔카드 간격 **24**(이름/계정 섹션과 동일). **`Change Plan >`는 월간 구독자만** 노출(`subscriptionBasePlanId==bp-premium-monthly`; 연간·미구독은 미표시). (l10n `accountChangePlan` + chevron, 텍스트 `bodySmall` 14·**w700**/`wght` 700·흰색)는 그 간격 안 하단 trailing(`end: 8`, 카드와 `bottom: 12`) → `ChangePlanScreen`. Premium 카드(`premium_verified_badge.png`) — 제목 `accountPremiumTitle`, 부제 `accountPremiumSubtitle`, 갱신일 `accountPremiumRenewsOn`(`subscriptionExpiredAt`, `DateFormat.yMd` 로케일 패턴 · 실패 시 `en`)
 
 ---
 

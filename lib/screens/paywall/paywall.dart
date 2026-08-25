@@ -392,7 +392,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
         final painter = TextPainter(
           text: TextSpan(text: text, style: textStyle),
           textAlign: align,
-          textDirection: TextDirection.ltr,
+          textDirection: Directionality.of(context),
         )..layout(maxWidth: maxWidth);
         final shader = gradient.createShader(
           Rect.fromLTWH(0, 0, painter.width, painter.height),
@@ -574,8 +574,8 @@ class _PaywallScreenState extends State<PaywallScreen> {
                       ),
                     ],
                   ),
-                  Positioned(
-                    left: 8,
+                  PositionedDirectional(
+                    start: 8,
                     top: topPad + closeTop,
                     child: IconButton(
                       onPressed: () => Navigator.of(context).maybePop(),
@@ -737,7 +737,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
               text: text,
               style: _style(size: size, color: Colors.white, height: lineHeight),
             ),
-            textDirection: TextDirection.ltr,
+            textDirection: Directionality.of(context),
             maxLines: maxLines,
           )..layout(maxWidth: maxWidth);
         }

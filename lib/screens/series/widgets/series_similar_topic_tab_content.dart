@@ -451,13 +451,13 @@ class _SimilarSeriesThumbnail extends StatelessWidget {
                                 decelerationCurve: Curves.easeOut,
                               )
                             : Align(
-                                alignment: Alignment.centerLeft,
+                                alignment: AlignmentDirectional.centerStart,
                                 child: Text(
                                   title,
                                   maxLines: 1,
                                   overflow: TextOverflow.clip,
                                   softWrap: false,
-                                  textAlign: TextAlign.left,
+                                  textAlign: TextAlign.start,
                                   style: textStyle,
                                 ),
                               ),

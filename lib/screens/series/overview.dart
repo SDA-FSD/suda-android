@@ -476,7 +476,7 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
     final asset = _complexityIconAsset(level);
     if (asset == null) return const SizedBox.shrink();
     return Align(
-      alignment: Alignment.centerLeft,
+      alignment: AlignmentDirectional.centerStart,
       child: Image.asset(
         asset,
         height: 18,

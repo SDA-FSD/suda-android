@@ -149,11 +149,11 @@ class RoleplayScaffold extends StatelessWidget {
               ],
             ),
 
-            // 3. 헤더 좌측 상단 X 버튼
+            // 3. 헤더 leading X 버튼
             if (showCloseButton)
-              Positioned(
+              PositionedDirectional(
                 top: 16,
-                left: 16,
+                start: 16,
                 child: _RoleplayCloseButton(onPressed: onClose),
               ),
 

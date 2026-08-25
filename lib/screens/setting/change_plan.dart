@@ -436,7 +436,7 @@ class _ChangePlanScreenState extends State<ChangePlanScreen> {
               children: [
                 FittedBox(
                   fit: BoxFit.scaleDown,
-                  alignment: Alignment.centerLeft,
+                  alignment: AlignmentDirectional.centerStart,
                   child: Text(
                     _planTitle(l10n, plan),
                     maxLines: 1,
@@ -503,7 +503,7 @@ class _ChangePlanScreenState extends State<ChangePlanScreen> {
                     children: [
                       FittedBox(
                         fit: BoxFit.scaleDown,
-                        alignment: Alignment.centerLeft,
+                        alignment: AlignmentDirectional.centerStart,
                         child: Text(
                           _planTitle(l10n, plan),
                           maxLines: 1,

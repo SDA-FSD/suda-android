@@ -369,7 +369,7 @@ class _AccountScreenState extends State<AccountScreen> with SingleTickerProvider
                           ),
                           const SizedBox(height: 24),
                           Align(
-                            alignment: Alignment.centerLeft,
+                            alignment: AlignmentDirectional.centerStart,
                             child: Text(l10n.accountName, style: theme.headlineMedium?.copyWith(color: const Color(0xFF0CABA8))),
                           ),
                           const SizedBox(height: 24),
@@ -411,18 +411,18 @@ class _AccountScreenState extends State<AccountScreen> with SingleTickerProvider
                           ),
                           const SizedBox(height: 24),
                           Align(
-                            alignment: Alignment.centerLeft,
+                            alignment: AlignmentDirectional.centerStart,
                             child: Text(l10n.accountInfo, style: theme.headlineMedium?.copyWith(color: const Color(0xFF0CABA8))),
                           ),
                           const SizedBox(height: 24),
                           Align(
-                            alignment: Alignment.centerLeft,
+                            alignment: AlignmentDirectional.centerStart,
                             child: Text(_user?.email ?? '', style: theme.bodyLarge?.copyWith(color: Colors.white)),
                           ),
                           if (_showFreePlanCard || _showPremiumCard) ...[
                             const SizedBox(height: 32),
                             Align(
-                              alignment: Alignment.centerLeft,
+                              alignment: AlignmentDirectional.centerStart,
                               child: Text(
                                 l10n.accountSubscription,
                                 style: theme.headlineMedium?.copyWith(
@@ -440,8 +440,8 @@ class _AccountScreenState extends State<AccountScreen> with SingleTickerProvider
                                     ? Stack(
                                         clipBehavior: Clip.none,
                                         children: [
-                                          Positioned(
-                                            right: 8,
+                                          PositionedDirectional(
+                                            end: 8,
                                             bottom: 12,
                                             child: GestureDetector(
                                               onTap: _onChangePlanTap,

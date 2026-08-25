@@ -7,7 +7,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 /// - 좌우 콘텐츠 여백: 24
 /// - 본문 시작 상단 여백: 80
 /// - 헤더 구성 규칙:
-///   - 좌측 상단 아이콘: 뒤로가기(`assets/images/icons/header_arrow_back.svg`) 등. Positioned(top: 16, left: 16)
+///   - leading 아이콘: 뒤로가기(`assets/images/icons/header_arrow_back.svg`) 등. PositionedDirectional(top: 16, start: 16)
 ///   - 중앙 제목: 페이지 제목 표시 시 h2 스타일 사용 및 중앙 정렬
 ///   - 아이콘 표준 크기: 24x24
 class AppScaffold extends StatelessWidget {
@@ -20,13 +20,13 @@ class AppScaffold extends StatelessWidget {
   final TextStyle? centerTitleStyle; // 헤더 중앙 타이틀 커스텀 스타일
   final double bodyTopPadding; // 본문 시작 상단 패딩
   final double centerTitleTop; // 중앙 타이틀 top 오프셋
-  final Widget? leading; // 좌측 상단 버튼 (커스텀이 필요할 경우)
-  final List<Widget>? actions; // 우측 상단에 표시될 버튼들
+  final Widget? leading; // leading 상단 버튼 (커스텀이 필요할 경우)
+  final List<Widget>? actions; // trailing 상단에 표시될 버튼들
   final Color backgroundColor;
   /// 상태바·헤더 뒤까지 full-bleed. SafeArea **밖**에 그려 시계/배터리 영역까지 확장.
   final Widget? background;
   final bool usePadding; // 본문 영역에 기본 24 패딩을 적용할지 여부
-  final bool showBackButton; // 좌측 상단 뒤로가기 버튼 표시 여부 (기본 true)
+  final bool showBackButton; // leading 뒤로가기 버튼 표시 여부 (기본 true)
   final Widget? bottomNavigationBar; // 하단 네비게이션 바 (메인 스크린용)
   final bool resizeToAvoidBottomInset; // 키보드에 따른 레이아웃 리사이즈 여부
 
@@ -96,12 +96,12 @@ class AppScaffold extends StatelessWidget {
                     ),
                   ),
 
-                // 헤더 타이틀 (좌측 상단)
+                // 헤더 타이틀 (leading 쪽)
                 if (title != null)
-                  Positioned(
+                  PositionedDirectional(
                     top: 16,
-                    left: showBackButton || leading != null ? 56 : 16,
-                    right: actions != null ? 88 : 16,
+                    start: showBackButton || leading != null ? 56 : 16,
+                    end: actions != null ? 88 : 16,
                     child: titleTrailing == null
                         ? Text(
                             title!,
@@ -129,19 +129,19 @@ class AppScaffold extends StatelessWidget {
                           ),
                   ),
 
-                // 좌측 상단 버튼
+                // leading 상단 버튼
                 if (showBackButton || leading != null)
-                  Positioned(
+                  PositionedDirectional(
                     top: 16,
-                    left: 16,
+                    start: 16,
                     child: leading ?? backButton(context),
                   ),
 
                 // 헤더 액션 버튼들
                 if (actions != null)
-                  Positioned(
+                  PositionedDirectional(
                     top: 16,
-                    right: 16,
+                    end: 16,
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: actions!,
@@ -180,6 +180,7 @@ class AppScaffold extends StatelessWidget {
             'assets/images/icons/header_arrow_back.svg',
             width: 24,
             height: 24,
+            matchTextDirection: true,
           ),
         ),
       ),

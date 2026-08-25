@@ -317,7 +317,7 @@ class _ProfileGoPremiumButtonState extends State<ProfileGoPremiumButton>
                           const SizedBox(width: _iconToTitleGap),
                           Expanded(
                             child: Align(
-                              alignment: Alignment.centerLeft,
+                              alignment: AlignmentDirectional.centerStart,
                               child: _ScaledSingleLineText(
                                 text: widget.title,
                                 baseStyle: theme.headlineSmall!.copyWith(
