@@ -15,7 +15,6 @@ import '../../services/series_state_service.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
 import '../../utils/english_level_util.dart';
-import '../../utils/language_util.dart';
 import '../../utils/suda_json_util.dart';
 import '../../utils/sub_screen_route.dart';
 import '../../widgets/app_scaffold.dart';
@@ -379,10 +378,7 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
   }
 
   String _completionLabel(int percent) {
-    final langCode = LanguageUtil.getCurrentLanguageCode();
-    if (langCode == 'ko') return '$percent% 진행완료';
-    if (langCode == 'pt') return '$percent% Completo';
-    return '$percent% Complete';
+    return AppLocalizations.of(context)!.seriesOverviewCompletionPercent(percent);
   }
 
   Widget _buildProgressBarArea(RpS2SeriesOverviewDto overview) {

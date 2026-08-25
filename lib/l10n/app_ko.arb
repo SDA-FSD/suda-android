@@ -261,5 +261,14 @@
   "paywallFallbackMonthly": "₩21,000",
   "paywallCompletedTitle": "축하합니다!",
   "paywallCompletedBody": "이제 프리미엄 기능을\n사용할 수 있어요.",
-  "paywallCompletedContinue": "계속하기"
+  "paywallCompletedContinue": "계속하기",
+  "roleplayChooseYourRole": "역할을 선택하세요",
+  "roleplaySimilarRoleplays": "비슷한 롤플레이",
+  "roleplayBeingPrepared": "이 롤플레이는 준비 중입니다.",
+  "roleplayUnlockPreviousRole": "이 역할을 잠금 해제하려면 이전 역할의 모든 엔딩을 완료하세요.",
+  "seriesOverviewCompletionPercent": "{percent}% 진행완료",
+  "roleplayTurnGradeA": "와!",
+  "roleplayTurnGradeB": "좋아!",
+  "roleplayTurnGradeC": "흠…",
+  "roleplayTurnGradeD": "오…"
 }

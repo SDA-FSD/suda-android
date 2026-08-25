@@ -261,5 +261,14 @@
   "paywallFallbackMonthly": "$13.99",
   "paywallCompletedTitle": "Binabati ka!",
   "paywallCompletedBody": "Aktibo na ang mga benepisyo mo sa Premium.",
-  "paywallCompletedContinue": "Magpatuloy"
+  "paywallCompletedContinue": "Magpatuloy",
+  "roleplayChooseYourRole": "Piliin ang iyong papel",
+  "roleplaySimilarRoleplays": "Mga katulad na roleplay",
+  "roleplayBeingPrepared": "Inihanda pa ang roleplay na ito.",
+  "roleplayUnlockPreviousRole": "Tapusin ang lahat ng ending ng naunang papel para i-unlock ang papel na ito.",
+  "seriesOverviewCompletionPercent": "{percent}% tapos na",
+  "roleplayTurnGradeA": "wow!",
+  "roleplayTurnGradeB": "ok!",
+  "roleplayTurnGradeC": "hmm…",
+  "roleplayTurnGradeD": "oh…"
 }

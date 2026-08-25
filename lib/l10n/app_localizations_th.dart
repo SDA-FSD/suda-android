@@ -638,4 +638,34 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get paywallCompletedContinue => 'ไปต่อ';
+
+  @override
+  String get roleplayChooseYourRole => 'เลือกบทบาทของคุณ';
+
+  @override
+  String get roleplaySimilarRoleplays => 'บทบาทสมมติที่คล้ายกัน';
+
+  @override
+  String get roleplayBeingPrepared => 'บทบาทสมมตินี้กำลังเตรียมอยู่';
+
+  @override
+  String get roleplayUnlockPreviousRole =>
+      'จบตอนจบทั้งหมดของบทบาทก่อนหน้าเพื่อปลดล็อกบทบาทนี้';
+
+  @override
+  String seriesOverviewCompletionPercent(int percent) {
+    return 'เสร็จแล้ว $percent%';
+  }
+
+  @override
+  String get roleplayTurnGradeA => 'ว้าว!';
+
+  @override
+  String get roleplayTurnGradeB => 'โอเค!';
+
+  @override
+  String get roleplayTurnGradeC => 'อืม…';
+
+  @override
+  String get roleplayTurnGradeD => 'โอ้…';
 }

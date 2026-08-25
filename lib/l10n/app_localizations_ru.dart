@@ -645,4 +645,34 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get paywallCompletedContinue => 'Продолжить';
+
+  @override
+  String get roleplayChooseYourRole => 'Выберите роль';
+
+  @override
+  String get roleplaySimilarRoleplays => 'Похожие ролевые игры';
+
+  @override
+  String get roleplayBeingPrepared => 'Эта ролевая игра ещё готовится.';
+
+  @override
+  String get roleplayUnlockPreviousRole =>
+      'Чтобы открыть эту роль, пройдите все концовки предыдущей роли.';
+
+  @override
+  String seriesOverviewCompletionPercent(int percent) {
+    return '$percent% завершено';
+  }
+
+  @override
+  String get roleplayTurnGradeA => 'вау!';
+
+  @override
+  String get roleplayTurnGradeB => 'ок!';
+
+  @override
+  String get roleplayTurnGradeC => 'хм…';
+
+  @override
+  String get roleplayTurnGradeD => 'ох…';
 }

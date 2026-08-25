@@ -645,4 +645,34 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get paywallCompletedContinue => 'जारी रखें';
+
+  @override
+  String get roleplayChooseYourRole => 'अपनी भूमिका चुनें';
+
+  @override
+  String get roleplaySimilarRoleplays => 'मिलते-जुलते रोलप्ले';
+
+  @override
+  String get roleplayBeingPrepared => 'यह रोलप्ले तैयार किया जा रहा है।';
+
+  @override
+  String get roleplayUnlockPreviousRole =>
+      'इस भूमिका को अनलॉक करने के लिए पिछली भूमिका के सभी एंडिंग पूरे करें।';
+
+  @override
+  String seriesOverviewCompletionPercent(int percent) {
+    return '$percent% पूरा';
+  }
+
+  @override
+  String get roleplayTurnGradeA => 'वाह!';
+
+  @override
+  String get roleplayTurnGradeB => 'ओके!';
+
+  @override
+  String get roleplayTurnGradeC => 'हम्म…';
+
+  @override
+  String get roleplayTurnGradeD => 'ओह…';
 }

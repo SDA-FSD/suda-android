@@ -261,5 +261,14 @@
   "paywallFallbackMonthly": "$13.99",
   "paywallCompletedTitle": "Gefeliciteerd!",
   "paywallCompletedBody": "Je Premium-voordelen zijn nu actief.",
-  "paywallCompletedContinue": "Doorgaan"
+  "paywallCompletedContinue": "Doorgaan",
+  "roleplayChooseYourRole": "Kies je rol",
+  "roleplaySimilarRoleplays": "Vergelijkbare rollenspellen",
+  "roleplayBeingPrepared": "Dit rollenspel wordt nog voorbereid.",
+  "roleplayUnlockPreviousRole": "Rond alle eindes van de vorige rol af om deze rol te ontgrendelen.",
+  "seriesOverviewCompletionPercent": "{percent}% voltooid",
+  "roleplayTurnGradeA": "wow!",
+  "roleplayTurnGradeB": "ok!",
+  "roleplayTurnGradeC": "hmm…",
+  "roleplayTurnGradeD": "oh…"
 }

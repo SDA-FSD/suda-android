@@ -621,4 +621,34 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get paywallCompletedContinue => '계속하기';
+
+  @override
+  String get roleplayChooseYourRole => '역할을 선택하세요';
+
+  @override
+  String get roleplaySimilarRoleplays => '비슷한 롤플레이';
+
+  @override
+  String get roleplayBeingPrepared => '이 롤플레이는 준비 중입니다.';
+
+  @override
+  String get roleplayUnlockPreviousRole =>
+      '이 역할을 잠금 해제하려면 이전 역할의 모든 엔딩을 완료하세요.';
+
+  @override
+  String seriesOverviewCompletionPercent(int percent) {
+    return '$percent% 진행완료';
+  }
+
+  @override
+  String get roleplayTurnGradeA => '와!';
+
+  @override
+  String get roleplayTurnGradeB => '좋아!';
+
+  @override
+  String get roleplayTurnGradeC => '흠…';
+
+  @override
+  String get roleplayTurnGradeD => '오…';
 }

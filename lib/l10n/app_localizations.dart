@@ -1312,6 +1312,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Continue'**
   String get paywallCompletedContinue;
+
+  /// No description provided for @roleplayChooseYourRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your role'**
+  String get roleplayChooseYourRole;
+
+  /// No description provided for @roleplaySimilarRoleplays.
+  ///
+  /// In en, this message translates to:
+  /// **'Similar Roleplays'**
+  String get roleplaySimilarRoleplays;
+
+  /// No description provided for @roleplayBeingPrepared.
+  ///
+  /// In en, this message translates to:
+  /// **'This roleplay is being prepared.'**
+  String get roleplayBeingPrepared;
+
+  /// No description provided for @roleplayUnlockPreviousRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete all endings of the previous role to unlock this role.'**
+  String get roleplayUnlockPreviousRole;
+
+  /// No description provided for @seriesOverviewCompletionPercent.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% Complete'**
+  String seriesOverviewCompletionPercent(int percent);
+
+  /// No description provided for @roleplayTurnGradeA.
+  ///
+  /// In en, this message translates to:
+  /// **'wow!'**
+  String get roleplayTurnGradeA;
+
+  /// No description provided for @roleplayTurnGradeB.
+  ///
+  /// In en, this message translates to:
+  /// **'ok!'**
+  String get roleplayTurnGradeB;
+
+  /// No description provided for @roleplayTurnGradeC.
+  ///
+  /// In en, this message translates to:
+  /// **'hmm…'**
+  String get roleplayTurnGradeC;
+
+  /// No description provided for @roleplayTurnGradeD.
+  ///
+  /// In en, this message translates to:
+  /// **'oh…'**
+  String get roleplayTurnGradeD;
 }
 
 class _AppLocalizationsDelegate

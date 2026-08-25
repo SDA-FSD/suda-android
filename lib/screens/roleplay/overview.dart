@@ -9,8 +9,8 @@ import '../../config/app_config.dart';
 import '../../services/roleplay_state_service.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
+import '../../l10n/app_localizations.dart';
 import '../../utils/default_toast.dart';
-import '../../utils/language_util.dart';
 import '../../utils/suda_json_util.dart';
 import '../../widgets/app_scaffold.dart';
 
@@ -128,33 +128,17 @@ class _RoleplayOverviewScreenState extends State<RoleplayOverviewScreen> {
   }
 
   String _getChooseRoleText() {
-    final langCode = LanguageUtil.getCurrentLanguageCode();
-    if (langCode == 'ko') return '역할을 선택하세요';
-    if (langCode == 'pt') return 'Escolha seu papel';
-    return 'Choose your role';
+    return AppLocalizations.of(context)!.roleplayChooseYourRole;
   }
 
   String _getSimilarRoleplaysText() {
-    final langCode = LanguageUtil.getCurrentLanguageCode();
-    if (langCode == 'ko') return '비슷한 롤플레이';
-    if (langCode == 'pt') return 'Roleplays Similares';
-    return 'Similar Roleplays';
+    return AppLocalizations.of(context)!.roleplaySimilarRoleplays;
   }
 
   String _getRoleLockedMessage({required bool isAvailableToUsers}) {
-    final langCode = LanguageUtil.getCurrentLanguageCode();
-    if (!isAvailableToUsers) {
-      if (langCode == 'ko') return '이 롤플레이는 준비 중입니다.';
-      if (langCode == 'pt') return 'Este roleplay está sendo preparado.';
-      return 'This roleplay is being prepared.';
-    }
-    if (langCode == 'ko') {
-      return '이 역할을 잠금 해제하려면 이전 역할의 모든 엔딩을 완료하세요.';
-    }
-    if (langCode == 'pt') {
-      return 'Complete todos os finais do papel anterior para desbloquear este papel.';
-    }
-    return 'Complete all endings of the previous role to unlock this role.';
+    final l10n = AppLocalizations.of(context)!;
+    if (!isAvailableToUsers) return l10n.roleplayBeingPrepared;
+    return l10n.roleplayUnlockPreviousRole;
   }
 
   Widget _buildStars(int activeCount) {

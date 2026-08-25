@@ -649,4 +649,34 @@ class AppLocalizationsMs extends AppLocalizations {
 
   @override
   String get paywallCompletedContinue => 'Teruskan';
+
+  @override
+  String get roleplayChooseYourRole => 'Pilih peranan anda';
+
+  @override
+  String get roleplaySimilarRoleplays => 'Roleplay serupa';
+
+  @override
+  String get roleplayBeingPrepared => 'Roleplay ini sedang disediakan.';
+
+  @override
+  String get roleplayUnlockPreviousRole =>
+      'Lengkapkan semua ending peranan sebelumnya untuk membuka peranan ini.';
+
+  @override
+  String seriesOverviewCompletionPercent(int percent) {
+    return '$percent% selesai';
+  }
+
+  @override
+  String get roleplayTurnGradeA => 'wow!';
+
+  @override
+  String get roleplayTurnGradeB => 'ok!';
+
+  @override
+  String get roleplayTurnGradeC => 'hmm…';
+
+  @override
+  String get roleplayTurnGradeD => 'oh…';
 }

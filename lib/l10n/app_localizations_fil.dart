@@ -657,4 +657,34 @@ class AppLocalizationsFil extends AppLocalizations {
 
   @override
   String get paywallCompletedContinue => 'Magpatuloy';
+
+  @override
+  String get roleplayChooseYourRole => 'Piliin ang iyong papel';
+
+  @override
+  String get roleplaySimilarRoleplays => 'Mga katulad na roleplay';
+
+  @override
+  String get roleplayBeingPrepared => 'Inihanda pa ang roleplay na ito.';
+
+  @override
+  String get roleplayUnlockPreviousRole =>
+      'Tapusin ang lahat ng ending ng naunang papel para i-unlock ang papel na ito.';
+
+  @override
+  String seriesOverviewCompletionPercent(int percent) {
+    return '$percent% tapos na';
+  }
+
+  @override
+  String get roleplayTurnGradeA => 'wow!';
+
+  @override
+  String get roleplayTurnGradeB => 'ok!';
+
+  @override
+  String get roleplayTurnGradeC => 'hmm…';
+
+  @override
+  String get roleplayTurnGradeD => 'oh…';
 }

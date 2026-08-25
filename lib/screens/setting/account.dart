@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:intl/intl.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../services/auth_service.dart';
@@ -154,14 +155,15 @@ class _AccountScreenState extends State<AccountScreen> with SingleTickerProvider
     await _refreshSubscriptionStatus();
   }
 
-  /// en/ko: yyyy/MM/dd, pt: dd/MM/yyyy (로컬 시각).
-  String _formatRenewDate(DateTime utc, String languageCode) {
+  /// Locale date pattern; unresolved locale falls back to `en`.
+  String _formatRenewDate(DateTime utc, Locale locale) {
     final local = utc.toLocal();
-    final y = local.year.toString().padLeft(4, '0');
-    final m = local.month.toString().padLeft(2, '0');
-    final d = local.day.toString().padLeft(2, '0');
-    if (languageCode == 'pt') return '$d/$m/$y';
-    return '$y/$m/$d';
+    for (final name in [locale.toString(), locale.languageCode, 'en']) {
+      try {
+        return DateFormat.yMd(name).format(local);
+      } catch (_) {}
+    }
+    return DateFormat.yMd('en').format(local);
   }
 
   Future<void> _handleUpdateName() async {
@@ -523,7 +525,7 @@ class _AccountScreenState extends State<AccountScreen> with SingleTickerProvider
                                                   _subscriptionExpiredAt!,
                                                   Localizations.localeOf(
                                                     context,
-                                                  ).languageCode,
+                                                  ),
                                                 ),
                                               ),
                                               style: theme.bodySmall?.copyWith(

@@ -17,7 +17,6 @@ import '../../widgets/roleplay_configuration_panel.dart';
 import '../../widgets/roleplay_overview_backdrop.dart';
 import '../../widgets/roleplay_scaffold.dart';
 import '../../models/series_models.dart';
-import '../../utils/language_util.dart';
 import '../../widgets/roleplay_mission_panel.dart';
 import '../../widgets/roleplay_turn_bar_area.dart';
 import 'playing_conversation_mixin.dart';
@@ -312,13 +311,13 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
   }
 
   String _turnGradeLabel(String grade) {
-    final isPortuguese = LanguageUtil.getCurrentLanguageCode() == 'pt';
+    final l10n = AppLocalizations.of(context)!;
     return switch (grade) {
-      'A' => isPortuguese ? 'bah!' : 'wow!',
-      'B' => 'ok!',
-      'C' => isPortuguese ? 'nhé…' : 'hmm…',
-      'D' => isPortuguese ? 'oxi?' : 'oh…',
-      _ => isPortuguese ? 'nhé…' : 'hmm…',
+      'A' => l10n.roleplayTurnGradeA,
+      'B' => l10n.roleplayTurnGradeB,
+      'C' => l10n.roleplayTurnGradeC,
+      'D' => l10n.roleplayTurnGradeD,
+      _ => l10n.roleplayTurnGradeC,
     };
   }
 

@@ -614,6 +614,35 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get paywallCompletedContinue => '继续';
+
+  @override
+  String get roleplayChooseYourRole => '请选择角色';
+
+  @override
+  String get roleplaySimilarRoleplays => '相似角色扮演';
+
+  @override
+  String get roleplayBeingPrepared => '该角色扮演正在准备中。';
+
+  @override
+  String get roleplayUnlockPreviousRole => '完成上一角色的全部结局即可解锁此角色。';
+
+  @override
+  String seriesOverviewCompletionPercent(int percent) {
+    return '已完成 $percent%';
+  }
+
+  @override
+  String get roleplayTurnGradeA => '哇!';
+
+  @override
+  String get roleplayTurnGradeB => '好!';
+
+  @override
+  String get roleplayTurnGradeC => '嗯…';
+
+  @override
+  String get roleplayTurnGradeD => '哦…';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -1226,6 +1255,35 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get paywallCompletedContinue => '继续';
+
+  @override
+  String get roleplayChooseYourRole => '请选择角色';
+
+  @override
+  String get roleplaySimilarRoleplays => '相似角色扮演';
+
+  @override
+  String get roleplayBeingPrepared => '该角色扮演正在准备中。';
+
+  @override
+  String get roleplayUnlockPreviousRole => '完成上一角色的全部结局即可解锁此角色。';
+
+  @override
+  String seriesOverviewCompletionPercent(int percent) {
+    return '已完成 $percent%';
+  }
+
+  @override
+  String get roleplayTurnGradeA => '哇!';
+
+  @override
+  String get roleplayTurnGradeB => '好!';
+
+  @override
+  String get roleplayTurnGradeC => '嗯…';
+
+  @override
+  String get roleplayTurnGradeD => '哦…';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -1838,4 +1896,33 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get paywallCompletedContinue => '繼續';
+
+  @override
+  String get roleplayChooseYourRole => '請選擇角色';
+
+  @override
+  String get roleplaySimilarRoleplays => '相似角色扮演';
+
+  @override
+  String get roleplayBeingPrepared => '此角色扮演正在準備中。';
+
+  @override
+  String get roleplayUnlockPreviousRole => '完成上一角色的全部結局即可解鎖此角色。';
+
+  @override
+  String seriesOverviewCompletionPercent(int percent) {
+    return '已完成 $percent%';
+  }
+
+  @override
+  String get roleplayTurnGradeA => '哇！';
+
+  @override
+  String get roleplayTurnGradeB => '好！';
+
+  @override
+  String get roleplayTurnGradeC => '嗯…';
+
+  @override
+  String get roleplayTurnGradeD => '哦…';
 }

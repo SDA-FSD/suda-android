@@ -646,4 +646,34 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get paywallCompletedContinue => 'Doorgaan';
+
+  @override
+  String get roleplayChooseYourRole => 'Kies je rol';
+
+  @override
+  String get roleplaySimilarRoleplays => 'Vergelijkbare rollenspellen';
+
+  @override
+  String get roleplayBeingPrepared => 'Dit rollenspel wordt nog voorbereid.';
+
+  @override
+  String get roleplayUnlockPreviousRole =>
+      'Rond alle eindes van de vorige rol af om deze rol te ontgrendelen.';
+
+  @override
+  String seriesOverviewCompletionPercent(int percent) {
+    return '$percent% voltooid';
+  }
+
+  @override
+  String get roleplayTurnGradeA => 'wow!';
+
+  @override
+  String get roleplayTurnGradeB => 'ok!';
+
+  @override
+  String get roleplayTurnGradeC => 'hmm…';
+
+  @override
+  String get roleplayTurnGradeD => 'oh…';
 }

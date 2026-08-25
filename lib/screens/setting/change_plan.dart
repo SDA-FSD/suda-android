@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../services/iap_purchase_service.dart';
@@ -142,13 +143,14 @@ class _ChangePlanScreenState extends State<ChangePlanScreen> {
     return current == _PlanKind.monthly ? _PlanKind.yearly : _PlanKind.monthly;
   }
 
-  String _formatRenewDate(DateTime utc, String languageCode) {
+  String _formatRenewDate(DateTime utc, Locale locale) {
     final local = utc.toLocal();
-    final y = local.year.toString().padLeft(4, '0');
-    final m = local.month.toString().padLeft(2, '0');
-    final d = local.day.toString().padLeft(2, '0');
-    if (languageCode == 'pt') return '$d/$m/$y';
-    return '$y/$m/$d';
+    for (final name in [locale.toString(), locale.languageCode, 'en']) {
+      try {
+        return DateFormat.yMd(name).format(local);
+      } catch (_) {}
+    }
+    return DateFormat.yMd('en').format(local);
   }
 
   String _planTitle(AppLocalizations l10n, _PlanKind plan) {
@@ -347,7 +349,7 @@ class _ChangePlanScreenState extends State<ChangePlanScreen> {
     final current = _currentPlan!;
     final available = _availablePlan!;
     final expiredAt = _energy?.subscriptionExpiredAt;
-    final lang = Localizations.localeOf(context).languageCode;
+    final locale = Localizations.localeOf(context);
 
     return Column(
       children: [
@@ -368,7 +370,7 @@ class _ChangePlanScreenState extends State<ChangePlanScreen> {
                   renewsLabel: expiredAt == null
                       ? null
                       : l10n.changePlanRenewsOn(
-                          _formatRenewDate(expiredAt, lang),
+                          _formatRenewDate(expiredAt, locale),
                         ),
                 ),
                 const SizedBox(height: 32),

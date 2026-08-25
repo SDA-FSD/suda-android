@@ -642,4 +642,34 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get paywallCompletedContinue => 'متابعة';
+
+  @override
+  String get roleplayChooseYourRole => 'اختر دورك';
+
+  @override
+  String get roleplaySimilarRoleplays => 'تمثيل أدوار مشابه';
+
+  @override
+  String get roleplayBeingPrepared => 'تمثيل الأدوار هذا قيد الإعداد.';
+
+  @override
+  String get roleplayUnlockPreviousRole =>
+      'أكمل جميع نهايات الدور السابق لإلغاء قفل هذا الدور.';
+
+  @override
+  String seriesOverviewCompletionPercent(int percent) {
+    return 'اكتمل $percent٪';
+  }
+
+  @override
+  String get roleplayTurnGradeA => 'واو!';
+
+  @override
+  String get roleplayTurnGradeB => 'حسنًا!';
+
+  @override
+  String get roleplayTurnGradeC => 'همم…';
+
+  @override
+  String get roleplayTurnGradeD => 'أوه…';
 }

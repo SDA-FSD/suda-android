@@ -261,5 +261,14 @@
   "paywallFallbackMonthly": "$13.99",
   "paywallCompletedTitle": "Tebrikler!",
   "paywallCompletedBody": "Premium avantajların artık aktif.",
-  "paywallCompletedContinue": "Devam Et"
+  "paywallCompletedContinue": "Devam Et",
+  "roleplayChooseYourRole": "Rolünü seç",
+  "roleplaySimilarRoleplays": "Benzer rol oyunları",
+  "roleplayBeingPrepared": "Bu rol oyunu hazırlanıyor.",
+  "roleplayUnlockPreviousRole": "Bu rolün kilidini açmak için önceki rolün tüm sonlarını tamamla.",
+  "seriesOverviewCompletionPercent": "%{percent} tamamlandı",
+  "roleplayTurnGradeA": "vay!",
+  "roleplayTurnGradeB": "tamam!",
+  "roleplayTurnGradeC": "hmm…",
+  "roleplayTurnGradeD": "oh…"
 }

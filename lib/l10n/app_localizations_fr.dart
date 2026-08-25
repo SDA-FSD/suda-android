@@ -654,4 +654,35 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get paywallCompletedContinue => 'Continuer';
+
+  @override
+  String get roleplayChooseYourRole => 'Choisissez votre rôle';
+
+  @override
+  String get roleplaySimilarRoleplays => 'Jeux de rôle similaires';
+
+  @override
+  String get roleplayBeingPrepared =>
+      'Ce jeu de rôle est en cours de préparation.';
+
+  @override
+  String get roleplayUnlockPreviousRole =>
+      'Terminez toutes les fins du rôle précédent pour déverrouiller ce rôle.';
+
+  @override
+  String seriesOverviewCompletionPercent(int percent) {
+    return '$percent% terminé';
+  }
+
+  @override
+  String get roleplayTurnGradeA => 'waouh !';
+
+  @override
+  String get roleplayTurnGradeB => 'ok !';
+
+  @override
+  String get roleplayTurnGradeC => 'hmm…';
+
+  @override
+  String get roleplayTurnGradeD => 'oh…';
 }

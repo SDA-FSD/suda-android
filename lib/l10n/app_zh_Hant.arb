@@ -261,5 +261,14 @@
   "paywallFallbackMonthly": "$13.99",
   "paywallCompletedTitle": "恭喜！",
   "paywallCompletedBody": "你的 Premium 權益現已生效。",
-  "paywallCompletedContinue": "繼續"
+  "paywallCompletedContinue": "繼續",
+  "roleplayChooseYourRole": "請選擇角色",
+  "roleplaySimilarRoleplays": "相似角色扮演",
+  "roleplayBeingPrepared": "此角色扮演正在準備中。",
+  "roleplayUnlockPreviousRole": "完成上一角色的全部結局即可解鎖此角色。",
+  "seriesOverviewCompletionPercent": "已完成 {percent}%",
+  "roleplayTurnGradeA": "哇！",
+  "roleplayTurnGradeB": "好！",
+  "roleplayTurnGradeC": "嗯…",
+  "roleplayTurnGradeD": "哦…"
 }

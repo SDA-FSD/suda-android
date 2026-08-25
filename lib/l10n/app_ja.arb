@@ -261,5 +261,14 @@
   "paywallFallbackMonthly": "$13.99",
   "paywallCompletedTitle": "おめでとうございます！",
   "paywallCompletedBody": "プレミアム特典が有効になりました。",
-  "paywallCompletedContinue": "続ける"
+  "paywallCompletedContinue": "続ける",
+  "roleplayChooseYourRole": "役割を選んでください",
+  "roleplaySimilarRoleplays": "似たロールプレイ",
+  "roleplayBeingPrepared": "このロールプレイは準備中です。",
+  "roleplayUnlockPreviousRole": "この役割のロックを解除するには、前の役割のエンディングをすべて完了してください。",
+  "seriesOverviewCompletionPercent": "{percent}% 完了",
+  "roleplayTurnGradeA": "すごい!",
+  "roleplayTurnGradeB": "OK!",
+  "roleplayTurnGradeC": "うーん…",
+  "roleplayTurnGradeD": "おっ…"
 }

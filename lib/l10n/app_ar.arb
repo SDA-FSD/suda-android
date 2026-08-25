@@ -261,5 +261,14 @@
   "paywallFallbackMonthly": "$13.99",
   "paywallCompletedTitle": "تهانينا!",
   "paywallCompletedBody": "مزايا Premium مفعّلة الآن.",
-  "paywallCompletedContinue": "متابعة"
+  "paywallCompletedContinue": "متابعة",
+  "roleplayChooseYourRole": "اختر دورك",
+  "roleplaySimilarRoleplays": "تمثيل أدوار مشابه",
+  "roleplayBeingPrepared": "تمثيل الأدوار هذا قيد الإعداد.",
+  "roleplayUnlockPreviousRole": "أكمل جميع نهايات الدور السابق لإلغاء قفل هذا الدور.",
+  "seriesOverviewCompletionPercent": "اكتمل {percent}٪",
+  "roleplayTurnGradeA": "واو!",
+  "roleplayTurnGradeB": "حسنًا!",
+  "roleplayTurnGradeC": "همم…",
+  "roleplayTurnGradeD": "أوه…"
 }

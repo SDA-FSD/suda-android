@@ -261,5 +261,14 @@
   "paywallFallbackMonthly": "$13.99",
   "paywallCompletedTitle": "ยินดีด้วย!",
   "paywallCompletedBody": "สิทธิประโยชน์ Premium ของคุณเปิดใช้งานแล้ว",
-  "paywallCompletedContinue": "ไปต่อ"
+  "paywallCompletedContinue": "ไปต่อ",
+  "roleplayChooseYourRole": "เลือกบทบาทของคุณ",
+  "roleplaySimilarRoleplays": "บทบาทสมมติที่คล้ายกัน",
+  "roleplayBeingPrepared": "บทบาทสมมตินี้กำลังเตรียมอยู่",
+  "roleplayUnlockPreviousRole": "จบตอนจบทั้งหมดของบทบาทก่อนหน้าเพื่อปลดล็อกบทบาทนี้",
+  "seriesOverviewCompletionPercent": "เสร็จแล้ว {percent}%",
+  "roleplayTurnGradeA": "ว้าว!",
+  "roleplayTurnGradeB": "โอเค!",
+  "roleplayTurnGradeC": "อืม…",
+  "roleplayTurnGradeD": "โอ้…"
 }

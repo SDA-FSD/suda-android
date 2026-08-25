@@ -261,5 +261,14 @@
   "paywallFallbackMonthly": "$13.99",
   "paywallCompletedTitle": "बधाई हो!",
   "paywallCompletedBody": "आपके प्रीमियम फ़ायदे अब ऐक्टिव हैं।",
-  "paywallCompletedContinue": "जारी रखें"
+  "paywallCompletedContinue": "जारी रखें",
+  "roleplayChooseYourRole": "अपनी भूमिका चुनें",
+  "roleplaySimilarRoleplays": "मिलते-जुलते रोलप्ले",
+  "roleplayBeingPrepared": "यह रोलप्ले तैयार किया जा रहा है।",
+  "roleplayUnlockPreviousRole": "इस भूमिका को अनलॉक करने के लिए पिछली भूमिका के सभी एंडिंग पूरे करें।",
+  "seriesOverviewCompletionPercent": "{percent}% पूरा",
+  "roleplayTurnGradeA": "वाह!",
+  "roleplayTurnGradeB": "ओके!",
+  "roleplayTurnGradeC": "हम्म…",
+  "roleplayTurnGradeD": "ओह…"
 }

@@ -261,5 +261,14 @@
   "paywallFallbackMonthly": "R$24,99",
   "paywallCompletedTitle": "Parabéns!",
   "paywallCompletedBody": "Seus benefícios Premium\njá estão ativos.",
-  "paywallCompletedContinue": "Continuar"
+  "paywallCompletedContinue": "Continuar",
+  "roleplayChooseYourRole": "Escolha seu papel",
+  "roleplaySimilarRoleplays": "Roleplays Similares",
+  "roleplayBeingPrepared": "Este roleplay está sendo preparado.",
+  "roleplayUnlockPreviousRole": "Complete todos os finais do papel anterior para desbloquear este papel.",
+  "seriesOverviewCompletionPercent": "{percent}% Completo",
+  "roleplayTurnGradeA": "bah!",
+  "roleplayTurnGradeB": "ok!",
+  "roleplayTurnGradeC": "nhé…",
+  "roleplayTurnGradeD": "oxi?"
 }

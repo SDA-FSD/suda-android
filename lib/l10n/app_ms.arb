@@ -261,5 +261,14 @@
   "paywallFallbackMonthly": "$13.99",
   "paywallCompletedTitle": "Tahniah!",
   "paywallCompletedBody": "Manfaat Premium anda kini aktif.",
-  "paywallCompletedContinue": "Teruskan"
+  "paywallCompletedContinue": "Teruskan",
+  "roleplayChooseYourRole": "Pilih peranan anda",
+  "roleplaySimilarRoleplays": "Roleplay serupa",
+  "roleplayBeingPrepared": "Roleplay ini sedang disediakan.",
+  "roleplayUnlockPreviousRole": "Lengkapkan semua ending peranan sebelumnya untuk membuka peranan ini.",
+  "seriesOverviewCompletionPercent": "{percent}% selesai",
+  "roleplayTurnGradeA": "wow!",
+  "roleplayTurnGradeB": "ok!",
+  "roleplayTurnGradeC": "hmm…",
+  "roleplayTurnGradeD": "oh…"
 }

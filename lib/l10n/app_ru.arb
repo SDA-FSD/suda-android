@@ -261,5 +261,14 @@
   "paywallFallbackMonthly": "$13.99",
   "paywallCompletedTitle": "Поздравляем!",
   "paywallCompletedBody": "Преимущества Premium уже доступны.",
-  "paywallCompletedContinue": "Продолжить"
+  "paywallCompletedContinue": "Продолжить",
+  "roleplayChooseYourRole": "Выберите роль",
+  "roleplaySimilarRoleplays": "Похожие ролевые игры",
+  "roleplayBeingPrepared": "Эта ролевая игра ещё готовится.",
+  "roleplayUnlockPreviousRole": "Чтобы открыть эту роль, пройдите все концовки предыдущей роли.",
+  "seriesOverviewCompletionPercent": "{percent}% завершено",
+  "roleplayTurnGradeA": "вау!",
+  "roleplayTurnGradeB": "ок!",
+  "roleplayTurnGradeC": "хм…",
+  "roleplayTurnGradeD": "ох…"
 }

@@ -261,5 +261,14 @@
   "paywallFallbackMonthly": "$13.99",
   "paywallCompletedTitle": "Selamat!",
   "paywallCompletedBody": "Manfaat Premium Anda kini aktif.",
-  "paywallCompletedContinue": "Lanjutkan"
+  "paywallCompletedContinue": "Lanjutkan",
+  "roleplayChooseYourRole": "Pilih peranmu",
+  "roleplaySimilarRoleplays": "Roleplay serupa",
+  "roleplayBeingPrepared": "Roleplay ini sedang disiapkan.",
+  "roleplayUnlockPreviousRole": "Selesaikan semua ending peran sebelumnya untuk membuka peran ini.",
+  "seriesOverviewCompletionPercent": "{percent}% selesai",
+  "roleplayTurnGradeA": "wow!",
+  "roleplayTurnGradeB": "ok!",
+  "roleplayTurnGradeC": "hmm…",
+  "roleplayTurnGradeD": "oh…"
 }

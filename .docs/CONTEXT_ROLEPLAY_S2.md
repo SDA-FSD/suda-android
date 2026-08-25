@@ -212,7 +212,7 @@ Home (시리즈 썸네일)
   - **초기 turn bar 색**: 전 턴 `#635F5F` **40%** (`Color(0x66635F5F)`, `RoleplayTurnBarArea.defaultBarColor`)
   - **상태 보관** (`playing.dart`): `_turnBarColors`, `_turnLabelTexts`, `_turnLabelColors` (길이 = `_turnCount`)
   - **진행 정책**: 사용자 발화 **1회 완료**마다 해당 턴 turn bar 색 1개 갱신 → `requiredSpeechCount`회 발화 완료(마지막 턴) 시에도 나레이션·후속 AI 말풍선/음성을 노출한 뒤 서버 `serviceMessage`(없으면 `roleplayAnalyzing`) blink(결과 호출·이동은 추후).
-  - **등급 효과**: A `#0CABA8` 라벨 en `wow!`/pt `bah!`, B `#62FF00` `ok!`, C `#FFB700` en `hmm…`/pt `nhé…`, D `#FF0000` en `oh…`/pt `oxi?`. bar 색·라벨 즉시 100% pop(1.0→1.42→1.0, 320ms). **2초 후** 라벨 150ms fade-out + bar 등급색 **20%**(`pastTurnBarOpacity`)로 dim(다음 사용자 턴 시작과 무관).
+  - **등급 효과**: A `#0CABA8` 라벨 l10n `roleplayTurnGradeA`, B `#62FF00` `roleplayTurnGradeB`, C `#FFB700` `roleplayTurnGradeC`, D `#FF0000` `roleplayTurnGradeD`. bar 색·라벨 즉시 100% pop(1.0→1.42→1.0, 320ms). **2초 후** 라벨 150ms fade-out + bar 등급색 **20%**(`pastTurnBarOpacity`)로 dim(다음 사용자 턴 시작과 무관).
 - **시스템 뒤로가기**: `PopScope` → X와 동일하게 확인 레이어
 - **나가기 확정**: `RoleplayRouter.popToOverview` → Series Overview
 - **설정패널 (configuration panel)** — `lib/widgets/roleplay_configuration_panel.dart`

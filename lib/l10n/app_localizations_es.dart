@@ -651,6 +651,36 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get paywallCompletedContinue => 'Continuar';
+
+  @override
+  String get roleplayChooseYourRole => 'Elige tu papel';
+
+  @override
+  String get roleplaySimilarRoleplays => 'Roleplays similares';
+
+  @override
+  String get roleplayBeingPrepared => 'Este roleplay se está preparando.';
+
+  @override
+  String get roleplayUnlockPreviousRole =>
+      'Completa todos los finales del papel anterior para desbloquear este papel.';
+
+  @override
+  String seriesOverviewCompletionPercent(int percent) {
+    return '$percent% completado';
+  }
+
+  @override
+  String get roleplayTurnGradeA => '¡guau!';
+
+  @override
+  String get roleplayTurnGradeB => 'ok!';
+
+  @override
+  String get roleplayTurnGradeC => 'hmm…';
+
+  @override
+  String get roleplayTurnGradeD => 'oh…';
 }
 
 /// The translations for Spanish Castilian, as used in Latin America and the Caribbean (`es_419`).
@@ -1300,4 +1330,34 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
 
   @override
   String get paywallCompletedContinue => 'Continuar';
+
+  @override
+  String get roleplayChooseYourRole => 'Elige tu papel';
+
+  @override
+  String get roleplaySimilarRoleplays => 'Roleplays similares';
+
+  @override
+  String get roleplayBeingPrepared => 'Este roleplay se está preparando.';
+
+  @override
+  String get roleplayUnlockPreviousRole =>
+      'Completa todos los finales del papel anterior para desbloquear este papel.';
+
+  @override
+  String seriesOverviewCompletionPercent(int percent) {
+    return '$percent% completado';
+  }
+
+  @override
+  String get roleplayTurnGradeA => '¡guau!';
+
+  @override
+  String get roleplayTurnGradeB => 'ok!';
+
+  @override
+  String get roleplayTurnGradeC => 'hmm…';
+
+  @override
+  String get roleplayTurnGradeD => 'oh…';
 }

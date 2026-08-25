@@ -648,4 +648,34 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get paywallCompletedContinue => 'Tiếp tục';
+
+  @override
+  String get roleplayChooseYourRole => 'Chọn vai của bạn';
+
+  @override
+  String get roleplaySimilarRoleplays => 'Roleplay tương tự';
+
+  @override
+  String get roleplayBeingPrepared => 'Roleplay này đang được chuẩn bị.';
+
+  @override
+  String get roleplayUnlockPreviousRole =>
+      'Hoàn thành mọi ending của vai trước để mở khóa vai này.';
+
+  @override
+  String seriesOverviewCompletionPercent(int percent) {
+    return 'Hoàn thành $percent%';
+  }
+
+  @override
+  String get roleplayTurnGradeA => 'wow!';
+
+  @override
+  String get roleplayTurnGradeB => 'ok!';
+
+  @override
+  String get roleplayTurnGradeC => 'hmm…';
+
+  @override
+  String get roleplayTurnGradeD => 'ồ…';
 }

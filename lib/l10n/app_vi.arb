@@ -261,5 +261,14 @@
   "paywallFallbackMonthly": "$13.99",
   "paywallCompletedTitle": "Chúc mừng!",
   "paywallCompletedBody": "Các quyền lợi Premium của bạn đã được kích hoạt.",
-  "paywallCompletedContinue": "Tiếp tục"
+  "paywallCompletedContinue": "Tiếp tục",
+  "roleplayChooseYourRole": "Chọn vai của bạn",
+  "roleplaySimilarRoleplays": "Roleplay tương tự",
+  "roleplayBeingPrepared": "Roleplay này đang được chuẩn bị.",
+  "roleplayUnlockPreviousRole": "Hoàn thành mọi ending của vai trước để mở khóa vai này.",
+  "seriesOverviewCompletionPercent": "Hoàn thành {percent}%",
+  "roleplayTurnGradeA": "wow!",
+  "roleplayTurnGradeB": "ok!",
+  "roleplayTurnGradeC": "hmm…",
+  "roleplayTurnGradeD": "ồ…"
 }
