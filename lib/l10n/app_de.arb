@@ -1,0 +1,265 @@
+{
+  "@@locale": "de",
+  "agreementHeading": "Bitte lies die folgenden Bedingungen und stimme ihnen zu, um fortzufahren.",
+  "agreementTermsLabel": "Ich stimme den Nutzungsbedingungen zu.",
+  "agreementPrivacyLabel": "Ich stimme der Datenschutzerklärung zu.",
+  "agreementTermsTitle": "Nutzungsbedingungen",
+  "agreementPrivacyTitle": "Datenschutzerklärung",
+  "agreementDetailsLink": "Details anzeigen",
+  "agreementButtonConfirm": "Zustimmen und weiter",
+  "settingsTitle": "Einstellungen",
+  "settingsAccount": "Konto",
+  "settingsRestorePurchases": "Käufe wiederherstellen",
+  "restorePurchasesNothing": "Keine wiederherstellbaren Käufe gefunden.",
+  "restorePurchasesCompleted": "Käufe wiederhergestellt.",
+  "settingsNotification": "Benachrichtigungen",
+  "settingsTutorial": "Tutorial",
+  "settingsCefrLevel": "Englischniveau",
+  "pushNotifications": "Push-Benachrichtigungen",
+  "pushNotificationsDesc": "Erhalte Erinnerungen und wichtige Updates.",
+  "settingsFeedback": "Feedback",
+  "settingsAnnouncements": "Ankündigungen",
+  "announcementsEmpty": "Noch keine Ankündigungen",
+  "noticesEmpty": "Noch keine Beiträge",
+  "deletedPost": "Dieser Beitrag wurde gelöscht.",
+  "postNoLongerAvailable": "Dieser Beitrag ist nicht mehr verfügbar.",
+  "backToHome": "Zur Startseite",
+  "settingsSignOut": "Abmelden",
+  "settingsFsdLaboratory": "FSD-Labor",
+  "settingsPrivacy": "Datenschutzerklärung",
+  "settingsTerms": "Nutzungsbedingungen",
+  "settingsOpenSource": "Open-Source-Lizenzen",
+  "loginWelcome": "Willkommen, {name}!",
+  "@loginWelcome": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "loginTermsTemplate": "Wenn du fortfährst, stimmst du unseren {terms} und unserer {privacy} zu.",
+  "@loginTermsTemplate": {
+    "placeholders": {
+      "terms": {
+        "type": "String"
+      },
+      "privacy": {
+        "type": "String"
+      }
+    }
+  },
+  "loginTermsTitle": "Nutzungsbedingungen",
+  "loginPrivacyTitle": "Datenschutzerklärung",
+  "loginCatchphrase": "Sprich einfach. So lernst du.",
+  "loginWelcomeTitle": "Willkommen bei SUDA!",
+  "loginWelcomeSubtitle": "Tauche in eine Geschichte ein und sprich Englisch!",
+  "loginErrorIdToken": "Google-ID-Token konnte nicht abgerufen werden. Bitte versuche es erneut.",
+  "loginErrorFailed": "Anmeldung fehlgeschlagen: {error}",
+  "@loginErrorFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "accountName": "Name",
+  "accountInfo": "Konto",
+  "accountDelete": "Konto löschen",
+  "accountDeleteTitle": "Konto löschen?",
+  "accountDeleteConfirmText": "Dein gesamter Fortschritt und alle Daten gehen dauerhaft verloren. Bist du sicher?",
+  "accountDeleteProfileImageTitle": "Profilbild löschen?",
+  "accountDeleteProfileImageContent": "Nach dem Löschen kann dein Profilbild nicht wiederhergestellt werden.",
+  "accountGoBack": "Zurück",
+  "accountDeleteAction": "Löschen",
+  "accountSubscription": "Abonnement",
+  "accountFreePlanTitle": "Kostenloser Tarif",
+  "accountFreePlanSubtitle": "Mit Premium schaltest du weitere Funktionen frei",
+  "accountPremiumTitle": "Premium",
+  "accountPremiumSubtitle": "Deine Premium-Vorteile sind aktiv",
+  "accountPremiumRenewsOn": "Verlängert sich am {date}",
+  "@accountPremiumRenewsOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "accountChangePlan": "Tarif ändern",
+  "changePlanTitle": "Tarif ändern",
+  "changePlanCurrentPlan": "Aktueller Tarif",
+  "changePlanAvailablePlans": "Verfügbare Tarife",
+  "changePlanRenewsOn": "Verlängert sich am {date}",
+  "@changePlanRenewsOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "changePlanLoadFailed": "Informationen konnten nicht geladen werden. Bitte versuche es erneut.",
+  "changePlanRetry": "Erneut versuchen",
+  "changePlanConfirmTitle": "Tarif ändern?",
+  "changePlanConfirmBody": "Die Tarifänderung gilt ab deinem nächsten Abrechnungstermin.",
+  "changePlanConfirmOk": "Bestätigen",
+  "changePlanConfirmCancel": "Aktuellen Tarif behalten",
+  "changePlanOldPurchaseMissing": "Kein aktives Abonnement zum Ändern gefunden. Versuche es erneut, sobald dein Abonnement aktiv ist.",
+  "changePlanChangeRequested": "Tarifwechsel angefordert. Er wird möglicherweise am nächsten Abrechnungstermin wirksam.",
+  "cefrLevelTitle": "Wähle dein Englischniveau",
+  "cefrLevelAbsoluteBeginner": "Keine Vorkenntnisse",
+  "cefrLevelBeginner": "Anfänger",
+  "cefrLevelBasic": "Grundkenntnisse",
+  "cefrLevelIntermediate": "Mittelstufe",
+  "firstCefrLevelTitle": "Wie gut ist dein Englisch?",
+  "firstCefrLevelDescriptionPreA1": "Ich kann Englisch lesen",
+  "firstCefrLevelDescriptionA1": "Ich kenne einfache Begrüßungen und Wendungen",
+  "firstCefrLevelDescriptionA2": "Ich kann kurze, einfache Sätze verstehen und verwenden",
+  "firstCefrLevelDescriptionB1": "Ich kann meine Meinung äußern und mich an Alltagsgesprächen beteiligen",
+  "firstCefrLevelSettingsHint": "Du kannst es jederzeit ändern",
+  "firstCefrLevelConfirm": "Bestätigen",
+  "feedbackPlaceholder": "Teile uns deine Meinung, Vorschläge oder Probleme mit ...",
+  "feedbackSend": "Senden",
+  "feedbackSuccess": "Danke für dein Feedback.",
+  "microphonePermissionDenied": "Zum Starten ist der Mikrofonzugriff erforderlich.",
+  "holdMicrophoneToSpeak": "Mikrofon gedrückt halten und sprechen",
+  "roleplayTypeMessagePlaceholder": "Nachricht eingeben ...",
+  "yourTurnFirst": "Du fängst an!",
+  "sayLineBelowToStart": "Sprich den Satz unten, um zu starten.",
+  "roleplayExitWait": "Warte!",
+  "roleplayExitMessage": "Wenn du jetzt gehst, verpasst du deine Belohnung. Möchtest du wirklich aufhören?",
+  "roleplayExitKeepPlaying": "Weiterspielen",
+  "roleplayExitExit": "Beenden",
+  "roleplayAutoHint": "Auto-Tipp",
+  "roleplayHintLabel": "Tipp",
+  "roleplayHintShowAnswer": "Englischen Antwortvorschlag ansehen",
+  "roleplayVoiceSpeed": "Sprechtempo",
+  "roleplayEndedFailed": "Mission fehlgeschlagen ...",
+  "roleplayEndedComplete": "Rollenspiel abgeschlossen",
+  "roleplayEndedEnding": "Weiter zum Ende ...",
+  "roleplayFinishNotEnoughProgress": "Nicht genug Fortschritt",
+  "roleplayFinishCompleted": "Rollenspiel abgeschlossen",
+  "roleplayFinishMovingToEnding": "Weiter zum Ende ...",
+  "roleplayAnalyzing": "Dein Rollenspiel wird analysiert ...",
+  "roleplayOpeningAiCharacter": "KI-Charakter",
+  "roleplayOpeningScenario": "Szenario",
+  "roleplayOpeningAiDisclaimer": "KI kann Fehler machen.\nTeile keine persönlichen oder sensiblen Informationen.",
+  "endingFailTitle": "Du hast nicht alle Missionen abgeschlossen!",
+  "endingFailSubtitle": "Versuche es erneut und entdecke die ganze Geschichte.",
+  "roleplayTryAgainMessage": "Leider war deine Punktzahl nicht hoch genug für die Belohnung.",
+  "endingReport": "Problem melden",
+  "endingHowWas": "Wie war das Rollenspiel?",
+  "endingNext": "Weiter",
+  "reportTitle": "Problem melden",
+  "profileHistory": "Verlauf",
+  "profileSaved": "Gespeichert",
+  "profileHistoryEmpty": "Noch kein Verlauf",
+  "profileSavedEmpty": "Noch keine Ausdrücke gespeichert.",
+  "profileSavedRemoveTitle": "Gespeicherten Ausdruck entfernen?",
+  "profileSavedRemoveContent": "Du findest ihn später wieder im Verlauf.",
+  "profileSavedRemoveOk": "Entfernen",
+  "profileSavedRemoveCancel": "Weiter üben",
+  "seriesOverviewTabEpisodes": "Folgen",
+  "seriesOverviewTabSimilarTopic": "Ähnliches Thema",
+  "seriesOverviewEpisodeNumber": "Folge #{number}",
+  "@seriesOverviewEpisodeNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "seriesOverviewPlay": "Starten",
+  "seriesOverviewLocked": "Gesperrt",
+  "seriesOverviewEpisodeLockedToast": "Schließe zum Freischalten zuerst die vorherige Folge ab.",
+  "notificationPermissionBlockedTitle": "Benachrichtigungen sind aus",
+  "notificationPermissionBlockedMessage": "Aktiviere Benachrichtigungen in den Geräteeinstellungen, um Push-Benachrichtigungen zu erhalten.",
+  "openSettings": "Einstellungen öffnen",
+  "notificationsTitle": "Benachrichtigungen",
+  "notificationsEmpty": "Noch keine Benachrichtigungen",
+  "notificationSendToday": "Heute",
+  "notificationSendOneDayAgo": "Vor 1 Tag",
+  "notificationSendDaysAgo": "Vor {count} Tagen",
+  "@notificationSendDaysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reregistrationRestrictedMessage": "Du kannst dich erst 2 Tage nach dem Löschen deines Kontos erneut registrieren. Bitte versuche es später noch einmal.",
+  "expressionSavedToProfile": "Im Profil gespeichert",
+  "expressionUnsavedToProfile": "Nicht mehr gespeichert",
+  "roleplayResultFeedbackInsufficientWords": "Diesmal konnten wir kein Feedback geben. Antworte mit mindestens 7 Wörtern!",
+  "roleplayResultScoreMeaning": "Bedeutung",
+  "roleplayResultScoreRelevance": "Relevanz",
+  "roleplayResultScoreVocabulary": "Wortschatz",
+  "roleplayResultScoreGrammar": "Grammatik",
+  "closePopup": "Schließen",
+  "reviewChatTapHint": "Tippe auf die Sprechblase, um das Audio abzuspielen.",
+  "reviewChatNoAudioToPlay": "Kein Audio zum Abspielen.",
+  "seriesInformationTopicDifficulty": "Schwierigkeitsgrad",
+  "seriesInformationLearningGoals": "Lernziele",
+  "energyInfoTitle": "Energie",
+  "energyOutOfEnergyTitle": "Keine Energie mehr",
+  "energyInfoRechargeUntil": "Nächste Aufladung in @@TIME@@",
+  "energyInfoFull": "Deine Energie ist voll.",
+  "energyInfoUnlimitedEndsIn": "Unbegrenzter Modus aktiv",
+  "energyInsufficient": "Du hast nicht genug Energie.",
+  "endRoleplay": "Rollenspiel beenden",
+  "energyEnablePushTitle": "Benachrichtigungen aktivieren",
+  "energyEnablePushSubtitle": "Aktiviere Benachrichtigungen und fülle deine Energie vollständig auf.",
+  "energyEnablePushPrice": "Kostenlos",
+  "energyEnablePushOfferBadge": "EINMALIGES ANGEBOT",
+  "energyEnablePushCompleted": "Energie vollständig aufgeladen!",
+  "energyPurchaseUnlimitedTitle": "Unbegrenzter Pass",
+  "energyPurchaseUnlimitedSubtitle": "Startet direkt nach dem Kauf und gilt 10 Minuten.",
+  "energyPurchaseCapacityTitle": "Maximale Energie erhöhen",
+  "energyPurchaseCapacitySubtitle": "Erhöhe deine maximal aufladbare Energie dauerhaft um 1.",
+  "energyGoPremiumTitle": "Premium sichern",
+  "energyGoPremiumExplore": "Entdecken",
+  "profileGoPremiumTitle": "SUDA Premium abonnieren",
+  "profileGoPremiumExplore": "Entdecken",
+  "energyPurchasePendingApproval": "Deine Zahlung muss noch genehmigt werden.",
+  "energyPurchaseNotCompleted": "Der Kauf wurde nicht abgeschlossen.",
+  "welcomeGiftTitle": "Dein Willkommensgeschenk ist da!",
+  "welcomeGiftBenefitLead": "Spiele 10 Minuten unbegrenzt!",
+  "welcomeGiftLine2": "Premium-Funktionen freigeschaltet",
+  "welcomeGiftLine3": "Unbegrenztes Spielen freigeschaltet",
+  "welcomeGiftStartNow": "Jetzt starten",
+  "paywallHeroTitle1": "Mehr üben",
+  "paywallHeroTitle2": "Schneller besser werden",
+  "paywallHeroBody": "Übe länger mit Premium und sprich dank KI-Feedback sicherer Englisch.",
+  "paywallPremiumLabel": "PREMIUM",
+  "paywallBenefitDailyPractice": "Täglich mehr üben",
+  "paywallBenefitMaxEnergy": "Maximale Energie: 30",
+  "paywallBenefitAiFeedback": "KI-Satzfeedback",
+  "paywallChoosePlan": "Wähle deinen Tarif",
+  "paywallAnnualPlanTitle": "Jahresabo",
+  "paywallAnnualPlanSubtitle": "Spare über 33 % gegenüber dem Monatsabo.",
+  "paywallMonthlyPlanTitle": "Monatsabo",
+  "paywallMonthlyPlanSubtitle": "Flexibel Monat für Monat.",
+  "paywallBestBadge": "TOP",
+  "paywallCta": "Jetzt abonnieren",
+  "paywallAutoRenewNotice": "Abonnements verlängern sich automatisch, sofern sie nicht mindestens 24 Stunden vor Ende des aktuellen Abrechnungszeitraums gekündigt werden.",
+  "paywallPricePerMonth": "{price}/Monat",
+  "@paywallPricePerMonth": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallPricePerYear": "{price}/Jahr",
+  "@paywallPricePerYear": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallFallbackAnnualPerMonth": "$8.33",
+  "paywallFallbackAnnual": "$99.99",
+  "paywallFallbackMonthly": "$13.99",
+  "paywallCompletedTitle": "Glückwunsch!",
+  "paywallCompletedBody": "Deine Premium-Vorteile sind jetzt aktiv.",
+  "paywallCompletedContinue": "Weiter"
+}

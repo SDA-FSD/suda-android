@@ -1,0 +1,265 @@
+{
+  "@@locale": "nl",
+  "agreementHeading": "Lees en accepteer de onderstaande voorwaarden om door te gaan.",
+  "agreementTermsLabel": "Ik ga akkoord met de gebruiksvoorwaarden.",
+  "agreementPrivacyLabel": "Ik ga akkoord met het privacybeleid.",
+  "agreementTermsTitle": "Gebruiksvoorwaarden",
+  "agreementPrivacyTitle": "Privacybeleid",
+  "agreementDetailsLink": "Details bekijken",
+  "agreementButtonConfirm": "Akkoord en doorgaan",
+  "settingsTitle": "Instellingen",
+  "settingsAccount": "Account",
+  "settingsRestorePurchases": "Aankopen herstellen",
+  "restorePurchasesNothing": "Er zijn geen aankopen om te herstellen.",
+  "restorePurchasesCompleted": "Aankopen hersteld.",
+  "settingsNotification": "Meldingen",
+  "settingsTutorial": "Tutorial",
+  "settingsCefrLevel": "Engelsniveau",
+  "pushNotifications": "Pushmeldingen",
+  "pushNotificationsDesc": "Ontvang herinneringen en belangrijke updates.",
+  "settingsFeedback": "Feedback",
+  "settingsAnnouncements": "Mededelingen",
+  "announcementsEmpty": "Nog geen mededelingen",
+  "noticesEmpty": "Nog geen berichten",
+  "deletedPost": "Dit bericht is verwijderd.",
+  "postNoLongerAvailable": "Dit bericht is niet meer beschikbaar.",
+  "backToHome": "Terug naar home",
+  "settingsSignOut": "Uitloggen",
+  "settingsFsdLaboratory": "FSD-laboratorium",
+  "settingsPrivacy": "Privacybeleid",
+  "settingsTerms": "Gebruiksvoorwaarden",
+  "settingsOpenSource": "Opensourcelicenties",
+  "loginWelcome": "Welkom, {name}!",
+  "@loginWelcome": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "loginTermsTemplate": "Door verder te gaan, ga je akkoord met onze {terms} en ons {privacy}.",
+  "@loginTermsTemplate": {
+    "placeholders": {
+      "terms": {
+        "type": "String"
+      },
+      "privacy": {
+        "type": "String"
+      }
+    }
+  },
+  "loginTermsTitle": "Gebruiksvoorwaarden",
+  "loginPrivacyTitle": "Privacybeleid",
+  "loginCatchphrase": "Begin te praten. Zo leer je.",
+  "loginWelcomeTitle": "Welkom bij SUDA!",
+  "loginWelcomeSubtitle": "Stap in een verhaal en spreek Engels!",
+  "loginErrorIdToken": "Google-ID-token ophalen mislukt. Probeer het opnieuw.",
+  "loginErrorFailed": "Inloggen mislukt: {error}",
+  "@loginErrorFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "accountName": "Naam",
+  "accountInfo": "Account",
+  "accountDelete": "Account verwijderen",
+  "accountDeleteTitle": "Account verwijderen?",
+  "accountDeleteConfirmText": "Al je voortgang en gegevens gaan permanent verloren. Weet je het zeker?",
+  "accountDeleteProfileImageTitle": "Profielfoto verwijderen?",
+  "accountDeleteProfileImageContent": "Na verwijdering kan je profielfoto niet worden hersteld.",
+  "accountGoBack": "Terug",
+  "accountDeleteAction": "Verwijderen",
+  "accountSubscription": "Abonnement",
+  "accountFreePlanTitle": "Gratis abonnement",
+  "accountFreePlanSubtitle": "Neem Premium voor meer functies",
+  "accountPremiumTitle": "Premium",
+  "accountPremiumSubtitle": "Je Premium-voordelen zijn actief",
+  "accountPremiumRenewsOn": "Wordt verlengd op {date}",
+  "@accountPremiumRenewsOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "accountChangePlan": "Abonnement wijzigen",
+  "changePlanTitle": "Abonnement wijzigen",
+  "changePlanCurrentPlan": "Huidig abonnement",
+  "changePlanAvailablePlans": "Beschikbare abonnementen",
+  "changePlanRenewsOn": "Wordt verlengd op {date}",
+  "@changePlanRenewsOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "changePlanLoadFailed": "Kan de informatie niet laden. Probeer het opnieuw.",
+  "changePlanRetry": "Opnieuw proberen",
+  "changePlanConfirmTitle": "Abonnement wijzigen?",
+  "changePlanConfirmBody": "De wijziging gaat in op je volgende betaaldatum.",
+  "changePlanConfirmOk": "Bevestigen",
+  "changePlanConfirmCancel": "Huidig abonnement houden",
+  "changePlanOldPurchaseMissing": "Geen actief abonnement gevonden om te wijzigen. Probeer het opnieuw zodra je abonnement actief is.",
+  "changePlanChangeRequested": "Wijziging aangevraagd. Deze kan ingaan op je volgende betaaldatum.",
+  "cefrLevelTitle": "Kies je Engelsniveau",
+  "cefrLevelAbsoluteBeginner": "Absolute beginner",
+  "cefrLevelBeginner": "Beginner",
+  "cefrLevelBasic": "Basis",
+  "cefrLevelIntermediate": "Halfgevorderd",
+  "firstCefrLevelTitle": "Wat is je Engelsniveau?",
+  "firstCefrLevelDescriptionPreA1": "Ik kan Engels lezen",
+  "firstCefrLevelDescriptionA1": "Ik ken basisbegroetingen en eenvoudige uitdrukkingen",
+  "firstCefrLevelDescriptionA2": "Ik kan korte, eenvoudige zinnen gebruiken en begrijpen",
+  "firstCefrLevelDescriptionB1": "Ik kan mijn mening geven en alledaagse gesprekken voeren",
+  "firstCefrLevelSettingsHint": "Je kunt dit altijd wijzigen",
+  "firstCefrLevelConfirm": "Bevestigen",
+  "feedbackPlaceholder": "Deel je mening, suggesties of problemen...",
+  "feedbackSend": "Versturen",
+  "feedbackSuccess": "Bedankt voor je feedback.",
+  "microphonePermissionDenied": "Je kunt niet starten zonder toegang tot de microfoon.",
+  "holdMicrophoneToSpeak": "Houd de microfoon ingedrukt om te praten",
+  "roleplayTypeMessagePlaceholder": "Typ je bericht...",
+  "yourTurnFirst": "Jij mag beginnen!",
+  "sayLineBelowToStart": "Zeg de zin hieronder om te beginnen.",
+  "roleplayExitWait": "Wacht!",
+  "roleplayExitMessage": "Als je nu stopt, loop je je beloning mis. Weet je zeker dat je wilt stoppen?",
+  "roleplayExitKeepPlaying": "Doorgaan",
+  "roleplayExitExit": "Stoppen",
+  "roleplayAutoHint": "Automatische hint",
+  "roleplayHintLabel": "Hint",
+  "roleplayHintShowAnswer": "Engels voorbeeldantwoord bekijken",
+  "roleplayVoiceSpeed": "Spreeksnelheid",
+  "roleplayEndedFailed": "Missie mislukt...",
+  "roleplayEndedComplete": "Rollenspel voltooid",
+  "roleplayEndedEnding": "Naar het einde...",
+  "roleplayFinishNotEnoughProgress": "Onvoldoende voortgang",
+  "roleplayFinishCompleted": "Rollenspel voltooid",
+  "roleplayFinishMovingToEnding": "Naar het einde...",
+  "roleplayAnalyzing": "Je rollenspel wordt geanalyseerd...",
+  "roleplayOpeningAiCharacter": "AI-personage",
+  "roleplayOpeningScenario": "Scenario",
+  "roleplayOpeningAiDisclaimer": "AI kan fouten maken.\nDeel geen persoonlijke of gevoelige informatie.",
+  "endingFailTitle": "Je hebt niet alle missies voltooid!",
+  "endingFailSubtitle": "Probeer het opnieuw en ontdek het hele verhaal.",
+  "roleplayTryAgainMessage": "Helaas was je score niet hoog genoeg voor de beloning.",
+  "endingReport": "Probleem melden",
+  "endingHowWas": "Hoe vond je het rollenspel?",
+  "endingNext": "Volgende",
+  "reportTitle": "Probleem melden",
+  "profileHistory": "Geschiedenis",
+  "profileSaved": "Opgeslagen",
+  "profileHistoryEmpty": "Nog geen geschiedenis",
+  "profileSavedEmpty": "Nog geen opgeslagen uitdrukkingen.",
+  "profileSavedRemoveTitle": "Niet meer opslaan?",
+  "profileSavedRemoveContent": "Je vindt dit later terug in Geschiedenis.",
+  "profileSavedRemoveOk": "Verwijderen",
+  "profileSavedRemoveCancel": "Verder oefenen",
+  "seriesOverviewTabEpisodes": "Aflevering",
+  "seriesOverviewTabSimilarTopic": "Soortgelijk onderwerp",
+  "seriesOverviewEpisodeNumber": "Aflevering #{number}",
+  "@seriesOverviewEpisodeNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "seriesOverviewPlay": "Spelen",
+  "seriesOverviewLocked": "Vergrendeld",
+  "seriesOverviewEpisodeLockedToast": "Voltooi eerst de vorige aflevering.",
+  "notificationPermissionBlockedTitle": "Meldingen staan uit",
+  "notificationPermissionBlockedMessage": "Schakel meldingen in via de apparaatinstellingen om pushmeldingen te ontvangen.",
+  "openSettings": "Instellingen openen",
+  "notificationsTitle": "Meldingen",
+  "notificationsEmpty": "Nog geen meldingen",
+  "notificationSendToday": "Vandaag",
+  "notificationSendOneDayAgo": "1 dag geleden",
+  "notificationSendDaysAgo": "{count} dagen geleden",
+  "@notificationSendDaysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reregistrationRestrictedMessage": "Je kunt je pas 2 dagen na het verwijderen van je account opnieuw registreren. Probeer het later opnieuw.",
+  "expressionSavedToProfile": "Opgeslagen in je profiel",
+  "expressionUnsavedToProfile": "Niet meer opgeslagen",
+  "roleplayResultFeedbackInsufficientWords": "Deze keer konden we geen feedback geven. Breid je antwoord uit tot minimaal 7 woorden!",
+  "roleplayResultScoreMeaning": "Betekenis",
+  "roleplayResultScoreRelevance": "Relevantie",
+  "roleplayResultScoreVocabulary": "Woordenschat",
+  "roleplayResultScoreGrammar": "Grammatica",
+  "closePopup": "Sluiten",
+  "reviewChatTapHint": "Tik op de chatballon om de audio af te spelen.",
+  "reviewChatNoAudioToPlay": "Er is geen audio om af te spelen.",
+  "seriesInformationTopicDifficulty": "Moeilijkheidsgraad",
+  "seriesInformationLearningGoals": "Leerdoelen",
+  "energyInfoTitle": "Energie",
+  "energyOutOfEnergyTitle": "Energie op",
+  "energyInfoRechargeUntil": "Volgende aanvulling over @@TIME@@",
+  "energyInfoFull": "Je energie is vol.",
+  "energyInfoUnlimitedEndsIn": "Onbeperkte modus actief",
+  "energyInsufficient": "Je hebt niet genoeg energie.",
+  "endRoleplay": "Rollenspel beëindigen",
+  "energyEnablePushTitle": "Meldingen inschakelen",
+  "energyEnablePushSubtitle": "Zet meldingen aan en vul je energie helemaal aan.",
+  "energyEnablePushPrice": "Gratis",
+  "energyEnablePushOfferBadge": "EENMALIGE AANBIEDING",
+  "energyEnablePushCompleted": "Energie aangevuld!",
+  "energyPurchaseUnlimitedTitle": "Onbeperkte speelpas",
+  "energyPurchaseUnlimitedSubtitle": "Start direct na aankoop. 10 minuten geldig.",
+  "energyPurchaseCapacityTitle": "Energielimiet verhogen",
+  "energyPurchaseCapacitySubtitle": "Verhoog je maximale energie permanent met 1.",
+  "energyGoPremiumTitle": "Neem Premium",
+  "energyGoPremiumExplore": "Ontdekken",
+  "profileGoPremiumTitle": "Neem SUDA Premium",
+  "profileGoPremiumExplore": "Ontdekken",
+  "energyPurchasePendingApproval": "Je betaling moet nog worden goedgekeurd",
+  "energyPurchaseNotCompleted": "De aankoop is niet voltooid.",
+  "welcomeGiftTitle": "Je welkomstcadeau is er!",
+  "welcomeGiftBenefitLead": "Speel 10 minuten onbeperkt!",
+  "welcomeGiftLine2": "Premium-functies ontgrendeld",
+  "welcomeGiftLine3": "Onbeperkt spelen ontgrendeld",
+  "welcomeGiftStartNow": "Nu starten",
+  "paywallHeroTitle1": "Oefen meer",
+  "paywallHeroTitle2": "Ga sneller vooruit",
+  "paywallHeroBody": "Oefen langer met Premium en krijg AI-feedback om zelfverzekerder Engels te spreken.",
+  "paywallPremiumLabel": "PREMIUM",
+  "paywallBenefitDailyPractice": "Elke dag meer oefenen",
+  "paywallBenefitMaxEnergy": "Maximale energie: 30",
+  "paywallBenefitAiFeedback": "AI-feedback op zinnen",
+  "paywallChoosePlan": "Kies je abonnement",
+  "paywallAnnualPlanTitle": "Jaarabonnement",
+  "paywallAnnualPlanSubtitle": "Bespaar meer dan 33% ten opzichte van het maandabonnement.",
+  "paywallMonthlyPlanTitle": "Maandabonnement",
+  "paywallMonthlyPlanSubtitle": "Flexibele toegang per maand.",
+  "paywallBestBadge": "BESTE",
+  "paywallCta": "Nu abonneren",
+  "paywallAutoRenewNotice": "Je abonnement wordt automatisch verlengd, tenzij je het minimaal 24 uur vóór het einde van de huidige factureringsperiode opzegt.",
+  "paywallPricePerMonth": "{price}/maand",
+  "@paywallPricePerMonth": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallPricePerYear": "{price}/jaar",
+  "@paywallPricePerYear": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallFallbackAnnualPerMonth": "$8.33",
+  "paywallFallbackAnnual": "$99.99",
+  "paywallFallbackMonthly": "$13.99",
+  "paywallCompletedTitle": "Gefeliciteerd!",
+  "paywallCompletedBody": "Je Premium-voordelen zijn nu actief.",
+  "paywallCompletedContinue": "Doorgaan"
+}

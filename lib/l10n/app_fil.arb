@@ -1,0 +1,265 @@
+{
+  "@@locale": "fil",
+  "agreementHeading": "Pakisuri at sang-ayunan ang mga tuntunin sa ibaba para magpatuloy.",
+  "agreementTermsLabel": "Sumasang-ayon ako sa Mga Tuntunin ng Paggamit.",
+  "agreementPrivacyLabel": "Sumasang-ayon ako sa Patakaran sa Privacy.",
+  "agreementTermsTitle": "Mga Tuntunin ng Paggamit",
+  "agreementPrivacyTitle": "Patakaran sa Privacy",
+  "agreementDetailsLink": "Tingnan ang detalye",
+  "agreementButtonConfirm": "Kumpirmahin at magpatuloy",
+  "settingsTitle": "Mga Setting",
+  "settingsAccount": "Account",
+  "settingsRestorePurchases": "I-restore ang mga binili",
+  "restorePurchasesNothing": "Walang biniling maire-restore.",
+  "restorePurchasesCompleted": "Na-restore na ang mga binili.",
+  "settingsNotification": "Mga Notification",
+  "settingsTutorial": "Tutorial",
+  "settingsCefrLevel": "Antas ng English",
+  "pushNotifications": "Mga Push Notification",
+  "pushNotificationsDesc": "Makatanggap ng mga paalala at mahahalagang update.",
+  "settingsFeedback": "Feedback",
+  "settingsAnnouncements": "Mga Anunsyo",
+  "announcementsEmpty": "Wala pang anunsyo",
+  "noticesEmpty": "Wala pang post",
+  "deletedPost": "Na-delete na ang post na ito.",
+  "postNoLongerAvailable": "Hindi na available ang post na ito.",
+  "backToHome": "Bumalik sa Home",
+  "settingsSignOut": "Mag-log out",
+  "settingsFsdLaboratory": "FSD Laboratory",
+  "settingsPrivacy": "Patakaran sa Privacy",
+  "settingsTerms": "Mga Tuntunin ng Serbisyo",
+  "settingsOpenSource": "Mga Lisensya ng Open Source",
+  "loginWelcome": "Maligayang pagdating, {name}!",
+  "@loginWelcome": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "loginTermsTemplate": "Sa pagpapatuloy, sumasang-ayon ka sa aming {terms} at {privacy}.",
+  "@loginTermsTemplate": {
+    "placeholders": {
+      "terms": {
+        "type": "String"
+      },
+      "privacy": {
+        "type": "String"
+      }
+    }
+  },
+  "loginTermsTitle": "Mga Tuntunin ng Paggamit",
+  "loginPrivacyTitle": "Patakaran sa Privacy",
+  "loginCatchphrase": "Magsalita ka lang. Doon ka matututo.",
+  "loginWelcomeTitle": "Welcome sa SUDA!",
+  "loginWelcomeSubtitle": "Pumasok sa isang kuwento at magsimulang magsalita ng English!",
+  "loginErrorIdToken": "Hindi nakuha ang Google ID Token. Pakisubukang muli.",
+  "loginErrorFailed": "Hindi nagtagumpay ang login: {error}",
+  "@loginErrorFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "accountName": "Pangalan",
+  "accountInfo": "Account",
+  "accountDelete": "I-delete ang Account",
+  "accountDeleteTitle": "I-delete ang Account?",
+  "accountDeleteConfirmText": "Permanenteng mawawala ang lahat ng progreso at data mo. Sigurado ka ba?",
+  "accountDeleteProfileImageTitle": "I-delete ang profile image?",
+  "accountDeleteProfileImageContent": "Kapag na-delete na, hindi na mare-recover ang profile image mo.",
+  "accountGoBack": "Bumalik",
+  "accountDeleteAction": "I-delete",
+  "accountSubscription": "Subscription",
+  "accountFreePlanTitle": "Libreng Plan",
+  "accountFreePlanSubtitle": "Mag-Premium para ma-unlock ang iba pang feature",
+  "accountPremiumTitle": "Premium",
+  "accountPremiumSubtitle": "Aktibo ang mga benepisyo mo sa Premium",
+  "accountPremiumRenewsOn": "Magre-renew sa {date}",
+  "@accountPremiumRenewsOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "accountChangePlan": "Baguhin ang Plan",
+  "changePlanTitle": "Baguhin ang Plan",
+  "changePlanCurrentPlan": "Kasalukuyang Plan",
+  "changePlanAvailablePlans": "Mga Available na Plan",
+  "changePlanRenewsOn": "Magre-renew sa {date}",
+  "@changePlanRenewsOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "changePlanLoadFailed": "Hindi ma-load ang impormasyon. Pakisubukang muli.",
+  "changePlanRetry": "Subukan muli",
+  "changePlanConfirmTitle": "Baguhin ang Plan?",
+  "changePlanConfirmBody": "Magkakabisa ang pagbabago ng plan sa susunod mong billing date.",
+  "changePlanConfirmOk": "Kumpirmahin",
+  "changePlanConfirmCancel": "Panatilihin ang Kasalukuyang Plan",
+  "changePlanOldPurchaseMissing": "Walang nakitang active na subscription na puwedeng baguhin. Subukan muli kapag active na ang subscription mo.",
+  "changePlanChangeRequested": "Naisumite ang request na baguhin ang plan. Maaaring magkabisa ito sa susunod mong billing date.",
+  "cefrLevelTitle": "Piliin ang antas mo sa English",
+  "cefrLevelAbsoluteBeginner": "Baguhang-baguhan",
+  "cefrLevelBeginner": "Baguhan",
+  "cefrLevelBasic": "Basic",
+  "cefrLevelIntermediate": "Intermediate",
+  "firstCefrLevelTitle": "Ano ang antas mo sa English?",
+  "firstCefrLevelDescriptionPreA1": "Marunong akong magbasa ng English",
+  "firstCefrLevelDescriptionA1": "Alam ko ang mga basic na pagbati at simpleng parirala",
+  "firstCefrLevelDescriptionA2": "Nakakagamit at nakakaintindi ako ng maiikli at simpleng pangungusap",
+  "firstCefrLevelDescriptionB1": "Naibabahagi ko ang opinyon ko at nakakasali sa pang-araw-araw na usapan",
+  "firstCefrLevelSettingsHint": "Maaari mo itong baguhin anumang oras",
+  "firstCefrLevelConfirm": "Kumpirmahin",
+  "feedbackPlaceholder": "Ibahagi ang opinyon, mungkahi, o anumang problemang naranasan mo...",
+  "feedbackSend": "Ipadala",
+  "feedbackSuccess": "Salamat sa feedback mo.",
+  "microphonePermissionDenied": "Hindi makapagsimula nang walang pahintulot sa microphone.",
+  "holdMicrophoneToSpeak": "Pindutin nang matagal ang mic para magsalita",
+  "roleplayTypeMessagePlaceholder": "I-type ang mensahe mo...",
+  "yourTurnFirst": "Ikaw muna!",
+  "sayLineBelowToStart": "Sabihin ang linya sa ibaba para magsimula.",
+  "roleplayExitWait": "Teka!",
+  "roleplayExitMessage": "Kapag umalis ka ngayon, hindi mo makukuha ang reward. Sigurado ka bang aalis ka?",
+  "roleplayExitKeepPlaying": "Magpatuloy",
+  "roleplayExitExit": "Umalis",
+  "roleplayAutoHint": "Auto Hint",
+  "roleplayHintLabel": "Hint",
+  "roleplayHintShowAnswer": "I-tap para makita ang mungkahing sagot sa English",
+  "roleplayVoiceSpeed": "Bilis ng pagsasalita",
+  "roleplayEndedFailed": "Hindi nakumpleto ang mission...",
+  "roleplayEndedComplete": "Nakumpleto ang Roleplay",
+  "roleplayEndedEnding": "Papunta na sa ending...",
+  "roleplayFinishNotEnoughProgress": "Kulang ang progreso",
+  "roleplayFinishCompleted": "Nakumpleto ang Roleplay",
+  "roleplayFinishMovingToEnding": "Papunta na sa ending...",
+  "roleplayAnalyzing": "Sinusuri ang roleplay mo...",
+  "roleplayOpeningAiCharacter": "AI Character",
+  "roleplayOpeningScenario": "Scenario",
+  "roleplayOpeningAiDisclaimer": "Maaaring magkamali ang AI.\nHuwag magbahagi ng personal o sensitibong impormasyon.",
+  "endingFailTitle": "Hindi mo nakumpleto ang lahat ng mission!",
+  "endingFailSubtitle": "Subukan muli at tuklasin ang buong kuwento.",
+  "roleplayTryAgainMessage": "Sayang, hindi sapat ang score mo para makuha ang reward.",
+  "endingReport": "I-report ang problema",
+  "endingHowWas": "Kumusta ang Roleplay?",
+  "endingNext": "Susunod",
+  "reportTitle": "I-report ang Problema",
+  "profileHistory": "History",
+  "profileSaved": "Mga Naka-save",
+  "profileHistoryEmpty": "Wala pang history",
+  "profileSavedEmpty": "Wala pang naka-save na expression.",
+  "profileSavedRemoveTitle": "Alisin sa mga naka-save?",
+  "profileSavedRemoveContent": "Mahahanap mo ulit ito sa History sa ibang pagkakataon.",
+  "profileSavedRemoveOk": "Alisin",
+  "profileSavedRemoveCancel": "Magpraktis pa",
+  "seriesOverviewTabEpisodes": "Episode",
+  "seriesOverviewTabSimilarTopic": "Katulad na Paksa",
+  "seriesOverviewEpisodeNumber": "Episode #{number}",
+  "@seriesOverviewEpisodeNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "seriesOverviewPlay": "I-play",
+  "seriesOverviewLocked": "Naka-lock",
+  "seriesOverviewEpisodeLockedToast": "Tapusin muna ang nakaraang episode para ma-unlock ito.",
+  "notificationPermissionBlockedTitle": "Naka-off ang mga notification",
+  "notificationPermissionBlockedMessage": "I-on ang mga notification sa settings ng device para makatanggap ng mga push notification.",
+  "openSettings": "Buksan ang Settings",
+  "notificationsTitle": "Mga Notification",
+  "notificationsEmpty": "Wala pang notification",
+  "notificationSendToday": "Ngayong araw",
+  "notificationSendOneDayAgo": "1 araw ang nakalipas",
+  "notificationSendDaysAgo": "{count} araw ang nakalipas",
+  "@notificationSendDaysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reregistrationRestrictedMessage": "Maaari kang mag-sign up muli 2 araw pagkatapos i-delete ang account mo. Pakisubukang muli mamaya.",
+  "expressionSavedToProfile": "Na-save sa Profile mo",
+  "expressionUnsavedToProfile": "Hindi na naka-save",
+  "roleplayResultFeedbackInsufficientWords": "Hindi kami makapagbigay ng feedback sa pagkakataong ito. Subukang pahabain ang sagot mo sa 7 salita o higit pa!",
+  "roleplayResultScoreMeaning": "Kahulugan",
+  "roleplayResultScoreRelevance": "Kaugnayan",
+  "roleplayResultScoreVocabulary": "Bokabularyo",
+  "roleplayResultScoreGrammar": "Gramatika",
+  "closePopup": "Isara",
+  "reviewChatTapHint": "I-tap ang chat bubble para i-play ang audio.",
+  "reviewChatNoAudioToPlay": "Walang audio na puwedeng i-play.",
+  "seriesInformationTopicDifficulty": "Antas ng Hirap ng Paksa",
+  "seriesInformationLearningGoals": "Mga Layunin sa Pag-aaral",
+  "energyInfoTitle": "Energy",
+  "energyOutOfEnergyTitle": "Ubos na ang Energy",
+  "energyInfoRechargeUntil": "Susunod na recharge sa loob ng @@TIME@@",
+  "energyInfoFull": "Puno ang Energy mo.",
+  "energyInfoUnlimitedEndsIn": "Aktibo ang Unlimited Mode",
+  "energyInsufficient": "Kulang ang Energy mo.",
+  "endRoleplay": "Tapusin ang Roleplay",
+  "energyEnablePushTitle": "I-on ang mga Notification",
+  "energyEnablePushSubtitle": "I-on ang mga notification at punuin ang Energy mo.",
+  "energyEnablePushPrice": "Libre",
+  "energyEnablePushOfferBadge": "ALOK NA ISANG BESES LANG",
+  "energyEnablePushCompleted": "Napuno na ang Energy!",
+  "energyPurchaseUnlimitedTitle": "Pass para sa Unlimited Mode",
+  "energyPurchaseUnlimitedSubtitle": "Magsisimula agad pagkatapos bilhin. Valid sa loob ng 10 minuto.",
+  "energyPurchaseCapacityTitle": "Upgrade sa Max Energy",
+  "energyPurchaseCapacitySubtitle": "Permanenteng tataas nang 1 ang maximum na Energy na mare-recharge mo.",
+  "energyGoPremiumTitle": "Mag-Premium",
+  "energyGoPremiumExplore": "Tingnan",
+  "profileGoPremiumTitle": "Kunin ang SUDA Premium",
+  "profileGoPremiumExplore": "Tingnan",
+  "energyPurchasePendingApproval": "Naghihintay pa ng approval ang payment mo",
+  "energyPurchaseNotCompleted": "Hindi nakumpleto ang pagbili.",
+  "welcomeGiftTitle": "Dumating na ang Welcome Gift Mo!",
+  "welcomeGiftBenefitLead": "Mag-enjoy sa unlimited play nang 10 minuto!",
+  "welcomeGiftLine2": "Na-unlock ang mga Premium feature",
+  "welcomeGiftLine3": "Na-unlock ang unlimited play",
+  "welcomeGiftStartNow": "Magsimula Ngayon",
+  "paywallHeroTitle1": "Magpraktis Pa",
+  "paywallHeroTitle2": "Mas Mabilis na Gumaling",
+  "paywallHeroBody": "Magpraktis nang mas matagal gamit ang Premium at makakuha ng AI feedback para mas maging confident sa English.",
+  "paywallPremiumLabel": "PREMIUM",
+  "paywallBenefitDailyPractice": "Mas Maraming Practice Kada Araw",
+  "paywallBenefitMaxEnergy": "Hanggang 30 ang Max Energy",
+  "paywallBenefitAiFeedback": "AI Feedback sa Pangungusap",
+  "paywallChoosePlan": "Piliin ang Plan Mo",
+  "paywallAnnualPlanTitle": "Taunang Plan",
+  "paywallAnnualPlanSubtitle": "Makatipid nang mahigit 33% kumpara sa buwanang plan.",
+  "paywallMonthlyPlanTitle": "Buwanang Plan",
+  "paywallMonthlyPlanSubtitle": "Flexible na access buwan-buwan.",
+  "paywallBestBadge": "PINAKASULIT",
+  "paywallCta": "Mag-subscribe Ngayon",
+  "paywallAutoRenewNotice": "Awtomatikong mare-renew ang subscription maliban kung kanselahin ito nang hindi bababa sa 24 na oras bago matapos ang kasalukuyang billing period.",
+  "paywallPricePerMonth": "{price}/buwan",
+  "@paywallPricePerMonth": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallPricePerYear": "{price}/taon",
+  "@paywallPricePerYear": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallFallbackAnnualPerMonth": "$8.33",
+  "paywallFallbackAnnual": "$99.99",
+  "paywallFallbackMonthly": "$13.99",
+  "paywallCompletedTitle": "Binabati ka!",
+  "paywallCompletedBody": "Aktibo na ang mga benepisyo mo sa Premium.",
+  "paywallCompletedContinue": "Magpatuloy"
+}

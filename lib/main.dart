@@ -7,7 +7,6 @@ import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'l10n/app_localizations.dart';
 
 import 'services/auth_service.dart';
@@ -822,14 +821,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       ],
       title: 'SUDA',
       debugShowCheckedModeBanner: false,
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: const [Locale('en'), Locale('ko'), Locale('pt')],
-      locale: Locale(LanguageUtil.getCurrentLanguageCode()),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       // MaterialApp 빌드 후 첫 프레임이 그려진 후 버전 체크 실행
       builder: (BuildContext context, Widget? child) {
         // MaterialApp이 빌드된 후 한 번만 실행

@@ -1,0 +1,265 @@
+{
+  "@@locale": "ms",
+  "agreementHeading": "Sila semak dan setujui perkara di bawah untuk meneruskan.",
+  "agreementTermsLabel": "Saya bersetuju dengan Terma Penggunaan.",
+  "agreementPrivacyLabel": "Saya bersetuju dengan Dasar Privasi.",
+  "agreementTermsTitle": "Terma Penggunaan",
+  "agreementPrivacyTitle": "Dasar Privasi",
+  "agreementDetailsLink": "Lihat butiran",
+  "agreementButtonConfirm": "Setuju dan teruskan",
+  "settingsTitle": "Tetapan",
+  "settingsAccount": "Akaun",
+  "settingsRestorePurchases": "Pulihkan Pembelian",
+  "restorePurchasesNothing": "Tiada pembelian untuk dipulihkan.",
+  "restorePurchasesCompleted": "Pembelian dipulihkan.",
+  "settingsNotification": "Pemberitahuan",
+  "settingsTutorial": "Tutorial",
+  "settingsCefrLevel": "Tahap Bahasa Inggeris",
+  "pushNotifications": "Pemberitahuan Push",
+  "pushNotificationsDesc": "Terima peringatan dan kemas kini penting.",
+  "settingsFeedback": "Maklum Balas",
+  "settingsAnnouncements": "Pengumuman",
+  "announcementsEmpty": "Belum ada pengumuman",
+  "noticesEmpty": "Belum ada siaran",
+  "deletedPost": "Siaran ini telah dipadamkan.",
+  "postNoLongerAvailable": "Siaran ini tidak lagi tersedia.",
+  "backToHome": "Kembali ke Laman Utama",
+  "settingsSignOut": "Log Keluar",
+  "settingsFsdLaboratory": "Makmal FSD",
+  "settingsPrivacy": "Dasar Privasi",
+  "settingsTerms": "Terma Perkhidmatan",
+  "settingsOpenSource": "Lesen Sumber Terbuka",
+  "loginWelcome": "Selamat datang, {name}!",
+  "@loginWelcome": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "loginTermsTemplate": "Dengan meneruskan, anda bersetuju dengan {terms} dan {privacy} kami.",
+  "@loginTermsTemplate": {
+    "placeholders": {
+      "terms": {
+        "type": "String"
+      },
+      "privacy": {
+        "type": "String"
+      }
+    }
+  },
+  "loginTermsTitle": "Terma Penggunaan",
+  "loginPrivacyTitle": "Dasar Privasi",
+  "loginCatchphrase": "Mula bercakap. Begitulah cara anda belajar.",
+  "loginWelcomeTitle": "Selamat datang ke SUDA!",
+  "loginWelcomeSubtitle": "Masuk ke dalam cerita dan mula bercakap dalam bahasa Inggeris!",
+  "loginErrorIdToken": "Gagal mendapatkan Token ID Google. Sila cuba lagi.",
+  "loginErrorFailed": "Log masuk gagal: {error}",
+  "@loginErrorFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "accountName": "Nama",
+  "accountInfo": "Akaun",
+  "accountDelete": "Padam Akaun",
+  "accountDeleteTitle": "Padam Akaun?",
+  "accountDeleteConfirmText": "Semua kemajuan dan data anda akan hilang secara kekal. Adakah anda pasti?",
+  "accountDeleteProfileImageTitle": "Padam gambar profil?",
+  "accountDeleteProfileImageContent": "Selepas dipadamkan, gambar profil anda tidak boleh dipulihkan.",
+  "accountGoBack": "Kembali",
+  "accountDeleteAction": "Padam",
+  "accountSubscription": "Langganan",
+  "accountFreePlanTitle": "Pelan Percuma",
+  "accountFreePlanSubtitle": "Dapatkan Premium untuk membuka lebih banyak ciri",
+  "accountPremiumTitle": "Premium",
+  "accountPremiumSubtitle": "Anda sedang menikmati manfaat Premium",
+  "accountPremiumRenewsOn": "Akan diperbaharui pada {date}",
+  "@accountPremiumRenewsOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "accountChangePlan": "Tukar Pelan",
+  "changePlanTitle": "Tukar Pelan",
+  "changePlanCurrentPlan": "Pelan Semasa",
+  "changePlanAvailablePlans": "Pelan Tersedia",
+  "changePlanRenewsOn": "Akan diperbaharui pada {date}",
+  "@changePlanRenewsOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "changePlanLoadFailed": "Maklumat tidak dapat dimuatkan. Sila cuba lagi.",
+  "changePlanRetry": "Cuba lagi",
+  "changePlanConfirmTitle": "Tukar Pelan?",
+  "changePlanConfirmBody": "Perubahan pelan berkuat kuasa pada tarikh pengebilan anda yang seterusnya.",
+  "changePlanConfirmOk": "Sahkan",
+  "changePlanConfirmCancel": "Kekalkan Pelan Semasa",
+  "changePlanOldPurchaseMissing": "Langganan aktif untuk ditukar tidak ditemui. Cuba lagi selepas langganan anda aktif.",
+  "changePlanChangeRequested": "Permintaan pertukaran pelan dihantar. Perubahan mungkin berkuat kuasa pada tarikh pengebilan seterusnya.",
+  "cefrLevelTitle": "Pilih tahap bahasa Inggeris anda",
+  "cefrLevelAbsoluteBeginner": "Baru Bermula",
+  "cefrLevelBeginner": "Pemula",
+  "cefrLevelBasic": "Asas",
+  "cefrLevelIntermediate": "Pertengahan",
+  "firstCefrLevelTitle": "Apakah tahap bahasa Inggeris anda?",
+  "firstCefrLevelDescriptionPreA1": "Saya boleh membaca bahasa Inggeris",
+  "firstCefrLevelDescriptionA1": "Saya tahu sapaan asas dan frasa mudah",
+  "firstCefrLevelDescriptionA2": "Saya boleh menggunakan dan memahami ayat pendek dan mudah",
+  "firstCefrLevelDescriptionB1": "Saya boleh berkongsi pendapat dan menyertai perbualan harian",
+  "firstCefrLevelSettingsHint": "Boleh ditukar pada bila-bila masa",
+  "firstCefrLevelConfirm": "Sahkan",
+  "feedbackPlaceholder": "Kongsi pendapat, cadangan atau sebarang masalah yang anda hadapi...",
+  "feedbackSend": "Hantar",
+  "feedbackSuccess": "Terima kasih atas maklum balas anda.",
+  "microphonePermissionDenied": "Tidak dapat bermula tanpa kebenaran mikrofon.",
+  "holdMicrophoneToSpeak": "Tekan dan tahan mikrofon untuk bercakap",
+  "roleplayTypeMessagePlaceholder": "Taip mesej anda...",
+  "yourTurnFirst": "Giliran anda dulu!",
+  "sayLineBelowToStart": "Sebut ayat di bawah untuk bermula.",
+  "roleplayExitWait": "Tunggu!",
+  "roleplayExitMessage": "Jika keluar sekarang, anda akan terlepas ganjaran. Adakah anda pasti mahu keluar?",
+  "roleplayExitKeepPlaying": "Teruskan Bermain",
+  "roleplayExitExit": "Keluar",
+  "roleplayAutoHint": "Petunjuk Automatik",
+  "roleplayHintLabel": "Petunjuk",
+  "roleplayHintShowAnswer": "Ketik untuk melihat cadangan jawapan dalam bahasa Inggeris",
+  "roleplayVoiceSpeed": "Kelajuan Pertuturan",
+  "roleplayEndedFailed": "Misi Gagal...",
+  "roleplayEndedComplete": "Lakon peranan selesai",
+  "roleplayEndedEnding": "Menuju ke penamat...",
+  "roleplayFinishNotEnoughProgress": "Kemajuan tidak mencukupi",
+  "roleplayFinishCompleted": "Lakon peranan selesai",
+  "roleplayFinishMovingToEnding": "Menuju ke penamat...",
+  "roleplayAnalyzing": "Menganalisis sesi lakon peranan anda...",
+  "roleplayOpeningAiCharacter": "Watak AI",
+  "roleplayOpeningScenario": "Senario",
+  "roleplayOpeningAiDisclaimer": "AI boleh melakukan kesilapan.\nJangan kongsi maklumat peribadi atau sensitif.",
+  "endingFailTitle": "Anda belum menyelesaikan semua misi!",
+  "endingFailSubtitle": "Cuba lagi dan temui keseluruhan cerita.",
+  "roleplayTryAgainMessage": "Malangnya, markah anda tidak cukup tinggi untuk memperoleh ganjaran.",
+  "endingReport": "Laporkan Masalah",
+  "endingHowWas": "Bagaimanakah sesi lakon peranan tadi?",
+  "endingNext": "Seterusnya",
+  "reportTitle": "Laporkan Masalah",
+  "profileHistory": "Sejarah",
+  "profileSaved": "Disimpan",
+  "profileHistoryEmpty": "Belum ada sejarah",
+  "profileSavedEmpty": "Belum ada ungkapan disimpan.",
+  "profileSavedRemoveTitle": "Alih keluar daripada simpanan?",
+  "profileSavedRemoveContent": "Anda boleh menemuinya semula dalam Sejarah nanti.",
+  "profileSavedRemoveOk": "Alih keluar",
+  "profileSavedRemoveCancel": "Berlatih lagi",
+  "seriesOverviewTabEpisodes": "Episod",
+  "seriesOverviewTabSimilarTopic": "Topik Serupa",
+  "seriesOverviewEpisodeNumber": "Episod #{number}",
+  "@seriesOverviewEpisodeNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "seriesOverviewPlay": "Main",
+  "seriesOverviewLocked": "Dikunci",
+  "seriesOverviewEpisodeLockedToast": "Selesaikan episod sebelumnya untuk membuka kunci.",
+  "notificationPermissionBlockedTitle": "Pemberitahuan dimatikan",
+  "notificationPermissionBlockedMessage": "Hidupkan pemberitahuan dalam tetapan peranti untuk menerima pemberitahuan push.",
+  "openSettings": "Buka Tetapan",
+  "notificationsTitle": "Pemberitahuan",
+  "notificationsEmpty": "Belum ada pemberitahuan",
+  "notificationSendToday": "Hari ini",
+  "notificationSendOneDayAgo": "1 hari lalu",
+  "notificationSendDaysAgo": "{count} hari lalu",
+  "@notificationSendDaysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reregistrationRestrictedMessage": "Anda boleh mendaftar semula 2 hari selepas memadamkan akaun. Sila cuba lagi kemudian.",
+  "expressionSavedToProfile": "Disimpan dalam profil anda",
+  "expressionUnsavedToProfile": "Dialih keluar daripada simpanan",
+  "roleplayResultFeedbackInsufficientWords": "Kami tidak dapat memberikan maklum balas kali ini. Cuba panjangkan jawapan anda kepada 7 perkataan atau lebih!",
+  "roleplayResultScoreMeaning": "Maksud",
+  "roleplayResultScoreRelevance": "Kaitan",
+  "roleplayResultScoreVocabulary": "Kosa Kata",
+  "roleplayResultScoreGrammar": "Tatabahasa",
+  "closePopup": "Tutup",
+  "reviewChatTapHint": "Ketik gelembung sembang untuk memainkan audio.",
+  "reviewChatNoAudioToPlay": "Tiada audio untuk dimainkan.",
+  "seriesInformationTopicDifficulty": "Tahap Kesukaran Topik",
+  "seriesInformationLearningGoals": "Matlamat Pembelajaran",
+  "energyInfoTitle": "Tenaga",
+  "energyOutOfEnergyTitle": "Kehabisan Tenaga",
+  "energyInfoRechargeUntil": "Cas semula seterusnya dalam @@TIME@@",
+  "energyInfoFull": "Tenaga anda penuh.",
+  "energyInfoUnlimitedEndsIn": "Mod Tanpa Had Aktif",
+  "energyInsufficient": "Tenaga anda tidak mencukupi.",
+  "endRoleplay": "Tamatkan lakon peranan",
+  "energyEnablePushTitle": "Hidupkan Pemberitahuan",
+  "energyEnablePushSubtitle": "Hidupkan pemberitahuan dan isi semula tenaga hingga penuh.",
+  "energyEnablePushPrice": "Percuma",
+  "energyEnablePushOfferBadge": "TAWARAN SEKALI SAHAJA",
+  "energyEnablePushCompleted": "Tenaga diisi semula!",
+  "energyPurchaseUnlimitedTitle": "Pas Tanpa Had",
+  "energyPurchaseUnlimitedSubtitle": "Bermula serta-merta selepas pembelian. Sah selama 10 minit.",
+  "energyPurchaseCapacityTitle": "Naik Taraf Tenaga Maksimum",
+  "energyPurchaseCapacitySubtitle": "Tingkatkan had tenaga yang boleh dicas semula sebanyak 1 secara kekal.",
+  "energyGoPremiumTitle": "Langgan Premium",
+  "energyGoPremiumExplore": "Terokai",
+  "profileGoPremiumTitle": "Dapatkan SUDA Premium",
+  "profileGoPremiumExplore": "Terokai",
+  "energyPurchasePendingApproval": "Pembayaran anda sedang menunggu kelulusan",
+  "energyPurchaseNotCompleted": "Pembelian tidak dapat diselesaikan.",
+  "welcomeGiftTitle": "Hadiah Alu-aluan Anda Sudah Tiba!",
+  "welcomeGiftBenefitLead": "Nikmati akses bermain tanpa had selama 10 minit!",
+  "welcomeGiftLine2": "Ciri Premium diaktifkan",
+  "welcomeGiftLine3": "Akses bermain tanpa had diaktifkan",
+  "welcomeGiftStartNow": "Mula Sekarang",
+  "paywallHeroTitle1": "Berlatih Lebih Banyak",
+  "paywallHeroTitle2": "Maju Lebih Pantas",
+  "paywallHeroBody": "Berlatih lebih lama dengan Premium dan dapatkan maklum balas AI untuk membina keyakinan berbahasa Inggeris.",
+  "paywallPremiumLabel": "PREMIUM",
+  "paywallBenefitDailyPractice": "Lebih Banyak Latihan Harian",
+  "paywallBenefitMaxEnergy": "Had Tenaga hingga 30",
+  "paywallBenefitAiFeedback": "Maklum Balas AI untuk Ayat",
+  "paywallChoosePlan": "Pilih Pelan Anda",
+  "paywallAnnualPlanTitle": "Pelan Tahunan",
+  "paywallAnnualPlanSubtitle": "Jimat lebih 33% berbanding pelan bulanan.",
+  "paywallMonthlyPlanTitle": "Pelan Bulanan",
+  "paywallMonthlyPlanSubtitle": "Akses bulanan yang fleksibel.",
+  "paywallBestBadge": "TERBAIK",
+  "paywallCta": "Langgan Sekarang",
+  "paywallAutoRenewNotice": "Langganan diperbaharui secara automatik kecuali dibatalkan sekurang-kurangnya 24 jam sebelum tempoh pengebilan semasa berakhir.",
+  "paywallPricePerMonth": "{price}/bulan",
+  "@paywallPricePerMonth": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallPricePerYear": "{price}/tahun",
+  "@paywallPricePerYear": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallFallbackAnnualPerMonth": "$8.33",
+  "paywallFallbackAnnual": "$99.99",
+  "paywallFallbackMonthly": "$13.99",
+  "paywallCompletedTitle": "Tahniah!",
+  "paywallCompletedBody": "Manfaat Premium anda kini aktif.",
+  "paywallCompletedContinue": "Teruskan"
+}

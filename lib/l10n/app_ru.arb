@@ -1,0 +1,265 @@
+{
+  "@@locale": "ru",
+  "agreementHeading": "Чтобы продолжить, ознакомьтесь с условиями ниже и примите их.",
+  "agreementTermsLabel": "Я принимаю Условия использования.",
+  "agreementPrivacyLabel": "Я принимаю Политику конфиденциальности.",
+  "agreementTermsTitle": "Условия использования",
+  "agreementPrivacyTitle": "Политика конфиденциальности",
+  "agreementDetailsLink": "Подробнее",
+  "agreementButtonConfirm": "Принять и продолжить",
+  "settingsTitle": "Настройки",
+  "settingsAccount": "Аккаунт",
+  "settingsRestorePurchases": "Восстановить покупки",
+  "restorePurchasesNothing": "Нет покупок для восстановления.",
+  "restorePurchasesCompleted": "Покупки восстановлены.",
+  "settingsNotification": "Уведомления",
+  "settingsTutorial": "Обучение",
+  "settingsCefrLevel": "Уровень английского",
+  "pushNotifications": "Push-уведомления",
+  "pushNotificationsDesc": "Получайте напоминания и важные новости.",
+  "settingsFeedback": "Обратная связь",
+  "settingsAnnouncements": "Объявления",
+  "announcementsEmpty": "Объявлений пока нет",
+  "noticesEmpty": "Публикаций пока нет",
+  "deletedPost": "Эта публикация удалена.",
+  "postNoLongerAvailable": "Эта публикация больше недоступна.",
+  "backToHome": "На главную",
+  "settingsSignOut": "Выйти",
+  "settingsFsdLaboratory": "Лаборатория FSD",
+  "settingsPrivacy": "Политика конфиденциальности",
+  "settingsTerms": "Условия использования",
+  "settingsOpenSource": "Лицензии открытого ПО",
+  "loginWelcome": "Добро пожаловать, {name}!",
+  "@loginWelcome": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "loginTermsTemplate": "Продолжая, вы соглашаетесь со следующими документами: {terms} и {privacy}.",
+  "@loginTermsTemplate": {
+    "placeholders": {
+      "terms": {
+        "type": "String"
+      },
+      "privacy": {
+        "type": "String"
+      }
+    }
+  },
+  "loginTermsTitle": "Условия использования",
+  "loginPrivacyTitle": "Политика конфиденциальности",
+  "loginCatchphrase": "Начните говорить — так и учатся.",
+  "loginWelcomeTitle": "Добро пожаловать в SUDA!",
+  "loginWelcomeSubtitle": "Погрузитесь в историю и начните говорить по-английски!",
+  "loginErrorIdToken": "Не удалось получить ID-токен Google. Повторите попытку.",
+  "loginErrorFailed": "Не удалось войти: {error}",
+  "@loginErrorFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "accountName": "Имя",
+  "accountInfo": "Аккаунт",
+  "accountDelete": "Удалить аккаунт",
+  "accountDeleteTitle": "Удалить аккаунт?",
+  "accountDeleteConfirmText": "Весь прогресс и данные будут удалены без возможности восстановления. Вы уверены?",
+  "accountDeleteProfileImageTitle": "Удалить фото профиля?",
+  "accountDeleteProfileImageContent": "После удаления фото профиля нельзя будет восстановить.",
+  "accountGoBack": "Назад",
+  "accountDeleteAction": "Удалить",
+  "accountSubscription": "Подписка",
+  "accountFreePlanTitle": "Бесплатный тариф",
+  "accountFreePlanSubtitle": "Оформите подписку Premium, чтобы открыть больше возможностей",
+  "accountPremiumTitle": "Premium",
+  "accountPremiumSubtitle": "Вам доступны преимущества Premium",
+  "accountPremiumRenewsOn": "Продление: {date}",
+  "@accountPremiumRenewsOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "accountChangePlan": "Изменить тариф",
+  "changePlanTitle": "Изменить тариф",
+  "changePlanCurrentPlan": "Текущий тариф",
+  "changePlanAvailablePlans": "Доступные тарифы",
+  "changePlanRenewsOn": "Продление: {date}",
+  "@changePlanRenewsOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "changePlanLoadFailed": "Не удалось загрузить данные. Повторите попытку.",
+  "changePlanRetry": "Повторить",
+  "changePlanConfirmTitle": "Изменить тариф?",
+  "changePlanConfirmBody": "Новый тариф начнёт действовать в день следующего списания.",
+  "changePlanConfirmOk": "Подтвердить",
+  "changePlanConfirmCancel": "Оставить текущий тариф",
+  "changePlanOldPurchaseMissing": "Не найдена активная подписка для смены тарифа. Повторите попытку после её активации.",
+  "changePlanChangeRequested": "Запрос на смену тарифа отправлен. Новый тариф может начать действовать в день следующего списания.",
+  "cefrLevelTitle": "Выберите свой уровень английского",
+  "cefrLevelAbsoluteBeginner": "С нуля",
+  "cefrLevelBeginner": "Начальный",
+  "cefrLevelBasic": "Базовый",
+  "cefrLevelIntermediate": "Средний",
+  "firstCefrLevelTitle": "Какой у вас уровень английского?",
+  "firstCefrLevelDescriptionPreA1": "Я умею читать по-английски",
+  "firstCefrLevelDescriptionA1": "Я знаю основные приветствия и простые фразы",
+  "firstCefrLevelDescriptionA2": "Я понимаю и использую короткие простые предложения",
+  "firstCefrLevelDescriptionB1": "Я могу выражать своё мнение и общаться на повседневные темы",
+  "firstCefrLevelSettingsHint": "Уровень можно изменить в любое время",
+  "firstCefrLevelConfirm": "Подтвердить",
+  "feedbackPlaceholder": "Расскажите, что вы думаете, предложите улучшение или сообщите о проблеме...",
+  "feedbackSend": "Отправить",
+  "feedbackSuccess": "Спасибо за обратную связь.",
+  "microphonePermissionDenied": "Без доступа к микрофону начать нельзя.",
+  "holdMicrophoneToSpeak": "Удерживайте кнопку микрофона и говорите",
+  "roleplayTypeMessagePlaceholder": "Введите сообщение...",
+  "yourTurnFirst": "Начните вы!",
+  "sayLineBelowToStart": "Произнесите фразу ниже, чтобы начать.",
+  "roleplayExitWait": "Подождите!",
+  "roleplayExitMessage": "Если выйти сейчас, вы не получите награду. Всё равно выйти?",
+  "roleplayExitKeepPlaying": "Продолжить",
+  "roleplayExitExit": "Выйти",
+  "roleplayAutoHint": "Автоподсказки",
+  "roleplayHintLabel": "Подсказка",
+  "roleplayHintShowAnswer": "Показать вариант ответа на английском",
+  "roleplayVoiceSpeed": "Скорость речи",
+  "roleplayEndedFailed": "Миссия провалена...",
+  "roleplayEndedComplete": "Ролевая игра завершена",
+  "roleplayEndedEnding": "Переход к финалу...",
+  "roleplayFinishNotEnoughProgress": "Недостаточно прогресса",
+  "roleplayFinishCompleted": "Ролевая игра завершена",
+  "roleplayFinishMovingToEnding": "Переход к финалу...",
+  "roleplayAnalyzing": "Анализируем ролевую игру...",
+  "roleplayOpeningAiCharacter": "Персонаж ИИ",
+  "roleplayOpeningScenario": "Сценарий",
+  "roleplayOpeningAiDisclaimer": "ИИ может ошибаться.\nНе сообщайте личную или конфиденциальную информацию.",
+  "endingFailTitle": "Вы выполнили не все миссии!",
+  "endingFailSubtitle": "Попробуйте снова и узнайте всю историю.",
+  "roleplayTryAgainMessage": "К сожалению, вы набрали недостаточно баллов, чтобы получить награду.",
+  "endingReport": "Сообщить о проблеме",
+  "endingHowWas": "Как вам ролевая игра?",
+  "endingNext": "Далее",
+  "reportTitle": "Сообщить о проблеме",
+  "profileHistory": "История",
+  "profileSaved": "Сохранённое",
+  "profileHistoryEmpty": "Истории пока нет",
+  "profileSavedEmpty": "Сохранённых выражений пока нет.",
+  "profileSavedRemoveTitle": "Удалить из сохранённого?",
+  "profileSavedRemoveContent": "Позже это выражение можно снова найти в истории.",
+  "profileSavedRemoveOk": "Удалить",
+  "profileSavedRemoveCancel": "Продолжить практику",
+  "seriesOverviewTabEpisodes": "Эпизоды",
+  "seriesOverviewTabSimilarTopic": "Похожие темы",
+  "seriesOverviewEpisodeNumber": "Эпизод #{number}",
+  "@seriesOverviewEpisodeNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "seriesOverviewPlay": "Играть",
+  "seriesOverviewLocked": "Заблокирован",
+  "seriesOverviewEpisodeLockedToast": "Чтобы открыть, завершите предыдущий эпизод.",
+  "notificationPermissionBlockedTitle": "Уведомления отключены",
+  "notificationPermissionBlockedMessage": "Чтобы получать push-уведомления, включите их в настройках устройства.",
+  "openSettings": "Открыть настройки",
+  "notificationsTitle": "Уведомления",
+  "notificationsEmpty": "Уведомлений пока нет",
+  "notificationSendToday": "Сегодня",
+  "notificationSendOneDayAgo": "1 день назад",
+  "notificationSendDaysAgo": "{count} дн. назад",
+  "@notificationSendDaysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reregistrationRestrictedMessage": "Повторно зарегистрироваться можно через 2 дня после удаления аккаунта. Попробуйте позже.",
+  "expressionSavedToProfile": "Сохранено в профиле",
+  "expressionUnsavedToProfile": "Удалено из сохранённого",
+  "roleplayResultFeedbackInsufficientWords": "В этот раз не удалось дать обратную связь. Ответьте подробнее — используйте не менее 7 слов!",
+  "roleplayResultScoreMeaning": "Смысл",
+  "roleplayResultScoreRelevance": "Соответствие",
+  "roleplayResultScoreVocabulary": "Лексика",
+  "roleplayResultScoreGrammar": "Грамматика",
+  "closePopup": "Закрыть",
+  "reviewChatTapHint": "Нажмите на облачко сообщения, чтобы воспроизвести аудио.",
+  "reviewChatNoAudioToPlay": "Нет аудио для воспроизведения.",
+  "seriesInformationTopicDifficulty": "Сложность темы",
+  "seriesInformationLearningGoals": "Цели обучения",
+  "energyInfoTitle": "Энергия",
+  "energyOutOfEnergyTitle": "Энергия закончилась",
+  "energyInfoRechargeUntil": "До следующего восстановления: @@TIME@@",
+  "energyInfoFull": "Энергия полностью восстановлена.",
+  "energyInfoUnlimitedEndsIn": "Безлимитный режим активен",
+  "energyInsufficient": "Недостаточно энергии.",
+  "endRoleplay": "Завершить ролевую игру",
+  "energyEnablePushTitle": "Включить уведомления",
+  "energyEnablePushSubtitle": "Включите уведомления и полностью восстановите энергию.",
+  "energyEnablePushPrice": "Бесплатно",
+  "energyEnablePushOfferBadge": "РАЗОВОЕ ПРЕДЛОЖЕНИЕ",
+  "energyEnablePushCompleted": "Энергия восстановлена!",
+  "energyPurchaseUnlimitedTitle": "Безлимитный пропуск",
+  "energyPurchaseUnlimitedSubtitle": "Активируется сразу после покупки и действует 10 минут.",
+  "energyPurchaseCapacityTitle": "Увеличение запаса энергии",
+  "energyPurchaseCapacitySubtitle": "Навсегда увеличивает максимальный запас энергии на 1.",
+  "energyGoPremiumTitle": "Перейти на Premium",
+  "energyGoPremiumExplore": "Подробнее",
+  "profileGoPremiumTitle": "Оформить SUDA Premium",
+  "profileGoPremiumExplore": "Подробнее",
+  "energyPurchasePendingApproval": "Платёж ожидает подтверждения.",
+  "energyPurchaseNotCompleted": "Покупка не завершена.",
+  "welcomeGiftTitle": "Ваш приветственный подарок уже здесь!",
+  "welcomeGiftBenefitLead": "Играйте без ограничений 10 минут!",
+  "welcomeGiftLine2": "Функции Premium открыты",
+  "welcomeGiftLine3": "Открыт безлимитный режим",
+  "welcomeGiftStartNow": "Начать",
+  "paywallHeroTitle1": "Практикуйтесь больше",
+  "paywallHeroTitle2": "Учитесь быстрее",
+  "paywallHeroBody": "Практикуйтесь дольше с Premium и получайте обратную связь от ИИ, чтобы увереннее говорить по-английски.",
+  "paywallPremiumLabel": "PREMIUM",
+  "paywallBenefitDailyPractice": "Больше практики каждый день",
+  "paywallBenefitMaxEnergy": "До 30 единиц энергии",
+  "paywallBenefitAiFeedback": "Обратная связь от ИИ по фразам",
+  "paywallChoosePlan": "Выберите тариф",
+  "paywallAnnualPlanTitle": "Годовой тариф",
+  "paywallAnnualPlanSubtitle": "Экономия более 33% по сравнению с месячным тарифом.",
+  "paywallMonthlyPlanTitle": "Месячный тариф",
+  "paywallMonthlyPlanSubtitle": "Гибкая помесячная подписка.",
+  "paywallBestBadge": "ВЫГОДНО",
+  "paywallCta": "Оформить подписку",
+  "paywallAutoRenewNotice": "Подписка продлевается автоматически, если её не отменить минимум за 24 часа до окончания текущего расчётного периода.",
+  "paywallPricePerMonth": "{price}/мес.",
+  "@paywallPricePerMonth": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallPricePerYear": "{price}/год",
+  "@paywallPricePerYear": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallFallbackAnnualPerMonth": "$8.33",
+  "paywallFallbackAnnual": "$99.99",
+  "paywallFallbackMonthly": "$13.99",
+  "paywallCompletedTitle": "Поздравляем!",
+  "paywallCompletedBody": "Преимущества Premium уже доступны.",
+  "paywallCompletedContinue": "Продолжить"
+}

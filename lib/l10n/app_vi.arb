@@ -1,0 +1,265 @@
+{
+  "@@locale": "vi",
+  "agreementHeading": "Để tiếp tục, vui lòng xem và đồng ý với các điều khoản dưới đây.",
+  "agreementTermsLabel": "Tôi đồng ý với Điều khoản sử dụng.",
+  "agreementPrivacyLabel": "Tôi đồng ý với Chính sách quyền riêng tư.",
+  "agreementTermsTitle": "Điều khoản sử dụng",
+  "agreementPrivacyTitle": "Chính sách quyền riêng tư",
+  "agreementDetailsLink": "Xem chi tiết",
+  "agreementButtonConfirm": "Đồng ý và tiếp tục",
+  "settingsTitle": "Cài đặt",
+  "settingsAccount": "Tài khoản",
+  "settingsRestorePurchases": "Khôi phục giao dịch mua",
+  "restorePurchasesNothing": "Không có giao dịch mua nào để khôi phục.",
+  "restorePurchasesCompleted": "Đã khôi phục giao dịch mua.",
+  "settingsNotification": "Thông báo",
+  "settingsTutorial": "Hướng dẫn",
+  "settingsCefrLevel": "Trình độ tiếng Anh",
+  "pushNotifications": "Thông báo đẩy",
+  "pushNotificationsDesc": "Nhận lời nhắc và các cập nhật quan trọng.",
+  "settingsFeedback": "Góp ý",
+  "settingsAnnouncements": "Tin mới",
+  "announcementsEmpty": "Chưa có thông báo",
+  "noticesEmpty": "Chưa có bài đăng",
+  "deletedPost": "Bài đăng này đã bị xóa.",
+  "postNoLongerAvailable": "Bài đăng này không còn xem được.",
+  "backToHome": "Về trang chủ",
+  "settingsSignOut": "Đăng xuất",
+  "settingsFsdLaboratory": "Phòng thí nghiệm FSD",
+  "settingsPrivacy": "Chính sách quyền riêng tư",
+  "settingsTerms": "Điều khoản dịch vụ",
+  "settingsOpenSource": "Giấy phép mã nguồn mở",
+  "loginWelcome": "Chào mừng {name}!",
+  "@loginWelcome": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "loginTermsTemplate": "Khi tiếp tục, bạn đồng ý với {terms} và {privacy} của chúng tôi.",
+  "@loginTermsTemplate": {
+    "placeholders": {
+      "terms": {
+        "type": "String"
+      },
+      "privacy": {
+        "type": "String"
+      }
+    }
+  },
+  "loginTermsTitle": "Điều khoản sử dụng",
+  "loginPrivacyTitle": "Chính sách quyền riêng tư",
+  "loginCatchphrase": "Cứ nói đi. Đó là cách bạn học.",
+  "loginWelcomeTitle": "Chào mừng bạn đến với SUDA!",
+  "loginWelcomeSubtitle": "Bước vào câu chuyện và bắt đầu nói tiếng Anh!",
+  "loginErrorIdToken": "Không thể lấy mã xác thực Google. Vui lòng thử lại.",
+  "loginErrorFailed": "Đăng nhập thất bại: {error}",
+  "@loginErrorFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "accountName": "Tên",
+  "accountInfo": "Tài khoản",
+  "accountDelete": "Xóa tài khoản",
+  "accountDeleteTitle": "Xóa tài khoản?",
+  "accountDeleteConfirmText": "Toàn bộ tiến trình và dữ liệu của bạn sẽ bị xóa vĩnh viễn. Bạn chắc chắn muốn tiếp tục?",
+  "accountDeleteProfileImageTitle": "Xóa ảnh đại diện?",
+  "accountDeleteProfileImageContent": "Ảnh đại diện đã xóa sẽ không thể khôi phục.",
+  "accountGoBack": "Quay lại",
+  "accountDeleteAction": "Xóa",
+  "accountSubscription": "Gói đăng ký",
+  "accountFreePlanTitle": "Gói miễn phí",
+  "accountFreePlanSubtitle": "Đăng ký Premium để mở khóa thêm tính năng",
+  "accountPremiumTitle": "Premium",
+  "accountPremiumSubtitle": "Bạn đang sử dụng các quyền lợi Premium",
+  "accountPremiumRenewsOn": "Tự động gia hạn vào {date}",
+  "@accountPremiumRenewsOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "accountChangePlan": "Đổi gói",
+  "changePlanTitle": "Đổi gói",
+  "changePlanCurrentPlan": "Gói hiện tại",
+  "changePlanAvailablePlans": "Các gói hiện có",
+  "changePlanRenewsOn": "Tự động gia hạn vào {date}",
+  "@changePlanRenewsOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "changePlanLoadFailed": "Không thể tải thông tin. Vui lòng thử lại.",
+  "changePlanRetry": "Thử lại",
+  "changePlanConfirmTitle": "Đổi gói?",
+  "changePlanConfirmBody": "Gói mới sẽ có hiệu lực vào ngày thanh toán tiếp theo.",
+  "changePlanConfirmOk": "Xác nhận",
+  "changePlanConfirmCancel": "Giữ gói hiện tại",
+  "changePlanOldPurchaseMissing": "Không tìm thấy gói đăng ký đang hoạt động để thay đổi. Hãy thử lại sau khi gói được kích hoạt.",
+  "changePlanChangeRequested": "Đã yêu cầu đổi gói. Thay đổi có thể được áp dụng vào ngày thanh toán tiếp theo.",
+  "cefrLevelTitle": "Chọn trình độ tiếng Anh của bạn",
+  "cefrLevelAbsoluteBeginner": "Mới bắt đầu",
+  "cefrLevelBeginner": "Sơ cấp",
+  "cefrLevelBasic": "Cơ bản",
+  "cefrLevelIntermediate": "Trung cấp",
+  "firstCefrLevelTitle": "Trình độ tiếng Anh của bạn là gì?",
+  "firstCefrLevelDescriptionPreA1": "Tôi có thể đọc tiếng Anh",
+  "firstCefrLevelDescriptionA1": "Tôi biết các câu chào hỏi và cụm từ đơn giản",
+  "firstCefrLevelDescriptionA2": "Tôi có thể hiểu và dùng các câu ngắn, đơn giản",
+  "firstCefrLevelDescriptionB1": "Tôi có thể nêu ý kiến và tham gia hội thoại hằng ngày",
+  "firstCefrLevelSettingsHint": "Bạn có thể thay đổi bất cứ lúc nào",
+  "firstCefrLevelConfirm": "Xác nhận",
+  "feedbackPlaceholder": "Hãy chia sẻ cảm nhận, đề xuất hoặc vấn đề bạn gặp phải...",
+  "feedbackSend": "Gửi",
+  "feedbackSuccess": "Cảm ơn bạn đã góp ý.",
+  "microphonePermissionDenied": "Không thể bắt đầu khi chưa có quyền dùng micrô.",
+  "holdMicrophoneToSpeak": "Nhấn giữ micrô để nói",
+  "roleplayTypeMessagePlaceholder": "Nhập câu trả lời...",
+  "yourTurnFirst": "Bạn nói trước nhé!",
+  "sayLineBelowToStart": "Hãy nói câu bên dưới để bắt đầu.",
+  "roleplayExitWait": "Khoan đã!",
+  "roleplayExitMessage": "Nếu thoát bây giờ, bạn sẽ mất phần thưởng. Bạn vẫn muốn thoát?",
+  "roleplayExitKeepPlaying": "Chơi tiếp",
+  "roleplayExitExit": "Thoát",
+  "roleplayAutoHint": "Gợi ý tự động",
+  "roleplayHintLabel": "Gợi ý",
+  "roleplayHintShowAnswer": "Nhấn để xem gợi ý trả lời bằng tiếng Anh",
+  "roleplayVoiceSpeed": "Tốc độ giọng đọc",
+  "roleplayEndedFailed": "Nhiệm vụ thất bại...",
+  "roleplayEndedComplete": "Đã hoàn thành phần nhập vai",
+  "roleplayEndedEnding": "Đang chuyển đến phần kết...",
+  "roleplayFinishNotEnoughProgress": "Chưa đủ tiến độ",
+  "roleplayFinishCompleted": "Đã hoàn thành phần nhập vai",
+  "roleplayFinishMovingToEnding": "Đang chuyển đến phần kết...",
+  "roleplayAnalyzing": "Đang phân tích phần nhập vai của bạn...",
+  "roleplayOpeningAiCharacter": "Nhân vật AI",
+  "roleplayOpeningScenario": "Tình huống",
+  "roleplayOpeningAiDisclaimer": "AI có thể mắc lỗi.\nĐừng chia sẻ thông tin cá nhân hoặc thông tin nhạy cảm.",
+  "endingFailTitle": "Bạn chưa hoàn thành tất cả nhiệm vụ!",
+  "endingFailSubtitle": "Thử lại để khám phá toàn bộ câu chuyện.",
+  "roleplayTryAgainMessage": "Tiếc quá, điểm của bạn chưa đủ để nhận phần thưởng.",
+  "endingReport": "Báo cáo sự cố",
+  "endingHowWas": "Phần nhập vai vừa rồi thế nào?",
+  "endingNext": "Tiếp",
+  "reportTitle": "Báo cáo sự cố",
+  "profileHistory": "Lịch sử",
+  "profileSaved": "Đã lưu",
+  "profileHistoryEmpty": "Chưa có lịch sử",
+  "profileSavedEmpty": "Chưa có mẫu câu nào được lưu.",
+  "profileSavedRemoveTitle": "Bỏ khỏi mục Đã lưu?",
+  "profileSavedRemoveContent": "Bạn có thể tìm lại mẫu câu này trong Lịch sử.",
+  "profileSavedRemoveOk": "Bỏ lưu",
+  "profileSavedRemoveCancel": "Luyện tập thêm",
+  "seriesOverviewTabEpisodes": "Tập",
+  "seriesOverviewTabSimilarTopic": "Chủ đề tương tự",
+  "seriesOverviewEpisodeNumber": "Tập #{number}",
+  "@seriesOverviewEpisodeNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "seriesOverviewPlay": "Chơi",
+  "seriesOverviewLocked": "Đã khóa",
+  "seriesOverviewEpisodeLockedToast": "Hoàn thành tập trước để mở khóa.",
+  "notificationPermissionBlockedTitle": "Thông báo đang tắt",
+  "notificationPermissionBlockedMessage": "Bật thông báo trong phần cài đặt của thiết bị để nhận thông báo đẩy.",
+  "openSettings": "Mở cài đặt",
+  "notificationsTitle": "Thông báo",
+  "notificationsEmpty": "Chưa có thông báo",
+  "notificationSendToday": "Hôm nay",
+  "notificationSendOneDayAgo": "1 ngày trước",
+  "notificationSendDaysAgo": "{count} ngày trước",
+  "@notificationSendDaysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reregistrationRestrictedMessage": "Bạn có thể đăng ký lại sau 2 ngày kể từ khi xóa tài khoản. Vui lòng thử lại sau.",
+  "expressionSavedToProfile": "Đã lưu vào hồ sơ",
+  "expressionUnsavedToProfile": "Đã bỏ lưu",
+  "roleplayResultFeedbackInsufficientWords": "Chưa thể đưa ra phản hồi vì câu trả lời quá ngắn. Hãy thử dùng ít nhất 7 từ!",
+  "roleplayResultScoreMeaning": "Ý nghĩa",
+  "roleplayResultScoreRelevance": "Độ phù hợp",
+  "roleplayResultScoreVocabulary": "Từ vựng",
+  "roleplayResultScoreGrammar": "Ngữ pháp",
+  "closePopup": "Đóng",
+  "reviewChatTapHint": "Nhấn vào tin nhắn để phát âm thanh.",
+  "reviewChatNoAudioToPlay": "Không có âm thanh để phát.",
+  "seriesInformationTopicDifficulty": "Độ khó của chủ đề",
+  "seriesInformationLearningGoals": "Mục tiêu học tập",
+  "energyInfoTitle": "Năng lượng",
+  "energyOutOfEnergyTitle": "Hết năng lượng",
+  "energyInfoRechargeUntil": "Năng lượng sẽ hồi sau @@TIME@@",
+  "energyInfoFull": "Năng lượng đã đầy.",
+  "energyInfoUnlimitedEndsIn": "Chế độ không giới hạn đang hoạt động",
+  "energyInsufficient": "Bạn không có đủ năng lượng.",
+  "endRoleplay": "Kết thúc nhập vai",
+  "energyEnablePushTitle": "Bật thông báo",
+  "energyEnablePushSubtitle": "Bật thông báo để nạp đầy năng lượng.",
+  "energyEnablePushPrice": "Miễn phí",
+  "energyEnablePushOfferBadge": "ƯU ĐÃI MỘT LẦN",
+  "energyEnablePushCompleted": "Đã nạp đầy năng lượng!",
+  "energyPurchaseUnlimitedTitle": "Vé chơi không giới hạn",
+  "energyPurchaseUnlimitedSubtitle": "Có hiệu lực ngay sau khi mua và kéo dài 10 phút.",
+  "energyPurchaseCapacityTitle": "Nâng giới hạn năng lượng",
+  "energyPurchaseCapacitySubtitle": "Tăng vĩnh viễn giới hạn năng lượng thêm 1 điểm.",
+  "energyGoPremiumTitle": "Nâng cấp lên Premium",
+  "energyGoPremiumExplore": "Khám phá",
+  "profileGoPremiumTitle": "Đăng ký SUDA Premium",
+  "profileGoPremiumExplore": "Khám phá",
+  "energyPurchasePendingApproval": "Thanh toán của bạn đang chờ phê duyệt.",
+  "energyPurchaseNotCompleted": "Giao dịch mua chưa hoàn tất.",
+  "welcomeGiftTitle": "Quà chào mừng đã đến!",
+  "welcomeGiftBenefitLead": "Chơi không giới hạn trong 10 phút!",
+  "welcomeGiftLine2": "Đã mở khóa các tính năng Premium",
+  "welcomeGiftLine3": "Đã mở khóa chế độ chơi không giới hạn",
+  "welcomeGiftStartNow": "Chơi ngay",
+  "paywallHeroTitle1": "Luyện tập nhiều hơn",
+  "paywallHeroTitle2": "Tiến bộ nhanh hơn",
+  "paywallHeroBody": "Luyện tập lâu hơn với Premium và nhận phản hồi từ AI để tự tin nói tiếng Anh.",
+  "paywallPremiumLabel": "PREMIUM",
+  "paywallBenefitDailyPractice": "Luyện tập nhiều hơn mỗi ngày",
+  "paywallBenefitMaxEnergy": "Năng lượng tối đa lên đến 30",
+  "paywallBenefitAiFeedback": "AI góp ý từng câu",
+  "paywallChoosePlan": "Chọn gói của bạn",
+  "paywallAnnualPlanTitle": "Gói năm",
+  "paywallAnnualPlanSubtitle": "Tiết kiệm hơn 33% so với gói theo tháng.",
+  "paywallMonthlyPlanTitle": "Gói tháng",
+  "paywallMonthlyPlanSubtitle": "Linh hoạt theo từng tháng.",
+  "paywallBestBadge": "TỐT NHẤT",
+  "paywallCta": "Đăng ký ngay",
+  "paywallAutoRenewNotice": "Gói đăng ký sẽ tự động gia hạn, trừ khi bạn hủy ít nhất 24 giờ trước khi kỳ thanh toán hiện tại kết thúc.",
+  "paywallPricePerMonth": "{price}/tháng",
+  "@paywallPricePerMonth": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallPricePerYear": "{price}/năm",
+  "@paywallPricePerYear": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallFallbackAnnualPerMonth": "$8.33",
+  "paywallFallbackAnnual": "$99.99",
+  "paywallFallbackMonthly": "$13.99",
+  "paywallCompletedTitle": "Chúc mừng!",
+  "paywallCompletedBody": "Các quyền lợi Premium của bạn đã được kích hoạt.",
+  "paywallCompletedContinue": "Tiếp tục"
+}

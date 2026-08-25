@@ -1,0 +1,265 @@
+{
+  "@@locale": "tr",
+  "agreementHeading": "Devam etmek için lütfen aşağıdaki koşulları inceleyip kabul et.",
+  "agreementTermsLabel": "Kullanım Koşulları'nı kabul ediyorum.",
+  "agreementPrivacyLabel": "Gizlilik Politikası'nı kabul ediyorum.",
+  "agreementTermsTitle": "Kullanım Koşulları",
+  "agreementPrivacyTitle": "Gizlilik Politikası",
+  "agreementDetailsLink": "Ayrıntıları gör",
+  "agreementButtonConfirm": "Onayla ve devam et",
+  "settingsTitle": "Ayarlar",
+  "settingsAccount": "Hesap",
+  "settingsRestorePurchases": "Satın Alımları Geri Yükle",
+  "restorePurchasesNothing": "Geri yüklenecek satın alım yok.",
+  "restorePurchasesCompleted": "Satın alımlar geri yüklendi.",
+  "settingsNotification": "Bildirimler",
+  "settingsTutorial": "Eğitim",
+  "settingsCefrLevel": "İngilizce Seviyesi",
+  "pushNotifications": "Anlık Bildirimler",
+  "pushNotificationsDesc": "Hatırlatmaları ve önemli güncellemeleri al.",
+  "settingsFeedback": "Geri Bildirim",
+  "settingsAnnouncements": "Duyurular",
+  "announcementsEmpty": "Henüz duyuru yok",
+  "noticesEmpty": "Henüz gönderi yok",
+  "deletedPost": "Bu gönderi silindi.",
+  "postNoLongerAvailable": "Bu gönderi artık kullanılamıyor.",
+  "backToHome": "Ana Sayfaya Dön",
+  "settingsSignOut": "Çıkış Yap",
+  "settingsFsdLaboratory": "FSD Laboratuvarı",
+  "settingsPrivacy": "Gizlilik Politikası",
+  "settingsTerms": "Hizmet Koşulları",
+  "settingsOpenSource": "Açık Kaynak Lisansları",
+  "loginWelcome": "Hoş geldin, {name}!",
+  "@loginWelcome": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "loginTermsTemplate": "Devam ederek {terms} ve {privacy} hükümlerini kabul etmiş olursun.",
+  "@loginTermsTemplate": {
+    "placeholders": {
+      "terms": {
+        "type": "String"
+      },
+      "privacy": {
+        "type": "String"
+      }
+    }
+  },
+  "loginTermsTitle": "Kullanım Koşulları",
+  "loginPrivacyTitle": "Gizlilik Politikası",
+  "loginCatchphrase": "Konuşmaya başla. Böyle öğrenirsin.",
+  "loginWelcomeTitle": "SUDA'ya hoş geldin!",
+  "loginWelcomeSubtitle": "Bir hikâyeye adım at ve İngilizce konuşmaya başla!",
+  "loginErrorIdToken": "Google ID Token alınamadı. Lütfen tekrar dene.",
+  "loginErrorFailed": "Giriş başarısız: {error}",
+  "@loginErrorFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "accountName": "Ad",
+  "accountInfo": "Hesap",
+  "accountDelete": "Hesabı Sil",
+  "accountDeleteTitle": "Hesap silinsin mi?",
+  "accountDeleteConfirmText": "Tüm ilerlemen ve verilerin kalıcı olarak silinecek. Emin misin?",
+  "accountDeleteProfileImageTitle": "Profil resmi silinsin mi?",
+  "accountDeleteProfileImageContent": "Silinen profil resmi geri getirilemez.",
+  "accountGoBack": "Geri Dön",
+  "accountDeleteAction": "Sil",
+  "accountSubscription": "Abonelik",
+  "accountFreePlanTitle": "Ücretsiz Plan",
+  "accountFreePlanSubtitle": "Daha fazla özelliğin kilidini açmak için Premium'a geç",
+  "accountPremiumTitle": "Premium",
+  "accountPremiumSubtitle": "Premium avantajlarından yararlanıyorsun",
+  "accountPremiumRenewsOn": "{date} tarihinde yenilenir",
+  "@accountPremiumRenewsOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "accountChangePlan": "Planı Değiştir",
+  "changePlanTitle": "Planı Değiştir",
+  "changePlanCurrentPlan": "Mevcut Plan",
+  "changePlanAvailablePlans": "Kullanılabilir Planlar",
+  "changePlanRenewsOn": "{date} tarihinde yenilenir",
+  "@changePlanRenewsOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "changePlanLoadFailed": "Bilgiler yüklenemedi. Lütfen tekrar dene.",
+  "changePlanRetry": "Tekrar dene",
+  "changePlanConfirmTitle": "Plan değiştirilsin mi?",
+  "changePlanConfirmBody": "Plan değişikliği bir sonraki faturalandırma tarihinde geçerli olur.",
+  "changePlanConfirmOk": "Onayla",
+  "changePlanConfirmCancel": "Mevcut Planı Koru",
+  "changePlanOldPurchaseMissing": "Değiştirilecek aktif abonelik bulunamadı. Aboneliğin etkinleştikten sonra tekrar dene.",
+  "changePlanChangeRequested": "Plan değişikliği talebiniz alındı. Bir sonraki faturalandırma tarihinde uygulanabilir.",
+  "cefrLevelTitle": "İngilizce seviyeni seç",
+  "cefrLevelAbsoluteBeginner": "Sıfırdan Başlangıç",
+  "cefrLevelBeginner": "Başlangıç",
+  "cefrLevelBasic": "Temel",
+  "cefrLevelIntermediate": "Orta",
+  "firstCefrLevelTitle": "İngilizce seviyen nedir?",
+  "firstCefrLevelDescriptionPreA1": "İngilizce okuyabiliyorum",
+  "firstCefrLevelDescriptionA1": "Temel selamlaşmaları ve basit ifadeleri biliyorum",
+  "firstCefrLevelDescriptionA2": "Kısa ve basit cümleleri anlayıp kullanabiliyorum",
+  "firstCefrLevelDescriptionB1": "Fikrimi söyleyip günlük konuşmalara katılabiliyorum",
+  "firstCefrLevelSettingsHint": "İstediğin zaman değiştirebilirsin",
+  "firstCefrLevelConfirm": "Onayla",
+  "feedbackPlaceholder": "Fikirlerini, önerilerini veya karşılaştığın sorunları paylaş...",
+  "feedbackSend": "Gönder",
+  "feedbackSuccess": "Geri bildirimin için teşekkürler.",
+  "microphonePermissionDenied": "Mikrofon izni olmadan başlanamaz.",
+  "holdMicrophoneToSpeak": "Konuşmak için mikrofona basılı tut",
+  "roleplayTypeMessagePlaceholder": "Mesajını yaz...",
+  "yourTurnFirst": "İlk sıra sende!",
+  "sayLineBelowToStart": "Başlamak için aşağıdaki cümleyi söyle.",
+  "roleplayExitWait": "Bekle!",
+  "roleplayExitMessage": "Şimdi çıkarsan ödülünü kaçıracaksın. Çıkmak istediğine emin misin?",
+  "roleplayExitKeepPlaying": "Oynamaya Devam Et",
+  "roleplayExitExit": "Çık",
+  "roleplayAutoHint": "Otomatik İpucu",
+  "roleplayHintLabel": "İpucu",
+  "roleplayHintShowAnswer": "Önerilen İngilizce yanıtı görmek için dokun",
+  "roleplayVoiceSpeed": "Ses Hızı",
+  "roleplayEndedFailed": "Görev başarısız oldu...",
+  "roleplayEndedComplete": "Rol yapmayı tamamladın",
+  "roleplayEndedEnding": "Finale geçiliyor...",
+  "roleplayFinishNotEnoughProgress": "Yeterli ilerleme yok",
+  "roleplayFinishCompleted": "Rol yapmayı tamamladın",
+  "roleplayFinishMovingToEnding": "Finale geçiliyor...",
+  "roleplayAnalyzing": "Rol yapman analiz ediliyor...",
+  "roleplayOpeningAiCharacter": "Yapay Zekâ Karakteri",
+  "roleplayOpeningScenario": "Senaryo",
+  "roleplayOpeningAiDisclaimer": "Yapay zekâ hata yapabilir.\nLütfen kişisel veya hassas bilgilerini paylaşma.",
+  "endingFailTitle": "Tüm görevleri tamamlayamadın!",
+  "endingFailSubtitle": "Tekrar dene ve hikâyenin tamamını keşfet.",
+  "roleplayTryAgainMessage": "Ne yazık ki puanın ödül kazanmak için yeterince yüksek değildi.",
+  "endingReport": "Sorun Bildir",
+  "endingHowWas": "Rol yapma nasıldı?",
+  "endingNext": "İleri",
+  "reportTitle": "Sorun Bildir",
+  "profileHistory": "Geçmiş",
+  "profileSaved": "Kaydedilenler",
+  "profileHistoryEmpty": "Henüz geçmiş yok",
+  "profileSavedEmpty": "Henüz kaydedilmiş ifade yok.",
+  "profileSavedRemoveTitle": "Kaydedilenlerden kaldırılsın mı?",
+  "profileSavedRemoveContent": "Bu ifadeyi daha sonra Geçmiş bölümünde yeniden bulabilirsin.",
+  "profileSavedRemoveOk": "Kaldır",
+  "profileSavedRemoveCancel": "Biraz daha pratik yap",
+  "seriesOverviewTabEpisodes": "Bölümler",
+  "seriesOverviewTabSimilarTopic": "Benzer Konular",
+  "seriesOverviewEpisodeNumber": "Bölüm #{number}",
+  "@seriesOverviewEpisodeNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "seriesOverviewPlay": "Oyna",
+  "seriesOverviewLocked": "Kilitli",
+  "seriesOverviewEpisodeLockedToast": "Kilidi açmak için önceki bölümü tamamla.",
+  "notificationPermissionBlockedTitle": "Bildirimler kapalı",
+  "notificationPermissionBlockedMessage": "Anlık bildirimleri almak için cihaz ayarlarından bildirimleri aç.",
+  "openSettings": "Ayarları Aç",
+  "notificationsTitle": "Bildirimler",
+  "notificationsEmpty": "Henüz bildirim yok",
+  "notificationSendToday": "Bugün",
+  "notificationSendOneDayAgo": "1 gün önce",
+  "notificationSendDaysAgo": "{count} gün önce",
+  "@notificationSendDaysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reregistrationRestrictedMessage": "Hesabını sildikten 2 gün sonra tekrar kaydolabilirsin. Lütfen daha sonra tekrar dene.",
+  "expressionSavedToProfile": "Profiline kaydedildi",
+  "expressionUnsavedToProfile": "Kaydedilenlerden kaldırıldı",
+  "roleplayResultFeedbackInsufficientWords": "Bu kez geri bildirim veremedik. Yanıtını 7 veya daha fazla kelimeyle genişletmeyi dene!",
+  "roleplayResultScoreMeaning": "Anlam",
+  "roleplayResultScoreRelevance": "Uygunluk",
+  "roleplayResultScoreVocabulary": "Kelime Bilgisi",
+  "roleplayResultScoreGrammar": "Dil Bilgisi",
+  "closePopup": "Kapat",
+  "reviewChatTapHint": "Sesi oynatmak için sohbet balonuna dokun.",
+  "reviewChatNoAudioToPlay": "Oynatılacak ses yok.",
+  "seriesInformationTopicDifficulty": "Konu Zorluğu",
+  "seriesInformationLearningGoals": "Öğrenme Hedefleri",
+  "energyInfoTitle": "Enerji",
+  "energyOutOfEnergyTitle": "Enerjin Bitti",
+  "energyInfoRechargeUntil": "Sonraki enerji dolumuna @@TIME@@ kaldı",
+  "energyInfoFull": "Enerjin dolu.",
+  "energyInfoUnlimitedEndsIn": "Sınırsız Mod Aktif",
+  "energyInsufficient": "Yeterli enerjin yok.",
+  "endRoleplay": "Rol Yapmayı Bitir",
+  "energyEnablePushTitle": "Bildirimleri Aç",
+  "energyEnablePushSubtitle": "Bildirimleri aç ve enerjini tamamen doldur.",
+  "energyEnablePushPrice": "Ücretsiz",
+  "energyEnablePushOfferBadge": "TEK SEFERLİK TEKLİF",
+  "energyEnablePushCompleted": "Enerjin doldu!",
+  "energyPurchaseUnlimitedTitle": "Sınırsız Oyun Bileti",
+  "energyPurchaseUnlimitedSubtitle": "Satın alır almaz başlar. 10 dakika geçerlidir.",
+  "energyPurchaseCapacityTitle": "Maksimum Enerji Artışı",
+  "energyPurchaseCapacitySubtitle": "Yenilenebilen maksimum enerji kapasiteni kalıcı olarak 1 artır.",
+  "energyGoPremiumTitle": "Premium'a Geç",
+  "energyGoPremiumExplore": "İncele",
+  "profileGoPremiumTitle": "SUDA Premium'a Geç",
+  "profileGoPremiumExplore": "İncele",
+  "energyPurchasePendingApproval": "Ödemen onay bekliyor",
+  "energyPurchaseNotCompleted": "Satın alım tamamlanmadı.",
+  "welcomeGiftTitle": "Hoş Geldin Hediyen Hazır!",
+  "welcomeGiftBenefitLead": "10 dakika sınırsız oynamanın keyfini çıkar!",
+  "welcomeGiftLine2": "Premium özellikler açıldı",
+  "welcomeGiftLine3": "Sınırsız oyun modu açıldı",
+  "welcomeGiftStartNow": "Şimdi Başla",
+  "paywallHeroTitle1": "Daha Fazla Pratik Yap",
+  "paywallHeroTitle2": "Daha Hızlı Geliş",
+  "paywallHeroBody": "Premium ile daha uzun pratik yap ve yapay zekâ geri bildirimiyle İngilizce konuşma öz güvenini artır.",
+  "paywallPremiumLabel": "PREMIUM",
+  "paywallBenefitDailyPractice": "Daha Fazla Günlük Pratik",
+  "paywallBenefitMaxEnergy": "Maksimum 30 Enerji",
+  "paywallBenefitAiFeedback": "Yapay Zekâdan Cümle Geri Bildirimi",
+  "paywallChoosePlan": "Planını Seç",
+  "paywallAnnualPlanTitle": "Yıllık Plan",
+  "paywallAnnualPlanSubtitle": "Aylık plana göre %33'ten fazla tasarruf et.",
+  "paywallMonthlyPlanTitle": "Aylık Plan",
+  "paywallMonthlyPlanSubtitle": "Esnek aylık erişim.",
+  "paywallBestBadge": "EN İYİ",
+  "paywallCta": "Şimdi Abone Ol",
+  "paywallAutoRenewNotice": "Abonelik, mevcut faturalandırma dönemi sona ermeden en az 24 saat önce iptal edilmezse otomatik olarak yenilenir.",
+  "paywallPricePerMonth": "{price}/ay",
+  "@paywallPricePerMonth": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallPricePerYear": "{price}/yıl",
+  "@paywallPricePerYear": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallFallbackAnnualPerMonth": "$8.33",
+  "paywallFallbackAnnual": "$99.99",
+  "paywallFallbackMonthly": "$13.99",
+  "paywallCompletedTitle": "Tebrikler!",
+  "paywallCompletedBody": "Premium avantajların artık aktif.",
+  "paywallCompletedContinue": "Devam Et"
+}

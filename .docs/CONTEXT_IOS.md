@@ -20,10 +20,12 @@ iOS는 골격·로그인·푸시 토큰 `deviceType=IOS`까지 들어갔고, 이
 ## 마이크 (Opening Start)
 앱 기동 시 요청하지 않음. `RoleplayOpeningScreen` Start → status/request → 영구거부 시 설정 안내만, 복귀 후 사용자가 다시 Start.  
 필수: `Info.plist` `NSMicrophoneUsageDescription` + Podfile `PERMISSION_MICROPHONE=1`. UX: `CONTEXT_ROLEPLAY_S2.md` Opening Start.
+지원 locale별 시스템 마이크 문구는 `Runner/*.lproj/InfoPlist.strings`의 `NSMicrophoneUsageDescription`으로 유지한다(`es`/`es-419`, `zh`/`zh-Hans`/`zh-Hant` 포함).
 
 ## App Store 상수 (출시 때)
 - Team `DWBJM357N6` · Apple ID `future.strategy.division@gmail.com`
 - 운영 Bundle `kr.sudatalk.app`. 버전은 `pubspec.yaml` 공통
+- 정적 UI 지원 언어는 `Runner/Info.plist`의 `CFBundleLocalizations`와 Xcode `knownRegions`를 `AppLocalizations.supportedLocales`와 함께 유지한다. Flutter fallback용 `es`·`zh`도 등록한다.
 - Export: `ITSAppUsesNonExemptEncryption=false`
 - NSE 버전: `NotificationService.xcconfig`가 Flutter `FLUTTER_BUILD_NAME`/`NUMBER`와 동기화 (ITMS-90473 재발 방지)
 - 업로드: `flutter build ipa --flavor prd` 후 exportArchive upload

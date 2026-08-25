@@ -1,0 +1,265 @@
+{
+  "@@locale": "hi",
+  "agreementHeading": "जारी रखने के लिए नीचे दी गई शर्तें पढ़ें और सहमति दें।",
+  "agreementTermsLabel": "मैं उपयोग की शर्तों से सहमत हूँ।",
+  "agreementPrivacyLabel": "मैं गोपनीयता नीति से सहमत हूँ।",
+  "agreementTermsTitle": "उपयोग की शर्तें",
+  "agreementPrivacyTitle": "गोपनीयता नीति",
+  "agreementDetailsLink": "जानकारी देखें",
+  "agreementButtonConfirm": "सहमत होकर आगे बढ़ें",
+  "settingsTitle": "सेटिंग्स",
+  "settingsAccount": "अकाउंट",
+  "settingsRestorePurchases": "खरीदारी रीस्टोर करें",
+  "restorePurchasesNothing": "रीस्टोर करने के लिए कोई खरीदारी नहीं है।",
+  "restorePurchasesCompleted": "खरीदारी रीस्टोर हो गई।",
+  "settingsNotification": "नोटिफ़िकेशन",
+  "settingsTutorial": "ट्यूटोरियल",
+  "settingsCefrLevel": "अंग्रेज़ी का स्तर",
+  "pushNotifications": "पुश नोटिफ़िकेशन",
+  "pushNotificationsDesc": "रिमाइंडर और ज़रूरी अपडेट पाएँ।",
+  "settingsFeedback": "फ़ीडबैक",
+  "settingsAnnouncements": "घोषणाएँ",
+  "announcementsEmpty": "अभी कोई घोषणा नहीं है",
+  "noticesEmpty": "अभी कोई पोस्ट नहीं है",
+  "deletedPost": "यह पोस्ट डिलीट कर दी गई है।",
+  "postNoLongerAvailable": "यह पोस्ट अब उपलब्ध नहीं है।",
+  "backToHome": "होम पर वापस जाएँ",
+  "settingsSignOut": "लॉग आउट",
+  "settingsFsdLaboratory": "FSD लैब",
+  "settingsPrivacy": "गोपनीयता नीति",
+  "settingsTerms": "सेवा की शर्तें",
+  "settingsOpenSource": "ओपन सोर्स लाइसेंस",
+  "loginWelcome": "{name}, आपका स्वागत है!",
+  "@loginWelcome": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "loginTermsTemplate": "जारी रखकर, आप हमारी {terms} और {privacy} से सहमत होते हैं।",
+  "@loginTermsTemplate": {
+    "placeholders": {
+      "terms": {
+        "type": "String"
+      },
+      "privacy": {
+        "type": "String"
+      }
+    }
+  },
+  "loginTermsTitle": "उपयोग की शर्तें",
+  "loginPrivacyTitle": "गोपनीयता नीति",
+  "loginCatchphrase": "बोलना शुरू करें—सीखने का यही तरीका है।",
+  "loginWelcomeTitle": "SUDA में आपका स्वागत है!",
+  "loginWelcomeSubtitle": "किसी कहानी का हिस्सा बनें और अंग्रेज़ी बोलना शुरू करें!",
+  "loginErrorIdToken": "Google ID टोकन नहीं मिल सका। फिर कोशिश करें।",
+  "loginErrorFailed": "लॉगिन नहीं हुआ: {error}",
+  "@loginErrorFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "accountName": "नाम",
+  "accountInfo": "अकाउंट",
+  "accountDelete": "अकाउंट डिलीट करें",
+  "accountDeleteTitle": "अकाउंट डिलीट करें?",
+  "accountDeleteConfirmText": "आपकी सारी प्रोग्रेस और डेटा हमेशा के लिए डिलीट हो जाएँगे। क्या आप वाकई ऐसा करना चाहते हैं?",
+  "accountDeleteProfileImageTitle": "प्रोफ़ाइल फ़ोटो डिलीट करें?",
+  "accountDeleteProfileImageContent": "डिलीट करने के बाद आपकी प्रोफ़ाइल फ़ोटो वापस नहीं मिल सकती।",
+  "accountGoBack": "वापस जाएँ",
+  "accountDeleteAction": "डिलीट करें",
+  "accountSubscription": "सब्सक्रिप्शन",
+  "accountFreePlanTitle": "फ़्री प्लान",
+  "accountFreePlanSubtitle": "ज़्यादा फ़ीचर अनलॉक करने के लिए प्रीमियम लें",
+  "accountPremiumTitle": "प्रीमियम",
+  "accountPremiumSubtitle": "आपको प्रीमियम के फ़ायदे मिल रहे हैं",
+  "accountPremiumRenewsOn": "रिन्यू होने की तारीख: {date}",
+  "@accountPremiumRenewsOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "accountChangePlan": "प्लान बदलें",
+  "changePlanTitle": "प्लान बदलें",
+  "changePlanCurrentPlan": "मौजूदा प्लान",
+  "changePlanAvailablePlans": "उपलब्ध प्लान",
+  "changePlanRenewsOn": "रिन्यू होने की तारीख: {date}",
+  "@changePlanRenewsOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "changePlanLoadFailed": "जानकारी लोड नहीं हो सकी। फिर कोशिश करें।",
+  "changePlanRetry": "फिर कोशिश करें",
+  "changePlanConfirmTitle": "प्लान बदलें?",
+  "changePlanConfirmBody": "प्लान में बदलाव आपकी अगली बिलिंग तारीख से लागू होगा।",
+  "changePlanConfirmOk": "कन्फ़र्म करें",
+  "changePlanConfirmCancel": "मौजूदा प्लान रखें",
+  "changePlanOldPurchaseMissing": "बदलने के लिए कोई ऐक्टिव सब्सक्रिप्शन नहीं मिला। सब्सक्रिप्शन ऐक्टिव होने के बाद फिर कोशिश करें।",
+  "changePlanChangeRequested": "प्लान बदलने का अनुरोध भेज दिया गया है। यह अगली बिलिंग तारीख से लागू हो सकता है।",
+  "cefrLevelTitle": "अपना अंग्रेज़ी स्तर चुनें",
+  "cefrLevelAbsoluteBeginner": "एकदम शुरुआती",
+  "cefrLevelBeginner": "शुरुआती",
+  "cefrLevelBasic": "बेसिक",
+  "cefrLevelIntermediate": "इंटरमीडिएट",
+  "firstCefrLevelTitle": "आपका अंग्रेज़ी स्तर क्या है?",
+  "firstCefrLevelDescriptionPreA1": "मुझे अंग्रेज़ी पढ़नी आती है",
+  "firstCefrLevelDescriptionA1": "मुझे सामान्य अभिवादन और आसान वाक्यांश आते हैं",
+  "firstCefrLevelDescriptionA2": "मैं छोटे और आसान वाक्य समझ सकता हूँ और उनका इस्तेमाल कर सकता हूँ",
+  "firstCefrLevelDescriptionB1": "मैं अपनी राय बता सकता हूँ और रोज़मर्रा की बातचीत कर सकता हूँ",
+  "firstCefrLevelSettingsHint": "इसे कभी भी बदल सकते हैं",
+  "firstCefrLevelConfirm": "कन्फ़र्म करें",
+  "feedbackPlaceholder": "अपने विचार, सुझाव या सामने आई कोई समस्या बताएँ...",
+  "feedbackSend": "भेजें",
+  "feedbackSuccess": "फ़ीडबैक देने के लिए धन्यवाद।",
+  "microphonePermissionDenied": "माइक्रोफ़ोन की अनुमति के बिना शुरू नहीं कर सकते।",
+  "holdMicrophoneToSpeak": "बोलने के लिए माइक्रोफ़ोन दबाकर रखें",
+  "roleplayTypeMessagePlaceholder": "अपना मैसेज लिखें...",
+  "yourTurnFirst": "पहले आपकी बारी!",
+  "sayLineBelowToStart": "शुरू करने के लिए नीचे दी गई लाइन बोलें।",
+  "roleplayExitWait": "रुकिए!",
+  "roleplayExitMessage": "अभी बाहर निकले तो आपका इनाम छूट जाएगा। क्या आप वाकई बाहर निकलना चाहते हैं?",
+  "roleplayExitKeepPlaying": "रोलप्ले जारी रखें",
+  "roleplayExitExit": "बाहर निकलें",
+  "roleplayAutoHint": "ऑटो हिंट",
+  "roleplayHintLabel": "हिंट",
+  "roleplayHintShowAnswer": "सुझाया गया अंग्रेज़ी जवाब देखने के लिए टैप करें",
+  "roleplayVoiceSpeed": "आवाज़ की स्पीड",
+  "roleplayEndedFailed": "मिशन फ़ेल हो गया...",
+  "roleplayEndedComplete": "रोलप्ले पूरा हुआ",
+  "roleplayEndedEnding": "एंडिंग पर जा रहे हैं...",
+  "roleplayFinishNotEnoughProgress": "पर्याप्त प्रोग्रेस नहीं हुई",
+  "roleplayFinishCompleted": "रोलप्ले पूरा हुआ",
+  "roleplayFinishMovingToEnding": "एंडिंग पर जा रहे हैं...",
+  "roleplayAnalyzing": "आपके रोलप्ले का विश्लेषण हो रहा है...",
+  "roleplayOpeningAiCharacter": "एआई कैरेक्टर",
+  "roleplayOpeningScenario": "सिनेरियो",
+  "roleplayOpeningAiDisclaimer": "एआई से गलतियाँ हो सकती हैं।\nकृपया निजी या संवेदनशील जानकारी शेयर न करें।",
+  "endingFailTitle": "आप सभी मिशन पूरे नहीं कर पाए!",
+  "endingFailSubtitle": "फिर कोशिश करें और पूरी कहानी जानें।",
+  "roleplayTryAgainMessage": "अफ़सोस, आपका स्कोर इनाम पाने के लिए काफ़ी नहीं था।",
+  "endingReport": "समस्या रिपोर्ट करें",
+  "endingHowWas": "रोलप्ले कैसा रहा?",
+  "endingNext": "अगला",
+  "reportTitle": "समस्या रिपोर्ट करें",
+  "profileHistory": "हिस्ट्री",
+  "profileSaved": "सेव किए गए",
+  "profileHistoryEmpty": "अभी कोई हिस्ट्री नहीं है",
+  "profileSavedEmpty": "अभी कोई एक्सप्रेशन सेव नहीं है।",
+  "profileSavedRemoveTitle": "सेव से हटाएँ?",
+  "profileSavedRemoveContent": "इसे बाद में हिस्ट्री में फिर से ढूँढ सकते हैं।",
+  "profileSavedRemoveOk": "हटाएँ",
+  "profileSavedRemoveCancel": "और प्रैक्टिस करें",
+  "seriesOverviewTabEpisodes": "एपिसोड",
+  "seriesOverviewTabSimilarTopic": "मिलता-जुलता टॉपिक",
+  "seriesOverviewEpisodeNumber": "एपिसोड #{number}",
+  "@seriesOverviewEpisodeNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "seriesOverviewPlay": "खेलें",
+  "seriesOverviewLocked": "लॉक है",
+  "seriesOverviewEpisodeLockedToast": "अनलॉक करने के लिए पिछला एपिसोड पूरा करें।",
+  "notificationPermissionBlockedTitle": "नोटिफ़िकेशन बंद हैं",
+  "notificationPermissionBlockedMessage": "पुश नोटिफ़िकेशन पाने के लिए डिवाइस सेटिंग्स में नोटिफ़िकेशन चालू करें।",
+  "openSettings": "सेटिंग्स खोलें",
+  "notificationsTitle": "नोटिफ़िकेशन",
+  "notificationsEmpty": "अभी कोई नोटिफ़िकेशन नहीं है",
+  "notificationSendToday": "आज",
+  "notificationSendOneDayAgo": "1 दिन पहले",
+  "notificationSendDaysAgo": "{count} दिन पहले",
+  "@notificationSendDaysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reregistrationRestrictedMessage": "अकाउंट डिलीट करने के 2 दिन बाद ही दोबारा साइन अप कर सकते हैं। कृपया बाद में फिर कोशिश करें।",
+  "expressionSavedToProfile": "आपकी प्रोफ़ाइल में सेव हो गया",
+  "expressionUnsavedToProfile": "सेव से हटा दिया गया",
+  "roleplayResultFeedbackInsufficientWords": "इस बार फ़ीडबैक नहीं दे पाए। 7 या उससे ज़्यादा शब्दों में जवाब देने की कोशिश करें!",
+  "roleplayResultScoreMeaning": "अर्थ",
+  "roleplayResultScoreRelevance": "प्रासंगिकता",
+  "roleplayResultScoreVocabulary": "शब्दावली",
+  "roleplayResultScoreGrammar": "व्याकरण",
+  "closePopup": "बंद करें",
+  "reviewChatTapHint": "ऑडियो चलाने के लिए चैट बबल पर टैप करें।",
+  "reviewChatNoAudioToPlay": "चलाने के लिए कोई ऑडियो नहीं है।",
+  "seriesInformationTopicDifficulty": "टॉपिक की कठिनाई",
+  "seriesInformationLearningGoals": "सीखने के लक्ष्य",
+  "energyInfoTitle": "एनर्जी",
+  "energyOutOfEnergyTitle": "एनर्जी खत्म हो गई",
+  "energyInfoRechargeUntil": "अगला रीचार्ज @@TIME@@ में",
+  "energyInfoFull": "आपकी एनर्जी पूरी भरी है।",
+  "energyInfoUnlimitedEndsIn": "अनलिमिटेड मोड चालू है",
+  "energyInsufficient": "आपके पास पर्याप्त एनर्जी नहीं है।",
+  "endRoleplay": "रोलप्ले खत्म करें",
+  "energyEnablePushTitle": "नोटिफ़िकेशन चालू करें",
+  "energyEnablePushSubtitle": "नोटिफ़िकेशन चालू करें और अपनी एनर्जी पूरी भरें।",
+  "energyEnablePushPrice": "फ़्री",
+  "energyEnablePushOfferBadge": "सिर्फ़ एक बार का ऑफ़र",
+  "energyEnablePushCompleted": "एनर्जी पूरी भर गई!",
+  "energyPurchaseUnlimitedTitle": "अनलिमिटेड पास",
+  "energyPurchaseUnlimitedSubtitle": "खरीदते ही शुरू होगा। 10 मिनट तक मान्य।",
+  "energyPurchaseCapacityTitle": "अधिकतम एनर्जी अपग्रेड",
+  "energyPurchaseCapacitySubtitle": "रीचार्ज होने वाली आपकी अधिकतम एनर्जी हमेशा के लिए 1 बढ़ जाएगी।",
+  "energyGoPremiumTitle": "प्रीमियम लें",
+  "energyGoPremiumExplore": "देखें",
+  "profileGoPremiumTitle": "SUDA प्रीमियम लें",
+  "profileGoPremiumExplore": "देखें",
+  "energyPurchasePendingApproval": "आपका पेमेंट मंज़ूरी के इंतज़ार में है",
+  "energyPurchaseNotCompleted": "खरीद पूरी नहीं हुई।",
+  "welcomeGiftTitle": "आपका वेलकम गिफ़्ट आ गया!",
+  "welcomeGiftBenefitLead": "10 मिनट तक अनलिमिटेड खेलें!",
+  "welcomeGiftLine2": "प्रीमियम फ़ीचर अनलॉक",
+  "welcomeGiftLine3": "अनलिमिटेड प्ले अनलॉक",
+  "welcomeGiftStartNow": "अभी शुरू करें",
+  "paywallHeroTitle1": "ज़्यादा प्रैक्टिस करें",
+  "paywallHeroTitle2": "तेज़ी से सुधार करें",
+  "paywallHeroBody": "प्रीमियम के साथ ज़्यादा देर प्रैक्टिस करें और एआई फ़ीडबैक से अंग्रेज़ी बोलने का आत्मविश्वास बढ़ाएँ।",
+  "paywallPremiumLabel": "प्रीमियम",
+  "paywallBenefitDailyPractice": "हर दिन ज़्यादा प्रैक्टिस",
+  "paywallBenefitMaxEnergy": "अधिकतम 30 एनर्जी",
+  "paywallBenefitAiFeedback": "वाक्यों पर एआई फ़ीडबैक",
+  "paywallChoosePlan": "अपना प्लान चुनें",
+  "paywallAnnualPlanTitle": "सालाना प्लान",
+  "paywallAnnualPlanSubtitle": "मासिक प्लान की तुलना में 33% से ज़्यादा बचाएँ।",
+  "paywallMonthlyPlanTitle": "मासिक प्लान",
+  "paywallMonthlyPlanSubtitle": "महीने के हिसाब से सुविधाजनक ऐक्सेस।",
+  "paywallBestBadge": "बेस्ट",
+  "paywallCta": "अभी शुरू करें",
+  "paywallAutoRenewNotice": "सब्सक्रिप्शन तब तक अपने-आप रिन्यू होता रहेगा, जब तक इसे मौजूदा बिलिंग अवधि खत्म होने से कम-से-कम 24 घंटे पहले कैंसल न किया जाए।",
+  "paywallPricePerMonth": "{price}/माह",
+  "@paywallPricePerMonth": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallPricePerYear": "{price}/वर्ष",
+  "@paywallPricePerYear": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallFallbackAnnualPerMonth": "$8.33",
+  "paywallFallbackAnnual": "$99.99",
+  "paywallFallbackMonthly": "$13.99",
+  "paywallCompletedTitle": "बधाई हो!",
+  "paywallCompletedBody": "आपके प्रीमियम फ़ायदे अब ऐक्टिव हैं।",
+  "paywallCompletedContinue": "जारी रखें"
+}

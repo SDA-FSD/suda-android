@@ -1,0 +1,265 @@
+{
+  "@@locale": "ja",
+  "agreementHeading": "続行するには、以下の内容を確認して同意してください。",
+  "agreementTermsLabel": "利用規約に同意します。",
+  "agreementPrivacyLabel": "プライバシーポリシーに同意します。",
+  "agreementTermsTitle": "利用規約",
+  "agreementPrivacyTitle": "プライバシーポリシー",
+  "agreementDetailsLink": "詳細を見る",
+  "agreementButtonConfirm": "同意して続ける",
+  "settingsTitle": "設定",
+  "settingsAccount": "アカウント",
+  "settingsRestorePurchases": "購入を復元",
+  "restorePurchasesNothing": "復元できる購入項目がありません。",
+  "restorePurchasesCompleted": "購入を復元しました。",
+  "settingsNotification": "通知",
+  "settingsTutorial": "チュートリアル",
+  "settingsCefrLevel": "英語レベル",
+  "pushNotifications": "プッシュ通知",
+  "pushNotificationsDesc": "リマインダーや重要なお知らせを受け取ります。",
+  "settingsFeedback": "ご意見・ご要望",
+  "settingsAnnouncements": "お知らせ",
+  "announcementsEmpty": "まだお知らせはありません",
+  "noticesEmpty": "まだ投稿はありません",
+  "deletedPost": "この投稿は削除されました。",
+  "postNoLongerAvailable": "この投稿は現在ご覧いただけません。",
+  "backToHome": "ホームに戻る",
+  "settingsSignOut": "ログアウト",
+  "settingsFsdLaboratory": "FSDラボ",
+  "settingsPrivacy": "プライバシーポリシー",
+  "settingsTerms": "利用規約",
+  "settingsOpenSource": "オープンソースライセンス",
+  "loginWelcome": "{name}さん、ようこそ！",
+  "@loginWelcome": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "loginTermsTemplate": "続行すると、{terms}および{privacy}に同意したものとみなされます。",
+  "@loginTermsTemplate": {
+    "placeholders": {
+      "terms": {
+        "type": "String"
+      },
+      "privacy": {
+        "type": "String"
+      }
+    }
+  },
+  "loginTermsTitle": "利用規約",
+  "loginPrivacyTitle": "プライバシーポリシー",
+  "loginCatchphrase": "話してみましょう。そこから学びが始まります。",
+  "loginWelcomeTitle": "SUDAへようこそ！",
+  "loginWelcomeSubtitle": "物語の中に入り、英語を話してみましょう！",
+  "loginErrorIdToken": "Google ID トークンを取得できませんでした。もう一度お試しください。",
+  "loginErrorFailed": "ログインに失敗しました：{error}",
+  "@loginErrorFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "accountName": "名前",
+  "accountInfo": "アカウント",
+  "accountDelete": "アカウントを削除",
+  "accountDeleteTitle": "アカウントを削除しますか？",
+  "accountDeleteConfirmText": "すべての進捗状況とデータが永久に削除され、復元できません。本当に削除しますか？",
+  "accountDeleteProfileImageTitle": "プロフィール画像を削除しますか？",
+  "accountDeleteProfileImageContent": "一度削除すると、プロフィール画像は復元できません。",
+  "accountGoBack": "戻る",
+  "accountDeleteAction": "削除",
+  "accountSubscription": "定期購入",
+  "accountFreePlanTitle": "無料プラン",
+  "accountFreePlanSubtitle": "プレミアムに登録して、さらに多くの機能を利用しましょう",
+  "accountPremiumTitle": "プレミアム",
+  "accountPremiumSubtitle": "プレミアム特典をご利用中です",
+  "accountPremiumRenewsOn": "次回更新日：{date}",
+  "@accountPremiumRenewsOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "accountChangePlan": "プランを変更",
+  "changePlanTitle": "プランを変更",
+  "changePlanCurrentPlan": "現在のプラン",
+  "changePlanAvailablePlans": "利用可能なプラン",
+  "changePlanRenewsOn": "次回更新日：{date}",
+  "@changePlanRenewsOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "changePlanLoadFailed": "情報を読み込めませんでした。もう一度お試しください。",
+  "changePlanRetry": "再試行",
+  "changePlanConfirmTitle": "プランを変更しますか？",
+  "changePlanConfirmBody": "プランの変更は次回の請求日に適用されます。",
+  "changePlanConfirmOk": "変更を確定",
+  "changePlanConfirmCancel": "現在のプランを継続",
+  "changePlanOldPurchaseMissing": "変更対象の有効な定期購入が見つかりません。定期購入が有効になってから、もう一度お試しください。",
+  "changePlanChangeRequested": "プラン変更を受け付けました。次回の請求日に適用される場合があります。",
+  "cefrLevelTitle": "英語レベルを選択してください",
+  "cefrLevelAbsoluteBeginner": "超入門",
+  "cefrLevelBeginner": "入門",
+  "cefrLevelBasic": "初級",
+  "cefrLevelIntermediate": "中級",
+  "firstCefrLevelTitle": "あなたの英語レベルは？",
+  "firstCefrLevelDescriptionPreA1": "英語の文字が読めます",
+  "firstCefrLevelDescriptionA1": "基本的なあいさつや簡単な表現がわかります",
+  "firstCefrLevelDescriptionA2": "短く簡単な文を理解して使えます",
+  "firstCefrLevelDescriptionB1": "自分の意見を伝え、日常会話に参加できます",
+  "firstCefrLevelSettingsHint": "いつでも変更できます",
+  "firstCefrLevelConfirm": "決定",
+  "feedbackPlaceholder": "ご意見、ご要望、お困りの点などをお聞かせください…",
+  "feedbackSend": "送信",
+  "feedbackSuccess": "ご意見をお寄せいただきありがとうございます。",
+  "microphonePermissionDenied": "マイクの使用を許可しないと開始できません。",
+  "holdMicrophoneToSpeak": "マイクボタンを長押しして話す",
+  "roleplayTypeMessagePlaceholder": "メッセージを入力…",
+  "yourTurnFirst": "あなたから始めましょう！",
+  "sayLineBelowToStart": "下のフレーズを話して始めましょう。",
+  "roleplayExitWait": "ちょっと待って！",
+  "roleplayExitMessage": "今終了すると、報酬を獲得できません。本当に終了しますか？",
+  "roleplayExitKeepPlaying": "続ける",
+  "roleplayExitExit": "終了",
+  "roleplayAutoHint": "ヒントを自動表示",
+  "roleplayHintLabel": "ヒント",
+  "roleplayHintShowAnswer": "タップして英語の回答例を見る",
+  "roleplayVoiceSpeed": "音声速度",
+  "roleplayEndedFailed": "ミッション失敗…",
+  "roleplayEndedComplete": "ロールプレイ完了",
+  "roleplayEndedEnding": "エンディングへ移動中…",
+  "roleplayFinishNotEnoughProgress": "進行度が足りません",
+  "roleplayFinishCompleted": "ロールプレイ完了",
+  "roleplayFinishMovingToEnding": "エンディングへ移動中…",
+  "roleplayAnalyzing": "ロールプレイを分析しています…",
+  "roleplayOpeningAiCharacter": "AIキャラクター",
+  "roleplayOpeningScenario": "シナリオ",
+  "roleplayOpeningAiDisclaimer": "AIは間違えることがあります。\n個人情報や機密性の高い情報を共有しないでください。",
+  "endingFailTitle": "すべてのミッションをクリアできませんでした！",
+  "endingFailSubtitle": "もう一度挑戦して、物語の全貌を明らかにしましょう。",
+  "roleplayTryAgainMessage": "残念ながら、スコアが足りず報酬を獲得できませんでした。",
+  "endingReport": "問題を報告",
+  "endingHowWas": "ロールプレイはいかがでしたか？",
+  "endingNext": "次へ",
+  "reportTitle": "問題を報告",
+  "profileHistory": "履歴",
+  "profileSaved": "保存済み",
+  "profileHistoryEmpty": "まだ履歴はありません",
+  "profileSavedEmpty": "まだ保存した表現はありません。",
+  "profileSavedRemoveTitle": "保存済みから削除しますか？",
+  "profileSavedRemoveContent": "後で履歴からもう一度見つけられます。",
+  "profileSavedRemoveOk": "削除",
+  "profileSavedRemoveCancel": "もっと練習する",
+  "seriesOverviewTabEpisodes": "エピソード",
+  "seriesOverviewTabSimilarTopic": "関連トピック",
+  "seriesOverviewEpisodeNumber": "エピソード #{number}",
+  "@seriesOverviewEpisodeNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "seriesOverviewPlay": "プレイ",
+  "seriesOverviewLocked": "ロック中",
+  "seriesOverviewEpisodeLockedToast": "前のエピソードをクリアするとロックが解除されます。",
+  "notificationPermissionBlockedTitle": "通知がオフになっています",
+  "notificationPermissionBlockedMessage": "プッシュ通知を受け取るには、端末の設定で通知を有効にしてください。",
+  "openSettings": "設定を開く",
+  "notificationsTitle": "通知",
+  "notificationsEmpty": "まだ通知はありません",
+  "notificationSendToday": "今日",
+  "notificationSendOneDayAgo": "1日前",
+  "notificationSendDaysAgo": "{count}日前",
+  "@notificationSendDaysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reregistrationRestrictedMessage": "アカウント削除後2日間は再登録できません。しばらくしてからもう一度お試しください。",
+  "expressionSavedToProfile": "プロフィールに保存しました",
+  "expressionUnsavedToProfile": "保存を解除しました",
+  "roleplayResultFeedbackInsufficientWords": "今回はフィードバックを作成できませんでした。英語で7語以上になるよう、もう少し長く答えてみましょう！",
+  "roleplayResultScoreMeaning": "意味",
+  "roleplayResultScoreRelevance": "関連性",
+  "roleplayResultScoreVocabulary": "語彙",
+  "roleplayResultScoreGrammar": "文法",
+  "closePopup": "閉じる",
+  "reviewChatTapHint": "吹き出しをタップすると音声が再生されます。",
+  "reviewChatNoAudioToPlay": "再生できる音声がありません。",
+  "seriesInformationTopicDifficulty": "トピックの難易度",
+  "seriesInformationLearningGoals": "学習目標",
+  "energyInfoTitle": "エネルギー",
+  "energyOutOfEnergyTitle": "エネルギーがありません",
+  "energyInfoRechargeUntil": "次の回復まで @@TIME@@",
+  "energyInfoFull": "エネルギーは満タンです。",
+  "energyInfoUnlimitedEndsIn": "無制限モード利用中",
+  "energyInsufficient": "エネルギーが足りません。",
+  "endRoleplay": "ロールプレイを終了",
+  "energyEnablePushTitle": "通知をオンにする",
+  "energyEnablePushSubtitle": "通知をオンにして、エネルギーを全回復しましょう。",
+  "energyEnablePushPrice": "無料",
+  "energyEnablePushOfferBadge": "1回限りの特典",
+  "energyEnablePushCompleted": "エネルギーが全回復しました！",
+  "energyPurchaseUnlimitedTitle": "無制限パス",
+  "energyPurchaseUnlimitedSubtitle": "購入後すぐに開始し、10分間有効です。",
+  "energyPurchaseCapacityTitle": "最大エネルギーを増やす",
+  "energyPurchaseCapacitySubtitle": "回復できるエネルギーの上限が恒久的に1増えます。",
+  "energyGoPremiumTitle": "プレミアムに登録",
+  "energyGoPremiumExplore": "詳細を見る",
+  "profileGoPremiumTitle": "SUDAプレミアムに登録",
+  "profileGoPremiumExplore": "詳細を見る",
+  "energyPurchasePendingApproval": "お支払いは承認待ちです。",
+  "energyPurchaseNotCompleted": "購入は完了していません。",
+  "welcomeGiftTitle": "ようこそ！プレゼントが届きました",
+  "welcomeGiftBenefitLead": "10分間、回数を気にせず楽しめます！",
+  "welcomeGiftLine2": "プレミアム機能を利用できます",
+  "welcomeGiftLine3": "無制限プレイを利用できます",
+  "welcomeGiftStartNow": "今すぐ始める",
+  "paywallHeroTitle1": "もっと練習して",
+  "paywallHeroTitle2": "もっと早く上達",
+  "paywallHeroBody": "プレミアムなら長く練習でき、AIのフィードバックで英語への自信を育てられます。",
+  "paywallPremiumLabel": "プレミアム",
+  "paywallBenefitDailyPractice": "毎日の練習量アップ",
+  "paywallBenefitMaxEnergy": "最大エネルギー30",
+  "paywallBenefitAiFeedback": "AIによる英文フィードバック",
+  "paywallChoosePlan": "プランを選択",
+  "paywallAnnualPlanTitle": "年間プラン",
+  "paywallAnnualPlanSubtitle": "月間プランより33%以上お得です。",
+  "paywallMonthlyPlanTitle": "月間プラン",
+  "paywallMonthlyPlanSubtitle": "月ごとに気軽に利用できます。",
+  "paywallBestBadge": "おすすめ",
+  "paywallCta": "今すぐ始める",
+  "paywallAutoRenewNotice": "定期購入は、現在の請求期間が終了する24時間以上前までに解約しない限り、自動的に更新されます。",
+  "paywallPricePerMonth": "{price}/月",
+  "@paywallPricePerMonth": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallPricePerYear": "{price}/年",
+  "@paywallPricePerYear": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallFallbackAnnualPerMonth": "$8.33",
+  "paywallFallbackAnnual": "$99.99",
+  "paywallFallbackMonthly": "$13.99",
+  "paywallCompletedTitle": "おめでとうございます！",
+  "paywallCompletedBody": "プレミアム特典が有効になりました。",
+  "paywallCompletedContinue": "続ける"
+}

@@ -1,0 +1,265 @@
+{
+  "@@locale": "ar",
+  "agreementHeading": "يرجى مراجعة البنود أدناه والموافقة عليها للمتابعة.",
+  "agreementTermsLabel": "أوافق على شروط الاستخدام.",
+  "agreementPrivacyLabel": "أوافق على سياسة الخصوصية.",
+  "agreementTermsTitle": "شروط الاستخدام",
+  "agreementPrivacyTitle": "سياسة الخصوصية",
+  "agreementDetailsLink": "عرض التفاصيل",
+  "agreementButtonConfirm": "تأكيد ومتابعة",
+  "settingsTitle": "الإعدادات",
+  "settingsAccount": "الحساب",
+  "settingsRestorePurchases": "استعادة المشتريات",
+  "restorePurchasesNothing": "لا توجد مشتريات لاستعادتها.",
+  "restorePurchasesCompleted": "تمت استعادة المشتريات.",
+  "settingsNotification": "الإشعارات",
+  "settingsTutorial": "البرنامج التعليمي",
+  "settingsCefrLevel": "مستوى اللغة الإنجليزية",
+  "pushNotifications": "الإشعارات الفورية",
+  "pushNotificationsDesc": "تلقَّ التذكيرات والتحديثات المهمة.",
+  "settingsFeedback": "الملاحظات",
+  "settingsAnnouncements": "الإعلانات",
+  "announcementsEmpty": "لا توجد إعلانات بعد",
+  "noticesEmpty": "لا توجد منشورات بعد",
+  "deletedPost": "تم حذف هذا المنشور.",
+  "postNoLongerAvailable": "لم يعد هذا المنشور متاحًا.",
+  "backToHome": "العودة إلى الصفحة الرئيسية",
+  "settingsSignOut": "تسجيل الخروج",
+  "settingsFsdLaboratory": "مختبر FSD",
+  "settingsPrivacy": "سياسة الخصوصية",
+  "settingsTerms": "شروط الخدمة",
+  "settingsOpenSource": "تراخيص المصادر المفتوحة",
+  "loginWelcome": "مرحبًا بك، {name}!",
+  "@loginWelcome": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "loginTermsTemplate": "بالمتابعة، فإنك توافق على {terms} و{privacy}.",
+  "@loginTermsTemplate": {
+    "placeholders": {
+      "terms": {
+        "type": "String"
+      },
+      "privacy": {
+        "type": "String"
+      }
+    }
+  },
+  "loginTermsTitle": "شروط الاستخدام",
+  "loginPrivacyTitle": "سياسة الخصوصية",
+  "loginCatchphrase": "ابدأ بالتحدث. هكذا تتعلم.",
+  "loginWelcomeTitle": "مرحبًا بك في SUDA!",
+  "loginWelcomeSubtitle": "انغمس في قصة وابدأ التحدث بالإنجليزية!",
+  "loginErrorIdToken": "تعذّر الحصول على رمز تعريف Google. يرجى المحاولة مرة أخرى.",
+  "loginErrorFailed": "فشل تسجيل الدخول: {error}",
+  "@loginErrorFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "accountName": "الاسم",
+  "accountInfo": "الحساب",
+  "accountDelete": "حذف الحساب",
+  "accountDeleteTitle": "هل تريد حذف الحساب؟",
+  "accountDeleteConfirmText": "ستفقد كل تقدمك وبياناتك نهائيًا. هل أنت متأكد؟",
+  "accountDeleteProfileImageTitle": "هل تريد حذف صورة الملف الشخصي؟",
+  "accountDeleteProfileImageContent": "بعد حذفها، لا يمكن استعادة صورة ملفك الشخصي.",
+  "accountGoBack": "العودة",
+  "accountDeleteAction": "حذف",
+  "accountSubscription": "الاشتراك",
+  "accountFreePlanTitle": "الخطة المجانية",
+  "accountFreePlanSubtitle": "اشترك في Premium لفتح المزيد من الميزات",
+  "accountPremiumTitle": "Premium",
+  "accountPremiumSubtitle": "أنت تستمتع بمزايا Premium",
+  "accountPremiumRenewsOn": "يتجدد الاشتراك في {date}",
+  "@accountPremiumRenewsOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "accountChangePlan": "تغيير الخطة",
+  "changePlanTitle": "تغيير الخطة",
+  "changePlanCurrentPlan": "الخطة الحالية",
+  "changePlanAvailablePlans": "الخطط المتاحة",
+  "changePlanRenewsOn": "يتجدد الاشتراك في {date}",
+  "@changePlanRenewsOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "changePlanLoadFailed": "تعذّر تحميل المعلومات. يرجى المحاولة مرة أخرى.",
+  "changePlanRetry": "إعادة المحاولة",
+  "changePlanConfirmTitle": "هل تريد تغيير الخطة؟",
+  "changePlanConfirmBody": "يسري تغيير الخطة في تاريخ الفوترة التالي.",
+  "changePlanConfirmOk": "تأكيد",
+  "changePlanConfirmCancel": "الاحتفاظ بالخطة الحالية",
+  "changePlanOldPurchaseMissing": "تعذّر العثور على اشتراك نشط لتغييره. حاول مرة أخرى بعد تفعيل اشتراكك.",
+  "changePlanChangeRequested": "تم طلب تغيير الخطة. قد يُطبّق في تاريخ الفوترة التالي.",
+  "cefrLevelTitle": "اختر مستواك في اللغة الإنجليزية",
+  "cefrLevelAbsoluteBeginner": "مبتدئ تمامًا",
+  "cefrLevelBeginner": "مبتدئ",
+  "cefrLevelBasic": "أساسي",
+  "cefrLevelIntermediate": "متوسط",
+  "firstCefrLevelTitle": "ما مستواك في اللغة الإنجليزية؟",
+  "firstCefrLevelDescriptionPreA1": "أستطيع قراءة الإنجليزية",
+  "firstCefrLevelDescriptionA1": "أعرف التحيات الأساسية والعبارات البسيطة",
+  "firstCefrLevelDescriptionA2": "أستطيع استخدام جمل قصيرة وبسيطة وفهمها",
+  "firstCefrLevelDescriptionB1": "أستطيع التعبير عن رأيي والمشاركة في المحادثات اليومية",
+  "firstCefrLevelSettingsHint": "يمكنك تغييره في أي وقت",
+  "firstCefrLevelConfirm": "تأكيد",
+  "feedbackPlaceholder": "شاركنا أفكارك أو اقتراحاتك أو أي مشكلات واجهتها...",
+  "feedbackSend": "إرسال",
+  "feedbackSuccess": "شكرًا لك على ملاحظاتك.",
+  "microphonePermissionDenied": "لا يمكن البدء من دون إذن الميكروفون.",
+  "holdMicrophoneToSpeak": "اضغط مطولًا على الميكروفون للتحدث",
+  "roleplayTypeMessagePlaceholder": "اكتب رسالتك...",
+  "yourTurnFirst": "ابدأ أنت أولًا!",
+  "sayLineBelowToStart": "قل العبارة أدناه للبدء.",
+  "roleplayExitWait": "انتظر!",
+  "roleplayExitMessage": "إذا غادرت الآن، فستفوتك المكافأة. هل أنت متأكد من رغبتك في المغادرة؟",
+  "roleplayExitKeepPlaying": "متابعة اللعب",
+  "roleplayExitExit": "خروج",
+  "roleplayAutoHint": "تلميح تلقائي",
+  "roleplayHintLabel": "تلميح",
+  "roleplayHintShowAnswer": "اضغط لعرض الإجابة المقترحة بالإنجليزية",
+  "roleplayVoiceSpeed": "سرعة الصوت",
+  "roleplayEndedFailed": "فشلت المهمة...",
+  "roleplayEndedComplete": "اكتمل تمثيل الأدوار",
+  "roleplayEndedEnding": "جارٍ الانتقال إلى النهاية...",
+  "roleplayFinishNotEnoughProgress": "التقدم غير كافٍ",
+  "roleplayFinishCompleted": "اكتمل تمثيل الأدوار",
+  "roleplayFinishMovingToEnding": "جارٍ الانتقال إلى النهاية...",
+  "roleplayAnalyzing": "جارٍ تحليل أدائك في تمثيل الأدوار...",
+  "roleplayOpeningAiCharacter": "شخصية الذكاء الاصطناعي",
+  "roleplayOpeningScenario": "السيناريو",
+  "roleplayOpeningAiDisclaimer": "قد يخطئ الذكاء الاصطناعي.\nيرجى عدم مشاركة معلومات شخصية أو حساسة.",
+  "endingFailTitle": "لم تُكمل جميع المهام!",
+  "endingFailSubtitle": "حاول مرة أخرى لاكتشاف القصة كاملة.",
+  "roleplayTryAgainMessage": "للأسف، لم تكن نتيجتك عالية بما يكفي للحصول على المكافأة.",
+  "endingReport": "الإبلاغ عن مشكلة",
+  "endingHowWas": "كيف كانت تجربة تمثيل الأدوار؟",
+  "endingNext": "التالي",
+  "reportTitle": "الإبلاغ عن مشكلة",
+  "profileHistory": "السجل",
+  "profileSaved": "المحفوظات",
+  "profileHistoryEmpty": "لا يوجد سجل بعد",
+  "profileSavedEmpty": "لا توجد عبارات محفوظة بعد.",
+  "profileSavedRemoveTitle": "هل تريد إزالة هذه العبارة من المحفوظات؟",
+  "profileSavedRemoveContent": "يمكنك العثور عليها مجددًا في السجل لاحقًا.",
+  "profileSavedRemoveOk": "إزالة",
+  "profileSavedRemoveCancel": "التدرّب أكثر",
+  "seriesOverviewTabEpisodes": "الحلقات",
+  "seriesOverviewTabSimilarTopic": "موضوع مشابه",
+  "seriesOverviewEpisodeNumber": "الحلقة #{number}",
+  "@seriesOverviewEpisodeNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "seriesOverviewPlay": "ابدأ",
+  "seriesOverviewLocked": "مقفل",
+  "seriesOverviewEpisodeLockedToast": "أكمل الحلقة السابقة لفتح هذه الحلقة.",
+  "notificationPermissionBlockedTitle": "الإشعارات متوقفة",
+  "notificationPermissionBlockedMessage": "فعّل الإشعارات من إعدادات جهازك لتلقي الإشعارات الفورية.",
+  "openSettings": "فتح الإعدادات",
+  "notificationsTitle": "الإشعارات",
+  "notificationsEmpty": "لا توجد إشعارات بعد",
+  "notificationSendToday": "اليوم",
+  "notificationSendOneDayAgo": "قبل يوم واحد",
+  "notificationSendDaysAgo": "قبل {count} أيام",
+  "@notificationSendDaysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reregistrationRestrictedMessage": "يمكنك التسجيل مجددًا بعد يومين من حذف حسابك. يرجى المحاولة لاحقًا.",
+  "expressionSavedToProfile": "تم الحفظ في ملفك الشخصي",
+  "expressionUnsavedToProfile": "أُلغي الحفظ",
+  "roleplayResultFeedbackInsufficientWords": "لم نتمكن من تقديم ملاحظات هذه المرة. حاول أن تجعل إجابتك 7 كلمات أو أكثر!",
+  "roleplayResultScoreMeaning": "المعنى",
+  "roleplayResultScoreRelevance": "مدى الصلة",
+  "roleplayResultScoreVocabulary": "المفردات",
+  "roleplayResultScoreGrammar": "القواعد",
+  "closePopup": "إغلاق",
+  "reviewChatTapHint": "اضغط على فقاعة الدردشة لتشغيل الصوت.",
+  "reviewChatNoAudioToPlay": "لا يوجد صوت لتشغيله.",
+  "seriesInformationTopicDifficulty": "صعوبة الموضوع",
+  "seriesInformationLearningGoals": "أهداف التعلم",
+  "energyInfoTitle": "الطاقة",
+  "energyOutOfEnergyTitle": "نفدت الطاقة",
+  "energyInfoRechargeUntil": "إعادة الشحن التالية بعد @@TIME@@",
+  "energyInfoFull": "طاقتك ممتلئة.",
+  "energyInfoUnlimitedEndsIn": "وضع اللعب غير المحدود مفعّل",
+  "energyInsufficient": "ليس لديك طاقة كافية.",
+  "endRoleplay": "إنهاء تمثيل الأدوار",
+  "energyEnablePushTitle": "تفعيل الإشعارات",
+  "energyEnablePushSubtitle": "فعّل الإشعارات وأعد تعبئة طاقتك بالكامل.",
+  "energyEnablePushPrice": "مجاني",
+  "energyEnablePushOfferBadge": "عرض لمرة واحدة",
+  "energyEnablePushCompleted": "تمت إعادة تعبئة الطاقة!",
+  "energyPurchaseUnlimitedTitle": "بطاقة اللعب غير المحدود",
+  "energyPurchaseUnlimitedSubtitle": "يبدأ فور إتمام الشراء. صالح لمدة 10 دقائق.",
+  "energyPurchaseCapacityTitle": "ترقية الحد الأقصى للطاقة",
+  "energyPurchaseCapacitySubtitle": "زِد الحد الأقصى للطاقة القابلة لإعادة الشحن بمقدار 1 بشكل دائم.",
+  "energyGoPremiumTitle": "الترقية إلى Premium",
+  "energyGoPremiumExplore": "استكشاف",
+  "profileGoPremiumTitle": "احصل على SUDA Premium",
+  "profileGoPremiumExplore": "استكشاف",
+  "energyPurchasePendingApproval": "دفعتك في انتظار الموافقة",
+  "energyPurchaseNotCompleted": "لم تكتمل عملية الشراء.",
+  "welcomeGiftTitle": "وصلت هدية الترحيب!",
+  "welcomeGiftBenefitLead": "استمتع بلعب غير محدود لمدة 10 دقائق!",
+  "welcomeGiftLine2": "تم فتح ميزات Premium",
+  "welcomeGiftLine3": "تم فتح اللعب غير المحدود",
+  "welcomeGiftStartNow": "ابدأ الآن",
+  "paywallHeroTitle1": "تدرّب أكثر",
+  "paywallHeroTitle2": "تحسّن بشكل أسرع",
+  "paywallHeroBody": "تدرّب لفترة أطول مع Premium واحصل على ملاحظات من الذكاء الاصطناعي لتعزيز ثقتك في استخدام الإنجليزية.",
+  "paywallPremiumLabel": "PREMIUM",
+  "paywallBenefitDailyPractice": "مزيد من التدريب اليومي",
+  "paywallBenefitMaxEnergy": "حد أقصى للطاقة يصل إلى 30",
+  "paywallBenefitAiFeedback": "ملاحظات الذكاء الاصطناعي على الجمل",
+  "paywallChoosePlan": "اختر خطتك",
+  "paywallAnnualPlanTitle": "الخطة السنوية",
+  "paywallAnnualPlanSubtitle": "وفّر أكثر من 33% مقارنة بالخطة الشهرية.",
+  "paywallMonthlyPlanTitle": "الخطة الشهرية",
+  "paywallMonthlyPlanSubtitle": "اشتراك شهري مرن.",
+  "paywallBestBadge": "الأفضل",
+  "paywallCta": "ابدأ الآن",
+  "paywallAutoRenewNotice": "تتجدد الاشتراكات تلقائيًا ما لم تُلغَ قبل 24 ساعة على الأقل من نهاية فترة الفوترة الحالية.",
+  "paywallPricePerMonth": "{price}/شهر",
+  "@paywallPricePerMonth": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallPricePerYear": "{price}/سنة",
+  "@paywallPricePerYear": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallFallbackAnnualPerMonth": "$8.33",
+  "paywallFallbackAnnual": "$99.99",
+  "paywallFallbackMonthly": "$13.99",
+  "paywallCompletedTitle": "تهانينا!",
+  "paywallCompletedBody": "مزايا Premium مفعّلة الآن.",
+  "paywallCompletedContinue": "متابعة"
+}

@@ -1,0 +1,265 @@
+{
+  "@@locale": "th",
+  "agreementHeading": "อ่านและยอมรับข้อตกลงด้านล่างเพื่อใช้งานต่อ",
+  "agreementTermsLabel": "ยอมรับข้อกำหนดการใช้งาน",
+  "agreementPrivacyLabel": "ยอมรับนโยบายความเป็นส่วนตัว",
+  "agreementTermsTitle": "ข้อกำหนดการใช้งาน",
+  "agreementPrivacyTitle": "นโยบายความเป็นส่วนตัว",
+  "agreementDetailsLink": "ดูรายละเอียด",
+  "agreementButtonConfirm": "ยอมรับและไปต่อ",
+  "settingsTitle": "การตั้งค่า",
+  "settingsAccount": "บัญชี",
+  "settingsRestorePurchases": "กู้คืนรายการซื้อ",
+  "restorePurchasesNothing": "ไม่มีรายการซื้อให้กู้คืน",
+  "restorePurchasesCompleted": "กู้คืนรายการซื้อแล้ว",
+  "settingsNotification": "การแจ้งเตือน",
+  "settingsTutorial": "บทแนะนำ",
+  "settingsCefrLevel": "ระดับภาษาอังกฤษ",
+  "pushNotifications": "การแจ้งเตือนแบบพุช",
+  "pushNotificationsDesc": "รับการเตือนและอัปเดตสำคัญ",
+  "settingsFeedback": "ความคิดเห็น",
+  "settingsAnnouncements": "ประกาศ",
+  "announcementsEmpty": "ยังไม่มีประกาศ",
+  "noticesEmpty": "ยังไม่มีโพสต์",
+  "deletedPost": "โพสต์นี้ถูกลบแล้ว",
+  "postNoLongerAvailable": "โพสต์นี้ไม่สามารถดูได้แล้ว",
+  "backToHome": "กลับหน้าหลัก",
+  "settingsSignOut": "ออกจากระบบ",
+  "settingsFsdLaboratory": "ห้องทดลอง FSD",
+  "settingsPrivacy": "นโยบายความเป็นส่วนตัว",
+  "settingsTerms": "ข้อกำหนดการให้บริการ",
+  "settingsOpenSource": "ใบอนุญาตโอเพนซอร์ส",
+  "loginWelcome": "ยินดีต้อนรับ {name}!",
+  "@loginWelcome": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "loginTermsTemplate": "เมื่อไปต่อ คุณยอมรับ {terms} และ {privacy} ของเรา",
+  "@loginTermsTemplate": {
+    "placeholders": {
+      "terms": {
+        "type": "String"
+      },
+      "privacy": {
+        "type": "String"
+      }
+    }
+  },
+  "loginTermsTitle": "ข้อกำหนดการใช้งาน",
+  "loginPrivacyTitle": "นโยบายความเป็นส่วนตัว",
+  "loginCatchphrase": "แค่เริ่มพูด ก็เริ่มเรียนรู้ได้แล้ว",
+  "loginWelcomeTitle": "ยินดีต้อนรับสู่ SUDA!",
+  "loginWelcomeSubtitle": "ก้าวเข้าสู่เรื่องราว แล้วเริ่มพูดภาษาอังกฤษกัน!",
+  "loginErrorIdToken": "ยืนยันตัวตนกับ Google ไม่สำเร็จ ลองอีกครั้ง",
+  "loginErrorFailed": "เข้าสู่ระบบไม่สำเร็จ: {error}",
+  "@loginErrorFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "accountName": "ชื่อ",
+  "accountInfo": "บัญชี",
+  "accountDelete": "ลบบัญชี",
+  "accountDeleteTitle": "ลบบัญชีไหม?",
+  "accountDeleteConfirmText": "ความคืบหน้าและข้อมูลทั้งหมดจะถูกลบอย่างถาวรและกู้คืนไม่ได้ ต้องการลบบัญชีไหม?",
+  "accountDeleteProfileImageTitle": "ลบรูปโปรไฟล์ไหม?",
+  "accountDeleteProfileImageContent": "เมื่อลบแล้ว จะกู้คืนรูปโปรไฟล์ไม่ได้",
+  "accountGoBack": "ย้อนกลับ",
+  "accountDeleteAction": "ลบ",
+  "accountSubscription": "การสมัครสมาชิก",
+  "accountFreePlanTitle": "แพ็กเกจฟรี",
+  "accountFreePlanSubtitle": "สมัคร Premium เพื่อปลดล็อกฟีเจอร์เพิ่มเติม",
+  "accountPremiumTitle": "Premium",
+  "accountPremiumSubtitle": "คุณกำลังใช้สิทธิประโยชน์ Premium",
+  "accountPremiumRenewsOn": "ต่ออายุวันที่ {date}",
+  "@accountPremiumRenewsOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "accountChangePlan": "เปลี่ยนแพ็กเกจ",
+  "changePlanTitle": "เปลี่ยนแพ็กเกจ",
+  "changePlanCurrentPlan": "แพ็กเกจปัจจุบัน",
+  "changePlanAvailablePlans": "แพ็กเกจที่เลือกได้",
+  "changePlanRenewsOn": "ต่ออายุวันที่ {date}",
+  "@changePlanRenewsOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "changePlanLoadFailed": "โหลดข้อมูลไม่สำเร็จ ลองอีกครั้ง",
+  "changePlanRetry": "ลองอีกครั้ง",
+  "changePlanConfirmTitle": "เปลี่ยนแพ็กเกจไหม?",
+  "changePlanConfirmBody": "การเปลี่ยนแพ็กเกจจะมีผลในวันเรียกเก็บเงินรอบถัดไป",
+  "changePlanConfirmOk": "ยืนยัน",
+  "changePlanConfirmCancel": "ใช้แพ็กเกจเดิม",
+  "changePlanOldPurchaseMissing": "ไม่พบการสมัครสมาชิกที่ใช้งานอยู่สำหรับเปลี่ยนแพ็กเกจ ลองอีกครั้งเมื่อการสมัครสมาชิกเปิดใช้งานแล้ว",
+  "changePlanChangeRequested": "ส่งคำขอเปลี่ยนแพ็กเกจแล้ว การเปลี่ยนแปลงอาจมีผลในวันเรียกเก็บเงินรอบถัดไป",
+  "cefrLevelTitle": "เลือกระดับภาษาอังกฤษของคุณ",
+  "cefrLevelAbsoluteBeginner": "เริ่มต้นจากศูนย์",
+  "cefrLevelBeginner": "เริ่มต้น",
+  "cefrLevelBasic": "พื้นฐาน",
+  "cefrLevelIntermediate": "ระดับกลาง",
+  "firstCefrLevelTitle": "ภาษาอังกฤษของคุณอยู่ระดับไหน?",
+  "firstCefrLevelDescriptionPreA1": "ฉันอ่านภาษาอังกฤษได้",
+  "firstCefrLevelDescriptionA1": "ฉันรู้คำทักทายพื้นฐานและวลีง่าย ๆ",
+  "firstCefrLevelDescriptionA2": "ฉันเข้าใจและใช้ประโยคสั้น ๆ ง่าย ๆ ได้",
+  "firstCefrLevelDescriptionB1": "ฉันแสดงความคิดเห็นและร่วมบทสนทนาในชีวิตประจำวันได้",
+  "firstCefrLevelSettingsHint": "เปลี่ยนได้ทุกเมื่อ",
+  "firstCefrLevelConfirm": "ยืนยัน",
+  "feedbackPlaceholder": "แชร์ความคิดเห็น ข้อเสนอแนะ หรือปัญหาที่พบ...",
+  "feedbackSend": "ส่ง",
+  "feedbackSuccess": "ขอบคุณสำหรับความคิดเห็น",
+  "microphonePermissionDenied": "เริ่มไม่ได้หากไม่อนุญาตให้ใช้ไมโครโฟน",
+  "holdMicrophoneToSpeak": "กดไมโครโฟนค้างไว้แล้วพูด",
+  "roleplayTypeMessagePlaceholder": "พิมพ์ข้อความ...",
+  "yourTurnFirst": "คุณพูดก่อนเลย!",
+  "sayLineBelowToStart": "พูดประโยคด้านล่างเพื่อเริ่ม",
+  "roleplayExitWait": "เดี๋ยวก่อน!",
+  "roleplayExitMessage": "ถ้าออกตอนนี้ คุณจะพลาดรางวัล ยังต้องการออกไหม?",
+  "roleplayExitKeepPlaying": "เล่นต่อ",
+  "roleplayExitExit": "ออก",
+  "roleplayAutoHint": "คำใบ้อัตโนมัติ",
+  "roleplayHintLabel": "คำใบ้",
+  "roleplayHintShowAnswer": "แตะเพื่อดูคำตอบภาษาอังกฤษที่แนะนำ",
+  "roleplayVoiceSpeed": "ความเร็วในการพูด",
+  "roleplayEndedFailed": "ทำภารกิจไม่สำเร็จ...",
+  "roleplayEndedComplete": "โรลเพลย์เสร็จแล้ว",
+  "roleplayEndedEnding": "กำลังไปยังตอนจบ...",
+  "roleplayFinishNotEnoughProgress": "ความคืบหน้ายังไม่พอ",
+  "roleplayFinishCompleted": "โรลเพลย์เสร็จแล้ว",
+  "roleplayFinishMovingToEnding": "กำลังไปยังตอนจบ...",
+  "roleplayAnalyzing": "กำลังวิเคราะห์โรลเพลย์ของคุณ...",
+  "roleplayOpeningAiCharacter": "ตัวละคร AI",
+  "roleplayOpeningScenario": "สถานการณ์",
+  "roleplayOpeningAiDisclaimer": "AI อาจผิดพลาดได้\nอย่าแชร์ข้อมูลส่วนตัวหรือข้อมูลที่ละเอียดอ่อน",
+  "endingFailTitle": "คุณทำภารกิจไม่ครบ!",
+  "endingFailSubtitle": "ลองอีกครั้งเพื่อดูเรื่องราวทั้งหมด",
+  "roleplayTryAgainMessage": "น่าเสียดาย คะแนนของคุณยังไม่พอรับรางวัล",
+  "endingReport": "รายงานปัญหา",
+  "endingHowWas": "โรลเพลย์เป็นอย่างไรบ้าง?",
+  "endingNext": "ถัดไป",
+  "reportTitle": "รายงานปัญหา",
+  "profileHistory": "ประวัติ",
+  "profileSaved": "บันทึกไว้",
+  "profileHistoryEmpty": "ยังไม่มีประวัติ",
+  "profileSavedEmpty": "ยังไม่มีวลีที่บันทึกไว้",
+  "profileSavedRemoveTitle": "นำออกจากรายการที่บันทึกไหม?",
+  "profileSavedRemoveContent": "คุณยังค้นหาวลีนี้ได้ในประวัติ",
+  "profileSavedRemoveOk": "นำออก",
+  "profileSavedRemoveCancel": "ฝึกต่อ",
+  "seriesOverviewTabEpisodes": "ตอน",
+  "seriesOverviewTabSimilarTopic": "หัวข้อคล้ายกัน",
+  "seriesOverviewEpisodeNumber": "ตอนที่ #{number}",
+  "@seriesOverviewEpisodeNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "seriesOverviewPlay": "เล่น",
+  "seriesOverviewLocked": "ล็อกอยู่",
+  "seriesOverviewEpisodeLockedToast": "เล่นตอนก่อนหน้าให้จบเพื่อปลดล็อก",
+  "notificationPermissionBlockedTitle": "ปิดการแจ้งเตือนอยู่",
+  "notificationPermissionBlockedMessage": "เปิดการแจ้งเตือนในการตั้งค่าอุปกรณ์เพื่อรับการแจ้งเตือนแบบพุช",
+  "openSettings": "เปิดการตั้งค่า",
+  "notificationsTitle": "การแจ้งเตือน",
+  "notificationsEmpty": "ยังไม่มีการแจ้งเตือน",
+  "notificationSendToday": "วันนี้",
+  "notificationSendOneDayAgo": "1 วันที่แล้ว",
+  "notificationSendDaysAgo": "{count} วันที่แล้ว",
+  "@notificationSendDaysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reregistrationRestrictedMessage": "สมัครใหม่ได้หลังจากลบบัญชีแล้ว 2 วัน ลองอีกครั้งภายหลัง",
+  "expressionSavedToProfile": "บันทึกในโปรไฟล์แล้ว",
+  "expressionUnsavedToProfile": "ยกเลิกการบันทึกแล้ว",
+  "roleplayResultFeedbackInsufficientWords": "ครั้งนี้ยังให้ฟีดแบ็กไม่ได้ ลองตอบอย่างน้อย 7 คำ!",
+  "roleplayResultScoreMeaning": "ความหมาย",
+  "roleplayResultScoreRelevance": "ความสอดคล้อง",
+  "roleplayResultScoreVocabulary": "คำศัพท์",
+  "roleplayResultScoreGrammar": "ไวยากรณ์",
+  "closePopup": "ปิด",
+  "reviewChatTapHint": "แตะข้อความเพื่อฟังเสียง",
+  "reviewChatNoAudioToPlay": "ไม่มีเสียงให้เล่น",
+  "seriesInformationTopicDifficulty": "ความยากของหัวข้อ",
+  "seriesInformationLearningGoals": "เป้าหมายการเรียนรู้",
+  "energyInfoTitle": "พลังงาน",
+  "energyOutOfEnergyTitle": "พลังงานหมด",
+  "energyInfoRechargeUntil": "พลังงานจะฟื้นฟูในอีก @@TIME@@",
+  "energyInfoFull": "พลังงานเต็มแล้ว",
+  "energyInfoUnlimitedEndsIn": "กำลังใช้โหมดไม่จำกัด",
+  "energyInsufficient": "พลังงานไม่พอ",
+  "endRoleplay": "จบโรลเพลย์",
+  "energyEnablePushTitle": "เปิดการแจ้งเตือน",
+  "energyEnablePushSubtitle": "เปิดการแจ้งเตือนเพื่อเติมพลังงานให้เต็ม",
+  "energyEnablePushPrice": "ฟรี",
+  "energyEnablePushOfferBadge": "ข้อเสนอครั้งเดียว",
+  "energyEnablePushCompleted": "เติมพลังงานเต็มแล้ว!",
+  "energyPurchaseUnlimitedTitle": "บัตรเล่นไม่จำกัด",
+  "energyPurchaseUnlimitedSubtitle": "เริ่มทันทีหลังซื้อ ใช้ได้ 10 นาที",
+  "energyPurchaseCapacityTitle": "เพิ่มพลังงานสูงสุด",
+  "energyPurchaseCapacitySubtitle": "เพิ่มพลังงานสูงสุดที่เติมได้ 1 หน่วยอย่างถาวร",
+  "energyGoPremiumTitle": "สมัคร Premium",
+  "energyGoPremiumExplore": "ดูเพิ่มเติม",
+  "profileGoPremiumTitle": "สมัคร SUDA Premium",
+  "profileGoPremiumExplore": "ดูเพิ่มเติม",
+  "energyPurchasePendingApproval": "การชำระเงินกำลังรอการอนุมัติ",
+  "energyPurchaseNotCompleted": "ดำเนินการซื้อไม่สำเร็จ",
+  "welcomeGiftTitle": "ของขวัญต้อนรับมาถึงแล้ว!",
+  "welcomeGiftBenefitLead": "เล่นได้ไม่จำกัด 10 นาที!",
+  "welcomeGiftLine2": "ปลดล็อกฟีเจอร์ Premium",
+  "welcomeGiftLine3": "ปลดล็อกการเล่นไม่จำกัด",
+  "welcomeGiftStartNow": "เริ่มเลย",
+  "paywallHeroTitle1": "ฝึกให้มากขึ้น",
+  "paywallHeroTitle2": "เก่งเร็วขึ้น",
+  "paywallHeroBody": "ฝึกได้นานขึ้นด้วย Premium พร้อมรับฟีดแบ็กจาก AI เพื่อเพิ่มความมั่นใจในการใช้ภาษาอังกฤษ",
+  "paywallPremiumLabel": "PREMIUM",
+  "paywallBenefitDailyPractice": "ฝึกได้มากขึ้นทุกวัน",
+  "paywallBenefitMaxEnergy": "พลังงานสูงสุด 30",
+  "paywallBenefitAiFeedback": "ฟีดแบ็กจาก AI รายประโยค",
+  "paywallChoosePlan": "เลือกแพ็กเกจ",
+  "paywallAnnualPlanTitle": "แพ็กเกจรายปี",
+  "paywallAnnualPlanSubtitle": "ประหยัดมากกว่า 33% เมื่อเทียบกับแพ็กเกจรายเดือน",
+  "paywallMonthlyPlanTitle": "แพ็กเกจรายเดือน",
+  "paywallMonthlyPlanSubtitle": "ใช้งานแบบรายเดือนได้อย่างยืดหยุ่น",
+  "paywallBestBadge": "คุ้มที่สุด",
+  "paywallCta": "สมัครเลย",
+  "paywallAutoRenewNotice": "การสมัครสมาชิกจะต่ออายุอัตโนมัติ เว้นแต่จะยกเลิกอย่างน้อย 24 ชั่วโมงก่อนสิ้นสุดรอบการเรียกเก็บเงินปัจจุบัน",
+  "paywallPricePerMonth": "{price}/เดือน",
+  "@paywallPricePerMonth": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallPricePerYear": "{price}/ปี",
+  "@paywallPricePerYear": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallFallbackAnnualPerMonth": "$8.33",
+  "paywallFallbackAnnual": "$99.99",
+  "paywallFallbackMonthly": "$13.99",
+  "paywallCompletedTitle": "ยินดีด้วย!",
+  "paywallCompletedBody": "สิทธิประโยชน์ Premium ของคุณเปิดใช้งานแล้ว",
+  "paywallCompletedContinue": "ไปต่อ"
+}

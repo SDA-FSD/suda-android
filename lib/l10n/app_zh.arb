@@ -1,0 +1,265 @@
+{
+  "@@locale": "zh",
+  "agreementHeading": "请查看并同意以下条款后继续。",
+  "agreementTermsLabel": "我同意《用户协议》。",
+  "agreementPrivacyLabel": "我同意《隐私政策》。",
+  "agreementTermsTitle": "用户协议",
+  "agreementPrivacyTitle": "隐私政策",
+  "agreementDetailsLink": "查看详情",
+  "agreementButtonConfirm": "同意并继续",
+  "settingsTitle": "设置",
+  "settingsAccount": "账号",
+  "settingsRestorePurchases": "恢复购买",
+  "restorePurchasesNothing": "没有可恢复的购买项目。",
+  "restorePurchasesCompleted": "购买项目已恢复。",
+  "settingsNotification": "通知",
+  "settingsTutorial": "教程",
+  "settingsCefrLevel": "英语水平",
+  "pushNotifications": "推送通知",
+  "pushNotificationsDesc": "接收提醒和重要更新。",
+  "settingsFeedback": "意见反馈",
+  "settingsAnnouncements": "公告",
+  "announcementsEmpty": "暂无公告",
+  "noticesEmpty": "暂无帖子",
+  "deletedPost": "该帖子已删除。",
+  "postNoLongerAvailable": "该帖子已无法查看。",
+  "backToHome": "返回首页",
+  "settingsSignOut": "退出登录",
+  "settingsFsdLaboratory": "FSD 实验室",
+  "settingsPrivacy": "隐私政策",
+  "settingsTerms": "用户协议",
+  "settingsOpenSource": "开源许可",
+  "loginWelcome": "欢迎你，{name}！",
+  "@loginWelcome": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "loginTermsTemplate": "继续即表示你同意我们的{terms}和{privacy}。",
+  "@loginTermsTemplate": {
+    "placeholders": {
+      "terms": {
+        "type": "String"
+      },
+      "privacy": {
+        "type": "String"
+      }
+    }
+  },
+  "loginTermsTitle": "用户协议",
+  "loginPrivacyTitle": "隐私政策",
+  "loginCatchphrase": "开口说，才能学得会。",
+  "loginWelcomeTitle": "欢迎来到 SUDA！",
+  "loginWelcomeSubtitle": "走进故事，开口说英语！",
+  "loginErrorIdToken": "无法获取 Google ID 令牌，请重试。",
+  "loginErrorFailed": "登录失败：{error}",
+  "@loginErrorFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "accountName": "姓名",
+  "accountInfo": "账号",
+  "accountDelete": "删除账号",
+  "accountDeleteTitle": "要删除账号吗？",
+  "accountDeleteConfirmText": "你的所有学习进度和数据都将被永久删除且无法恢复。确定要删除吗？",
+  "accountDeleteProfileImageTitle": "要删除头像吗？",
+  "accountDeleteProfileImageContent": "头像一旦删除将无法恢复。",
+  "accountGoBack": "返回",
+  "accountDeleteAction": "删除",
+  "accountSubscription": "订阅",
+  "accountFreePlanTitle": "免费版",
+  "accountFreePlanSubtitle": "升级 Premium，解锁更多功能",
+  "accountPremiumTitle": "Premium",
+  "accountPremiumSubtitle": "你正在享受 Premium 权益",
+  "accountPremiumRenewsOn": "将于{date}续订",
+  "@accountPremiumRenewsOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "accountChangePlan": "更换套餐",
+  "changePlanTitle": "更换套餐",
+  "changePlanCurrentPlan": "当前套餐",
+  "changePlanAvailablePlans": "可选套餐",
+  "changePlanRenewsOn": "将于{date}续订",
+  "@changePlanRenewsOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "changePlanLoadFailed": "无法加载信息，请重试。",
+  "changePlanRetry": "重试",
+  "changePlanConfirmTitle": "要更换套餐吗？",
+  "changePlanConfirmBody": "套餐变更将在下一个扣费日生效。",
+  "changePlanConfirmOk": "确认更换",
+  "changePlanConfirmCancel": "保留当前套餐",
+  "changePlanOldPurchaseMissing": "未找到可更改的有效订阅。请在订阅生效后重试。",
+  "changePlanChangeRequested": "已提交套餐变更申请，可能会在下一个扣费日生效。",
+  "cefrLevelTitle": "选择你的英语水平",
+  "cefrLevelAbsoluteBeginner": "零基础",
+  "cefrLevelBeginner": "入门",
+  "cefrLevelBasic": "初级",
+  "cefrLevelIntermediate": "中级",
+  "firstCefrLevelTitle": "你的英语水平如何？",
+  "firstCefrLevelDescriptionPreA1": "我会读英文",
+  "firstCefrLevelDescriptionA1": "我会基本问候语和简单短语",
+  "firstCefrLevelDescriptionA2": "我能理解并使用简短的句子",
+  "firstCefrLevelDescriptionB1": "我能表达自己的观点并参与日常对话",
+  "firstCefrLevelSettingsHint": "可随时更改",
+  "firstCefrLevelConfirm": "确认",
+  "feedbackPlaceholder": "请分享你的想法、建议或遇到的问题…",
+  "feedbackSend": "发送",
+  "feedbackSuccess": "感谢你的反馈。",
+  "microphonePermissionDenied": "未获得麦克风权限，无法开始。",
+  "holdMicrophoneToSpeak": "按住麦克风说话",
+  "roleplayTypeMessagePlaceholder": "输入你的回复…",
+  "yourTurnFirst": "由你先开始！",
+  "sayLineBelowToStart": "说出下面这句话即可开始。",
+  "roleplayExitWait": "等一下！",
+  "roleplayExitMessage": "现在退出将无法获得奖励。确定要退出吗？",
+  "roleplayExitKeepPlaying": "继续对话",
+  "roleplayExitExit": "退出",
+  "roleplayAutoHint": "自动提示",
+  "roleplayHintLabel": "提示",
+  "roleplayHintShowAnswer": "点击查看英文参考回复",
+  "roleplayVoiceSpeed": "语速",
+  "roleplayEndedFailed": "任务失败…",
+  "roleplayEndedComplete": "情景对话已完成",
+  "roleplayEndedEnding": "即将进入结局…",
+  "roleplayFinishNotEnoughProgress": "对话进度不足",
+  "roleplayFinishCompleted": "情景对话已完成",
+  "roleplayFinishMovingToEnding": "即将进入结局…",
+  "roleplayAnalyzing": "正在分析你的情景对话…",
+  "roleplayOpeningAiCharacter": "AI 角色",
+  "roleplayOpeningScenario": "场景",
+  "roleplayOpeningAiDisclaimer": "AI 可能会出错。\n请勿分享个人信息或敏感信息。",
+  "endingFailTitle": "你还没有完成所有任务！",
+  "endingFailSubtitle": "再试一次，解锁完整故事。",
+  "roleplayTryAgainMessage": "很遗憾，你的得分不足，无法获得奖励。",
+  "endingReport": "报告问题",
+  "endingHowWas": "这次情景对话体验如何？",
+  "endingNext": "下一步",
+  "reportTitle": "报告问题",
+  "profileHistory": "历史记录",
+  "profileSaved": "收藏",
+  "profileHistoryEmpty": "暂无历史记录",
+  "profileSavedEmpty": "暂无收藏的表达。",
+  "profileSavedRemoveTitle": "要取消收藏吗？",
+  "profileSavedRemoveContent": "之后仍可在历史记录中找到它。",
+  "profileSavedRemoveOk": "取消收藏",
+  "profileSavedRemoveCancel": "继续练习",
+  "seriesOverviewTabEpisodes": "剧集",
+  "seriesOverviewTabSimilarTopic": "相似主题",
+  "seriesOverviewEpisodeNumber": "第{number}集",
+  "@seriesOverviewEpisodeNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "seriesOverviewPlay": "开始",
+  "seriesOverviewLocked": "未解锁",
+  "seriesOverviewEpisodeLockedToast": "完成上一集即可解锁。",
+  "notificationPermissionBlockedTitle": "通知已关闭",
+  "notificationPermissionBlockedMessage": "请在设备设置中开启通知，以接收推送消息。",
+  "openSettings": "前往设置",
+  "notificationsTitle": "通知",
+  "notificationsEmpty": "暂无通知",
+  "notificationSendToday": "今天",
+  "notificationSendOneDayAgo": "1天前",
+  "notificationSendDaysAgo": "{count}天前",
+  "@notificationSendDaysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reregistrationRestrictedMessage": "删除账号2天后才能重新注册，请稍后重试。",
+  "expressionSavedToProfile": "已收藏到个人中心",
+  "expressionUnsavedToProfile": "已取消收藏",
+  "roleplayResultFeedbackInsufficientWords": "这次无法提供反馈。请尝试用至少7个英文单词回答！",
+  "roleplayResultScoreMeaning": "含义",
+  "roleplayResultScoreRelevance": "相关性",
+  "roleplayResultScoreVocabulary": "词汇",
+  "roleplayResultScoreGrammar": "语法",
+  "closePopup": "关闭",
+  "reviewChatTapHint": "点击聊天气泡播放音频。",
+  "reviewChatNoAudioToPlay": "暂无可播放的音频。",
+  "seriesInformationTopicDifficulty": "主题难度",
+  "seriesInformationLearningGoals": "学习目标",
+  "energyInfoTitle": "能量",
+  "energyOutOfEnergyTitle": "能量不足",
+  "energyInfoRechargeUntil": "距下次恢复还有 @@TIME@@",
+  "energyInfoFull": "能量已满。",
+  "energyInfoUnlimitedEndsIn": "无限模式已开启",
+  "energyInsufficient": "能量不足。",
+  "endRoleplay": "结束情景对话",
+  "energyEnablePushTitle": "开启通知",
+  "energyEnablePushSubtitle": "开启通知，将能量补充至满值。",
+  "energyEnablePushPrice": "免费",
+  "energyEnablePushOfferBadge": "仅限一次",
+  "energyEnablePushCompleted": "能量已补满！",
+  "energyPurchaseUnlimitedTitle": "无限畅玩卡",
+  "energyPurchaseUnlimitedSubtitle": "购买后立即生效，有效期10分钟。",
+  "energyPurchaseCapacityTitle": "提升能量上限",
+  "energyPurchaseCapacitySubtitle": "将可恢复的能量上限永久提高1点。",
+  "energyGoPremiumTitle": "升级 Premium",
+  "energyGoPremiumExplore": "查看权益",
+  "profileGoPremiumTitle": "订阅 SUDA Premium",
+  "profileGoPremiumExplore": "查看权益",
+  "energyPurchasePendingApproval": "你的付款正在等待批准。",
+  "energyPurchaseNotCompleted": "购买未完成。",
+  "welcomeGiftTitle": "欢迎礼物已送达！",
+  "welcomeGiftBenefitLead": "享受10分钟无限畅玩！",
+  "welcomeGiftLine2": "Premium 功能已解锁",
+  "welcomeGiftLine3": "无限畅玩已解锁",
+  "welcomeGiftStartNow": "立即开始",
+  "paywallHeroTitle1": "多多练习",
+  "paywallHeroTitle2": "进步更快",
+  "paywallHeroBody": "使用 Premium 延长练习时间，并获得 AI 反馈，提升英语表达信心。",
+  "paywallPremiumLabel": "PREMIUM",
+  "paywallBenefitDailyPractice": "增加每日练习量",
+  "paywallBenefitMaxEnergy": "能量上限最高30点",
+  "paywallBenefitAiFeedback": "AI 句子反馈",
+  "paywallChoosePlan": "选择套餐",
+  "paywallAnnualPlanTitle": "年度套餐",
+  "paywallAnnualPlanSubtitle": "相比月度套餐节省33%以上。",
+  "paywallMonthlyPlanTitle": "月度套餐",
+  "paywallMonthlyPlanSubtitle": "按月订阅，灵活使用。",
+  "paywallBestBadge": "最划算",
+  "paywallCta": "立即订阅",
+  "paywallAutoRenewNotice": "除非在当前计费周期结束前至少24小时取消订阅，否则订阅将自动续订。",
+  "paywallPricePerMonth": "{price}/月",
+  "@paywallPricePerMonth": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallPricePerYear": "{price}/年",
+  "@paywallPricePerYear": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallFallbackAnnualPerMonth": "$8.33",
+  "paywallFallbackAnnual": "$99.99",
+  "paywallFallbackMonthly": "$13.99",
+  "paywallCompletedTitle": "恭喜！",
+  "paywallCompletedBody": "你的 Premium 权益现已生效。",
+  "paywallCompletedContinue": "继续"
+}
