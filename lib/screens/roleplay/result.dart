@@ -1098,6 +1098,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
     final history = await SudaApiClient.getRpS2UserHistory(
       accessToken: token,
       rpUserHistoryId: historyId,
+      reason: 'subscription',
     );
     SeriesStateService.instance.setCachedUserHistory(history);
     if (mounted) setState(() {});

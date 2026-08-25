@@ -174,10 +174,12 @@ class SudaApiClient {
   static Future<RpS2UserHistoryDto> getRpS2UserHistory({
     required String accessToken,
     required int rpUserHistoryId,
+    String? reason,
   }) {
     return SeriesApi.getUserHistory(
       accessToken: accessToken,
       rpUserHistoryId: rpUserHistoryId,
+      reason: reason,
     );
   }
 

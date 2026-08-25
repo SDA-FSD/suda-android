@@ -780,20 +780,23 @@ class SeriesApi {
   static Future<RpS2UserHistoryDto> getUserHistory({
     required String accessToken,
     required int rpUserHistoryId,
+    String? reason,
   }) async {
     return await SudaHttpClient.executeWithRefresh(
-      () => _getUserHistoryInternal(accessToken, rpUserHistoryId),
+      () => _getUserHistoryInternal(accessToken, rpUserHistoryId, reason),
       retryWithNewToken: (newToken) =>
-          _getUserHistoryInternal(newToken, rpUserHistoryId),
+          _getUserHistoryInternal(newToken, rpUserHistoryId, reason),
     );
   }
 
   static Future<RpS2UserHistoryDto> _getUserHistoryInternal(
     String accessToken,
     int rpUserHistoryId,
+    String? reason,
   ) async {
     final uri = SudaHttpClient.buildUri(
       '/rps2/user-histories/$rpUserHistoryId',
+      reason == null || reason.isEmpty ? null : {'reason': reason},
     );
     late final http.Response response;
     try {

@@ -166,7 +166,7 @@ flutter run --flavor dev -t lib/main.dart --dart-define=ENV=dev -d 541F3961-8182
 - Change Plan: 월간 구독자만 (`subscriptionBasePlanId==bp-premium-monthly`) → 연간. AOS `ReplacementMode.withoutProration`. iOS 같은 그룹 `premium_yearly` 구매(다음 renewal crossgrade). verify 직후 simple은 계속 monthly
 - Restore UI: **Paywall 하단 링크 + Setting Account 다음 행, iOS만**. 에너지 팝업에는 없음
 - 에너지 팝업 구매 성공: 해당 슬롯 1초 숨김 애니 후 `GET energy/detail` refetch. **resume grace 2s는 AOS만**(Play 시트 dismiss). iOS는 스트림의 purchased/canceled 대기. iOS orphan/simple bus가 와도 팝업은 detail을 다시 받아 같은 애니로 슬롯을 가림
-- Speech Feedback: `feedbackLockedYn=='Y'` → Paywall. `'N'` → feedback TTS 준비 후 펼침+재생(실패 시 펼침만). 접기는 잠금 검사 없음. 상세 `CONTEXT_ROLEPLAY_S2.md`
+- Speech Feedback: `feedbackLockedYn=='Y'` → Paywall. 구독 성공 시 history 재조회에만 `?reason=subscription`. `'N'` → feedback TTS 준비 후 펼침+재생(실패 시 펼침만). 접기는 잠금 검사 없음. 상세 `CONTEXT_ROLEPLAY_S2.md`
 - **제약:** 상품은 prd 패키지 `kr.sudatalk.app`. verify `packageName`은 ENV 고정 → **산 패키지 = API ENV**. 스토어본↔유선본 상호 업데이트 불가. iOS IAP 테스트는 **prd + TestFlight**
 - `appAccountToken` 안 보냄. ASSN V2 `POST /v1/billing/webhook` (반영 배치 약 2분)
 
