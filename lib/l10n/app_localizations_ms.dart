@@ -679,4 +679,41 @@ class AppLocalizationsMs extends AppLocalizations {
 
   @override
   String get roleplayTurnGradeD => 'oh…';
+
+  @override
+  String get tutorialPage1Title =>
+      'Semak **Misi** anda\ndan mulakan perbualan.';
+
+  @override
+  String get tutorialPage1Tip =>
+      '*Tip: Semakin semula jadi anda bercakap,\nsemakin besar ganjaran anda!';
+
+  @override
+  String get tutorialPage2Title =>
+      'Gunakan **Penterjemah**\napabila anda tidak faham.';
+
+  @override
+  String get tutorialPage3Title =>
+      'Gunakan **Petunjuk**\napabila anda tersekat.';
+
+  @override
+  String get tutorialPage3Subtitle =>
+      'Anda boleh menghidupkan atau mematikan\npetunjuk automatik pada bila-bila masa.';
+
+  @override
+  String get tutorialPage4Title =>
+      'Jika sebutan sukar,\ndengar dahulu, kemudian ulang.';
+
+  @override
+  String get tutorialPage4Tip =>
+      '*Tip: Cuba jawab tanpa melihat terjemahan\nuntuk mendapat markah lebih tinggi.';
+
+  @override
+  String get tutorialPage5Title => 'Tidak boleh bercakap kuat?';
+
+  @override
+  String get tutorialPage5Subtitle => 'Tukar kepada **Mod Teks**.';
+
+  @override
+  String get tutorialPage6Title => 'Tiada siapa yang menghakimi.\nAnda mampu!';
 }

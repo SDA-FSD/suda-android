@@ -80,6 +80,24 @@ class RoleplayRouter {
     );
   }
 
+  /// Lab 미리보기. [locale] 오버레이로 열고, 완료 API는 호출하지 않는다.
+  static Future<void> pushTutorialPreview(
+    BuildContext context, {
+    required Locale locale,
+  }) {
+    return Navigator.push<void>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => Localizations.override(
+          context: context,
+          locale: locale,
+          child: const RoleplayTutorialScreen(preview: true),
+        ),
+        settings: const RouteSettings(name: RoleplayTutorialScreen.routeName),
+      ),
+    );
+  }
+
   /// Tutorial 완료 후 Opening으로 교체 (Tutorial 스크린을 스택에서 제거).
   static void replaceWithOpeningFromTutorial(BuildContext context) {
     Navigator.pushReplacement(

@@ -98,9 +98,7 @@ flutter:
     - assets/images/small_posters/
     - assets/images/icons/
     - assets/images/buttons/
-    - assets/images/tutorials2/en/
-    - assets/images/tutorials2/ko/
-    - assets/images/tutorials2/pt/
+    - assets/images/tutorial/
     - assets/fonts/
     - assets/sounds/
 

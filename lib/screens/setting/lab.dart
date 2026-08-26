@@ -66,6 +66,55 @@ class LabDefaultPopupOption {
   final Future<void> Function(BuildContext context) show;
 }
 
+class _LabTutorialLocaleOption {
+  const _LabTutorialLocaleOption({
+    required this.id,
+    required this.locale,
+    required this.label,
+  });
+
+  final String id;
+  final Locale locale;
+  final String label;
+}
+
+/// Lab 튜토리얼 미리보기 언어. 폴백 전용 `es`/`zh`는 제외(21개).
+const List<_LabTutorialLocaleOption> _kLabTutorialLocaleOptions = [
+  _LabTutorialLocaleOption(id: 'en', locale: Locale('en'), label: 'en'),
+  _LabTutorialLocaleOption(id: 'ko', locale: Locale('ko'), label: 'ko'),
+  _LabTutorialLocaleOption(id: 'pt', locale: Locale('pt'), label: 'pt'),
+  _LabTutorialLocaleOption(
+    id: 'es_419',
+    locale: Locale('es', '419'),
+    label: 'es_419',
+  ),
+  _LabTutorialLocaleOption(id: 'ja', locale: Locale('ja'), label: 'ja'),
+  _LabTutorialLocaleOption(
+    id: 'zh_Hans',
+    locale: Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans'),
+    label: 'zh_Hans',
+  ),
+  _LabTutorialLocaleOption(
+    id: 'zh_Hant',
+    locale: Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant'),
+    label: 'zh_Hant',
+  ),
+  _LabTutorialLocaleOption(id: 'fr', locale: Locale('fr'), label: 'fr'),
+  _LabTutorialLocaleOption(id: 'de', locale: Locale('de'), label: 'de'),
+  _LabTutorialLocaleOption(id: 'it', locale: Locale('it'), label: 'it'),
+  _LabTutorialLocaleOption(id: 'vi', locale: Locale('vi'), label: 'vi'),
+  _LabTutorialLocaleOption(id: 'th', locale: Locale('th'), label: 'th'),
+  _LabTutorialLocaleOption(id: 'id', locale: Locale('id'), label: 'id'),
+  _LabTutorialLocaleOption(id: 'ms', locale: Locale('ms'), label: 'ms'),
+  _LabTutorialLocaleOption(id: 'fil', locale: Locale('fil'), label: 'fil'),
+  _LabTutorialLocaleOption(id: 'hi', locale: Locale('hi'), label: 'hi'),
+  _LabTutorialLocaleOption(id: 'ar', locale: Locale('ar'), label: 'ar'),
+  _LabTutorialLocaleOption(id: 'tr', locale: Locale('tr'), label: 'tr'),
+  _LabTutorialLocaleOption(id: 'ru', locale: Locale('ru'), label: 'ru'),
+  _LabTutorialLocaleOption(id: 'pl', locale: Locale('pl'), label: 'pl'),
+  _LabTutorialLocaleOption(id: 'nl', locale: Locale('nl'), label: 'nl'),
+];
+
 class LabScreen extends StatefulWidget {
   const LabScreen({super.key});
 
@@ -77,6 +126,7 @@ class _LabScreenState extends State<LabScreen> {
   bool _guarded = false;
   bool _toastIsWarning = false;
   String? _selectedLabDefaultPopupId;
+  String _selectedTutorialLocaleId = 'en';
   bool _energyPopupPlaying = false;
   bool _energyPopupUnlimited = false;
   bool _energyPopupSubscribed = false;
@@ -201,6 +251,22 @@ class _LabScreenState extends State<LabScreen> {
   Future<void> _openTryAgainReportScreen() async {
     if (!mounted) return;
     await RoleplayRouter.pushTryAgainReport(context);
+  }
+
+  Future<void> _openTutorialPreview() async {
+    _LabTutorialLocaleOption? found;
+    for (final o in _kLabTutorialLocaleOptions) {
+      if (o.id == _selectedTutorialLocaleId) {
+        found = o;
+        break;
+      }
+    }
+    if (found == null) return;
+    if (!mounted) return;
+    await RoleplayRouter.pushTutorialPreview(
+      context,
+      locale: found.locale,
+    );
   }
 
   int _parseEnergyPopupCount() {
@@ -365,6 +431,55 @@ class _LabScreenState extends State<LabScreen> {
             _buildLabScreenButton(
               label: 'Open Try Again Report Screen',
               onPressed: () => unawaited(_openTryAgainReportScreen()),
+            ),
+            _buildSectionDivider(),
+            Text(
+              'Tutorial',
+              style: theme.headlineSmall?.copyWith(color: Colors.white),
+            ),
+            const SizedBox(height: 12),
+            InputDecorator(
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: const Color(0xFF1E1E1E),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: const BorderSide(color: Color(0xFF353535)),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: const BorderSide(color: Color(0xFF353535)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: const BorderSide(color: Color(0xFF80D7CF)),
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+              ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  isExpanded: true,
+                  value: _selectedTutorialLocaleId,
+                  dropdownColor: const Color(0xFF1E1E1E),
+                  style: theme.bodyLarge?.copyWith(color: Colors.white),
+                  items: [
+                    for (final o in _kLabTutorialLocaleOptions)
+                      DropdownMenuItem<String>(
+                        value: o.id,
+                        child: Text(o.label),
+                      ),
+                  ],
+                  onChanged: (v) {
+                    if (v == null) return;
+                    setState(() => _selectedTutorialLocaleId = v);
+                  },
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            _buildLabScreenButton(
+              label: 'Open Tutorial',
+              onPressed: () => unawaited(_openTutorialPreview()),
             ),
             _buildSectionDivider(),
             Text(

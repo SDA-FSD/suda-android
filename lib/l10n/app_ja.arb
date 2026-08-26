@@ -270,5 +270,15 @@
   "roleplayTurnGradeA": "すごい!",
   "roleplayTurnGradeB": "OK!",
   "roleplayTurnGradeC": "うーん…",
-  "roleplayTurnGradeD": "おっ…"
+  "roleplayTurnGradeD": "おっ…",
+  "tutorialPage1Title": "**ミッション**を確認して\n会話を始めましょう。",
+  "tutorialPage1Tip": "*Tip: 自然に話すほど、\n報酬が大きくなります！",
+  "tutorialPage2Title": "わからないときは\n**翻訳**を使いましょう。",
+  "tutorialPage3Title": "行き詰まったら\n**ヒント**を見て話してみましょう。",
+  "tutorialPage3Subtitle": "自動ヒントはいつでも\nオン/オフできます。",
+  "tutorialPage4Title": "発音が難しいときは、\nまず聞いてから繰り返しましょう。",
+  "tutorialPage4Tip": "*Tip: 翻訳を見ずに答えると、\nより高いスコアを獲得できます。",
+  "tutorialPage5Title": "声に出して\n話せないときは？",
+  "tutorialPage5Subtitle": "**テキストモード**に\n切り替えてください。",
+  "tutorialPage6Title": "誰もジャッジしません。\n自信を持って！"
 }

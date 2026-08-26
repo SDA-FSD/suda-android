@@ -678,4 +678,39 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get roleplayTurnGradeD => 'ồ…';
+
+  @override
+  String get tutorialPage1Title =>
+      'Xem **Nhiệm vụ** của bạn\nvà bắt đầu trò chuyện.';
+
+  @override
+  String get tutorialPage1Tip =>
+      '*Mẹo: Bạn nói càng tự nhiên,\nphần thưởng càng lớn!';
+
+  @override
+  String get tutorialPage2Title => 'Dùng **Trình dịch**\nkhi bạn không hiểu.';
+
+  @override
+  String get tutorialPage3Title => 'Dùng **Gợi ý**\nkhi bạn bị kẹt.';
+
+  @override
+  String get tutorialPage3Subtitle =>
+      'Bạn có thể bật hoặc tắt\ngợi ý tự động bất cứ lúc nào.';
+
+  @override
+  String get tutorialPage4Title =>
+      'Nếu phát âm khó,\nhãy nghe trước rồi nhắc lại.';
+
+  @override
+  String get tutorialPage4Tip =>
+      '*Mẹo: Hãy trả lời mà không nhìn bản dịch\nđể được điểm cao hơn.';
+
+  @override
+  String get tutorialPage5Title => 'Không thể nói to?';
+
+  @override
+  String get tutorialPage5Subtitle => 'Chuyển sang **Chế độ văn bản**.';
+
+  @override
+  String get tutorialPage6Title => 'Không ai đang đánh giá bạn.\nBạn làm được!';
 }

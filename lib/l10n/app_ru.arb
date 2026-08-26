@@ -270,5 +270,15 @@
   "roleplayTurnGradeA": "вау!",
   "roleplayTurnGradeB": "ок!",
   "roleplayTurnGradeC": "хм…",
-  "roleplayTurnGradeD": "ох…"
+  "roleplayTurnGradeD": "ох…",
+  "tutorialPage1Title": "Проверь **миссию**\nи начни разговор.",
+  "tutorialPage1Tip": "*Совет: Чем естественнее говоришь,\nтем больше награда!",
+  "tutorialPage2Title": "Используй **переводчик**,\nесли не понимаешь.",
+  "tutorialPage3Title": "Используй **подсказку**,\nесли застрял.",
+  "tutorialPage3Subtitle": "Автоподсказки можно включать\nи выключать в любой момент.",
+  "tutorialPage4Title": "Если произношение трудное,\nсначала послушай, потом повтори.",
+  "tutorialPage4Tip": "*Совет: Попробуй ответить, не глядя на перевод,\nчтобы получить больше баллов.",
+  "tutorialPage5Title": "Не можешь говорить вслух?",
+  "tutorialPage5Subtitle": "Переключись в **текстовый режим**.",
+  "tutorialPage6Title": "Никто тебя не оценивает.\nУ тебя получится!"
 }

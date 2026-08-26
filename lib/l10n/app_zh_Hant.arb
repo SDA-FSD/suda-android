@@ -270,5 +270,15 @@
   "roleplayTurnGradeA": "哇！",
   "roleplayTurnGradeB": "好！",
   "roleplayTurnGradeC": "嗯…",
-  "roleplayTurnGradeD": "哦…"
+  "roleplayTurnGradeD": "哦…",
+  "tutorialPage1Title": "查看你的**任務**，\n開始對話吧。",
+  "tutorialPage1Tip": "*提示：說得越自然，\n獎勵越大！",
+  "tutorialPage2Title": "聽不懂時\n請使用**翻譯**。",
+  "tutorialPage3Title": "卡住時\n請使用**提示**。",
+  "tutorialPage3Subtitle": "你可以隨時\n開啟或關閉自動提示。",
+  "tutorialPage4Title": "發音有困難的話，\n先聽再跟讀。",
+  "tutorialPage4Tip": "*提示：不看翻譯來回答，\n可以獲得更高分數。",
+  "tutorialPage5Title": "不方便大聲說？",
+  "tutorialPage5Subtitle": "切換到**文字模式**。",
+  "tutorialPage6Title": "沒有人在評判你。\n你沒問題的！"
 }

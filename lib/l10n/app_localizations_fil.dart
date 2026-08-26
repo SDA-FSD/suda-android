@@ -687,4 +687,40 @@ class AppLocalizationsFil extends AppLocalizations {
 
   @override
   String get roleplayTurnGradeD => 'oh…';
+
+  @override
+  String get tutorialPage1Title =>
+      'Tingnan ang **Mission** mo\nat simulan ang usapan.';
+
+  @override
+  String get tutorialPage1Tip =>
+      '*Tip: Mas natural ang pagsasalita mo,\nmas malaki ang reward!';
+
+  @override
+  String get tutorialPage2Title =>
+      'Gamitin ang **Translator**\nkapag hindi mo naintindihan.';
+
+  @override
+  String get tutorialPage3Title => 'Gamitin ang **Hint**\nkapag natigil ka.';
+
+  @override
+  String get tutorialPage3Subtitle =>
+      'Pwede mong i-on o i-off\nang auto hints anytime.';
+
+  @override
+  String get tutorialPage4Title =>
+      'Kung mahirap ang pagbigkas,\nmakinig muna, tapos ulitin.';
+
+  @override
+  String get tutorialPage4Tip =>
+      '*Tip: Subukang sumagot nang hindi tinitingnan\nang translation para sa mas mataas na score.';
+
+  @override
+  String get tutorialPage5Title => 'Hindi makapagsalita\nnang malakas?';
+
+  @override
+  String get tutorialPage5Subtitle => 'Lumipat sa **Text Mode**.';
+
+  @override
+  String get tutorialPage6Title => 'Walang humahatol sa\'yo.\nKaya mo \'yan!';
 }

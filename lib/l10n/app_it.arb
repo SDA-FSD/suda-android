@@ -270,5 +270,15 @@
   "roleplayTurnGradeA": "wow!",
   "roleplayTurnGradeB": "ok!",
   "roleplayTurnGradeC": "hmm…",
-  "roleplayTurnGradeD": "oh…"
+  "roleplayTurnGradeD": "oh…",
+  "tutorialPage1Title": "Controlla la tua **Missione**\ne inizia la conversazione.",
+  "tutorialPage1Tip": "*Suggerimento: Più parli in modo naturale,\npiù grande sarà la ricompensa!",
+  "tutorialPage2Title": "Usa il **Traduttore**\nquando non capisci.",
+  "tutorialPage3Title": "Usa un **Suggerimento**\nquando ti blocchi.",
+  "tutorialPage3Subtitle": "Puoi attivare o disattivare\ni suggerimenti automatici quando vuoi.",
+  "tutorialPage4Title": "Se la pronuncia è difficile,\nascolta prima e poi ripeti.",
+  "tutorialPage4Tip": "*Suggerimento: Prova a rispondere senza guardare\nla traduzione per ottenere un punteggio più alto.",
+  "tutorialPage5Title": "Non puoi parlare\nad alta voce?",
+  "tutorialPage5Subtitle": "Passa alla **Modalità testo**.",
+  "tutorialPage6Title": "Nessuno ti sta giudicando.\nCe la puoi fare!"
 }

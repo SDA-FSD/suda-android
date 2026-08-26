@@ -675,4 +675,38 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get roleplayTurnGradeD => 'ओह…';
+
+  @override
+  String get tutorialPage1Title => 'अपना **मिशन** देखें\nऔर बातचीत शुरू करें।';
+
+  @override
+  String get tutorialPage1Tip =>
+      '*टिप: जितना स्वाभाविक बोलेंगे,\nइनाम उतना बड़ा होगा!';
+
+  @override
+  String get tutorialPage2Title => 'समझ न आए तो\n**अनुवादक** का उपयोग करें।';
+
+  @override
+  String get tutorialPage3Title => 'अटक जाएँ तो\n**हिंट** देखें।';
+
+  @override
+  String get tutorialPage3Subtitle =>
+      'ऑटो हिंट कभी भी\nचालू या बंद कर सकते हैं।';
+
+  @override
+  String get tutorialPage4Title =>
+      'उच्चारण मुश्किल हो तो\nपहले सुनें, फिर दोहराएँ।';
+
+  @override
+  String get tutorialPage4Tip =>
+      '*टिप: अनुवाद देखे बिना जवाब देने पर\nज़्यादा स्कोर मिल सकता है।';
+
+  @override
+  String get tutorialPage5Title => 'ज़ोर से नहीं बोल सकते?';
+
+  @override
+  String get tutorialPage5Subtitle => '**टेक्स्ट मोड** पर स्विच करें।';
+
+  @override
+  String get tutorialPage6Title => 'कोई जज नहीं कर रहा।\nआप कर सकते हैं!';
 }

@@ -668,4 +668,36 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get roleplayTurnGradeD => 'โอ้…';
+
+  @override
+  String get tutorialPage1Title => 'ดู**ภารกิจ**แล้ว\nเริ่มบทสนทนาเลย';
+
+  @override
+  String get tutorialPage1Tip =>
+      '*ทิป: พูดได้เป็นธรรมชาติมากเท่าไหร่\nรางวัลยิ่งมากขึ้น!';
+
+  @override
+  String get tutorialPage2Title => 'ใช้**ตัวแปล**\nเมื่อคุณไม่เข้าใจ';
+
+  @override
+  String get tutorialPage3Title => 'ใช้**คำใบ้**\nเมื่อคุณติดขัด';
+
+  @override
+  String get tutorialPage3Subtitle => 'เปิดหรือปิดคำใบ้อัตโนมัติ\nได้ทุกเมื่อ';
+
+  @override
+  String get tutorialPage4Title => 'ถ้าออกเสียงยาก\nให้ฟังก่อนแล้วค่อยพูดตาม';
+
+  @override
+  String get tutorialPage4Tip =>
+      '*ทิป: ลองตอบโดยไม่ดูคำแปล\nเพื่อได้คะแนนสูงขึ้น';
+
+  @override
+  String get tutorialPage5Title => 'พูดออกเสียงไม่ได้?';
+
+  @override
+  String get tutorialPage5Subtitle => 'สลับเป็น**โหมดข้อความ**';
+
+  @override
+  String get tutorialPage6Title => 'ไม่มีใครตัดสินคุณ\nสู้ ๆ นะ!';
 }

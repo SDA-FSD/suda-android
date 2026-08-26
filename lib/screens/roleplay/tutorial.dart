@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:vibration/vibration.dart';
+import '../../l10n/app_localizations.dart';
 import '../../routes/roleplay_router.dart';
 import '../../services/main_user_sync.dart';
 import '../../services/roleplay_state_service.dart';
@@ -9,14 +10,18 @@ import '../../services/series_state_service.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
 import '../../utils/default_toast.dart';
-import '../../utils/language_util.dart';
-import '../../models/common_models.dart';
 import '../../models/user_models.dart';
 
 class RoleplayTutorialScreen extends StatefulWidget {
-  const RoleplayTutorialScreen({super.key});
+  const RoleplayTutorialScreen({
+    super.key,
+    this.preview = false,
+  });
 
   static const String routeName = '/roleplay/tutorial';
+
+  /// Lab 미리보기. 완료 API·Opening 전환 없이 닫기만 한다.
+  final bool preview;
 
   @override
   State<RoleplayTutorialScreen> createState() => _RoleplayTutorialScreenState();
@@ -29,6 +34,11 @@ class _RoleplayTutorialScreenState extends State<RoleplayTutorialScreen> {
   bool _isSubmitting = false;
 
   static const int _totalPages = 6;
+  static const double _imageAspect = 880 / 1912;
+  static const Color _hintKeywordColor = Color(0xFF704028);
+  static const List<FontVariation> _wght700 = [FontVariation('wght', 700)];
+  static const List<FontVariation> _wght800 = [FontVariation('wght', 800)];
+  static const List<FontVariation> _wght400 = [FontVariation('wght', 400)];
 
   static const List<Color> _pageColors = [
     Color(0xFF0CABA8),
@@ -42,7 +52,11 @@ class _RoleplayTutorialScreenState extends State<RoleplayTutorialScreen> {
   @override
   void initState() {
     super.initState();
-    _checkTutorialStatus();
+    if (widget.preview) {
+      _isCheckingUser = false;
+    } else {
+      _checkTutorialStatus();
+    }
   }
 
   @override
@@ -94,10 +108,7 @@ class _RoleplayTutorialScreenState extends State<RoleplayTutorialScreen> {
   }
 
   String _imagePath(int pageIndex) {
-    final num = pageIndex + 1;
-    final lang = LanguageUtil.getCurrentLanguageCode();
-    final folder = (lang == 'ko' || lang == 'pt') ? lang : 'en';
-    return 'assets/images/tutorials2/$folder/Tutorial-$num.png';
+    return 'assets/images/tutorial/tutorial${pageIndex + 1}.png';
   }
 
   void _updateLocalUserTutorialDone() {
@@ -131,6 +142,8 @@ class _RoleplayTutorialScreenState extends State<RoleplayTutorialScreen> {
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
+    } else if (widget.preview) {
+      Navigator.of(context).pop();
     } else {
       _handleComplete();
     }
@@ -168,6 +181,165 @@ class _RoleplayTutorialScreenState extends State<RoleplayTutorialScreen> {
       setState(() => _isSubmitting = false);
       DefaultToast.show(context, 'Failed to save tutorial. Please try again.', isError: true);
     }
+  }
+
+  ({String title, String subtitle, Color? keywordColor}) _copyForPage(
+    AppLocalizations l10n,
+    int index,
+  ) {
+    switch (index) {
+      case 0:
+        return (
+          title: l10n.tutorialPage1Title,
+          subtitle: l10n.tutorialPage1Tip,
+          keywordColor: null,
+        );
+      case 1:
+        return (
+          title: l10n.tutorialPage2Title,
+          subtitle: '',
+          keywordColor: null,
+        );
+      case 2:
+        return (
+          title: l10n.tutorialPage3Title,
+          subtitle: l10n.tutorialPage3Subtitle,
+          keywordColor: _hintKeywordColor,
+        );
+      case 3:
+        return (
+          title: l10n.tutorialPage4Title,
+          subtitle: l10n.tutorialPage4Tip,
+          keywordColor: null,
+        );
+      case 4:
+        return (
+          title: l10n.tutorialPage5Title,
+          subtitle: l10n.tutorialPage5Subtitle,
+          keywordColor: null,
+        );
+      case 5:
+        return (
+          title: l10n.tutorialPage6Title,
+          subtitle: '',
+          keywordColor: null,
+        );
+      default:
+        return (title: '', subtitle: '', keywordColor: null);
+    }
+  }
+
+  /// `**keyword**`만 강조. 팁의 선행 `*`는 그대로 둔다.
+  List<InlineSpan> _spansFor(
+    String text,
+    TextStyle base, {
+    Color? keywordColor,
+  }) {
+    final parts = text.split('**');
+    final spans = <InlineSpan>[];
+    for (var i = 0; i < parts.length; i++) {
+      if (parts[i].isEmpty) continue;
+      if (i % 2 == 1) {
+        spans.add(TextSpan(
+          text: parts[i],
+          style: base.copyWith(
+            fontWeight: FontWeight.w800,
+            fontVariations: _wght800,
+            color: keywordColor ?? base.color,
+          ),
+        ));
+      } else {
+        spans.add(TextSpan(text: parts[i], style: base));
+      }
+    }
+    if (spans.isEmpty) {
+      return [TextSpan(text: '', style: base)];
+    }
+    return spans;
+  }
+
+  Widget _buildRich(
+    String text,
+    TextStyle style, {
+    Color? keywordColor,
+  }) {
+    return Text.rich(
+      TextSpan(children: _spansFor(text, style, keywordColor: keywordColor)),
+      textAlign: TextAlign.center,
+    );
+  }
+
+  Widget _buildOverlay(BuildContext context, int index) {
+    final l10n = AppLocalizations.of(context)!;
+    final copy = _copyForPage(l10n, index);
+    final titleStyle = TextStyle(
+      fontFamily: 'ChironHeiHK',
+      fontSize: index == 5 ? 28 : 24,
+      fontWeight: FontWeight.w700,
+      fontVariations: _wght700,
+      letterSpacing: -0.4,
+      height: 1.2,
+      color: Colors.white,
+    );
+    final subtitleStyle = TextStyle(
+      fontFamily: 'ChironHeiHK',
+      fontSize: 14,
+      fontWeight: FontWeight.w400,
+      fontVariations: _wght400,
+      letterSpacing: -0.4,
+      height: 1.3,
+      color: Colors.white,
+    );
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final h = constraints.maxHeight;
+        final isLast = index == 5;
+        return Stack(
+          children: [
+            Positioned.fill(
+              child: Image.asset(
+                _imagePath(index),
+                fit: BoxFit.fill,
+              ),
+            ),
+            Positioned(
+              left: 28,
+              right: 28,
+              top: isLast ? h * 0.28 : h * 0.775,
+              bottom: isLast ? h * 0.38 : h * 0.03,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.topCenter,
+                child: SizedBox(
+                  width: constraints.maxWidth - 56,
+                  child: isLast
+                      ? _buildRich(copy.title, titleStyle)
+                      : Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            _buildRich(
+                              copy.title,
+                              titleStyle,
+                              keywordColor: copy.keywordColor,
+                            ),
+                            if (copy.subtitle.trim().isNotEmpty) ...[
+                              const SizedBox(height: 10),
+                              _buildRich(
+                                copy.subtitle,
+                                subtitleStyle,
+                                keywordColor: copy.keywordColor,
+                              ),
+                            ],
+                          ],
+                        ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Widget _buildDotIndicator() {
@@ -229,10 +401,9 @@ class _RoleplayTutorialScreenState extends State<RoleplayTutorialScreen> {
                         return ColoredBox(
                           color: _pageColors[index],
                           child: Center(
-                            child: Image.asset(
-                              _imagePath(index),
-                              width: double.infinity,
-                              fit: BoxFit.contain,
+                            child: AspectRatio(
+                              aspectRatio: _imageAspect,
+                              child: _buildOverlay(context, index),
                             ),
                           ),
                         );

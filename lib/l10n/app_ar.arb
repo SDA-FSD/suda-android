@@ -270,5 +270,15 @@
   "roleplayTurnGradeA": "واو!",
   "roleplayTurnGradeB": "حسنًا!",
   "roleplayTurnGradeC": "همم…",
-  "roleplayTurnGradeD": "أوه…"
+  "roleplayTurnGradeD": "أوه…",
+  "tutorialPage1Title": "راجع **المهمة**\nوابدأ المحادثة.",
+  "tutorialPage1Tip": "*نصيحة: كلما تحدّثت بعفوية أكبر،\nزاد مكافأتك!",
+  "tutorialPage2Title": "استخدم **المترجم**\nعندما لا تفهم.",
+  "tutorialPage3Title": "استخدم **التلميح**\nعندما تتوقف.",
+  "tutorialPage3Subtitle": "يمكنك تشغيل التلميحات التلقائية\nأو إيقافها في أي وقت.",
+  "tutorialPage4Title": "إذا كان النطق صعبًا،\nاستمع أولًا ثم كرّر.",
+  "tutorialPage4Tip": "*نصيحة: حاول الإجابة دون النظر إلى الترجمة\nلتحصل على درجة أعلى.",
+  "tutorialPage5Title": "لا تستطيع التحدث\nبصوت عالٍ؟",
+  "tutorialPage5Subtitle": "انتقل إلى **وضع النص**.",
+  "tutorialPage6Title": "لا أحد يحكم عليك.\nأنت قادر!"
 }

@@ -675,4 +675,40 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get roleplayTurnGradeD => 'ох…';
+
+  @override
+  String get tutorialPage1Title => 'Проверь **миссию**\nи начни разговор.';
+
+  @override
+  String get tutorialPage1Tip =>
+      '*Совет: Чем естественнее говоришь,\nтем больше награда!';
+
+  @override
+  String get tutorialPage2Title =>
+      'Используй **переводчик**,\nесли не понимаешь.';
+
+  @override
+  String get tutorialPage3Title => 'Используй **подсказку**,\nесли застрял.';
+
+  @override
+  String get tutorialPage3Subtitle =>
+      'Автоподсказки можно включать\nи выключать в любой момент.';
+
+  @override
+  String get tutorialPage4Title =>
+      'Если произношение трудное,\nсначала послушай, потом повтори.';
+
+  @override
+  String get tutorialPage4Tip =>
+      '*Совет: Попробуй ответить, не глядя на перевод,\nчтобы получить больше баллов.';
+
+  @override
+  String get tutorialPage5Title => 'Не можешь говорить вслух?';
+
+  @override
+  String get tutorialPage5Subtitle => 'Переключись в **текстовый режим**.';
+
+  @override
+  String get tutorialPage6Title =>
+      'Никто тебя не оценивает.\nУ тебя получится!';
 }

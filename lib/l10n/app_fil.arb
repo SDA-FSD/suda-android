@@ -270,5 +270,15 @@
   "roleplayTurnGradeA": "wow!",
   "roleplayTurnGradeB": "ok!",
   "roleplayTurnGradeC": "hmm…",
-  "roleplayTurnGradeD": "oh…"
+  "roleplayTurnGradeD": "oh…",
+  "tutorialPage1Title": "Tingnan ang **Mission** mo\nat simulan ang usapan.",
+  "tutorialPage1Tip": "*Tip: Mas natural ang pagsasalita mo,\nmas malaki ang reward!",
+  "tutorialPage2Title": "Gamitin ang **Translator**\nkapag hindi mo naintindihan.",
+  "tutorialPage3Title": "Gamitin ang **Hint**\nkapag natigil ka.",
+  "tutorialPage3Subtitle": "Pwede mong i-on o i-off\nang auto hints anytime.",
+  "tutorialPage4Title": "Kung mahirap ang pagbigkas,\nmakinig muna, tapos ulitin.",
+  "tutorialPage4Tip": "*Tip: Subukang sumagot nang hindi tinitingnan\nang translation para sa mas mataas na score.",
+  "tutorialPage5Title": "Hindi makapagsalita\nnang malakas?",
+  "tutorialPage5Subtitle": "Lumipat sa **Text Mode**.",
+  "tutorialPage6Title": "Walang humahatol sa'yo.\nKaya mo 'yan!"
 }

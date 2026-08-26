@@ -270,5 +270,15 @@
   "roleplayTurnGradeA": "waouh !",
   "roleplayTurnGradeB": "ok !",
   "roleplayTurnGradeC": "hmm…",
-  "roleplayTurnGradeD": "oh…"
+  "roleplayTurnGradeD": "oh…",
+  "tutorialPage1Title": "Consultez votre **Mission**\net lancez la conversation.",
+  "tutorialPage1Tip": "*Astuce : Plus vous parlez naturellement,\nplus la récompense est grande !",
+  "tutorialPage2Title": "Utilisez le **Traducteur**\nquand vous ne comprenez pas.",
+  "tutorialPage3Title": "Utilisez un **Indice**\nquand vous bloquez.",
+  "tutorialPage3Subtitle": "Vous pouvez activer ou désactiver\nles indices auto à tout moment.",
+  "tutorialPage4Title": "Si la prononciation est difficile,\nécoutez d'abord, puis répétez.",
+  "tutorialPage4Tip": "*Astuce : Essayez de répondre sans regarder\nla traduction pour obtenir un meilleur score.",
+  "tutorialPage5Title": "Vous ne pouvez pas\nparler à voix haute ?",
+  "tutorialPage5Subtitle": "Passez en **mode texte**.",
+  "tutorialPage6Title": "Personne ne vous juge.\nVous allez y arriver !"
 }

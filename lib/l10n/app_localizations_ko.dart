@@ -651,4 +651,34 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get roleplayTurnGradeD => '오…';
+
+  @override
+  String get tutorialPage1Title => '**미션**을 확인하고\n대화를 시작하세요.';
+
+  @override
+  String get tutorialPage1Tip => '* Tip: 자연스럽게 말할수록\n보상이 더 커져요!';
+
+  @override
+  String get tutorialPage2Title => '문장을 모르겠으면\n**번역기**를 사용하세요.';
+
+  @override
+  String get tutorialPage3Title => '막힐 때는\n**힌트**를 보고 말해보세요.';
+
+  @override
+  String get tutorialPage3Subtitle => '힌트 자동 노출은\n언제든 켜고 끌 수 있어요.';
+
+  @override
+  String get tutorialPage4Title => '발음이 어렵다면\n듣고 따라 말해 보세요.';
+
+  @override
+  String get tutorialPage4Tip => '* Tip: 영어 답변을 보지 않고 말하면\n더 높은 점수를 받을 수 있어요!';
+
+  @override
+  String get tutorialPage5Title => '말하기 어려운 상황이면\n**텍스트 모드**로 전환하세요.';
+
+  @override
+  String get tutorialPage5Subtitle => '';
+
+  @override
+  String get tutorialPage6Title => '아무도 평가하지 않아요.\n자신 있게 말해봐요!';
 }

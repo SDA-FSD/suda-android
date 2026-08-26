@@ -270,5 +270,15 @@
   "roleplayTurnGradeA": "wow!",
   "roleplayTurnGradeB": "ok!",
   "roleplayTurnGradeC": "hmm…",
-  "roleplayTurnGradeD": "oh…"
+  "roleplayTurnGradeD": "oh…",
+  "tutorialPage1Title": "Check je **Missie**\nen start het gesprek.",
+  "tutorialPage1Tip": "*Tip: Hoe natuurlijker je spreekt,\nhoe groter je beloning!",
+  "tutorialPage2Title": "Gebruik de **Vertaler**\nals je het niet begrijpt.",
+  "tutorialPage3Title": "Gebruik een **Hint**\nals je vastloopt.",
+  "tutorialPage3Subtitle": "Je kunt automatische hints\naltijd aan of uit zetten.",
+  "tutorialPage4Title": "Als de uitspraak lastig is,\nluister eerst en herhaal daarna.",
+  "tutorialPage4Tip": "*Tip: Probeer te antwoorden zonder naar de vertaling\nte kijken voor een hogere score.",
+  "tutorialPage5Title": "Kun je niet hardop praten?",
+  "tutorialPage5Subtitle": "Schakel over naar de **Tekstmodus**.",
+  "tutorialPage6Title": "Niemand beoordeelt je.\nJij kunt dit!"
 }

@@ -583,18 +583,20 @@
 
 ### 이전 스크린 정보 (진입점)
 - **SeriesOverviewScreen**: 에피소드 Play (`RoleplayRouter.pushTutorial`)
+- **LabScreen** (dev): Setting > Lab > Tutorial 언어 선택 후 **Open Tutorial** (`preview: true`, 완료 API 없음)
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
 - **RoleplayOpeningScreen**: 튜토리얼 완료(마지막 이미지에서 탭) 또는 이미 완료된 경우 즉시 replace
   - `Navigator.pushReplacement()`로 Tutorial 스크린을 스택에서 제거하며 전환
+- **Lab 미리보기**: 마지막 페이지 탭 또는 뒤로가기 시 Lab으로 pop (Opening 전환 없음)
 
 ### 스크린 내부 구현 특이사항
-- **진입 시 조건 체크**: `RoleplayStateService.instance.user` 없으면 `GET /v1/users` 호출. `TUTORIAL == 'Y'`이면 첫 프레임 이후 `replaceWithOpeningFromTutorial()`로 스킵(`addPostFrameCallback` — build 중 `pushReplacement` 금지)
-- **이미지**: `assets/images/tutorials2/{lang}/tutorial-{1~6}.png` (lang: ko/pt/en, 기본 en)
+- **진입 시 조건 체크**: `preview`가 아니면 `RoleplayStateService.instance.user` 없으면 `GET /v1/users` 호출. `TUTORIAL == 'Y'`이면 첫 프레임 이후 `replaceWithOpeningFromTutorial()`로 스킵(`addPostFrameCallback` — build 중 `pushReplacement` 금지). Lab `preview`는 스킵·API 없이 즉시 노출
+- **이미지**: `assets/images/tutorial/tutorial{1~6}.png` (언어 공통). 카피는 l10n 오버레이(`tutorialPage*` , `**keyword**` 강조). 긴 문장은 locale별 명시적 `\n`(절 경계, 첫 줄이 짧아도 조사·전치사 중간 금지). 오버레이는 하단(6은 상단) 밴드 안에서 `FittedBox` `scaleDown`으로 overflow 방지. 1·2·5는 키워드 볼드 흰색, 3은 Hint 계열 `#704028`. 6페이지 `I'm Ready!`와 이미지 안 라벨(Hold and speak 등)은 PNG 고정
 - **인디케이터**: 상단 6개 dot (활성: 흰색 / 비활성: 흰색 40% 불투명도)
-- **완료 처리**: 마지막(6번째) 페이지에서 화면 탭 시 `SudaApiClient.completeTutorial()` 호출 → 첫 프레임 이후 `replaceWithOpeningFromTutorial()`
-- **뒤로가기**: `PopScope(canPop: true)` — Overview로 복귀 가능
-- **API**: `POST /v1/users/tutorial` (request body 없음, 200 응답 시 성공)
+- **완료 처리**: 마지막(6번째) 페이지에서 화면 탭 시 `SudaApiClient.completeTutorial()` 호출 → 첫 프레임 이후 `replaceWithOpeningFromTutorial()`. `preview`면 `Navigator.pop`
+- **뒤로가기**: `PopScope(canPop: true)` — Overview(또는 Lab)로 복귀 가능
+- **API**: `POST /v1/users/tutorial` (request body 없음, 200 응답 시 성공). `preview`는 미호출
 - Route name: `/roleplay/tutorial`
 
 ---

@@ -681,6 +681,42 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get roleplayTurnGradeD => 'oh…';
+
+  @override
+  String get tutorialPage1Title =>
+      'Revisa tu **Misión**\ny empieza la conversación.';
+
+  @override
+  String get tutorialPage1Tip =>
+      '*Consejo: ¡Cuanto más natural hables,\nmayor será tu recompensa!';
+
+  @override
+  String get tutorialPage2Title =>
+      '¡Usa el **Traductor**\ncuando no entiendas!';
+
+  @override
+  String get tutorialPage3Title => 'Usa una **Pista**\ncuando te trabes.';
+
+  @override
+  String get tutorialPage3Subtitle =>
+      'Puedes activar o desactivar\nlas pistas automáticas cuando quieras.';
+
+  @override
+  String get tutorialPage4Title =>
+      'Si la pronunciación es difícil,\nescucha primero y luego repite.';
+
+  @override
+  String get tutorialPage4Tip =>
+      '*Consejo: Intenta responder sin mirar la traducción\npara obtener una puntuación más alta.';
+
+  @override
+  String get tutorialPage5Title => '¿No puedes hablar\nen voz alta?';
+
+  @override
+  String get tutorialPage5Subtitle => 'Cambia al **Modo texto**.';
+
+  @override
+  String get tutorialPage6Title => 'Nadie te está juzgando.\n¡Tú puedes!';
 }
 
 /// The translations for Spanish Castilian, as used in Latin America and the Caribbean (`es_419`).
@@ -1360,4 +1396,40 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
 
   @override
   String get roleplayTurnGradeD => 'oh…';
+
+  @override
+  String get tutorialPage1Title =>
+      'Revisa tu **Misión**\ny empieza la conversación.';
+
+  @override
+  String get tutorialPage1Tip =>
+      '*Consejo: ¡Cuanto más natural hables,\nmayor será tu recompensa!';
+
+  @override
+  String get tutorialPage2Title =>
+      '¡Usa el **Traductor**\ncuando no entiendas!';
+
+  @override
+  String get tutorialPage3Title => 'Usa una **Pista**\ncuando te trabes.';
+
+  @override
+  String get tutorialPage3Subtitle =>
+      'Puedes activar o desactivar\nlas pistas automáticas cuando quieras.';
+
+  @override
+  String get tutorialPage4Title =>
+      'Si la pronunciación es difícil,\nescucha primero y luego repite.';
+
+  @override
+  String get tutorialPage4Tip =>
+      '*Consejo: Intenta responder sin mirar la traducción\npara obtener una puntuación más alta.';
+
+  @override
+  String get tutorialPage5Title => '¿No puedes hablar\nen voz alta?';
+
+  @override
+  String get tutorialPage5Subtitle => 'Cambia al **Modo texto**.';
+
+  @override
+  String get tutorialPage6Title => 'Nadie te está juzgando.\n¡Tú puedes!';
 }

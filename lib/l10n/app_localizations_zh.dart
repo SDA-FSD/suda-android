@@ -643,6 +643,36 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get roleplayTurnGradeD => '哦…';
+
+  @override
+  String get tutorialPage1Title => '查看你的**任务**，\n开始对话吧。';
+
+  @override
+  String get tutorialPage1Tip => '*提示：说得越自然，\n奖励越大！';
+
+  @override
+  String get tutorialPage2Title => '听不懂时\n请使用**翻译**。';
+
+  @override
+  String get tutorialPage3Title => '卡住时\n请使用**提示**。';
+
+  @override
+  String get tutorialPage3Subtitle => '你可以随时\n开启或关闭自动提示。';
+
+  @override
+  String get tutorialPage4Title => '发音有困难的话，\n先听再跟读。';
+
+  @override
+  String get tutorialPage4Tip => '*提示：不看翻译来回答，\n可以获得更高分数。';
+
+  @override
+  String get tutorialPage5Title => '不方便大声说？';
+
+  @override
+  String get tutorialPage5Subtitle => '切换到**文字模式**。';
+
+  @override
+  String get tutorialPage6Title => '没有人在评判你。\n你可以的！';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -1284,6 +1314,36 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get roleplayTurnGradeD => '哦…';
+
+  @override
+  String get tutorialPage1Title => '查看你的**任务**，\n开始对话吧。';
+
+  @override
+  String get tutorialPage1Tip => '*提示：说得越自然，\n奖励越大！';
+
+  @override
+  String get tutorialPage2Title => '听不懂时\n请使用**翻译**。';
+
+  @override
+  String get tutorialPage3Title => '卡住时\n请使用**提示**。';
+
+  @override
+  String get tutorialPage3Subtitle => '你可以随时\n开启或关闭自动提示。';
+
+  @override
+  String get tutorialPage4Title => '发音有困难的话，\n先听再跟读。';
+
+  @override
+  String get tutorialPage4Tip => '*提示：不看翻译来回答，\n可以获得更高分数。';
+
+  @override
+  String get tutorialPage5Title => '不方便大声说？';
+
+  @override
+  String get tutorialPage5Subtitle => '切换到**文字模式**。';
+
+  @override
+  String get tutorialPage6Title => '没有人在评判你。\n你可以的！';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -1925,4 +1985,34 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get roleplayTurnGradeD => '哦…';
+
+  @override
+  String get tutorialPage1Title => '查看你的**任務**，\n開始對話吧。';
+
+  @override
+  String get tutorialPage1Tip => '*提示：說得越自然，\n獎勵越大！';
+
+  @override
+  String get tutorialPage2Title => '聽不懂時\n請使用**翻譯**。';
+
+  @override
+  String get tutorialPage3Title => '卡住時\n請使用**提示**。';
+
+  @override
+  String get tutorialPage3Subtitle => '你可以隨時\n開啟或關閉自動提示。';
+
+  @override
+  String get tutorialPage4Title => '發音有困難的話，\n先聽再跟讀。';
+
+  @override
+  String get tutorialPage4Tip => '*提示：不看翻譯來回答，\n可以獲得更高分數。';
+
+  @override
+  String get tutorialPage5Title => '不方便大聲說？';
+
+  @override
+  String get tutorialPage5Subtitle => '切換到**文字模式**。';
+
+  @override
+  String get tutorialPage6Title => '沒有人在評判你。\n你沒問題的！';
 }

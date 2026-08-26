@@ -270,5 +270,15 @@
   "roleplayTurnGradeA": "vay!",
   "roleplayTurnGradeB": "tamam!",
   "roleplayTurnGradeC": "hmm…",
-  "roleplayTurnGradeD": "oh…"
+  "roleplayTurnGradeD": "oh…",
+  "tutorialPage1Title": "**Görev**ini kontrol et\nve sohbeti başlat.",
+  "tutorialPage1Tip": "*İpucu: Ne kadar doğal konuşursan\nödülün o kadar büyük olur!",
+  "tutorialPage2Title": "Anlamadığında\n**Çevirmen**i kullan.",
+  "tutorialPage3Title": "Takıldığında\n**İpucu** kullan.",
+  "tutorialPage3Subtitle": "Otomatik ipuçlarını istediğin zaman\naçıp kapatabilirsin.",
+  "tutorialPage4Title": "Telaffuz zorsa\nönce dinle, sonra tekrarla.",
+  "tutorialPage4Tip": "*İpucu: Çeviriye bakmadan cevaplamayı dene,\ndaha yüksek puan alırsın.",
+  "tutorialPage5Title": "Sesli konuşamıyor musun?",
+  "tutorialPage5Subtitle": "**Metin Modu**na geç.",
+  "tutorialPage6Title": "Kimse seni yargılamıyor.\nBaşaracaksın!"
 }

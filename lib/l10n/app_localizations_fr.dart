@@ -685,4 +685,42 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get roleplayTurnGradeD => 'oh…';
+
+  @override
+  String get tutorialPage1Title =>
+      'Consultez votre **Mission**\net lancez la conversation.';
+
+  @override
+  String get tutorialPage1Tip =>
+      '*Astuce : Plus vous parlez naturellement,\nplus la récompense est grande !';
+
+  @override
+  String get tutorialPage2Title =>
+      'Utilisez le **Traducteur**\nquand vous ne comprenez pas.';
+
+  @override
+  String get tutorialPage3Title =>
+      'Utilisez un **Indice**\nquand vous bloquez.';
+
+  @override
+  String get tutorialPage3Subtitle =>
+      'Vous pouvez activer ou désactiver\nles indices auto à tout moment.';
+
+  @override
+  String get tutorialPage4Title =>
+      'Si la prononciation est difficile,\nécoutez d\'abord, puis répétez.';
+
+  @override
+  String get tutorialPage4Tip =>
+      '*Astuce : Essayez de répondre sans regarder\nla traduction pour obtenir un meilleur score.';
+
+  @override
+  String get tutorialPage5Title => 'Vous ne pouvez pas\nparler à voix haute ?';
+
+  @override
+  String get tutorialPage5Subtitle => 'Passez en **mode texte**.';
+
+  @override
+  String get tutorialPage6Title =>
+      'Personne ne vous juge.\nVous allez y arriver !';
 }

@@ -676,4 +676,39 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get roleplayTurnGradeD => 'oh…';
+
+  @override
+  String get tutorialPage1Title => 'Check je **Missie**\nen start het gesprek.';
+
+  @override
+  String get tutorialPage1Tip =>
+      '*Tip: Hoe natuurlijker je spreekt,\nhoe groter je beloning!';
+
+  @override
+  String get tutorialPage2Title =>
+      'Gebruik de **Vertaler**\nals je het niet begrijpt.';
+
+  @override
+  String get tutorialPage3Title => 'Gebruik een **Hint**\nals je vastloopt.';
+
+  @override
+  String get tutorialPage3Subtitle =>
+      'Je kunt automatische hints\naltijd aan of uit zetten.';
+
+  @override
+  String get tutorialPage4Title =>
+      'Als de uitspraak lastig is,\nluister eerst en herhaal daarna.';
+
+  @override
+  String get tutorialPage4Tip =>
+      '*Tip: Probeer te antwoorden zonder naar de vertaling\nte kijken voor een hogere score.';
+
+  @override
+  String get tutorialPage5Title => 'Kun je niet hardop praten?';
+
+  @override
+  String get tutorialPage5Subtitle => 'Schakel over naar de **Tekstmodus**.';
+
+  @override
+  String get tutorialPage6Title => 'Niemand beoordeelt je.\nJij kunt dit!';
 }

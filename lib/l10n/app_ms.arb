@@ -270,5 +270,15 @@
   "roleplayTurnGradeA": "wow!",
   "roleplayTurnGradeB": "ok!",
   "roleplayTurnGradeC": "hmm…",
-  "roleplayTurnGradeD": "oh…"
+  "roleplayTurnGradeD": "oh…",
+  "tutorialPage1Title": "Semak **Misi** anda\ndan mulakan perbualan.",
+  "tutorialPage1Tip": "*Tip: Semakin semula jadi anda bercakap,\nsemakin besar ganjaran anda!",
+  "tutorialPage2Title": "Gunakan **Penterjemah**\napabila anda tidak faham.",
+  "tutorialPage3Title": "Gunakan **Petunjuk**\napabila anda tersekat.",
+  "tutorialPage3Subtitle": "Anda boleh menghidupkan atau mematikan\npetunjuk automatik pada bila-bila masa.",
+  "tutorialPage4Title": "Jika sebutan sukar,\ndengar dahulu, kemudian ulang.",
+  "tutorialPage4Tip": "*Tip: Cuba jawab tanpa melihat terjemahan\nuntuk mendapat markah lebih tinggi.",
+  "tutorialPage5Title": "Tidak boleh bercakap kuat?",
+  "tutorialPage5Subtitle": "Tukar kepada **Mod Teks**.",
+  "tutorialPage6Title": "Tiada siapa yang menghakimi.\nAnda mampu!"
 }

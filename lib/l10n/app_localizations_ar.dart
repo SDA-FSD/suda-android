@@ -672,4 +672,37 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get roleplayTurnGradeD => 'أوه…';
+
+  @override
+  String get tutorialPage1Title => 'راجع **المهمة**\nوابدأ المحادثة.';
+
+  @override
+  String get tutorialPage1Tip =>
+      '*نصيحة: كلما تحدّثت بعفوية أكبر،\nزاد مكافأتك!';
+
+  @override
+  String get tutorialPage2Title => 'استخدم **المترجم**\nعندما لا تفهم.';
+
+  @override
+  String get tutorialPage3Title => 'استخدم **التلميح**\nعندما تتوقف.';
+
+  @override
+  String get tutorialPage3Subtitle =>
+      'يمكنك تشغيل التلميحات التلقائية\nأو إيقافها في أي وقت.';
+
+  @override
+  String get tutorialPage4Title => 'إذا كان النطق صعبًا،\nاستمع أولًا ثم كرّر.';
+
+  @override
+  String get tutorialPage4Tip =>
+      '*نصيحة: حاول الإجابة دون النظر إلى الترجمة\nلتحصل على درجة أعلى.';
+
+  @override
+  String get tutorialPage5Title => 'لا تستطيع التحدث\nبصوت عالٍ؟';
+
+  @override
+  String get tutorialPage5Subtitle => 'انتقل إلى **وضع النص**.';
+
+  @override
+  String get tutorialPage6Title => 'لا أحد يحكم عليك.\nأنت قادر!';
 }

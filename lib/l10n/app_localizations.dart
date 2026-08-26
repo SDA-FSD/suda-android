@@ -1366,6 +1366,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'oh…'**
   String get roleplayTurnGradeD;
+
+  /// No description provided for @tutorialPage1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your **Mission**\nand start the conversation.'**
+  String get tutorialPage1Title;
+
+  /// No description provided for @tutorialPage1Tip.
+  ///
+  /// In en, this message translates to:
+  /// **'*Tip: The more naturally you speak,\nthe bigger your reward!'**
+  String get tutorialPage1Tip;
+
+  /// No description provided for @tutorialPage2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the **Translator**\nwhen you don\'t understand.'**
+  String get tutorialPage2Title;
+
+  /// No description provided for @tutorialPage3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a **Hint**\nwhen you get stuck.'**
+  String get tutorialPage3Title;
+
+  /// No description provided for @tutorialPage3Subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You can turn auto hints\non or off anytime.'**
+  String get tutorialPage3Subtitle;
+
+  /// No description provided for @tutorialPage4Title.
+  ///
+  /// In en, this message translates to:
+  /// **'If pronunciation is hard,\nlisten first, then repeat.'**
+  String get tutorialPage4Title;
+
+  /// No description provided for @tutorialPage4Tip.
+  ///
+  /// In en, this message translates to:
+  /// **'*Tip: Try answering without looking at the translation\nto earn a higher score.'**
+  String get tutorialPage4Tip;
+
+  /// No description provided for @tutorialPage5Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t speak out loud?'**
+  String get tutorialPage5Title;
+
+  /// No description provided for @tutorialPage5Subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to **Text Mode**.'**
+  String get tutorialPage5Subtitle;
+
+  /// No description provided for @tutorialPage6Title.
+  ///
+  /// In en, this message translates to:
+  /// **'No one\'s judging.\nYou\'ve got this!'**
+  String get tutorialPage6Title;
 }
 
 class _AppLocalizationsDelegate

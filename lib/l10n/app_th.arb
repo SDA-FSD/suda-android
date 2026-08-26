@@ -270,5 +270,15 @@
   "roleplayTurnGradeA": "ว้าว!",
   "roleplayTurnGradeB": "โอเค!",
   "roleplayTurnGradeC": "อืม…",
-  "roleplayTurnGradeD": "โอ้…"
+  "roleplayTurnGradeD": "โอ้…",
+  "tutorialPage1Title": "ดู**ภารกิจ**แล้ว\nเริ่มบทสนทนาเลย",
+  "tutorialPage1Tip": "*ทิป: พูดได้เป็นธรรมชาติมากเท่าไหร่\nรางวัลยิ่งมากขึ้น!",
+  "tutorialPage2Title": "ใช้**ตัวแปล**\nเมื่อคุณไม่เข้าใจ",
+  "tutorialPage3Title": "ใช้**คำใบ้**\nเมื่อคุณติดขัด",
+  "tutorialPage3Subtitle": "เปิดหรือปิดคำใบ้อัตโนมัติ\nได้ทุกเมื่อ",
+  "tutorialPage4Title": "ถ้าออกเสียงยาก\nให้ฟังก่อนแล้วค่อยพูดตาม",
+  "tutorialPage4Tip": "*ทิป: ลองตอบโดยไม่ดูคำแปล\nเพื่อได้คะแนนสูงขึ้น",
+  "tutorialPage5Title": "พูดออกเสียงไม่ได้?",
+  "tutorialPage5Subtitle": "สลับเป็น**โหมดข้อความ**",
+  "tutorialPage6Title": "ไม่มีใครตัดสินคุณ\nสู้ ๆ นะ!"
 }

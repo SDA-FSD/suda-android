@@ -676,4 +676,39 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get roleplayTurnGradeD => 'oh…';
+
+  @override
+  String get tutorialPage1Title =>
+      '**Görev**ini kontrol et\nve sohbeti başlat.';
+
+  @override
+  String get tutorialPage1Tip =>
+      '*İpucu: Ne kadar doğal konuşursan\nödülün o kadar büyük olur!';
+
+  @override
+  String get tutorialPage2Title => 'Anlamadığında\n**Çevirmen**i kullan.';
+
+  @override
+  String get tutorialPage3Title => 'Takıldığında\n**İpucu** kullan.';
+
+  @override
+  String get tutorialPage3Subtitle =>
+      'Otomatik ipuçlarını istediğin zaman\naçıp kapatabilirsin.';
+
+  @override
+  String get tutorialPage4Title =>
+      'Telaffuz zorsa\nönce dinle, sonra tekrarla.';
+
+  @override
+  String get tutorialPage4Tip =>
+      '*İpucu: Çeviriye bakmadan cevaplamayı dene,\ndaha yüksek puan alırsın.';
+
+  @override
+  String get tutorialPage5Title => 'Sesli konuşamıyor musun?';
+
+  @override
+  String get tutorialPage5Subtitle => '**Metin Modu**na geç.';
+
+  @override
+  String get tutorialPage6Title => 'Kimse seni yargılamıyor.\nBaşaracaksın!';
 }

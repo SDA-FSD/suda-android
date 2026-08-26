@@ -277,5 +277,15 @@
   "roleplayTurnGradeA": "wow!",
   "roleplayTurnGradeB": "ok!",
   "roleplayTurnGradeC": "hmm…",
-  "roleplayTurnGradeD": "oh…"
+  "roleplayTurnGradeD": "oh…",
+  "tutorialPage1Title": "Check your **Mission**\nand start the conversation.",
+  "tutorialPage1Tip": "*Tip: The more naturally you speak,\nthe bigger your reward!",
+  "tutorialPage2Title": "Use the **Translator**\nwhen you don't understand.",
+  "tutorialPage3Title": "Use a **Hint**\nwhen you get stuck.",
+  "tutorialPage3Subtitle": "You can turn auto hints\non or off anytime.",
+  "tutorialPage4Title": "If pronunciation is hard,\nlisten first, then repeat.",
+  "tutorialPage4Tip": "*Tip: Try answering without looking at the translation\nto earn a higher score.",
+  "tutorialPage5Title": "Can't speak out loud?",
+  "tutorialPage5Subtitle": "Switch to **Text Mode**.",
+  "tutorialPage6Title": "No one's judging.\nYou've got this!"
 }

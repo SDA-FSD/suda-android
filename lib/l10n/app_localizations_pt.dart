@@ -679,4 +679,39 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get roleplayTurnGradeD => 'oxi?';
+
+  @override
+  String get tutorialPage1Title =>
+      'Confira sua **Missão**\ne comece a conversa.';
+
+  @override
+  String get tutorialPage1Tip =>
+      '* Dica: quanto mais natural você falar,\nmaior será a recompensa!';
+
+  @override
+  String get tutorialPage2Title => 'Use o **Tradutor**\nquando não entender!';
+
+  @override
+  String get tutorialPage3Title => 'Use as **Dicas**\nquando travar.';
+
+  @override
+  String get tutorialPage3Subtitle =>
+      'Você pode ativar ou desativar\ndicas automáticas quando quiser.';
+
+  @override
+  String get tutorialPage4Title =>
+      'Se a pronúncia estiver difícil,\nescuta primeiro e depois repete.';
+
+  @override
+  String get tutorialPage4Tip =>
+      '* Dica: tente responder sem ver a tradução\npara aumentar sua pontuação.';
+
+  @override
+  String get tutorialPage5Title => 'Não consegue falar\nem voz alta?';
+
+  @override
+  String get tutorialPage5Subtitle => 'Mude para o **Modo Texto**.';
+
+  @override
+  String get tutorialPage6Title => 'Ninguém está te julgando.\nVai com tudo!';
 }
