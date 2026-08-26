@@ -19,8 +19,10 @@ import 'token_storage.dart';
 ///
 /// - 동시에 하나의 구매/restore만 처리 (`isBusy`).
 /// - 가격은 [IapPriceCache]에 영속 저장.
-/// - 스토어 UI에서 복귀(resume) 후 [_resumeGrace] 동안 **매칭 스트림이 없으면**
-///   `storeDismissed`로 UI lock 해제. 스트림 수신 후에는 grace를 다시 걸지 않음.
+/// - AOS: 스토어 복귀 후 [_resumeGrace] 동안 매칭 스트림을 기다린다. 오면 즉시
+///   verify하고 스피너를 닫는다. 만료 시에만 `queryPastPurchases`로 회수하고,
+///   그래도 없으면 `storeDismissed`. 미ack/미consume은 orphan으로 verify.
+/// - iOS: StoreKit 스트림의 purchased/canceled 대기. resume grace 없음.
 /// - AOS: Play consume/ack는 서버. 클라 `completePurchase` 없음.
 /// - iOS: verify `finishYn=Y`일 때만 `completePurchase`.
 class IapPurchaseService with WidgetsBindingObserver {
@@ -59,8 +61,8 @@ class IapPurchaseService with WidgetsBindingObserver {
     return null;
   }
 
-  /// 스토어 복귀 후 스트림 대기 grace.
-  static const _resumeGrace = Duration(seconds: 2);
+  /// AOS: 스토어 복귀 후 매칭 스트림 대기 상한. 조기 수신 시 즉시 종료.
+  static const _resumeGrace = Duration(seconds: 10);
   static const _restoreInitialGrace = Duration(seconds: 8);
   static const _restoreIdleGrace = Duration(seconds: 2);
 
@@ -78,6 +80,18 @@ class IapPurchaseService with WidgetsBindingObserver {
   /// 매칭 purchaseStream 수신 후 true. resume grace가 verify 중 storeDismissed로
   /// 성공 결과를 덮어쓰지 않도록 한다.
   bool _purchaseUpdateReceived = false;
+
+  /// 화면 이탈(abandon) 후에도 orphan verify에 쓸 세션.
+  String? _detachedProductId;
+  String? _detachedAccessToken;
+  String? _detachedOfferSessionId;
+  String? _detachedPaywallSessionId;
+  String? _detachedBasePlanId;
+
+  final Set<String> _verifiedPurchaseTokens = {};
+  final Set<String> _verifyingPurchaseTokens = {};
+  bool _recoveringUnfinished = false;
+  Future<void> _purchaseUpdateChain = Future<void>.value();
 
   Completer<IapPurchaseResult>? _restorePending;
   String? _restoreAccessToken;
@@ -100,6 +114,9 @@ class IapPurchaseService with WidgetsBindingObserver {
       },
     );
     _ensureLifecycleObserver();
+    if (!_isIos) {
+      unawaited(_recoverUnfinishedAndroidPurchases());
+    }
   }
 
   void _ensureLifecycleObserver() {
@@ -112,19 +129,14 @@ class IapPurchaseService with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state != AppLifecycleState.resumed) return;
     // iOS는 StoreKit이 purchased/canceled를 스트림으로 줌. Play 시트 dismiss용
-    // resume grace를 쓰면 복귀 후 2초 내 스트림이 늦을 때 성공 구매가
-    // storeDismissed로 떨어져 팝업 숨김 애니가 스킵된다.
+    // resume grace를 쓰면 복귀 후 스트림이 늦을 때 성공 구매가 storeDismissed로
+    // 떨어질 수 있어 AOS만 상한 대기한다. 만료 전에는 조기 종료.
     if (_isIos) return;
     if (_pending == null || _purchaseUpdateReceived) return;
 
     _resumeGraceTimer?.cancel();
     _resumeGraceTimer = Timer(_resumeGrace, () {
-      if (_pending == null || _purchaseUpdateReceived) return;
-      debugPrint(
-        '[DEBUG] IapPurchaseService resume grace timeout → storeDismissed '
-        '(productId=$_pendingProductId)',
-      );
-      _failPending(IapPurchaseResult.storeDismissed);
+      unawaited(_onResumeGraceTimeout());
     });
   }
 
@@ -133,9 +145,27 @@ class IapPurchaseService with WidgetsBindingObserver {
     _resumeGraceTimer = null;
   }
 
+  Future<void> _onResumeGraceTimeout() async {
+    if (_pending == null || _purchaseUpdateReceived) return;
+    debugPrint(
+      '[DEBUG] IapPurchaseService resume grace timeout → query '
+      '(productId=$_pendingProductId)',
+    );
+    final recovered = await _recoverPendingFromPlayQuery();
+    if (_pending == null || _purchaseUpdateReceived) return;
+    if (recovered) return;
+    debugPrint(
+      '[DEBUG] IapPurchaseService resume grace timeout → storeDismissed '
+      '(productId=$_pendingProductId)',
+    );
+    _failPending(IapPurchaseResult.storeDismissed);
+  }
+
   /// 화면 이탈 등으로 대기 중 구매/restore를 포기할 때.
+  /// 이후 도착하는 Play 콜백은 orphan이 세션을 이어받아 verify한다.
   void abandonPendingPurchase() {
     if (_pending != null) {
+      _stashDetachedPending();
       _failPending(IapPurchaseResult.storeDismissed);
     }
     if (_restorePending != null) {
@@ -479,6 +509,7 @@ class IapPurchaseService with WidgetsBindingObserver {
         (trimmedPlan != null && trimmedPlan.isNotEmpty) ? trimmedPlan : null;
     _purchaseUpdateReceived = false;
     _cancelResumeGrace();
+    _clearDetachedPending();
 
     try {
       final user = await SudaApiClient.getCurrentUser(accessToken: accessToken);
@@ -550,6 +581,9 @@ class IapPurchaseService with WidgetsBindingObserver {
           '(productId=$productId, basePlanId=$cacheBasePlanId, '
           'change=${changeSubscriptionParam != null})',
         );
+        if (!_isIos && await _recoverPendingFromPlayQuery()) {
+          return completer.future;
+        }
         _clearPending();
         await PerfMonitoringService.instance.stop('purchase_before_token');
         return IapPurchaseResult.storeDismissed;
@@ -560,6 +594,9 @@ class IapPurchaseService with WidgetsBindingObserver {
         '(productId=$productId, basePlanId=$cacheBasePlanId, '
         'change=${changeSubscriptionParam != null}): $e\n$st',
       );
+      if (!_isIos && _pending != null && await _recoverPendingFromPlayQuery()) {
+        return completer.future;
+      }
       _clearPending();
       await PerfMonitoringService.instance.stop('purchase_before_token');
       return IapPurchaseResult.storeDismissed;
@@ -568,20 +605,42 @@ class IapPurchaseService with WidgetsBindingObserver {
     return completer.future;
   }
 
-  Future<void> _onPurchaseUpdates(List<PurchaseDetails> purchases) async {
+  Future<void> _onPurchaseUpdates(List<PurchaseDetails> purchases) {
+    final run = _purchaseUpdateChain.then((_) => _dispatchPurchaseUpdates(purchases));
+    _purchaseUpdateChain = run.catchError((Object e, StackTrace st) {
+      debugPrint('[DEBUG] IapPurchaseService dispatch failed: $e\n$st');
+    });
+    return run;
+  }
+
+  Future<void> _dispatchPurchaseUpdates(List<PurchaseDetails> purchases) async {
     for (final purchase in purchases) {
-      if (_pending != null && purchase.productID == _pendingProductId) {
+      debugPrint(
+        '[DEBUG] IapPurchaseService stream: productId=${purchase.productID}, '
+        'status=${purchase.status}, pendingProductId=$_pendingProductId',
+      );
+    }
+    for (final purchase in purchases) {
+      if (_isMatchingPendingUpdate(purchase)) {
         await _handlePendingPurchaseUpdate(purchase);
-        continue;
       }
+    }
+    for (final purchase in purchases) {
+      if (_isMatchingPendingUpdate(purchase)) continue;
       if (_restorePending != null) {
         await _handleRestorePurchaseUpdate(purchase);
         continue;
       }
-      if (_isIos) {
-        unawaited(_handleOrphanPurchase(purchase));
-      }
+      await _handleOrphanPurchase(purchase);
     }
+  }
+
+  bool _isMatchingPendingUpdate(PurchaseDetails purchase) {
+    if (_pending == null) return false;
+    if (purchase.productID == _pendingProductId) return true;
+    return purchase.productID.isEmpty &&
+        (purchase.status == PurchaseStatus.error ||
+            purchase.status == PurchaseStatus.canceled);
   }
 
   Future<void> _handlePendingPurchaseUpdate(PurchaseDetails purchase) async {
@@ -703,7 +762,7 @@ class IapPurchaseService with WidgetsBindingObserver {
     }
   }
 
-  /// finish 안 한 iOS 트랜잭션 — 앱 재실행 공식 재시도.
+  /// 미ack(iOS finish / AOS ack) 또는 AOS 미consume 소모품.
   Future<void> _handleOrphanPurchase(PurchaseDetails purchase) async {
     if (purchase.status == PurchaseStatus.pending) return;
     if (purchase.status == PurchaseStatus.error ||
@@ -714,9 +773,17 @@ class IapPurchaseService with WidgetsBindingObserver {
         purchase.status != PurchaseStatus.restored) {
       return;
     }
-    if (!purchase.pendingCompletePurchase) return;
+    if (purchase.productID.isEmpty) return;
+    if (!_shouldVerifyOrphan(purchase)) return;
+    final existingToken = _purchaseTokenOf(purchase);
+    if (existingToken.isNotEmpty &&
+        _verifiedPurchaseTokens.contains(existingToken)) {
+      return;
+    }
 
-    final accessToken = await TokenStorage.loadAccessToken();
+    final useDetached = purchase.productID == _detachedProductId;
+    final accessToken = (useDetached ? _detachedAccessToken : null) ??
+        await TokenStorage.loadAccessToken();
     if (accessToken == null || accessToken.isEmpty) return;
 
     try {
@@ -724,9 +791,15 @@ class IapPurchaseService with WidgetsBindingObserver {
         accessToken: accessToken,
         purchase: purchase,
         purchaseToken: _purchaseTokenOf(purchase),
-        basePlanId: _basePlanIdForVerify(purchase.productID),
+        offerSessionId: useDetached ? _detachedOfferSessionId : null,
+        paywallSessionId: useDetached ? _detachedPaywallSessionId : null,
+        basePlanId: _basePlanIdForVerify(
+          purchase.productID,
+          pending: useDetached ? _detachedBasePlanId : null,
+        ),
       );
       await _maybeFinish(purchase, verify);
+      if (useDetached) _clearDetachedPending();
       if (verify.isSuccess) {
         try {
           await SudaApiClient.getUserEnergySimple(accessToken: accessToken);
@@ -751,16 +824,56 @@ class IapPurchaseService with WidgetsBindingObserver {
     String? offerSessionId,
     String? paywallSessionId,
     String? basePlanId,
-  }) {
-    return SudaApiClient.verifyPurchase(
-      accessToken: accessToken,
-      purchaseToken: purchaseToken,
-      productId: purchase.productID,
-      offerSessionId: offerSessionId,
-      paywallSessionId: paywallSessionId,
-      basePlanId: basePlanId,
-      platform: _isIos ? verifyPlatformIos : null,
+  }) async {
+    debugPrint(
+      '[DEBUG] IapPurchaseService verify start: productId=${purchase.productID}, '
+      'tokenLen=${purchaseToken.length}',
     );
+    if (purchaseToken.isNotEmpty) {
+      if (_verifiedPurchaseTokens.contains(purchaseToken)) {
+        debugPrint(
+          '[DEBUG] IapPurchaseService verify skip (already verified) '
+          'productId=${purchase.productID}',
+        );
+        return const PurchaseVerifyResultDto(
+          successYn: 'Y',
+          pendingYn: 'N',
+          finishYn: 'N',
+        );
+      }
+      while (_verifyingPurchaseTokens.contains(purchaseToken)) {
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+      }
+      if (_verifiedPurchaseTokens.contains(purchaseToken)) {
+        debugPrint(
+          '[DEBUG] IapPurchaseService verify skip (already verified) '
+          'productId=${purchase.productID}',
+        );
+        return const PurchaseVerifyResultDto(
+          successYn: 'Y',
+          pendingYn: 'N',
+          finishYn: 'N',
+        );
+      }
+      _verifyingPurchaseTokens.add(purchaseToken);
+    }
+    try {
+      final result = await SudaApiClient.verifyPurchase(
+        accessToken: accessToken,
+        purchaseToken: purchaseToken,
+        productId: purchase.productID,
+        offerSessionId: offerSessionId,
+        paywallSessionId: paywallSessionId,
+        basePlanId: basePlanId,
+        platform: _isIos ? verifyPlatformIos : null,
+      );
+      if (result.isSuccess && purchaseToken.isNotEmpty) {
+        _verifiedPurchaseTokens.add(purchaseToken);
+      }
+      return result;
+    } finally {
+      _verifyingPurchaseTokens.remove(purchaseToken);
+    }
   }
 
   String? _basePlanIdForVerify(String productId, {String? pending}) {
@@ -799,6 +912,115 @@ class IapPurchaseService with WidgetsBindingObserver {
       return purchase.billingClientPurchase.purchaseToken;
     }
     return purchase.verificationData.serverVerificationData;
+  }
+
+  bool _shouldVerifyOrphan(PurchaseDetails purchase) {
+    if (_isIos) return purchase.pendingCompletePurchase;
+    return _shouldVerifyAndroidPurchase(purchase);
+  }
+
+  /// AOS query/stream 회수 대상. ack된 비소모/구독은 매 런치 verify하지 않음.
+  /// 소모품은 query에 남아 있으면 미consume.
+  bool _shouldVerifyAndroidPurchase(PurchaseDetails purchase) {
+    if (purchase.productID.isEmpty) return false;
+    if (_purchaseTokenOf(purchase).isEmpty) return false;
+    if (purchase.status != PurchaseStatus.purchased &&
+        purchase.status != PurchaseStatus.restored) {
+      return false;
+    }
+    if (purchase.productID == productUnlimited10Min) return true;
+    return purchase.pendingCompletePurchase;
+  }
+
+  Future<List<PurchaseDetails>> _queryAndroidPastPurchases() async {
+    final addition = InAppPurchase.instance
+        .getPlatformAddition<InAppPurchaseAndroidPlatformAddition>();
+    final past = await addition.queryPastPurchases();
+    if (past.error != null) {
+      debugPrint(
+        '[DEBUG] IapPurchaseService queryPastPurchases error: ${past.error}',
+      );
+    }
+    return past.pastPurchases;
+  }
+
+  /// pending 중인 상품을 Play query로 찾아 기존 verify 경로로 넘긴다.
+  /// 매칭 구매를 핸들러에 넘겼으면 true.
+  Future<bool> _recoverPendingFromPlayQuery() async {
+    if (_isIos || _pending == null || _purchaseUpdateReceived) return false;
+    final productId = _pendingProductId;
+    if (productId == null || productId.isEmpty) return false;
+
+    debugPrint(
+      '[DEBUG] IapPurchaseService query recover start (productId=$productId)',
+    );
+    try {
+      final past = await _queryAndroidPastPurchases();
+      if (_pending == null || _purchaseUpdateReceived) return false;
+      for (final p in past) {
+        if (p.productID != productId) continue;
+        if (_purchaseTokenOf(p).isEmpty) continue;
+        if (p.status != PurchaseStatus.purchased &&
+            p.status != PurchaseStatus.restored) {
+          continue;
+        }
+        debugPrint(
+          '[DEBUG] IapPurchaseService query recover hit '
+          '(productId=${p.productID}, pendingComplete=${p.pendingCompletePurchase})',
+        );
+        await _handlePendingPurchaseUpdate(p);
+        return true;
+      }
+      debugPrint(
+        '[DEBUG] IapPurchaseService query recover miss (productId=$productId, '
+        'count=${past.length})',
+      );
+    } catch (e, st) {
+      debugPrint(
+        '[DEBUG] IapPurchaseService query recover failed: $e\n$st',
+      );
+    }
+    return false;
+  }
+
+  Future<void> _recoverUnfinishedAndroidPurchases() async {
+    if (_isIos || _recoveringUnfinished) return;
+    _recoveringUnfinished = true;
+    try {
+      if (isBusy) return;
+      final past = await _queryAndroidPastPurchases();
+      for (final p in past) {
+        if (isBusy) return;
+        if (!_shouldVerifyAndroidPurchase(p)) continue;
+        debugPrint(
+          '[DEBUG] IapPurchaseService unfinished recover '
+          '(productId=${p.productID})',
+        );
+        await _handleOrphanPurchase(p);
+      }
+    } catch (e, st) {
+      debugPrint(
+        '[DEBUG] IapPurchaseService unfinished recover failed: $e\n$st',
+      );
+    } finally {
+      _recoveringUnfinished = false;
+    }
+  }
+
+  void _stashDetachedPending() {
+    _detachedProductId = _pendingProductId;
+    _detachedAccessToken = _pendingAccessToken;
+    _detachedOfferSessionId = _pendingOfferSessionId;
+    _detachedPaywallSessionId = _pendingPaywallSessionId;
+    _detachedBasePlanId = _pendingBasePlanId;
+  }
+
+  void _clearDetachedPending() {
+    _detachedProductId = null;
+    _detachedAccessToken = null;
+    _detachedOfferSessionId = null;
+    _detachedPaywallSessionId = null;
+    _detachedBasePlanId = null;
   }
 
   void _armRestoreGrace(Duration duration) {
