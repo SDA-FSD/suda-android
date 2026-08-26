@@ -193,15 +193,15 @@ class _PaywallScreenState extends State<PaywallScreen> {
   }
 
   String _annualPriceMain(AppLocalizations l10n) {
-    final v = _prices?.yearlyPerMonthFormatted;
-    final amount = (v != null && v.isNotEmpty) ? v : l10n.paywallFallbackAnnualPerMonth;
-    return l10n.paywallPricePerMonth(amount);
-  }
-
-  String _annualPriceSub(AppLocalizations l10n) {
     final v = _prices?.yearlyFormatted;
     final amount = (v != null && v.isNotEmpty) ? v : l10n.paywallFallbackAnnual;
     return l10n.paywallPricePerYear(amount);
+  }
+
+  String _annualPriceSub(AppLocalizations l10n) {
+    final v = _prices?.yearlyPerMonthFormatted;
+    final amount = (v != null && v.isNotEmpty) ? v : l10n.paywallFallbackAnnualPerMonth;
+    return l10n.paywallPricePerMonth(amount);
   }
 
   String _monthlyPriceMain(AppLocalizations l10n) {
