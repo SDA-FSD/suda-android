@@ -371,28 +371,126 @@ class _PaywallScreenState extends State<PaywallScreen> {
     );
   }
 
+  /// 가용 폭·줄 수에 맞게 base→min까지 축소. 로케일 분기 없음(좁은 기기·긴 문장 공통).
+  /// [forceTokenFitBelowMin]: min에 도달해도 긴 토큰이 폭을 넘으면 [absoluteMinSize]까지 더 줄임
+  /// (단어 중간 줄바꿈 방지). Paywall은 말줄임 없이 전부 보여야 함.
+  double _autoFitFontSize({
+    required String text,
+    required TextStyle baseStyle,
+    required double maxWidth,
+    required TextDirection textDirection,
+    required double baseSize,
+    required double minSize,
+    required int maxLines,
+    bool requireTokensFit = true,
+    bool forceTokenFitBelowMin = false,
+    double? absoluteMinSize,
+  }) {
+    final floor = absoluteMinSize ?? minSize;
+    var fontSize = baseSize;
+    while (true) {
+      final style = baseStyle.copyWith(fontSize: fontSize);
+      final painter = TextPainter(
+        text: TextSpan(text: text, style: style),
+        textDirection: textDirection,
+        maxLines: maxLines,
+      )..layout(maxWidth: maxWidth);
+      final linesOk = !painter.didExceedMaxLines;
+      final tokensOk = !requireTokensFit ||
+          !_anyTokenExceedsWidth(text, style, maxWidth, textDirection);
+      if (linesOk && tokensOk) return fontSize;
+
+      final next = fontSize - 0.5;
+      if (next < minSize) {
+        if (forceTokenFitBelowMin &&
+            requireTokensFit &&
+            !tokensOk &&
+            next >= floor) {
+          fontSize = next;
+          continue;
+        }
+        // min(또는 absolute floor)에서도 한 번 더 검사한 뒤 반환.
+        if (fontSize > minSize) {
+          fontSize = minSize;
+          continue;
+        }
+        if (forceTokenFitBelowMin && fontSize > floor) {
+          fontSize = floor;
+          continue;
+        }
+        return fontSize;
+      }
+      fontSize = next;
+    }
+  }
+
+  bool _anyTokenExceedsWidth(
+    String text,
+    TextStyle style,
+    double maxWidth,
+    TextDirection textDirection,
+  ) {
+    for (final line in text.split('\n')) {
+      for (final token in line.split(RegExp(r'\s+'))) {
+        if (token.isEmpty) continue;
+        final painter = TextPainter(
+          text: TextSpan(text: token, style: style),
+          textDirection: textDirection,
+          maxLines: 1,
+        )..layout();
+        if (painter.width > maxWidth) return true;
+      }
+    }
+    return false;
+  }
+
   Widget _gradientText({
     required String text,
     required TextStyle style,
     required Gradient gradient,
     TextAlign align = TextAlign.start,
     List<Shadow>? shadows,
+    double? minFontSize,
+    int maxLines = 2,
   }) {
     // ShaderMask는 레이어 클립으로 글리프 하단이 잘리므로,
     // TextStyle.foreground 셰이더로 그린다.
     return LayoutBuilder(
       builder: (context, constraints) {
-        final textStyle = style.copyWith(
-          height: 1.35,
-          leadingDistribution: TextLeadingDistribution.even,
-        );
         final maxWidth = constraints.maxWidth.isFinite
             ? constraints.maxWidth
             : MediaQuery.sizeOf(context).width;
+        final baseSize = style.fontSize ?? 32;
+        final minSize = minFontSize ?? baseSize;
+        final absoluteFloor = minFontSize != null
+            ? (minFontSize - 4).clamp(20.0, minFontSize)
+            : baseSize;
+        final fittedSize = minSize < baseSize
+            ? _autoFitFontSize(
+                text: text,
+                baseStyle: style.copyWith(
+                  height: 1.35,
+                  leadingDistribution: TextLeadingDistribution.even,
+                ),
+                maxWidth: maxWidth,
+                textDirection: Directionality.of(context),
+                baseSize: baseSize,
+                minSize: minSize,
+                maxLines: maxLines,
+                forceTokenFitBelowMin: true,
+                absoluteMinSize: absoluteFloor,
+              )
+            : baseSize;
+        final textStyle = style.copyWith(
+          fontSize: fittedSize,
+          height: 1.35,
+          leadingDistribution: TextLeadingDistribution.even,
+        );
         final painter = TextPainter(
           text: TextSpan(text: text, style: textStyle),
           textAlign: align,
           textDirection: Directionality.of(context),
+          maxLines: maxLines,
         )..layout(maxWidth: maxWidth);
         final shader = gradient.createShader(
           Rect.fromLTWH(0, 0, painter.width, painter.height),
@@ -400,6 +498,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
         return Text(
           text,
           textAlign: align,
+          maxLines: maxLines,
           overflow: TextOverflow.visible,
           style: textStyle.copyWith(
             foreground: Paint()..shader = shader,
@@ -704,6 +803,10 @@ class _PaywallScreenState extends State<PaywallScreen> {
           _gradientText(
             text: l10n.paywallHeroTitle2,
             style: _style(size: 32, weight: FontWeight.w700),
+            // 좁은 기기에서 Conversando가 한 줄에 들어갈 때까지 동일 크기로 축소.
+            // 캐릭터 영역(right padding)은 유지. 말줄임 없음.
+            minFontSize: 26,
+            maxLines: 2,
             gradient: const LinearGradient(
               begin: Alignment.centerLeft,
               end: Alignment.centerRight,
@@ -717,11 +820,11 @@ class _PaywallScreenState extends State<PaywallScreen> {
     );
   }
 
-  /// 히어로 본문: 기본 14px, 넘치면 축소해 최대 2줄로 맞춤.
+  /// 히어로 본문: 기본 14px, 가능하면 3줄 안에 맞춤. 말줄임 없음(세로로 늘어나도 전부 표시).
   Widget _buildHeroBody(String text) {
-    const maxLines = 2;
+    const preferredMaxLines = 3;
     const baseSize = 14.0;
-    const minSize = 12.0;
+    const minSize = 12.5;
     const lineHeight = 1.35;
 
     return LayoutBuilder(
@@ -729,34 +832,29 @@ class _PaywallScreenState extends State<PaywallScreen> {
         final maxWidth = constraints.maxWidth.isFinite
             ? constraints.maxWidth
             : MediaQuery.sizeOf(context).width;
-
-        var fontSize = baseSize;
-        TextPainter painterFor(double size) {
-          return TextPainter(
-            text: TextSpan(
-              text: text,
-              style: _style(size: size, color: Colors.white, height: lineHeight),
-            ),
-            textDirection: Directionality.of(context),
-            maxLines: maxLines,
-          )..layout(maxWidth: maxWidth);
-        }
-
-        while (fontSize > minSize) {
-          final painter = painterFor(fontSize);
-          if (!painter.didExceedMaxLines) break;
-          fontSize -= 0.5;
-        }
+        final textDirection = Directionality.of(context);
+        final baseStyle = _style(
+          size: baseSize,
+          color: Colors.white,
+          height: lineHeight,
+        );
+        final fontSize = _autoFitFontSize(
+          text: text,
+          baseStyle: baseStyle,
+          maxWidth: maxWidth,
+          textDirection: textDirection,
+          baseSize: baseSize,
+          minSize: minSize,
+          maxLines: preferredMaxLines,
+          requireTokensFit: false,
+        );
+        final fittedStyle = baseStyle.copyWith(fontSize: fontSize);
 
         return Text(
           text,
-          maxLines: maxLines,
-          overflow: TextOverflow.ellipsis,
-          style: _style(
-            size: fontSize,
-            color: Colors.white,
-            height: lineHeight,
-          ),
+          // 줄 수 제한 없음 → 공간 부족 시 아래로 늘어나며 전부 표시.
+          overflow: TextOverflow.visible,
+          style: fittedStyle,
         );
       },
     );
@@ -788,7 +886,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
                   key: _premiumCardKey,
                   width: cardWidth,
                   margin: const EdgeInsets.only(top: _premiumCardTopInset),
-                  padding: const EdgeInsets.fromLTRB(20, 6, 20, 18),
+                  padding: const EdgeInsets.fromLTRB(16, 6, 16, 18),
                   decoration: BoxDecoration(
                     color: _premiumCard,
                     borderRadius: BorderRadius.circular(15),
@@ -850,17 +948,58 @@ class _PaywallScreenState extends State<PaywallScreen> {
 
   Widget _premiumRow(String label) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Image.asset(
-          'assets/images/icons/paywall_check_Icon.png',
-          width: 18,
-          height: 18,
+        Padding(
+          padding: const EdgeInsets.only(top: 2),
+          child: Image.asset(
+            'assets/images/icons/paywall_check_Icon.png',
+            width: 18,
+            height: 18,
+          ),
         ),
-        const SizedBox(width: 10),
+        const SizedBox(width: 8),
         Expanded(
-          child: Text(
-            label,
-            style: _style(size: 16, color: Colors.white),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              const preferredMaxLines = 1;
+              const baseSize = 16.0;
+              const minSize = 14.0;
+              final maxWidth = constraints.maxWidth;
+              final textDirection = Directionality.of(context);
+              final baseStyle = _style(size: baseSize, color: Colors.white);
+              final fontSize = _autoFitFontSize(
+                text: label,
+                baseStyle: baseStyle,
+                maxWidth: maxWidth,
+                textDirection: textDirection,
+                baseSize: baseSize,
+                minSize: minSize,
+                maxLines: preferredMaxLines,
+              );
+              final style = baseStyle.copyWith(fontSize: fontSize);
+              final oneLinePainter = TextPainter(
+                text: TextSpan(text: label, style: style),
+                textDirection: textDirection,
+                maxLines: 1,
+              )..layout(maxWidth: maxWidth);
+              // 1줄 불가해도 말줄임/fade 없이 줄바꿈해 전부 표시.
+              final fitsOneLine = !oneLinePainter.didExceedMaxLines &&
+                  !_anyTokenExceedsWidth(
+                    label,
+                    style,
+                    maxWidth,
+                    textDirection,
+                  );
+
+              return Text(
+                label,
+                maxLines: fitsOneLine ? 1 : null,
+                softWrap: true,
+                overflow: TextOverflow.visible,
+                style: style,
+              );
+            },
           ),
         ),
       ],

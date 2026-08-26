@@ -577,7 +577,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get paywallHeroTitle1 => 'Pratique Mais';
 
   @override
-  String get paywallHeroTitle2 => 'Aprenda Conversando';
+  String get paywallHeroTitle2 => 'Aprenda\nConversando';
 
   @override
   String get paywallHeroBody =>
