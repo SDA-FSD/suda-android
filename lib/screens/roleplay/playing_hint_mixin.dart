@@ -270,7 +270,7 @@ mixin PlayingHintMixin<T extends StatefulWidget>
       padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
       child: Center(
         child: SizedBox(
-          width: bodyWidth * 0.8,
+          width: bodyWidth * 0.9,
           child: Material(
             color: const Color(0xFF076766),
             borderRadius: BorderRadius.circular(22),

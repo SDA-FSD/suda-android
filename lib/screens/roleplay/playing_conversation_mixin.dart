@@ -901,18 +901,9 @@ class _NarrationRevealTextState extends State<_NarrationRevealText> {
     final metrics = painter.computeLineMetrics();
     if (metrics.isEmpty) {
       _lines = [widget.text];
-      _lineHeights = [painter.height];
+      _lineHeights = [painter.height + _lineExtraHeight];
     } else {
-      final rawLines = widget.text.split('\n');
-      if (rawLines.length == metrics.length) {
-        _lines = rawLines;
-      } else {
-        _lines = _splitTextIntoVisualLines(
-          widget.text,
-          maxWidth,
-          textDirection,
-        );
-      }
+      _lines = _visualLinesFromPainter(painter, widget.text);
       _lineHeights = metrics
           .map((metric) => metric.height + _lineExtraHeight)
           .toList();
@@ -920,28 +911,53 @@ class _NarrationRevealTextState extends State<_NarrationRevealText> {
     _scheduleReveal();
   }
 
-  List<String> _splitTextIntoVisualLines(
-    String text,
-    double maxWidth,
-    TextDirection textDirection,
-  ) {
-    final words = text.split(RegExp(r'\s+'));
+  /// [painter]가 [maxWidth]로 접은 시각 줄. 공백 유무와 무관.
+  /// 가운데 정렬이므로 y=0 히트테스트는 쓰지 않고 offset만 순회한다.
+  static List<String> _visualLinesFromPainter(TextPainter painter, String text) {
+    if (text.isEmpty) return [text];
     final lines = <String>[];
-    var current = '';
-    for (final word in words) {
-      final candidate = current.isEmpty ? word : '$current $word';
-      final painter = TextPainter(
-        text: TextSpan(text: candidate, style: widget.style),
-        textDirection: textDirection,
-      )..layout(maxWidth: maxWidth);
-      if (painter.computeLineMetrics().length > 1 && current.isNotEmpty) {
-        lines.add(current);
-        current = word;
-      } else {
-        current = candidate;
+    var offset = 0;
+    var guard = 0;
+    while (offset < text.length && guard <= text.length) {
+      guard++;
+      final range = painter.getLineBoundary(
+        TextPosition(offset: offset, affinity: TextAffinity.downstream),
+      );
+      if (!range.isValid) break;
+      var start = range.start;
+      var end = range.end;
+      if (start < 0) start = 0;
+      if (end > text.length) end = text.length;
+      if (end < start) break;
+      if (end == start) {
+        if (offset < text.length && text[offset] == '\n') {
+          lines.add('');
+          offset++;
+          continue;
+        }
+        offset++;
+        continue;
       }
+      var line = text.substring(start, end);
+      if (line.endsWith('\r\n')) {
+        line = line.substring(0, line.length - 2);
+      } else if (line.endsWith('\n') || line.endsWith('\r')) {
+        line = line.substring(0, line.length - 1);
+      }
+      lines.add(line);
+      var next = end;
+      if (next < text.length && (text[next] == '\n' || text[next] == '\r')) {
+        if (text[next] == '\r' &&
+            next + 1 < text.length &&
+            text[next + 1] == '\n') {
+          next += 2;
+        } else {
+          next++;
+        }
+      }
+      if (next <= offset) next = offset + 1;
+      offset = next;
     }
-    if (current.isNotEmpty) lines.add(current);
     return lines.isEmpty ? [text] : lines;
   }
 
