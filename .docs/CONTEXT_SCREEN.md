@@ -430,7 +430,7 @@
 - **`subscriptionBasePlanId` null/미지 값·로드 실패**: 추측 폴백 없음. l10n `changePlanLoadFailed` + `changePlanRetry`로 재시도.
 - **Current Plan**: 섹션 라벨 H2(`headlineMedium`)·`#0CABA8`. 카드 높이 **103**·좌우 패딩 **16**. 좌측 플랜명 20·갱신일 14(`changePlanRenewsOn`), 우측 가격 **H3** 수직 중앙.
 - **Available Plans**: 동일 섹션 라벨. **월→연만** (연간 카드). 카드 동일 폭·**minHeight 103**(설명 줄바꿈 시 확장)·좌우 16. 라디오 **24×24**·플랜명 20·설명 14·주 가격 H3·연간 부제 **`#80D7CF` 14**. ko 연간 설명 `paywallAnnualPlanSubtitle`는 `월간 플랜 대비`/`33% 이상 절약` 2줄(`\n`); 폭 부족 시 부제 `FittedBox`로 축소해 2줄 유지. 탭 토글 선택.
-- **CTA**: l10n `accountChangePlan`. 기본 비활성. Available 선택 시에만 활성. 탭 시 `DefaultPopup` 확인 팝업(`changePlanConfirmBody`: **다음 결제일부터 적용**) → Confirm 시 `IapPurchaseService.changeSubscription`. AOS **`ReplacementMode.withoutProration`**. iOS 같은 그룹 `premium_yearly`(verify `productId=premium_yearly`, `basePlanId=bp-premium-yearly`, paywall 세션 없음). old purchase 없으면 토스트 `changePlanOldPurchaseMissing`(크래시 없음, AOS). 성공 시 Account `pop(true)` + `changePlanChangeRequested`. verify 직후 simple은 계속 monthly. 실패 시 Billing/Purchase error code·message를 debugPrint.
+- **CTA**: l10n `accountChangePlan`. 기본 비활성. Available 선택 시에만 활성. 탭 시 `DefaultPopup` 확인 팝업(`changePlanConfirmBody`: **다음 결제일부터 적용**) → Confirm 시 `IapPurchaseService.changeSubscription`. AOS **`ReplacementMode.withoutProration`**. iOS 같은 그룹 `premium_yearly`(verify `productId=premium_yearly`, `basePlanId=bp-premium-yearly`, paywall 세션 없음). old purchase 없으면 토스트 `changePlanOldPurchaseMissing`(크래시 없음, AOS). 성공 시 Account `pop(true)` + `changePlanChangeRequested`. pending → 승인대기 토스트·화면 유지. verify 직후 simple은 계속 monthly. 실패 시 Billing/Purchase error code·message를 debugPrint.
 - **ReplacementMode 실측 메모:** `DEFERRED`=에러·변경 불가. `WITHOUT_PRORATION`=앱 채택(월↔년 가능했으나 제품은 월→연만 노출). `CHARGE_FULL_PRICE`는 미사용.
 
 ---
@@ -910,13 +910,13 @@
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
 - **PaywallCompletedScreen**: 신규 구독 verify 성공(비 pending)
-- **이전 스크린**: X/`pop()`, 또는 성공·승인대기·Restore 성공 후 `pop(true)`
+- **이전 스크린**: X/`pop()`, 또는 성공·Restore 성공 후 `pop(true)`. 승인대기는 pop하지 않음.
 
 ### 스크린 내부 구현 특이사항
 - **결제**: `IapPurchaseService.purchaseSubscription`. AOS `subscription_premium`+`bp-premium-*`. iOS `premium_monthly`/`premium_yearly` + 매핑 `basePlanId`. CTA `_purchasing` lock. dispose 시 `abandonPendingPurchase`.
 - **가격**: 스토어. 월간 `price/mês`. 연간 메인 yearly+`/ano`(청구액, 큰 글씨), 서브 `rawPrice/12` 포맷+`/mês`(월환산, 작은 글씨). 미조회 시 하드코딩 폴백. ASC 3.1.2(c): 청구액이 가장 conspicuous.
-- **verify N**: 실패 토스트·유지. **pending Y**: 승인대기 토스트+`pop(true)`. **성공**: Completed push 후 Paywall `pop(true)`.
-- **Restore**: **iOS만** Terms•Privacy 옆 링크. 세션 ID 없이 restore+verify. Completed 화면 없음. 성공/`pending` → `pop(true)`. 에너지 팝업에는 Restore 없음.
+- **verify N**: 실패 토스트·유지. **pending**(Play pending / `pendingYn=Y`): 승인대기 토스트·화면 유지. **성공**: Completed push 후 Paywall `pop(true)`.
+- **Restore**: **iOS만** Terms•Privacy 옆 링크. 세션 ID 없이 restore+verify. Completed 화면 없음. 성공 → `pop(true)`. pending → 토스트·유지. 에너지 팝업에는 Restore 없음.
 - **CTA**: Assinar agora → 결제. Terms/Privacy → WebView. X = pop
 - **UI**: 배경 그라데이션·glow·PREMIUM 카드·플랜 카드·MELHOR 등 기존 레이아웃 유지.
 

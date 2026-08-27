@@ -20,8 +20,9 @@ import 'token_storage.dart';
 /// - 동시에 하나의 구매/restore만 처리 (`isBusy`).
 /// - 가격은 [IapPriceCache]에 영속 저장.
 /// - AOS: 스토어 복귀 후 [_resumeGrace] 동안 매칭 스트림을 기다린다. 오면 즉시
-///   verify하고 스피너를 닫는다. 만료 시에만 `queryPastPurchases`로 회수하고,
-///   그래도 없으면 `storeDismissed`. 미ack/미consume은 orphan으로 verify.
+///   verify하고 스피너를 닫는다. `pending`이면 실패가 아니라 승인대기로 스피너를
+///   닫고, 이후 purchased는 orphan verify. 만료 시 `queryPastPurchases`로
+///   purchased/pending 회수, 둘 다 없으면 `storeDismissed`.
 /// - iOS: StoreKit 스트림의 purchased/canceled 대기. resume grace 없음.
 /// - AOS: Play consume/ack는 서버. 클라 `completePurchase` 없음.
 /// - iOS: verify `finishYn=Y`일 때만 `completePurchase`.
@@ -648,6 +649,11 @@ class IapPurchaseService with WidgetsBindingObserver {
     _cancelResumeGrace();
 
     if (purchase.status == PurchaseStatus.pending) {
+      debugPrint(
+        '[DEBUG] IapPurchaseService purchase pending: '
+        'productId=${purchase.productID}',
+      );
+      _completePendingApproval();
       return;
     }
 
@@ -690,9 +696,11 @@ class IapPurchaseService with WidgetsBindingObserver {
         await _maybeFinish(purchase, verify);
         if (!verify.isSuccess) {
           _failPending(IapPurchaseResult.verifyFailed);
+        } else if (verify.isPending) {
+          _completePendingApproval();
         } else {
           _completePending(
-            IapPurchaseResult.success(pendingApproval: verify.isPending),
+            IapPurchaseResult.success(pendingApproval: false),
           );
         }
       } catch (e, st) {
@@ -960,16 +968,17 @@ class IapPurchaseService with WidgetsBindingObserver {
       for (final p in past) {
         if (p.productID != productId) continue;
         if (_purchaseTokenOf(p).isEmpty) continue;
-        if (p.status != PurchaseStatus.purchased &&
-            p.status != PurchaseStatus.restored) {
-          continue;
+        if (p.status == PurchaseStatus.pending ||
+            p.status == PurchaseStatus.purchased ||
+            p.status == PurchaseStatus.restored) {
+          debugPrint(
+            '[DEBUG] IapPurchaseService query recover hit '
+            '(productId=${p.productID}, status=${p.status}, '
+            'pendingComplete=${p.pendingCompletePurchase})',
+          );
+          await _handlePendingPurchaseUpdate(p);
+          return true;
         }
-        debugPrint(
-          '[DEBUG] IapPurchaseService query recover hit '
-          '(productId=${p.productID}, pendingComplete=${p.pendingCompletePurchase})',
-        );
-        await _handlePendingPurchaseUpdate(p);
-        return true;
       }
       debugPrint(
         '[DEBUG] IapPurchaseService query recover miss (productId=$productId, '
@@ -1076,6 +1085,12 @@ class IapPurchaseService with WidgetsBindingObserver {
     if (completer != null && !completer.isCompleted) {
       completer.complete(result);
     }
+  }
+
+  /// Play/verify 승인 대기. UI Future는 닫고, 이후 purchased는 orphan verify.
+  void _completePendingApproval() {
+    _stashDetachedPending();
+    _completePending(IapPurchaseResult.success(pendingApproval: true));
   }
 
   void _failPending(IapPurchaseResult result) {

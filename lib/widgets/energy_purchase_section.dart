@@ -373,6 +373,16 @@ class _EnergyPurchaseSectionState extends State<EnergyPurchaseSection> {
     );
     if (!mounted) return;
 
+    if (result.pendingApproval) {
+      final l10n = AppLocalizations.of(context)!;
+      DefaultToast.show(context, l10n.energyPurchasePendingApproval);
+      setState(() {
+        _themeTintOpacity = _themeTintIdle;
+        _busyKind = null;
+      });
+      return;
+    }
+
     if (!result.isSuccess) {
       if (result.outcome == IapPurchaseOutcome.verifyFailed) {
         final l10n = AppLocalizations.of(context)!;
@@ -387,11 +397,6 @@ class _EnergyPurchaseSectionState extends State<EnergyPurchaseSection> {
         _busyKind = null;
       });
       return;
-    }
-
-    if (result.pendingApproval) {
-      final l10n = AppLocalizations.of(context)!;
-      DefaultToast.show(context, l10n.energyPurchasePendingApproval);
     }
 
     setState(() => _removingKinds.add(kind));

@@ -270,6 +270,12 @@ class _ChangePlanScreenState extends State<ChangePlanScreen> {
         return;
       }
 
+      if (result.pendingApproval) {
+        DefaultToast.show(context, l10n.energyPurchasePendingApproval);
+        setState(() => _purchasing = false);
+        return;
+      }
+
       if (!result.isSuccess) {
         if (result.outcome == IapPurchaseOutcome.verifyFailed ||
             result.outcome == IapPurchaseOutcome.unavailable) {
@@ -283,12 +289,8 @@ class _ChangePlanScreenState extends State<ChangePlanScreen> {
         return;
       }
 
-      if (result.pendingApproval) {
-        DefaultToast.show(context, l10n.energyPurchasePendingApproval);
-      } else {
-        // 실측 단계: 완성 UX 전 — 날짜/예약 안내는 모드 확정 후.
-        DefaultToast.show(context, l10n.changePlanChangeRequested);
-      }
+      // 실측 단계: 완성 UX 전 — 날짜/예약 안내는 모드 확정 후.
+      DefaultToast.show(context, l10n.changePlanChangeRequested);
       setState(() => _purchasing = false);
       Navigator.of(context).pop(true);
     } catch (e, st) {

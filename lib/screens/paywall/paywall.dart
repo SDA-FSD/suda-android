@@ -22,7 +22,7 @@ import 'paywall_completed.dart';
 ///
 /// 진입: 에너지 팝업 Go Premium / Lab 등에서 [PaywallScreen.push].
 /// 결제 성공 → [PaywallCompletedScreen] → pop(true).
-/// `pendingYn=Y` → 토스트 후 pop(true). `successYn=N` → 실패 토스트·유지.
+/// Play/`pendingYn` 승인대기 → 토스트 후 화면 유지. `successYn=N` → 실패 토스트·유지.
 class PaywallScreen extends StatefulWidget {
   const PaywallScreen({super.key, required this.screen});
 
@@ -31,7 +31,7 @@ class PaywallScreen extends StatefulWidget {
 
   static const String routeName = '/paywall';
 
-  /// `true` = 구독 성공 또는 승인대기(에너지 팝업에서 Go Premium 숨김·detail 재조회).
+  /// `true` = 구독 성공(에너지 팝업에서 Go Premium 숨김·detail 재조회).
   static Future<T?> push<T>(BuildContext context, {required String screen}) {
     return Navigator.of(context).push<T>(
       FullScreenRoute<T>(
@@ -238,6 +238,13 @@ class _PaywallScreenState extends State<PaywallScreen> {
       );
       if (!mounted) return;
 
+      if (result.pendingApproval) {
+        final l10n = AppLocalizations.of(context)!;
+        DefaultToast.show(context, l10n.energyPurchasePendingApproval);
+        setState(() => _purchasing = false);
+        return;
+      }
+
       if (!result.isSuccess) {
         if (result.outcome == IapPurchaseOutcome.verifyFailed) {
           final l10n = AppLocalizations.of(context)!;
@@ -248,13 +255,6 @@ class _PaywallScreenState extends State<PaywallScreen> {
           );
         }
         setState(() => _purchasing = false);
-        return;
-      }
-
-      if (result.pendingApproval) {
-        final l10n = AppLocalizations.of(context)!;
-        DefaultToast.show(context, l10n.energyPurchasePendingApproval);
-        Navigator.of(context).pop(true);
         return;
       }
 
@@ -294,6 +294,11 @@ class _PaywallScreenState extends State<PaywallScreen> {
         setState(() => _purchasing = false);
         return;
       }
+      if (result.pendingApproval) {
+        DefaultToast.show(context, l10n.energyPurchasePendingApproval);
+        setState(() => _purchasing = false);
+        return;
+      }
       if (!result.isSuccess) {
         if (result.outcome == IapPurchaseOutcome.verifyFailed ||
             result.outcome == IapPurchaseOutcome.unavailable) {
@@ -307,11 +312,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
         return;
       }
 
-      if (result.pendingApproval) {
-        DefaultToast.show(context, l10n.energyPurchasePendingApproval);
-      } else {
-        DefaultToast.show(context, l10n.restorePurchasesCompleted);
-      }
+      DefaultToast.show(context, l10n.restorePurchasesCompleted);
       try {
         await SudaApiClient.getUserEnergySimple(accessToken: accessToken);
       } catch (e, st) {
