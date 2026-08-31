@@ -143,7 +143,7 @@ flutter run --flavor dev -t lib/main.dart --dart-define=ENV=dev -d 541F3961-8182
 상세: `CONTEXT_SCREEN.md`. 스크린 작업 시 그쪽도 갱신.
 
 - 동의(`SUDA_AGREEMENT`): Login 위 레이어. 완료 시 `POST /v1/users/agreement` + AppsFlyer `af_complete_registration` → **1회** `FirstCefrLevelScreen` → Confirm `PUT /v1/users/language-level` 후 Home(실패여도 Home). 레이어 닫기(미동의)는 토큰 삭제·비로그인
-- Lab: Setting > Lab (`AppConfig.isDev` · `kDebugMode`). **prd release 미노출**. Tutorial 미리보기: 21 locale 선택 후 Open Tutorial (`RoleplayTutorialScreen(preview: true)`)
+- Lab: Setting > Lab (`AppConfig.isDev` · `kDebugMode`). **prd release 미노출**. Tutorial 미리보기: 21 locale 선택 후 Open Tutorial (`RoleplayTutorialScreen(preview: true)`). **Play Ribbon Burst**: `RibbonBurstEffect` 오버레이 재현
 
 롤플레이 상세: `CONTEXT_ROLEPLAY_S2.md`.
 
@@ -200,6 +200,7 @@ dev·prd만 ON. `PerfMonitoringService` + `SudaHttpClient` `HttpMetric`(query �
 - 토스트: `lib/utils/default_toast.dart`
 - 서버 마크다운 `***`/`**`/`*`: `lib/utils/default_markdown.dart` (Ending content, 공지, 알림함, Opening briefing)
 - Like 진행 오버레이: `EffectOverlayService` + `LikeProgressEffect` (`lib/effects/like_progress_effect.dart`). 동시 1개. 앵커 `EffectAnchorId.energyBadge`
+- 리본 폭죽 오버레이: `RibbonBurstEffect` (`lib/effects/ribbon_burst_effect.dart`) — 화면 중앙 3D 직사각형 리본 burst. 딤·입력 가로채기 없음. 주간랭킹 claim 보조 연출(예정). Lab `Play Ribbon Burst`
 
 ## 12. 이력
 `.docs/CONTEXT_HISTORY.md` (오래된 것: `CONTEXT_HISTORY_ARCHIVE.md`)
