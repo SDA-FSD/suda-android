@@ -604,13 +604,16 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get paywallFallbackAnnualPerMonth => '\$8.33';
+  String get paywallFallbackAnnualPerMonth => 'S\$11.67';
 
   @override
-  String get paywallFallbackAnnual => '\$99.99';
+  String get paywallFallbackAnnual => 'S\$139.99';
 
   @override
-  String get paywallFallbackMonthly => '\$13.99';
+  String get paywallFallbackMonthly => 'S\$19.98';
+
+  @override
+  String get paywallFallbackMonthlyTimes12 => 'S\$239.76';
 
   @override
   String get paywallCompletedTitle => '恭喜！';
@@ -1281,13 +1284,16 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   }
 
   @override
-  String get paywallFallbackAnnualPerMonth => '\$8.33';
+  String get paywallFallbackAnnualPerMonth => 'S\$11.67';
 
   @override
-  String get paywallFallbackAnnual => '\$99.99';
+  String get paywallFallbackAnnual => 'S\$139.99';
 
   @override
-  String get paywallFallbackMonthly => '\$13.99';
+  String get paywallFallbackMonthly => 'S\$19.98';
+
+  @override
+  String get paywallFallbackMonthlyTimes12 => 'S\$239.76';
 
   @override
   String get paywallCompletedTitle => '恭喜！';
@@ -1958,13 +1964,16 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   }
 
   @override
-  String get paywallFallbackAnnualPerMonth => '\$8.33';
+  String get paywallFallbackAnnualPerMonth => 'NT\$281.67';
 
   @override
-  String get paywallFallbackAnnual => '\$99.99';
+  String get paywallFallbackAnnual => 'NT\$3,380';
 
   @override
-  String get paywallFallbackMonthly => '\$13.99';
+  String get paywallFallbackMonthly => 'NT\$470';
+
+  @override
+  String get paywallFallbackMonthlyTimes12 => 'NT\$5,640';
 
   @override
   String get paywallCompletedTitle => '恭喜！';

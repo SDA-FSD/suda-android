@@ -258,9 +258,10 @@
       }
     }
   },
-  "paywallFallbackAnnualPerMonth": "$8.33",
-  "paywallFallbackAnnual": "$99.99",
-  "paywallFallbackMonthly": "$13.99",
+  "paywallFallbackAnnualPerMonth": "¥1,492",
+  "paywallFallbackAnnual": "¥17,900",
+  "paywallFallbackMonthly": "¥2,500",
+  "paywallFallbackMonthlyTimes12": "¥30,000",
   "paywallCompletedTitle": "おめでとうございます！",
   "paywallCompletedBody": "プレミアム特典が有効になりました。",
   "paywallCompletedContinue": "続ける",

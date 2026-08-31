@@ -641,13 +641,16 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get paywallFallbackAnnualPerMonth => '\$8.33';
+  String get paywallFallbackAnnualPerMonth => '\$170.75';
 
   @override
-  String get paywallFallbackAnnual => '\$99.99';
+  String get paywallFallbackAnnual => '\$2,049';
 
   @override
-  String get paywallFallbackMonthly => '\$13.99';
+  String get paywallFallbackMonthly => '\$285';
+
+  @override
+  String get paywallFallbackMonthlyTimes12 => '\$3,420';
 
   @override
   String get paywallCompletedTitle => '¡Felicidades!';
@@ -1362,13 +1365,16 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
   }
 
   @override
-  String get paywallFallbackAnnualPerMonth => '\$8.33';
+  String get paywallFallbackAnnualPerMonth => '\$170.75';
 
   @override
-  String get paywallFallbackAnnual => '\$99.99';
+  String get paywallFallbackAnnual => '\$2,049';
 
   @override
-  String get paywallFallbackMonthly => '\$13.99';
+  String get paywallFallbackMonthly => '\$285';
+
+  @override
+  String get paywallFallbackMonthlyTimes12 => '\$3,420';
 
   @override
   String get paywallCompletedTitle => '¡Felicidades!';

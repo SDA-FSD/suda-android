@@ -258,9 +258,10 @@
       }
     }
   },
-  "paywallFallbackAnnualPerMonth": "$8.33",
-  "paywallFallbackAnnual": "$99.99",
-  "paywallFallbackMonthly": "$13.99",
+  "paywallFallbackAnnualPerMonth": "649,17 ₽",
+  "paywallFallbackAnnual": "7 790,00 ₽",
+  "paywallFallbackMonthly": "1 090,00 ₽",
+  "paywallFallbackMonthlyTimes12": "13 080,00 ₽",
   "paywallCompletedTitle": "Поздравляем!",
   "paywallCompletedBody": "Преимущества Premium уже доступны.",
   "paywallCompletedContinue": "Продолжить",

@@ -610,13 +610,16 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get paywallFallbackAnnualPerMonth => '\$8.33';
+  String get paywallFallbackAnnualPerMonth => '¥1,492';
 
   @override
-  String get paywallFallbackAnnual => '\$99.99';
+  String get paywallFallbackAnnual => '¥17,900';
 
   @override
-  String get paywallFallbackMonthly => '\$13.99';
+  String get paywallFallbackMonthly => '¥2,500';
+
+  @override
+  String get paywallFallbackMonthlyTimes12 => '¥30,000';
 
   @override
   String get paywallCompletedTitle => 'おめでとうございます！';

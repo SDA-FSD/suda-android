@@ -258,9 +258,10 @@
       }
     }
   },
-  "paywallFallbackAnnualPerMonth": "$8.33",
-  "paywallFallbackAnnual": "$99.99",
-  "paywallFallbackMonthly": "$13.99",
+  "paywallFallbackAnnualPerMonth": "₹941.67",
+  "paywallFallbackAnnual": "₹11,300",
+  "paywallFallbackMonthly": "₹1,600",
+  "paywallFallbackMonthlyTimes12": "₹19,200",
   "paywallCompletedTitle": "बधाई हो!",
   "paywallCompletedBody": "आपके प्रीमियम फ़ायदे अब ऐक्टिव हैं।",
   "paywallCompletedContinue": "जारी रखें",

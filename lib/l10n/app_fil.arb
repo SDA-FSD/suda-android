@@ -258,9 +258,10 @@
       }
     }
   },
-  "paywallFallbackAnnualPerMonth": "$8.33",
-  "paywallFallbackAnnual": "$99.99",
-  "paywallFallbackMonthly": "$13.99",
+  "paywallFallbackAnnualPerMonth": "₱575",
+  "paywallFallbackAnnual": "₱6,900",
+  "paywallFallbackMonthly": "₱965",
+  "paywallFallbackMonthlyTimes12": "₱11,580",
   "paywallCompletedTitle": "Binabati ka!",
   "paywallCompletedBody": "Aktibo na ang mga benepisyo mo sa Premium.",
   "paywallCompletedContinue": "Magpatuloy",

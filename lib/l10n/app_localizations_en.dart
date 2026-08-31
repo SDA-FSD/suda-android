@@ -642,6 +642,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paywallFallbackMonthly => '\$13.99';
 
   @override
+  String get paywallFallbackMonthlyTimes12 => '\$167.88';
+
+  @override
   String get paywallCompletedTitle => 'Congratulations!';
 
   @override

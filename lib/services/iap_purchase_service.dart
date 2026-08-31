@@ -7,11 +7,11 @@ import 'package:flutter/widgets.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:in_app_purchase_android/billing_client_wrappers.dart';
 import 'package:in_app_purchase_android/in_app_purchase_android.dart';
-import 'package:intl/intl.dart';
 
 import '../api/suda_api_client.dart';
 import '../models/user_models.dart';
 import '../utils/iap_obfuscated_account_id.dart';
+import '../utils/iap_price_format.dart';
 import 'iap_price_cache.dart';
 import 'perf_monitoring_service.dart';
 import 'token_storage.dart';
@@ -334,7 +334,10 @@ class IapPurchaseService with WidgetsBindingObserver {
       for (final product in response.productDetails) {
         final price = product.price;
         if (price.isNotEmpty) {
-          await IapPriceCache.save(product.id, price);
+          await _cachePremiumProduct(
+            product,
+            product.id,
+          );
         }
       }
     } catch (e, st) {
@@ -358,15 +361,26 @@ class IapPurchaseService with WidgetsBindingObserver {
       productPremium,
       basePlanId: basePlanYearly,
     );
+    final cachedMonthlyMeta = await IapPriceCache.loadMeta(
+      productId: productPremium,
+      basePlanId: basePlanMonthly,
+    );
+    final cachedYearlyMeta = await IapPriceCache.loadMeta(
+      productId: productPremium,
+      basePlanId: basePlanYearly,
+    );
+
+    PremiumSubscriptionPrices fromCache() => _premiumPricesFromCache(
+          cachedMonthly: cachedMonthly,
+          cachedYearly: cachedYearly,
+          cachedMonthlyMeta: cachedMonthlyMeta,
+          cachedYearlyMeta: cachedYearlyMeta,
+        );
 
     try {
       final available = await InAppPurchase.instance.isAvailable();
       if (!available) {
-        return PremiumSubscriptionPrices(
-          monthlyFormatted: cachedMonthly,
-          yearlyFormatted: cachedYearly,
-          yearlyPerMonthFormatted: null,
-        );
+        return fromCache();
       }
 
       final queryIds = _isIos
@@ -389,17 +403,17 @@ class IapPurchaseService with WidgetsBindingObserver {
               response.productDetails,
             );
 
-      if (monthly != null && monthly.price.isNotEmpty) {
-        await IapPriceCache.save(
+      if (monthly != null) {
+        await _cachePremiumProduct(
+          monthly,
           productPremium,
-          monthly.price,
           basePlanId: basePlanMonthly,
         );
       }
-      if (yearly != null && yearly.price.isNotEmpty) {
-        await IapPriceCache.save(
+      if (yearly != null) {
+        await _cachePremiumProduct(
+          yearly,
           productPremium,
-          yearly.price,
           basePlanId: basePlanYearly,
         );
       }
@@ -407,30 +421,74 @@ class IapPurchaseService with WidgetsBindingObserver {
       return PremiumSubscriptionPrices(
         monthlyFormatted: monthly?.price ?? cachedMonthly,
         yearlyFormatted: yearly?.price ?? cachedYearly,
-        yearlyPerMonthFormatted:
-            yearly == null ? null : _formatYearlyPerMonth(yearly),
+        yearlyPerMonthFormatted: yearly == null
+            ? _formatDerivedFromMeta(cachedYearlyMeta, (raw) => raw / 12.0)
+            : IapPriceFormat.formatAmount(yearly, yearly.rawPrice / 12.0),
+        monthlyTimes12Formatted: monthly == null
+            ? _formatDerivedFromMeta(cachedMonthlyMeta, (raw) => raw * 12.0)
+            : IapPriceFormat.formatAmount(monthly, monthly.rawPrice * 12.0),
       );
     } catch (e, st) {
       debugPrint(
         '[DEBUG] IapPurchaseService load premium prices failed: $e\n$st',
       );
-      return PremiumSubscriptionPrices(
-        monthlyFormatted: cachedMonthly,
-        yearlyFormatted: cachedYearly,
-        yearlyPerMonthFormatted: null,
-      );
+      return fromCache();
     }
   }
 
-  String _formatYearlyPerMonth(ProductDetails yearly) {
-    final perMonth = yearly.rawPrice / 12.0;
-    final symbol = yearly.currencySymbol;
-    final formatted = NumberFormat.currency(
-      name: yearly.currencyCode,
-      symbol: symbol,
-      decimalDigits: 2,
-    ).format(perMonth);
-    return formatted;
+  Future<void> _cachePremiumProduct(
+    ProductDetails product,
+    String productId, {
+    String? basePlanId,
+  }) async {
+    if (product.price.isEmpty) return;
+    await IapPriceCache.save(
+      productId,
+      product.price,
+      basePlanId: basePlanId,
+    );
+    await IapPriceCache.saveMeta(
+      IapPriceMeta(
+        formattedPrice: product.price,
+        rawPrice: product.rawPrice,
+        currencyCode: product.currencyCode,
+        currencySymbol: product.currencySymbol,
+        locale: IapPriceFormat.resolveLocale(product),
+      ),
+      productId: productId,
+      basePlanId: basePlanId,
+    );
+  }
+
+  PremiumSubscriptionPrices _premiumPricesFromCache({
+    required String? cachedMonthly,
+    required String? cachedYearly,
+    required IapPriceMeta? cachedMonthlyMeta,
+    required IapPriceMeta? cachedYearlyMeta,
+  }) {
+    return PremiumSubscriptionPrices(
+      monthlyFormatted: cachedMonthly,
+      yearlyFormatted: cachedYearly,
+      yearlyPerMonthFormatted:
+          _formatDerivedFromMeta(cachedYearlyMeta, (raw) => raw / 12.0),
+      monthlyTimes12Formatted:
+          _formatDerivedFromMeta(cachedMonthlyMeta, (raw) => raw * 12.0),
+    );
+  }
+
+  String? _formatDerivedFromMeta(
+    IapPriceMeta? meta,
+    double Function(double raw) transform,
+  ) {
+    if (meta == null || meta.rawPrice <= 0) return null;
+    return IapPriceFormat.formatWithLocale(
+      amount: transform(meta.rawPrice),
+      currencyCode: meta.currencyCode,
+      currencySymbol: meta.currencySymbol,
+      locale: meta.locale.isNotEmpty
+          ? meta.locale
+          : IapPriceFormat.localeFromCurrencyCode(meta.currencyCode),
+    );
   }
 
   ProductDetails? _productById(String productId, List<ProductDetails> products) {
@@ -1547,13 +1605,16 @@ class IapPurchaseUserNotice {
 class PremiumSubscriptionPrices {
   final String? monthlyFormatted;
   final String? yearlyFormatted;
-  /// 연간 rawPrice/12 포맷 (연간 카드 메인 `…/mês`용).
+  /// 연간 rawPrice/12 포맷 (연간 카드 보조 `…/mês`).
   final String? yearlyPerMonthFormatted;
+  /// 월간 rawPrice×12 포맷 (연간 카드 취소선 비교가).
+  final String? monthlyTimes12Formatted;
 
   const PremiumSubscriptionPrices({
     required this.monthlyFormatted,
     required this.yearlyFormatted,
     required this.yearlyPerMonthFormatted,
+    required this.monthlyTimes12Formatted,
   });
 }
 

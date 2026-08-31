@@ -241,6 +241,13 @@ class _PaywallScreenState extends State<PaywallScreen> {
     return l10n.paywallPricePerMonth(amount);
   }
 
+  /// 월간 구독료×12 비교가 (취소선). 접미사 없음.
+  String _annualPriceStrike(AppLocalizations l10n) {
+    final v = _prices?.monthlyTimes12Formatted;
+    if (v != null && v.isNotEmpty) return v;
+    return l10n.paywallFallbackMonthlyTimes12;
+  }
+
   String _monthlyPriceMain(AppLocalizations l10n) {
     final v = _prices?.monthlyFormatted;
     final amount = (v != null && v.isNotEmpty) ? v : l10n.paywallFallbackMonthly;
@@ -1099,6 +1106,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
       subtitle: l10n.paywallAnnualPlanSubtitle,
       priceMain: _annualPriceMain(l10n),
       priceSub: _annualPriceSub(l10n),
+      priceStrike: _annualPriceStrike(l10n),
       showMelhorBadge: true,
     );
   }
@@ -1124,59 +1132,78 @@ class _PaywallScreenState extends State<PaywallScreen> {
   );
 
   Widget _melhorBadge() {
-    const strokeWidth = 1.2;
+    const strokeWidth = 2.0;
     const radius = 24.0;
-    // Outside stroke가 CustomPaint bounds 밖으로 그려지므로 padding으로 확보.
+    // Outside stroke가 bounds 밖으로 그려지므로 padding으로 확보.
     return Padding(
       padding: const EdgeInsets.all(strokeWidth),
-      child: CustomPaint(
-        foregroundPainter: const _MelhorBadgeStrokePainter(
-          strokeWidth: strokeWidth,
-          radius: radius,
-        ),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.038),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          ClipRRect(
             borderRadius: BorderRadius.circular(radius),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                decoration: const BoxDecoration(
-                  boxShadow: [
-                    BoxShadow(
-                      color: Color(0x78000000),
-                      offset: Offset(0, 4),
-                      blurRadius: 4,
-                      spreadRadius: 0,
-                    ),
-                  ],
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.038),
+                  borderRadius: BorderRadius.circular(radius),
                 ),
-                child: Image.asset(
-                  'assets/images/icons/paywall_small_star.png',
-                  width: 12,
-                  height: 12,
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        decoration: const BoxDecoration(
+                          boxShadow: [
+                            BoxShadow(
+                              color: Color(0x78000000),
+                              offset: Offset(0, 4),
+                              blurRadius: 4,
+                              spreadRadius: 0,
+                            ),
+                          ],
+                        ),
+                        child: Image.asset(
+                          'assets/images/icons/paywall_small_star.png',
+                          width: 12,
+                          height: 12,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      _gradientText(
+                        text: AppLocalizations.of(context)!.paywallBestBadge,
+                        style: _style(size: 14, weight: FontWeight.w700)
+                            .copyWith(
+                          letterSpacing: 14 * -0.01,
+                        ),
+                        shadows: const [_melhorGlyphShadow],
+                        gradient: const LinearGradient(
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                          colors: [Color(0xFFFFFFFF), Color(0xFFFFD8A4)],
+                          stops: [0.0, 0.65],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              const SizedBox(width: 4),
-              _gradientText(
-                text: AppLocalizations.of(context)!.paywallBestBadge,
-                style: _style(size: 14, weight: FontWeight.w700).copyWith(
-                  letterSpacing: 14 * -0.01,
-                ),
-                shadows: const [_melhorGlyphShadow],
-                gradient: const LinearGradient(
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                  colors: [Color(0xFFFFFFFF), Color(0xFFFFD8A4)],
-                  stops: [0.0, 0.65],
+            ),
+          ),
+          Positioned.fill(
+            child: IgnorePointer(
+              child: CustomPaint(
+                painter: _MelhorBadgeStrokePainter(
+                  strokeWidth: strokeWidth,
+                  radius: radius,
                 ),
               ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -1188,6 +1215,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
     required String subtitle,
     required String priceMain,
     String? priceSub,
+    String? priceStrike,
     bool showMelhorBadge = false,
   }) {
     final radius = BorderRadius.circular(16);
@@ -1213,141 +1241,147 @@ class _PaywallScreenState extends State<PaywallScreen> {
       child: ClipRRect(
         borderRadius: radius,
         clipBehavior: Clip.antiAlias,
-        child: Stack(
-          children: [
-            Padding(
-              padding: EdgeInsets.fromLTRB(
-                14,
-                showMelhorBadge ? 6 : 14,
-                14,
-                showMelhorBadge ? 25 : 14,
-              ),
-              child: Row(
-                crossAxisAlignment: showMelhorBadge
-                    ? CrossAxisAlignment.start
-                    : CrossAxisAlignment.center,
-                children: [
-                  if (!showMelhorBadge) ...[
-                    Image.asset(
-                      selected
-                          ? 'assets/images/icons/paywall_radio_selected.png'
-                          : 'assets/images/icons/paywall_radio_unselected.png',
-                      width: 20,
-                      height: 20,
-                    ),
-                    const SizedBox(width: 10),
-                  ],
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (showMelhorBadge) const SizedBox(height: 30),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(
+            14,
+            showMelhorBadge ? 26 : 14,
+            14,
+            14,
+          ),
+          child: IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: showMelhorBadge
+                  ? CrossAxisAlignment.stretch
+                  : CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Image.asset(
+                        selected
+                            ? 'assets/images/icons/paywall_radio_selected.png'
+                            : 'assets/images/icons/paywall_radio_unselected.png',
+                        width: 20,
+                        height: 20,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            if (showMelhorBadge) ...[
-                              Transform.translate(
-                                offset: const Offset(0, -4),
-                                child: Image.asset(
-                                  selected
-                                      ? 'assets/images/icons/paywall_radio_selected.png'
-                                      : 'assets/images/icons/paywall_radio_unselected.png',
-                                  width: 20,
-                                  height: 20,
-                                ),
+                            Text(
+                              title,
+                              style: _style(
+                                size: 20,
+                                weight: FontWeight.w700,
+                                color: _planTitle,
                               ),
-                              const SizedBox(width: 10),
-                            ],
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    title,
-                                    style: _style(
-                                      size: 20,
-                                      weight: FontWeight.w700,
-                                      color: _planTitle,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    subtitle,
-                                    style: _style(
-                                      size: 14,
-                                      color: _planTitle.withValues(
-                                        alpha: 0.85,
-                                      ),
-                                      height: 1.3,
-                                    ),
-                                  ),
-                                ],
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              subtitle,
+                              style: _style(
+                                size: 14,
+                                color: _planTitle.withValues(
+                                  alpha: 0.85,
+                                ),
+                                height: 1.3,
                               ),
                             ),
                           ],
                         ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (showMelhorBadge) ...[
-                        _melhorBadge(),
-                        const SizedBox(height: 6),
-                      ],
-                      Text(
-                        priceMain,
-                        style: _style(
-                          size: 20,
-                          weight: FontWeight.w700,
-                          color: Colors.white,
-                        ),
                       ),
-                      if (priceSub != null) ...[
-                        const SizedBox(height: 2),
-                        Text(
-                          priceSub,
-                          style: _style(size: 15, color: _yearPrice),
-                        ),
-                      ],
                     ],
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(width: 8),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisAlignment: showMelhorBadge
+                      ? MainAxisAlignment.center
+                      : MainAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (priceStrike != null) ...[
+                      Text(
+                        priceStrike,
+                        style: _style(size: 15, color: _yearPrice).copyWith(
+                          decoration: TextDecoration.lineThrough,
+                          decorationColor: _yearPrice,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                    ],
+                    Text(
+                      priceMain,
+                      style: _style(
+                        size: 20,
+                        weight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
+                    ),
+                    if (priceSub != null) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        priceSub,
+                        style: _style(size: 15, color: _yearPrice),
+                      ),
+                    ],
+                  ],
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
 
-    // 그림자는 Material/Ink 바깥. (카드에 RepaintBoundary 금지 — soft shadow overflow가 잘림)
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: radius,
-        boxShadow: const [_planCardShadow],
+    final painted = CustomPaint(
+      foregroundPainter: _PlanCardOutsideStrokePainter(
+        strokeWidth: strokeWidth,
+        radius: 16,
+        // 선택: 흰 80% solid / 미선택: 기존 gradient
+        color: selected ? const Color(0xCCFFFFFF) : null,
+        gradient: selected
+            ? null
+            : _PlanCardOutsideStrokePainter.unselectedStrokeGradient,
       ),
-      child: Material(
-        color: Colors.transparent,
-        clipBehavior: Clip.none,
-        child: InkWell(
-          onTap: onTap,
+      child: cardBody,
+    );
+
+    // BEST 뱃지는 ClipRRect 밖 Stack에 두고 top border와 겹치게 함.
+    final cardWithBadge = showMelhorBadge
+        ? Stack(
+            clipBehavior: Clip.none,
+            children: [
+              painted,
+              Positioned(
+                left: 10,
+                top: -16,
+                child: _melhorBadge(),
+              ),
+            ],
+          )
+        : painted;
+
+    // 그림자는 Material/Ink 바깥. (카드에 RepaintBoundary 금지 — soft shadow overflow가 잘림)
+    // 연간 뱃지 overhang을 위해 상단 여백.
+    return Padding(
+      padding: EdgeInsets.only(top: showMelhorBadge ? 16 : 0),
+      child: Container(
+        decoration: BoxDecoration(
           borderRadius: radius,
-          child: CustomPaint(
-            foregroundPainter: _PlanCardOutsideStrokePainter(
-              strokeWidth: strokeWidth,
-              radius: 16,
-              // 선택: 흰 80% solid / 미선택: 기존 gradient
-              color: selected ? const Color(0xCCFFFFFF) : null,
-              gradient: selected
-                  ? null
-                  : _PlanCardOutsideStrokePainter.unselectedStrokeGradient,
-            ),
-            child: cardBody,
+          boxShadow: const [_planCardShadow],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          clipBehavior: Clip.none,
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: radius,
+            child: cardWithBadge,
           ),
         ),
       ),
@@ -1400,8 +1434,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
   }
 }
 
-/// MELHOR 뱃지 outside stroke 근사: path를 strokeWidth/2만큼 확장 후
-/// [PaintingStyle.stroke] + [SweepGradient] shader만 적용(배경 fill 금지).
+/// MELHOR 뱃지 outside stroke: Figma 각도형 #FFFFFF 31/0% @ 13/37/62/87%.
 class _MelhorBadgeStrokePainter extends CustomPainter {
   const _MelhorBadgeStrokePainter({
     required this.strokeWidth,
@@ -1411,37 +1444,43 @@ class _MelhorBadgeStrokePainter extends CustomPainter {
   final double strokeWidth;
   final double radius;
 
+  static const _white31 = Color(0x4FFFFFFF); // #FFFFFF 31%
+  static const _white0 = Color(0x00FFFFFF); // #FFFFFF 0%
+
+  /// Figma 중지점 13·37·62·87% (+ 루프 seam).
   static const _sweep = SweepGradient(
+    startAngle: -1.5707963267948966, // -90° (Figma 각도형 0° ≈ 상단)
     colors: [
-      Color(0x29FFFFFF), // #FFFFFF ~16.1% (0.0 == 1.0, seam 맞춤)
-      Color(0x4FFFFFFF), // #FFFFFF 31% @ 0.12
-      Color(0x00FFFFFF), // #FFFFFF 0%  @ 0.37
-      Color(0x4FFFFFFF), // #FFFFFF 31% @ 0.62
-      Color(0x00FFFFFF), // #FFFFFF 0%  @ 0.87
-      Color(0x29FFFFFF), // #FFFFFF ~16.1% @ 1.0
+      _white0,
+      _white31,
+      _white0,
+      _white31,
+      _white0,
+      _white0,
     ],
-    stops: [0.0, 0.12, 0.37, 0.62, 0.87, 1.0],
+    stops: [0.0, 0.13, 0.37, 0.62, 0.87, 1.0],
   );
 
   @override
   void paint(Canvas canvas, Size size) {
     final half = strokeWidth / 2;
-    // Centered stroke를 Outside에 가깝게: Rect를 half만큼 확장.
     final rect = Rect.fromLTWH(
-      -half,
-      -half,
-      size.width + strokeWidth,
-      size.height + strokeWidth,
+      half,
+      half,
+      size.width - strokeWidth,
+      size.height - strokeWidth,
     );
     final rrect = RRect.fromRectAndRadius(
       rect,
-      Radius.circular(radius + half),
+      Radius.circular(radius),
     );
     final paint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..isAntiAlias = true
-      ..shader = _sweep.createShader(rect);
+      ..shader = _sweep.createShader(
+        Rect.fromLTWH(0, 0, size.width, size.height),
+      );
     canvas.drawRRect(rrect, paint);
   }
 

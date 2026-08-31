@@ -258,9 +258,10 @@
       }
     }
   },
-  "paywallFallbackAnnualPerMonth": "$8.33",
-  "paywallFallbackAnnual": "$99.99",
-  "paywallFallbackMonthly": "$13.99",
+  "paywallFallbackAnnualPerMonth": "220.833 ₫",
+  "paywallFallbackAnnual": "2.650.000 ₫",
+  "paywallFallbackMonthly": "367.000 ₫",
+  "paywallFallbackMonthlyTimes12": "4.404.000 ₫",
   "paywallCompletedTitle": "Chúc mừng!",
   "paywallCompletedBody": "Các quyền lợi Premium của bạn đã được kích hoạt.",
   "paywallCompletedContinue": "Tiếp tục",
