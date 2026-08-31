@@ -1,4 +1,4 @@
-import 'dart:async' show TimeoutException, unawaited;
+import 'dart:async' show unawaited;
 import 'dart:io' show Platform;
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -232,15 +232,7 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen> {
         _restoreButton();
         return;
       }
-      if (Platform.isIOS) {
-        await _stopBriefingAudio();
-      } else {
-        try {
-          await _stopBriefingAudio().timeout(const Duration(seconds: 2));
-        } on TimeoutException {
-          debugPrint('[DEBUG] Opening briefing stop timeout (AOS)');
-        } catch (_) {}
-      }
+      await _stopBriefingAudio();
       if (!context.mounted) {
         _restoreButton();
         return;
