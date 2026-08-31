@@ -73,12 +73,12 @@ flutter run --flavor dev -t lib/main.dart --dart-define=ENV=dev -d 541F3961-8182
 
 ## 3. 환경 (`lib/config/app_config.dart`)
 
-| ENV | API | CDN | Google server client (idToken) |
-|-----|-----|-----|--------------------------------|
-| local | `http://10.0.2.2:8083` (AOS 에뮬; iOS는 `localhost`/`IOS_LOCAL_API_URL`) | `https://cdn.dev-sudatalk.kr` | local/dev 공용 Web† |
-| dev | `https://api.dev-sudatalk.kr` | 상동 | † |
-| stg | `https://api.stg-sudatalk.kr` | 상동 | Android도 미비 |
-| prd | `https://api.sudatalk.kr` | `https://cdn.sudatalk.kr` | prd Web |
+| ENV      | API | CDN | Google server client (idToken) |
+|----------|-----|-----|--------------------------------|
+| local    | `http://10.0.2.2:8083` (AOS 에뮬; iOS는 `localhost`/`IOS_LOCAL_API_URL`) | `https://cdn.dev-sudatalk.kr` | local/dev 공용 Web† |
+| dev      | `https://api.dev-sudatalk.kr` | 상동 | † |
+| stg(TBD) | `https://api.stg-sudatalk.kr` | 상동 | Android도 미비 |
+| prd      | `https://api.sudatalk.kr` | `https://cdn.sudatalk.kr` | prd Web |
 
 † local/dev: `558349443875-ceevp4cjf86ubp0p066qm5hsujukljg4…` / prd: `841694444330-g8gn852m4somers2668v46k3mm69p7dg…` (`app_config.dart` 원천)
 
