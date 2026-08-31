@@ -567,13 +567,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get paywallPremiumLabel => 'PREMIUM';
 
   @override
-  String get paywallBenefitDailyPractice => '에너지 걱정 없는 연습';
-
-  @override
   String get paywallBenefitMaxEnergy => '최대 에너지 30개';
 
   @override
   String get paywallBenefitAiFeedback => 'AI 문장 피드백 제공';
+
+  @override
+  String get paywallBenefitProfileBadge => '프리미엄 프로필 뱃지';
 
   @override
   String get paywallChoosePlan => '플랜을 선택하세요';

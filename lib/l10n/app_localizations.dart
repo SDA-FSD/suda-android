@@ -1196,7 +1196,7 @@ abstract class AppLocalizations {
   /// No description provided for @paywallHeroTitle2.
   ///
   /// In en, this message translates to:
-  /// **'Improve Faster'**
+  /// **'Improve\nFaster'**
   String get paywallHeroTitle2;
 
   /// No description provided for @paywallHeroBody.
@@ -1211,12 +1211,6 @@ abstract class AppLocalizations {
   /// **'PREMIUM'**
   String get paywallPremiumLabel;
 
-  /// No description provided for @paywallBenefitDailyPractice.
-  ///
-  /// In en, this message translates to:
-  /// **'More Daily Practice'**
-  String get paywallBenefitDailyPractice;
-
   /// No description provided for @paywallBenefitMaxEnergy.
   ///
   /// In en, this message translates to:
@@ -1228,6 +1222,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'AI Sentence Feedback'**
   String get paywallBenefitAiFeedback;
+
+  /// No description provided for @paywallBenefitProfileBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Premium Profile Badge'**
+  String get paywallBenefitProfileBadge;
 
   /// No description provided for @paywallChoosePlan.
   ///

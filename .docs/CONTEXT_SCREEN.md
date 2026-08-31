@@ -921,7 +921,7 @@
 - **verify N**: 실패 토스트·유지. **pending**(Play pending / `pendingYn=Y`): 승인대기 토스트·화면 유지. **성공**: Completed push 후 Paywall `pop(true)`.
 - **Restore**: **iOS만** Terms•Privacy 옆 링크. 세션 ID 없이 restore+verify. Completed 화면 없음. 성공 → `pop(true)`. pending → 토스트·유지. 에너지 팝업에는 Restore 없음.
 - **CTA**: Assinar agora → 결제. Terms/Privacy → WebView. X = pop
-- **UI**: 배경 그라데이션·glow·PREMIUM 카드·플랜 카드 유지. **연간만** BEST/MELHOR 뱃지를 카드 **좌상단** `top: -16`에 두고 white border와 겹치게 배치. 뱃지 fill `#FFFFFF` 3.8% + `BackdropFilter` σ12. 외곽선 각도형 stroke 2px·`SweepGradient` #FFFFFF 31/0% @ 13/37/62/87%(별도 `CustomPaint` 오버레이). 연간 카드 본문 `padding top 26`·`IntrinsicHeight`(월간 미변경).
+- **UI**: 배경 그라데이션·glow·PREMIUM 카드·플랜 카드 유지. **연간만** BEST/MELHOR 뱃지를 카드 **좌상단** `top: -16`에 두고 white border와 겹치게 배치. 뱃지 fill `#FFFFFF` 3.8% + `BackdropFilter` σ12. 외곽선 각도형 stroke 2px·`SweepGradient` #FFFFFF 31/0% @ 13/37/62/87%(별도 `CustomPaint` 오버레이). 연간 카드 본문 `padding top 26`·`IntrinsicHeight`(월간 미변경). 히어로 `paywallHeroTitle2`: arb `\n`은 **soft break**(1줄에 들어가면 `\n` 무시·공백 연결, 2줄 필요할 때만 `\n` 적용·`_resolveSoftBreakHeroTitle`).
 
 ---
 

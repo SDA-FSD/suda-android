@@ -593,13 +593,13 @@ class AppLocalizationsPt extends AppLocalizations {
   String get paywallPremiumLabel => 'PREMIUM';
 
   @override
-  String get paywallBenefitDailyPractice => 'Mais prática todos os dias';
-
-  @override
   String get paywallBenefitMaxEnergy => 'Energia máxima de 30';
 
   @override
   String get paywallBenefitAiFeedback => 'Feedback da IA sobre frases';
+
+  @override
+  String get paywallBenefitProfileBadge => 'Selo Premium no Perfil';
 
   @override
   String get paywallChoosePlan => 'Escolha seu plano';

@@ -582,13 +582,13 @@ class AppLocalizationsTh extends AppLocalizations {
   String get paywallPremiumLabel => 'PREMIUM';
 
   @override
-  String get paywallBenefitDailyPractice => 'ฝึกได้มากขึ้นทุกวัน';
-
-  @override
   String get paywallBenefitMaxEnergy => 'พลังงานสูงสุด 30';
 
   @override
   String get paywallBenefitAiFeedback => 'ฟีดแบ็กจาก AI รายประโยค';
+
+  @override
+  String get paywallBenefitProfileBadge => 'ป้าย Premium บนโปรไฟล์';
 
   @override
   String get paywallChoosePlan => 'เลือกแพ็กเกจ';

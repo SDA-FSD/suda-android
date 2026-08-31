@@ -486,6 +486,108 @@ class _PaywallScreenState extends State<PaywallScreen> {
     return false;
   }
 
+  bool _textFitsLines({
+    required String text,
+    required TextStyle style,
+    required double maxWidth,
+    required TextDirection textDirection,
+    required int maxLines,
+  }) {
+    final painter = TextPainter(
+      text: TextSpan(text: text, style: style),
+      textDirection: textDirection,
+      maxLines: maxLines,
+    )..layout(maxWidth: maxWidth);
+    return !painter.didExceedMaxLines;
+  }
+
+  double _lineTextWidth({
+    required String text,
+    required TextStyle style,
+    required TextDirection textDirection,
+  }) {
+    final painter = TextPainter(
+      text: TextSpan(text: text, style: style),
+      textDirection: textDirection,
+      maxLines: 1,
+    )..layout();
+    return painter.width;
+  }
+
+  /// arb `\n`은 2줄 필요할 때만 적용. 1줄에 들어가면 공백으로 이어 붙여 표시.
+  ({String displayText, double fontSize}) _resolveSoftBreakHeroTitle({
+    required String textWithBreaks,
+    required TextStyle baseStyle,
+    required double maxWidth,
+    required TextDirection textDirection,
+    required double baseSize,
+    required double minSize,
+    required int maxLinesWhenBroken,
+    double? absoluteMinSize,
+  }) {
+    final singleLine = textWithBreaks.replaceAll('\n', ' ');
+    final styleBase = baseStyle.copyWith(
+      height: 1.35,
+      leadingDistribution: TextLeadingDistribution.even,
+    );
+    final floor = absoluteMinSize ?? minSize;
+
+    var fontSize = baseSize;
+    while (fontSize >= minSize) {
+      final style = styleBase.copyWith(fontSize: fontSize);
+      if (_textFitsLines(
+            text: singleLine,
+            style: style,
+            maxWidth: maxWidth,
+            textDirection: textDirection,
+            maxLines: 1,
+          ) &&
+          !_anyTokenExceedsWidth(
+            singleLine,
+            style,
+            maxWidth,
+            textDirection,
+          )) {
+        // `\n`이 있는데 1줄이 더 넓으면(예: Improve Faster) 캐릭터 손과 겹침 → 줄바꿈 유지.
+        if (textWithBreaks.contains('\n')) {
+          var maxBrokenWidth = 0.0;
+          for (final line in textWithBreaks.split('\n')) {
+            if (line.trim().isEmpty) continue;
+            final w = _lineTextWidth(
+              text: line,
+              style: style,
+              textDirection: textDirection,
+            );
+            if (w > maxBrokenWidth) maxBrokenWidth = w;
+          }
+          final singleWidth = _lineTextWidth(
+            text: singleLine,
+            style: style,
+            textDirection: textDirection,
+          );
+          if (singleWidth > maxBrokenWidth) {
+            break;
+          }
+        }
+        return (displayText: singleLine, fontSize: fontSize);
+      }
+      fontSize -= 0.5;
+    }
+
+    final fittedSize = _autoFitFontSize(
+      text: textWithBreaks,
+      baseStyle: styleBase,
+      maxWidth: maxWidth,
+      textDirection: textDirection,
+      baseSize: baseSize,
+      minSize: minSize,
+      maxLines: maxLinesWhenBroken,
+      forceTokenFitBelowMin: true,
+      absoluteMinSize: floor,
+    );
+    return (displayText: textWithBreaks, fontSize: fittedSize);
+  }
+
   Widget _gradientText({
     required String text,
     required TextStyle style,
@@ -494,6 +596,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
     List<Shadow>? shadows,
     double? minFontSize,
     int maxLines = 2,
+    bool softLineBreak = false,
   }) {
     // ShaderMask는 레이어 클립으로 글리프 하단이 잘리므로,
     // TextStyle.foreground 셰이더로 그린다.
@@ -507,40 +610,60 @@ class _PaywallScreenState extends State<PaywallScreen> {
         final absoluteFloor = minFontSize != null
             ? (minFontSize - 4).clamp(20.0, minFontSize)
             : baseSize;
-        final fittedSize = minSize < baseSize
-            ? _autoFitFontSize(
-                text: text,
-                baseStyle: style.copyWith(
-                  height: 1.35,
-                  leadingDistribution: TextLeadingDistribution.even,
-                ),
-                maxWidth: maxWidth,
-                textDirection: Directionality.of(context),
-                baseSize: baseSize,
-                minSize: minSize,
-                maxLines: maxLines,
-                forceTokenFitBelowMin: true,
-                absoluteMinSize: absoluteFloor,
-              )
-            : baseSize;
-        final textStyle = style.copyWith(
-          fontSize: fittedSize,
+        final textDirection = Directionality.of(context);
+        final styleBase = style.copyWith(
           height: 1.35,
           leadingDistribution: TextLeadingDistribution.even,
         );
+
+        late final String displayText;
+        late final double fittedSize;
+        if (softLineBreak && text.contains('\n')) {
+          final resolved = _resolveSoftBreakHeroTitle(
+            textWithBreaks: text,
+            baseStyle: style,
+            maxWidth: maxWidth,
+            textDirection: textDirection,
+            baseSize: baseSize,
+            minSize: minSize,
+            maxLinesWhenBroken: maxLines,
+            absoluteMinSize: absoluteFloor,
+          );
+          displayText = resolved.displayText;
+          fittedSize = resolved.fontSize;
+        } else {
+          displayText = text;
+          fittedSize = minSize < baseSize
+              ? _autoFitFontSize(
+                  text: text,
+                  baseStyle: styleBase,
+                  maxWidth: maxWidth,
+                  textDirection: textDirection,
+                  baseSize: baseSize,
+                  minSize: minSize,
+                  maxLines: maxLines,
+                  forceTokenFitBelowMin: true,
+                  absoluteMinSize: absoluteFloor,
+                )
+              : baseSize;
+        }
+
+        final textStyle = styleBase.copyWith(fontSize: fittedSize);
+        final displayMaxLines =
+            displayText.contains('\n') ? maxLines : 1;
         final painter = TextPainter(
-          text: TextSpan(text: text, style: textStyle),
+          text: TextSpan(text: displayText, style: textStyle),
           textAlign: align,
-          textDirection: Directionality.of(context),
-          maxLines: maxLines,
+          textDirection: textDirection,
+          maxLines: displayMaxLines,
         )..layout(maxWidth: maxWidth);
         final shader = gradient.createShader(
           Rect.fromLTWH(0, 0, painter.width, painter.height),
         );
         return Text(
-          text,
+          displayText,
           textAlign: align,
-          maxLines: maxLines,
+          maxLines: displayMaxLines,
           overflow: TextOverflow.visible,
           style: textStyle.copyWith(
             foreground: Paint()..shader = shader,
@@ -845,8 +968,8 @@ class _PaywallScreenState extends State<PaywallScreen> {
           _gradientText(
             text: l10n.paywallHeroTitle2,
             style: _style(size: 32, weight: FontWeight.w700),
-            // 좁은 기기에서 Conversando가 한 줄에 들어갈 때까지 동일 크기로 축소.
-            // 캐릭터 영역(right padding)은 유지. 말줄임 없음.
+            // `\n`은 2줄 필요할 때만 적용. 1줄에 들어가면 줄바꿈 없음.
+            softLineBreak: true,
             minFontSize: 26,
             maxLines: 2,
             gradient: const LinearGradient(
@@ -946,11 +1069,11 @@ class _PaywallScreenState extends State<PaywallScreen> {
                         ),
                       ),
                       const SizedBox(height: 14),
-                      _premiumRow(l10n.paywallBenefitDailyPractice),
-                      const SizedBox(height: 10),
                       _premiumRow(l10n.paywallBenefitMaxEnergy),
                       const SizedBox(height: 10),
                       _premiumRow(l10n.paywallBenefitAiFeedback),
+                      const SizedBox(height: 10),
+                      _premiumRow(l10n.paywallBenefitProfileBadge),
                     ],
                   ),
                 ),

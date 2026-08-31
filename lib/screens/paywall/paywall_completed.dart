@@ -123,11 +123,11 @@ class PaywallCompletedScreen extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _BenefitLine(l10n.paywallBenefitDailyPractice),
-                              const SizedBox(height: 14),
                               _BenefitLine(l10n.paywallBenefitMaxEnergy),
                               const SizedBox(height: 14),
                               _BenefitLine(l10n.paywallBenefitAiFeedback),
+                              const SizedBox(height: 14),
+                              _BenefitLine(l10n.paywallBenefitProfileBadge),
                             ],
                           ),
                         ),

@@ -561,13 +561,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get paywallPremiumLabel => 'PREMIUM';
 
   @override
-  String get paywallBenefitDailyPractice => '增加每日练习量';
-
-  @override
   String get paywallBenefitMaxEnergy => '能量上限最高30点';
 
   @override
   String get paywallBenefitAiFeedback => 'AI 句子反馈';
+
+  @override
+  String get paywallBenefitProfileBadge => 'Premium 个人资料徽章';
 
   @override
   String get paywallChoosePlan => '选择套餐';
@@ -1241,13 +1241,13 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get paywallPremiumLabel => 'PREMIUM';
 
   @override
-  String get paywallBenefitDailyPractice => '增加每日练习量';
-
-  @override
   String get paywallBenefitMaxEnergy => '能量上限最高30点';
 
   @override
   String get paywallBenefitAiFeedback => 'AI 句子反馈';
+
+  @override
+  String get paywallBenefitProfileBadge => 'Premium 个人资料徽章';
 
   @override
   String get paywallChoosePlan => '选择套餐';
@@ -1921,13 +1921,13 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get paywallPremiumLabel => 'PREMIUM';
 
   @override
-  String get paywallBenefitDailyPractice => '每天練習更多';
-
-  @override
   String get paywallBenefitMaxEnergy => '能量上限可達 30 點';
 
   @override
   String get paywallBenefitAiFeedback => 'AI 句子回饋';
+
+  @override
+  String get paywallBenefitProfileBadge => 'Premium 個人檔案徽章';
 
   @override
   String get paywallChoosePlan => '選擇你的方案';

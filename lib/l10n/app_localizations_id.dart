@@ -583,7 +583,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get paywallHeroTitle1 => 'Berlatih lebih banyak';
 
   @override
-  String get paywallHeroTitle2 => 'Berkembang lebih cepat';
+  String get paywallHeroTitle2 => 'Berkembang\nlebih cepat';
 
   @override
   String get paywallHeroBody =>
@@ -593,13 +593,13 @@ class AppLocalizationsId extends AppLocalizations {
   String get paywallPremiumLabel => 'PREMIUM';
 
   @override
-  String get paywallBenefitDailyPractice => 'Lebih banyak latihan harian';
-
-  @override
   String get paywallBenefitMaxEnergy => 'Kapasitas Energi hingga 30';
 
   @override
   String get paywallBenefitAiFeedback => 'Masukan AI untuk kalimat';
+
+  @override
+  String get paywallBenefitProfileBadge => 'Lencana Premium di Profil';
 
   @override
   String get paywallChoosePlan => 'Pilih paket Anda';

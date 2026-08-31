@@ -585,7 +585,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get paywallHeroTitle1 => 'Esercitati di più';
 
   @override
-  String get paywallHeroTitle2 => 'Migliora più in fretta';
+  String get paywallHeroTitle2 => 'Migliora\npiù in fretta';
 
   @override
   String get paywallHeroBody =>
@@ -595,13 +595,13 @@ class AppLocalizationsIt extends AppLocalizations {
   String get paywallPremiumLabel => 'PREMIUM';
 
   @override
-  String get paywallBenefitDailyPractice => 'Più pratica ogni giorno';
-
-  @override
   String get paywallBenefitMaxEnergy => 'Fino a 30 punti di energia';
 
   @override
   String get paywallBenefitAiFeedback => 'Feedback dell\'IA sulle tue frasi';
+
+  @override
+  String get paywallBenefitProfileBadge => 'Badge Premium sul profilo';
 
   @override
   String get paywallChoosePlan => 'Scegli il piano';

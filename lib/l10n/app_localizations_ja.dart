@@ -557,7 +557,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get paywallHeroTitle1 => 'もっと練習して';
 
   @override
-  String get paywallHeroTitle2 => 'もっと早く上達';
+  String get paywallHeroTitle2 => 'もっと早く\n上達';
 
   @override
   String get paywallHeroBody => 'プレミアムなら長く練習でき、AIのフィードバックで英語への自信を育てられます。';
@@ -566,13 +566,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get paywallPremiumLabel => 'プレミアム';
 
   @override
-  String get paywallBenefitDailyPractice => '毎日の練習量アップ';
-
-  @override
   String get paywallBenefitMaxEnergy => '最大エネルギー30';
 
   @override
   String get paywallBenefitAiFeedback => 'AIによる英文フィードバック';
+
+  @override
+  String get paywallBenefitProfileBadge => 'プレミアムプロフィールバッジ';
 
   @override
   String get paywallChoosePlan => 'プランを選択';

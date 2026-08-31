@@ -585,7 +585,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get paywallHeroTitle1 => 'Practica más';
 
   @override
-  String get paywallHeroTitle2 => 'Mejora más rápido';
+  String get paywallHeroTitle2 => 'Mejora\nmás rápido';
 
   @override
   String get paywallHeroBody =>
@@ -595,14 +595,14 @@ class AppLocalizationsEs extends AppLocalizations {
   String get paywallPremiumLabel => 'PREMIUM';
 
   @override
-  String get paywallBenefitDailyPractice => 'Más práctica diaria';
-
-  @override
   String get paywallBenefitMaxEnergy => 'Hasta 30 puntos de energía';
 
   @override
   String get paywallBenefitAiFeedback =>
       'Comentarios de la IA sobre tus frases';
+
+  @override
+  String get paywallBenefitProfileBadge => 'Insignia Premium en el perfil';
 
   @override
   String get paywallChoosePlan => 'Elige tu plan';
@@ -1309,7 +1309,7 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
   String get paywallHeroTitle1 => 'Practica más';
 
   @override
-  String get paywallHeroTitle2 => 'Mejora más rápido';
+  String get paywallHeroTitle2 => 'Mejora\nmás rápido';
 
   @override
   String get paywallHeroBody =>
@@ -1319,14 +1319,14 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
   String get paywallPremiumLabel => 'PREMIUM';
 
   @override
-  String get paywallBenefitDailyPractice => 'Más práctica diaria';
-
-  @override
   String get paywallBenefitMaxEnergy => 'Hasta 30 puntos de energía';
 
   @override
   String get paywallBenefitAiFeedback =>
       'Comentarios de la IA sobre tus frases';
+
+  @override
+  String get paywallBenefitProfileBadge => 'Insignia Premium en el perfil';
 
   @override
   String get paywallChoosePlan => 'Elige tu plan';

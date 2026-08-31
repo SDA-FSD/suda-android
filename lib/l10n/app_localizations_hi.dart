@@ -579,7 +579,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get paywallHeroTitle1 => 'ज़्यादा प्रैक्टिस करें';
 
   @override
-  String get paywallHeroTitle2 => 'तेज़ी से सुधार करें';
+  String get paywallHeroTitle2 => 'तेज़ी से\nसुधार करें';
 
   @override
   String get paywallHeroBody =>
@@ -589,13 +589,13 @@ class AppLocalizationsHi extends AppLocalizations {
   String get paywallPremiumLabel => 'प्रीमियम';
 
   @override
-  String get paywallBenefitDailyPractice => 'हर दिन ज़्यादा प्रैक्टिस';
-
-  @override
   String get paywallBenefitMaxEnergy => 'अधिकतम 30 एनर्जी';
 
   @override
   String get paywallBenefitAiFeedback => 'वाक्यों पर एआई फ़ीडबैक';
+
+  @override
+  String get paywallBenefitProfileBadge => 'प्रीमियम प्रोफ़ाइल बैज';
 
   @override
   String get paywallChoosePlan => 'अपना प्लान चुनें';

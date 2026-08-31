@@ -581,7 +581,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get paywallHeroTitle1 => 'Daha Fazla Pratik Yap';
 
   @override
-  String get paywallHeroTitle2 => 'Daha Hızlı Geliş';
+  String get paywallHeroTitle2 => 'Daha Hızlı\nGelişim';
 
   @override
   String get paywallHeroBody =>
@@ -591,13 +591,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get paywallPremiumLabel => 'PREMIUM';
 
   @override
-  String get paywallBenefitDailyPractice => 'Daha Fazla Günlük Pratik';
-
-  @override
   String get paywallBenefitMaxEnergy => 'Maksimum 30 Enerji';
 
   @override
   String get paywallBenefitAiFeedback => 'Yapay Zekâdan Cümle Geri Bildirimi';
+
+  @override
+  String get paywallBenefitProfileBadge => 'Premium Profil Rozeti';
 
   @override
   String get paywallChoosePlan => 'Planını Seç';

@@ -582,7 +582,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get paywallHeroTitle1 => 'Luyện tập nhiều hơn';
 
   @override
-  String get paywallHeroTitle2 => 'Tiến bộ nhanh hơn';
+  String get paywallHeroTitle2 => 'Tiến bộ\nnhanh hơn';
 
   @override
   String get paywallHeroBody =>
@@ -592,13 +592,13 @@ class AppLocalizationsVi extends AppLocalizations {
   String get paywallPremiumLabel => 'PREMIUM';
 
   @override
-  String get paywallBenefitDailyPractice => 'Luyện tập nhiều hơn mỗi ngày';
-
-  @override
   String get paywallBenefitMaxEnergy => 'Năng lượng tối đa lên đến 30';
 
   @override
   String get paywallBenefitAiFeedback => 'AI góp ý từng câu';
+
+  @override
+  String get paywallBenefitProfileBadge => 'Huy hiệu Premium trên hồ sơ';
 
   @override
   String get paywallChoosePlan => 'Chọn gói của bạn';

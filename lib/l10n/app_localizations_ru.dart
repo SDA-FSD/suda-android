@@ -580,7 +580,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get paywallHeroTitle1 => 'Практикуйтесь больше';
 
   @override
-  String get paywallHeroTitle2 => 'Учитесь быстрее';
+  String get paywallHeroTitle2 => 'Учитесь\nбыстрее';
 
   @override
   String get paywallHeroBody =>
@@ -590,13 +590,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get paywallPremiumLabel => 'PREMIUM';
 
   @override
-  String get paywallBenefitDailyPractice => 'Больше практики каждый день';
-
-  @override
   String get paywallBenefitMaxEnergy => 'До 30 единиц энергии';
 
   @override
   String get paywallBenefitAiFeedback => 'Обратная связь от ИИ по фразам';
+
+  @override
+  String get paywallBenefitProfileBadge => 'Premium-значок в профиле';
 
   @override
   String get paywallChoosePlan => 'Выберите тариф';
