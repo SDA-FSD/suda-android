@@ -897,6 +897,7 @@ class _NarrationRevealTextState extends State<_NarrationRevealText> {
       text: TextSpan(text: widget.text, style: widget.style),
       textDirection: textDirection,
       textAlign: TextAlign.center,
+      textScaler: MediaQuery.textScalerOf(context),
     )..layout(maxWidth: maxWidth);
     final metrics = painter.computeLineMetrics();
     if (metrics.isEmpty) {

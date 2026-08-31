@@ -255,7 +255,7 @@ Home (시리즈 썸네일)
 
 - `conversationIndex`는 **1부터 시작**하며 AI/User/Narration entry를 포함한 전체 대화 순번이다. **recording preview 말풍선은 index를 소비하지 않는다** (`consumesConversationIndex`). 힌트 조회의 `rpMsgId`는 마지막 AI entry의 `conversationIndex`를 그대로 사용한다.
 - 사용자 말풍선 노출 직후 후속 AI 음성(`GET /rps2/sessions/{id}/ai-message/audio`)을 미리 준비한다.
-- 사용자 말풍선 후 **500ms 대기** → 나레이션 노출(`playing_conversation_mixin`, `TextPainter` 시각 줄마다 fade-in. 공백 분절 없음 → ja/zh/th도 폭에 맞게 접힘. 가운데 정렬 유지) → 나레이션 단계는 **최소 1초** 보장 → **500ms 대기**.
+- 사용자 말풍선 후 **500ms 대기** → 나레이션 노출(`playing_conversation_mixin`, `TextPainter` 시각 줄마다 fade-in. painter는 표시 `Text`와 같은 `textScaler`. 공백 분절 없음 → ja/zh/th도 폭에 맞게 접힘. 가운데 정렬 유지) → 나레이션 단계는 **최소 1초** 보장 → **500ms 대기**.
 - 위 시점과 AI 음성 준비 완료 중 늦은 시점에 AI 말풍선을 노출하고, 준비된 음성이 있으면 말풍선 노출과 동시에 재생한다.
 
 **푸터 3층 상세** (`lib/screens/roleplay/playing_input_mixin.dart` — `buildPlayingFooter`)
