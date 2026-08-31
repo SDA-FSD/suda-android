@@ -635,13 +635,16 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get paywallFallbackAnnualPerMonth => '\$8.33';
+  String get paywallFallbackAnnualPerMonth => '649,17 ₽';
 
   @override
-  String get paywallFallbackAnnual => '\$99.99';
+  String get paywallFallbackAnnual => '7 790,00 ₽';
 
   @override
-  String get paywallFallbackMonthly => '\$13.99';
+  String get paywallFallbackMonthly => '1 090,00 ₽';
+
+  @override
+  String get paywallFallbackMonthlyTimes12 => '13 080,00 ₽';
 
   @override
   String get paywallCompletedTitle => 'Поздравляем!';

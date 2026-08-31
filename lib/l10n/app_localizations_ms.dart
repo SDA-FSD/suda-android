@@ -639,13 +639,16 @@ class AppLocalizationsMs extends AppLocalizations {
   }
 
   @override
-  String get paywallFallbackAnnualPerMonth => '\$8.33';
+  String get paywallFallbackAnnualPerMonth => 'RM36.67';
 
   @override
-  String get paywallFallbackAnnual => '\$99.99';
+  String get paywallFallbackAnnual => 'RM439.99';
 
   @override
-  String get paywallFallbackMonthly => '\$13.99';
+  String get paywallFallbackMonthly => 'RM61.99';
+
+  @override
+  String get paywallFallbackMonthlyTimes12 => 'RM743.88';
 
   @override
   String get paywallCompletedTitle => 'Tahniah!';

@@ -646,13 +646,16 @@ class AppLocalizationsFil extends AppLocalizations {
   }
 
   @override
-  String get paywallFallbackAnnualPerMonth => '\$8.33';
+  String get paywallFallbackAnnualPerMonth => '₱575';
 
   @override
-  String get paywallFallbackAnnual => '\$99.99';
+  String get paywallFallbackAnnual => '₱6,900';
 
   @override
-  String get paywallFallbackMonthly => '\$13.99';
+  String get paywallFallbackMonthly => '₱965';
+
+  @override
+  String get paywallFallbackMonthlyTimes12 => '₱11,580';
 
   @override
   String get paywallCompletedTitle => 'Binabati ka!';

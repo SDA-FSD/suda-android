@@ -258,9 +258,10 @@
       }
     }
   },
-  "paywallFallbackAnnualPerMonth": "$8.33",
-  "paywallFallbackAnnual": "$99.99",
-  "paywallFallbackMonthly": "$13.99",
+  "paywallFallbackAnnualPerMonth": "฿297.92",
+  "paywallFallbackAnnual": "฿3,575",
+  "paywallFallbackMonthly": "฿500",
+  "paywallFallbackMonthlyTimes12": "฿6,000",
   "paywallCompletedTitle": "ยินดีด้วย!",
   "paywallCompletedBody": "สิทธิประโยชน์ Premium ของคุณเปิดใช้งานแล้ว",
   "paywallCompletedContinue": "ไปต่อ",

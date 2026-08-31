@@ -638,13 +638,16 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
-  String get paywallFallbackAnnualPerMonth => '\$8.33';
+  String get paywallFallbackAnnualPerMonth => 'Rp149.167';
 
   @override
-  String get paywallFallbackAnnual => '\$99.99';
+  String get paywallFallbackAnnual => 'Rp1.790.000';
 
   @override
-  String get paywallFallbackMonthly => '\$13.99';
+  String get paywallFallbackMonthly => 'Rp249.000';
+
+  @override
+  String get paywallFallbackMonthlyTimes12 => 'Rp2.988.000';
 
   @override
   String get paywallCompletedTitle => 'Selamat!';

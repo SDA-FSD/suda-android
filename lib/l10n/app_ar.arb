@@ -258,9 +258,10 @@
       }
     }
   },
-  "paywallFallbackAnnualPerMonth": "$8.33",
-  "paywallFallbackAnnual": "$99.99",
-  "paywallFallbackMonthly": "$13.99",
+  "paywallFallbackAnnualPerMonth": "SAR 35.83",
+  "paywallFallbackAnnual": "SAR 429.99",
+  "paywallFallbackMonthly": "SAR 59.99",
+  "paywallFallbackMonthlyTimes12": "SAR 719.88",
   "paywallCompletedTitle": "تهانينا!",
   "paywallCompletedBody": "مزايا Premium مفعّلة الآن.",
   "paywallCompletedContinue": "متابعة",

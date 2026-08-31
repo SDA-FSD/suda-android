@@ -258,9 +258,10 @@
       }
     }
   },
-  "paywallFallbackAnnualPerMonth": "$8.33",
-  "paywallFallbackAnnual": "$99.99",
-  "paywallFallbackMonthly": "$13.99",
+  "paywallFallbackAnnualPerMonth": "NT$281.67",
+  "paywallFallbackAnnual": "NT$3,380",
+  "paywallFallbackMonthly": "NT$470",
+  "paywallFallbackMonthlyTimes12": "NT$5,640",
   "paywallCompletedTitle": "恭喜！",
   "paywallCompletedBody": "你的 Premium 權益現已生效。",
   "paywallCompletedContinue": "繼續",

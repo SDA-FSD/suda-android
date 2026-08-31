@@ -632,13 +632,16 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get paywallFallbackAnnualPerMonth => '\$8.33';
+  String get paywallFallbackAnnualPerMonth => 'SAR 35.83';
 
   @override
-  String get paywallFallbackAnnual => '\$99.99';
+  String get paywallFallbackAnnual => 'SAR 429.99';
 
   @override
-  String get paywallFallbackMonthly => '\$13.99';
+  String get paywallFallbackMonthly => 'SAR 59.99';
+
+  @override
+  String get paywallFallbackMonthlyTimes12 => 'SAR 719.88';
 
   @override
   String get paywallCompletedTitle => 'تهانينا!';

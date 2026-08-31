@@ -258,9 +258,10 @@
       }
     }
   },
-  "paywallFallbackAnnualPerMonth": "$8.33",
-  "paywallFallbackAnnual": "$99.99",
-  "paywallFallbackMonthly": "$13.99",
+  "paywallFallbackAnnualPerMonth": "₺470,00",
+  "paywallFallbackAnnual": "₺5.639,99",
+  "paywallFallbackMonthly": "₺789,99",
+  "paywallFallbackMonthlyTimes12": "₺9.479,88",
   "paywallCompletedTitle": "Tebrikler!",
   "paywallCompletedBody": "Premium avantajların artık aktif.",
   "paywallCompletedContinue": "Devam Et",

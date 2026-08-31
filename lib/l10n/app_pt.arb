@@ -258,9 +258,10 @@
       }
     }
   },
-  "paywallFallbackAnnualPerMonth": "R$16,66",
+  "paywallFallbackAnnualPerMonth": "R$16,67",
   "paywallFallbackAnnual": "R$199,99",
   "paywallFallbackMonthly": "R$24,99",
+  "paywallFallbackMonthlyTimes12": "R$299,88",
   "paywallCompletedTitle": "Parabéns!",
   "paywallCompletedBody": "Seus benefícios Premium\njá estão ativos.",
   "paywallCompletedContinue": "Continuar",

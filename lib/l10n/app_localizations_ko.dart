@@ -620,6 +620,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get paywallFallbackMonthly => '₩21,000';
 
   @override
+  String get paywallFallbackMonthlyTimes12 => '₩252,000';
+
+  @override
   String get paywallCompletedTitle => '축하합니다!';
 
   @override

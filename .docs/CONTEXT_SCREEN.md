@@ -916,9 +916,12 @@
 - **결제**: `IapPurchaseService.purchaseSubscription`. AOS `subscription_premium`+`bp-premium-*`. iOS `premium_monthly`/`premium_yearly` + 매핑 `basePlanId`. CTA `_purchasing` + 같은 구독 productId unfinished/inFlight 시 disable. iOS StoreKit 시트 구간 전면 overlay 없음. dispose 시 `abandonPendingPurchase`(UI Future만, inFlight 유지).
 - **가격**: 스토어. 월간 `price/mês`. 연간 메인 yearly+`/ano`(청구액, 큰 글씨), 서브 `rawPrice/12` 포맷+`/mês`(월환산, 작은 글씨). 미조회 시 하드코딩 폴백. ASC 3.1.2(c): 청구액이 가장 conspicuous.
 - **verify N**: 실패 토스트·유지. **pending**(Play pending / `pendingYn=Y`): 승인대기 토스트·화면 유지. **processing**(verify timeout): overlay 없음·CTA disable·`iapPurchaseProcessing`. **성공**: Completed push 후 Paywall `pop(true)`. 화면 이탈 후 늦은 성공은 `iapPurchaseCompleted` 토스트.
+- **결제**: `IapPurchaseService.purchaseSubscription`. AOS `subscription_premium`+`bp-premium-*`. iOS `premium_monthly`/`premium_yearly` + 매핑 `basePlanId`. CTA `_purchasing` lock. dispose 시 `abandonPendingPurchase`.
+- **가격**: 스토어. 월간 `price/mês`. 연간: 취소선 `monthly.rawPrice×12`(비교가·접미사 없음·보조와 동일 `#80D7CF` 15) → 메인 yearly+`/ano`(청구액·흰 20 bold) → 보조 `yearly.rawPrice/12`+`/mês`(`#80D7CF` 15). **계산가**는 `IapPriceFormat`으로 스토어 locale·통화(`ProductDetails` iOS `priceLocale.countryCode` / Android `currencyCode`→locale)에 맞춰 포맷. 조회 성공 시 `IapPriceCache` meta(rawPrice·currencyCode·locale) 저장 → 오프라인·폴백 시에도 동일 locale로 재계산. 미조회·meta 없을 때만 l10n 하드코딩 폴백. ASC 3.1.2(c): 청구액이 가장 conspicuous.
+- **verify N**: 실패 토스트·유지. **pending**(Play pending / `pendingYn=Y`): 승인대기 토스트·화면 유지. **성공**: Completed push 후 Paywall `pop(true)`.
 - **Restore**: **iOS만** Terms•Privacy 옆 링크. 세션 ID 없이 restore+verify. Completed 화면 없음. 성공 → `pop(true)`. pending → 토스트·유지. 에너지 팝업에는 Restore 없음.
 - **CTA**: Assinar agora → 결제. Terms/Privacy → WebView. X = pop
-- **UI**: 배경 그라데이션·glow·PREMIUM 카드·플랜 카드·MELHOR 등 기존 레이아웃 유지.
+- **UI**: 배경 그라데이션·glow·PREMIUM 카드·플랜 카드 유지. **연간만** BEST/MELHOR 뱃지를 카드 **좌상단** `top: -16`에 두고 white border와 겹치게 배치. 뱃지 fill `#FFFFFF` 3.8% + `BackdropFilter` σ12. 외곽선 각도형 stroke 2px·`SweepGradient` #FFFFFF 31/0% @ 13/37/62/87%(별도 `CustomPaint` 오버레이). 연간 카드 본문 `padding top 26`·`IntrinsicHeight`(월간 미변경).
 
 ---
 

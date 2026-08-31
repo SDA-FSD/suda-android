@@ -258,9 +258,10 @@
       }
     }
   },
-  "paywallFallbackAnnualPerMonth": "$8.33",
-  "paywallFallbackAnnual": "$99.99",
-  "paywallFallbackMonthly": "$13.99",
+  "paywallFallbackAnnualPerMonth": "S$11.67",
+  "paywallFallbackAnnual": "S$139.99",
+  "paywallFallbackMonthly": "S$19.98",
+  "paywallFallbackMonthlyTimes12": "S$239.76",
   "paywallCompletedTitle": "恭喜！",
   "paywallCompletedBody": "你的 Premium 权益现已生效。",
   "paywallCompletedContinue": "继续",

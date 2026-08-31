@@ -636,13 +636,16 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String get paywallFallbackAnnualPerMonth => '\$8.33';
+  String get paywallFallbackAnnualPerMonth => '₺470,00';
 
   @override
-  String get paywallFallbackAnnual => '\$99.99';
+  String get paywallFallbackAnnual => '₺5.639,99';
 
   @override
-  String get paywallFallbackMonthly => '\$13.99';
+  String get paywallFallbackMonthly => '₺789,99';
+
+  @override
+  String get paywallFallbackMonthlyTimes12 => '₺9.479,88';
 
   @override
   String get paywallCompletedTitle => 'Tebrikler!';

@@ -258,9 +258,10 @@
       }
     }
   },
-  "paywallFallbackAnnualPerMonth": "$8.33",
-  "paywallFallbackAnnual": "$99.99",
-  "paywallFallbackMonthly": "$13.99",
+  "paywallFallbackAnnualPerMonth": "RM36.67",
+  "paywallFallbackAnnual": "RM439.99",
+  "paywallFallbackMonthly": "RM61.99",
+  "paywallFallbackMonthlyTimes12": "RM743.88",
   "paywallCompletedTitle": "Tahniah!",
   "paywallCompletedBody": "Manfaat Premium anda kini aktif.",
   "paywallCompletedContinue": "Teruskan",

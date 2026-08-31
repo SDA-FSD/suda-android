@@ -637,13 +637,16 @@ class AppLocalizationsVi extends AppLocalizations {
   }
 
   @override
-  String get paywallFallbackAnnualPerMonth => '\$8.33';
+  String get paywallFallbackAnnualPerMonth => '220.833 ₫';
 
   @override
-  String get paywallFallbackAnnual => '\$99.99';
+  String get paywallFallbackAnnual => '2.650.000 ₫';
 
   @override
-  String get paywallFallbackMonthly => '\$13.99';
+  String get paywallFallbackMonthly => '367.000 ₫';
+
+  @override
+  String get paywallFallbackMonthlyTimes12 => '4.404.000 ₫';
 
   @override
   String get paywallCompletedTitle => 'Chúc mừng!';

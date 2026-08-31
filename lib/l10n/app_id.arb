@@ -258,9 +258,10 @@
       }
     }
   },
-  "paywallFallbackAnnualPerMonth": "$8.33",
-  "paywallFallbackAnnual": "$99.99",
-  "paywallFallbackMonthly": "$13.99",
+  "paywallFallbackAnnualPerMonth": "Rp149.167",
+  "paywallFallbackAnnual": "Rp1.790.000",
+  "paywallFallbackMonthly": "Rp249.000",
+  "paywallFallbackMonthlyTimes12": "Rp2.988.000",
   "paywallCompletedTitle": "Selamat!",
   "paywallCompletedBody": "Manfaat Premium Anda kini aktif.",
   "paywallCompletedContinue": "Lanjutkan",

@@ -258,9 +258,10 @@
       }
     }
   },
-  "paywallFallbackAnnualPerMonth": "$8.33",
-  "paywallFallbackAnnual": "$99.99",
-  "paywallFallbackMonthly": "$13.99",
+  "paywallFallbackAnnualPerMonth": "€ 8,75",
+  "paywallFallbackAnnual": "€ 104,99",
+  "paywallFallbackMonthly": "€ 14,99",
+  "paywallFallbackMonthlyTimes12": "€ 179,88",
   "paywallCompletedTitle": "Gefeliciteerd!",
   "paywallCompletedBody": "Je Premium-voordelen zijn nu actief.",
   "paywallCompletedContinue": "Doorgaan",

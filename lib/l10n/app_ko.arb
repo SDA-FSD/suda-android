@@ -261,6 +261,7 @@
   "paywallFallbackAnnualPerMonth": "₩12,500",
   "paywallFallbackAnnual": "₩150,000",
   "paywallFallbackMonthly": "₩21,000",
+  "paywallFallbackMonthlyTimes12": "₩252,000",
   "paywallCompletedTitle": "축하합니다!",
   "paywallCompletedBody": "이제 프리미엄 기능을\n사용할 수 있어요.",
   "paywallCompletedContinue": "계속하기",

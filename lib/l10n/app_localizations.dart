@@ -1307,6 +1307,12 @@ abstract class AppLocalizations {
   /// **'\$13.99'**
   String get paywallFallbackMonthly;
 
+  /// No description provided for @paywallFallbackMonthlyTimes12.
+  ///
+  /// In en, this message translates to:
+  /// **'\$167.88'**
+  String get paywallFallbackMonthlyTimes12;
+
   /// No description provided for @paywallCompletedTitle.
   ///
   /// In en, this message translates to:
