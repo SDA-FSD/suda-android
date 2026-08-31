@@ -679,7 +679,7 @@
 - 배경: episode `thumbnailImgPath` → `RoleplayOverviewBackdrop`. 본문: `aiCharacter.name` + briefing(`DefaultMarkdown`). duration 없음.
 - 시스템 뒤로가기: Opening 제거, Series Overview 노출
 - 우상단 `EnergyHeaderBadge` — Home과 동일(충전·무제한 타이머 포함)
-- **Briefing TTS**: episode `briefingAudio`(언어→CDN path). 진입 첫 프레임 후 language tag(`ko-KR`)→languageCode(`ko`)→`en` 순으로 path 선택·`cdnBaseUrl` prepend·`just_audio` 자동재생. 없으면 스킵(다른 언어로 폴백 없음). 이탈/Playing 전환 시 즉시 stop. 재진입 시 다시 재생.
+- **Briefing TTS**: episode `briefingAudio`(언어→CDN path). 진입 첫 프레임 후 language tag(`ko-KR`)→languageCode(`ko`)→`en` 순으로 path 선택·`cdnBaseUrl` prepend·`just_audio` 자동재생. 없으면 스킵(다른 언어로 폴백 없음). 이탈/Playing 전환 시 즉시 stop. **AOS Start는 `stop()` 2s timeout 후 전환**(네이티브 hang이 Playing 진입을 막지 않음). iOS는 `stop()` await. 재진입 시 다시 재생.
 - footer Start 버튼 아래 AI 안내(`l10n.roleplayOpeningAiDisclaimer`): `labelSmall`·`#8C8C8C`·중앙 정렬·두 문장 줄바꿈(`\n`). 버튼↔문구 12dp, 문구 아래 50dp.
 - **Start 마이크 권한**: status→request→영구거부 시 설정 안내만. 복귀 후 사용자가 다시 Start. iOS `PERMISSION_MICROPHONE=1` + `NSMicrophoneUsageDescription`. 상세 `CONTEXT_ROLEPLAY_S2.md` Opening Start.
 - 세션 초기화 응답 분기 (`POST /rps2/sessions`):
