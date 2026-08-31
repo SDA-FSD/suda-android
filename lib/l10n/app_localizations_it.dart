@@ -561,6 +561,12 @@ class AppLocalizationsIt extends AppLocalizations {
       'L\'acquisto non è stato completato.';
 
   @override
+  String get iapPurchaseProcessing => 'Il tuo acquisto è in elaborazione.';
+
+  @override
+  String get iapPurchaseCompleted => 'Acquisto completato.';
+
+  @override
   String get welcomeGiftTitle => 'Il tuo regalo di benvenuto è arrivato!';
 
   @override

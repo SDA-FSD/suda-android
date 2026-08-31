@@ -220,6 +220,8 @@
   "profileGoPremiumExplore": "استكشاف",
   "energyPurchasePendingApproval": "دفعتك في انتظار الموافقة",
   "energyPurchaseNotCompleted": "لم تكتمل عملية الشراء.",
+  "iapPurchaseProcessing": "جارٍ معالجة عملية الشراء.",
+  "iapPurchaseCompleted": "اكتملت عملية الشراء.",
   "welcomeGiftTitle": "وصلت هدية الترحيب!",
   "welcomeGiftBenefitLead": "استمتع بلعب غير محدود لمدة 10 دقائق!",
   "welcomeGiftLine2": "تم فتح ميزات Premium",

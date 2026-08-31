@@ -566,6 +566,12 @@ class AppLocalizationsFil extends AppLocalizations {
   String get energyPurchaseNotCompleted => 'Hindi nakumpleto ang pagbili.';
 
   @override
+  String get iapPurchaseProcessing => 'Pinoproseso ang binili mo.';
+
+  @override
+  String get iapPurchaseCompleted => 'Tapos na ang pagbili.';
+
+  @override
   String get welcomeGiftTitle => 'Dumating na ang Welcome Gift Mo!';
 
   @override

@@ -220,6 +220,8 @@
   "profileGoPremiumExplore": "देखें",
   "energyPurchasePendingApproval": "आपका पेमेंट मंज़ूरी के इंतज़ार में है",
   "energyPurchaseNotCompleted": "खरीद पूरी नहीं हुई।",
+  "iapPurchaseProcessing": "आपकी खरीदारी प्रोसेस हो रही है।",
+  "iapPurchaseCompleted": "खरीदारी पूरी हुई।",
   "welcomeGiftTitle": "आपका वेलकम गिफ़्ट आ गया!",
   "welcomeGiftBenefitLead": "10 मिनट तक अनलिमिटेड खेलें!",
   "welcomeGiftLine2": "प्रीमियम फ़ीचर अनलॉक",

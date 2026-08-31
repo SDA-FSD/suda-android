@@ -557,6 +557,12 @@ class AppLocalizationsPl extends AppLocalizations {
   String get energyPurchaseNotCompleted => 'Zakup nie został sfinalizowany.';
 
   @override
+  String get iapPurchaseProcessing => 'Twój zakup jest przetwarzany.';
+
+  @override
+  String get iapPurchaseCompleted => 'Zakup zakończony.';
+
+  @override
   String get welcomeGiftTitle => 'Twój prezent powitalny już tu jest!';
 
   @override

@@ -8,7 +8,6 @@ import '../../services/iap_purchase_service.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
 import '../../utils/default_toast.dart';
-import '../../utils/iap_busy_overlay.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../widgets/default_popup.dart';
 
@@ -76,18 +75,50 @@ class _ChangePlanScreenState extends State<ChangePlanScreen> {
   bool _availableSelected = false;
   bool _purchasing = false;
 
+  bool get _changeLocked {
+    if (_purchasing) return true;
+    final available = _availablePlan;
+    if (available == null) return true;
+    final basePlanId = available == _PlanKind.yearly
+        ? IapPurchaseService.basePlanYearly
+        : IapPurchaseService.basePlanMonthly;
+    return IapPurchaseService.instance.isSubscriptionPurchaseBlocked(
+      basePlanId: basePlanId,
+    );
+  }
+
   @override
   void initState() {
     super.initState();
+    IapPurchaseService.instance.uiListenable.addListener(_onIapUi);
+    IapPurchaseService.instance.userNotice.addListener(_onIapNotice);
     unawaited(_load());
   }
 
   @override
   void dispose() {
+    IapPurchaseService.instance.uiListenable.removeListener(_onIapUi);
+    IapPurchaseService.instance.userNotice.removeListener(_onIapNotice);
     if (_purchasing) {
       IapPurchaseService.instance.abandonPendingPurchase();
     }
     super.dispose();
+  }
+
+  void _onIapUi() {
+    if (mounted) setState(() {});
+  }
+
+  void _onIapNotice() {
+    final notice = IapPurchaseService.instance.userNotice.value;
+    if (notice == null) return;
+    if (notice.kind != IapPurchaseUserNoticeKind.completed) return;
+    if (!IapPurchaseService.isSubscriptionProductId(notice.productId)) return;
+    if (!mounted) return;
+    IapPurchaseService.instance.markSuccessUiPresented();
+    final l10n = AppLocalizations.of(context)!;
+    DefaultToast.show(context, l10n.changePlanChangeRequested);
+    Navigator.of(context).pop(true);
   }
 
   Future<void> _load() async {
@@ -222,7 +253,7 @@ class _ChangePlanScreenState extends State<ChangePlanScreen> {
   }
 
   Future<void> _changePlan() async {
-    if (_purchasing || IapPurchaseService.instance.isBusy) return;
+    if (_changeLocked || IapPurchaseService.instance.isBusy) return;
     final available = _availablePlan;
     if (available == null) return;
 
@@ -244,12 +275,9 @@ class _ChangePlanScreenState extends State<ChangePlanScreen> {
         'newBasePlanId=$newBasePlanId replacementMode=withoutProration',
       );
 
-      final result = await IapBusyOverlay.run(
-        context,
-        () => IapPurchaseService.instance.changeSubscription(
-          newBasePlanId: newBasePlanId,
-          accessToken: accessToken,
-        ),
+      final result = await IapPurchaseService.instance.changeSubscription(
+        newBasePlanId: newBasePlanId,
+        accessToken: accessToken,
       );
       if (!mounted) return;
 
@@ -260,6 +288,10 @@ class _ChangePlanScreenState extends State<ChangePlanScreen> {
       );
 
       final l10n = AppLocalizations.of(context)!;
+      if (result.isProcessing) {
+        setState(() => _purchasing = false);
+        return;
+      }
       if (result.outcome == IapPurchaseOutcome.oldPurchaseNotFound) {
         DefaultToast.show(
           context,
@@ -289,6 +321,7 @@ class _ChangePlanScreenState extends State<ChangePlanScreen> {
         return;
       }
 
+      IapPurchaseService.instance.markSuccessUiPresented();
       // 실측 단계: 완성 UX 전 — 날짜/예약 안내는 모드 확정 후.
       DefaultToast.show(context, l10n.changePlanChangeRequested);
       setState(() => _purchasing = false);
@@ -397,7 +430,9 @@ class _ChangePlanScreenState extends State<ChangePlanScreen> {
               width: double.infinity,
               height: 48,
               child: ElevatedButton(
-                onPressed: _availableSelected ? _onChangePlanTap : null,
+                onPressed: (_availableSelected && !_changeLocked)
+                    ? _onChangePlanTap
+                    : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: _accent,
                   disabledBackgroundColor: const Color(0xFF4A4A4A),

@@ -12,7 +12,6 @@ import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
 import '../../utils/default_toast.dart';
 import '../../utils/full_screen_route.dart';
-import '../../utils/iap_busy_overlay.dart';
 import '../../utils/paywall_impression_screen.dart';
 import '../../utils/sub_screen_route.dart';
 import '../webview_screen.dart';
@@ -128,7 +127,18 @@ class _PaywallScreenState extends State<PaywallScreen> {
   late final TapGestureRecognizer _restoreRecognizer;
   PremiumSubscriptionPrices? _prices;
   bool _purchasing = false;
+  bool _presentingCompleted = false;
   String? _paywallSessionId;
+
+  bool get _subscribeLocked {
+    if (_purchasing) return true;
+    final basePlanId = _selected == _PaywallPlan.annual
+        ? IapPurchaseService.basePlanYearly
+        : IapPurchaseService.basePlanMonthly;
+    return IapPurchaseService.instance.isSubscriptionPurchaseBlocked(
+      basePlanId: basePlanId,
+    );
+  }
 
   @override
   void initState() {
@@ -138,12 +148,16 @@ class _PaywallScreenState extends State<PaywallScreen> {
     _restoreRecognizer = TapGestureRecognizer()..onTap = () {
       unawaited(_onRestoreTap());
     };
+    IapPurchaseService.instance.uiListenable.addListener(_onIapUi);
+    IapPurchaseService.instance.userNotice.addListener(_onIapNotice);
     unawaited(_loadPrices());
     unawaited(_initPaywallSession());
   }
 
   @override
   void dispose() {
+    IapPurchaseService.instance.uiListenable.removeListener(_onIapUi);
+    IapPurchaseService.instance.userNotice.removeListener(_onIapNotice);
     if (_purchasing) {
       IapPurchaseService.instance.abandonPendingPurchase();
     }
@@ -151,6 +165,29 @@ class _PaywallScreenState extends State<PaywallScreen> {
     _privacyRecognizer.dispose();
     _restoreRecognizer.dispose();
     super.dispose();
+  }
+
+  void _onIapUi() {
+    if (mounted) setState(() {});
+  }
+
+  void _onIapNotice() {
+    final notice = IapPurchaseService.instance.userNotice.value;
+    if (notice == null) return;
+    if (notice.kind != IapPurchaseUserNoticeKind.completed) return;
+    if (!IapPurchaseService.isSubscriptionProductId(notice.productId)) return;
+    if (!mounted || _presentingCompleted) return;
+    unawaited(_presentCompletedFlow());
+  }
+
+  Future<void> _presentCompletedFlow() async {
+    if (_presentingCompleted) return;
+    _presentingCompleted = true;
+    IapPurchaseService.instance.markSuccessUiPresented();
+    if (!mounted) return;
+    await PaywallCompletedScreen.push(context);
+    if (!mounted) return;
+    Navigator.of(context).pop(true);
   }
 
   Future<void> _loadPrices() async {
@@ -211,7 +248,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
   }
 
   Future<void> _onSubscribeTap() async {
-    if (_purchasing || IapPurchaseService.instance.isBusy) return;
+    if (_subscribeLocked || IapPurchaseService.instance.isBusy) return;
     setState(() => _purchasing = true);
 
     try {
@@ -228,15 +265,17 @@ class _PaywallScreenState extends State<PaywallScreen> {
 
       await _recordSubscriptionTap(basePlanId);
 
-      final result = await IapBusyOverlay.run(
-        context,
-        () => IapPurchaseService.instance.purchaseSubscription(
-          basePlanId: basePlanId,
-          accessToken: accessToken,
-          paywallSessionId: _paywallSessionId,
-        ),
+      final result = await IapPurchaseService.instance.purchaseSubscription(
+        basePlanId: basePlanId,
+        accessToken: accessToken,
+        paywallSessionId: _paywallSessionId,
       );
       if (!mounted) return;
+
+      if (result.isProcessing) {
+        setState(() => _purchasing = false);
+        return;
+      }
 
       if (result.pendingApproval) {
         final l10n = AppLocalizations.of(context)!;
@@ -259,9 +298,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
       }
 
       setState(() => _purchasing = false);
-      await PaywallCompletedScreen.push(context);
-      if (!mounted) return;
-      Navigator.of(context).pop(true);
+      await _presentCompletedFlow();
     } catch (e, st) {
       debugPrint('[DEBUG] Paywall subscribe failed: $e\n$st');
       if (mounted) setState(() => _purchasing = false);
@@ -269,7 +306,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
   }
 
   Future<void> _onRestoreTap() async {
-    if (_purchasing || IapPurchaseService.instance.isBusy) return;
+    if (_subscribeLocked || IapPurchaseService.instance.isBusy) return;
     setState(() => _purchasing = true);
 
     try {
@@ -280,11 +317,8 @@ class _PaywallScreenState extends State<PaywallScreen> {
         return;
       }
 
-      final result = await IapBusyOverlay.run(
-        context,
-        () => IapPurchaseService.instance.restorePurchases(
-          accessToken: accessToken,
-        ),
+      final result = await IapPurchaseService.instance.restorePurchases(
+        accessToken: accessToken,
       );
       if (!mounted) return;
 
@@ -1058,7 +1092,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
     final selected = _selected == _PaywallPlan.annual;
     return _planCard(
       selected: selected,
-      onTap: _purchasing
+      onTap: _subscribeLocked
           ? () {}
           : () => setState(() => _selected = _PaywallPlan.annual),
       title: l10n.paywallAnnualPlanTitle,
@@ -1074,7 +1108,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
     final selected = _selected == _PaywallPlan.monthly;
     return _planCard(
       selected: selected,
-      onTap: _purchasing
+      onTap: _subscribeLocked
           ? () {}
           : () => setState(() => _selected = _PaywallPlan.monthly),
       title: l10n.paywallMonthlyPlanTitle,
@@ -1324,9 +1358,9 @@ class _PaywallScreenState extends State<PaywallScreen> {
     return Center(
       child: IntrinsicWidth(
         child: Opacity(
-          opacity: _purchasing ? 0.7 : 1,
+          opacity: _subscribeLocked ? 0.7 : 1,
           child: GestureDetector(
-            onTap: _purchasing ? null : () => unawaited(_onSubscribeTap()),
+            onTap: _subscribeLocked ? null : () => unawaited(_onSubscribeTap()),
             child: Container(
               height: 52,
               decoration: BoxDecoration(

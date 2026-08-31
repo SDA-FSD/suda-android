@@ -563,6 +563,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get energyPurchaseNotCompleted => 'L’achat n’a pas abouti.';
 
   @override
+  String get iapPurchaseProcessing => 'Votre achat est en cours de traitement.';
+
+  @override
+  String get iapPurchaseCompleted => 'Achat effectué.';
+
+  @override
   String get welcomeGiftTitle => 'Votre cadeau de bienvenue est arrivé !';
 
   @override

@@ -556,6 +556,12 @@ class AppLocalizationsTr extends AppLocalizations {
   String get energyPurchaseNotCompleted => 'Satın alım tamamlanmadı.';
 
   @override
+  String get iapPurchaseProcessing => 'Satın alımın işleniyor.';
+
+  @override
+  String get iapPurchaseCompleted => 'Satın alım tamamlandı.';
+
+  @override
   String get welcomeGiftTitle => 'Hoş Geldin Hediyen Hazır!';
 
   @override

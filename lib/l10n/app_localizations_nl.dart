@@ -557,6 +557,12 @@ class AppLocalizationsNl extends AppLocalizations {
   String get energyPurchaseNotCompleted => 'De aankoop is niet voltooid.';
 
   @override
+  String get iapPurchaseProcessing => 'Je aankoop wordt verwerkt.';
+
+  @override
+  String get iapPurchaseCompleted => 'Aankoop voltooid.';
+
+  @override
   String get welcomeGiftTitle => 'Je welkomstcadeau is er!';
 
   @override

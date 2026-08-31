@@ -913,9 +913,9 @@
 - **이전 스크린**: X/`pop()`, 또는 성공·Restore 성공 후 `pop(true)`. 승인대기는 pop하지 않음.
 
 ### 스크린 내부 구현 특이사항
-- **결제**: `IapPurchaseService.purchaseSubscription`. AOS `subscription_premium`+`bp-premium-*`. iOS `premium_monthly`/`premium_yearly` + 매핑 `basePlanId`. CTA `_purchasing` lock. dispose 시 `abandonPendingPurchase`.
+- **결제**: `IapPurchaseService.purchaseSubscription`. AOS `subscription_premium`+`bp-premium-*`. iOS `premium_monthly`/`premium_yearly` + 매핑 `basePlanId`. CTA `_purchasing` + 같은 구독 productId unfinished/inFlight 시 disable. iOS StoreKit 시트 구간 전면 overlay 없음. dispose 시 `abandonPendingPurchase`(UI Future만, inFlight 유지).
 - **가격**: 스토어. 월간 `price/mês`. 연간 메인 yearly+`/ano`(청구액, 큰 글씨), 서브 `rawPrice/12` 포맷+`/mês`(월환산, 작은 글씨). 미조회 시 하드코딩 폴백. ASC 3.1.2(c): 청구액이 가장 conspicuous.
-- **verify N**: 실패 토스트·유지. **pending**(Play pending / `pendingYn=Y`): 승인대기 토스트·화면 유지. **성공**: Completed push 후 Paywall `pop(true)`.
+- **verify N**: 실패 토스트·유지. **pending**(Play pending / `pendingYn=Y`): 승인대기 토스트·화면 유지. **processing**(verify timeout): overlay 없음·CTA disable·`iapPurchaseProcessing`. **성공**: Completed push 후 Paywall `pop(true)`. 화면 이탈 후 늦은 성공은 `iapPurchaseCompleted` 토스트.
 - **Restore**: **iOS만** Terms•Privacy 옆 링크. 세션 ID 없이 restore+verify. Completed 화면 없음. 성공 → `pop(true)`. pending → 토스트·유지. 에너지 팝업에는 Restore 없음.
 - **CTA**: Assinar agora → 결제. Terms/Privacy → WebView. X = pop
 - **UI**: 배경 그라데이션·glow·PREMIUM 카드·플랜 카드·MELHOR 등 기존 레이아웃 유지.

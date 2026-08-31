@@ -220,6 +220,8 @@
   "profileGoPremiumExplore": "詳細を見る",
   "energyPurchasePendingApproval": "お支払いは承認待ちです。",
   "energyPurchaseNotCompleted": "購入は完了していません。",
+  "iapPurchaseProcessing": "購入を処理しています。",
+  "iapPurchaseCompleted": "購入が完了しました。",
   "welcomeGiftTitle": "ようこそ！プレゼントが届きました",
   "welcomeGiftBenefitLead": "10分間、回数を気にせず楽しめます！",
   "welcomeGiftLine2": "プレミアム機能を利用できます",

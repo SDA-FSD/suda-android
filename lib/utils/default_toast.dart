@@ -30,11 +30,12 @@ class DefaultToast {
     String message, {
     bool isError = false,
     Duration duration = const Duration(seconds: 2),
+    OverlayState? overlay,
   }) {
     _currentEntry?.remove();
     _currentEntry = null;
 
-    final overlay = Overlay.of(context, rootOverlay: true);
+    final overlayState = overlay ?? Overlay.of(context, rootOverlay: true);
     final mediaQuery = MediaQuery.of(context);
     final theme = Theme.of(context);
     final color = isError ? _errorBg : _defaultBg;
@@ -92,7 +93,7 @@ class DefaultToast {
     );
 
     _currentEntry = entry;
-    overlay.insert(entry);
+    overlayState.insert(entry);
   }
 }
 

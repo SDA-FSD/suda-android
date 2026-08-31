@@ -554,6 +554,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get energyPurchaseNotCompleted => 'The purchase was not completed.';
 
   @override
+  String get iapPurchaseProcessing => 'Your purchase is being processed.';
+
+  @override
+  String get iapPurchaseCompleted => 'Purchase complete.';
+
+  @override
   String get welcomeGiftTitle => 'Your Welcome Gift Has Arrived!';
 
   @override

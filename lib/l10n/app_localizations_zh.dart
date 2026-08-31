@@ -528,6 +528,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get energyPurchaseNotCompleted => '购买未完成。';
 
   @override
+  String get iapPurchaseProcessing => '正在处理你的购买。';
+
+  @override
+  String get iapPurchaseCompleted => '购买已完成。';
+
+  @override
   String get welcomeGiftTitle => '欢迎礼物已送达！';
 
   @override
@@ -1199,6 +1205,12 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get energyPurchaseNotCompleted => '购买未完成。';
 
   @override
+  String get iapPurchaseProcessing => '正在处理你的购买。';
+
+  @override
+  String get iapPurchaseCompleted => '购买已完成。';
+
+  @override
   String get welcomeGiftTitle => '欢迎礼物已送达！';
 
   @override
@@ -1868,6 +1880,12 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get energyPurchaseNotCompleted => '購買尚未完成。';
+
+  @override
+  String get iapPurchaseProcessing => '正在處理你的購買。';
+
+  @override
+  String get iapPurchaseCompleted => '購買已完成。';
 
   @override
   String get welcomeGiftTitle => '你的迎新禮物已送達！';

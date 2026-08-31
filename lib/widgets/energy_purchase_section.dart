@@ -12,7 +12,6 @@ import '../services/energy_refresh_bus.dart';
 import '../services/iap_purchase_service.dart';
 import '../theme/app_theme.dart';
 import '../utils/default_toast.dart';
-import '../utils/iap_busy_overlay.dart';
 import '../utils/sub_screen_route.dart';
 
 enum _EnergyPurchaseKind { enablePush, unlimited, capacity6, capacity7 }
@@ -74,13 +73,22 @@ class _EnergyPurchaseSectionState extends State<EnergyPurchaseSection> {
     super.initState();
     _energy = widget.energy;
     EnergyRefreshBus.instance.addListener(_onEnergyRefreshBus);
+    IapPurchaseService.instance.uiListenable.addListener(_onIapUi);
     unawaited(_loadPrices());
   }
 
   @override
   void dispose() {
+    IapPurchaseService.instance.uiListenable.removeListener(_onIapUi);
     EnergyRefreshBus.instance.removeListener(_onEnergyRefreshBus);
+    if (_busyKind != null && _busyKind != _EnergyPurchaseKind.enablePush) {
+      IapPurchaseService.instance.abandonPendingPurchase();
+    }
     super.dispose();
+  }
+
+  void _onIapUi() {
+    if (mounted) setState(() {});
   }
 
   @override
@@ -349,10 +357,11 @@ class _EnergyPurchaseSectionState extends State<EnergyPurchaseSection> {
   Future<void> _onPurchaseTap(_EnergyPurchaseKind kind) async {
     if (widget.labMode) return;
     if (_busyKind != null || IapPurchaseService.instance.isBusy) return;
+    final productId = _productId(kind);
+    if (IapPurchaseService.instance.isProductPurchaseBlocked(productId)) return;
     if (widget.accessToken.isEmpty) return;
 
     final offerSessionId = _energy.offerSessionId;
-    final productId = _productId(kind);
     unawaited(_impressIfNeeded(productId));
 
     setState(() {
@@ -360,18 +369,23 @@ class _EnergyPurchaseSectionState extends State<EnergyPurchaseSection> {
       _themeTintOpacity = _themeTintBusy;
     });
 
-    final result = await IapBusyOverlay.run(
-      context,
-      () => IapPurchaseService.instance.purchaseInApp(
-        productId: productId,
-        consumable: _isConsumable(kind),
-        accessToken: widget.accessToken,
-        // 탭 시점 세션 고정(스토어 체류 중 detail refetch로 id가 바뀌어도 유지).
-        offerSessionId:
-            offerSessionId.isNotEmpty ? offerSessionId : null,
-      ),
+    final result = await IapPurchaseService.instance.purchaseInApp(
+      productId: productId,
+      consumable: _isConsumable(kind),
+      accessToken: widget.accessToken,
+      // 탭 시점 세션 고정(스토어 체류 중 detail refetch로 id가 바뀌어도 유지).
+      offerSessionId:
+          offerSessionId.isNotEmpty ? offerSessionId : null,
     );
     if (!mounted) return;
+
+    if (result.isProcessing) {
+      setState(() {
+        _themeTintOpacity = _themeTintIdle;
+        _busyKind = null;
+      });
+      return;
+    }
 
     if (result.pendingApproval) {
       final l10n = AppLocalizations.of(context)!;
@@ -399,6 +413,7 @@ class _EnergyPurchaseSectionState extends State<EnergyPurchaseSection> {
       return;
     }
 
+    IapPurchaseService.instance.markSuccessUiPresented();
     setState(() => _removingKinds.add(kind));
     await Future<void>.delayed(_removeDuration);
     if (!mounted) return;
@@ -489,7 +504,10 @@ class _EnergyPurchaseSectionState extends State<EnergyPurchaseSection> {
                 isEnablePush ? l10n.energyEnablePushOfferBadge : null,
             themeTintOpacity:
                 _busyKind == kind ? _themeTintOpacity : _themeTintIdle,
-            enabled: _busyKind == null,
+            enabled: _busyKind == null &&
+                (isEnablePush ||
+                    !IapPurchaseService.instance
+                        .isProductPurchaseBlocked(productId)),
             onTap: () => unawaited(
               isEnablePush ? _onEnablePushTap() : _onPurchaseTap(kind),
             ),

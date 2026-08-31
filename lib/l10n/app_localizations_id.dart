@@ -558,6 +558,12 @@ class AppLocalizationsId extends AppLocalizations {
       'Pembelian tidak dapat diselesaikan.';
 
   @override
+  String get iapPurchaseProcessing => 'Pembelian Anda sedang diproses.';
+
+  @override
+  String get iapPurchaseCompleted => 'Pembelian selesai.';
+
+  @override
   String get welcomeGiftTitle => 'Hadiah selamat datang sudah tiba!';
 
   @override

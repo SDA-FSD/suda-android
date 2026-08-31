@@ -1145,6 +1145,18 @@ abstract class AppLocalizations {
   /// **'The purchase was not completed.'**
   String get energyPurchaseNotCompleted;
 
+  /// No description provided for @iapPurchaseProcessing.
+  ///
+  /// In en, this message translates to:
+  /// **'Your purchase is being processed.'**
+  String get iapPurchaseProcessing;
+
+  /// No description provided for @iapPurchaseCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchase complete.'**
+  String get iapPurchaseCompleted;
+
   /// No description provided for @welcomeGiftTitle.
   ///
   /// In en, this message translates to:

@@ -558,6 +558,12 @@ class AppLocalizationsVi extends AppLocalizations {
   String get energyPurchaseNotCompleted => 'Giao dịch mua chưa hoàn tất.';
 
   @override
+  String get iapPurchaseProcessing => 'Giao dịch mua đang được xử lý.';
+
+  @override
+  String get iapPurchaseCompleted => 'Giao dịch mua đã hoàn tất.';
+
+  @override
   String get welcomeGiftTitle => 'Quà chào mừng đã đến!';
 
   @override

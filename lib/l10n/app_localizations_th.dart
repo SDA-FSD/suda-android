@@ -548,6 +548,12 @@ class AppLocalizationsTh extends AppLocalizations {
   String get energyPurchaseNotCompleted => 'ดำเนินการซื้อไม่สำเร็จ';
 
   @override
+  String get iapPurchaseProcessing => 'กำลังดำเนินการซื้อของคุณ';
+
+  @override
+  String get iapPurchaseCompleted => 'การซื้อเสร็จสมบูรณ์';
+
+  @override
   String get welcomeGiftTitle => 'ของขวัญต้อนรับมาถึงแล้ว!';
 
   @override

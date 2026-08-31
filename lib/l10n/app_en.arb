@@ -220,6 +220,8 @@
   "profileGoPremiumExplore": "Explore",
   "energyPurchasePendingApproval": "Your payment is pending approval",
   "energyPurchaseNotCompleted": "The purchase was not completed.",
+  "iapPurchaseProcessing": "Your purchase is being processed.",
+  "iapPurchaseCompleted": "Purchase complete.",
   "welcomeGiftTitle": "Your Welcome Gift Has Arrived!",
   "welcomeGiftBenefitLead": "Enjoy unlimited play for 10 minutes!",
   "welcomeGiftLine2": "Premium features unlocked",

@@ -553,6 +553,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get energyPurchaseNotCompleted => 'لم تكتمل عملية الشراء.';
 
   @override
+  String get iapPurchaseProcessing => 'جارٍ معالجة عملية الشراء.';
+
+  @override
+  String get iapPurchaseCompleted => 'اكتملت عملية الشراء.';
+
+  @override
   String get welcomeGiftTitle => 'وصلت هدية الترحيب!';
 
   @override

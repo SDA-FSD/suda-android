@@ -220,6 +220,8 @@
   "profileGoPremiumExplore": "Khám phá",
   "energyPurchasePendingApproval": "Thanh toán của bạn đang chờ phê duyệt.",
   "energyPurchaseNotCompleted": "Giao dịch mua chưa hoàn tất.",
+  "iapPurchaseProcessing": "Giao dịch mua đang được xử lý.",
+  "iapPurchaseCompleted": "Giao dịch mua đã hoàn tất.",
   "welcomeGiftTitle": "Quà chào mừng đã đến!",
   "welcomeGiftBenefitLead": "Chơi không giới hạn trong 10 phút!",
   "welcomeGiftLine2": "Đã mở khóa các tính năng Premium",

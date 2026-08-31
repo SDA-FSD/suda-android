@@ -220,6 +220,8 @@
   "profileGoPremiumExplore": "Ontdekken",
   "energyPurchasePendingApproval": "Je betaling moet nog worden goedgekeurd",
   "energyPurchaseNotCompleted": "De aankoop is niet voltooid.",
+  "iapPurchaseProcessing": "Je aankoop wordt verwerkt.",
+  "iapPurchaseCompleted": "Aankoop voltooid.",
   "welcomeGiftTitle": "Je welkomstcadeau is er!",
   "welcomeGiftBenefitLead": "Speel 10 minuten onbeperkt!",
   "welcomeGiftLine2": "Premium-functies ontgrendeld",

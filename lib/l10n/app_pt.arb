@@ -220,6 +220,8 @@
   "profileGoPremiumExplore": "Explorar",
   "energyPurchasePendingApproval": "Seu pagamento está pendente.",
   "energyPurchaseNotCompleted": "A compra não foi concluída.",
+  "iapPurchaseProcessing": "Sua compra está sendo processada.",
+  "iapPurchaseCompleted": "Compra concluída.",
   "welcomeGiftTitle": "Tem um presente de boas-vindas para você!",
   "welcomeGiftBenefitLead": "Aproveite grátis por 10 minutos!",
   "welcomeGiftLine2": "Recursos Premium liberados",

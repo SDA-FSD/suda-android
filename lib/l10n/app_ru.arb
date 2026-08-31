@@ -220,6 +220,8 @@
   "profileGoPremiumExplore": "Подробнее",
   "energyPurchasePendingApproval": "Платёж ожидает подтверждения.",
   "energyPurchaseNotCompleted": "Покупка не завершена.",
+  "iapPurchaseProcessing": "Покупка обрабатывается.",
+  "iapPurchaseCompleted": "Покупка завершена.",
   "welcomeGiftTitle": "Ваш приветственный подарок уже здесь!",
   "welcomeGiftBenefitLead": "Играйте без ограничений 10 минут!",
   "welcomeGiftLine2": "Функции Premium открыты",

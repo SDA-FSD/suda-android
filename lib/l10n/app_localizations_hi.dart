@@ -555,6 +555,12 @@ class AppLocalizationsHi extends AppLocalizations {
   String get energyPurchaseNotCompleted => 'खरीद पूरी नहीं हुई।';
 
   @override
+  String get iapPurchaseProcessing => 'आपकी खरीदारी प्रोसेस हो रही है।';
+
+  @override
+  String get iapPurchaseCompleted => 'खरीदारी पूरी हुई।';
+
+  @override
   String get welcomeGiftTitle => 'आपका वेलकम गिफ़्ट आ गया!';
 
   @override

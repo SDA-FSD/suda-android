@@ -220,6 +220,8 @@
   "profileGoPremiumExplore": "ดูเพิ่มเติม",
   "energyPurchasePendingApproval": "การชำระเงินกำลังรอการอนุมัติ",
   "energyPurchaseNotCompleted": "ดำเนินการซื้อไม่สำเร็จ",
+  "iapPurchaseProcessing": "กำลังดำเนินการซื้อของคุณ",
+  "iapPurchaseCompleted": "การซื้อเสร็จสมบูรณ์",
   "welcomeGiftTitle": "ของขวัญต้อนรับมาถึงแล้ว!",
   "welcomeGiftBenefitLead": "เล่นได้ไม่จำกัด 10 นาที!",
   "welcomeGiftLine2": "ปลดล็อกฟีเจอร์ Premium",

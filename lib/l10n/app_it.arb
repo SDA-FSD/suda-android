@@ -220,6 +220,8 @@
   "profileGoPremiumExplore": "Scopri",
   "energyPurchasePendingApproval": "Pagamento in attesa di approvazione",
   "energyPurchaseNotCompleted": "L'acquisto non è stato completato.",
+  "iapPurchaseProcessing": "Il tuo acquisto è in elaborazione.",
+  "iapPurchaseCompleted": "Acquisto completato.",
   "welcomeGiftTitle": "Il tuo regalo di benvenuto è arrivato!",
   "welcomeGiftBenefitLead": "Gioca senza limiti per 10 minuti!",
   "welcomeGiftLine2": "Funzioni Premium sbloccate",

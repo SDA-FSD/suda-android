@@ -220,6 +220,8 @@
   "profileGoPremiumExplore": "İncele",
   "energyPurchasePendingApproval": "Ödemen onay bekliyor",
   "energyPurchaseNotCompleted": "Satın alım tamamlanmadı.",
+  "iapPurchaseProcessing": "Satın alımın işleniyor.",
+  "iapPurchaseCompleted": "Satın alım tamamlandı.",
   "welcomeGiftTitle": "Hoş Geldin Hediyen Hazır!",
   "welcomeGiftBenefitLead": "10 dakika sınırsız oynamanın keyfini çıkar!",
   "welcomeGiftLine2": "Premium özellikler açıldı",

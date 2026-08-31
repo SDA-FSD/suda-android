@@ -561,6 +561,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get energyPurchaseNotCompleted => 'La compra no se completó.';
 
   @override
+  String get iapPurchaseProcessing => 'Tu compra se está procesando.';
+
+  @override
+  String get iapPurchaseCompleted => 'Compra completada.';
+
+  @override
   String get welcomeGiftTitle => '¡Llegó tu regalo de bienvenida!';
 
   @override
@@ -1274,6 +1280,12 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
 
   @override
   String get energyPurchaseNotCompleted => 'La compra no se completó.';
+
+  @override
+  String get iapPurchaseProcessing => 'Tu compra se está procesando.';
+
+  @override
+  String get iapPurchaseCompleted => 'Compra completada.';
 
   @override
   String get welcomeGiftTitle => '¡Llegó tu regalo de bienvenida!';

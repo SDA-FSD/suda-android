@@ -220,6 +220,8 @@
   "profileGoPremiumExplore": "Tingnan",
   "energyPurchasePendingApproval": "Naghihintay pa ng approval ang payment mo",
   "energyPurchaseNotCompleted": "Hindi nakumpleto ang pagbili.",
+  "iapPurchaseProcessing": "Pinoproseso ang binili mo.",
+  "iapPurchaseCompleted": "Tapos na ang pagbili.",
   "welcomeGiftTitle": "Dumating na ang Welcome Gift Mo!",
   "welcomeGiftBenefitLead": "Mag-enjoy sa unlimited play nang 10 minuto!",
   "welcomeGiftLine2": "Na-unlock ang mga Premium feature",

@@ -533,6 +533,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get energyPurchaseNotCompleted => '購入は完了していません。';
 
   @override
+  String get iapPurchaseProcessing => '購入を処理しています。';
+
+  @override
+  String get iapPurchaseCompleted => '購入が完了しました。';
+
+  @override
   String get welcomeGiftTitle => 'ようこそ！プレゼントが届きました';
 
   @override

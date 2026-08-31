@@ -15,6 +15,7 @@ import 'models/home_models.dart';
 import 'models/user_models.dart';
 import 'services/pending_app_path_service.dart';
 import 'services/token_storage.dart';
+import 'services/iap_purchase_service.dart';
 import 'services/suda_api_client.dart';
 import 'services/version_check_service.dart';
 import 'services/token_refresh_service.dart';
@@ -34,6 +35,7 @@ import 'screens/setting/announcement_detail.dart';
 import 'utils/sub_screen_route.dart';
 import 'config/app_config.dart';
 import 'utils/language_util.dart';
+import 'utils/iap_busy_overlay.dart';
 import 'theme/app_theme.dart';
 import 'widgets/main_reregistration_restricted_popup.dart'
     show
@@ -152,6 +154,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+    IapPurchaseService.instance.ensureListening();
     MainUserSync.instance.register(_onMainUserUpdatedFromSubflow);
     WidgetsBinding.instance.addObserver(this);
     // 푸시 알림 클릭(백그라운드/포그라운드) 시 appPath·notificationId 보관
@@ -476,6 +479,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       }
 
       TokenRefreshService.instance.start();
+      unawaited(
+        IapPurchaseService.instance.onAccessTokenReady(
+          storedAccessToken,
+          sessionRestore: true,
+        ),
+      );
       setState(() {
         _accessToken = storedAccessToken;
         _googleUser = account ?? AuthService.currentUser;
@@ -570,6 +579,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
       // 6) 상태 업데이트 (화면 전환 트리거)
       TokenRefreshService.instance.start();
+      unawaited(
+        IapPurchaseService.instance.onAccessTokenReady(
+          token,
+          sessionRestore: false,
+        ),
+      );
       setState(() {
         _accessToken = token;
         _user = user;
@@ -834,7 +849,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             }
           });
         }
-        return child ?? const SizedBox.shrink();
+        return IapBlockingOverlayHost(
+          navigatorKey: _navigatorKey,
+          child: child ?? const SizedBox.shrink(),
+        );
       },
       theme: AppTheme.themeData,
       home: _isLoading

@@ -220,6 +220,8 @@
   "profileGoPremiumExplore": "혜택보기",
   "energyPurchasePendingApproval": "결제 승인 대기중입니다.",
   "energyPurchaseNotCompleted": "결제가 이루어지지 않았습니다.",
+  "iapPurchaseProcessing": "결제를 처리하고 있습니다.",
+  "iapPurchaseCompleted": "결제가 완료되었습니다.",
   "welcomeGiftTitle": "웰컴 기프트 도착!",
   "welcomeGiftBenefitLead": "10분동안 무료로 즐겨보세요!",
   "welcomeGiftLine2": "무제한 플레이 모드",

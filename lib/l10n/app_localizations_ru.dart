@@ -556,6 +556,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get energyPurchaseNotCompleted => 'Покупка не завершена.';
 
   @override
+  String get iapPurchaseProcessing => 'Покупка обрабатывается.';
+
+  @override
+  String get iapPurchaseCompleted => 'Покупка завершена.';
+
+  @override
   String get welcomeGiftTitle => 'Ваш приветственный подарок уже здесь!';
 
   @override

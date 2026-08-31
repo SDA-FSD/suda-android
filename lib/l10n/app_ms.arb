@@ -220,6 +220,8 @@
   "profileGoPremiumExplore": "Terokai",
   "energyPurchasePendingApproval": "Pembayaran anda sedang menunggu kelulusan",
   "energyPurchaseNotCompleted": "Pembelian tidak dapat diselesaikan.",
+  "iapPurchaseProcessing": "Pembelian anda sedang diproses.",
+  "iapPurchaseCompleted": "Pembelian selesai.",
   "welcomeGiftTitle": "Hadiah Alu-aluan Anda Sudah Tiba!",
   "welcomeGiftBenefitLead": "Nikmati akses bermain tanpa had selama 10 minit!",
   "welcomeGiftLine2": "Ciri Premium diaktifkan",

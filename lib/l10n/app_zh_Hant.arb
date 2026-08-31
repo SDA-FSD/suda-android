@@ -220,6 +220,8 @@
   "profileGoPremiumExplore": "了解更多",
   "energyPurchasePendingApproval": "你的付款正在等待核准。",
   "energyPurchaseNotCompleted": "購買尚未完成。",
+  "iapPurchaseProcessing": "正在處理你的購買。",
+  "iapPurchaseCompleted": "購買已完成。",
   "welcomeGiftTitle": "你的迎新禮物已送達！",
   "welcomeGiftBenefitLead": "享受 10 分鐘的無限暢玩！",
   "welcomeGiftLine2": "Premium 功能已解鎖",

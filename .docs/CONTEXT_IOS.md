@@ -13,7 +13,7 @@ iOS는 골격·로그인·푸시 토큰 `deviceType=IOS`까지 들어갔고, 이
 - FPM iOS 네이티브 플러그인 (Dart 헬퍼는 있음)
 
 ## StoreKit IAP
-- `IapPurchaseService`: AOS Play 유지. iOS는 `premium_monthly`/`premium_yearly` + INAPP 동일 ID. `platform:"IOS"`, JWS, `finishYn=Y`만 finish. Restore는 Paywall+Setting(iOS). 상세 **`.docs/CONTEXT.md` §7-2**
+- `IapPurchaseService`: AOS Play 유지. iOS는 `premium_monthly`/`premium_yearly` + INAPP 동일 ID. `platform:"IOS"`, JWS, `finishYn=Y`만 finish. StoreKit 시트 구간 blocking overlay 없음. listener는 앱 기동 즉시. Restore는 Paywall+Setting(iOS). 상세 **`.docs/CONTEXT.md` §7-2**
 - 테스트: **prd** Bundle `kr.sudatalk.app` · TestFlight. local/dev/stg 상품 없음
 - `appAccountToken` 생략. 시뮬은 StoreKit Configuration 없이 실결제 불가
 

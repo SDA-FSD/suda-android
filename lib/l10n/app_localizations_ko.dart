@@ -534,6 +534,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get energyPurchaseNotCompleted => '결제가 이루어지지 않았습니다.';
 
   @override
+  String get iapPurchaseProcessing => '결제를 처리하고 있습니다.';
+
+  @override
+  String get iapPurchaseCompleted => '결제가 완료되었습니다.';
+
+  @override
   String get welcomeGiftTitle => '웰컴 기프트 도착!';
 
   @override

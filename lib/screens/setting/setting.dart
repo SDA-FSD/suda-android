@@ -10,7 +10,6 @@ import '../../services/auth_service.dart';
 import '../../services/iap_purchase_service.dart';
 import '../../services/suda_api_client.dart';
 import '../../utils/default_toast.dart';
-import '../../utils/iap_busy_overlay.dart';
 import '../../utils/sub_screen_route.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../services/app_version_service.dart';
@@ -204,17 +203,16 @@ class SettingScreen extends StatelessWidget {
   }
 
   Future<void> _handleRestore(BuildContext context) async {
-    if (IapPurchaseService.instance.isBusy) return;
+    if (IapPurchaseService.instance.isBusy) {
+      return;
+    }
     final accessToken = await TokenStorage.loadAccessToken();
     if (!context.mounted) return;
     if (accessToken == null || accessToken.isEmpty) return;
 
     final l10n = AppLocalizations.of(context)!;
-    final result = await IapBusyOverlay.run(
-      context,
-      () => IapPurchaseService.instance.restorePurchases(
-        accessToken: accessToken,
-      ),
+    final result = await IapPurchaseService.instance.restorePurchases(
+      accessToken: accessToken,
     );
     if (!context.mounted) return;
 

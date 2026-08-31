@@ -220,6 +220,8 @@
   "profileGoPremiumExplore": "Jelajahi",
   "energyPurchasePendingApproval": "Pembayaran Anda menunggu persetujuan",
   "energyPurchaseNotCompleted": "Pembelian tidak dapat diselesaikan.",
+  "iapPurchaseProcessing": "Pembelian Anda sedang diproses.",
+  "iapPurchaseCompleted": "Pembelian selesai.",
   "welcomeGiftTitle": "Hadiah selamat datang sudah tiba!",
   "welcomeGiftBenefitLead": "Nikmati akses bermain tanpa batas selama 10 menit!",
   "welcomeGiftLine2": "Fitur Premium aktif",
