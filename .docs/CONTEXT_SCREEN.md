@@ -124,8 +124,9 @@
 
 ### 스플래시 내부 구현 특이사항
 - **배경색**: `#121212`
-- **중앙 이미지**: `assets/images/splash_still_260513.png` 기반 밀도별 `splash_still.png`(mdpi 165×36 ~ xxxhdpi 660×144 픽셀, 논리 165×36dp 유지)
-- **Android 구현**: `launch_background.xml`의 `layer-list`에서 배경 shape + `android:gravity="center"` bitmap
+- **중앙 이미지**: `assets/images/splash_still_260513.png` 기반 밀도별 스틸(논리 165×36dp 유지)
+- **Android 구현**: `launch_background.xml`의 `layer-list`에서 배경 shape + `android:gravity="center"` bitmap. 밀도별 `drawable-*/splash_still.png`(mdpi 165×36 ~ xxxhdpi 660×144)
+- **iOS 구현**: `LaunchScreen.storyboard` — `LaunchBackground`(#121212) 전면 + `LaunchImage` 전면 제약·`contentMode=center`. `LaunchImage.imageset` @1x/@2x/@3x = AOS mdpi/xhdpi/xxhdpi와 동일 픽셀. `flutter_native_splash:create`는 AOS 12 스퀘어 아이콘을 덮어쓰므로 iOS 스틸은 에셋 직접 유지.
 - **생성 방법**: `dart run flutter_native_splash:create`로 기본 리소스 생성 가능. Android 중앙 스틸은 `launch_background.xml`과 밀도별 `splash_still.png`로 유지.
 - **Android 12+(API 31) 지원**: `windowSplashScreenAnimatedIcon` → `drawable-v31/splash_still_square_v3.png`(원본 `assets/images/splash_still_square_v3.png`와 동기화). API 30 이하는 기존 `launch_background` + 가로형 `splash_still` 유지. `LaunchTheme`은 `values-v31` / `values-night-v31`
 - **제어 방법**: `lib/main.dart`에서 `FlutterNativeSplash.preserve()` 및 `FlutterNativeSplash.remove()` 사용

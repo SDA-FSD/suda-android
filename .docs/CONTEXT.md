@@ -178,7 +178,7 @@ flutter run --flavor dev -t lib/main.dart --dart-define=ENV=dev -d 541F3961-8182
 - **RTL 크롬:** `ar` 등에서 헤더 leading/trailing은 `PositionedDirectional`·`AlignmentDirectional`·`TextAlign.start`. 학습 영어(미션·힌트·채팅)와 마이크 드래그 취소(물리 왼쪽)는 LTR/좌표 유지. 진행 바 fill·장식 절대좌표는 미러하지 않음.
 
 ## 9. 스플래시·Login
-네이티브 스플래시 `#121212` + 중앙 스틸. `FlutterNativeSplash.preserve` → JWT 후 remove. Login은 동일 스틸에서 페이드/로고 이동/포스터 마키(상세 `CONTEXT_SCREEN.md` Login). CustomSplash·LoadingScreen 없음. 로그아웃 → 곧장 Login.
+네이티브 스플래시 `#121212` + 중앙 스틸(`splash_still_260513.png`, 논리 165×36). **AOS** `launch_background.xml` gravity center. **iOS** `LaunchScreen` `LaunchImage` contentMode center(밀도 @1x/@2x/@3x = AOS mdpi/xhdpi/xxhdpi). `FlutterNativeSplash.preserve` → JWT 후 remove. Login은 동일 스틸에서 페이드/로고 이동/포스터 마키(상세 `CONTEXT_SCREEN.md` Login). CustomSplash·LoadingScreen 없음. 로그아웃 → 곧장 Login.
 
 ## 10. 푸시
 `firebase_messaging`. Home `initState`에서 `POST /v1/users/push-token` (`deviceType` ANDROID|IOS, `languageCode`, `languageTag` BCP 47 예: `ko-KR`, 실패 무시). `LanguageUtil.getCurrentLanguageTag()` = `platformDispatcher.locale.toLanguageTag()` (region 없으면 languageCode만).
