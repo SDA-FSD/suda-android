@@ -256,6 +256,31 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
     }
   }
 
+  Widget _buildBackButton(BuildContext context) {
+    return SizedBox(
+      width: 40,
+      height: 40,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          DecoratedBox(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: RadialGradient(
+                colors: [
+                  Colors.black.withValues(alpha: 0.22),
+                  Colors.black.withValues(alpha: 0.0),
+                ],
+              ),
+            ),
+            child: const SizedBox(width: 28, height: 28),
+          ),
+          AppScaffold.backButton(context),
+        ],
+      ),
+    );
+  }
+
   Widget _buildLanguageLevelButton(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context).textTheme;
@@ -346,7 +371,7 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
               padding: const EdgeInsets.only(top: 16, left: 16, right: 16),
               child: Row(
                 children: [
-                  AppScaffold.backButton(context),
+                  _buildBackButton(context),
                   const Spacer(),
                   _buildLanguageLevelButton(context),
                 ],
