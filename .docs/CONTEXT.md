@@ -195,7 +195,7 @@ dev·prd만 ON. `PerfMonitoringService` + `SudaHttpClient` `HttpMetric`(query �
 **URL 패턴 목록·추가 절차:** `CONTEXT_FPM_CUSTOM_URL.md`.
 
 ## 11. 코드 습관
-- 폰트: 풀 가변 `ChironHeiHK` / `ChironGoRoundTC` (`assets/fonts/*-VariableFont_wght.ttf`). 상세 `CONTEXT_STYLE.md`
+- 폰트: 풀 가변 `ChironHeiHK` / `ChironGoRoundTC` (`assets/fonts/*-VariableFont_wght.ttf`). 상세 `CONTEXT_STYLE.md`. AOS APK는 TTF `noCompress`. 기동 `AppFontPreload`는 Firebase·`getInitialMessage`와 병렬이고 `runApp` 전에 끝낸다(실패해도 기동 계속). 네이티브 스플래시 해제는 JWT/`_checkAuthStatus` 기준이며 폰트 완료를 기다리지 않음
 - 로그: `debugPrint('[DEBUG] …')` (`print` 금지)
 - 토스트: `lib/utils/default_toast.dart`
 - 서버 마크다운 `***`/`**`/`*`: `lib/utils/default_markdown.dart` (Ending content, 공지, 알림함, Opening briefing)

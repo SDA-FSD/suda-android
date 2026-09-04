@@ -20,13 +20,14 @@
 - **등록 방식**
   - 패밀리당 가변 TTF 1파일. `pubspec`에는 기존과 같이 weight 400/600/700 슬롯을 같은 파일에 매핑 (에셋은 경로 1회 패키징).
   - subset 정적 파일(`*-subset-w400/600/700.ttf`)은 사용하지 않음.
+  - 기동: `AppFontPreload`가 두 패밀리를 `loadFontFromList`로 `runApp` 전에 등록. AOS는 `androidResources.noCompress += ttf`. 스플래시 해제는 JWT 경로.
   - 커버리지: 라틴·한글·일·한자·키릴·그리스·베트남/폴란드 확장. **아랍·데바나가리(힌디)·태국 글리프는 이 두 패밀리에 없음** → 해당 locale은 시스템 폴백.
 
 - **가변폰트(weight) 적용 규칙**
   - 두 폰트 모두 `fvar`의 `wght` 축(200~900)을 가진 **가변폰트**이므로, `fontWeight`만으로는 체감 굵기가 부족할 수 있다.
   - 전역 `TextTheme`/버튼 `textStyle`에서는 `fontWeight`와 함께 `fontVariations: [FontVariation('wght', <동일값>)]`를 명시한다. (구현: `lib/theme/app_theme.dart`)
 
-폰트 로딩은 `pubspec.yaml`의 `flutter/fonts` 섹션과  
+폰트 로딩은 `pubspec.yaml`의 `flutter/fonts` 섹션, `AppFontPreload`(`runApp` 전),  
 `lib/theme/app_theme.dart`의 `ThemeData`에서 설정합니다.
 
 ---

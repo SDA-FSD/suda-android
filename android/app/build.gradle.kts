@@ -45,6 +45,11 @@ android {
         resValues = true
     }
 
+    // 가변 TTF zlib inflate가 첫 프레임 메인 스레드 ANR이 되지 않게 비압축 저장
+    androidResources {
+        noCompress += "ttf"
+    }
+
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "kr.sudatalk.app"
