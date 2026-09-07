@@ -66,6 +66,8 @@ mixin PlayingInputMixin<T extends StatefulWidget>
   late final AnimationController _analyzingBlinkController;
   bool _isAnalyzingBlinking = false;
   bool _holdToSpeakMessageShown = false;
+  bool _hasLoggedStartScriptPlaybackEnded = false;
+  bool _hasLoggedFirstUtteranceSubmitted = false;
   double _missionPanelHeight = RoleplayMissionPanel.collapsedHeight;
   final GlobalKey _missionPanelSizeKey = GlobalKey();
   void Function()? onPlayingEnergyExitRequested;
@@ -111,9 +113,52 @@ mixin PlayingInputMixin<T extends StatefulWidget>
     _analyzingBlinkController.dispose();
   }
 
+  void logRpS2PlayingEvent(String event) {
+    final clientOccurredAt = DateTime.now().millisecondsSinceEpoch;
+    unawaited(_logRpS2PlayingEventAsync(event, clientOccurredAt));
+  }
+
+  Future<void> _logRpS2PlayingEventAsync(
+    String event,
+    int clientOccurredAt,
+  ) async {
+    try {
+      final accessToken = await TokenStorage.loadAccessToken();
+      final sessionId = SeriesStateService.instance.sessionId;
+      if (accessToken == null || sessionId == null || sessionId.isEmpty) {
+        return;
+      }
+      await SudaApiClient.logRpS2SessionEvent(
+        accessToken: accessToken,
+        rpSessionId: sessionId,
+        event: event,
+        clientOccurredAt: clientOccurredAt,
+      );
+    } catch (e) {
+      debugPrint('[DEBUG] RpS2 event-log ignored: $e');
+    }
+  }
+
+  void _logStartScriptPlaybackEndedIfNeeded() {
+    if (_hasLoggedStartScriptPlaybackEnded) return;
+    _hasLoggedStartScriptPlaybackEnded = true;
+    logRpS2PlayingEvent('START_SCRIPT_PLAYBACK_ENDED');
+  }
+
+  void _logFirstUtteranceSubmittedIfNeeded() {
+    if (_hasLoggedFirstUtteranceSubmitted) return;
+    _hasLoggedFirstUtteranceSubmitted = true;
+    logRpS2PlayingEvent('FIRST_UTTERANCE_SUBMITTED');
+  }
+
+  void _logMicRecordingCancelled() {
+    logRpS2PlayingEvent('MIC_RECORDING_CANCELLED');
+  }
+
   /// S2 턴 흐름에서 사용자 발화 준비 시점에 호출 (S1 `_activateUserTurn` 이식).
   void activateUserTurn({bool enableHintButton = true}) {
     unawaited(PerfMonitoringService.instance.stop('roleplay_screen_ready'));
+    _logStartScriptPlaybackEndedIfNeeded();
     _hintUsedThisTurn = !enableHintButton;
     _isInputLocked = false;
     _setUserTurn(true);
@@ -408,6 +453,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
 
   Future<void> _teardownRecordingImpl() async {
     if (_isRecording) {
+      _logMicRecordingCancelled();
       _recordingStartedAt = null;
       await _stopRecording(discard: true);
       removePlayingRecordingEntry();
@@ -888,6 +934,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
         path: path,
       );
       _recordingStartedAt = DateTime.now();
+      logRpS2PlayingEvent('MIC_RECORDING_STARTED');
     } catch (e) {
       debugPrint('[DEBUG] S2 recording start error: $e');
       _isRecordingStarting = false;
@@ -919,6 +966,9 @@ mixin PlayingInputMixin<T extends StatefulWidget>
     if (_isRecordingStarting && !_isRecording) {
       _pendingRecordingAction = _PendingRecordingAction.cancel;
       return;
+    }
+    if (_isRecording) {
+      _logMicRecordingCancelled();
     }
     _recordingStartedAt = null;
     await _stopRecording(discard: true);
@@ -953,6 +1003,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
     setState(() => _isRecording = false);
 
     if (durationMs < _minRecordingDurationMs) {
+      _logMicRecordingCancelled();
       _deleteRecordingFile(path);
       _setMicState(_PlayingMicButtonState.defaultState);
       _showHoldToSpeakMessage();
@@ -1002,6 +1053,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
       _restoreUserTurnAfterSendFailure();
       return;
     }
+    _logFirstUtteranceSubmittedIfNeeded();
     await PerfMonitoringService.instance.trace('roleplay_turn_total', () async {
       late final RpS2UserMessageResponseDto response;
       try {
@@ -1048,6 +1100,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
       _restoreUserTurnAfterSendFailure();
       return;
     }
+    _logFirstUtteranceSubmittedIfNeeded();
     await PerfMonitoringService.instance.trace('roleplay_turn_total', () async {
       late final RpS2UserMessageResponseDto response;
       try {

@@ -671,6 +671,63 @@ class SeriesApi {
     );
   }
 
+  /// POST /rps2/sessions/{rpSessionId}/event-logs
+  /// Playing 상황 로그. 서버는 200만 주지만 호출부는 응답을 무시한다.
+  static Future<void> logSessionEvent({
+    required String accessToken,
+    required String rpSessionId,
+    required String event,
+    required int clientOccurredAt,
+  }) async {
+    await SudaHttpClient.executeWithRefresh(
+      () => _logSessionEventInternal(
+        accessToken,
+        rpSessionId,
+        event,
+        clientOccurredAt,
+      ),
+      retryWithNewToken: (newToken) => _logSessionEventInternal(
+        newToken,
+        rpSessionId,
+        event,
+        clientOccurredAt,
+      ),
+    );
+  }
+
+  static Future<void> _logSessionEventInternal(
+    String accessToken,
+    String rpSessionId,
+    String event,
+    int clientOccurredAt,
+  ) async {
+    final uri = SudaHttpClient.buildUri(
+      '/rps2/sessions/$rpSessionId/event-logs',
+    );
+    late final http.Response response;
+    try {
+      response = await SudaHttpClient.client
+          .post(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+              'Content-Type': 'application/json',
+            },
+            body: jsonEncode({
+              'event': event,
+              'clientOccurredAt': clientOccurredAt,
+            }),
+          )
+          .timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      rethrow;
+    }
+
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+  }
+
   static Future<int> finishSession({
     required String accessToken,
     required String rpSessionId,

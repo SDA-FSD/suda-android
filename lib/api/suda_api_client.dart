@@ -161,6 +161,20 @@ class SudaApiClient {
     );
   }
 
+  static Future<void> logRpS2SessionEvent({
+    required String accessToken,
+    required String rpSessionId,
+    required String event,
+    required int clientOccurredAt,
+  }) {
+    return SeriesApi.logSessionEvent(
+      accessToken: accessToken,
+      rpSessionId: rpSessionId,
+      event: event,
+      clientOccurredAt: clientOccurredAt,
+    );
+  }
+
   static Future<int> finishRpS2Session({
     required String accessToken,
     required String rpSessionId,

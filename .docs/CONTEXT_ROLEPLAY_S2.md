@@ -344,6 +344,7 @@ Home (시리즈 썸네일)
 | POST | `/rps2/sessions/{id}/user-message/audio` | req: `byte[]` octet-stream / res: `RpS2UserMessageResponseDto` | 사용자 음성 발화 | ✅ |
 | POST | `/rps2/sessions/{id}/user-message/text` | req: raw `String` / res: `RpS2UserMessageResponseDto` | 사용자 텍스트 발화 | ✅ |
 | GET | `/rps2/sessions/{id}/ai-message/audio` | `RpS2SoundResDto` (`cdnYn`, `cdnPath`, `file`/`sound`) | 후속 AI 음성 | ✅ |
+| POST | `/rps2/sessions/{id}/event-logs` | req: `{event, clientOccurredAt}` (epoch ms) · 응답 무시 | Playing 상황 로그. `RP_SCREEN_READY`(첫 프레임, start script 직전 1회), `START_SCRIPT_PLAYBACK_ENDED`(첫 `activateUserTurn`/녹음 버튼 enabled 1회), `MIC_RECORDING_STARTED`(`recorder.start` 성공마다), `MIC_RECORDING_CANCELLED`(취소 영역·이탈 teardown·0.5s 미만마다), `FIRST_UTTERANCE_SUBMITTED`(첫 유효 오디오/텍스트 요청 직전 1회) | ✅ |
 | PUT | `/rps2/sessions/{id}/finish` | res: JSON `Long` (`0` 또는 `rpUserHistoryId`) | Playing 마무리 | ✅ |
 | GET | `/rps2/user-histories?pageNum=` | `SudaAppPage<RpS2SimpleHistoryDto>` | Profile History 목록 | ✅ |
 | GET | `/rps2/user-histories/{rpUserHistoryId}` | `RpS2UserHistoryDto` | finish 성공 후 result/ending 이동 전 · **Profile History 상세**. Speech Feedback Paywall 구독 성공 직후 재조회만 `?reason=subscription` | ✅ |

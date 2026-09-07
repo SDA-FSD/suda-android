@@ -107,7 +107,9 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     deactivateUserTurn();
     unawaited(PerfMonitoringService.instance.start('roleplay_screen_ready'));
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) startAiOpeningFlow();
+      if (!mounted) return;
+      logRpS2PlayingEvent('RP_SCREEN_READY');
+      startAiOpeningFlow();
     });
   }
 
