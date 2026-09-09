@@ -106,6 +106,7 @@ class AppTheme {
         style: ElevatedButton.styleFrom(
           textStyle: const TextStyle(
             fontFamily: 'ChironGoRoundTC',
+            fontFamilyFallback: ['ChironHeiHK'],
             fontSize: 18,
             fontWeight: FontWeight.w600,
             fontVariations: _wght600,
@@ -118,6 +119,7 @@ class AppTheme {
         style: OutlinedButton.styleFrom(
           textStyle: const TextStyle(
             fontFamily: 'ChironGoRoundTC',
+            fontFamilyFallback: ['ChironHeiHK'],
             fontWeight: FontWeight.w400,
             fontVariations: _wght400,
           ),
@@ -129,6 +131,7 @@ class AppTheme {
         style: TextButton.styleFrom(
           textStyle: const TextStyle(
             fontFamily: 'ChironGoRoundTC',
+            fontFamilyFallback: ['ChironHeiHK'],
             fontWeight: FontWeight.w400,
             fontVariations: _wght400,
           ),

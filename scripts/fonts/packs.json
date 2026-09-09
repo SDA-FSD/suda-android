@@ -1,0 +1,72 @@
+{
+  "version": "v1",
+  "cdn": {
+    "basePath": "/fonts",
+    "sourceDir": "/fonts/source",
+    "packsDir": "/fonts/packs/v1",
+    "note": "호스트는 AppConfig.cdnBaseUrl. 2026-09-09 원본·v1 팩 업로드 확인. 런타임은 FontPackService가 이 path에서 locale 팩을 받는다."
+  },
+  "sourceFiles": {
+    "ChironHeiHK": "ChironHeiHK-VariableFont_wght.ttf",
+    "ChironGoRoundTC": "ChironGoRoundTC-VariableFont_wght.ttf"
+  },
+  "packs": {
+    "latn": {
+      "unicodes": "U+0000-007F,U+00A0-024F,U+1E00-1EFF,U+1EA0-1EFF,U+2000-206F,U+2070-209F,U+20A0-20CF,U+2100-214F,U+2190-21FF,U+2200-22FF,U+2500-257F,U+25A0-25FF"
+    },
+    "hang": {
+      "unicodes": "U+1100-11FF,U+3130-318F,U+A960-A97F,U+AC00-D7AF,U+D7B0-D7FF"
+    },
+    "jpan": {
+      "unicodes": "U+3000-303F,U+3040-309F,U+30A0-30FF,U+31F0-31FF,U+FF00-FFEF"
+    },
+    "hani": {
+      "unicodes": "U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF"
+    },
+    "cyrl": {
+      "unicodes": "U+0400-04FF,U+0500-052F,U+2DE0-2DFF,U+A640-A69F"
+    },
+    "grek": {
+      "unicodes": "U+0370-03FF,U+1F00-1FFF"
+    },
+    "arab": {
+      "unicodes": "U+0600-06FF,U+0750-077F,U+08A0-08FF,U+FB50-FDFF,U+FE70-FEFF"
+    },
+    "thai": {
+      "unicodes": "U+0E00-0E7F"
+    },
+    "deva": {
+      "unicodes": "U+0900-097F,U+A8E0-A8FF"
+    }
+  },
+  "familyPacks": {
+    "ChironHeiHK": ["latn", "hang", "jpan", "hani", "cyrl", "grek", "arab", "thai", "deva"],
+    "ChironGoRoundTC": ["latn", "hang", "jpan", "cyrl", "grek", "arab", "thai", "deva"]
+  },
+  "localePacks": {
+    "en": ["latn"],
+    "ko": ["latn", "hang"],
+    "ja": ["latn", "jpan", "hani"],
+    "zh": ["latn", "hani"],
+    "zh_Hans": ["latn", "hani"],
+    "zh_Hant": ["latn", "hani"],
+    "pt": ["latn"],
+    "es": ["latn"],
+    "es_419": ["latn"],
+    "fr": ["latn"],
+    "de": ["latn"],
+    "it": ["latn"],
+    "vi": ["latn"],
+    "id": ["latn"],
+    "ms": ["latn"],
+    "fil": ["latn"],
+    "tr": ["latn"],
+    "pl": ["latn"],
+    "nl": ["latn"],
+    "ru": ["latn", "cyrl"],
+    "el": ["latn", "grek"],
+    "ar": ["latn", "arab"],
+    "th": ["latn", "thai"],
+    "hi": ["latn", "deva"]
+  }
+}

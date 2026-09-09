@@ -8,27 +8,33 @@
 ## 1. 폰트 정의
 
 - **기본 폰트 (default font)**
-  - 파일(등록 기준): `assets/fonts/ChironHeiHK-VariableFont_wght.ttf` (풀 가변, `wght` 200–900)
-  - `pubspec.yaml` 상의 패밀리명: `ChironHeiHK` (코드의 `fontFamily`와 동일. 파일 내부 name table의 `Chiron Hei HK ExtraLight`가 아님)
+  - 패밀리명: `ChironHeiHK` (코드의 `fontFamily`와 동일. 파일 내부 name table의 `Chiron Hei HK ExtraLight`가 아님)
+  - 원본(재생·CDN): `assets/fonts/ChironHeiHK-VariableFont_wght.ttf` (풀 가변, `wght` 200–900). APK에는 넣지 않음.
   - 용도: 앱 내 대부분 텍스트 (heading, body, caption)
 
 - **버튼 폰트 (button font)**
-  - 파일(등록 기준): `assets/fonts/ChironGoRoundTC-VariableFont_wght.ttf` (풀 가변, `wght` 200–900)
-  - `pubspec.yaml` 상의 패밀리명: `ChironGoRoundTC` (코드의 `fontFamily`와 동일)
-  - 용도: 버튼 계열 위젯(TextButton, ElevatedButton 등)의 텍스트
+  - 패밀리명: `ChironGoRoundTC` (코드의 `fontFamily`와 동일)
+  - 원본(재생·CDN): `assets/fonts/ChironGoRoundTC-VariableFont_wght.ttf` (풀 가변, `wght` 200–900). APK에는 넣지 않음.
+  - 용도: 버튼 계열 위젯(TextButton, ElevatedButton 등)의 텍스트. CJK는 `fontFamilyFallback: ['ChironHeiHK']`.
 
 - **등록 방식**
-  - 패밀리당 가변 TTF 1파일. `pubspec`에는 기존과 같이 weight 400/600/700 슬롯을 같은 파일에 매핑 (에셋은 경로 1회 패키징).
-  - subset 정적 파일(`*-subset-w400/600/700.ttf`)은 사용하지 않음.
-  - 기동: `AppFontPreload`가 두 패밀리를 `loadFontFromList`로 `runApp` 전에 등록. AOS는 `androidResources.noCompress += ttf`. 스플래시 해제는 JWT 경로.
-  - 커버리지: 라틴·한글·일·한자·키릴·그리스·베트남/폴란드 확장. **아랍·데바나가리(힌디)·태국 글리프는 이 두 패밀리에 없음** → 해당 locale은 시스템 폴백.
+  - subset 정적 파일(`*-subset-w400/600/700.ttf`)은 사용하지 않음. **스크립트 팩**(가변 wght 유지, 글리프만 자름)은 `scripts/fonts/`.
+  - 기동: `FontPackService` (`lib/services/font_pack_service.dart`). `pubspec` `fonts:` 풀 VF 매핑 없음. AOS는 `androidResources.noCompress += ttf` 유지(SUDA-1042 zlib inflate). 스플래시 해제는 JWT 경로.
+  - 커버리지: 라틴·한글·일·한자·키릴·그리스·베트남/폴란드 확장. **아랍·데바나가리(힌디)·태국 글리프는 이 두 패밀리에 없음** → 해당 locale은 시스템 폴백. 팩 `arab`/`thai`/`deva`는 파이프라인에만 있고 CDN 미배포.
+  - **CDN 파이프라인 (중요):** 원본·팩은 `AppConfig.cdnBaseUrl` + 아래 path. **2026-09-09 확인:** dev·prd 모두 HTTP 200, TTF magic `00010000`, 로컬 `build/font-packs/v1`·`assets/fonts`와 byte 일치. 팩 수정/재생산은 같은 path를 덮어쓴다.
+    - 호스트: local/dev/stg `https://cdn.dev-sudatalk.kr` · prd `https://cdn.sudatalk.kr`
+    - 원본: `{cdn}/fonts/source/ChironHeiHK-VariableFont_wght.ttf` (30378192), `{cdn}/fonts/source/ChironGoRoundTC-VariableFont_wght.ttf` (48540320)
+    - 팩: `{cdn}/fonts/packs/v1/{Family}-{packId}.ttf` (`scripts/fonts/packs.json`). 업로드된 팩: HeiHK `latn,hang,jpan,hani,cyrl,grek` · GoRound `latn,hang,jpan,cyrl` (arab/thai/deva·GoRound-grek는 원본 글리프 없음 → 미업로드)
+    - 재생: `python3 scripts/fonts/generate_packs.py` → `build/font-packs/v1/` → 동일 path 덮어쓰기(또는 `version` 올리고 json·이 절 갱신)
+    - GoRound는 `hani` 팩 없음. CJK 버튼은 `fontFamilyFallback: ['ChironHeiHK']`.
+    - locale→팩: `packs.json` `localePacks` = `lib/config/font_pack_catalog.dart`.
+    - **런타임 (2026-09-09):** APK는 `assets/fonts/packs/*-latn.ttf`만 포함(~0.5MB×2). 풀 VF는 `assets/fonts/`에 재생용으로만 두고 `pubspec` 미등록. `FontPackService`가 디바이스 locale로 CDN 팩을 documents `fonts/v1/`에 캐시하고 같은 family로 `FontLoader` 등록. 기동 네트워크는 최대 4초. AOS `noCompress ttf` 유지. 스플래시 해제는 JWT 경로.
 
 - **가변폰트(weight) 적용 규칙**
   - 두 폰트 모두 `fvar`의 `wght` 축(200~900)을 가진 **가변폰트**이므로, `fontWeight`만으로는 체감 굵기가 부족할 수 있다.
   - 전역 `TextTheme`/버튼 `textStyle`에서는 `fontWeight`와 함께 `fontVariations: [FontVariation('wght', <동일값>)]`를 명시한다. (구현: `lib/theme/app_theme.dart`)
 
-폰트 로딩은 `pubspec.yaml`의 `flutter/fonts` 섹션, `AppFontPreload`(`runApp` 전),  
-`lib/theme/app_theme.dart`의 `ThemeData`에서 설정합니다.
+폰트 로딩은 `FontPackService` + `lib/theme/app_theme.dart`의 `ThemeData`. 팩 재생·CDN path는 위 **CDN 파이프라인**.
 
 ---
 
@@ -118,7 +124,7 @@ Text('더 작은 보조', style: theme.labelMini);   // body-tiny2 (extension)
   - `outlinedButtonTheme` (w400)
   - `textButtonTheme` (w400)
 - 공통 규칙:
-  - 폰트 패밀리: `ChironGoRoundTC`
+  - 폰트 패밀리: `ChironGoRoundTC` (`fontFamilyFallback: ChironHeiHK`)
   - 굵기: 각 테마 설정 참조
   - 크기: 기본적으로 Theme 값을 사용하며, 특수 케이스만 override
 

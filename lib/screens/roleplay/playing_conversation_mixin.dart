@@ -1,4 +1,4 @@
-import 'dart:async' show StreamSubscription, unawaited;
+import 'dart:async' show StreamSubscription, TimeoutException, unawaited;
 import 'dart:io';
 import 'dart:math' as math;
 import 'dart:typed_data';
@@ -266,8 +266,15 @@ mixin PlayingConversationMixin<T extends StatefulWidget> on State<T> {
     _voiceSeq++;
     _aiPlaybackSub?.cancel();
     _aiPlaybackSub = null;
+    await _stopPlayingAudioPlayer();
+  }
+
+  /// Opening AOS briefing `stop()`과 같은 2s. hang 시 턴/힌트가 영구 대기하지 않음.
+  Future<void> _stopPlayingAudioPlayer() async {
     try {
-      await _audioPlayer.stop();
+      await _audioPlayer.stop().timeout(const Duration(seconds: 2));
+    } on TimeoutException {
+      debugPrint('[DEBUG] RpS2 Playing audio stop timeout');
     } catch (_) {}
   }
 
@@ -403,7 +410,7 @@ mixin PlayingConversationMixin<T extends StatefulWidget> on State<T> {
     required String? cdnPath,
     required Uint8List? soundBytes,
   }) async {
-    await _audioPlayer.stop();
+    await _stopPlayingAudioPlayer();
     if (cdnYn == 'Y' && cdnPath != null && cdnPath.isNotEmpty) {
       final url = '${AppConfig.cdnBaseUrl}$cdnPath';
       final source = AudioSource.uri(Uri.parse(url));

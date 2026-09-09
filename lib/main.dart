@@ -21,7 +21,7 @@ import 'services/version_check_service.dart';
 import 'services/token_refresh_service.dart';
 import 'services/appsflyer_service.dart';
 import 'services/main_user_sync.dart';
-import 'services/app_font_preload.dart';
+import 'services/font_pack_service.dart';
 import 'services/perf_monitoring_service.dart';
 import 'services/series_state_service.dart';
 import 'routes/roleplay_router.dart';
@@ -68,8 +68,13 @@ void main() async {
   print('[BOOT] main() start');
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
 
-  print('[BOOT] font preload start');
-  final fontsFuture = AppFontPreload.load();
+  print('[BOOT] font packs ...');
+  try {
+    await FontPackService.instance.loadForCurrentLocale();
+    print('[BOOT] font packs ready');
+  } catch (e) {
+    print('[BOOT] font packs failed: $e — continuing');
+  }
 
   // 앱 방향을 세로로 고정
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
@@ -109,13 +114,6 @@ void main() async {
     print('[BOOT] getInitialMessage() timed out — continuing');
   } catch (e) {
     print('[BOOT] getInitialMessage() failed: $e — continuing');
-  }
-
-  try {
-    await fontsFuture;
-    print('[BOOT] font preload done');
-  } catch (e) {
-    print('[BOOT] font preload failed: $e — continuing');
   }
 
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);

@@ -67,6 +67,7 @@ dependencies:
   crypto: ^3.0.7
   firebase_performance: ^0.10.1+10
   sign_in_with_apple: ^7.0.1
+  path_provider: ^2.1.5
 
 dev_dependencies:
   flutter_test:
@@ -99,7 +100,7 @@ flutter:
     - assets/images/icons/
     - assets/images/buttons/
     - assets/images/tutorial/
-    - assets/fonts/
+    - assets/fonts/packs/
     - assets/sounds/
 
   # An image asset can refer to one or more resolution-specific "variants", see
@@ -108,27 +109,7 @@ flutter:
   # For details regarding adding assets from package dependencies, see
   # https://flutter.dev/to/asset-from-package
 
-  # 커스텀 폰트 정의
-  fonts:
-    # 기본 텍스트용 폰트 (default font)
-    - family: ChironHeiHK
-      fonts:
-        - asset: assets/fonts/ChironHeiHK-VariableFont_wght.ttf
-          weight: 400
-        - asset: assets/fonts/ChironHeiHK-VariableFont_wght.ttf
-          weight: 600
-        - asset: assets/fonts/ChironHeiHK-VariableFont_wght.ttf
-          weight: 700
-
-    # 버튼 전용 폰트 (button font)
-    - family: ChironGoRoundTC
-      fonts:
-        - asset: assets/fonts/ChironGoRoundTC-VariableFont_wght.ttf
-          weight: 400
-        - asset: assets/fonts/ChironGoRoundTC-VariableFont_wght.ttf
-          weight: 600
-        - asset: assets/fonts/ChironGoRoundTC-VariableFont_wght.ttf
-          weight: 700
+  # 패밀리 등록은 FontPackService (번들 latn + CDN 팩). 풀 가변 원본은 APK에 넣지 않음.
 
 # Flutter Launcher Icons 설정
 flutter_launcher_icons:
