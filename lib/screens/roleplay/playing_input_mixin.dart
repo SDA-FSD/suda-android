@@ -1028,10 +1028,13 @@ mixin PlayingInputMixin<T extends StatefulWidget>
     if (!_isRecording) return null;
     try {
       if (discard) {
-        await _recorder.cancel();
+        await _recorder.cancel().timeout(const Duration(seconds: 2));
         return null;
       }
-      return await _recorder.stop();
+      return await _recorder.stop().timeout(const Duration(seconds: 2));
+    } on TimeoutException {
+      debugPrint('[DEBUG] S2 recording stop timeout discard=$discard');
+      return null;
     } catch (e, st) {
       debugPrint('[DEBUG] S2 recording stop error: $e\n$st');
       return null;
