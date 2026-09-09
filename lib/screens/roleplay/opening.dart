@@ -74,12 +74,13 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen> {
     super.dispose();
   }
 
+  /// Playing 오디오·녹음과 같은 2s. hang 시 Start/이탈이 영구 대기하지 않음.
   Future<void> _stopBriefingAudio() async {
     try {
-      await _briefingAudioPlayer.stop();
-    } catch (_) {
-      // ignore
-    }
+      await _briefingAudioPlayer.stop().timeout(const Duration(seconds: 2));
+    } on TimeoutException {
+      debugPrint('[DEBUG] Opening briefing stop timeout');
+    } catch (_) {}
   }
 
   /// language tag → languageCode → `en`. 없으면 재생하지 않음(다른 언어로 폴백하지 않음).
@@ -232,15 +233,7 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen> {
         _restoreButton();
         return;
       }
-      if (Platform.isIOS) {
-        await _stopBriefingAudio();
-      } else {
-        try {
-          await _stopBriefingAudio().timeout(const Duration(seconds: 2));
-        } on TimeoutException {
-          debugPrint('[DEBUG] Opening briefing stop timeout (AOS)');
-        } catch (_) {}
-      }
+      await _stopBriefingAudio();
       if (!context.mounted) {
         _restoreButton();
         return;
