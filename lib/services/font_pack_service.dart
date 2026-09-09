@@ -35,7 +35,7 @@ class FontPackService {
     try {
       await download.timeout(_bootDownloadWait);
     } on TimeoutException {
-      debugPrint('[DEBUG] FontPack boot wait elapsed; remaining packs continue');
+      // 기동은 latn(+캐시)으로 진행. 나머지 팩은 같은 Future가 이어서 등록.
     }
   }
 
@@ -102,7 +102,6 @@ class FontPackService {
     await PaintingBinding.instance.handleSystemMessage(
       <String, dynamic>{'type': 'fontsChange'},
     );
-    debugPrint('[DEBUG] FontPack family $family packs=$packIds');
   }
 
   Future<Uint8List?> _readPackBytes(String family, String packId) async {

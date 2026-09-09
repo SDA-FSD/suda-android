@@ -68,12 +68,10 @@ void main() async {
   print('[BOOT] main() start');
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
 
-  print('[BOOT] font packs ...');
   try {
     await FontPackService.instance.loadForCurrentLocale();
-    print('[BOOT] font packs ready');
   } catch (e) {
-    print('[BOOT] font packs failed: $e — continuing');
+    debugPrint('[DEBUG] FontPack boot failed: $e');
   }
 
   // 앱 방향을 세로로 고정
