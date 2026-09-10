@@ -2,12 +2,10 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' show ImageFilter;
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:shimmer/shimmer.dart';
-import '../config/app_config.dart';
 import '../l10n/app_localizations.dart';
 import '../models/series_models.dart';
 import '../services/auth_service.dart';
@@ -22,6 +20,7 @@ import '../utils/default_toast.dart';
 import '../utils/sub_screen_route.dart';
 import '../widgets/default_popup.dart';
 import '../widgets/app_scaffold.dart';
+import '../widgets/cdn_thumb_image.dart';
 import '../widgets/gnb_bar.dart';
 import '../widgets/level_progress_bar.dart';
 import '../widgets/suda_label_tabs.dart';
@@ -1479,9 +1478,7 @@ class _HistoryThumbnail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context).textTheme;
-    final imageUrl = item.imgPath != null && item.imgPath!.isNotEmpty
-        ? '${AppConfig.cdnBaseUrl}${item.imgPath}'
-        : null;
+    final imagePath = item.imgPath;
     final starResult = item.starResult ?? 0;
     final goldCount = starResult.clamp(0, 3);
     final starSize = (width * 0.4) / 3;
@@ -1490,9 +1487,10 @@ class _HistoryThumbnail extends StatelessWidget {
 
     final imageWidget = ClipRRect(
       borderRadius: BorderRadius.circular(10),
-      child: imageUrl != null
-          ? CachedNetworkImage(
-              imageUrl: imageUrl,
+      child: imagePath != null && imagePath.isNotEmpty
+          ? CdnThumbImage(
+              path: imagePath,
+              slot: CdnThumbSlot.profileHistory,
               width: width,
               height: height,
               fit: BoxFit.cover,

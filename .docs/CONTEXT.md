@@ -138,6 +138,9 @@ flutter run --flavor dev -t lib/main.dart --dart-define=ENV=dev -d 541F3961-8182
 ## 6. 스토리지
 - **캐시** (`getTemporaryDirectory` 등): 다시 받을 수 있는 것. OS/캐시삭제로 사라져도 됨. **이미지 작업 전 캐시 사용 여부 확인**
 - **보존** (`getApplicationDocumentsDirectory` / SharedPreferences): 녹음·설정 등. 로그아웃/초기화 때만 삭제
+- **CDN 썸네일** (`lib/utils/cdn_thumbnail.dart`, `lib/widgets/cdn_thumb_image.dart`): 원본 path `…/zj66s0.png` → `{stem}_{size}.{ext}` (`_300` 현행, `_150`/`_500` enum 예약) 후 `cdnBaseUrl` prepend. 파생 파일이 없으면 원본. 슬롯 `CdnThumbSlot`→`CdnThumbSize`.
+  - **작은 노출** (`CdnThumbImage`): Home 가로 행·Similar Topic 3열(`HomeSeriesDto.thumbnailImgPath`)·Episode 탭 좌측 카드(`RpS2SeriesEpisodeDto.thumbnailImgPath`)·Profile 히스토리 그리드(`RpS2SimpleHistoryDto.imgPath`, 프로필 아바타 아님).
+  - **배경**(Overview 히어로·Information·Opening/Playing `RoleplayOverviewBackdrop`): 원본. 메모리에 원본 있으면 즉시 원본, 없으면 `_300` 메모리 히트만 placeholder로 먼저 노출 후 원본 도착 즉시 교체. `_300` 추가 GET 없음.
 
 ## 7. 스크린
 상세: `CONTEXT_SCREEN.md`. 스크린 작업 시 그쪽도 갱신.

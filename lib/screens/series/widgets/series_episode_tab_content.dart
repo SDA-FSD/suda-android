@@ -1,12 +1,11 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../../../config/app_config.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../models/series_models.dart';
 import '../../../utils/default_toast.dart';
 import '../../../utils/suda_json_util.dart';
+import '../../../widgets/cdn_thumb_image.dart';
 
 enum _EpisodePlayButtonKind { replay, unlock, locked }
 
@@ -151,9 +150,6 @@ class _SeriesEpisodeTabContentState extends State<SeriesEpisodeTabContent> {
     required int starCount,
   }) {
     final imageHeight = width * 1.35;
-    final imageUrl = thumbnailPath != null && thumbnailPath.isNotEmpty
-        ? '${AppConfig.cdnBaseUrl}$thumbnailPath'
-        : null;
 
     return SizedBox(
       width: width,
@@ -163,10 +159,11 @@ class _SeriesEpisodeTabContentState extends State<SeriesEpisodeTabContent> {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            imageUrl == null
+            thumbnailPath == null || thumbnailPath.isEmpty
                 ? const ColoredBox(color: Color(0xFF353535))
-                : CachedNetworkImage(
-                    imageUrl: imageUrl,
+                : CdnThumbImage(
+                    path: thumbnailPath,
+                    slot: CdnThumbSlot.episodeCard,
                     fit: BoxFit.cover,
                     width: width,
                     height: imageHeight,

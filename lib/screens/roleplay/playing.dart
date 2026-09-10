@@ -3,7 +3,6 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-import '../../config/app_config.dart';
 import '../../l10n/app_localizations.dart';
 import '../../routes/roleplay_router.dart';
 import '../../services/series_state_service.dart';
@@ -550,9 +549,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
         : SudaJsonUtil.localizedMapText(episode.title);
 
     final thumbnailPath = episode?.thumbnailImgPath;
-    final backdropUrl = (thumbnailPath != null && thumbnailPath.isNotEmpty)
-        ? '${AppConfig.cdnBaseUrl}$thumbnailPath'
-        : null;
+    final hasBackdrop = thumbnailPath != null && thumbnailPath.isNotEmpty;
     final topInset = MediaQuery.of(context).padding.top;
     final bottomInset = MediaQuery.paddingOf(context).bottom;
     const systemChromeColor = Color(0xFF121212);
@@ -565,9 +562,9 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
       child: Stack(
         fit: StackFit.expand,
         children: [
-          if (backdropUrl != null)
+          if (hasBackdrop)
             Positioned.fill(
-              child: RoleplayOverviewBackdrop(imageUrl: backdropUrl),
+              child: RoleplayOverviewBackdrop(imagePath: thumbnailPath),
             ),
           if (topInset > 0)
             Positioned(
@@ -586,7 +583,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
               child: const ColoredBox(color: systemChromeColor),
             ),
           RoleplayScaffold(
-            backgroundColor: backdropUrl != null ? Colors.transparent : null,
+            backgroundColor: hasBackdrop ? Colors.transparent : null,
             showCloseButton: widget.showCloseButton,
             onClose: _handleBackButton,
             title: title.isEmpty ? null : title,

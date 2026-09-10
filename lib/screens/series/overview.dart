@@ -1,11 +1,9 @@
 import 'dart:async' show unawaited;
 import 'dart:ui' show ImageFilter;
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../../config/app_config.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/series_models.dart';
 import '../../services/main_user_sync.dart';
@@ -18,6 +16,7 @@ import '../../utils/english_level_util.dart';
 import '../../utils/suda_json_util.dart';
 import '../../utils/sub_screen_route.dart';
 import '../../widgets/app_scaffold.dart';
+import '../../widgets/cdn_thumb_image.dart';
 import '../../widgets/suda_label_tabs.dart';
 import '../../navigation/app_route_observer.dart';
 import '../../routes/roleplay_router.dart';
@@ -603,8 +602,8 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
                     height: heroHeight,
                     color: scaffoldBackground,
                   )
-                : CachedNetworkImage(
-                    imageUrl: '${AppConfig.cdnBaseUrl}$thumbnailPath',
+                : CdnProgressiveNetworkImage(
+                    path: thumbnailPath,
                     width: double.infinity,
                     height: heroHeight,
                     fit: BoxFit.cover,

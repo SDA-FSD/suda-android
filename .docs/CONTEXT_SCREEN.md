@@ -225,8 +225,8 @@
   - `onNavigateToProfile` 콜백 호출 → `_MyAppState._navigateToProfile()` 실행 → 상태 업데이트로 전환
 - **SeriesOverviewScreen** (Sub): Home 시리즈 썸네일 탭 시 `SeriesRouter.pushOverview`. `lib/screens/series/overview.dart`.
   - 진입 시 `GET /rps2/series/{seriesId}/overview` (`SudaApiClient.getSeriesOverview`) → `RpS2SeriesOverviewDto` 파싱.
-  - **레이아웃**(rp overview와 동일 골격): `Scaffold`+`Stack` — 상단 배경 `thumbnailImgPath`(CDN, 너비×**60%** 높이)·히어로 그라데이션·스크롤 본문(`information.png` 24×24(타이틀 **상단** 좌측·탭 → `SeriesInformationScreen`) → 타이틀 `headlineSmall` → gap 4 → `synopsisComplexityLevel` 태그 → 진행률 바(l10n `seriesOverviewCompletionPercent`) → gap 8 → `synopsis`)·**플로팅 헤더**(좌 뒤로가기: 히트 40·암점 원 28 RadialGradient 검정 중앙 α0.22→투명 / 우 언어레벨 pill: liquid glass 24h — `ClipRRect` pill, `BackdropFilter` blur 12, white α0.14~0.22 gradient(좌상 밝음/우하 어두움), border white α0.36, shadow blur 10 offset (0,2), `ENGLISH_LEVEL` l10n 라벨, 탭 → `CefrLevelScreen`) 스크롤 시 타이틀 상단 도달하면 fade-out. §5 이후(에피소드 등) 추후.
-- **SeriesInformationScreen** (Sub Screen, **S2**): Overview information 탭 → `SubScreenRoute` (`lib/screens/series/series_information.dart`). 부모가 로드한 `RpS2SeriesOverviewDto`·`UserDto` 전달(API 재호출 없음). 헤더: Setting 계열 `AppScaffold`(좌 뒤로가기·우측 없음)+커스텀 중앙 title(`headlineSmall`·좌우 inset 40·max 2줄·`bodyTopPadding` 타이틀 높이 연동). 배경: `RoleplayOverviewBackdrop`(thumbnail CDN·Opening과 동일 blur/dim). 본문: synopsis(bodySmall·justify) → gap10 → blockquote(좌 #353535 3px)·언어레벨·주제난이도(scl) → gap20 → 학습목표(headlineSmall) → gap10 → 에피소드별 learningFunction+#N title(gap10)·핵심 표현 불릿(`missions[].keyExpression` **en** 고정, 사용자 언어 미사용).
+  - **레이아웃**(rp overview와 동일 골격): `Scaffold`+`Stack` — 상단 배경 `thumbnailImgPath`(원본 CDN, 너비×**60%** 높이. 메모리 `_300`이 있으면 먼저 노출 후 원본 즉시 교체)·히어로 그라데이션·스크롤 본문(`information.png` 24×24(타이틀 **상단** 좌측·탭 → `SeriesInformationScreen`) → 타이틀 `headlineSmall` → gap 4 → `synopsisComplexityLevel` 태그 → 진행률 바(l10n `seriesOverviewCompletionPercent`) → gap 8 → `synopsis`)·**플로팅 헤더**(좌 뒤로가기: 히트 40·암점 원 28 RadialGradient 검정 중앙 α0.22→투명 / 우 언어레벨 pill: liquid glass 24h — `ClipRRect` pill, `BackdropFilter` blur 12, white α0.14~0.22 gradient(좌상 밝음/우하 어두움), border white α0.36, shadow blur 10 offset (0,2), `ENGLISH_LEVEL` l10n 라벨, 탭 → `CefrLevelScreen`) 스크롤 시 타이틀 상단 도달하면 fade-out. Episode 탭 좌측 카드·Similar Topic 3열은 `CdnThumbImage`(`_300`). §5 이후(에피소드 등) 추후.
+- **SeriesInformationScreen** (Sub Screen, **S2**): Overview information 탭 → `SubScreenRoute` (`lib/screens/series/series_information.dart`). 부모가 로드한 `RpS2SeriesOverviewDto`·`UserDto` 전달(API 재호출 없음). 헤더: Setting 계열 `AppScaffold`(좌 뒤로가기·우측 없음)+커스텀 중앙 title(`headlineSmall`·좌우 inset 40·max 2줄·`bodyTopPadding` 타이틀 높이 연동). 배경: 시리즈 thumbnail 원본(메모리 `_300` 있으면 먼저)·Opening과 동일 blur/dim. 본문: synopsis(bodySmall·justify) → gap10 → blockquote(좌 #353535 3px)·언어레벨·주제난이도(scl) → gap20 → 학습목표(headlineSmall) → gap10 → 에피소드별 learningFunction+#N title(gap10)·핵심 표현 불릿(`missions[].keyExpression` **en** 고정, 사용자 언어 미사용).
 
 ### 스크린 내부 구현 특이사항
 - **스크린 타입 특성**: Main Screen
@@ -246,7 +246,7 @@
       - `MainHomeBannerDto.appPath`가 있으면 배너 탭 시 기존 appPath 규칙으로 화면 이동
     - **시리즈 카테고리** (S2):
       - 구성: 카테고리명(h3, `HomeCategoryDto.name` Map) + 가로 스크롤 썸네일 리스트
-      - 썸네일: 30% 너비, radius 10, 음영 박스 오버레이 타이틀 (`HomeSeriesDto.title` Map)  
+      - 썸네일: 30% 너비, radius 10, 음영 박스 오버레이 타이틀 (`HomeSeriesDto.title` Map). 이미지는 `CdnThumbSlot.seriesRow`(`_300`, 없으면 원본).  
         (텍스트가 영역을 초과할 때만 Marquee 적용)
       - 기능: 레이지 로딩(페이징) 지원, 로딩 중 Shimmer 스켈레톤 노출
       - 탭: `SeriesOverviewScreen` (Sub)
@@ -326,7 +326,7 @@
     - **글로우 애니메이션**: progress 기반 좌우 왕복(easeInOut 2.4~3.8s/leg). Glow1 별(왼)→오른끝→홈, Glow2 혜택보기(오른)→왼끝→홈. 횡단 중 Y 튕김 0~3회 랜덤 + bob. 소스: `paywall_star_badge.png` blur σ10, opacity ~0.55
     - 탭: pill 전체 → `PaywallScreen.push` → 성공 시 `getUserEnergySimple` 재조회 후 CTA 숨김
     - Profile 탭 활성·복귀 시 `getUserEnergySimple`로 구독 상태 갱신
-- **Profile 히스토리 (S2)**: `GET /rps2/user-histories?pageNum=` (0-based 페이징). 썸네일 3열 그리드 — `imgPath`·`starResult`·`createdAt`(dd/mm) 기존과 동일. 상단 좌측 **CEFR 알약** + 우측 별 3개. 탭 시 `HistoryScreen(rpUserHistoryId)` → `GET /rps2/user-histories/{id}` 후 Result 본문(애니메이션 없음).
+- **Profile 히스토리 (S2)**: `GET /rps2/user-histories?pageNum=` (0-based 페이징). 썸네일 3열 그리드 — `imgPath`(`CdnThumbSlot.profileHistory` `_300`, 없으면 원본)·`starResult`·`createdAt`(dd/mm) 기존과 동일. 상단 좌측 **CEFR 알약** + 우측 별 3개. 탭 시 `HistoryScreen(rpUserHistoryId)` → `GET /rps2/user-histories/{id}` 후 Result 본문(애니메이션 없음).
 - **Saved 표현 (Expression 탭)**: 목록 `GET /v1/users/expressions?pageNum=` · 카드 탭 TTS `GET /rps2/user-histories/{rpUserHistoryId}/expressions/{expressionIndex}/sound` (`roleplayResultId` → `rpUserHistoryId`, `TtsResultDto`) · 삭제 `DELETE /v1/users/expressions?rpResultId=…&expressionIndex=…`. 카드 배경 기본·재생 모두 `#FFFFFF`. 오디오 fetch 중 16×16 `CircularProgressIndicator`(strokeWidth 2, `#0CABA8` 70%), 재생 중 `megaphone_fill.png` `#0CABA8`, 기본 `megaphone.png` `#0CABA8`(Result Key Expression 카드와 동일). iOS 재생은 Result와 동일 `SudaTtsAudioPlayer`.
 - **Saved 표현 삭제 확인 팝업**: Saved 탭의 expression 카드에서 `bookmark_on` 탭 시 `DefaultPopup`으로 삭제 confirm 팝업을 띄운다. 상단 버튼(삭제/Remove) 탭 시 팝업을 닫고 `DELETE /v1/users/expressions`를 호출해 목록에서 제거, 하단 버튼(Practice more/더 연습할래요) 탭 시 팝업만 닫는다.
 - **Props**:
@@ -677,7 +677,7 @@
 - **RoleplayPlayingScreen**: Start 성공 시 `replaceWithPlaying`
 
 ### 스크린 내부 구현 특이사항
-- 배경: episode `thumbnailImgPath` → `RoleplayOverviewBackdrop`. 본문: `aiCharacter.name` + briefing(`DefaultMarkdown`). duration 없음.
+- 배경: episode `thumbnailImgPath` 원본 → `RoleplayOverviewBackdrop`. 본문: `aiCharacter.name` + briefing(`DefaultMarkdown`). duration 없음.
 - 시스템 뒤로가기: Opening 제거, Series Overview 노출
 - 우상단 `EnergyHeaderBadge` — Home과 동일(충전·무제한 타이머 포함)
 - **Briefing TTS**: episode `briefingAudio`(언어→CDN path). 진입 첫 프레임 후 language tag(`ko-KR`)→languageCode(`ko`)→`en` 순으로 path 선택·`cdnBaseUrl` prepend·`just_audio` 자동재생. 없으면 스킵(다른 언어로 폴백 없음). 이탈/Playing 전환 시 즉시 stop. **`_stopBriefingAudio` 2s timeout**(AOS·iOS Start 공통. hang이 Playing 진입을 막지 않음). iOS dispose는 `IosAudioTeardown`. 재진입 시 다시 재생.
@@ -709,7 +709,7 @@
 - **Ending/Try Again/Result 계열**: S2 result 호출·이동은 아직 미구현. 현재 `requiredSpeechCount` 도달 후 응답 `narration`·`aiText`가 모두 비어 있을 때 `roleplayAnalyzing` 서비스 메시지 blink까지만 수행한다. 응답 본문이 있으면 정상 대화 루프를 계속 처리한다.
 
 ### 스크린 내부 구현 특이사항
-- `SeriesStateService.selectedEpisode` 기반. 배경은 episode `thumbnailImgPath`, 헤더 타이틀은 episode `title`(`bodySmall` w700·1줄 말줄임), 본문은 `briefing`·`aiCharacter.name`. 헤더 슬롯 높이 **60**, duration 없음. 타이틀은 X·kebab과 동일 밴드(top 16·height 40) 세로 중앙(`centerTitleInHeaderActionRow`).
+- `SeriesStateService.selectedEpisode` 기반. 배경은 episode `thumbnailImgPath` 원본, 헤더 타이틀은 episode `title`(`bodySmall` w700·1줄 말줄임), 본문은 `briefing`·`aiCharacter.name`. 헤더 슬롯 높이 **60**, duration 없음. 타이틀은 X·kebab과 동일 밴드(top 16·height 40) 세로 중앙(`centerTitleInHeaderActionRow`).
 - 헤더 좌측 X/시스템 뒤로가기: 나가기 확인 레이어 노출, 확인 시 `/series/overview`까지 pop. 우측 `kebab.png`는 설정패널 토글(오토힌트, 음성 속도).
 - `RoleplayScaffold.belowHeader`에 S2 턴바 영역 표시. `requiredSpeechCount`개 턴박스를 렌더링하고, 사용자 발화 응답 `userGrade` A/B/C/D에 따라 색상·라벨 효과 후 40% opacity 상태로 남긴다.
 - 본문은 상단 고정 미션 패널 + 스크롤 대화 영역. 대화 entry는 AI/User/Narration 타입이며 힌트는 별도 bubble로 append된다. 힌트 텍스트 조회 `GET /rps2/sessions/{id}/hint/{rpMsgId}`는 202 not-ready 시 최대 15회 재시도. AI 말풍선은 번역 아이콘과 `GET /rps2/sessions/{id}/translation?index=`를 사용한다.

@@ -1,15 +1,14 @@
 import 'dart:async' show unawaited;
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:marquee/marquee.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../../../config/app_config.dart';
 import '../../../routes/series_router.dart';
 import '../../../services/suda_api_client.dart';
 import '../../../services/token_storage.dart';
 import '../../../utils/suda_json_util.dart';
+import '../../../widgets/cdn_thumb_image.dart';
 
 /// Series Overview Similar Topic 탭 — 카테고리 시리즈 3열 그리드 + 페이징.
 class SeriesSimilarTopicTabContent extends StatefulWidget {
@@ -360,8 +359,6 @@ class _SimilarSeriesThumbnail extends StatelessWidget {
   Widget build(BuildContext context) {
     final title = SudaJsonUtil.localizedMapText(item.title);
     final path = item.thumbnailImgPath;
-    final imageUrl =
-        path != null && path.isNotEmpty ? '${AppConfig.cdnBaseUrl}$path' : null;
     final textStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
           color: Colors.white,
           fontSize: 12,
@@ -377,9 +374,10 @@ class _SimilarSeriesThumbnail extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(10),
-              child: imageUrl != null
-                  ? CachedNetworkImage(
-                      imageUrl: imageUrl,
+              child: path != null && path.isNotEmpty
+                  ? CdnThumbImage(
+                      path: path,
+                      slot: CdnThumbSlot.similarGrid,
                       width: width,
                       height: height,
                       fit: BoxFit.cover,

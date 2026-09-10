@@ -272,9 +272,7 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen> {
     final l10n = AppLocalizations.of(context)!;
 
     final thumbnailPath = episode?.thumbnailImgPath;
-    final backdropUrl = (thumbnailPath != null && thumbnailPath.isNotEmpty)
-        ? '${AppConfig.cdnBaseUrl}$thumbnailPath'
-        : null;
+    final hasBackdrop = thumbnailPath != null && thumbnailPath.isNotEmpty;
     final topInset = MediaQuery.paddingOf(context).top;
 
     return PopScope(
@@ -286,12 +284,12 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen> {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          if (backdropUrl != null)
+          if (hasBackdrop)
             Positioned.fill(
-              child: RoleplayOverviewBackdrop(imageUrl: backdropUrl),
+              child: RoleplayOverviewBackdrop(imagePath: thumbnailPath),
             ),
           RoleplayScaffold(
-            backgroundColor: backdropUrl != null ? Colors.transparent : null,
+            backgroundColor: hasBackdrop ? Colors.transparent : null,
             showCloseButton: widget.showCloseButton,
             title: title.isEmpty ? null : title,
             titleStyle: RoleplayScaffold.episodeTitleStyle(theme),

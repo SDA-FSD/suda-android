@@ -1,15 +1,14 @@
 import 'dart:ui' show ImageFilter;
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
-import '../../config/app_config.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/series_models.dart';
 import '../../models/user_models.dart';
 import '../../utils/english_level_util.dart';
 import '../../utils/suda_json_util.dart';
 import '../../widgets/app_scaffold.dart';
+import '../../widgets/cdn_thumb_image.dart';
 import '../../widgets/roleplay_overview_backdrop.dart'
     show kRoleplayOverviewBackdropBlurSigma;
 
@@ -40,7 +39,7 @@ class SeriesInformationScreen extends StatelessWidget {
 
   Widget _buildHeroBackground(
     BuildContext context, {
-    required String imageUrl,
+    required String imagePath,
     required double height,
   }) {
     final scaffoldBackground = Theme.of(context).scaffoldBackgroundColor;
@@ -57,14 +56,12 @@ class SeriesInformationScreen extends StatelessWidget {
                 sigmaX: kRoleplayOverviewBackdropBlurSigma,
                 sigmaY: kRoleplayOverviewBackdropBlurSigma,
               ),
-              child: CachedNetworkImage(
-                imageUrl: imageUrl,
+              child: CdnProgressiveNetworkImage(
+                path: imagePath,
                 width: double.infinity,
                 height: height,
                 fit: BoxFit.cover,
                 alignment: Alignment.center,
-                fadeInDuration: Duration.zero,
-                fadeOutDuration: Duration.zero,
                 placeholder: (context, url) =>
                     ColoredBox(color: scaffoldBackground),
                 errorWidget: (context, url, error) =>
@@ -296,9 +293,7 @@ class SeriesInformationScreen extends StatelessWidget {
     final seriesTitle = SudaJsonUtil.localizedMapText(overview.title);
     final synopsis = SudaJsonUtil.localizedMapText(overview.synopsis);
     final thumbnailPath = overview.thumbnailImgPath;
-    final backdropUrl = thumbnailPath != null && thumbnailPath.isNotEmpty
-        ? '${AppConfig.cdnBaseUrl}$thumbnailPath'
-        : null;
+    final hasBackdrop = thumbnailPath != null && thumbnailPath.isNotEmpty;
     final headerTitleStyle =
         theme.headlineSmall?.copyWith(color: Colors.white);
     final bodyTopPadding = _bodyTopPaddingForTitle(
@@ -314,14 +309,14 @@ class SeriesInformationScreen extends StatelessWidget {
       fit: StackFit.expand,
       children: [
         ColoredBox(color: scaffoldBackground),
-        if (backdropUrl != null)
+        if (hasBackdrop)
           Positioned(
             top: 0,
             left: 0,
             right: 0,
             child: _buildHeroBackground(
               context,
-              imageUrl: backdropUrl,
+              imagePath: thumbnailPath,
               height: heroHeight,
             ),
           ),

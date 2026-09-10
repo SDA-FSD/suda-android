@@ -16,6 +16,7 @@ import '../routes/series_router.dart';
 import '../utils/language_util.dart';
 import '../utils/suda_json_util.dart';
 import '../widgets/app_scaffold.dart';
+import '../widgets/cdn_thumb_image.dart';
 import '../widgets/energy_header_badge.dart';
 import '../widgets/gnb_bar.dart';
 import '../widgets/welcome_gift_layer.dart';
@@ -665,7 +666,7 @@ class SeriesThumbnail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final title = _getTitle();
-    final imageUrl = '${AppConfig.cdnBaseUrl}${item.thumbnailImgPath}';
+    final thumbnailPath = item.thumbnailImgPath;
     final textStyle = Theme.of(
       context,
     ).textTheme.bodySmall?.copyWith(color: Colors.white, fontSize: 12);
@@ -681,43 +682,57 @@ class SeriesThumbnail extends StatelessWidget {
               // 1. 이미지 영역 (상하좌우 radius 10 보장)
               ClipRRect(
                 borderRadius: BorderRadius.circular(10),
-                child: CachedNetworkImage(
-                  imageUrl: imageUrl,
-                  imageBuilder: (context, imageProvider) {
-                    if (onRendered != null) {
-                      WidgetsBinding.instance.addPostFrameCallback(
-                        (_) => onRendered!(),
-                      );
-                    }
-                    return Image(
-                      image: imageProvider,
-                      width: width,
-                      fit: BoxFit.fitWidth, // 너비 고정, 높이는 원본 비율에 따라 자동 결정
-                    );
-                  },
-                  placeholder: (context, url) => Shimmer.fromColors(
-                    baseColor: const Color(0xFF2A2A2A),
-                    highlightColor: const Color(0xFF3F3F3F),
-                    child: Container(
-                      width: width,
-                      height: width * 1.5, // 로딩 중 최소 높이 가이드
-                      color: Colors.white,
-                    ),
-                  ),
-                  errorWidget: (context, url, error) {
-                    if (onRendered != null) {
-                      WidgetsBinding.instance.addPostFrameCallback(
-                        (_) => onRendered!(),
-                      );
-                    }
-                    return Container(
-                      width: width,
-                      height: width * 1.5,
-                      color: Colors.grey[900],
-                      child: const Icon(Icons.broken_image, color: Colors.grey),
-                    );
-                  },
-                ),
+                child: thumbnailPath == null || thumbnailPath.isEmpty
+                    ? Container(
+                        width: width,
+                        height: width * 1.5,
+                        color: Colors.grey[900],
+                        child: const Icon(
+                          Icons.broken_image,
+                          color: Colors.grey,
+                        ),
+                      )
+                    : CdnThumbImage(
+                        path: thumbnailPath,
+                        slot: CdnThumbSlot.seriesRow,
+                        imageBuilder: (context, imageProvider) {
+                          if (onRendered != null) {
+                            WidgetsBinding.instance.addPostFrameCallback(
+                              (_) => onRendered!(),
+                            );
+                          }
+                          return Image(
+                            image: imageProvider,
+                            width: width,
+                            fit: BoxFit.fitWidth,
+                          );
+                        },
+                        placeholder: (context, url) => Shimmer.fromColors(
+                          baseColor: const Color(0xFF2A2A2A),
+                          highlightColor: const Color(0xFF3F3F3F),
+                          child: Container(
+                            width: width,
+                            height: width * 1.5,
+                            color: Colors.white,
+                          ),
+                        ),
+                        errorWidget: (context, url, error) {
+                          if (onRendered != null) {
+                            WidgetsBinding.instance.addPostFrameCallback(
+                              (_) => onRendered!(),
+                            );
+                          }
+                          return Container(
+                            width: width,
+                            height: width * 1.5,
+                            color: Colors.grey[900],
+                            child: const Icon(
+                              Icons.broken_image,
+                              color: Colors.grey,
+                            ),
+                          );
+                        },
+                      ),
               ),
               // 2. 오버레이 박스 (이미지 하단에 겹쳐서 노출)
               if (title.isNotEmpty)

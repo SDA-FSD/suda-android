@@ -152,7 +152,7 @@ Home (시리즈 썸네일)
 - **복귀 시 bestScore 갱신**: `RoleplayRouter.popToOverview` 직전 `markBestScoreRefreshPending` → Overview `RouteAware.didPopNext`에서 `GET .../best-score` 재조회(현재 CEFR 기준). CEFR 변경 후와 동일 API.
 - **로드 시**: `SeriesStateService.setSeriesOverview`, **`FIRST_OVERVIEW`** 통계 (`POST /v1/users/first-overview`, metaInfo `FIRST_OVERVIEW=Y` 가드)
 - **에피소드 Play**: `setSelectedEpisodeId(episode.id)` → `RoleplayRouter.pushTutorial`
-- **Similar Topic 탭**: `SeriesSimilarTopicTabContent` — `GET /v2/home/series?category=` 초기 0–2페이지 로드·스크롤 추가 페이징, 현재 series 제외, 3열 썸네일 탭 시 Overview push
+- **Similar Topic 탭**: `SeriesSimilarTopicTabContent` — `GET /v2/home/series?category=` 초기 0–2페이지 로드·스크롤 추가 페이징, 현재 series 제외, 3열 썸네일(`CdnThumbSlot.similarGrid`) 탭 시 Overview push
 
 ### 4-2. RoleplayTutorialScreen ✅ (S2 경로 연동)
 
@@ -166,7 +166,7 @@ Home (시리즈 썸네일)
 - **파일**: `lib/screens/roleplay/opening.dart`
 - **데이터**: `SeriesStateService.selectedEpisode` (`title`/`briefing`/`thumbnailImgPath`/`aiCharacter`)
 - **렌더**
-  - 배경: episode `thumbnailImgPath` → `RoleplayOverviewBackdrop`
+  - 배경: episode `thumbnailImgPath` 원본 → `RoleplayOverviewBackdrop` (메모리 `_300` 있으면 먼저, 원본 즉시 교체)
   - 헤더 타이틀: episode `title` (`SudaJsonUtil.localizedMapText`) · `bodySmall` **w700** · **1줄** 말줄임 — X 밴드(top 16·height 40) 세로 중앙(`centerTitleInHeaderActionRow`, `RoleplayScaffold.episodeTitleStyle`)
   - **우상단 에너지 배지**: `EnergyHeaderBadge` (`SafeArea top + 16`, `right: 16`) — Home과 동일 스펙·탭 시 `showEnergyInfoPopup`
   - **duration 없음** (S2)
@@ -196,7 +196,7 @@ Home (시리즈 썸네일)
 
 #### ✅ 이미 구현됨 (`playing.dart`)
 
-- `RoleplayScaffold` + episode `thumbnailImgPath` 배경
+- `RoleplayScaffold` + episode `thumbnailImgPath` 원본 배경 (`RoleplayOverviewBackdrop`)
 - **헤더**
   - 좌상 **X** → 나가기 확인 레이어
   - 중앙 **타이틀**: episode `title` (사용자 언어, fallback en) · `bodySmall` **w700** · **1줄** 말줄임
