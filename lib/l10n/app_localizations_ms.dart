@@ -265,7 +265,10 @@ class AppLocalizationsMs extends AppLocalizations {
   String get firstCefrLevelSettingsHint => 'Boleh ditukar pada bila-bila masa';
 
   @override
-  String get firstCefrLevelConfirm => 'Sahkan';
+  String get firstProfileImageTitle => 'Pilih gambar profil anda';
+
+  @override
+  String get actionConfirm => 'Sahkan';
 
   @override
   String get feedbackPlaceholder =>

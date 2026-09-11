@@ -265,7 +265,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get firstCefrLevelSettingsHint => 'İstediğin zaman değiştirebilirsin';
 
   @override
-  String get firstCefrLevelConfirm => 'Onayla';
+  String get firstProfileImageTitle => 'Profil resmini seç';
+
+  @override
+  String get actionConfirm => 'Onayla';
 
   @override
   String get feedbackPlaceholder =>

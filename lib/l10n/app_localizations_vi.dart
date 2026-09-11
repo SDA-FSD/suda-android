@@ -266,7 +266,10 @@ class AppLocalizationsVi extends AppLocalizations {
   String get firstCefrLevelSettingsHint => 'Bạn có thể thay đổi bất cứ lúc nào';
 
   @override
-  String get firstCefrLevelConfirm => 'Xác nhận';
+  String get firstProfileImageTitle => 'Chọn ảnh hồ sơ của bạn';
+
+  @override
+  String get actionConfirm => 'Xác nhận';
 
   @override
   String get feedbackPlaceholder =>

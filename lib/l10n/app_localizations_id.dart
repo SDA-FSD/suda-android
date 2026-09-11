@@ -264,7 +264,10 @@ class AppLocalizationsId extends AppLocalizations {
   String get firstCefrLevelSettingsHint => 'Bisa diubah kapan saja';
 
   @override
-  String get firstCefrLevelConfirm => 'Konfirmasi';
+  String get firstProfileImageTitle => 'Pilih foto profilmu';
+
+  @override
+  String get actionConfirm => 'Konfirmasi';
 
   @override
   String get feedbackPlaceholder =>

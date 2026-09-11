@@ -268,7 +268,10 @@ class AppLocalizationsFil extends AppLocalizations {
       'Maaari mo itong baguhin anumang oras';
 
   @override
-  String get firstCefrLevelConfirm => 'Kumpirmahin';
+  String get firstProfileImageTitle => 'Piliin ang iyong profile picture';
+
+  @override
+  String get actionConfirm => 'Kumpirmahin';
 
   @override
   String get feedbackPlaceholder =>

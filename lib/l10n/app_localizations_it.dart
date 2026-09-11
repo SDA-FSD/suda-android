@@ -265,7 +265,10 @@ class AppLocalizationsIt extends AppLocalizations {
   String get firstCefrLevelSettingsHint => 'Puoi cambiarlo quando vuoi';
 
   @override
-  String get firstCefrLevelConfirm => 'Conferma';
+  String get firstProfileImageTitle => 'Scegli la tua foto del profilo';
+
+  @override
+  String get actionConfirm => 'Conferma';
 
   @override
   String get feedbackPlaceholder =>

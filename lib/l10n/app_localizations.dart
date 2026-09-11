@@ -599,11 +599,17 @@ abstract class AppLocalizations {
   /// **'You can change it anytime'**
   String get firstCefrLevelSettingsHint;
 
-  /// No description provided for @firstCefrLevelConfirm.
+  /// No description provided for @firstProfileImageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your Profile Picture'**
+  String get firstProfileImageTitle;
+
+  /// No description provided for @actionConfirm.
   ///
   /// In en, this message translates to:
   /// **'Confirm'**
-  String get firstCefrLevelConfirm;
+  String get actionConfirm;
 
   /// No description provided for @feedbackPlaceholder.
   ///

@@ -267,7 +267,10 @@ class AppLocalizationsFr extends AppLocalizations {
       'Vous pouvez le modifier à tout moment';
 
   @override
-  String get firstCefrLevelConfirm => 'Confirmer';
+  String get firstProfileImageTitle => 'Choisissez votre photo de profil';
+
+  @override
+  String get actionConfirm => 'Confirmer';
 
   @override
   String get feedbackPlaceholder =>

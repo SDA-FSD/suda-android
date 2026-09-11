@@ -264,7 +264,10 @@ class AppLocalizationsRu extends AppLocalizations {
       'Уровень можно изменить в любое время';
 
   @override
-  String get firstCefrLevelConfirm => 'Подтвердить';
+  String get firstProfileImageTitle => 'Выберите фото профиля';
+
+  @override
+  String get actionConfirm => 'Подтвердить';
 
   @override
   String get feedbackPlaceholder =>

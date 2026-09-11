@@ -369,7 +369,7 @@ class _FirstCefrLevelScreenState extends State<FirstCefrLevelScreen> {
                               color: Colors.black,
                             ),
                           )
-                        : Text(l10n.firstCefrLevelConfirm),
+                        : Text(l10n.actionConfirm),
                   ),
                 ),
               ],

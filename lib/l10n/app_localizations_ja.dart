@@ -252,7 +252,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get firstCefrLevelSettingsHint => 'いつでも変更できます';
 
   @override
-  String get firstCefrLevelConfirm => '決定';
+  String get firstProfileImageTitle => 'プロフィール画像を選んでください';
+
+  @override
+  String get actionConfirm => '決定';
 
   @override
   String get feedbackPlaceholder => 'ご意見、ご要望、お困りの点などをお聞かせください…';

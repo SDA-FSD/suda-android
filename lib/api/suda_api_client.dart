@@ -520,6 +520,18 @@ class SudaApiClient {
     );
   }
 
+  static Future<void> updateProfileImage({
+    required String accessToken,
+    required String type,
+    required String value,
+  }) {
+    return UserApi.updateProfileImage(
+      accessToken: accessToken,
+      type: type,
+      value: value,
+    );
+  }
+
   static Future<QuestResultDto> updatePushAgreement({
     required String accessToken,
     required String agreementYn,

@@ -175,6 +175,41 @@ class UserApi {
     );
   }
 
+  static Future<void> updateProfileImage({
+    required String accessToken,
+    required String type,
+    required String value,
+  }) async {
+    final uri = SudaHttpClient.buildUri('/v1/users/profile-img');
+
+    late final http.Response response;
+    try {
+      response = await SudaHttpClient.client
+          .put(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+              'Content-Type': 'application/json',
+            },
+            body: jsonEncode({
+              'type': type,
+              'value': value,
+            }),
+          )
+          .timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      rethrow;
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return;
+    }
+
+    throw Exception(
+      'PUT /v1/users/profile-img failed: HTTP ${response.statusCode} ${response.body}',
+    );
+  }
+
   static Future<void> completeTutorial({
     required String accessToken,
   }) async {

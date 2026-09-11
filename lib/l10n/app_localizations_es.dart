@@ -265,7 +265,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'Puedes cambiarlo en cualquier momento';
 
   @override
-  String get firstCefrLevelConfirm => 'Confirmar';
+  String get firstProfileImageTitle => 'Elige tu foto de perfil';
+
+  @override
+  String get actionConfirm => 'Confirmar';
 
   @override
   String get feedbackPlaceholder =>
@@ -989,7 +992,10 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
       'Puedes cambiarlo en cualquier momento';
 
   @override
-  String get firstCefrLevelConfirm => 'Confirmar';
+  String get firstProfileImageTitle => 'Elige tu foto de perfil';
+
+  @override
+  String get actionConfirm => 'Confirmar';
 
   @override
   String get feedbackPlaceholder =>

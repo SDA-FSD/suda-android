@@ -259,7 +259,10 @@ class AppLocalizationsTh extends AppLocalizations {
   String get firstCefrLevelSettingsHint => 'เปลี่ยนได้ทุกเมื่อ';
 
   @override
-  String get firstCefrLevelConfirm => 'ยืนยัน';
+  String get firstProfileImageTitle => 'เลือกรูปโปรไฟล์ของคุณ';
+
+  @override
+  String get actionConfirm => 'ยืนยัน';
 
   @override
   String get feedbackPlaceholder =>

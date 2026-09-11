@@ -263,7 +263,10 @@ class AppLocalizationsNl extends AppLocalizations {
   String get firstCefrLevelSettingsHint => 'Je kunt dit altijd wijzigen';
 
   @override
-  String get firstCefrLevelConfirm => 'Bevestigen';
+  String get firstProfileImageTitle => 'Kies je profielfoto';
+
+  @override
+  String get actionConfirm => 'Bevestigen';
 
   @override
   String get feedbackPlaceholder =>

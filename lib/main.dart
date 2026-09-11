@@ -27,6 +27,7 @@ import 'services/series_state_service.dart';
 import 'routes/roleplay_router.dart';
 import 'screens/login.dart';
 import 'screens/first_cefr_level.dart';
+import 'screens/first_profile_image.dart';
 import 'screens/home.dart';
 import 'screens/profile.dart';
 import 'screens/notification_box.dart';
@@ -140,6 +141,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   bool _hasCheckedVersion = false; // 버전 체크 실행 여부
   bool _needsAgreement = false; // 서비스 이용 동의 필요 여부
   bool _needsFirstCefrLevel = false; // 동의 직후 1회 CEFR 레벨 선택
+  bool _needsFirstProfileImage = false; // CEFR 직후 1회 프로필 이미지 선택
 
   /// 마지막 홈 `getHomeContents`의 `notiboxUnreadYn` (`onHomeContentsLoaded`만 갱신)
   String _homeNotiboxUnreadYn = 'N';
@@ -656,10 +658,21 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     });
   }
 
-  /// 최초 CEFR 레벨 선택 완료 시 호출 (API 실패여도 Home 진입)
+  /// 최초 CEFR 레벨 선택 완료 시 호출 (API 실패여도 프로필 이미지 선택으로)
   void _onFirstCefrLevelComplete() {
     setState(() {
       _needsFirstCefrLevel = false;
+      _needsFirstProfileImage = true;
+    });
+  }
+
+  /// 최초 프로필 이미지 선택 완료 시 호출 (API 실패여도 Home 진입)
+  void _onFirstProfileImageComplete(UserDto? updatedUser) {
+    setState(() {
+      _needsFirstProfileImage = false;
+      if (updatedUser != null) {
+        _user = updatedUser;
+      }
     });
   }
 
@@ -678,6 +691,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       _accessToken = null;
       _user = null;
       _needsAgreement = false;
+      _needsFirstCefrLevel = false;
+      _needsFirstProfileImage = false;
       _currentMainScreen = 'home';
       _homeNotiboxUnreadYn = 'N';
       _notiboxHasUnreadFromAlarmList = false;
@@ -877,6 +892,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             )
           : _needsFirstCefrLevel
           ? FirstCefrLevelScreen(onComplete: _onFirstCefrLevelComplete)
+          : _needsFirstProfileImage
+          ? FirstProfileImageScreen(onComplete: _onFirstProfileImageComplete)
           : Builder(
               builder: (_) {
                 if (PendingAppPathService.instance.hasPendingNavigation) {

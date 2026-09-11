@@ -250,7 +250,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get firstCefrLevelSettingsHint => '可随时更改';
 
   @override
-  String get firstCefrLevelConfirm => '确认';
+  String get firstProfileImageTitle => '请选择你的头像';
+
+  @override
+  String get actionConfirm => '确认';
 
   @override
   String get feedbackPlaceholder => '请分享你的想法、建议或遇到的问题…';
@@ -930,7 +933,10 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get firstCefrLevelSettingsHint => '可随时更改';
 
   @override
-  String get firstCefrLevelConfirm => '确认';
+  String get firstProfileImageTitle => '请选择你的头像';
+
+  @override
+  String get actionConfirm => '确认';
 
   @override
   String get feedbackPlaceholder => '请分享你的想法、建议或遇到的问题…';
@@ -1610,7 +1616,10 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get firstCefrLevelSettingsHint => '之後可隨時更改';
 
   @override
-  String get firstCefrLevelConfirm => '確認';
+  String get firstProfileImageTitle => '請選擇你的頭像';
+
+  @override
+  String get actionConfirm => '確認';
 
   @override
   String get feedbackPlaceholder => '歡迎分享你的想法、建議或遇到的任何問題⋯⋯';

@@ -252,7 +252,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get firstCefrLevelSettingsHint => '언제든지 변경할 수 있습니다';
 
   @override
-  String get firstCefrLevelConfirm => '확인';
+  String get firstProfileImageTitle => '프로필 이미지를 선택하세요';
+
+  @override
+  String get actionConfirm => '확인';
 
   @override
   String get feedbackPlaceholder => '생각, 제안사항 또는 겪으신 문제점을 공유해 주세요...';

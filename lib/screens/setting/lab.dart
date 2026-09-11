@@ -24,6 +24,7 @@ import 'announcements.dart'
     show showAnnouncementsPostNoLongerAvailableDefaultPopupForLab;
 import '../roleplay/try_again.dart';
 import '../first_cefr_level.dart';
+import '../first_profile_image.dart';
 import '../paywall/paywall.dart';
 import '../paywall/paywall_completed.dart';
 import '../../utils/paywall_impression_screen.dart';
@@ -199,6 +200,18 @@ class _LabScreenState extends State<LabScreen> {
       MaterialPageRoute(
         builder: (routeContext) => FirstCefrLevelScreen(
           onComplete: () => Navigator.of(routeContext).pop(),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openFirstProfileImageScreen() async {
+    if (!mounted) return;
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (routeContext) => FirstProfileImageScreen(
+          onComplete: (_) => Navigator.of(routeContext).pop(),
         ),
       ),
     );
@@ -401,6 +414,23 @@ class _LabScreenState extends State<LabScreen> {
                   elevation: 0,
                 ),
                 child: const Text('Open First CEFR Level'),
+              ),
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: ElevatedButton(
+                onPressed: _openFirstProfileImageScreen,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF0CABA8),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  elevation: 0,
+                ),
+                child: const Text('Open First Profile Image'),
               ),
             ),
             _buildSectionDivider(),

@@ -161,14 +161,39 @@
 - **LoginScreen 동의 레이어**: `_onAgreementComplete` → `main.dart` `_needsFirstCefrLevel = true`
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
-- **HomeScreen(Main)**: Confirm 탭 시 API 호출 후 `_onFirstCefrLevelComplete`(실패해도 Home)
+- **FirstProfileImageScreen**(§1.3): Confirm 탭 시 API 호출 후 `_onFirstCefrLevelComplete`(실패해도 다음)
 
 ### 스크린 내부 구현 특이사항
 - **배경**: `#121212`. **PopScope** `canPop: false`(시스템·스와이프 백 차단)
 - **레이아웃**: 상·중·하 3등분(`Expanded`×3). 상단·하단은 각각 2등분 가상선 기준 배치
 - **중앙**: `PageView` 캐러셀(Pre-A1~B1, 기본 포커스 **A1**, 무한루프 없음). 포커스 원 40% width·`#0CABA8`, 대기 원 90%·반원 peek. 좌우 `#121212` 60%→0% 그라데이션. 스냅 후 `Vibration` 80ms
-- **Confirm**: width 70%·흰 배경·Stadium·검정 텍스트. l10n `firstCefrLevel*`
+- **Confirm**: 흰 배경·Stadium·검정 텍스트. l10n `firstCefrLevel*` + 공통 `actionConfirm`
 - **Lab(dev)**: Setting > Lab > **Open First CEFR Level**
+
+## 1.3 FirstProfileImageScreen
+
+### 스크린 관련 정의 파일
+- **파일 경로**: `lib/screens/first_profile_image.dart`
+- **클래스명**: `FirstProfileImageScreen` (StatefulWidget)
+- **스크린 타입**: **Full Screen**
+- **appPath**: 해당 없음 (온보딩 플로우)
+
+### 스크린 용도
+- CEFR 선택 **직후 1회** 기본 프로필 이미지(색상) 선택
+- `PUT /v1/users/profile-img` body `{ "type": "DEFAULT", "value": "1"…"5" }` (좌→우 `#03ABA8`/`#FFB700`/`#FFAAE1`/`#B286EB`/`#054544`)
+
+### 이전 스크린 정보 (진입점)
+- **FirstCefrLevelScreen**: `_onFirstCefrLevelComplete` → `main.dart` `_needsFirstProfileImage = true`
+
+### 이후 스크린 정보 (이동 가능한 다른 스크린)
+- **HomeScreen(Main)**: Confirm 후 `_onFirstProfileImageComplete`. PUT 성공 시 `GET /v1/users`로 `_user` 갱신. API 실패여도 Home
+
+### 스크린 내부 구현 특이사항
+- **배경**: `#121212`. **PopScope** `canPop: false`
+- **레이아웃**: FirstCefr와 동일 상·중·하 3등분. **캐러셀 위 선택별 설명 문구 없음**
+- **중앙**: `PageView` + `DefaultProfileAvatar`(마스크 `maskScale` 기본 **0.35**). 포커스 지름은 캐러셀 `LayoutBuilder` 영역 내 최대 정사각(잘림 방지). 측면은 `Transform.scale(0.4)`만 적용해 마스크 비율 고정. 기본 포커스 **1번**. 스냅 `Vibration` 80ms. 좌우 그라데이션 peek 동일
+- **힌트**: `firstCefrLevelSettingsHint`. 버튼: `actionConfirm`
+- **Lab(dev)**: Setting > Lab > **Open First Profile Image**
 
 ---
 
@@ -185,7 +210,7 @@
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
 - **HomeScreen**: Google 로그인 성공 및 JWT 토큰 발급 성공 시 (`SUDA_AGREEMENT == 'Y'`)
   - `onSignIn` 콜백 호출 → `_MyAppState._onSignIn()` 실행 → 상태 업데이트로 자동 전환
-- **FirstCefrLevelScreen**: 로그인 성공 후 동의 레이어에서 동의 완료 시(§1.2)
+- **FirstCefrLevelScreen** / **FirstProfileImageScreen**: 로그인 성공 후 동의 레이어에서 동의 완료 시(§1.2·§1.3)
 
 ### 스크린 내부 구현 특이사항
 - **스크린 타입 특성**: Full Screen, GNB 없음
@@ -963,7 +988,7 @@
   └─ 토큰 유효 → [HomeScreen] (동의 미완료 시 LoginScreen 동의 레이어)
 
 [LoginScreen]
-  ├─ 로그인 성공 → [HomeScreen] (이미 동의) / [FirstCefrLevelScreen] (동의 직후)
+  ├─ 로그인 성공 → [HomeScreen] (이미 동의) / [FirstCefrLevelScreen] → [FirstProfileImageScreen] (동의 직후)
   └─ 로그인 취소/실패 → [LoginScreen] (유지)
 
 [NotificationBoxScreen] ←→ [HomeScreen] ←→ [ProfileScreen] (GNB Alarm/Home/Profile)
@@ -987,7 +1012,7 @@
    - JWT 토큰 확인 및 서버 검증 (네이티브 스플래시 유지 중)
    - 처리 완료 후 `FlutterNativeSplash.remove()` 호출
    - 토큰 없음/유효하지 않음 → LoginScreen 표시
-   - 토큰 유효 → HomeScreen 표시 (동의 미완료 시 LoginScreen 동의 레이어 → 동의 직후 FirstCefrLevelScreen → Home)
+   - 토큰 유효 → HomeScreen 표시 (동의 미완료 시 LoginScreen 동의 레이어 → 동의 직후 FirstCefrLevelScreen → FirstProfileImageScreen → Home)
 
 3. **로그아웃 시**
    - `_onSignOut()`에서 곧바로 LoginScreen 표시

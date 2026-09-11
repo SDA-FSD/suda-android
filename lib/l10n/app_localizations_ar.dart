@@ -262,7 +262,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get firstCefrLevelSettingsHint => 'يمكنك تغييره في أي وقت';
 
   @override
-  String get firstCefrLevelConfirm => 'تأكيد';
+  String get firstProfileImageTitle => 'اختر صورة ملفك الشخصي';
+
+  @override
+  String get actionConfirm => 'تأكيد';
 
   @override
   String get feedbackPlaceholder =>

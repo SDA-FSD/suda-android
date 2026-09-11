@@ -263,7 +263,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get firstCefrLevelSettingsHint => 'इसे कभी भी बदल सकते हैं';
 
   @override
-  String get firstCefrLevelConfirm => 'कन्फ़र्म करें';
+  String get firstProfileImageTitle => 'अपनी प्रोफ़ाइल तस्वीर चुनें';
+
+  @override
+  String get actionConfirm => 'कन्फ़र्म करें';
 
   @override
   String get feedbackPlaceholder =>
