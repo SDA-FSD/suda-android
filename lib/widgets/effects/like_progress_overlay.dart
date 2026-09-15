@@ -42,6 +42,8 @@ class _LikeProgressOverlayState extends State<LikeProgressOverlay>
   late final AnimationController _phase6WobbleCtrl;
   late final AnimationController _phase7Ctrl;
   late final AnimationController _phase8Ctrl;
+  late final AnimationController _levelBounceCtrl;
+  late final Animation<double> _levelBounceScale;
 
   bool _phase5Visible = false;
   bool _phase8FadingOut = false;
@@ -96,6 +98,33 @@ class _LikeProgressOverlayState extends State<LikeProgressOverlay>
       vsync: this,
       duration: const Duration(milliseconds: 500),
     );
+    _levelBounceCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 320),
+    );
+    _levelBounceScale = TweenSequence<double>([
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: 1,
+          end: 1.35,
+        ).chain(CurveTween(curve: Curves.easeOut)),
+        weight: 30,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: 1.35,
+          end: 0.94,
+        ).chain(CurveTween(curve: Curves.easeIn)),
+        weight: 35,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: 0.94,
+          end: 1,
+        ).chain(CurveTween(curve: Curves.easeOut)),
+        weight: 35,
+      ),
+    ]).animate(_levelBounceCtrl);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -113,6 +142,7 @@ class _LikeProgressOverlayState extends State<LikeProgressOverlay>
     _phase6WobbleCtrl.dispose();
     _phase7Ctrl.dispose();
     _phase8Ctrl.dispose();
+    _levelBounceCtrl.dispose();
     super.dispose();
   }
 
@@ -184,6 +214,7 @@ class _LikeProgressOverlayState extends State<LikeProgressOverlay>
           _pausePhase6HapticsForTicket();
         }
         lastLevelUpLevel = currentLevel;
+        _levelBounceCtrl.forward(from: 0);
       }
     });
 
@@ -499,6 +530,7 @@ class _LikeProgressOverlayState extends State<LikeProgressOverlay>
         _phase6WobbleCtrl,
         _phase7Ctrl,
         _phase8Ctrl,
+        _levelBounceCtrl,
       ]),
       builder: (context, _) {
         final dimOpacity = _phase8FadingOut
@@ -652,11 +684,15 @@ class _LikeProgressOverlayState extends State<LikeProgressOverlay>
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                Text(
-                                  'Lv. $_displayLevel',
-                                  key: _lvLabelKey,
-                                  style: theme.labelSmall?.copyWith(
-                                    color: Colors.white,
+                                Transform.scale(
+                                  alignment: Alignment.centerLeft,
+                                  scale: _levelBounceScale.value,
+                                  child: Text(
+                                    'Lv. $_displayLevel',
+                                    key: _lvLabelKey,
+                                    style: theme.labelSmall?.copyWith(
+                                      color: Colors.white,
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(width: 10),

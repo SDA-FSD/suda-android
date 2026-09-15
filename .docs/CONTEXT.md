@@ -202,7 +202,7 @@ dev·prd만 ON. `PerfMonitoringService` + `SudaHttpClient` `HttpMetric`(query �
 - 로그: `debugPrint('[DEBUG] …')` (`print` 금지)
 - 토스트: `lib/utils/default_toast.dart`
 - 서버 마크다운 `***`/`**`/`*`: `lib/utils/default_markdown.dart` (Ending content, 공지, 알림함, Opening briefing)
-- Like 진행 오버레이: `EffectOverlayService` + `LikeProgressEffect` (`lib/effects/like_progress_effect.dart`). 동시 1개. 앵커 `EffectAnchorId.energyBadge`
+- Like 진행 오버레이: `EffectOverlayService` + `LikeProgressEffect` (`lib/effects/like_progress_effect.dart`). 동시 1개. 앵커 `EffectAnchorId.energyBadge`. 레벨업 시(`Lv.` +1) 라벨 320ms 바운스(1.0→1.35→0.94→1.0)
 - 리본 폭죽 오버레이: `RibbonBurstEffect` (`lib/effects/ribbon_burst_effect.dart`) — 화면 중앙 3D 직사각형 리본 burst. 딤·입력 가로채기 없음. 주간랭킹 claim 보조 연출(예정). Lab `Play Ribbon Burst`
 
 ## 12. 이력
