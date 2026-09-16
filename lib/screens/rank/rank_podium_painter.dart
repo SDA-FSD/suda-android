@@ -2,20 +2,17 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
-/// SVG 포디움 wireframe 9선.
-/// 로컬 원점 (0,0) = 화면 (34, 290). 좌표에 [scale] (= contentWidth/440) 곱함.
+/// SVG 포디움 wireframe 9선만. 숫자 1/2/3은 Stack Text로 그림(페인터 Paragraph가 기기에서 안 보임).
 class RankPodiumBasePainter extends CustomPainter {
   const RankPodiumBasePainter({required this.scale});
 
   final double scale;
 
-  /// #FFFFFF @ 20%
-  static const _strokeStart = Color(0x33FFFFFF);
-
-  static const _end5626A1 = Color(0xFF5626A1);
-  static const _end4E2292 = Color(0xFF4E2292);
-  static const _end8A38F5 = Color(0xFF8A38F5);
-  static const _end5928A6 = Color(0xFF5928A6);
+  static const _strokeStart = Color(0x2BFFFFFF);
+  static const _end5626A1 = Color(0xD95626A1);
+  static const _end4E2292 = Color(0xD94E2292);
+  static const _end8A38F5 = Color(0xD98A38F5);
+  static const _end5928A6 = Color(0xD95928A6);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -79,81 +76,4 @@ class RankPodiumBasePainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant RankPodiumBasePainter oldDelegate) =>
       scale != oldDelegate.scale;
-}
-
-/// 포디움 배경 큰 순위 숫자.
-///
-/// Flutter에서 Opacity 레이어 + softLight/plus saveLayer 조합은 투명 버퍼에
-/// 합성되어 숫자가 사라짐. 흰색 20% Text를 그린 뒤, 같은 캔버스에서
-/// [blendMode]로 배경과 한 번 더 합성한다.
-class PodiumRankNumber extends StatelessWidget {
-  const PodiumRankNumber({
-    super.key,
-    required this.digit,
-    required this.style,
-    required this.blendMode,
-  });
-
-  final String digit;
-  final TextStyle style;
-  final BlendMode blendMode;
-
-  static const _fillOpacity = 0.2;
-
-  @override
-  Widget build(BuildContext context) {
-    final textStyle = style.copyWith(
-      color: Colors.white.withValues(alpha: _fillOpacity),
-    );
-    final textPainter = TextPainter(
-      text: TextSpan(text: digit, style: textStyle),
-      textDirection: TextDirection.ltr,
-    )..layout();
-
-    return SizedBox(
-      width: textPainter.width,
-      height: textPainter.height,
-      child: CustomPaint(
-        painter: _PodiumRankNumberPainter(
-          digit: digit,
-          style: textStyle,
-          blendMode: blendMode,
-        ),
-      ),
-    );
-  }
-}
-
-class _PodiumRankNumberPainter extends CustomPainter {
-  const _PodiumRankNumberPainter({
-    required this.digit,
-    required this.style,
-    required this.blendMode,
-  });
-
-  final String digit;
-  final TextStyle style;
-  final BlendMode blendMode;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final textPainter = TextPainter(
-      text: TextSpan(text: digit, style: style),
-      textDirection: TextDirection.ltr,
-    )..layout(maxWidth: size.width);
-
-    // 1) 먼저 일반 합성으로 그려 반드시 보이게 함
-    textPainter.paint(canvas, Offset.zero);
-
-    // 2) 같은 영역에 blendMode 재합성 (디자인 softLight/plus)
-    canvas.saveLayer(Offset.zero & size, Paint()..blendMode = blendMode);
-    textPainter.paint(canvas, Offset.zero);
-    canvas.restore();
-  }
-
-  @override
-  bool shouldRepaint(covariant _PodiumRankNumberPainter oldDelegate) =>
-      digit != oldDelegate.digit ||
-      style != oldDelegate.style ||
-      blendMode != oldDelegate.blendMode;
 }
