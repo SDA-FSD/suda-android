@@ -57,13 +57,23 @@ class _RankScreenState extends State<RankScreen> {
   static const _figmaPodiumBottomY = _figmaPodiumBaseY + _figmaPodiumBaseH;
   static const _figmaPodiumH = _figmaPodiumBottomY - _figmaPodiumOriginY;
   /// 포디움 로컬 원점 (34,290) 기준 큰 숫자.
+  /// 각 단(rect) 안에 Center 배치 — Figma absolute top(142~164)은 단 밖이라 클리핑됨.
   static const _podiumNumFontSize = 64.0;
-  static const _podiumNum1LocalLeft = 40.69;
-  static const _podiumNum1LocalTop = 164.0;
-  static const _podiumNum2LocalLeft = 25.0;
-  static const _podiumNum2LocalTop = 142.0;
-  static const _podiumNum3LocalLeft = 38.0;
-  static const _podiumNum3LocalTop = 150.0;
+  // 2등 단: x0~133, y65~133
+  static const _num2CellLeft = 0.0;
+  static const _num2CellTop = 65.0;
+  static const _num2CellW = 133.0;
+  static const _num2CellH = 68.0;
+  // 1등 단: x132~259, y2~148
+  static const _num1CellLeft = 132.0;
+  static const _num1CellTop = 2.0;
+  static const _num1CellW = 127.0;
+  static const _num1CellH = 146.0;
+  // 3등 단: x259~385, y82~150
+  static const _num3CellLeft = 259.0;
+  static const _num3CellTop = 82.0;
+  static const _num3CellW = 126.0;
+  static const _num3CellH = 68.0;
   /// 4~10 리스트가 한 화면에 들어가도록 포디움이 비워 줄 높이.
   /// row = margin 2+2 + padding 6+6 + avatar 40.
   static const _listRowH = 56.0;
@@ -434,98 +444,118 @@ class _RankScreenState extends State<RankScreen> {
         return SizedBox(
           width: constraints.maxWidth,
           height: _figmaPodiumH * s,
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              // wireframe 9선 — RankPodiumBasePainter (Podium.png 금지)
-              Positioned(
-                left: x(_figmaPodiumBaseX),
-                top: y(_figmaPodiumBaseY),
-                width: podiumPaintW,
-                height: podiumPaintH,
-                child: IgnorePointer(
-                  child: Opacity(
-                    opacity: 0.85,
-                    child: CustomPaint(
-                      size: Size(podiumPaintW, podiumPaintH),
-                      painter: RankPodiumBasePainter(scale: s),
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: SizedBox(
+              width: _figmaFrameW * s,
+              height: _figmaPodiumH * s,
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  // wireframe 9선 — RankPodiumBasePainter (Podium.png 금지)
+                  Positioned(
+                    left: x(_figmaPodiumBaseX),
+                    top: y(_figmaPodiumBaseY),
+                    width: podiumPaintW,
+                    height: podiumPaintH,
+                    child: IgnorePointer(
+                      child: Opacity(
+                        opacity: 0.85,
+                        child: CustomPaint(
+                          size: Size(podiumPaintW, podiumPaintH),
+                          painter: RankPodiumBasePainter(scale: s),
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                  // 큰 숫자 — 각 단 rect 중앙 (z: wireframe 위 · 아바타 아래)
+                  Positioned(
+                    left: podiumLocalX(_num2CellLeft),
+                    top: podiumLocalY(_num2CellTop),
+                    width: _num2CellW * s,
+                    height: _num2CellH * s,
+                    child: Center(
+                      child: PodiumRankNumber(
+                        digit: '2',
+                        style: podiumNumberStyle,
+                        blendMode: BlendMode.softLight,
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: podiumLocalX(_num3CellLeft),
+                    top: podiumLocalY(_num3CellTop),
+                    width: _num3CellW * s,
+                    height: _num3CellH * s,
+                    child: Center(
+                      child: PodiumRankNumber(
+                        digit: '3',
+                        style: podiumNumberStyle,
+                        blendMode: BlendMode.softLight,
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: podiumLocalX(_num1CellLeft),
+                    top: podiumLocalY(_num1CellTop),
+                    width: _num1CellW * s,
+                    height: _num1CellH * s,
+                    child: Center(
+                      child: PodiumRankNumber(
+                        digit: '1',
+                        style: podiumNumberStyle,
+                        blendMode: BlendMode.plus,
+                      ),
+                    ),
+                  ),
+                  // 2위 (왼쪽)
+                  Positioned(
+                    left: x(36),
+                    top: y(192),
+                    child: _PodiumSlot(
+                      entry: second,
+                      scale: s,
+                      winnerFrame: false,
+                      showCrown: false,
+                      defaultProfile: _defaultProfile,
+                      premiumBadge: _premiumBadge,
+                      likeIcon: _likeIcon,
+                      crownAsset: _podiumCrown,
+                    ),
+                  ),
+                  // 3위 (오른쪽)
+                  Positioned(
+                    left: x(312),
+                    top: y(212),
+                    child: _PodiumSlot(
+                      entry: third,
+                      scale: s,
+                      winnerFrame: false,
+                      showCrown: false,
+                      defaultProfile: _defaultProfile,
+                      premiumBadge: _premiumBadge,
+                      likeIcon: _likeIcon,
+                      crownAsset: _podiumCrown,
+                    ),
+                  ),
+                  // 1위 (중앙)
+                  Positioned(
+                    left: x(167.31),
+                    top: y(128),
+                    child: _PodiumSlot(
+                      entry: first,
+                      scale: s,
+                      winnerFrame: true,
+                      showCrown: true,
+                      defaultProfile: _defaultProfile,
+                      premiumBadge: _premiumBadge,
+                      likeIcon: _likeIcon,
+                      crownAsset: _podiumCrown,
+                    ),
+                  ),
+                ],
               ),
-              Positioned(
-                left: podiumLocalX(_podiumNum2LocalLeft),
-                top: podiumLocalY(_podiumNum2LocalTop),
-                child: PodiumRankNumber(
-                  digit: '2',
-                  style: podiumNumberStyle,
-                  blendMode: BlendMode.softLight,
-                ),
-              ),
-              Positioned(
-                left: podiumLocalX(_podiumNum3LocalLeft),
-                top: podiumLocalY(_podiumNum3LocalTop),
-                child: PodiumRankNumber(
-                  digit: '3',
-                  style: podiumNumberStyle,
-                  blendMode: BlendMode.softLight,
-                ),
-              ),
-              Positioned(
-                left: podiumLocalX(_podiumNum1LocalLeft),
-                top: podiumLocalY(_podiumNum1LocalTop),
-                child: PodiumRankNumber(
-                  digit: '1',
-                  style: podiumNumberStyle,
-                  blendMode: BlendMode.plus,
-                ),
-              ),
-              // 2위 (왼쪽)
-              Positioned(
-                left: x(36),
-                top: y(192),
-                child: _PodiumSlot(
-                  entry: second,
-                  scale: s,
-                  winnerFrame: false,
-                  showCrown: false,
-                  defaultProfile: _defaultProfile,
-                  premiumBadge: _premiumBadge,
-                  likeIcon: _likeIcon,
-                  crownAsset: _podiumCrown,
-                ),
-              ),
-              // 3위 (오른쪽) — 이름/좋아요가 포디움 선과 겹치지 않게 살짝 위
-              Positioned(
-                left: x(312),
-                top: y(212),
-                child: _PodiumSlot(
-                  entry: third,
-                  scale: s,
-                  winnerFrame: false,
-                  showCrown: false,
-                  defaultProfile: _defaultProfile,
-                  premiumBadge: _premiumBadge,
-                  likeIcon: _likeIcon,
-                  crownAsset: _podiumCrown,
-                ),
-              ),
-              // 1위 (중앙) — 왕관은 슬롯 안에서 아바타에 붙여 배치
-              Positioned(
-                left: x(167.31),
-                top: y(128),
-                child: _PodiumSlot(
-                  entry: first,
-                  scale: s,
-                  winnerFrame: true,
-                  showCrown: true,
-                  defaultProfile: _defaultProfile,
-                  premiumBadge: _premiumBadge,
-                  likeIcon: _likeIcon,
-                  crownAsset: _podiumCrown,
-                ),
-              ),
-            ],
+            ),
           ),
         );
       },
@@ -663,22 +693,23 @@ class _PodiumSlot extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    // 4~10위와 동일 (스케일 고정 14)
+                    style: const TextStyle(
                       fontFamily: 'ChironHeiHK',
                       color: Colors.white,
                       fontWeight: FontWeight.w700,
-                      fontVariations: const [FontVariation('wght', 700)],
-                      fontSize: 14 * s,
+                      fontVariations: [FontVariation('wght', 700)],
+                      fontSize: 14,
                       height: 1.1,
                     ),
                   ),
                 ),
                 if (isPremium) ...[
-                  SizedBox(width: 4 * s),
+                  const SizedBox(width: 4),
                   Image.asset(
                     premiumBadge,
-                    width: 14 * s,
-                    height: 14 * s,
+                    width: 14,
+                    height: 14,
                   ),
                 ],
               ],
@@ -690,18 +721,18 @@ class _PodiumSlot extends StatelessWidget {
               children: [
                 Image.asset(
                   likeIcon,
-                  width: 14 * s,
-                  height: 14 * s,
+                  width: 14,
+                  height: 14,
                 ),
-                SizedBox(width: 4 * s),
+                const SizedBox(width: 4),
                 Text(
                   '${entry!.weeklyLike}',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontFamily: 'ChironHeiHK',
                     color: Colors.white,
                     fontWeight: FontWeight.w400,
-                    fontVariations: const [FontVariation('wght', 400)],
-                    fontSize: 14 * s,
+                    fontVariations: [FontVariation('wght', 400)],
+                    fontSize: 14,
                     height: 1,
                   ),
                 ),
@@ -1010,18 +1041,18 @@ class _LevelBadge extends StatelessWidget {
   final int level;
   final bool compact;
 
+  /// 1~3위 `_PodiumLevelBadge`와 동일: #0CABA8 원형 + white w700.
   @override
   Widget build(BuildContext context) {
-    final h = compact ? 16.0 : 18.0;
+    final size = compact ? 16.0 : 18.0;
     final fontSize = compact ? 9.0 : 10.0;
     return Container(
-      height: h,
-      padding: EdgeInsets.symmetric(horizontal: compact ? 5 : 6),
+      width: size,
+      height: size,
       alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: const Color(0xFF1DB954),
-        borderRadius: BorderRadius.circular(h / 2),
-        border: Border.all(color: const Color(0xFF121212), width: 1.5),
+      decoration: const BoxDecoration(
+        color: Color(0xFF0CABA8),
+        shape: BoxShape.circle,
       ),
       child: Text(
         '$level',

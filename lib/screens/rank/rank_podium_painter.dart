@@ -19,23 +19,14 @@ class RankPodiumBasePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // 1. 2등 왼쪽 바깥 세로선
     _vertical(canvas, 0.5, 65, 133, _end5626A1);
-    // 2. 2등 오른쪽(1등과 경계) 세로선
     _vertical(canvas, 132.5, 65, 133, _end4E2292);
-    // 3. 2등 윗변 가로선 (그라디언트 벡터는 수직)
     _horizontal(canvas, 64.5, 0, 133, 65, 133, _end8A38F5);
-    // 4. 1등 왼쪽(2등과 경계) 세로선
     _vertical(canvas, 132.5, 2, 148, _end5626A1);
-    // 5. 1등 오른쪽(3등과 경계) 세로선
     _vertical(canvas, 258.5, 2, 148, _end5928A6);
-    // 6. 1등 윗변 가로선
     _horizontal(canvas, 0.5, 132, 259, 2, 148, _end8A38F5);
-    // 7. 3등 왼쪽(1등과 경계) 세로선 — 5번과 x 동일, 합치지 않음
     _vertical(canvas, 258.5, 82, 150, _end5626A1);
-    // 8. 3등 오른쪽 바깥 세로선
     _vertical(canvas, 384.5, 82, 150, _end4E2292);
-    // 9. 3등 윗변 가로선
     _horizontal(canvas, 81.5, 259, 385, 82, 150, _end8A38F5);
   }
 
@@ -90,7 +81,11 @@ class RankPodiumBasePainter extends CustomPainter {
       scale != oldDelegate.scale;
 }
 
-/// 포디움 배경 큰 순위 숫자. Opacity 0.2 + BlendMode.
+/// 포디움 배경 큰 순위 숫자.
+///
+/// Flutter에서 Opacity 레이어 + softLight/plus saveLayer 조합은 투명 버퍼에
+/// 합성되어 숫자가 사라짐. 흰색 20% Text를 그린 뒤, 같은 캔버스에서
+/// [blendMode]로 배경과 한 번 더 합성한다.
 class PodiumRankNumber extends StatelessWidget {
   const PodiumRankNumber({
     super.key,
@@ -103,10 +98,15 @@ class PodiumRankNumber extends StatelessWidget {
   final TextStyle style;
   final BlendMode blendMode;
 
+  static const _fillOpacity = 0.2;
+
   @override
   Widget build(BuildContext context) {
+    final textStyle = style.copyWith(
+      color: Colors.white.withValues(alpha: _fillOpacity),
+    );
     final textPainter = TextPainter(
-      text: TextSpan(text: digit, style: style),
+      text: TextSpan(text: digit, style: textStyle),
       textDirection: TextDirection.ltr,
     )..layout();
 
@@ -116,7 +116,7 @@ class PodiumRankNumber extends StatelessWidget {
       child: CustomPaint(
         painter: _PodiumRankNumberPainter(
           digit: digit,
-          style: style,
+          style: textStyle,
           blendMode: blendMode,
         ),
       ),
@@ -135,24 +135,18 @@ class _PodiumRankNumberPainter extends CustomPainter {
   final TextStyle style;
   final BlendMode blendMode;
 
-  static const _opacity = 0.2;
-
   @override
   void paint(Canvas canvas, Size size) {
     final textPainter = TextPainter(
-      text: TextSpan(
-        text: digit,
-        style: style.copyWith(
-          color: Colors.white.withValues(alpha: _opacity),
-        ),
-      ),
+      text: TextSpan(text: digit, style: style),
       textDirection: TextDirection.ltr,
     )..layout(maxWidth: size.width);
 
-    canvas.saveLayer(
-      Offset.zero & size,
-      Paint()..blendMode = blendMode,
-    );
+    // 1) 먼저 일반 합성으로 그려 반드시 보이게 함
+    textPainter.paint(canvas, Offset.zero);
+
+    // 2) 같은 영역에 blendMode 재합성 (디자인 softLight/plus)
+    canvas.saveLayer(Offset.zero & size, Paint()..blendMode = blendMode);
     textPainter.paint(canvas, Offset.zero);
     canvas.restore();
   }
