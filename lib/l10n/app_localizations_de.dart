@@ -730,4 +730,31 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get tutorialPage6Title => 'Niemand bewertet dich.\nDu schaffst das!';
+
+  @override
+  String rankCountdownDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Tage',
+      one: '1 Tag',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String rankCountdownHours(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Stunden',
+      one: '1 Stunde',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String rankCountdownMinutes(int count) {
+    return '$count Min.';
+  }
 }

@@ -284,5 +284,29 @@
   "tutorialPage4Tip": "*ทิป: ลองตอบโดยไม่ดูคำแปล\nเพื่อได้คะแนนสูงขึ้น",
   "tutorialPage5Title": "พูดออกเสียงไม่ได้?",
   "tutorialPage5Subtitle": "สลับเป็น**โหมดข้อความ**",
-  "tutorialPage6Title": "ไม่มีใครตัดสินคุณ\nสู้ ๆ นะ!"
+  "tutorialPage6Title": "ไม่มีใครตัดสินคุณ\nสู้ ๆ นะ!",
+  "rankCountdownDays": "เหลือ {count} วัน",
+  "rankCountdownHours": "เหลือ {count} ชม.",
+  "rankCountdownMinutes": "เหลือ {count} นาที",
+  "@rankCountdownDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@rankCountdownHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@rankCountdownMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

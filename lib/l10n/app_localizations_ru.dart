@@ -723,4 +723,35 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get tutorialPage6Title =>
       'Никто тебя не оценивает.\nУ тебя получится!';
+
+  @override
+  String rankCountdownDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count дня',
+      many: '$count дней',
+      few: '$count дня',
+      one: '$count день',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String rankCountdownHours(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count часа',
+      many: '$count часов',
+      few: '$count часа',
+      one: '$count час',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String rankCountdownMinutes(int count) {
+    return '$count мин';
+  }
 }

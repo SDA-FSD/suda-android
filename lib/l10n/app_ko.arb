@@ -284,5 +284,29 @@
   "tutorialPage4Tip": "* Tip: 영어 답변을 보지 않고 말하면\n더 높은 점수를 받을 수 있어요!",
   "tutorialPage5Title": "말하기 어려운 상황이면\n**텍스트 모드**로 전환하세요.",
   "tutorialPage5Subtitle": "",
-  "tutorialPage6Title": "아무도 평가하지 않아요.\n자신 있게 말해봐요!"
+  "tutorialPage6Title": "아무도 평가하지 않아요.\n자신 있게 말해봐요!",
+  "rankCountdownDays": "{count}일 남음",
+  "rankCountdownHours": "{count}시간 남음",
+  "rankCountdownMinutes": "{count}분 남음",
+  "@rankCountdownDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@rankCountdownHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@rankCountdownMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

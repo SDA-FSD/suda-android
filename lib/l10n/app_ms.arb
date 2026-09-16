@@ -284,5 +284,29 @@
   "tutorialPage4Tip": "*Tip: Cuba jawab tanpa melihat terjemahan\nuntuk mendapat markah lebih tinggi.",
   "tutorialPage5Title": "Tidak boleh bercakap kuat?",
   "tutorialPage5Subtitle": "Tukar kepada **Mod Teks**.",
-  "tutorialPage6Title": "Tiada siapa yang menghakimi.\nAnda mampu!"
+  "tutorialPage6Title": "Tiada siapa yang menghakimi.\nAnda mampu!",
+  "rankCountdownDays": "{count, plural, =1{1 hari} other{{count} hari}}",
+  "rankCountdownHours": "{count, plural, =1{1 jam} other{{count} jam}}",
+  "rankCountdownMinutes": "{count} min",
+  "@rankCountdownDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@rankCountdownHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@rankCountdownMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

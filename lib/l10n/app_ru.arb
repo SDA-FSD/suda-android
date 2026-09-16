@@ -284,5 +284,29 @@
   "tutorialPage4Tip": "*Совет: Попробуй ответить, не глядя на перевод,\nчтобы получить больше баллов.",
   "tutorialPage5Title": "Не можешь говорить вслух?",
   "tutorialPage5Subtitle": "Переключись в **текстовый режим**.",
-  "tutorialPage6Title": "Никто тебя не оценивает.\nУ тебя получится!"
+  "tutorialPage6Title": "Никто тебя не оценивает.\nУ тебя получится!",
+  "rankCountdownDays": "{count, plural, one{{count} день} few{{count} дня} many{{count} дней} other{{count} дня}}",
+  "rankCountdownHours": "{count, plural, one{{count} час} few{{count} часа} many{{count} часов} other{{count} часа}}",
+  "rankCountdownMinutes": "{count} мин",
+  "@rankCountdownDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@rankCountdownHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@rankCountdownMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

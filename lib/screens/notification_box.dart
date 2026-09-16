@@ -61,6 +61,7 @@ class NotificationBoxScreen extends StatefulWidget {
     this.onNavigateToHome,
     this.onNavigateToProfile,
     this.onNavigateToAlarm,
+    this.onNavigateToRank,
     this.isActive = false,
     this.user,
     this.showNotiboxUnreadBadge = false,
@@ -72,6 +73,7 @@ class NotificationBoxScreen extends StatefulWidget {
   final VoidCallback? onNavigateToHome;
   final VoidCallback? onNavigateToProfile;
   final VoidCallback? onNavigateToAlarm;
+  final VoidCallback? onNavigateToRank;
   final bool isActive;
   final UserDto? user;
   final bool showNotiboxUnreadBadge;
@@ -320,12 +322,14 @@ class _NotificationBoxScreenState extends State<NotificationBoxScreen> {
       showBackButton: false,
       centerTitle: l10n.notificationsTitle,
       bottomNavigationBar: GnbBar(
-        isAlarmActive: true,
         isHomeActive: false,
+        isAlarmActive: true,
+        isRankActive: false,
         isProfileActive: false,
         showNotiboxUnreadBadge: widget.showNotiboxUnreadBadge,
-        onAlarmTap: widget.onNavigateToAlarm,
         onHomeTap: widget.onNavigateToHome,
+        onAlarmTap: widget.onNavigateToAlarm,
+        onRankTap: widget.onNavigateToRank,
         onProfileTap: widget.onNavigateToProfile,
         user: widget.user,
       ),

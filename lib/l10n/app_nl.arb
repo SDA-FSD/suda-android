@@ -284,5 +284,29 @@
   "tutorialPage4Tip": "*Tip: Probeer te antwoorden zonder naar de vertaling\nte kijken voor een hogere score.",
   "tutorialPage5Title": "Kun je niet hardop praten?",
   "tutorialPage5Subtitle": "Schakel over naar de **Tekstmodus**.",
-  "tutorialPage6Title": "Niemand beoordeelt je.\nJij kunt dit!"
+  "tutorialPage6Title": "Niemand beoordeelt je.\nJij kunt dit!",
+  "rankCountdownDays": "{count, plural, =1{1 dag} other{{count} dagen}}",
+  "rankCountdownHours": "{count, plural, =1{1 uur} other{{count} uur}}",
+  "rankCountdownMinutes": "{count} min",
+  "@rankCountdownDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@rankCountdownHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@rankCountdownMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

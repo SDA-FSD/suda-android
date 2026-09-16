@@ -23,6 +23,7 @@ import '../widgets/welcome_gift_layer.dart';
 
 class HomeScreen extends StatefulWidget {
   final VoidCallback? onNavigateToAlarm;
+  final VoidCallback? onNavigateToRank;
   final VoidCallback? onNavigateToProfile;
   final UserDto? user;
 
@@ -37,6 +38,7 @@ class HomeScreen extends StatefulWidget {
   const HomeScreen({
     super.key,
     this.onNavigateToAlarm,
+    this.onNavigateToRank,
     this.onNavigateToProfile,
     this.user,
     this.homeTabSelectedCounter,
@@ -357,12 +359,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             ),
           ],
           bottomNavigationBar: GnbBar(
-            isAlarmActive: false,
             isHomeActive: true,
+            isAlarmActive: false,
+            isRankActive: false,
             isProfileActive: false,
             showNotiboxUnreadBadge: widget.showNotiboxUnreadBadge,
-            onAlarmTap: widget.onNavigateToAlarm,
             onHomeTap: () {},
+            onAlarmTap: widget.onNavigateToAlarm,
+            onRankTap: widget.onNavigateToRank,
             onProfileTap: widget.onNavigateToProfile,
             user: widget.user,
           ),

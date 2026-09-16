@@ -1557,7 +1557,8 @@ class _PaywallScreenState extends State<PaywallScreen> {
   }
 }
 
-/// MELHOR 뱃지 outside stroke: Figma 각도형 #FFFFFF 31/0% @ 13/37/62/87%.
+/// MELHOR 뱃지 outside stroke: Figma 각도형 #FFFFFF 하이라이트 유지 + 전 둘레 연속.
+/// (0% 투명 구간을 두면 오른쪽 끝이 잘린 것처럼 보이므로 최소 투명도 floor 적용)
 class _MelhorBadgeStrokePainter extends CustomPainter {
   const _MelhorBadgeStrokePainter({
     required this.strokeWidth,
@@ -1568,18 +1569,18 @@ class _MelhorBadgeStrokePainter extends CustomPainter {
   final double radius;
 
   static const _white31 = Color(0x4FFFFFFF); // #FFFFFF 31%
-  static const _white0 = Color(0x00FFFFFF); // #FFFFFF 0%
+  static const _whiteSoft = Color(0x28FFFFFF); // #FFFFFF 약 16% — 끊김 방지 floor
 
-  /// Figma 중지점 13·37·62·87% (+ 루프 seam).
+  /// Figma 중지점 13·37·62·87% (+ 루프 seam). 어두운 구간도 soft로 유지해 둘레가 이어짐.
   static const _sweep = SweepGradient(
     startAngle: -1.5707963267948966, // -90° (Figma 각도형 0° ≈ 상단)
     colors: [
-      _white0,
+      _whiteSoft,
       _white31,
-      _white0,
+      _whiteSoft,
       _white31,
-      _white0,
-      _white0,
+      _whiteSoft,
+      _whiteSoft,
     ],
     stops: [0.0, 0.13, 0.37, 0.62, 0.87, 1.0],
   );
@@ -1601,6 +1602,7 @@ class _MelhorBadgeStrokePainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..isAntiAlias = true
+      ..strokeJoin = StrokeJoin.round
       ..shader = _sweep.createShader(
         Rect.fromLTWH(0, 0, size.width, size.height),
       );

@@ -692,4 +692,19 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get tutorialPage6Title => '誰もジャッジしません。\n自信を持って！';
+
+  @override
+  String rankCountdownDays(int count) {
+    return '残り$count日';
+  }
+
+  @override
+  String rankCountdownHours(int count) {
+    return '残り$count時間';
+  }
+
+  @override
+  String rankCountdownMinutes(int count) {
+    return '残り$count分';
+  }
 }

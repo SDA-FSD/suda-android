@@ -721,4 +721,19 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get tutorialPage6Title => 'कोई जज नहीं कर रहा।\nआप कर सकते हैं!';
+
+  @override
+  String rankCountdownDays(int count) {
+    return '$count दिन शेष';
+  }
+
+  @override
+  String rankCountdownHours(int count) {
+    return '$count घंटे शेष';
+  }
+
+  @override
+  String rankCountdownMinutes(int count) {
+    return '$count मिनट शेष';
+  }
 }

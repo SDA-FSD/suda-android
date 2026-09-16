@@ -284,5 +284,29 @@
   "tutorialPage4Tip": "*提示：不看翻譯來回答，\n可以獲得更高分數。",
   "tutorialPage5Title": "不方便大聲說？",
   "tutorialPage5Subtitle": "切換到**文字模式**。",
-  "tutorialPage6Title": "沒有人在評判你。\n你沒問題的！"
+  "tutorialPage6Title": "沒有人在評判你。\n你沒問題的！",
+  "rankCountdownDays": "剩餘{count}天",
+  "rankCountdownHours": "剩餘{count}小時",
+  "rankCountdownMinutes": "剩餘{count}分鐘",
+  "@rankCountdownDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@rankCountdownHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@rankCountdownMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

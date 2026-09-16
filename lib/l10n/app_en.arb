@@ -291,5 +291,29 @@
   "tutorialPage4Tip": "*Tip: Try answering without looking at the translation\nto earn a higher score.",
   "tutorialPage5Title": "Can't speak out loud?",
   "tutorialPage5Subtitle": "Switch to **Text Mode**.",
-  "tutorialPage6Title": "No one's judging.\nYou've got this!"
+  "tutorialPage6Title": "No one's judging.\nYou've got this!",
+  "rankCountdownDays": "{count, plural, =1{1 day} other{{count} days left}}",
+  "rankCountdownHours": "{count, plural, =1{1 hour} other{{count} hours}}",
+  "rankCountdownMinutes": "{count} min",
+  "@rankCountdownDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@rankCountdownHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@rankCountdownMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

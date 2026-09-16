@@ -693,4 +693,19 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get tutorialPage6Title => '아무도 평가하지 않아요.\n자신 있게 말해봐요!';
+
+  @override
+  String rankCountdownDays(int count) {
+    return '$count일 남음';
+  }
+
+  @override
+  String rankCountdownHours(int count) {
+    return '$count시간 남음';
+  }
+
+  @override
+  String rankCountdownMinutes(int count) {
+    return '$count분 남음';
+  }
 }

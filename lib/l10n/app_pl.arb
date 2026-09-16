@@ -284,5 +284,29 @@
   "tutorialPage4Tip": "*Wskazówka: Odpowiadaj bez patrzenia na tłumaczenie,\naby zdobyć wyższy wynik.",
   "tutorialPage5Title": "Nie możesz mówić na głos?",
   "tutorialPage5Subtitle": "Przełącz na **tryb tekstowy**.",
-  "tutorialPage6Title": "Nikt Cię nie ocenia.\nDasz radę!"
+  "tutorialPage6Title": "Nikt Cię nie ocenia.\nDasz radę!",
+  "rankCountdownDays": "{count, plural, =1{1 dzień} few{{count} dni} many{{count} dni} other{{count} dnia}}",
+  "rankCountdownHours": "{count, plural, =1{1 godzina} few{{count} godziny} many{{count} godzin} other{{count} godziny}}",
+  "rankCountdownMinutes": "{count} min",
+  "@rankCountdownDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@rankCountdownHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@rankCountdownMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

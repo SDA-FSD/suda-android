@@ -284,5 +284,29 @@
   "tutorialPage4Tip": "*提示：不看翻译来回答，\n可以获得更高分数。",
   "tutorialPage5Title": "不方便大声说？",
   "tutorialPage5Subtitle": "切换到**文字模式**。",
-  "tutorialPage6Title": "没有人在评判你。\n你可以的！"
+  "tutorialPage6Title": "没有人在评判你。\n你可以的！",
+  "rankCountdownDays": "剩余{count}天",
+  "rankCountdownHours": "剩余{count}小时",
+  "rankCountdownMinutes": "剩余{count}分钟",
+  "@rankCountdownDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@rankCountdownHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@rankCountdownMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

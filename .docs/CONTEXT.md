@@ -147,6 +147,8 @@ flutter run --flavor dev -t lib/main.dart --dart-define=ENV=dev -d 541F3961-8182
 
 - 동의(`SUDA_AGREEMENT`): Login 위 레이어. 완료 시 `POST /v1/users/agreement` + AppsFlyer `af_complete_registration` → **1회** `FirstCefrLevelScreen` → Confirm `PUT /v1/users/language-level`(실패여도 다음) → **1회** `FirstProfileImageScreen` → Confirm `PUT /v1/users/profile-img` `{type:DEFAULT,value:"1"…"5"}` 성공 시 `GET /v1/users`로 `_user` 갱신 후 Home(실패여도 Home). 레이어 닫기(미동의)는 토큰 삭제·비로그인
 - Lab: Setting > Lab (`AppConfig.isDev` · `kDebugMode`). **prd release 미노출**. Tutorial 미리보기: 21 locale 선택 후 Open Tutorial (`RoleplayTutorialScreen(preview: true)`). **Open First CEFR Level** / **Open First Profile Image**. **Play Ribbon Burst**: `RibbonBurstEffect` 오버레이 재현
+- Ranking 카운트다운 (`RankScreen`): ≥48h 일 / 24h~48h 1일 / 1h~24h 시 / 1h 미만 분. l10n `rankCountdownDays|Hours|Minutes`(en: `1 day`·`N days left`·`N min`). 시계+문구 색 `#FFFFFF` ~70% 알파
+- Ranking 포디움 1~3위: Figma 440 기준 가로 스케일. **4~10 리스트(7행)가 한 화면에 들어가게** 세로가 부족하면 포디움 전체(프로필·왕관·레벨 뱃지 비율 유지)를 축소. 1위 `ranking_1st_crown`+흰→금 링. **1위 외** 프로필 프레임은 Profile과 동일(`subscribedYn`: premium mint→보라 / free mint→어두운 mint). 이름 Bold 14·좋아요 Regular 14·아이콘 14×14. 3위가 2위보다 살짝 아래(Y 212>204). 레벨 뱃지 `#0CABA8` 30
 
 롤플레이 상세: `CONTEXT_ROLEPLAY_S2.md`. Playing 상황 로그: `POST /rps2/sessions/{id}/event-logs` (`event`, `clientOccurredAt` epoch ms). 실패 무시.
 

@@ -33,6 +33,7 @@ enum _ProfileContentTab { history, saved }
 class ProfileScreen extends StatefulWidget {
   final VoidCallback? onNavigateToHome;
   final VoidCallback? onNavigateToAlarm;
+  final VoidCallback? onNavigateToRank;
   final VoidCallback? onSignOut;
   final UserDto? user;
   final ValueChanged<UserDto>? onUserUpdated;
@@ -45,6 +46,7 @@ class ProfileScreen extends StatefulWidget {
     super.key,
     this.onNavigateToHome,
     this.onNavigateToAlarm,
+    this.onNavigateToRank,
     this.onSignOut,
     this.user,
     this.onUserUpdated,
@@ -1011,12 +1013,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
       // 구독: LevelProgressBar 중앙 Y까지 그라데이션, 아래는 #121212 솔리드
       background: _buildPremiumBackground(),
       bottomNavigationBar: GnbBar(
-        isAlarmActive: false,
         isHomeActive: false,
+        isAlarmActive: false,
+        isRankActive: false,
         isProfileActive: true,
         showNotiboxUnreadBadge: widget.showNotiboxUnreadBadge,
-        onAlarmTap: widget.onNavigateToAlarm,
         onHomeTap: widget.onNavigateToHome,
+        onAlarmTap: widget.onNavigateToAlarm,
+        onRankTap: widget.onNavigateToRank,
         onProfileTap: () {},
         user: widget.user,
       ),

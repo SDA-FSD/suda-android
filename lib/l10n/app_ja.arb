@@ -284,5 +284,29 @@
   "tutorialPage4Tip": "*Tip: 翻訳を見ずに答えると、\nより高いスコアを獲得できます。",
   "tutorialPage5Title": "声に出して\n話せないときは？",
   "tutorialPage5Subtitle": "**テキストモード**に\n切り替えてください。",
-  "tutorialPage6Title": "誰もジャッジしません。\n自信を持って！"
+  "tutorialPage6Title": "誰もジャッジしません。\n自信を持って！",
+  "rankCountdownDays": "残り{count}日",
+  "rankCountdownHours": "残り{count}時間",
+  "rankCountdownMinutes": "残り{count}分",
+  "@rankCountdownDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@rankCountdownHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@rankCountdownMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

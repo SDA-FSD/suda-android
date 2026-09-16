@@ -735,4 +735,31 @@ class AppLocalizationsFil extends AppLocalizations {
 
   @override
   String get tutorialPage6Title => 'Walang humahatol sa\'yo.\nKaya mo \'yan!';
+
+  @override
+  String rankCountdownDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count araw',
+      one: '1 araw',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String rankCountdownHours(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count oras',
+      one: '1 oras',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String rankCountdownMinutes(int count) {
+    return '$count min';
+  }
 }

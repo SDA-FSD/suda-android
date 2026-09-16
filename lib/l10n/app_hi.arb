@@ -284,5 +284,29 @@
   "tutorialPage4Tip": "*टिप: अनुवाद देखे बिना जवाब देने पर\nज़्यादा स्कोर मिल सकता है।",
   "tutorialPage5Title": "ज़ोर से नहीं बोल सकते?",
   "tutorialPage5Subtitle": "**टेक्स्ट मोड** पर स्विच करें।",
-  "tutorialPage6Title": "कोई जज नहीं कर रहा।\nआप कर सकते हैं!"
+  "tutorialPage6Title": "कोई जज नहीं कर रहा।\nआप कर सकते हैं!",
+  "rankCountdownDays": "{count} दिन शेष",
+  "rankCountdownHours": "{count} घंटे शेष",
+  "rankCountdownMinutes": "{count} मिनट शेष",
+  "@rankCountdownDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@rankCountdownHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@rankCountdownMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

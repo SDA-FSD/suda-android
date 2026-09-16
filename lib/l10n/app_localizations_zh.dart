@@ -685,6 +685,21 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get tutorialPage6Title => '没有人在评判你。\n你可以的！';
+
+  @override
+  String rankCountdownDays(int count) {
+    return '剩余$count天';
+  }
+
+  @override
+  String rankCountdownHours(int count) {
+    return '剩余$count小时';
+  }
+
+  @override
+  String rankCountdownMinutes(int count) {
+    return '剩余$count分钟';
+  }
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -1368,6 +1383,21 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get tutorialPage6Title => '没有人在评判你。\n你可以的！';
+
+  @override
+  String rankCountdownDays(int count) {
+    return '剩余$count天';
+  }
+
+  @override
+  String rankCountdownHours(int count) {
+    return '剩余$count小时';
+  }
+
+  @override
+  String rankCountdownMinutes(int count) {
+    return '剩余$count分钟';
+  }
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -2051,4 +2081,19 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get tutorialPage6Title => '沒有人在評判你。\n你沒問題的！';
+
+  @override
+  String rankCountdownDays(int count) {
+    return '剩餘$count天';
+  }
+
+  @override
+  String rankCountdownHours(int count) {
+    return '剩餘$count小時';
+  }
+
+  @override
+  String rankCountdownMinutes(int count) {
+    return '剩餘$count分鐘';
+  }
 }

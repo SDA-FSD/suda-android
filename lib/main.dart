@@ -31,6 +31,7 @@ import 'screens/first_profile_image.dart';
 import 'screens/home.dart';
 import 'screens/profile.dart';
 import 'screens/notification_box.dart';
+import 'screens/rank/rank_screen.dart';
 import 'screens/roleplay/history.dart';
 import 'screens/setting/setting.dart';
 import 'screens/setting/announcement_detail.dart';
@@ -134,7 +135,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   String? _accessToken;
   UserDto? _user;
   bool _isLoading = true;
-  String _currentMainScreen = 'home'; // 'alarm' | 'home' | 'profile'
+  String _currentMainScreen = 'home'; // 'home' | 'alarm' | 'rank' | 'profile'
   int _homeTabSelectedCounter = 0; // 홈 탭 선택 시 증가 → HomeScreen 에너지 배지 갱신
   int _profileReturnCounter =
       0; // Profile 탭 활성 상태에서 서브 스크린 pop 복귀 시 증가 → ProfileScreen 프로필 재조회
@@ -643,6 +644,14 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   }
 
   /// GNB를 통한 화면 전환
+  void _navigateToRank() {
+    setState(() {
+      _currentMainScreen = 'rank';
+    });
+    unawaited(_syncNotiboxListFirstPage(force: true));
+  }
+
+  /// GNB를 통한 화면 전환
   void _navigateToProfile() {
     setState(() {
       _currentMainScreen = 'profile';
@@ -749,6 +758,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           return;
         case 'box':
           setState(() => _currentMainScreen = 'alarm');
+          unawaited(_syncNotiboxListFirstPage(force: true));
+          return;
+        case 'rank':
+          setState(() => _currentMainScreen = 'rank');
           unawaited(_syncNotiboxListFirstPage(force: true));
           return;
         case 'profile':
@@ -928,16 +941,33 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                       }
                     },
                     child: IndexedStack(
-                      index: _currentMainScreen == 'alarm'
-                          ? 0
-                          : _currentMainScreen == 'home'
-                          ? 1
-                          : 2,
+                      index: switch (_currentMainScreen) {
+                        'home' => 0,
+                        'alarm' => 1,
+                        'rank' => 2,
+                        _ => 3, // profile
+                      },
                       children: [
+                        HomeScreen(
+                          onNavigateToAlarm: _navigateToAlarm,
+                          onNavigateToRank: _navigateToRank,
+                          onNavigateToProfile: _navigateToProfile,
+                          user: _user,
+                          homeTabSelectedCounter: _homeTabSelectedCounter,
+                          isActive: _currentMainScreen == 'home',
+                          showNotiboxUnreadBadge: _showNotiboxUnreadBadge,
+                          onHomeContentsLoaded: _onHomeContentsLoadedForBadge,
+                          onOpenAppPath: (path) {
+                            _applyPendingPushNavigation(
+                              PendingPushNavigation(path: path),
+                            );
+                          },
+                        ),
                         NotificationBoxScreen(
                           onNavigateToHome: _navigateToHome,
                           onNavigateToProfile: _navigateToProfile,
                           onNavigateToAlarm: _navigateToAlarm,
+                          onNavigateToRank: _navigateToRank,
                           isActive: _currentMainScreen == 'alarm',
                           user: _user,
                           showNotiboxUnreadBadge: _showNotiboxUnreadBadge,
@@ -952,23 +982,18 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                             }
                           },
                         ),
-                        HomeScreen(
+                        RankScreen(
+                          onNavigateToHome: _navigateToHome,
                           onNavigateToAlarm: _navigateToAlarm,
                           onNavigateToProfile: _navigateToProfile,
+                          isActive: _currentMainScreen == 'rank',
                           user: _user,
-                          homeTabSelectedCounter: _homeTabSelectedCounter,
-                          isActive: _currentMainScreen == 'home',
                           showNotiboxUnreadBadge: _showNotiboxUnreadBadge,
-                          onHomeContentsLoaded: _onHomeContentsLoadedForBadge,
-                          onOpenAppPath: (path) {
-                            _applyPendingPushNavigation(
-                              PendingPushNavigation(path: path),
-                            );
-                          },
                         ),
                         ProfileScreen(
                           onNavigateToHome: _navigateToHome,
                           onNavigateToAlarm: _navigateToAlarm,
+                          onNavigateToRank: _navigateToRank,
                           onSignOut: _onSignOut,
                           user: _user,
                           onUserUpdated: (user) {

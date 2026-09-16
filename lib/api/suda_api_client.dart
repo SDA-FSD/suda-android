@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import '../models/auth_models.dart';
 import '../models/home_models.dart';
 import '../models/pagination.dart';
+import '../models/rank_models.dart';
 import '../models/roleplay_models.dart';
 import '../models/series_models.dart';
 import '../models/user_models.dart';
@@ -14,6 +15,7 @@ import 'endpoints/impression_api.dart';
 import 'endpoints/notice_api.dart';
 import 'endpoints/purchase_api.dart';
 import 'endpoints/push_api.dart';
+import 'endpoints/rank_api.dart';
 import 'endpoints/roleplay_api.dart';
 import 'endpoints/series_api.dart';
 import 'endpoints/user_api.dart';
@@ -23,6 +25,10 @@ import '../services/energy_refresh_bus.dart';
 class SudaApiClient {
   static Future<HomeDto> getHomeContents({required String accessToken}) {
     return HomeApi.getHomeContents(accessToken: accessToken);
+  }
+
+  static Future<RankScreenDto> getRankScreen({required String accessToken}) {
+    return RankApi.getRankScreen(accessToken: accessToken);
   }
 
   static Future<SudaAppPage<HomeSeriesDto>> getSeriesByCategory({

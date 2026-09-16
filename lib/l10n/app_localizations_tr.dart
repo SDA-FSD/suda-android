@@ -723,4 +723,31 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get tutorialPage6Title => 'Kimse seni yargılamıyor.\nBaşaracaksın!';
+
+  @override
+  String rankCountdownDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count gün',
+      one: '1 gün',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String rankCountdownHours(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count saat',
+      one: '1 saat',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String rankCountdownMinutes(int count) {
+    return '$count dk';
+  }
 }

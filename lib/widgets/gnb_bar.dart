@@ -6,27 +6,31 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../models/user_models.dart';
 
 /// Main Screen 하단 GNB. 본문 위에 오버레이, 투명+블러 배경.
-/// 아이콘: Alarm 22% / Home 50% / Profile 78% (각 아이콘 중심이 해당 % 위치).
-/// 탭 영역: 좌 33% / 중앙 34% / 우 33%. 아이콘 레이어는 IgnorePointer로 터치가 하단 탭 영역으로 전달.
+/// 아이콘: Home 12.5% / Alarm 37.5% / Rank 62.5% / Profile 87.5% (각 아이콘 중심).
+/// 탭 영역: 4등분. 아이콘 레이어는 IgnorePointer로 터치가 하단 탭 영역으로 전달.
 class GnbBar extends StatelessWidget {
   const GnbBar({
     super.key,
-    required this.isAlarmActive,
     required this.isHomeActive,
+    required this.isAlarmActive,
+    required this.isRankActive,
     required this.isProfileActive,
     this.showNotiboxUnreadBadge = false,
-    this.onAlarmTap,
     this.onHomeTap,
+    this.onAlarmTap,
+    this.onRankTap,
     this.onProfileTap,
     this.user,
   });
 
-  final bool isAlarmActive;
   final bool isHomeActive;
+  final bool isAlarmActive;
+  final bool isRankActive;
   final bool isProfileActive;
   final bool showNotiboxUnreadBadge;
-  final VoidCallback? onAlarmTap;
   final VoidCallback? onHomeTap;
+  final VoidCallback? onAlarmTap;
+  final VoidCallback? onRankTap;
   final VoidCallback? onProfileTap;
   final UserDto? user;
 
@@ -65,26 +69,16 @@ class GnbBar extends StatelessWidget {
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   final w = constraints.maxWidth;
-                  const double alarmIconSize = 24;
-                  const double homeIconSize = 24;
+                  const double iconSize = 24;
                   const double profileAvatarSize = 28;
 
                   return Stack(
                     clipBehavior: Clip.none,
                     children: [
-                      // 탭 영역: 좌 33% / 중앙 34% / 우 33% (아이콘 터치도 이 영역에서 판정)
+                      // 탭 영역: Home | Alarm | Rank | Profile (각 25%)
                       Row(
                         children: [
                           Expanded(
-                            flex: 3,
-                            child: GestureDetector(
-                              behavior: HitTestBehavior.opaque,
-                              onTap: onAlarmTap,
-                              child: const SizedBox.expand(),
-                            ),
-                          ),
-                          Expanded(
-                            flex: 3,
                             child: GestureDetector(
                               behavior: HitTestBehavior.opaque,
                               onTap: onHomeTap,
@@ -92,7 +86,20 @@ class GnbBar extends StatelessWidget {
                             ),
                           ),
                           Expanded(
-                            flex: 3,
+                            child: GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTap: onAlarmTap,
+                              child: const SizedBox.expand(),
+                            ),
+                          ),
+                          Expanded(
+                            child: GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTap: onRankTap,
+                              child: const SizedBox.expand(),
+                            ),
+                          ),
+                          Expanded(
                             child: GestureDetector(
                               behavior: HitTestBehavior.opaque,
                               onTap: onProfileTap,
@@ -101,14 +108,29 @@ class GnbBar extends StatelessWidget {
                           ),
                         ],
                       ),
-                      // 아이콘 레이어: 터치 판정 제외(IgnorePointer) → 하단 탭 영역에서 처리
+                      // 아이콘 레이어: 터치 판정 제외(IgnorePointer)
                       IgnorePointer(
                         child: Stack(
                           clipBehavior: Clip.none,
                           children: [
-                            // Alarm: 22% 위치 (아이콘 중심)
+                            // Home: 12.5%
                             Positioned(
-                              left: w * 0.22 - alarmIconSize / 2,
+                              left: w * 0.125 - iconSize / 2,
+                              top: 0,
+                              bottom: 0,
+                              child: Center(
+                                child: Image.asset(
+                                  isHomeActive
+                                      ? 'assets/images/icons/gnb_home_pressed.png'
+                                      : 'assets/images/icons/gnb_home.png',
+                                  width: iconSize,
+                                  fit: BoxFit.contain,
+                                ),
+                              ),
+                            ),
+                            // Alarm: 37.5%
+                            Positioned(
+                              left: w * 0.375 - iconSize / 2,
                               top: 0,
                               bottom: 0,
                               child: Center(
@@ -119,7 +141,7 @@ class GnbBar extends StatelessWidget {
                                       isAlarmActive
                                           ? 'assets/images/icons/gnb_alarm_pressed.png'
                                           : 'assets/images/icons/gnb_alarm.png',
-                                      height: alarmIconSize,
+                                      height: iconSize,
                                       fit: BoxFit.contain,
                                     ),
                                     if (showNotiboxUnreadBadge)
@@ -145,24 +167,24 @@ class GnbBar extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            // Home: 50% 위치 (아이콘 중심)
+                            // Rank: 62.5%
                             Positioned(
-                              left: w * 0.5 - homeIconSize / 2,
+                              left: w * 0.625 - iconSize / 2,
                               top: 0,
                               bottom: 0,
                               child: Center(
                                 child: Image.asset(
-                                  isHomeActive
-                                      ? 'assets/images/icons/gnb_home_pressed.png'
-                                      : 'assets/images/icons/gnb_home.png',
-                                  width: homeIconSize,
+                                  isRankActive
+                                      ? 'assets/images/icons/gnb_ranking_pressed.png'
+                                      : 'assets/images/icons/gnb_ranking.png',
+                                  width: iconSize,
                                   fit: BoxFit.contain,
                                 ),
                               ),
                             ),
-                            // Profile: 78% 위치 (아바타 중심)
+                            // Profile: 87.5%
                             Positioned(
-                              left: w * 0.78 - profileAvatarSize / 2,
+                              left: w * 0.875 - profileAvatarSize / 2,
                               top: 0,
                               bottom: 0,
                               child: Center(

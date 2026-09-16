@@ -712,4 +712,19 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get tutorialPage6Title => 'ไม่มีใครตัดสินคุณ\nสู้ ๆ นะ!';
+
+  @override
+  String rankCountdownDays(int count) {
+    return 'เหลือ $count วัน';
+  }
+
+  @override
+  String rankCountdownHours(int count) {
+    return 'เหลือ $count ชม.';
+  }
+
+  @override
+  String rankCountdownMinutes(int count) {
+    return 'เหลือ $count นาที';
+  }
 }

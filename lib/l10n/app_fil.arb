@@ -284,5 +284,29 @@
   "tutorialPage4Tip": "*Tip: Subukang sumagot nang hindi tinitingnan\nang translation para sa mas mataas na score.",
   "tutorialPage5Title": "Hindi makapagsalita\nnang malakas?",
   "tutorialPage5Subtitle": "Lumipat sa **Text Mode**.",
-  "tutorialPage6Title": "Walang humahatol sa'yo.\nKaya mo 'yan!"
+  "tutorialPage6Title": "Walang humahatol sa'yo.\nKaya mo 'yan!",
+  "rankCountdownDays": "{count, plural, =1{1 araw} other{{count} araw}}",
+  "rankCountdownHours": "{count, plural, =1{1 oras} other{{count} oras}}",
+  "rankCountdownMinutes": "{count} min",
+  "@rankCountdownDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@rankCountdownHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@rankCountdownMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

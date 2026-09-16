@@ -284,5 +284,29 @@
   "tutorialPage4Tip": "*Mẹo: Hãy trả lời mà không nhìn bản dịch\nđể được điểm cao hơn.",
   "tutorialPage5Title": "Không thể nói to?",
   "tutorialPage5Subtitle": "Chuyển sang **Chế độ văn bản**.",
-  "tutorialPage6Title": "Không ai đang đánh giá bạn.\nBạn làm được!"
+  "tutorialPage6Title": "Không ai đang đánh giá bạn.\nBạn làm được!",
+  "rankCountdownDays": "Còn {count} ngày",
+  "rankCountdownHours": "Còn {count} giờ",
+  "rankCountdownMinutes": "Còn {count} phút",
+  "@rankCountdownDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@rankCountdownHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@rankCountdownMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

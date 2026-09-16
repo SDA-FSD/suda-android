@@ -284,5 +284,29 @@
   "tutorialPage4Tip": "*Tip: Coba jawab tanpa melihat terjemahan\nuntuk skor yang lebih tinggi.",
   "tutorialPage5Title": "Tidak bisa berbicara keras?",
   "tutorialPage5Subtitle": "Beralih ke **Mode Teks**.",
-  "tutorialPage6Title": "Tidak ada yang menghakimi.\nKamu pasti bisa!"
+  "tutorialPage6Title": "Tidak ada yang menghakimi.\nKamu pasti bisa!",
+  "rankCountdownDays": "{count, plural, =1{1 hari} other{{count} hari}}",
+  "rankCountdownHours": "{count, plural, =1{1 jam} other{{count} jam}}",
+  "rankCountdownMinutes": "{count} mnt",
+  "@rankCountdownDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@rankCountdownHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@rankCountdownMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

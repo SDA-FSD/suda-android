@@ -284,5 +284,29 @@
   "tutorialPage4Tip": "* Dica: tente responder sem ver a tradução\npara aumentar sua pontuação.",
   "tutorialPage5Title": "Não consegue falar\nem voz alta?",
   "tutorialPage5Subtitle": "Mude para o **Modo Texto**.",
-  "tutorialPage6Title": "Ninguém está te julgando.\nVai com tudo!"
+  "tutorialPage6Title": "Ninguém está te julgando.\nVai com tudo!",
+  "rankCountdownDays": "{count, plural, =1{1 dia} other{{count} dias}}",
+  "rankCountdownHours": "{count, plural, =1{1 hora} other{{count} horas}}",
+  "rankCountdownMinutes": "{count} min",
+  "@rankCountdownDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@rankCountdownHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@rankCountdownMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

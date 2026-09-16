@@ -284,5 +284,29 @@
   "tutorialPage4Tip": "*Tipp: Antworte ohne die Übersetzung zu sehen,\num eine höhere Punktzahl zu erzielen.",
   "tutorialPage5Title": "Du kannst nicht laut sprechen?",
   "tutorialPage5Subtitle": "Wechsle in den **Textmodus**.",
-  "tutorialPage6Title": "Niemand bewertet dich.\nDu schaffst das!"
+  "tutorialPage6Title": "Niemand bewertet dich.\nDu schaffst das!",
+  "rankCountdownDays": "{count, plural, =1{1 Tag} other{{count} Tage}}",
+  "rankCountdownHours": "{count, plural, =1{1 Stunde} other{{count} Stunden}}",
+  "rankCountdownMinutes": "{count} Min.",
+  "@rankCountdownDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@rankCountdownHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@rankCountdownMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

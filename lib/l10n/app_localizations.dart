@@ -1450,6 +1450,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No one\'s judging.\nYou\'ve got this!'**
   String get tutorialPage6Title;
+
+  /// No description provided for @rankCountdownDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 day} other{{count} days left}}'**
+  String rankCountdownDays(int count);
+
+  /// No description provided for @rankCountdownHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 hour} other{{count} hours}}'**
+  String rankCountdownHours(int count);
+
+  /// No description provided for @rankCountdownMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} min'**
+  String rankCountdownMinutes(int count);
 }
 
 class _AppLocalizationsDelegate

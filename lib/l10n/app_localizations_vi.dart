@@ -725,4 +725,19 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get tutorialPage6Title => 'Không ai đang đánh giá bạn.\nBạn làm được!';
+
+  @override
+  String rankCountdownDays(int count) {
+    return 'Còn $count ngày';
+  }
+
+  @override
+  String rankCountdownHours(int count) {
+    return 'Còn $count giờ';
+  }
+
+  @override
+  String rankCountdownMinutes(int count) {
+    return 'Còn $count phút';
+  }
 }
