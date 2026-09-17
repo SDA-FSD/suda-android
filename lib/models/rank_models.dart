@@ -202,14 +202,18 @@ class RankScreenDto {
   factory RankScreenDto.fromPeriodAndPage({
     required RankPeriodDto? period,
     required RankEntryPageDto page,
-    int? meUserId,
+    RankEntryDto? myEntry,
+    bool myEntryFromMeApi = false,
   }) {
     final sorted = [...page.entries]..sort((a, b) => a.rank.compareTo(b.rank));
-    RankEntryDto? myEntry;
-    for (final e in sorted) {
-      if (e.isMe || (meUserId != null && e.userId == meUserId)) {
-        myEntry = e.copyWith(isMe: true);
-        break;
+    RankEntryDto? resolvedMe = myEntry?.copyWith(isMe: true);
+    // /entries/me 결과를 쓰면 null = 미참여. page isMe 스캔으로 덮지 않음.
+    if (!myEntryFromMeApi && resolvedMe == null) {
+      for (final e in sorted) {
+        if (e.isMe) {
+          resolvedMe = e.copyWith(isMe: true);
+          break;
+        }
       }
     }
     return RankScreenDto(
@@ -218,7 +222,7 @@ class RankScreenDto {
       total: page.total,
       nextFromRank: page.hasMore ? 11 : null,
       topEntries: sorted.where((e) => e.rank >= 1 && e.rank <= 10).toList(),
-      myEntry: myEntry,
+      myEntry: resolvedMe,
       snapshotMinute: page.snapshotMinute,
       hasMore: page.hasMore,
       nextPageNum: page.nextPageNum,

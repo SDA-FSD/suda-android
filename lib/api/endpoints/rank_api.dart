@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import '../../models/rank_models.dart';
@@ -19,7 +20,7 @@ class RankApi {
   }
 
   static Future<RankScreenDto> _getRankScreenInternal(String accessToken) async {
-    // period·entries 병렬 — 순차 대기(~2 RTT)를 1 RTT로 줄여 sticky 최초 노출 단축
+    // period·entries 병렬 → snapshotMinute로 /entries/me (sticky 전용)
     final results = await Future.wait<Object?>([
       _getCurrentPeriod(accessToken),
       _getEntries(accessToken, pageNum: 0),
@@ -29,7 +30,65 @@ class RankApi {
       return const RankScreenDto();
     }
     final page = results[1] as RankEntryPageDto;
-    return RankScreenDto.fromPeriodAndPage(period: period, page: page);
+    final snap = page.snapshotMinute;
+    RankEntryDto? myEntry;
+    if (snap != null && snap.isNotEmpty) {
+      try {
+        myEntry = await _getMyEntryInternal(accessToken, snap);
+      } catch (err) {
+        // /me 실패 시 page0 isMe 폴백
+        debugPrint('rank getMyEntry failed, fallback to page isMe: $err');
+        for (final entry in page.entries) {
+          if (entry.isMe) {
+            myEntry = entry.copyWith(isMe: true);
+            break;
+          }
+        }
+      }
+    }
+    return RankScreenDto.fromPeriodAndPage(
+      period: period,
+      page: page,
+      myEntry: myEntry,
+      myEntryFromMeApi: true,
+    );
+  }
+
+  /// GET /v1/rank/entries/me?snapshotMinute= — 200 + body / JSON null.
+  static Future<RankEntryDto?> getMyEntry({
+    required String accessToken,
+    required String snapshotMinute,
+  }) {
+    return SudaHttpClient.executeWithRefresh(
+      () => _getMyEntryInternal(accessToken, snapshotMinute),
+      retryWithNewToken: (newToken) =>
+          _getMyEntryInternal(newToken, snapshotMinute),
+    );
+  }
+
+  static Future<RankEntryDto?> _getMyEntryInternal(
+    String accessToken,
+    String snapshotMinute,
+  ) async {
+    final response = await _get(
+      '/v1/rank/entries/me',
+      accessToken,
+      {'snapshotMinute': snapshotMinute},
+    );
+    final raw = response.body.trim();
+    if (raw.isEmpty || raw == 'null') {
+      return null;
+    }
+    final data = jsonDecode(raw);
+    if (data == null) {
+      return null;
+    }
+    if (data is! Map<String, dynamic>) {
+      throw Exception(
+        'GET /v1/rank/entries/me unexpected body: ${response.body}',
+      );
+    }
+    return RankEntryDto.fromJson(data).copyWith(isMe: true);
   }
 
   static Future<RankPeriodDto?> _getCurrentPeriod(String accessToken) async {

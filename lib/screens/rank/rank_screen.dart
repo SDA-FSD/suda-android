@@ -19,8 +19,8 @@ import 'rank_podium_painter.dart';
 import 'top_3_rewards_popup.dart';
 
 /// Weekly Ranking Main Screen (GNB Ranking 탭).
-/// GET /v1/rank/period/current + GET /v1/rank/entries.
-/// myEntry는 API 필드 없이 entries의 isMe(또는 userId)로 찾고 sticky/inline만 적용.
+/// GET /v1/rank/period/current + /entries + /entries/me.
+/// sticky/미참여는 `/entries/me`(동일 snapshotMinute). 목록 inline은 userId/isMe.
 class RankScreen extends StatefulWidget {
   const RankScreen({
     super.key,
@@ -30,8 +30,7 @@ class RankScreen extends StatefulWidget {
     this.isActive = false,
     this.user,
     this.showNotiboxUnreadBadge = false,
-
-    /// Lab 미리보기: 서버 phase와 무관하게 ANNOUNCE UI(타이틀·배경 장식) 강제.
+    /// Lab 미리보기: 서버 phase와 무관하게 ANNOUNCE UI 강제.
     this.forceAnnouncePhase = false,
   });
 
@@ -76,16 +75,15 @@ class _RankScreenState extends State<RankScreen> {
   /// 포디움 큰 숫자 폰트 크기 (Figma 440 기준 × s).
   static const _podiumNumFontSize = 64.0;
 
-  /// sticky·리스트 행 높이(대략). sticky 아래 예약 영역에 사용.
+  /// sticky·리스트 행 높이(대략). sticky 아래 예약 영역에 사용. COLLECT만.
   static const _stickyRowExtent = 56.0;
-
-  /// 마지막 리스트 행 ↔ sticky 사이 보이는 간격(기기 공통).
-  static const _stickyListGap = 8.0;
 
   RankScreenDto? _screen;
 
-  /// 스냅샷에서 찾은 나. sticky/inline용. (live ripple 없음 — API myEntry 없음)
+  /// `/entries/me` 결과. null = 미참여(스냅샷 기준). live ripple 없음.
   RankEntryDto? _myEntryKept;
+  /// `/entries/me` 호출 완료 여부. false면 sticky/미참여 판정 보류.
+  bool _myEntryResolved = false;
   List<RankEntryDto> _listRows = const [];
   String? _snapshotMinute;
   int? _nextPageNum;
@@ -151,7 +149,9 @@ class _RankScreenState extends State<RankScreen> {
       }
       final dto = await SudaApiClient.getRankScreen(accessToken: token);
       if (!mounted) return;
-      _myEntryKept = _resolveMe(dto.myEntry, dto.listEntries, dto.topEntries);
+      // sticky 기준은 /entries/me. 목록 page isMe 스캔으로 덮지 않음.
+      _myEntryKept = dto.myEntry;
+      _myEntryResolved = true;
       _listRows = dto.listEntries;
       _snapshotMinute = dto.snapshotMinute;
       _nextPageNum = dto.nextPageNum;
@@ -160,7 +160,7 @@ class _RankScreenState extends State<RankScreen> {
       debugPrint(
         'rank screen loaded rows=${_listRows.length} hasMore=$_hasMorePages '
         'next=$_nextPageNum total=${dto.total} liveRankSize=${dto.period?.liveRankSize} '
-        'snap=$_snapshotMinute',
+        'snap=$_snapshotMinute my=${_myEntryKept?.rank}',
       );
       _applyCountdown(dto.period);
       setState(() {
@@ -172,8 +172,8 @@ class _RankScreenState extends State<RankScreen> {
         // 탭 복귀·리로드 시 항상 4위부터
         _jumpToListTop();
         _updateInlineMeVisibility();
-        // page0(≤50)만으로는 끝이 안 보일 수 있음 → 바로 다음 page 로드 시도
-        unawaited(_loadMore());
+        // 화면 미충전 시만 다음 page (내 순위 탐색용 loadMore 금지 — /me가 담당)
+        _requestLoadMoreIfNeeded();
       });
       // Claimable 시트: RankScreenDto에 claimable 없음 — 절대 show 하지 않음.
     } catch (_) {
@@ -210,13 +210,13 @@ class _RankScreenState extends State<RankScreen> {
     });
   }
 
-  bool get _isAnnouncePhase =>
-      widget.forceAnnouncePhase || _screen?.period?.phase == 'ANNOUNCE';
-
   String _titleText(AppLocalizations l10n) {
     if (_isAnnouncePhase) return l10n.rankAnnounceTitle;
     return l10n.rankWeeklyTitle;
   }
+
+  bool get _isAnnouncePhase =>
+      widget.forceAnnouncePhase || _screen?.period?.phase == 'ANNOUNCE';
 
   /// ANNOUNCE 전용 배경 장식 (그라디언트 위 · 콘텐츠 아래).
   /// Figma 440 로컬 좌표 × s(contentWidth/440).
@@ -247,7 +247,7 @@ class _RankScreenState extends State<RankScreen> {
         ),
         Positioned(
           left: -15 * s,
-          top: -3 * s,
+          top: 12 * s,
           width: 453 * s,
           height: 185 * s,
           child: Image.asset(
@@ -302,21 +302,6 @@ class _RankScreenState extends State<RankScreen> {
     final list = _screen?.topEntries ?? const <RankEntryDto>[];
     for (final e in list) {
       if (e.rank == rank) return e;
-    }
-    return null;
-  }
-
-  RankEntryDto? _resolveMe(
-    RankEntryDto? hint,
-    List<RankEntryDto> listRows,
-    List<RankEntryDto> topEntries,
-  ) {
-    if (hint != null) return hint.copyWith(isMe: true);
-    final id = widget.user?.id;
-    for (final e in [...topEntries, ...listRows]) {
-      if (e.isMe || (id != null && e.userId == id)) {
-        return e.copyWith(isMe: true);
-      }
     }
     return null;
   }
@@ -416,9 +401,6 @@ class _RankScreenState extends State<RankScreen> {
           merged.add(entry);
         }
       }
-      final me =
-          _myEntryKept ??
-          _resolveMe(null, merged, _screen?.topEntries ?? const []);
       final bool inferredHasMore;
       final int? inferredNext;
       if (page.entries.isEmpty) {
@@ -439,16 +421,11 @@ class _RankScreenState extends State<RankScreen> {
         _nextPageNum = inferredNext;
         _hasMorePages = inferredHasMore && inferredNext != null;
         _loadingMore = false;
-        if (me != null) _myEntryKept = me;
       });
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         _updateInlineMeVisibility();
-        if (_myEntryKept == null && _hasMorePages) {
-          unawaited(_loadMore());
-        } else {
-          _requestLoadMoreIfNeeded();
-        }
+        _requestLoadMoreIfNeeded();
       });
     } catch (e, st) {
       debugPrint('rank loadMore FAILED page=$requestingPage: $e\n$st');
@@ -466,16 +443,17 @@ class _RankScreenState extends State<RankScreen> {
     final hasMeOnScreen = (_screen?.topEntries ?? const <RankEntryDto>[]).any(
       (e) => e.isMe,
     );
-    // COLLECT만 sticky/미참여. ANNOUNCE 결과 화면에는 없음.
+    // /entries/me null = 미참여. 해석 전이면 오버레이 금지.
+    // sticky·미참여 오버레이는 COLLECT(주간 랭킹)만. ANNOUNCE(순위 발표)에는 절대 노출하지 않음.
+    final isCollectRank = showContent && !_isAnnouncePhase;
     final showNotRanked =
-        !_isAnnouncePhase &&
-        showContent &&
+        isCollectRank &&
         _screen != null &&
+        _myEntryResolved &&
         _myEntryKept == null &&
         !hasMeOnScreen;
     final showSticky =
-        !_isAnnouncePhase &&
-        showContent &&
+        isCollectRank &&
         _myEntryKept != null &&
         _myEntryKept!.rank > 10 &&
         !_inlineMeVisible;
@@ -511,9 +489,8 @@ class _RankScreenState extends State<RankScreen> {
             : null,
         body: _buildBody(
           context,
-          // sticky 가능 시 하단에 예약 영역(간격+행높이). 리스트 padding으로 비우지 않음.
-          reserveStickySpace:
-              !_isAnnouncePhase &&
+          // sticky 예약도 COLLECT만 (inline 보일 때도 높이 유지해 점프 방지)
+          reserveStickySpace: isCollectRank &&
               _myEntryKept != null &&
               _myEntryKept!.rank > 10,
         ),
@@ -532,7 +509,7 @@ class _RankScreenState extends State<RankScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (_isAnnouncePhase) const SizedBox(height: 32),
+          if (_isAnnouncePhase) const SizedBox(height: 64),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: side),
             child: _isAnnouncePhase
@@ -657,11 +634,8 @@ class _RankScreenState extends State<RankScreen> {
                           },
                         ),
                       ),
-                      // sticky 오버레이가 덮을 자리. 보이는 간격은 _stickyListGap만.
-                      if (reserveStickySpace) ...[
-                        const SizedBox(height: _stickyListGap),
-                        const SizedBox(height: _stickyRowExtent),
-                      ],
+                      // sticky 오버레이가 덮을 자리. 위 간격 없음(GNB 띄움은 AppScaffold +4). COLLECT만.
+                      if (reserveStickySpace) const SizedBox(height: _stickyRowExtent),
                     ],
                   );
                 },
