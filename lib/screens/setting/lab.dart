@@ -27,6 +27,7 @@ import '../first_cefr_level.dart';
 import '../first_profile_image.dart';
 import '../paywall/paywall.dart';
 import '../paywall/paywall_completed.dart';
+import '../rank/rank_screen.dart';
 import '../../utils/paywall_impression_screen.dart';
 
 /// Lab에서 재현 가능한 `DefaultPopup` 목록.
@@ -193,6 +194,22 @@ class _LabScreenState extends State<LabScreen> {
     DefaultToast.show(context, _longToastTestMessage, isError: _toastIsWarning);
   }
 
+  Future<void> _openRankAnnouncePreview() async {
+    if (!mounted) return;
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (routeContext) => RankScreen(
+          forceAnnouncePhase: true,
+          isActive: true,
+          onNavigateToHome: () => Navigator.of(routeContext).pop(),
+          onNavigateToAlarm: () => Navigator.of(routeContext).pop(),
+          onNavigateToProfile: () => Navigator.of(routeContext).pop(),
+        ),
+      ),
+    );
+  }
+
   Future<void> _openFirstCefrLevelScreen() async {
     if (!mounted) return;
     await Navigator.push(
@@ -219,10 +236,7 @@ class _LabScreenState extends State<LabScreen> {
 
   Future<void> _openPaywallScreen() async {
     if (!mounted) return;
-    await PaywallScreen.push(
-      context,
-      screen: PaywallImpressionScreen.lab,
-    );
+    await PaywallScreen.push(context, screen: PaywallImpressionScreen.lab);
   }
 
   Future<void> _openPaywallCompletedScreen() async {
@@ -277,10 +291,7 @@ class _LabScreenState extends State<LabScreen> {
     }
     if (found == null) return;
     if (!mounted) return;
-    await RoleplayRouter.pushTutorialPreview(
-      context,
-      locale: found.locale,
-    );
+    await RoleplayRouter.pushTutorialPreview(context, locale: found.locale);
   }
 
   int _parseEnergyPopupCount() {
@@ -321,10 +332,7 @@ class _LabScreenState extends State<LabScreen> {
       controlAffinity: ListTileControlAffinity.leading,
       activeColor: const Color(0xFF0CABA8),
       checkColor: Colors.white,
-      title: Text(
-        label,
-        style: theme.bodyLarge?.copyWith(color: Colors.white),
-      ),
+      title: Text(label, style: theme.bodyLarge?.copyWith(color: Colors.white)),
     );
   }
 
@@ -633,8 +641,7 @@ class _LabScreenState extends State<LabScreen> {
             _buildLabCheckbox(
               label: 'force Enable Notifications',
               value: _energyPopupForceEnablePush,
-              onChanged: (v) =>
-                  setState(() => _energyPopupForceEnablePush = v),
+              onChanged: (v) => setState(() => _energyPopupForceEnablePush = v),
             ),
             const SizedBox(height: 8),
             TextField(
@@ -779,6 +786,16 @@ class _LabScreenState extends State<LabScreen> {
                 ),
                 child: const Text('Levelup Like Effect'),
               ),
+            ),
+            _buildSectionDivider(),
+            Text(
+              'Ranking',
+              style: theme.headlineSmall?.copyWith(color: Colors.white),
+            ),
+            const SizedBox(height: 12),
+            _buildLabScreenButton(
+              label: 'Open Rank Announce Preview',
+              onPressed: () => unawaited(_openRankAnnouncePreview()),
             ),
             _buildSectionDivider(),
             Text(

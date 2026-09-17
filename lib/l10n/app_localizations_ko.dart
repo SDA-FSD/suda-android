@@ -713,6 +713,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get rankWeeklyTitle => '주간 랭킹';
 
   @override
+  String get rankAnnounceTitle => '주간 랭킹 결과';
+
+  @override
   String get rankTop3RewardsTitle => 'TOP 3 보상';
 
   @override

@@ -705,6 +705,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get rankWeeklyTitle => 'Weekly Ranking';
 
   @override
+  String get rankAnnounceTitle => '本周结果';
+
+  @override
   String get rankTop3RewardsTitle => 'Top 3 Rewards';
 
   @override
@@ -1461,6 +1464,9 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get rankWeeklyTitle => 'Weekly Ranking';
 
   @override
+  String get rankAnnounceTitle => '本周结果';
+
+  @override
   String get rankTop3RewardsTitle => 'Top 3 Rewards';
 
   @override
@@ -2215,6 +2221,9 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get rankWeeklyTitle => 'Weekly Ranking';
+
+  @override
+  String get rankAnnounceTitle => '本週結果';
 
   @override
   String get rankTop3RewardsTitle => 'Top 3 Rewards';

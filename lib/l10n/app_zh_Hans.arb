@@ -310,6 +310,7 @@
     }
   },
   "rankWeeklyTitle": "Weekly Ranking",
+  "rankAnnounceTitle": "本周结果",
   "rankTop3RewardsTitle": "Top 3 Rewards",
   "rankTop3RewardsDesc": "Earn Likes each week and compete with other learners for the top spots!",
   "rankTop3Place1": "1st",

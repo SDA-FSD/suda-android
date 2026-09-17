@@ -1475,6 +1475,12 @@ abstract class AppLocalizations {
   /// **'Weekly Ranking'**
   String get rankWeeklyTitle;
 
+  /// No description provided for @rankAnnounceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This Week\'s Results'**
+  String get rankAnnounceTitle;
+
   /// No description provided for @rankTop3RewardsTitle.
   ///
   /// In en, this message translates to:

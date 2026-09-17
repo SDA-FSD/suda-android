@@ -19,11 +19,16 @@ class RankApi {
   }
 
   static Future<RankScreenDto> _getRankScreenInternal(String accessToken) async {
-    final period = await _getCurrentPeriod(accessToken);
+    // period·entries 병렬 — 순차 대기(~2 RTT)를 1 RTT로 줄여 sticky 최초 노출 단축
+    final results = await Future.wait<Object?>([
+      _getCurrentPeriod(accessToken),
+      _getEntries(accessToken, pageNum: 0),
+    ]);
+    final period = results[0] as RankPeriodDto?;
     if (period == null) {
       return const RankScreenDto();
     }
-    final page = await _getEntries(accessToken, pageNum: 0);
+    final page = results[1] as RankEntryPageDto;
     return RankScreenDto.fromPeriodAndPage(period: period, page: page);
   }
 

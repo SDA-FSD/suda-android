@@ -761,6 +761,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get rankWeeklyTitle => 'Weekly Ranking';
 
   @override
+  String get rankAnnounceTitle => 'Resultados de la semana';
+
+  @override
   String get rankTop3RewardsTitle => 'Top 3 Rewards';
 
   @override
@@ -1571,6 +1574,9 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
 
   @override
   String get rankWeeklyTitle => 'Weekly Ranking';
+
+  @override
+  String get rankAnnounceTitle => 'Resultados de la semana';
 
   @override
   String get rankTop3RewardsTitle => 'Top 3 Rewards';

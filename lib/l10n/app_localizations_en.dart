@@ -753,6 +753,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rankWeeklyTitle => 'Weekly Ranking';
 
   @override
+  String get rankAnnounceTitle => 'This Week\'s Results';
+
+  @override
   String get rankTop3RewardsTitle => 'Top 3 Rewards';
 
   @override

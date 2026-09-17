@@ -758,6 +758,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get rankWeeklyTitle => 'Ranking Semanal';
 
   @override
+  String get rankAnnounceTitle => 'Resultados da Semana';
+
+  @override
   String get rankTop3RewardsTitle => 'Recompensas do Top 3';
 
   @override

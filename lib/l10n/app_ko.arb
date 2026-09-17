@@ -310,6 +310,7 @@
     }
   },
   "rankWeeklyTitle": "주간 랭킹",
+  "rankAnnounceTitle": "주간 랭킹 결과",
   "rankTop3RewardsTitle": "TOP 3 보상",
   "rankTop3RewardsDesc": "매주 Like를 획득하고 다른 학습자들과 상위 순위를 겨뤄보세요!",
   "rankTop3Place1": "1위",

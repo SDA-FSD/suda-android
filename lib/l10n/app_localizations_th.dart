@@ -732,6 +732,9 @@ class AppLocalizationsTh extends AppLocalizations {
   String get rankWeeklyTitle => 'Weekly Ranking';
 
   @override
+  String get rankAnnounceTitle => 'ผลสัปดาห์นี้';
+
+  @override
   String get rankTop3RewardsTitle => 'Top 3 Rewards';
 
   @override

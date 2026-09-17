@@ -749,6 +749,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get rankWeeklyTitle => 'Weekly Ranking';
 
   @override
+  String get rankAnnounceTitle => 'نتائج هذا الأسبوع';
+
+  @override
   String get rankTop3RewardsTitle => 'Top 3 Rewards';
 
   @override

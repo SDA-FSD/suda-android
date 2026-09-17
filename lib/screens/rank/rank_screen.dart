@@ -30,6 +30,9 @@ class RankScreen extends StatefulWidget {
     this.isActive = false,
     this.user,
     this.showNotiboxUnreadBadge = false,
+
+    /// Lab 미리보기: 서버 phase와 무관하게 ANNOUNCE UI(타이틀·배경 장식) 강제.
+    this.forceAnnouncePhase = false,
   });
 
   final VoidCallback? onNavigateToHome;
@@ -38,6 +41,7 @@ class RankScreen extends StatefulWidget {
   final bool isActive;
   final UserDto? user;
   final bool showNotiboxUnreadBadge;
+  final bool forceAnnouncePhase;
 
   static const String routeName = '/rank';
 
@@ -72,8 +76,11 @@ class _RankScreenState extends State<RankScreen> {
   /// 포디움 큰 숫자 폰트 크기 (Figma 440 기준 × s).
   static const _podiumNumFontSize = 64.0;
 
-  /// sticky(`_RankListRow`) 높이. 리스트 하단 패딩으로 마지막 행이 sticky에 가리지 않게 함.
-  static const _stickyListBottomPad = 56.0;
+  /// sticky·리스트 행 높이(대략). sticky 아래 예약 영역에 사용.
+  static const _stickyRowExtent = 56.0;
+
+  /// 마지막 리스트 행 ↔ sticky 사이 보이는 간격(기기 공통).
+  static const _stickyListGap = 8.0;
 
   RankScreenDto? _screen;
 
@@ -121,10 +128,16 @@ class _RankScreenState extends State<RankScreen> {
   }
 
   Future<void> _loadScreen() async {
-    setState(() {
-      _loading = true;
+    // 재진입: 기존 sticky/리스트를 숨기지 않고 백그라운드 갱신 (진입 시 1초 공백 방지)
+    final keepUi = _screen != null;
+    if (!keepUi) {
+      setState(() {
+        _loading = true;
+        _loadFailed = false;
+      });
+    } else {
       _loadFailed = false;
-    });
+    }
     try {
       final token = await TokenStorage.loadAccessToken();
       if (token == null || token.isEmpty) {
@@ -197,10 +210,79 @@ class _RankScreenState extends State<RankScreen> {
     });
   }
 
+  bool get _isAnnouncePhase =>
+      widget.forceAnnouncePhase || _screen?.period?.phase == 'ANNOUNCE';
+
   String _titleText(AppLocalizations l10n) {
-    final phase = _screen?.period?.phase;
-    if (phase == 'ANNOUNCE') return "This Week's Results";
+    if (_isAnnouncePhase) return l10n.rankAnnounceTitle;
     return l10n.rankWeeklyTitle;
+  }
+
+  /// ANNOUNCE 전용 배경 장식 (그라디언트 위 · 콘텐츠 아래).
+  /// Figma 440 로컬 좌표 × s(contentWidth/440).
+  static const _announceSunburst = 'assets/images/sunburst_pattern.png';
+  static const _announceConfetti = 'assets/images/confetti.png';
+  static const _announceDecorFrameW = 440.0;
+
+  Widget _buildAnnounceDecorLayers(double contentWidth) {
+    final s = contentWidth / _announceDecorFrameW;
+    return Stack(
+      fit: StackFit.expand,
+      clipBehavior: Clip.hardEdge,
+      children: [
+        Positioned(
+          left: -255 * s,
+          top: -3 * s,
+          width: 949 * s,
+          height: 949 * s,
+          child: _SoftLightLayer(
+            child: Image.asset(
+              _announceSunburst,
+              width: 949 * s,
+              height: 949 * s,
+              fit: BoxFit.fill,
+              filterQuality: FilterQuality.medium,
+            ),
+          ),
+        ),
+        Positioned(
+          left: -15 * s,
+          top: -3 * s,
+          width: 453 * s,
+          height: 185 * s,
+          child: Image.asset(
+            _announceConfetti,
+            width: 453 * s,
+            height: 185 * s,
+            fit: BoxFit.fill,
+            filterQuality: FilterQuality.medium,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRankBackground() {
+    const gradient = DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFF843DF2), Color(0xFF0D011F)],
+        ),
+      ),
+    );
+    if (!_isAnnouncePhase) return gradient;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final w = constraints.maxWidth;
+        return Stack(
+          fit: StackFit.expand,
+          clipBehavior: Clip.hardEdge,
+          children: [gradient, if (w > 0) _buildAnnounceDecorLayers(w)],
+        );
+      },
+    );
   }
 
   /// 랭킹 종료까지 남은 시간.
@@ -243,14 +325,13 @@ class _RankScreenState extends State<RankScreen> {
     final meId = widget.user?.id;
     final me = _myEntryKept;
     final base = [..._listRows]..sort((a, b) => a.rank.compareTo(b.rank));
-    return base
-        .map((e) {
-          final isMe = e.isMe ||
-              (meId != null && e.userId == meId) ||
-              (me != null && e.userId == me.userId);
-          return e.copyWith(isMe: isMe);
-        })
-        .toList();
+    return base.map((e) {
+      final isMe =
+          e.isMe ||
+          (meId != null && e.userId == meId) ||
+          (me != null && e.userId == me.userId);
+      return e.copyWith(isMe: isMe);
+    }).toList();
   }
 
   void _jumpToListTop() {
@@ -272,8 +353,7 @@ class _RankScreenState extends State<RankScreen> {
     }
     final pos = _scrollController.position;
     // maxScrollExtent가 작거나(첫 페이지가 화면을 다 못 채움) 하단 근처면 다음 page
-    if (pos.maxScrollExtent <= 240 ||
-        pos.pixels >= pos.maxScrollExtent - 480) {
+    if (pos.maxScrollExtent <= 240 || pos.pixels >= pos.maxScrollExtent - 480) {
       unawaited(_loadMore());
     }
   }
@@ -336,7 +416,8 @@ class _RankScreenState extends State<RankScreen> {
           merged.add(entry);
         }
       }
-      final me = _myEntryKept ??
+      final me =
+          _myEntryKept ??
           _resolveMe(null, merged, _screen?.topEntries ?? const []);
       final bool inferredHasMore;
       final int? inferredNext;
@@ -348,10 +429,10 @@ class _RankScreenState extends State<RankScreen> {
         final maxRank = merged.isEmpty
             ? 0
             : merged.map((e) => e.rank).reduce((a, b) => a > b ? a : b);
-        inferredHasMore = page.hasMore ||
-            (page.total > 0 && maxRank < page.total);
-        inferredNext = page.nextPageNum ??
-            (inferredHasMore ? requestingPage + 1 : null);
+        inferredHasMore =
+            page.hasMore || (page.total > 0 && maxRank < page.total);
+        inferredNext =
+            page.nextPageNum ?? (inferredHasMore ? requestingPage + 1 : null);
       }
       setState(() {
         _listRows = merged;
@@ -385,32 +466,27 @@ class _RankScreenState extends State<RankScreen> {
     final hasMeOnScreen = (_screen?.topEntries ?? const <RankEntryDto>[]).any(
       (e) => e.isMe,
     );
-    // 실제 미참여만. (리스트에 내가 있으면 오버레이 금지)
+    // COLLECT만 sticky/미참여. ANNOUNCE 결과 화면에는 없음.
     final showNotRanked =
+        !_isAnnouncePhase &&
         showContent &&
         _screen != null &&
         _myEntryKept == null &&
         !hasMeOnScreen;
-    final showSticky = showContent &&
+    final showSticky =
+        !_isAnnouncePhase &&
+        showContent &&
         _myEntryKept != null &&
         _myEntryKept!.rank > 10 &&
         !_inlineMeVisible;
 
     return RankClaimableSheet(
       child: AppScaffold(
-        showBackButton: false,
+        showBackButton: widget.forceAnnouncePhase,
         usePadding: false,
         bodyTopPadding: 16,
         backgroundColor: const Color(0xFF0D011F),
-        background: const DecoratedBox(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Color(0xFF843DF2), Color(0xFF0D011F)],
-            ),
-          ),
-        ),
+        background: _buildRankBackground(),
         bottomNavigationBar: GnbBar(
           isHomeActive: false,
           isAlarmActive: false,
@@ -435,29 +511,33 @@ class _RankScreenState extends State<RankScreen> {
             : null,
         body: _buildBody(
           context,
-          // sticky 가능 구간은 토글과 무관하게 패딩 유지(나타남/사라짐 점프 방지)
-          listBottomPad: (_myEntryKept != null && _myEntryKept!.rank > 10)
-              ? _stickyListBottomPad
-              : 0,
+          // sticky 가능 시 하단에 예약 영역(간격+행높이). 리스트 padding으로 비우지 않음.
+          reserveStickySpace:
+              !_isAnnouncePhase &&
+              _myEntryKept != null &&
+              _myEntryKept!.rank > 10,
         ),
       ),
     );
   }
 
-  Widget _buildBody(BuildContext context, {double listBottomPad = 0}) {
-    final bottomInset =
-        MediaQuery.paddingOf(context).bottom + GnbBar.contentHeight;
+  Widget _buildBody(BuildContext context, {bool reserveStickySpace = false}) {
+    // SafeArea가 시스템 inset을 이미 처리. GNB contentHeight만 본문에서 비움.
+    const bottomInset = GnbBar.contentHeight;
     final periodNull = _screen != null && _screen!.period == null;
     const side = 24.0;
 
     return Padding(
-      padding: EdgeInsets.only(bottom: bottomInset),
+      padding: const EdgeInsets.only(bottom: bottomInset),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          if (_isAnnouncePhase) const SizedBox(height: 32),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: side),
-            child: _buildHeader(context),
+            child: _isAnnouncePhase
+                ? _buildAnnounceHeader(context)
+                : _buildHeader(context),
           ),
           const SizedBox(height: 8),
           if (_loading && _screen == null)
@@ -478,6 +558,28 @@ class _RankScreenState extends State<RankScreen> {
                     style: TextStyle(color: Colors.white),
                   ),
                 ),
+              ),
+            )
+          else if (_isAnnouncePhase)
+            Expanded(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  // ANNOUNCE: 타이틀 + 1~3 포디움만 (리스트/카운트다운/? 없음).
+                  final contentConstraints = BoxConstraints(
+                    maxWidth: (constraints.maxWidth - side * 2).clamp(
+                      0.0,
+                      double.infinity,
+                    ),
+                    maxHeight: constraints.maxHeight,
+                  );
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: side),
+                    child: Align(
+                      alignment: Alignment.topCenter,
+                      child: _buildPodium(context, contentConstraints),
+                    ),
+                  );
+                },
               ),
             )
           else
@@ -517,7 +619,7 @@ class _RankScreenState extends State<RankScreen> {
                                 displayRows.length + (_loadingMore ? 1 : 0);
                             return ListView.builder(
                               controller: _scrollController,
-                              padding: EdgeInsets.only(bottom: listBottomPad),
+                              padding: EdgeInsets.zero,
                               clipBehavior: Clip.hardEdge,
                               physics: const AlwaysScrollableScrollPhysics(),
                               itemCount: itemCount,
@@ -555,6 +657,11 @@ class _RankScreenState extends State<RankScreen> {
                           },
                         ),
                       ),
+                      // sticky 오버레이가 덮을 자리. 보이는 간격은 _stickyListGap만.
+                      if (reserveStickySpace) ...[
+                        const SizedBox(height: _stickyListGap),
+                        const SizedBox(height: _stickyRowExtent),
+                      ],
                     ],
                   );
                 },
@@ -562,6 +669,30 @@ class _RankScreenState extends State<RankScreen> {
             ),
         ],
       ),
+    );
+  }
+
+  /// ANNOUNCE 결과 헤더: 타이틀만 (도움말·카운트다운 없음).
+  Widget _buildAnnounceHeader(BuildContext context) {
+    final theme = Theme.of(context).textTheme;
+    final l10n = AppLocalizations.of(context)!;
+    // Outer Shadow: X0 Y4 Blur4 Spread0 #000000 25%.
+    const announceTitleShadow = Shadow(
+      offset: Offset(0, 4),
+      blurRadius: 4,
+      color: Color(0x40000000),
+    );
+    final titleStyle = theme.headlineMedium?.copyWith(
+      color: Colors.white,
+      height: 1.0,
+      shadows: const [announceTitleShadow],
+    );
+    return Text(
+      l10n.rankAnnounceTitle,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      textAlign: TextAlign.center,
+      style: titleStyle,
     );
   }
 
@@ -1119,10 +1250,7 @@ class _RankProfileFrame extends StatelessWidget {
       child: Container(
         width: inner,
         height: inner,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: innerFill,
-        ),
+        decoration: BoxDecoration(shape: BoxShape.circle, color: innerFill),
         clipBehavior: Clip.antiAlias,
         child: _RankAvatar(
           imgPath: imgPath,
@@ -1179,6 +1307,7 @@ class _RankListRow extends StatelessWidget {
     required this.defaultProfile,
     required this.premiumBadge,
     this.contentHorizontal = 24,
+    this.flushTop = false,
   });
 
   final int rank;
@@ -1188,6 +1317,9 @@ class _RankListRow extends StatelessWidget {
 
   /// 행 콘텐츠 좌우 inset. isMe 하이라이트는 리스트 전체 폭(각진 모서리).
   final double contentHorizontal;
+
+  /// sticky: 상단 margin 제거(하이라이트가 위로 붙음). 하단만 2 유지.
+  final bool flushTop;
 
   static const _listAvatarOuter = 40.0;
   static const _listBorderW = 2.0;
@@ -1341,9 +1473,12 @@ class _RankListRow extends StatelessWidget {
 
     // softLight는 스크롤 시 레이어 분리로 순백 플래시 → #542493 고정.
     // isMe: 리스트(=화면) 전체 폭 · 각진 모서리(radius 없음).
+    // sticky(flushTop): 상단 공백 없이 하단만 2.
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.symmetric(vertical: 2),
+      margin: flushTop
+          ? const EdgeInsets.only(bottom: 2)
+          : const EdgeInsets.symmetric(vertical: 2),
       color: isMe ? const Color(0xFF542493) : null,
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: contentHorizontal),
@@ -1438,6 +1573,7 @@ class _RankMyEntrySticky extends StatelessWidget {
         entry: entry,
         defaultProfile: defaultProfile,
         premiumBadge: premiumBadge,
+        flushTop: true,
       ),
     );
   }
@@ -1526,5 +1662,32 @@ class _RankNotRankedOverlay extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+/// ANNOUNCE sunburst: 배경 그라디언트 위에 softLight 합성.
+/// PNG 알파가 이미 ~14%이므로 레이어 opacity를 또 곱하지 않음.
+class _SoftLightLayer extends SingleChildRenderObjectWidget {
+  const _SoftLightLayer({required Widget child}) : super(child: child);
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderSoftLightLayer();
+  }
+}
+
+class _RenderSoftLightLayer extends RenderProxyBox {
+  @override
+  bool get alwaysNeedsCompositing => child != null;
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (child == null) return;
+    context.canvas.saveLayer(
+      offset & size,
+      Paint()..blendMode = BlendMode.softLight,
+    );
+    context.paintChild(child!, offset);
+    context.canvas.restore();
   }
 }

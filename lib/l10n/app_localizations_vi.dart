@@ -745,6 +745,9 @@ class AppLocalizationsVi extends AppLocalizations {
   String get rankWeeklyTitle => 'Weekly Ranking';
 
   @override
+  String get rankAnnounceTitle => 'Kết quả tuần này';
+
+  @override
   String get rankTop3RewardsTitle => 'Top 3 Rewards';
 
   @override
