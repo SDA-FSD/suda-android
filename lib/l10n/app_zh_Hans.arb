@@ -308,5 +308,24 @@
         "type": "int"
       }
     }
-  }
+  },
+  "rankWeeklyTitle": "Weekly Ranking",
+  "rankTop3RewardsTitle": "Top 3 Rewards",
+  "rankTop3RewardsDesc": "Earn Likes each week and compete with other learners for the top spots!",
+  "rankTop3Place1": "1st",
+  "rankTop3Place2": "2nd",
+  "rankTop3Place3": "3rd",
+  "rankTop3Badge1": "1st Place Badge",
+  "rankTop3Badge2": "2nd Place Badge",
+  "rankTop3Badge3": "3rd Place Badge",
+  "rankTop3Likes100": "+100 Likes",
+  "rankTop3Likes60": "+60 Likes",
+  "rankTop3Likes50": "+50 Likes",
+  "rankTop3Box3": "×3 Reward Box",
+  "rankTop3Box2": "×2 Reward Box",
+  "rankTop3Box1": "×1 Reward Box",
+  "rankTop3Okay": "Okay",
+  "rankNotRankedYetTitle": "You're not ranked yet",
+  "rankNotRankedYetBody": "Earn Likes to join this week's ranking.",
+  "rankPlayNow": "play now"
 }

@@ -753,4 +753,63 @@ class AppLocalizationsPt extends AppLocalizations {
   String rankCountdownMinutes(int count) {
     return '$count min';
   }
+
+  @override
+  String get rankWeeklyTitle => 'Ranking Semanal';
+
+  @override
+  String get rankTop3RewardsTitle => 'Recompensas do Top 3';
+
+  @override
+  String get rankTop3RewardsDesc =>
+      'Ganhe Likes toda semana e dispute as primeiras posições com outros estudantes!';
+
+  @override
+  String get rankTop3Place1 => '1º';
+
+  @override
+  String get rankTop3Place2 => '2º';
+
+  @override
+  String get rankTop3Place3 => '3º';
+
+  @override
+  String get rankTop3Badge1 => 'Distintivo de 1º Lugar';
+
+  @override
+  String get rankTop3Badge2 => 'Distintivo de 2º Lugar';
+
+  @override
+  String get rankTop3Badge3 => 'Distintivo de 3º Lugar';
+
+  @override
+  String get rankTop3Likes100 => '+100 Likes';
+
+  @override
+  String get rankTop3Likes60 => '+60 Likes';
+
+  @override
+  String get rankTop3Likes50 => '+50 Likes';
+
+  @override
+  String get rankTop3Box3 => '×3 Caixa de Recompensa';
+
+  @override
+  String get rankTop3Box2 => '×2 Caixa de Recompensa';
+
+  @override
+  String get rankTop3Box1 => '×1 Caixa de Recompensa';
+
+  @override
+  String get rankTop3Okay => 'OK';
+
+  @override
+  String get rankNotRankedYetTitle => 'Você ainda não está no ranking';
+
+  @override
+  String get rankNotRankedYetBody =>
+      'Ganhe Likes para participar do ranking desta semana.';
+
+  @override
+  String get rankPlayNow => 'play now';
 }

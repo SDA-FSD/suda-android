@@ -308,5 +308,24 @@
         "type": "int"
       }
     }
-  }
+  },
+  "rankWeeklyTitle": "주간 랭킹",
+  "rankTop3RewardsTitle": "TOP 3 보상",
+  "rankTop3RewardsDesc": "매주 Like를 획득하고 다른 학습자들과 상위 순위를 겨뤄보세요!",
+  "rankTop3Place1": "1위",
+  "rankTop3Place2": "2위",
+  "rankTop3Place3": "3위",
+  "rankTop3Badge1": "1위 배지",
+  "rankTop3Badge2": "2위 배지",
+  "rankTop3Badge3": "3위 배지",
+  "rankTop3Likes100": "+100 Likes",
+  "rankTop3Likes60": "+60 Likes",
+  "rankTop3Likes50": "+50 Likes",
+  "rankTop3Box3": "×3 보상 상자",
+  "rankTop3Box2": "×2 보상 상자",
+  "rankTop3Box1": "×1 보상 상자",
+  "rankTop3Okay": "확인",
+  "rankNotRankedYetTitle": "아직 랭킹에 참여하지 않았어요",
+  "rankNotRankedYetBody": "Like를 획득하고 이번 주 랭킹에 참여해보세요.",
+  "rankPlayNow": "play now"
 }

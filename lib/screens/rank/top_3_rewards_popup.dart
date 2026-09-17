@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../widgets/default_popup.dart';
 
-/// Weekly Ranking `?` → Top 3 Rewards. 서버 호출 없음. 영어 카피 하드코딩.
+/// Weekly Ranking `?` → Top 3 Rewards. 서버 호출 없음.
 Future<void> showTop3RewardsPopup(BuildContext context) {
+  final l10n = AppLocalizations.of(context)!;
   return DefaultPopup.show(
     context,
-    titleText: 'Top 3 Rewards',
+    titleText: l10n.rankTop3RewardsTitle,
     bodyWidget: const _Top3RewardsBody(),
     buttons: [
       DefaultPopupButton(
         type: DefaultPopupButtonType.primary,
-        label: 'Okay',
+        label: l10n.rankTop3Okay,
         onPressed: () {},
       ),
     ],
@@ -22,27 +24,37 @@ Future<void> showTop3RewardsPopup(BuildContext context) {
 class _Top3RewardsBody extends StatelessWidget {
   const _Top3RewardsBody();
 
-  static const _rows = <(String, List<String>)>[
-    ('1st', ['Champion Badge', '+100 Likes', '×3 Reward Box']),
-    ('2nd', ['Champion Badge', '+60 Likes', '×2 Reward Box']),
-    ('3rd', ['Champion Badge', '+50 Likes', '×1 Reward Box']),
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context).textTheme;
+    final rows = <(String, List<String>)>[
+      (
+        l10n.rankTop3Place1,
+        [l10n.rankTop3Badge1, l10n.rankTop3Likes100, l10n.rankTop3Box3],
+      ),
+      (
+        l10n.rankTop3Place2,
+        [l10n.rankTop3Badge2, l10n.rankTop3Likes60, l10n.rankTop3Box2],
+      ),
+      (
+        l10n.rankTop3Place3,
+        [l10n.rankTop3Badge3, l10n.rankTop3Likes50, l10n.rankTop3Box1],
+      ),
+    ];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          'Earn Likes each week and compete with other learners for the top spots!',
+          l10n.rankTop3RewardsDesc,
           textAlign: TextAlign.center,
           style: theme.bodyMedium?.copyWith(color: Colors.white),
         ),
         const SizedBox(height: 16),
-        for (var i = 0; i < _rows.length; i++) ...[
+        for (var i = 0; i < rows.length; i++) ...[
           if (i > 0) const SizedBox(height: 12),
-          _RewardRankBlock(place: _rows[i].$1, items: _rows[i].$2),
+          _RewardRankBlock(place: rows[i].$1, items: rows[i].$2),
         ],
       ],
     );

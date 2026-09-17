@@ -1468,6 +1468,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} min'**
   String rankCountdownMinutes(int count);
+
+  /// No description provided for @rankWeeklyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly Ranking'**
+  String get rankWeeklyTitle;
+
+  /// No description provided for @rankTop3RewardsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Top 3 Rewards'**
+  String get rankTop3RewardsTitle;
+
+  /// No description provided for @rankTop3RewardsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Earn Likes each week and compete with other learners for the top spots!'**
+  String get rankTop3RewardsDesc;
+
+  /// No description provided for @rankTop3Place1.
+  ///
+  /// In en, this message translates to:
+  /// **'1st'**
+  String get rankTop3Place1;
+
+  /// No description provided for @rankTop3Place2.
+  ///
+  /// In en, this message translates to:
+  /// **'2nd'**
+  String get rankTop3Place2;
+
+  /// No description provided for @rankTop3Place3.
+  ///
+  /// In en, this message translates to:
+  /// **'3rd'**
+  String get rankTop3Place3;
+
+  /// No description provided for @rankTop3Badge1.
+  ///
+  /// In en, this message translates to:
+  /// **'1st Place Badge'**
+  String get rankTop3Badge1;
+
+  /// No description provided for @rankTop3Badge2.
+  ///
+  /// In en, this message translates to:
+  /// **'2nd Place Badge'**
+  String get rankTop3Badge2;
+
+  /// No description provided for @rankTop3Badge3.
+  ///
+  /// In en, this message translates to:
+  /// **'3rd Place Badge'**
+  String get rankTop3Badge3;
+
+  /// No description provided for @rankTop3Likes100.
+  ///
+  /// In en, this message translates to:
+  /// **'+100 Likes'**
+  String get rankTop3Likes100;
+
+  /// No description provided for @rankTop3Likes60.
+  ///
+  /// In en, this message translates to:
+  /// **'+60 Likes'**
+  String get rankTop3Likes60;
+
+  /// No description provided for @rankTop3Likes50.
+  ///
+  /// In en, this message translates to:
+  /// **'+50 Likes'**
+  String get rankTop3Likes50;
+
+  /// No description provided for @rankTop3Box3.
+  ///
+  /// In en, this message translates to:
+  /// **'×3 Reward Box'**
+  String get rankTop3Box3;
+
+  /// No description provided for @rankTop3Box2.
+  ///
+  /// In en, this message translates to:
+  /// **'×2 Reward Box'**
+  String get rankTop3Box2;
+
+  /// No description provided for @rankTop3Box1.
+  ///
+  /// In en, this message translates to:
+  /// **'×1 Reward Box'**
+  String get rankTop3Box1;
+
+  /// No description provided for @rankTop3Okay.
+  ///
+  /// In en, this message translates to:
+  /// **'Okay'**
+  String get rankTop3Okay;
+
+  /// No description provided for @rankNotRankedYetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re not ranked yet'**
+  String get rankNotRankedYetTitle;
+
+  /// No description provided for @rankNotRankedYetBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Earn Likes to join this week\'s ranking.'**
+  String get rankNotRankedYetBody;
+
+  /// No description provided for @rankPlayNow.
+  ///
+  /// In en, this message translates to:
+  /// **'play now'**
+  String get rankPlayNow;
 }
 
 class _AppLocalizationsDelegate

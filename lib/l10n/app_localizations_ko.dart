@@ -708,4 +708,61 @@ class AppLocalizationsKo extends AppLocalizations {
   String rankCountdownMinutes(int count) {
     return '$count분 남음';
   }
+
+  @override
+  String get rankWeeklyTitle => '주간 랭킹';
+
+  @override
+  String get rankTop3RewardsTitle => 'TOP 3 보상';
+
+  @override
+  String get rankTop3RewardsDesc => '매주 Like를 획득하고 다른 학습자들과 상위 순위를 겨뤄보세요!';
+
+  @override
+  String get rankTop3Place1 => '1위';
+
+  @override
+  String get rankTop3Place2 => '2위';
+
+  @override
+  String get rankTop3Place3 => '3위';
+
+  @override
+  String get rankTop3Badge1 => '1위 배지';
+
+  @override
+  String get rankTop3Badge2 => '2위 배지';
+
+  @override
+  String get rankTop3Badge3 => '3위 배지';
+
+  @override
+  String get rankTop3Likes100 => '+100 Likes';
+
+  @override
+  String get rankTop3Likes60 => '+60 Likes';
+
+  @override
+  String get rankTop3Likes50 => '+50 Likes';
+
+  @override
+  String get rankTop3Box3 => '×3 보상 상자';
+
+  @override
+  String get rankTop3Box2 => '×2 보상 상자';
+
+  @override
+  String get rankTop3Box1 => '×1 보상 상자';
+
+  @override
+  String get rankTop3Okay => '확인';
+
+  @override
+  String get rankNotRankedYetTitle => '아직 랭킹에 참여하지 않았어요';
+
+  @override
+  String get rankNotRankedYetBody => 'Like를 획득하고 이번 주 랭킹에 참여해보세요.';
+
+  @override
+  String get rankPlayNow => 'play now';
 }

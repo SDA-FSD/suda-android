@@ -756,6 +756,64 @@ class AppLocalizationsEs extends AppLocalizations {
   String rankCountdownMinutes(int count) {
     return '$count min';
   }
+
+  @override
+  String get rankWeeklyTitle => 'Weekly Ranking';
+
+  @override
+  String get rankTop3RewardsTitle => 'Top 3 Rewards';
+
+  @override
+  String get rankTop3RewardsDesc =>
+      'Earn Likes each week and compete with other learners for the top spots!';
+
+  @override
+  String get rankTop3Place1 => '1st';
+
+  @override
+  String get rankTop3Place2 => '2nd';
+
+  @override
+  String get rankTop3Place3 => '3rd';
+
+  @override
+  String get rankTop3Badge1 => '1st Place Badge';
+
+  @override
+  String get rankTop3Badge2 => '2nd Place Badge';
+
+  @override
+  String get rankTop3Badge3 => '3rd Place Badge';
+
+  @override
+  String get rankTop3Likes100 => '+100 Likes';
+
+  @override
+  String get rankTop3Likes60 => '+60 Likes';
+
+  @override
+  String get rankTop3Likes50 => '+50 Likes';
+
+  @override
+  String get rankTop3Box3 => '×3 Reward Box';
+
+  @override
+  String get rankTop3Box2 => '×2 Reward Box';
+
+  @override
+  String get rankTop3Box1 => '×1 Reward Box';
+
+  @override
+  String get rankTop3Okay => 'Okay';
+
+  @override
+  String get rankNotRankedYetTitle => 'You\'re not ranked yet';
+
+  @override
+  String get rankNotRankedYetBody => 'Earn Likes to join this week\'s ranking.';
+
+  @override
+  String get rankPlayNow => 'play now';
 }
 
 /// The translations for Spanish Castilian, as used in Latin America and the Caribbean (`es_419`).
@@ -1510,4 +1568,62 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
   String rankCountdownMinutes(int count) {
     return '$count min';
   }
+
+  @override
+  String get rankWeeklyTitle => 'Weekly Ranking';
+
+  @override
+  String get rankTop3RewardsTitle => 'Top 3 Rewards';
+
+  @override
+  String get rankTop3RewardsDesc =>
+      'Earn Likes each week and compete with other learners for the top spots!';
+
+  @override
+  String get rankTop3Place1 => '1st';
+
+  @override
+  String get rankTop3Place2 => '2nd';
+
+  @override
+  String get rankTop3Place3 => '3rd';
+
+  @override
+  String get rankTop3Badge1 => '1st Place Badge';
+
+  @override
+  String get rankTop3Badge2 => '2nd Place Badge';
+
+  @override
+  String get rankTop3Badge3 => '3rd Place Badge';
+
+  @override
+  String get rankTop3Likes100 => '+100 Likes';
+
+  @override
+  String get rankTop3Likes60 => '+60 Likes';
+
+  @override
+  String get rankTop3Likes50 => '+50 Likes';
+
+  @override
+  String get rankTop3Box3 => '×3 Reward Box';
+
+  @override
+  String get rankTop3Box2 => '×2 Reward Box';
+
+  @override
+  String get rankTop3Box1 => '×1 Reward Box';
+
+  @override
+  String get rankTop3Okay => 'Okay';
+
+  @override
+  String get rankNotRankedYetTitle => 'You\'re not ranked yet';
+
+  @override
+  String get rankNotRankedYetBody => 'Earn Likes to join this week\'s ranking.';
+
+  @override
+  String get rankPlayNow => 'play now';
 }

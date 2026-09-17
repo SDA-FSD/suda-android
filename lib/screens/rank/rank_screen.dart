@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:ui' show ImageFilter;
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:marquee/marquee.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../services/suda_api_client.dart';
@@ -44,31 +46,28 @@ class _RankScreenState extends State<RankScreen> {
   static const _premiumBadge =
       'assets/images/icons/premium_verified_badge.png';
   static const _podiumCrown = 'assets/images/icons/ranking_1st_crown.png';
-  static const _likeIcon = 'assets/images/like_at_result.png';
 
   /// Figma 440 프레임 기준 포디움(왕관 top→포디움 베이스 bottom).
   static const _figmaFrameW = 440.0;
   static const _figmaPodiumOriginY = 71.0;
-  // Figma Podium 베이스: x34 y290 w384 h150 → bottom 440
-  static const _figmaPodiumBaseX = 34.0;
+  // 포디움 베이스: 폭 408(+24 균등), 440 프레임 안 좌우 여백 균등(baseX=16).
+  static const _figmaPodiumBaseX = RankPodiumGeometry.baseXInFrame;
   static const _figmaPodiumBaseY = 290.0;
-  static const _figmaPodiumBaseW = 384.0;
+  static const _figmaPodiumBaseW = RankPodiumGeometry.width;
   static const _figmaPodiumBaseH = 150.0;
   static const _figmaPodiumBottomY = _figmaPodiumBaseY + _figmaPodiumBaseH;
   static const _figmaPodiumH = _figmaPodiumBottomY - _figmaPodiumOriginY;
+  /// 포디움 단 폭·로컬 x (= wireframe 세로 경계와 동일).
+  static const _step2W = RankPodiumGeometry.step2W;
+  static const _step1W = RankPodiumGeometry.step1W;
+  static const _step3W = RankPodiumGeometry.step3W;
+  static const _step1LocalX = RankPodiumGeometry.step1LocalX;
+  static const _step3LocalX = RankPodiumGeometry.step3LocalX;
   /// 포디움 큰 숫자 폰트 크기 (Figma 440 기준 × s).
   static const _podiumNumFontSize = 64.0;
-  /// 4~10 리스트가 한 화면에 들어가도록 포디움이 비워 줄 높이.
-  /// row = margin 2+2 + padding 6+6 + avatar 40.
-  static const _listRowH = 56.0;
-  static const _listHeaderH = 24.0;
-  static const _podiumListGap = 16.0;
-  static const _listBlockH =
-      _podiumListGap + _listHeaderH + _listRowH * 7;
-  static const _minPodiumH = 200.0;
 
   RankScreenDto? _screen;
-  // ignore: unused_field — 후속 claimable / my placement (CONTEXT §42). 리스트에 끼워 넣지 않음.
+  /// myEntry: 11위 이하면 리스트에 끼워 넣지 않음. 미참여 오버레이 / 후속 sticky용.
   RankEntryDto? _myEntryKept;
   bool _loading = true;
   bool _loadFailed = false;
@@ -159,10 +158,10 @@ class _RankScreenState extends State<RankScreen> {
     });
   }
 
-  String get _titleText {
+  String _titleText(AppLocalizations l10n) {
     final phase = _screen?.period?.phase;
     if (phase == 'ANNOUNCE') return "This Week's Results";
-    return 'Weekly Ranking';
+    return l10n.rankWeeklyTitle;
   }
 
   /// 랭킹 종료까지 남은 시간.
@@ -184,12 +183,6 @@ class _RankScreenState extends State<RankScreen> {
       if (e.rank == rank) return e;
     }
     return null;
-  }
-
-  /// 서버 topEntries 순서·rank 그대로. 4~10만 표시 (빈 슬롯/내 행 끼워넣기 없음).
-  List<RankEntryDto> get _listEntries {
-    final list = _screen?.topEntries ?? const <RankEntryDto>[];
-    return list.where((e) => e.rank >= 4 && e.rank <= 10).toList();
   }
 
   @override
@@ -266,32 +259,47 @@ class _RankScreenState extends State<RankScreen> {
             Expanded(
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  final podiumH = _podiumHeightFor(constraints);
-                  final contentH = podiumH + _listBlockH;
-                  return SingleChildScrollView(
-                    physics: contentH > constraints.maxHeight + 1
-                        ? const AlwaysScrollableScrollPhysics()
-                        : const NeverScrollableScrollPhysics(),
-                    child: ConstrainedBox(
-                      constraints:
-                          BoxConstraints(minHeight: constraints.maxHeight),
-                      child: Column(
+                  // 타이틀·1~3 포디움·Rank/Player/Like 헤더는 고정.
+                  // 4~10위 리스트만 스크롤.
+                  // 미참여(myEntry == null)일 때만 하단 고정 오버레이 (sticky와 배타).
+                  final showNotRanked = _myEntryKept == null;
+                  return Stack(
+                    children: [
+                      Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           _buildPodium(context, constraints),
                           const SizedBox(height: 12),
-                          _buildListHeader(context),
+                          _buildListHeader(context, constraints),
                           const SizedBox(height: 4),
-                          ..._listEntries.map(
-                            (e) => _RankListRow(
-                              entry: e,
-                              defaultProfile: _defaultProfile,
-                              premiumBadge: _premiumBadge,
+                          Expanded(
+                            child: ListView(
+                              padding: EdgeInsets.zero,
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              children: [
+                                for (var r = 4; r <= 10; r++)
+                                  _RankListRow(
+                                    rank: r,
+                                    entry: _entryAt(r),
+                                    defaultProfile: _defaultProfile,
+                                    premiumBadge: _premiumBadge,
+                                  ),
+                              ],
                             ),
                           ),
                         ],
                       ),
-                    ),
+                      if (showNotRanked)
+                        Positioned(
+                          left: 0,
+                          right: 0,
+                          // GNB와 살짝 간격 (본문 bottomInset이 이미 GNB 높이를 뺌).
+                          bottom: 12,
+                          child: _RankNotRankedOverlay(
+                            onPlayNow: widget.onNavigateToHome,
+                          ),
+                        ),
+                    ],
                   );
                 },
               ),
@@ -324,7 +332,7 @@ class _RankScreenState extends State<RankScreen> {
             const SizedBox(width: helpGap + helpSize),
             Flexible(
               child: Text(
-                _titleText,
+                _titleText(l10n),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
@@ -361,9 +369,12 @@ class _RankScreenState extends State<RankScreen> {
                 ),
               ),
               const SizedBox(width: 4),
-              Text(
-                formatRemaining(_remaining, l10n),
-                style: theme.bodySmall?.copyWith(color: countdownFg),
+              Transform.translate(
+                offset: const Offset(0, -1.0),
+                child: Text(
+                  formatRemaining(_remaining, l10n),
+                  style: theme.bodySmall?.copyWith(color: countdownFg),
+                ),
               ),
             ],
           ),
@@ -372,61 +383,48 @@ class _RankScreenState extends State<RankScreen> {
     );
   }
 
+  /// 포디움 스케일: 가로만 (contentWidth/440).
+  /// 1~10을 한 화면에 맞추려고 높이로 줄이지 않음 — 스크롤 허용.
   double _podiumScale(BoxConstraints bodyConstraints) {
     final maxW = bodyConstraints.maxWidth;
     if (!maxW.isFinite || maxW <= 0) return 1;
-    var s = maxW / _figmaFrameW;
-    final bodyH = bodyConstraints.maxHeight;
-    if (bodyH.isFinite) {
-      final maxPodiumH =
-          (bodyH - _listBlockH).clamp(_minPodiumH, _figmaPodiumH * s);
-      if (_figmaPodiumH * s > maxPodiumH) {
-        s = maxPodiumH / _figmaPodiumH;
-      }
-    }
-    return s;
+    return maxW / _figmaFrameW;
   }
 
-  double _podiumHeightFor(BoxConstraints bodyConstraints) {
-    final first = _entryAt(1);
-    final second = _entryAt(2);
-    final third = _entryAt(3);
-    if (first == null && second == null && third == null) return 0;
-    return _figmaPodiumH * _podiumScale(bodyConstraints);
-  }
+  static const _podiumDown = 22.0;
 
   Widget _buildPodium(BuildContext context, BoxConstraints bodyConstraints) {
     final first = _entryAt(1);
     final second = _entryAt(2);
     final third = _entryAt(3);
-    if (first == null && second == null && third == null) {
-      return const SizedBox.shrink();
-    }
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        // 가로 스케일 후, 4~10 리스트 높이를 남기도록 포디움(프로필·왕관·뱃지 비율 유지) 축소.
+        // 가로 스케일만 적용 — 프로필·왕관·선·숫자 동일 비율.
         final s = _podiumScale(bodyConstraints);
 
-        // 포디움 베이스 중심(34+384/2=226)을 화면 가로 중앙에 고정.
-        // 프레임(440) Center 시 콘텐츠 중심≠프레임 중심이라 왼쪽으로 쏠리던 문제 방지.
+        // 포디움 베이스 중심을 화면 가로 중앙에 고정. s = maxW/440 유지.
         final contentMidX = _figmaPodiumBaseX + _figmaPodiumBaseW / 2.0;
         final originX = constraints.maxWidth / 2.0 - contentMidX * s;
         double x(double figmaX) => originX + figmaX * s;
         double y(double figmaY) => (figmaY - _figmaPodiumOriginY) * s;
+        // 프로필은 두고 선·숫자만 아래로 (좋아요와 가로선 겹침 해소).
+        const podiumDown = _podiumDown;
+        double podiumY(double figmaY) => y(figmaY + podiumDown);
+        // 가로선 우측이 width+0.5 이므로 +1 여유.
         final podiumPaintW = (_figmaPodiumBaseW + 1.0) * s;
         final podiumPaintH = _figmaPodiumBaseH * s;
 
         return SizedBox(
           width: constraints.maxWidth,
-          height: _figmaPodiumH * s,
+          height: (_figmaPodiumH + podiumDown) * s,
           child: Stack(
             clipBehavior: Clip.none,
             children: [
               // wireframe
               Positioned(
                 left: x(_figmaPodiumBaseX),
-                top: y(_figmaPodiumBaseY),
+                top: podiumY(_figmaPodiumBaseY),
                 width: podiumPaintW,
                 height: podiumPaintH,
                 child: IgnorePointer(
@@ -436,106 +434,119 @@ class _RankScreenState extends State<RankScreen> {
                   ),
                 ),
               ),
-              // 단 안 숫자 1/2/3 — Text 위젯 (Painter Paragraph는 실기기에서 안 그려짐)
+              // 단 안 숫자 1/2/3 (선과 함께 하향)
               Positioned(
-                left: x(34),
-                top: y(290 + 65),
-                width: 133 * s,
+                left: x(_figmaPodiumBaseX),
+                top: podiumY(_figmaPodiumBaseY + 65),
+                width: _step2W * s,
                 height: 68 * s,
                 child: IgnorePointer(
                   child: Center(
-                    child: Text(
-                      '2',
+                    child: PodiumRankNumber(
+                      digit: '2',
+                      scale: s,
                       style: TextStyle(
-                        color: const Color(0x99FFFFFF),
                         fontSize: _podiumNumFontSize * s,
                         fontWeight: FontWeight.w700,
+                        fontVariations: const [FontVariation('wght', 700)],
                         height: 1,
+                        letterSpacing: 0,
                       ),
                     ),
                   ),
                 ),
               ),
               Positioned(
-                left: x(34 + 132),
-                top: y(290 + 2),
-                width: 127 * s,
+                left: x(_figmaPodiumBaseX + _step1LocalX),
+                top: podiumY(_figmaPodiumBaseY + 2),
+                width: _step1W * s,
                 height: 146 * s,
                 child: IgnorePointer(
-                  child: Center(
-                    child: Text(
-                      '1',
-                      style: TextStyle(
-                        color: const Color(0x99FFFFFF),
-                        fontSize: _podiumNumFontSize * s,
-                        fontWeight: FontWeight.w700,
-                        height: 1,
+                  child: Align(
+                    alignment: Alignment.topCenter,
+                    child: Padding(
+                      padding: EdgeInsets.only(top: 6 * s),
+                      child: PodiumRankNumber(
+                        digit: '1',
+                        scale: s,
+                        style: TextStyle(
+                          fontSize: _podiumNumFontSize * s,
+                          fontWeight: FontWeight.w700,
+                          fontVariations: const [FontVariation('wght', 700)],
+                          height: 1,
+                          letterSpacing: 0,
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
               Positioned(
-                left: x(34 + 259),
-                top: y(290 + 82),
-                width: 126 * s,
+                left: x(_figmaPodiumBaseX + _step3LocalX),
+                top: podiumY(_figmaPodiumBaseY + 82),
+                width: _step3W * s,
                 height: 68 * s,
                 child: IgnorePointer(
                   child: Center(
-                    child: Text(
-                      '3',
+                    child: PodiumRankNumber(
+                      digit: '3',
+                      scale: s,
                       style: TextStyle(
-                        color: const Color(0x99FFFFFF),
                         fontSize: _podiumNumFontSize * s,
                         fontWeight: FontWeight.w700,
+                        fontVariations: const [FontVariation('wght', 700)],
                         height: 1,
+                        letterSpacing: 0,
                       ),
                     ),
                   ),
                 ),
               ),
-              // 2위 (왼쪽)
+              // 2위 — 프로필 Y 유지, 슬롯 전체 왼쪽
               Positioned(
-                left: x(36),
+                left: x(_figmaPodiumBaseX) - 12 * s,
                 top: y(192),
+                width: _step2W * s,
                 child: _PodiumSlot(
                   entry: second,
                   scale: s,
+                  stepWidth: _step2W,
                   winnerFrame: false,
                   showCrown: false,
                   defaultProfile: _defaultProfile,
                   premiumBadge: _premiumBadge,
-                  likeIcon: _likeIcon,
                   crownAsset: _podiumCrown,
                 ),
               ),
-              // 3위 (오른쪽)
+              // 3위 — 프로필 Y 유지, 슬롯 전체 오른쪽
               Positioned(
-                left: x(312),
+                left: x(_figmaPodiumBaseX + _step3LocalX) + 12 * s,
                 top: y(212),
+                width: _step3W * s,
                 child: _PodiumSlot(
                   entry: third,
                   scale: s,
+                  stepWidth: _step3W,
                   winnerFrame: false,
                   showCrown: false,
                   defaultProfile: _defaultProfile,
                   premiumBadge: _premiumBadge,
-                  likeIcon: _likeIcon,
                   crownAsset: _podiumCrown,
                 ),
               ),
-              // 1위 (중앙)
+              // 1위
               Positioned(
-                left: x(167.31),
+                left: x(_figmaPodiumBaseX + _step1LocalX),
                 top: y(128),
+                width: _step1W * s,
                 child: _PodiumSlot(
                   entry: first,
                   scale: s,
+                  stepWidth: _step1W,
                   winnerFrame: true,
                   showCrown: true,
                   defaultProfile: _defaultProfile,
                   premiumBadge: _premiumBadge,
-                  likeIcon: _likeIcon,
                   crownAsset: _podiumCrown,
                 ),
               ),
@@ -546,20 +557,40 @@ class _RankScreenState extends State<RankScreen> {
     );
   }
 
-  Widget _buildListHeader(BuildContext context) {
-    final style = Theme.of(context).textTheme.labelSmall?.copyWith(
-          color: const Color(0xFF8A8A8A),
-          fontWeight: FontWeight.w600,
+  /// 헤더 높이. 폰트 14 클리핑 방지용으로 여유.
+  static const _headerBoxH = 20.0;
+
+  Widget _buildListHeader(BuildContext context, BoxConstraints _) {
+    // BlendMode.overlay는 스크롤 시 레이어 분리로 순백 플래시 → #9742FF 고정.
+    final style = Theme.of(context).textTheme.bodyMedium!.copyWith(
+          fontWeight: FontWeight.w700,
+          fontVariations: const [FontVariation('wght', 700)],
+          color: const Color(0xFF9742FF),
+          fontSize: 14,
+          height: 1.0,
         );
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-      child: Row(
+
+    // Rank/Player: 이전 위치 유지. Like만 top을 더 내려 같은 줄로 맞춤.
+    return SizedBox(
+      height: _headerBoxH,
+      width: double.infinity,
+      child: Stack(
+        clipBehavior: Clip.none,
         children: [
-          SizedBox(width: 36, child: Text('Rank', style: style)),
-          Expanded(child: Text('Player', style: style)),
-          SizedBox(
-            width: 48,
-            child: Text('Like', style: style, textAlign: TextAlign.right),
+          Positioned(
+            left: 0,
+            top: 3,
+            child: Text('Rank', style: style, softWrap: false),
+          ),
+          Positioned(
+            left: 48,
+            top: 3,
+            child: Text('Player', style: style, softWrap: false),
+          ),
+          Positioned(
+            right: 20,
+            top: 8,
+            child: Text('Like', style: style, softWrap: false),
           ),
         ],
       ),
@@ -571,59 +602,64 @@ class _PodiumSlot extends StatelessWidget {
   const _PodiumSlot({
     required this.entry,
     required this.scale,
+    required this.stepWidth,
     required this.winnerFrame,
     required this.showCrown,
     required this.defaultProfile,
     required this.premiumBadge,
-    required this.likeIcon,
     required this.crownAsset,
   });
 
   final RankEntryDto? entry;
   final double scale;
+  /// 단(=가로선) 폭 — 아바타·이름·좋아요를 이 폭 기준 가운데 정렬.
+  final double stepWidth;
   final bool winnerFrame;
   final bool showCrown;
   final String defaultProfile;
   final String premiumBadge;
-  final String likeIcon;
   final String crownAsset;
 
-  static const _boxW = 104.0;
-  static const _boxH = 115.5;
-  static const _badge = 30.0;
-  static const _badgeLeft = 76.69;
-  static const _badgeTop = 76.0;
-  /// Figma 아바타 박스 폭과 동일 — 원 지름.
-  static const _avatarOuter = 104.0;
-  static const _borderW = 3.5;
-  // 왕관 Figma(160,71,154.77×118.33) − 1위 박스(167.31,128). 보정 스케일/넛지 금지.
+  static const _boxH = 126.0;
+  static const _badge = 34.0;
+  static const _badgeFont = 22.0;
+  /// 아바타 112 기준 우하단 뱃지 (기존 104 비율 유지).
+  static const _badgeLeft = 84.0;
+  static const _badgeTop = 83.0;
+  /// 프로필·뱃지 약간 키움 (레이아웃 동일).
+  static const _avatarOuter = 114.0;
+  static const _borderW = 3.8;
+  // 왕관 Figma(160,71) − 1위 아바타 박스(167.31,128) + 우측 보정(아바타 키운 뒤 시각 정렬).
   static const _crownW = 154.77;
   static const _crownH = 118.33;
-  static const _crownLeft = 160.0 - 167.31; // -7.31
-  static const _crownTop = 71.0 - 128.0; // -57
+  static const _crownLeftOnAvatar = 160.0 - 167.31 + 8.0; // -7.31 → +0.69
+  static const _crownTopOnAvatar = 71.0 - 128.0; // -57
+  static const _likesToLineGap = 8.0;
 
   @override
   Widget build(BuildContext context) {
     final s = scale;
     final name = (entry?.name ?? '').trim();
-    final displayName =
-        entry == null ? '' : (name.isEmpty ? '—' : name);
+    // 빈자리·이름 없음 → "—".
+    final displayName = name.isEmpty ? '—' : name;
     final isPremium = entry?.subscribedYn == 'Y';
+    const attrSize = 14.0;
+    final avatarLeft = (stepWidth - _avatarOuter) / 2.0;
 
     return SizedBox(
-      width: _boxW * s,
+      width: stepWidth * s,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           SizedBox(
-            width: _boxW * s,
+            width: stepWidth * s,
             height: _boxH * s,
             child: Stack(
               clipBehavior: Clip.none,
               children: [
                 Positioned(
                   top: 0,
-                  left: 0,
+                  left: avatarLeft * s,
                   child: _RankProfileFrame(
                     imgPath: entry?.imgPath,
                     outer: _avatarOuter * s,
@@ -634,14 +670,23 @@ class _PodiumSlot extends StatelessWidget {
                             ? _RankProfileFrameStyle.premium
                             : _RankProfileFrameStyle.free),
                     defaultAsset: defaultProfile,
-                    // Paywall `_cardShadow`와 동일 (Figma 바깥쪽 그림자 20/20/20, #000 30%).
                     outerShadowScale: s,
                   ),
                 ),
+                if (entry != null)
+                  Positioned(
+                    left: (avatarLeft + _badgeLeft) * s,
+                    top: _badgeTop * s,
+                    child: _PodiumLevelBadge(
+                      level: entry!.level,
+                      size: _badge * s,
+                      fontSize: _badgeFont * s,
+                    ),
+                  ),
                 if (showCrown)
                   Positioned(
-                    left: _crownLeft * s,
-                    top: _crownTop * s,
+                    left: (avatarLeft + _crownLeftOnAvatar) * s,
+                    top: _crownTopOnAvatar * s,
                     child: IgnorePointer(
                       child: Image.asset(
                         crownAsset,
@@ -652,38 +697,28 @@ class _PodiumSlot extends StatelessWidget {
                       ),
                     ),
                   ),
-                if (entry != null)
-                  Positioned(
-                    left: _badgeLeft * s,
-                    top: _badgeTop * s,
-                    child: _PodiumLevelBadge(
-                      level: entry!.level,
-                      size: _badge * s,
-                      fontSize: 20 * s,
-                    ),
-                  ),
               ],
             ),
           ),
-          if (entry != null) ...[
-            SizedBox(height: 4 * s),
-            Row(
+          SizedBox(height: 4 * s),
+          SizedBox(
+            width: stepWidth * s,
+            child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
               children: [
                 Flexible(
                   child: Text(
                     displayName,
                     maxLines: 1,
+                    softWrap: false,
                     overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.center,
-                    // 4~10위와 동일 (스케일 고정 14)
                     style: const TextStyle(
                       fontFamily: 'ChironHeiHK',
                       color: Colors.white,
                       fontWeight: FontWeight.w700,
                       fontVariations: [FontVariation('wght', 700)],
-                      fontSize: 14,
+                      fontSize: attrSize,
                       height: 1.1,
                     ),
                   ),
@@ -692,21 +727,23 @@ class _PodiumSlot extends StatelessWidget {
                   const SizedBox(width: 4),
                   Image.asset(
                     premiumBadge,
-                    width: 14,
-                    height: 14,
+                    width: attrSize,
+                    height: attrSize,
                   ),
                 ],
               ],
             ),
+          ),
+          if (entry != null) ...[
             SizedBox(height: 2 * s),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: [
                 Image.asset(
-                  likeIcon,
-                  width: 14,
-                  height: 14,
+                  'assets/images/like_at_result.png',
+                  width: attrSize,
+                  height: attrSize,
                 ),
                 const SizedBox(width: 4),
                 Text(
@@ -716,13 +753,14 @@ class _PodiumSlot extends StatelessWidget {
                     color: Colors.white,
                     fontWeight: FontWeight.w400,
                     fontVariations: [FontVariation('wght', 400)],
-                    fontSize: 14,
+                    fontSize: attrSize,
                     height: 1,
                   ),
                 ),
               ],
             ),
           ],
+          SizedBox(height: _likesToLineGap * s),
         ],
       ),
     );
@@ -858,12 +896,14 @@ class _PodiumLevelBadge extends StatelessWidget {
 
 class _RankListRow extends StatelessWidget {
   const _RankListRow({
+    required this.rank,
     required this.entry,
     required this.defaultProfile,
     required this.premiumBadge,
   });
 
-  final RankEntryDto entry;
+  final int rank;
+  final RankEntryDto? entry;
   final String defaultProfile;
   final String premiumBadge;
 
@@ -872,39 +912,40 @@ class _RankListRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context).textTheme;
-    final name = (entry.name ?? '').trim();
-    final displayName = name.isEmpty ? '—' : name;
-    final highlight = entry.isMe;
-    final isPremium = entry.subscribedYn == 'Y';
+    final isEmpty = entry == null;
+    final name = (entry?.name ?? '').trim();
+    final displayName = (isEmpty || name.isEmpty) ? '—' : name;
+    final isMe = entry?.isMe == true;
+    final isPremium = !isEmpty && entry!.subscribedYn == 'Y';
+    final likeText = isEmpty ? '—' : '${entry!.weeklyLike}';
+    const nameStyle = TextStyle(
+      fontFamily: 'ChironHeiHK',
+      color: Colors.white,
+      fontWeight: FontWeight.w700,
+      fontVariations: [FontVariation('wght', 700)],
+      fontSize: 14,
+      height: 1.1,
+    );
 
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 2),
+    final row = Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-      decoration: BoxDecoration(
-        color: highlight ? const Color(0x3380D7CF) : Colors.transparent,
-        borderRadius: BorderRadius.circular(10),
-        border: highlight
-            ? Border.all(color: const Color(0x6680D7CF), width: 1)
-            : null,
-      ),
       child: Row(
         children: [
           SizedBox(
             width: 28,
             child: Text(
-              '${entry.rank}',
-              style: theme.titleSmall?.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.w700,
-              ),
+              '$rank',
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
             ),
           ),
           Stack(
             clipBehavior: Clip.none,
             children: [
               _RankProfileFrame(
-                imgPath: entry.imgPath,
+                imgPath: entry?.imgPath,
                 outer: _listAvatarOuter,
                 borderWidth: _listBorderW,
                 style: isPremium
@@ -912,40 +953,81 @@ class _RankListRow extends StatelessWidget {
                     : _RankProfileFrameStyle.free,
                 defaultAsset: defaultProfile,
               ),
-              Positioned(
-                right: -4,
-                bottom: -4,
-                child: _LevelBadge(level: entry.level, compact: true),
-              ),
+              if (!isEmpty)
+                Positioned(
+                  right: -4,
+                  bottom: -4,
+                  child: _LevelBadge(level: entry!.level, compact: true),
+                ),
             ],
           ),
           const SizedBox(width: 10),
           Expanded(
-            child: Row(
-              children: [
-                Flexible(
-                  child: Text(
-                    displayName,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontFamily: 'ChironHeiHK',
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                      fontVariations: [FontVariation('wght', 700)],
-                      fontSize: 14,
-                      height: 1.1,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                const badgeGap = 4.0;
+                const badgeSize = 14.0;
+                final badgeReserve =
+                    isPremium ? badgeGap + badgeSize : 0.0;
+                final nameMax = (constraints.maxWidth - badgeReserve)
+                    .clamp(0.0, double.infinity);
+                final textDir = Directionality.of(context);
+                final textPainter = TextPainter(
+                  text: TextSpan(text: displayName, style: nameStyle),
+                  maxLines: 1,
+                  textDirection: textDir,
+                )..layout();
+                final textW = textPainter.width;
+                final needsMarquee = textW > nameMax;
+                final nameW = needsMarquee ? nameMax : textW;
+
+                return Row(
+                  children: [
+                    SizedBox(
+                      width: nameW,
+                      height: 16,
+                      child: needsMarquee
+                          ? Marquee(
+                              text: displayName,
+                              style: nameStyle,
+                              scrollAxis: Axis.horizontal,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              blankSpace: 24,
+                              velocity: 30,
+                              pauseAfterRound: const Duration(seconds: 2),
+                              startPadding: 0,
+                              accelerationDuration:
+                                  const Duration(seconds: 1),
+                              accelerationCurve: Curves.linear,
+                              decelerationDuration:
+                                  const Duration(milliseconds: 500),
+                              decelerationCurve: Curves.easeOut,
+                            )
+                          : Align(
+                              alignment: AlignmentDirectional.centerStart,
+                              child: Text(
+                                displayName,
+                                maxLines: 1,
+                                softWrap: false,
+                                overflow: TextOverflow.clip,
+                                style: nameStyle,
+                              ),
+                            ),
                     ),
-                  ),
-                ),
-                if (isPremium) ...[
-                  const SizedBox(width: 4),
-                  Transform.translate(
-                    offset: const Offset(0, 1),
-                    child: Image.asset(premiumBadge, width: 14, height: 14),
-                  ),
-                ],
-              ],
+                    if (isPremium) ...[
+                      const SizedBox(width: badgeGap),
+                      Transform.translate(
+                        offset: const Offset(0, 1),
+                        child: Image.asset(
+                          premiumBadge,
+                          width: badgeSize,
+                          height: badgeSize,
+                        ),
+                      ),
+                    ],
+                  ],
+                );
+              },
             ),
           ),
           Row(
@@ -958,12 +1040,12 @@ class _RankListRow extends StatelessWidget {
               ),
               const SizedBox(width: 4),
               Text(
-                '${entry.weeklyLike}',
+                likeText,
                 style: const TextStyle(
                   fontFamily: 'ChironHeiHK',
                   color: Colors.white,
-                  fontWeight: FontWeight.w400,
-                  fontVariations: [FontVariation('wght', 400)],
+                  fontWeight: FontWeight.w700,
+                  fontVariations: [FontVariation('wght', 700)],
                   fontSize: 14,
                   height: 1,
                 ),
@@ -972,6 +1054,13 @@ class _RankListRow extends StatelessWidget {
           ),
         ],
       ),
+    );
+
+    // softLight는 스크롤 시 레이어 분리로 순백 플래시 → #542493 고정.
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 2),
+      color: isMe ? const Color(0xFF542493) : null,
+      child: row,
     );
   }
 }
@@ -1034,6 +1123,90 @@ class _LevelBadge extends StatelessWidget {
       level: level,
       size: size,
       fontSize: fontSize,
+    );
+  }
+}
+
+/// 주간 랭킹 미참여(myEntry == null) 하단 고정 오버레이.
+/// GNB [BackdropFilter] 패턴 재사용. blur 9.2 · #8A38F5 64%.
+class _RankNotRankedOverlay extends StatelessWidget {
+  const _RankNotRankedOverlay({this.onPlayNow});
+
+  final VoidCallback? onPlayNow;
+
+  static const _bg = Color(0xA38A38F5); // #8A38F5 @ 64%
+  static const _radius = BorderRadius.all(Radius.circular(24));
+  static const _blurSigma = 9.2;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final elevatedBase = Theme.of(context).elevatedButtonTheme.style;
+
+    return ClipRRect(
+      borderRadius: _radius,
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: _blurSigma, sigmaY: _blurSigma),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.fromLTRB(20, 28, 20, 28),
+          decoration: const BoxDecoration(
+            color: _bg,
+            borderRadius: _radius,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                l10n.rankNotRankedYetTitle,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontFamily: 'ChironGoRoundTC',
+                  fontFamilyFallback: ['ChironHeiHK'],
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w700,
+                  fontVariations: [FontVariation('wght', 700)],
+                  height: 1.2,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                l10n.rankNotRankedYetBody,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontFamily: 'ChironGoRoundTC',
+                  fontFamilyFallback: ['ChironHeiHK'],
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w400,
+                  fontStyle: FontStyle.italic,
+                  fontVariations: [FontVariation('wght', 400)],
+                  height: 1.3,
+                ),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                height: 44,
+                // TODO: rankPlayNow ko/pt 공식 카피 확정 시 ARB 갱신 (현재 en "play now" 유지).
+                child: ElevatedButton(
+                  onPressed: onPlayNow,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.black,
+                    shape: const StadiumBorder(),
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(horizontal: 28),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ).merge(elevatedBase),
+                  child: Text(l10n.rankPlayNow),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

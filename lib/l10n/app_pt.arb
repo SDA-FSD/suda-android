@@ -308,5 +308,24 @@
         "type": "int"
       }
     }
-  }
+  },
+  "rankWeeklyTitle": "Ranking Semanal",
+  "rankTop3RewardsTitle": "Recompensas do Top 3",
+  "rankTop3RewardsDesc": "Ganhe Likes toda semana e dispute as primeiras posições com outros estudantes!",
+  "rankTop3Place1": "1º",
+  "rankTop3Place2": "2º",
+  "rankTop3Place3": "3º",
+  "rankTop3Badge1": "Distintivo de 1º Lugar",
+  "rankTop3Badge2": "Distintivo de 2º Lugar",
+  "rankTop3Badge3": "Distintivo de 3º Lugar",
+  "rankTop3Likes100": "+100 Likes",
+  "rankTop3Likes60": "+60 Likes",
+  "rankTop3Likes50": "+50 Likes",
+  "rankTop3Box3": "×3 Caixa de Recompensa",
+  "rankTop3Box2": "×2 Caixa de Recompensa",
+  "rankTop3Box1": "×1 Caixa de Recompensa",
+  "rankTop3Okay": "OK",
+  "rankNotRankedYetTitle": "Você ainda não está no ranking",
+  "rankNotRankedYetBody": "Ganhe Likes para participar do ranking desta semana.",
+  "rankPlayNow": "play now"
 }
