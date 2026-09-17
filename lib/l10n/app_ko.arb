@@ -328,5 +328,9 @@
   "rankTop3Okay": "확인",
   "rankNotRankedYetTitle": "아직 랭킹에 참여하지 않았어요",
   "rankNotRankedYetBody": "Like를 획득하고 이번 주 랭킹에 참여해보세요.",
-  "rankPlayNow": "play now"
+  "rankAnnounceNextStartsIn": "다음 랭킹 시작까지:",
+  "rankAnnounceYou": "나:",
+  "rankAnnounceRank": "순위",
+  "rankAnnounceLike": "Like",
+  "rankPlayNow": "지금 플레이"
 }

@@ -326,7 +326,11 @@
   "rankTop3Box2": "×2 Reward Box",
   "rankTop3Box1": "×1 Reward Box",
   "rankTop3Okay": "Okay",
-  "rankNotRankedYetTitle": "You're not ranked yet",
-  "rankNotRankedYetBody": "Earn Likes to join this week's ranking.",
-  "rankPlayNow": "play now"
+  "rankNotRankedYetTitle": "Wala ka pa sa ranking",
+  "rankNotRankedYetBody": "Kumita ng Likes para sumali sa ranking ngayong linggo.",
+  "rankAnnounceNextStartsIn": "Magsisimula ang susunod na ranking sa:",
+  "rankAnnounceYou": "Ikaw:",
+  "rankAnnounceRank": "Rank",
+  "rankAnnounceLike": "Like",
+  "rankPlayNow": "maglaro ngayon"
 }

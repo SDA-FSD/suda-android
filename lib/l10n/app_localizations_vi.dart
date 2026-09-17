@@ -794,11 +794,24 @@ class AppLocalizationsVi extends AppLocalizations {
   String get rankTop3Okay => 'Okay';
 
   @override
-  String get rankNotRankedYetTitle => 'You\'re not ranked yet';
+  String get rankNotRankedYetTitle => 'Bạn chưa có thứ hạng';
 
   @override
-  String get rankNotRankedYetBody => 'Earn Likes to join this week\'s ranking.';
+  String get rankNotRankedYetBody =>
+      'Kiếm Like để tham gia bảng xếp hạng tuần này.';
 
   @override
-  String get rankPlayNow => 'play now';
+  String get rankAnnounceNextStartsIn => 'Bảng xếp hạng tiếp theo bắt đầu sau:';
+
+  @override
+  String get rankAnnounceYou => 'Bạn:';
+
+  @override
+  String get rankAnnounceRank => 'Hạng';
+
+  @override
+  String get rankAnnounceLike => 'Like';
+
+  @override
+  String get rankPlayNow => 'chơi ngay';
 }

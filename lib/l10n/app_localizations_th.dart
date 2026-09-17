@@ -781,11 +781,23 @@ class AppLocalizationsTh extends AppLocalizations {
   String get rankTop3Okay => 'Okay';
 
   @override
-  String get rankNotRankedYetTitle => 'You\'re not ranked yet';
+  String get rankNotRankedYetTitle => 'คุณยังไม่อยู่ในอันดับ';
 
   @override
-  String get rankNotRankedYetBody => 'Earn Likes to join this week\'s ranking.';
+  String get rankNotRankedYetBody => 'สะสม Like เพื่อร่วมอันดับสัปดาห์นี้';
 
   @override
-  String get rankPlayNow => 'play now';
+  String get rankAnnounceNextStartsIn => 'อันดับถัดไปเริ่มใน:';
+
+  @override
+  String get rankAnnounceYou => 'คุณ:';
+
+  @override
+  String get rankAnnounceRank => 'อันดับ';
+
+  @override
+  String get rankAnnounceLike => 'Like';
+
+  @override
+  String get rankPlayNow => 'เล่นเลย';
 }

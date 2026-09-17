@@ -335,5 +335,9 @@
   "rankTop3Okay": "Okay",
   "rankNotRankedYetTitle": "You're not ranked yet",
   "rankNotRankedYetBody": "Earn Likes to join this week's ranking.",
+  "rankAnnounceNextStartsIn": "Next Ranking Starts in:",
+  "rankAnnounceYou": "You:",
+  "rankAnnounceRank": "Rank",
+  "rankAnnounceLike": "Like",
   "rankPlayNow": "play now"
 }

@@ -816,11 +816,24 @@ class AppLocalizationsFr extends AppLocalizations {
   String get rankTop3Okay => 'Okay';
 
   @override
-  String get rankNotRankedYetTitle => 'You\'re not ranked yet';
+  String get rankNotRankedYetTitle => 'Vous n\'êtes pas encore classé';
 
   @override
-  String get rankNotRankedYetBody => 'Earn Likes to join this week\'s ranking.';
+  String get rankNotRankedYetBody =>
+      'Gagnez des Likes pour rejoindre le classement de cette semaine.';
 
   @override
-  String get rankPlayNow => 'play now';
+  String get rankAnnounceNextStartsIn => 'Prochain classement dans :';
+
+  @override
+  String get rankAnnounceYou => 'Vous :';
+
+  @override
+  String get rankAnnounceRank => 'Rang';
+
+  @override
+  String get rankAnnounceLike => 'Like';
+
+  @override
+  String get rankPlayNow => 'jouer maintenant';
 }

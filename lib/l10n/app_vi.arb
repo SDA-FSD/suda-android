@@ -326,7 +326,11 @@
   "rankTop3Box2": "×2 Reward Box",
   "rankTop3Box1": "×1 Reward Box",
   "rankTop3Okay": "Okay",
-  "rankNotRankedYetTitle": "You're not ranked yet",
-  "rankNotRankedYetBody": "Earn Likes to join this week's ranking.",
-  "rankPlayNow": "play now"
+  "rankNotRankedYetTitle": "Bạn chưa có thứ hạng",
+  "rankNotRankedYetBody": "Kiếm Like để tham gia bảng xếp hạng tuần này.",
+  "rankAnnounceNextStartsIn": "Bảng xếp hạng tiếp theo bắt đầu sau:",
+  "rankAnnounceYou": "Bạn:",
+  "rankAnnounceRank": "Hạng",
+  "rankAnnounceLike": "Like",
+  "rankPlayNow": "chơi ngay"
 }

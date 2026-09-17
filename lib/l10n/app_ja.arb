@@ -326,7 +326,11 @@
   "rankTop3Box2": "×2 Reward Box",
   "rankTop3Box1": "×1 Reward Box",
   "rankTop3Okay": "Okay",
-  "rankNotRankedYetTitle": "You're not ranked yet",
-  "rankNotRankedYetBody": "Earn Likes to join this week's ranking.",
-  "rankPlayNow": "play now"
+  "rankNotRankedYetTitle": "まだランキングに入っていません",
+  "rankNotRankedYetBody": "Likeを獲得して今週のランキングに参加しましょう。",
+  "rankAnnounceNextStartsIn": "次のランキング開始まで:",
+  "rankAnnounceYou": "あなた:",
+  "rankAnnounceRank": "順位",
+  "rankAnnounceLike": "Like",
+  "rankPlayNow": "今すぐプレイ"
 }

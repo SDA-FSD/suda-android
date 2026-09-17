@@ -188,26 +188,52 @@ class _RankScreenState extends State<RankScreen> {
   void _applyCountdown(RankPeriodDto? period) {
     _tickTimer?.cancel();
     _tickTimer = null;
-    if (period?.phaseEndsAt == null || period?.serverNow == null) {
+    if (period == null || period.serverNow == null) {
       _remainingAtFetch = Duration.zero;
       _fetchedAtLocal = null;
       _remaining = Duration.zero;
       return;
     }
-    final ends = period!.phaseEndsAt!;
+    // COLLECT: 현재 phase 종료(발표 시작). ANNOUNCE/Lab미리보기: 다음 주간 랭킹(COLLECT) 시작.
+    final announceUi =
+        period.phase == 'ANNOUNCE' || widget.forceAnnouncePhase;
+    final ends = announceUi
+        ? (period.nextCollectStartsAt ?? period.phaseEndsAt)
+        : period.phaseEndsAt;
+    if (ends == null) {
+      _remainingAtFetch = Duration.zero;
+      _fetchedAtLocal = null;
+      _remaining = Duration.zero;
+      return;
+    }
     final serverNow = period.serverNow!;
     var rem = ends.difference(serverNow);
     if (rem.isNegative) rem = Duration.zero;
     _remainingAtFetch = rem;
     _fetchedAtLocal = DateTime.now();
     _remaining = rem;
-    _tickTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+    // ANNOUNCE HH:MM:SS는 1초, COLLECT 헤더(일/시/분)는 30초.
+    final tick = announceUi
+        ? const Duration(seconds: 1)
+        : const Duration(seconds: 30);
+    _tickTimer = Timer.periodic(tick, (_) {
       if (!mounted || _fetchedAtLocal == null) return;
       final elapsed = DateTime.now().difference(_fetchedAtLocal!);
       var next = _remainingAtFetch - elapsed;
       if (next.isNegative) next = Duration.zero;
       setState(() => _remaining = next);
     });
+  }
+
+  /// ANNOUNCE 카운트다운 `HH:MM:SS`. 0 미만이면 `00:00:00`.
+  static String formatRemainingHms(Duration d) {
+    var total = d.inSeconds;
+    if (total < 0) total = 0;
+    final h = total ~/ 3600;
+    final m = (total % 3600) ~/ 60;
+    final s = total % 60;
+    String two(int n) => n.toString().padLeft(2, '0');
+    return '${two(h)}:${two(m)}:${two(s)}';
   }
 
   String _titleText(AppLocalizations l10n) {
@@ -541,7 +567,8 @@ class _RankScreenState extends State<RankScreen> {
             Expanded(
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  // ANNOUNCE: 타이틀 + 1~3 포디움만 (리스트/카운트다운/? 없음).
+                  // ANNOUNCE: 타이틀 + 1~3 포디움 + (아래) You Rank/Like 배지.
+                  // 포디움 레이아웃/스케일은 그대로 — 배지만 포디움 아래 공백 후 추가.
                   final contentConstraints = BoxConstraints(
                     maxWidth: (constraints.maxWidth - side * 2).clamp(
                       0.0,
@@ -549,11 +576,38 @@ class _RankScreenState extends State<RankScreen> {
                     ),
                     maxHeight: constraints.maxHeight,
                   );
+                  final s = contentConstraints.maxWidth / _figmaFrameW;
+                  // 포디움 SizedBox 하단(figma 71+369+22=462) → 배지 top 493 → 간격 31.
+                  final badgeGap =
+                      (493.0 -
+                          (_figmaPodiumOriginY + _figmaPodiumH + _podiumDown)) *
+                      s;
+                  final me = _myEntryKept;
+                  // 배지 하단(493+71=564) → Next Ranking 타이틀 y=639 → 간격 75.
+                  final nextGap = 75 * s;
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: side),
                     child: Align(
                       alignment: Alignment.topCenter,
-                      child: _buildPodium(context, contentConstraints),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _buildPodium(context, contentConstraints),
+                          if (me != null) ...[
+                            SizedBox(height: badgeGap.clamp(0.0, double.infinity)),
+                            _AnnounceYouBadge(
+                              scale: s * _AnnounceYouBadge.groupScale,
+                              rank: me.rank,
+                              weeklyLike: me.weeklyLike,
+                            ),
+                          ],
+                          SizedBox(height: nextGap),
+                          _AnnounceNextRankingBlock(
+                            scale: s,
+                            countdownText: formatRemainingHms(_remaining),
+                          ),
+                        ],
+                      ),
                     ),
                   );
                 },
@@ -1615,7 +1669,6 @@ class _RankNotRankedOverlay extends StatelessWidget {
                 const SizedBox(height: 20),
                 SizedBox(
                   height: 44,
-                  // TODO: rankPlayNow ko/pt 공식 카피 확정 시 ARB 갱신 (현재 en "play now" 유지).
                   child: ElevatedButton(
                     onPressed: onPlayNow,
                     style: ElevatedButton.styleFrom(
@@ -1635,6 +1688,279 @@ class _RankNotRankedOverlay extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// ANNOUNCE "Next Ranking Starts in:" + 카운트다운 (배지 아래).
+/// 440: 타이틀 softLight Bold32 @ y639 / 카운트다운 순백 Bold20 @ y729 · 폭 268 중앙.
+/// 남은 시간: `_applyCountdown`의 nextCollectStartsAt(없으면 phaseEndsAt).
+class _AnnounceNextRankingBlock extends StatelessWidget {
+  const _AnnounceNextRankingBlock({
+    required this.scale,
+    required this.countdownText,
+  });
+
+  final double scale;
+  final String countdownText;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = scale;
+    final l10n = AppLocalizations.of(context)!;
+    final width = 268 * s;
+    // 타이틀 y639 → 카운트다운 y729 = 간격 90 (스케일 전).
+    final gap = (729 - 639) * s;
+
+    final titleStyle = TextStyle(
+      fontFamily: 'ChironHeiHK',
+      color: Colors.white,
+      fontWeight: FontWeight.w700,
+      fontVariations: const [FontVariation('wght', 700)],
+      fontSize: 32 * s,
+      height: 1.15,
+    );
+    final countdownStyle = TextStyle(
+      fontFamily: 'ChironHeiHK',
+      color: Colors.white,
+      fontWeight: FontWeight.w700,
+      fontVariations: const [FontVariation('wght', 700)],
+      fontSize: 20 * s,
+      height: 1.0,
+    );
+
+    return SizedBox(
+      width: width,
+      height: (729 - 639 + 24) * s,
+      child: Stack(
+        alignment: Alignment.topCenter,
+        children: [
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: _SoftLightLayer(
+              child: Text(
+                l10n.rankAnnounceNextStartsIn,
+                textAlign: TextAlign.center,
+                style: titleStyle,
+              ),
+            ),
+          ),
+          Positioned(
+            top: gap,
+            left: 0,
+            right: 0,
+            child: Text(
+              countdownText,
+              textAlign: TextAlign.center,
+              style: countdownStyle,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// ANNOUNCE "You: Rank / Like" 배지 (포디움 아래).
+/// 440 기준: 외곽 208×71 rx15 white softLight / pill 52×28 rx14 #D9D9D9 softLight.
+/// 내부(y12~56)는 외곽 세로 중앙. [groupScale]로 카드 전체만 확대(내부 비율 유지).
+class _AnnounceYouBadge extends StatelessWidget {
+  const _AnnounceYouBadge({
+    required this.scale,
+    required this.rank,
+    required this.weeklyLike,
+  });
+
+  /// 파워포인트 그룹 확대처럼 카드 전체에 곱하는 배율.
+  static const groupScale = 1.35;
+
+  final double scale;
+  final int rank;
+  final int weeklyLike;
+
+  static const _likeAsset = 'assets/images/like_at_result.png';
+
+  @override
+  Widget build(BuildContext context) {
+    final s = scale;
+    final l10n = AppLocalizations.of(context)!;
+    final rankStr = '$rank';
+    final likeStr = '$weeklyLike';
+
+    const youStyle = TextStyle(
+      fontFamily: 'ChironHeiHK',
+      color: Colors.white,
+      fontWeight: FontWeight.w700,
+      fontVariations: [FontVariation('wght', 700)],
+      height: 1.0,
+    );
+    const labelStyle = TextStyle(
+      fontFamily: 'ChironHeiHK',
+      color: Colors.white,
+      fontWeight: FontWeight.w400,
+      fontStyle: FontStyle.italic,
+      fontVariations: [FontVariation('wght', 400)],
+      height: 1.0,
+    );
+    const valueStyle = TextStyle(
+      fontFamily: 'ChironHeiHK',
+      color: Colors.white,
+      fontWeight: FontWeight.w700,
+      fontVariations: [FontVariation('wght', 700)],
+      height: 1.0,
+    );
+
+    final youFs = 14 * s;
+    final labelFs = 12 * s;
+    final valueFs = 14 * s;
+    final iconSize = 14 * s;
+
+    // pill 내부: Rank 값 좌우 여유(figma pill70 / value79 → 9). Like: icon+값.
+    final rankValueW = _measure(rankStr, valueStyle.copyWith(fontSize: valueFs));
+    final likeValueW = _measure(likeStr, valueStyle.copyWith(fontSize: valueFs));
+    final rankPillW = (rankValueW + 18 * s).clamp(52 * s, double.infinity);
+    final likePillW =
+        (iconSize + 2 * s + likeValueW + 12 * s).clamp(52 * s, double.infinity);
+
+    // Like pill이 Rank pill과 겹치면 오른쪽으로 민다 (기본 x=139).
+    final rankPillLeft = 70 * s;
+    final likePillLeft = (139 * s).clamp(
+      rankPillLeft + rankPillW + 8 * s,
+      double.infinity,
+    );
+    final outerW = (208 * s).clamp(
+      likePillLeft + likePillW + 17 * s,
+      double.infinity,
+    );
+    // 외곽을 71로 키우고, figma y12~56(높이44) 콘텐츠 블록을 세로 중앙 정렬.
+    const contentMinY = 12.0;
+    const contentMaxY = 56.0; // pill top28 + h28
+    const contentH = contentMaxY - contentMinY;
+    final outerH = 71 * s;
+    final contentTop = (outerH - contentH * s) / 2;
+
+    double cy(double figmaY) => contentTop + (figmaY - contentMinY) * s;
+
+    return SizedBox(
+      width: outerW,
+      height: outerH,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Positioned.fill(
+            child: _SoftLightLayer(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(15 * s),
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            left: 20 * s,
+            top: cy(33),
+            child: Text(
+              l10n.rankAnnounceYou,
+              style: youStyle.copyWith(fontSize: youFs),
+            ),
+          ),
+          Positioned(
+            left: 81 * s,
+            top: cy(12),
+            child: Text(
+              l10n.rankAnnounceRank,
+              style: labelStyle.copyWith(fontSize: labelFs),
+            ),
+          ),
+          Positioned(
+            left: 157 * s,
+            top: cy(12),
+            child: Text(
+              l10n.rankAnnounceLike,
+              style: labelStyle.copyWith(fontSize: labelFs),
+            ),
+          ),
+          Positioned(
+            left: rankPillLeft,
+            top: cy(28),
+            width: rankPillW,
+            height: 28 * s,
+            child: _SoftLightPill(
+              child: Center(
+                child: Text(
+                  rankStr,
+                  style: valueStyle.copyWith(fontSize: valueFs),
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            left: likePillLeft,
+            top: cy(28),
+            width: likePillW,
+            height: 28 * s,
+            child: _SoftLightPill(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Image.asset(
+                    _likeAsset,
+                    width: iconSize,
+                    height: iconSize,
+                    fit: BoxFit.contain,
+                    filterQuality: FilterQuality.medium,
+                  ),
+                  SizedBox(width: 2 * s),
+                  Text(
+                    likeStr,
+                    style: valueStyle.copyWith(fontSize: valueFs),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  static double _measure(String text, TextStyle style) {
+    final painter = TextPainter(
+      text: TextSpan(text: text, style: style),
+      textDirection: TextDirection.ltr,
+      maxLines: 1,
+    )..layout();
+    return painter.width;
+  }
+}
+
+/// Rank/Like 숫자 배경만 softLight. 숫자·아이콘은 일반 합성(순백).
+class _SoftLightPill extends StatelessWidget {
+  const _SoftLightPill({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Positioned.fill(
+          child: _SoftLightLayer(
+            child: const DecoratedBox(
+              decoration: BoxDecoration(
+                color: Color(0xFFD9D9D9),
+                borderRadius: BorderRadius.all(Radius.circular(999)),
+              ),
+            ),
+          ),
+        ),
+        child,
+      ],
     );
   }
 }

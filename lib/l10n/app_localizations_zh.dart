@@ -754,13 +754,25 @@ class AppLocalizationsZh extends AppLocalizations {
   String get rankTop3Okay => 'Okay';
 
   @override
-  String get rankNotRankedYetTitle => 'You\'re not ranked yet';
+  String get rankNotRankedYetTitle => '你还没有上榜';
 
   @override
-  String get rankNotRankedYetBody => 'Earn Likes to join this week\'s ranking.';
+  String get rankNotRankedYetBody => '获得 Like，加入本周排名吧。';
 
   @override
-  String get rankPlayNow => 'play now';
+  String get rankAnnounceNextStartsIn => '下一轮排名开始倒计时:';
+
+  @override
+  String get rankAnnounceYou => '你：';
+
+  @override
+  String get rankAnnounceRank => '排名';
+
+  @override
+  String get rankAnnounceLike => 'Like';
+
+  @override
+  String get rankPlayNow => '立即开始';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -1513,13 +1525,25 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get rankTop3Okay => 'Okay';
 
   @override
-  String get rankNotRankedYetTitle => 'You\'re not ranked yet';
+  String get rankNotRankedYetTitle => '你还没有上榜';
 
   @override
-  String get rankNotRankedYetBody => 'Earn Likes to join this week\'s ranking.';
+  String get rankNotRankedYetBody => '获得 Like，加入本周排名吧。';
 
   @override
-  String get rankPlayNow => 'play now';
+  String get rankAnnounceNextStartsIn => '下一轮排名开始倒计时:';
+
+  @override
+  String get rankAnnounceYou => '你：';
+
+  @override
+  String get rankAnnounceRank => '排名';
+
+  @override
+  String get rankAnnounceLike => 'Like';
+
+  @override
+  String get rankPlayNow => '立即开始';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -2272,11 +2296,23 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get rankTop3Okay => 'Okay';
 
   @override
-  String get rankNotRankedYetTitle => 'You\'re not ranked yet';
+  String get rankNotRankedYetTitle => '你還沒有上榜';
 
   @override
-  String get rankNotRankedYetBody => 'Earn Likes to join this week\'s ranking.';
+  String get rankNotRankedYetBody => '獲得 Like，加入本週排名吧。';
 
   @override
-  String get rankPlayNow => 'play now';
+  String get rankAnnounceNextStartsIn => '下一輪排名開始倒數:';
+
+  @override
+  String get rankAnnounceYou => '你：';
+
+  @override
+  String get rankAnnounceRank => '排名';
+
+  @override
+  String get rankAnnounceLike => 'Like';
+
+  @override
+  String get rankPlayNow => '立即開始';
 }

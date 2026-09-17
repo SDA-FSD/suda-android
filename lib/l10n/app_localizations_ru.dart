@@ -808,11 +808,24 @@ class AppLocalizationsRu extends AppLocalizations {
   String get rankTop3Okay => 'Okay';
 
   @override
-  String get rankNotRankedYetTitle => 'You\'re not ranked yet';
+  String get rankNotRankedYetTitle => 'Вы ещё не в рейтинге';
 
   @override
-  String get rankNotRankedYetBody => 'Earn Likes to join this week\'s ranking.';
+  String get rankNotRankedYetBody =>
+      'Зарабатывайте Likes, чтобы попасть в рейтинг этой недели.';
 
   @override
-  String get rankPlayNow => 'play now';
+  String get rankAnnounceNextStartsIn => 'Следующий рейтинг начнётся через:';
+
+  @override
+  String get rankAnnounceYou => 'Вы:';
+
+  @override
+  String get rankAnnounceRank => 'Место';
+
+  @override
+  String get rankAnnounceLike => 'Like';
+
+  @override
+  String get rankPlayNow => 'играть сейчас';
 }

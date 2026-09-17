@@ -808,5 +808,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rankNotRankedYetBody => 'Earn Likes to join this week\'s ranking.';
 
   @override
+  String get rankAnnounceNextStartsIn => 'Next Ranking Starts in:';
+
+  @override
+  String get rankAnnounceYou => 'You:';
+
+  @override
+  String get rankAnnounceRank => 'Rank';
+
+  @override
+  String get rankAnnounceLike => 'Like';
+
+  @override
   String get rankPlayNow => 'play now';
 }

@@ -326,7 +326,11 @@
   "rankTop3Box2": "×2 Reward Box",
   "rankTop3Box1": "×1 Reward Box",
   "rankTop3Okay": "Okay",
-  "rankNotRankedYetTitle": "You're not ranked yet",
-  "rankNotRankedYetBody": "Earn Likes to join this week's ranking.",
-  "rankPlayNow": "play now"
+  "rankNotRankedYetTitle": "لست ضمن الترتيب بعد",
+  "rankNotRankedYetBody": "احصل على Likes للمشاركة في ترتيب هذا الأسبوع.",
+  "rankAnnounceNextStartsIn": "الترتيب التالي يبدأ خلال:",
+  "rankAnnounceYou": "أنت:",
+  "rankAnnounceRank": "الترتيب",
+  "rankAnnounceLike": "Like",
+  "rankPlayNow": "العب الآن"
 }

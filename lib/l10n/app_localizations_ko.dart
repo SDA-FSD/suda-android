@@ -767,5 +767,17 @@ class AppLocalizationsKo extends AppLocalizations {
   String get rankNotRankedYetBody => 'Like를 획득하고 이번 주 랭킹에 참여해보세요.';
 
   @override
-  String get rankPlayNow => 'play now';
+  String get rankAnnounceNextStartsIn => '다음 랭킹 시작까지:';
+
+  @override
+  String get rankAnnounceYou => '나:';
+
+  @override
+  String get rankAnnounceRank => '순위';
+
+  @override
+  String get rankAnnounceLike => 'Like';
+
+  @override
+  String get rankPlayNow => '지금 플레이';
 }

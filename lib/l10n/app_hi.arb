@@ -326,7 +326,11 @@
   "rankTop3Box2": "×2 Reward Box",
   "rankTop3Box1": "×1 Reward Box",
   "rankTop3Okay": "Okay",
-  "rankNotRankedYetTitle": "You're not ranked yet",
-  "rankNotRankedYetBody": "Earn Likes to join this week's ranking.",
-  "rankPlayNow": "play now"
+  "rankNotRankedYetTitle": "आप अभी रैंकिंग में नहीं हैं",
+  "rankNotRankedYetBody": "इस सप्ताह की रैंकिंग में शामिल होने के लिए Like कमाएँ।",
+  "rankAnnounceNextStartsIn": "अगली रैंकिंग शुरू होने में:",
+  "rankAnnounceYou": "आप:",
+  "rankAnnounceRank": "रैंक",
+  "rankAnnounceLike": "Like",
+  "rankPlayNow": "अभी खेलें"
 }

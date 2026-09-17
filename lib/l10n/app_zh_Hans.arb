@@ -326,7 +326,11 @@
   "rankTop3Box2": "×2 Reward Box",
   "rankTop3Box1": "×1 Reward Box",
   "rankTop3Okay": "Okay",
-  "rankNotRankedYetTitle": "You're not ranked yet",
-  "rankNotRankedYetBody": "Earn Likes to join this week's ranking.",
-  "rankPlayNow": "play now"
+  "rankNotRankedYetTitle": "你还没有上榜",
+  "rankNotRankedYetBody": "获得 Like，加入本周排名吧。",
+  "rankAnnounceNextStartsIn": "下一轮排名开始倒计时:",
+  "rankAnnounceYou": "你：",
+  "rankAnnounceRank": "排名",
+  "rankAnnounceLike": "Like",
+  "rankPlayNow": "立即开始"
 }

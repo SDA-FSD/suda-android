@@ -814,5 +814,17 @@ class AppLocalizationsPt extends AppLocalizations {
       'Ganhe Likes para participar do ranking desta semana.';
 
   @override
-  String get rankPlayNow => 'play now';
+  String get rankAnnounceNextStartsIn => 'Próximo ranking começa em:';
+
+  @override
+  String get rankAnnounceYou => 'Você:';
+
+  @override
+  String get rankAnnounceRank => 'Posição';
+
+  @override
+  String get rankAnnounceLike => 'Like';
+
+  @override
+  String get rankPlayNow => 'jogar agora';
 }

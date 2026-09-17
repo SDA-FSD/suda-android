@@ -326,7 +326,11 @@
   "rankTop3Box2": "×2 Reward Box",
   "rankTop3Box1": "×1 Reward Box",
   "rankTop3Okay": "Okay",
-  "rankNotRankedYetTitle": "You're not ranked yet",
-  "rankNotRankedYetBody": "Earn Likes to join this week's ranking.",
-  "rankPlayNow": "play now"
+  "rankNotRankedYetTitle": "Du bist noch nicht gerankt",
+  "rankNotRankedYetBody": "Sammle Likes, um am Ranking dieser Woche teilzunehmen.",
+  "rankAnnounceNextStartsIn": "Nächstes Ranking startet in:",
+  "rankAnnounceYou": "Du:",
+  "rankAnnounceRank": "Rang",
+  "rankAnnounceLike": "Like",
+  "rankPlayNow": "jetzt spielen"
 }

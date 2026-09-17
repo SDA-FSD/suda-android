@@ -810,13 +810,26 @@ class AppLocalizationsEs extends AppLocalizations {
   String get rankTop3Okay => 'Okay';
 
   @override
-  String get rankNotRankedYetTitle => 'You\'re not ranked yet';
+  String get rankNotRankedYetTitle => 'Aún no estás en el ranking';
 
   @override
-  String get rankNotRankedYetBody => 'Earn Likes to join this week\'s ranking.';
+  String get rankNotRankedYetBody =>
+      'Gana Likes para unirte al ranking de esta semana.';
 
   @override
-  String get rankPlayNow => 'play now';
+  String get rankAnnounceNextStartsIn => 'El próximo ranking empieza en:';
+
+  @override
+  String get rankAnnounceYou => 'Tú:';
+
+  @override
+  String get rankAnnounceRank => 'Puesto';
+
+  @override
+  String get rankAnnounceLike => 'Like';
+
+  @override
+  String get rankPlayNow => 'jugar ahora';
 }
 
 /// The translations for Spanish Castilian, as used in Latin America and the Caribbean (`es_419`).
@@ -1625,11 +1638,24 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
   String get rankTop3Okay => 'Okay';
 
   @override
-  String get rankNotRankedYetTitle => 'You\'re not ranked yet';
+  String get rankNotRankedYetTitle => 'Aún no estás en el ranking';
 
   @override
-  String get rankNotRankedYetBody => 'Earn Likes to join this week\'s ranking.';
+  String get rankNotRankedYetBody =>
+      'Gana Likes para unirte al ranking de esta semana.';
 
   @override
-  String get rankPlayNow => 'play now';
+  String get rankAnnounceNextStartsIn => 'El próximo ranking empieza en:';
+
+  @override
+  String get rankAnnounceYou => 'Tú:';
+
+  @override
+  String get rankAnnounceRank => 'Puesto';
+
+  @override
+  String get rankAnnounceLike => 'Like';
+
+  @override
+  String get rankPlayNow => 'jugar ahora';
 }

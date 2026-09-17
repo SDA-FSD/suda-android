@@ -809,11 +809,24 @@ class AppLocalizationsMs extends AppLocalizations {
   String get rankTop3Okay => 'Okay';
 
   @override
-  String get rankNotRankedYetTitle => 'You\'re not ranked yet';
+  String get rankNotRankedYetTitle => 'Anda belum berada dalam ranking';
 
   @override
-  String get rankNotRankedYetBody => 'Earn Likes to join this week\'s ranking.';
+  String get rankNotRankedYetBody =>
+      'Dapatkan Like untuk sertai ranking minggu ini.';
 
   @override
-  String get rankPlayNow => 'play now';
+  String get rankAnnounceNextStartsIn => 'Ranking seterusnya bermula dalam:';
+
+  @override
+  String get rankAnnounceYou => 'Anda:';
+
+  @override
+  String get rankAnnounceRank => 'Kedudukan';
+
+  @override
+  String get rankAnnounceLike => 'Like';
+
+  @override
+  String get rankPlayNow => 'main sekarang';
 }

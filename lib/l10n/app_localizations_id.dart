@@ -807,11 +807,24 @@ class AppLocalizationsId extends AppLocalizations {
   String get rankTop3Okay => 'Okay';
 
   @override
-  String get rankNotRankedYetTitle => 'You\'re not ranked yet';
+  String get rankNotRankedYetTitle => 'Kamu belum masuk ranking';
 
   @override
-  String get rankNotRankedYetBody => 'Earn Likes to join this week\'s ranking.';
+  String get rankNotRankedYetBody =>
+      'Dapatkan Like untuk ikut ranking minggu ini.';
 
   @override
-  String get rankPlayNow => 'play now';
+  String get rankAnnounceNextStartsIn => 'Ranking berikutnya dimulai dalam:';
+
+  @override
+  String get rankAnnounceYou => 'Kamu:';
+
+  @override
+  String get rankAnnounceRank => 'Peringkat';
+
+  @override
+  String get rankAnnounceLike => 'Like';
+
+  @override
+  String get rankPlayNow => 'main sekarang';
 }

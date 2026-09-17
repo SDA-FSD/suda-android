@@ -816,11 +816,25 @@ class AppLocalizationsFil extends AppLocalizations {
   String get rankTop3Okay => 'Okay';
 
   @override
-  String get rankNotRankedYetTitle => 'You\'re not ranked yet';
+  String get rankNotRankedYetTitle => 'Wala ka pa sa ranking';
 
   @override
-  String get rankNotRankedYetBody => 'Earn Likes to join this week\'s ranking.';
+  String get rankNotRankedYetBody =>
+      'Kumita ng Likes para sumali sa ranking ngayong linggo.';
 
   @override
-  String get rankPlayNow => 'play now';
+  String get rankAnnounceNextStartsIn =>
+      'Magsisimula ang susunod na ranking sa:';
+
+  @override
+  String get rankAnnounceYou => 'Ikaw:';
+
+  @override
+  String get rankAnnounceRank => 'Rank';
+
+  @override
+  String get rankAnnounceLike => 'Like';
+
+  @override
+  String get rankPlayNow => 'maglaro ngayon';
 }

@@ -1583,6 +1583,30 @@ abstract class AppLocalizations {
   /// **'Earn Likes to join this week\'s ranking.'**
   String get rankNotRankedYetBody;
 
+  /// No description provided for @rankAnnounceNextStartsIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Next Ranking Starts in:'**
+  String get rankAnnounceNextStartsIn;
+
+  /// No description provided for @rankAnnounceYou.
+  ///
+  /// In en, this message translates to:
+  /// **'You:'**
+  String get rankAnnounceYou;
+
+  /// No description provided for @rankAnnounceRank.
+  ///
+  /// In en, this message translates to:
+  /// **'Rank'**
+  String get rankAnnounceRank;
+
+  /// No description provided for @rankAnnounceLike.
+  ///
+  /// In en, this message translates to:
+  /// **'Like'**
+  String get rankAnnounceLike;
+
   /// No description provided for @rankPlayNow.
   ///
   /// In en, this message translates to:
