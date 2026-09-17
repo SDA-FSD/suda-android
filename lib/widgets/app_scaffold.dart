@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import 'gnb_bar.dart';
+
 /// 앱 전체의 공통 레이아웃 표준을 정의하는 베이스 스캐폴드
 /// 
 /// STYLE 가이드에 따라 다음 규칙을 적용합니다:
@@ -28,6 +30,8 @@ class AppScaffold extends StatelessWidget {
   final bool usePadding; // 본문 영역에 기본 24 패딩을 적용할지 여부
   final bool showBackButton; // leading 뒤로가기 버튼 표시 여부 (기본 true)
   final Widget? bottomNavigationBar; // 하단 네비게이션 바 (메인 스크린용)
+  /// GNB 바로 위 전체 폭 오버레이 (좌우 패딩 밖, GNB와 동일 Stack).
+  final Widget? aboveBottomBar;
   final bool resizeToAvoidBottomInset; // 키보드에 따른 레이아웃 리사이즈 여부
 
   const AppScaffold({
@@ -47,6 +51,7 @@ class AppScaffold extends StatelessWidget {
     this.usePadding = true,
     this.showBackButton = true,
     this.bottomNavigationBar,
+    this.aboveBottomBar,
     this.resizeToAvoidBottomInset = true,
   });
 
@@ -146,6 +151,15 @@ class AppScaffold extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: actions!,
                     ),
+                  ),
+
+                // GNB 바로 위 오버레이 (전체 폭, GNB와 동일 계층)
+                if (aboveBottomBar != null)
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: GnbBar.contentHeight + 4,
+                    child: aboveBottomBar!,
                   ),
 
                 // GNB

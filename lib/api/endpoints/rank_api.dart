@@ -41,6 +41,18 @@ class RankApi {
     return RankPeriodDto.fromJson(data);
   }
 
+  static Future<RankEntryPageDto> getRankEntries({
+    required String accessToken,
+    required int pageNum,
+    String? snapshotMinute,
+  }) async {
+    return SudaHttpClient.executeWithRefresh(
+      () => _getEntries(accessToken, pageNum: pageNum, snapshotMinute: snapshotMinute),
+      retryWithNewToken: (newToken) =>
+          _getEntries(newToken, pageNum: pageNum, snapshotMinute: snapshotMinute),
+    );
+  }
+
   static Future<RankEntryPageDto> _getEntries(
     String accessToken, {
     required int pageNum,

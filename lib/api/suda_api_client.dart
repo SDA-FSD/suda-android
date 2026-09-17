@@ -31,6 +31,18 @@ class SudaApiClient {
     return RankApi.getRankScreen(accessToken: accessToken);
   }
 
+  static Future<RankEntryPageDto> getRankEntries({
+    required String accessToken,
+    required int pageNum,
+    String? snapshotMinute,
+  }) {
+    return RankApi.getRankEntries(
+      accessToken: accessToken,
+      pageNum: pageNum,
+      snapshotMinute: snapshotMinute,
+    );
+  }
+
   static Future<SudaAppPage<HomeSeriesDto>> getSeriesByCategory({
     required String accessToken,
     required String categoryEnumValue,

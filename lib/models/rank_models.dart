@@ -91,6 +91,28 @@ class RankEntryDto {
       isMe: json['isMe'] == true,
     );
   }
+
+  RankEntryDto copyWith({
+    int? rank,
+    int? userId,
+    String? name,
+    String? imgPath,
+    int? weeklyLike,
+    String? subscribedYn,
+    int? level,
+    bool? isMe,
+  }) {
+    return RankEntryDto(
+      rank: rank ?? this.rank,
+      userId: userId ?? this.userId,
+      name: name ?? this.name,
+      imgPath: imgPath ?? this.imgPath,
+      weeklyLike: weeklyLike ?? this.weeklyLike,
+      subscribedYn: subscribedYn ?? this.subscribedYn,
+      level: level ?? this.level,
+      isMe: isMe ?? this.isMe,
+    );
+  }
 }
 
 /// GET /v1/rank/entries
@@ -125,21 +147,33 @@ class RankEntryPageDto {
             .map((e) => RankEntryDto.fromJson(Map<String, dynamic>.from(e)))
             .toList()
         : const [];
+    final pageNum = (json['pageNum'] as num?)?.toInt() ?? 0;
+    final pageSize = (json['pageSize'] as num?)?.toInt() ?? 50;
+    final total = (json['total'] as num?)?.toInt() ?? 0;
+    final totalPages = (json['totalPages'] as num?)?.toInt() ?? 0;
+    final parsedNext = (json['nextPageNum'] as num?)?.toInt();
+    // hasMore: 서버 값 우선. 없을 때만 total/totalPages로 추론.
+    // entries.length == pageSize 만으로는 추론하지 않음 (total==pageSize인 마지막 page와 구분 불가)
+    final hasMore = json['hasMore'] == true ||
+        parsedNext != null ||
+        (totalPages > 0 && pageNum + 1 < totalPages) ||
+        (total > 0 && (pageNum + 1) * pageSize < total);
+    final nextPageNum = parsedNext ?? (hasMore ? pageNum + 1 : null);
     return RankEntryPageDto(
       periodId: (json['periodId'] as num?)?.toInt(),
       snapshotMinute: json['snapshotMinute'] as String?,
-      pageNum: (json['pageNum'] as num?)?.toInt() ?? 0,
-      pageSize: (json['pageSize'] as num?)?.toInt() ?? 50,
-      total: (json['total'] as num?)?.toInt() ?? 0,
-      totalPages: (json['totalPages'] as num?)?.toInt() ?? 0,
-      hasMore: json['hasMore'] == true,
-      nextPageNum: (json['nextPageNum'] as num?)?.toInt(),
+      pageNum: pageNum,
+      pageSize: pageSize,
+      total: total,
+      totalPages: totalPages,
+      hasMore: hasMore,
+      nextPageNum: nextPageNum,
       entries: entries,
     );
   }
 }
 
-/// 랭킹 탭 화면용. DEV API는 /period/current + /entries 를 합친다.
+/// 랭킹 탭 화면용. /period/current + /entries 를 합친다.
 class RankScreenDto {
   final RankPeriodDto? period;
   final int snapVersion;
@@ -147,6 +181,10 @@ class RankScreenDto {
   final int? nextFromRank;
   final List<RankEntryDto> topEntries;
   final RankEntryDto? myEntry;
+  final String? snapshotMinute;
+  final bool hasMore;
+  final int? nextPageNum;
+  final List<RankEntryDto> listEntries;
 
   const RankScreenDto({
     this.period,
@@ -155,17 +193,22 @@ class RankScreenDto {
     this.nextFromRank,
     this.topEntries = const [],
     this.myEntry,
+    this.snapshotMinute,
+    this.hasMore = false,
+    this.nextPageNum,
+    this.listEntries = const [],
   });
 
   factory RankScreenDto.fromPeriodAndPage({
     required RankPeriodDto? period,
     required RankEntryPageDto page,
+    int? meUserId,
   }) {
     final sorted = [...page.entries]..sort((a, b) => a.rank.compareTo(b.rank));
     RankEntryDto? myEntry;
     for (final e in sorted) {
-      if (e.isMe) {
-        myEntry = e;
+      if (e.isMe || (meUserId != null && e.userId == meUserId)) {
+        myEntry = e.copyWith(isMe: true);
         break;
       }
     }
@@ -176,6 +219,10 @@ class RankScreenDto {
       nextFromRank: page.hasMore ? 11 : null,
       topEntries: sorted.where((e) => e.rank >= 1 && e.rank <= 10).toList(),
       myEntry: myEntry,
+      snapshotMinute: page.snapshotMinute,
+      hasMore: page.hasMore,
+      nextPageNum: page.nextPageNum,
+      listEntries: sorted.where((e) => e.rank >= 4).toList(),
     );
   }
 }

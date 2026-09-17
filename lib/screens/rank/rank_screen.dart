@@ -2,10 +2,14 @@ import 'dart:async';
 import 'dart:ui' show ImageFilter;
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:marquee/marquee.dart';
 
 import '../../l10n/app_localizations.dart';
+import '../../models/rank_models.dart';
+import '../../models/user_models.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
 import '../../widgets/app_scaffold.dart';
@@ -15,7 +19,8 @@ import 'rank_podium_painter.dart';
 import 'top_3_rewards_popup.dart';
 
 /// Weekly Ranking Main Screen (GNB Ranking 탭).
-/// GET /v1/rank/period/current + GET /v1/rank/entries?pageNum=0 — 1~10만. Claim 시트 없음.
+/// GET /v1/rank/period/current + GET /v1/rank/entries.
+/// myEntry는 API 필드 없이 entries의 isMe(또는 userId)로 찾고 sticky/inline만 적용.
 class RankScreen extends StatefulWidget {
   const RankScreen({
     super.key,
@@ -43,8 +48,7 @@ class RankScreen extends StatefulWidget {
 class _RankScreenState extends State<RankScreen> {
   static const _defaultProfile =
       'assets/images/icons/default_profile_image.png';
-  static const _premiumBadge =
-      'assets/images/icons/premium_verified_badge.png';
+  static const _premiumBadge = 'assets/images/icons/premium_verified_badge.png';
   static const _podiumCrown = 'assets/images/icons/ranking_1st_crown.png';
 
   /// Figma 440 프레임 기준 포디움(왕관 top→포디움 베이스 bottom).
@@ -57,18 +61,32 @@ class _RankScreenState extends State<RankScreen> {
   static const _figmaPodiumBaseH = 150.0;
   static const _figmaPodiumBottomY = _figmaPodiumBaseY + _figmaPodiumBaseH;
   static const _figmaPodiumH = _figmaPodiumBottomY - _figmaPodiumOriginY;
+
   /// 포디움 단 폭·로컬 x (= wireframe 세로 경계와 동일).
   static const _step2W = RankPodiumGeometry.step2W;
   static const _step1W = RankPodiumGeometry.step1W;
   static const _step3W = RankPodiumGeometry.step3W;
   static const _step1LocalX = RankPodiumGeometry.step1LocalX;
   static const _step3LocalX = RankPodiumGeometry.step3LocalX;
+
   /// 포디움 큰 숫자 폰트 크기 (Figma 440 기준 × s).
   static const _podiumNumFontSize = 64.0;
 
+  /// sticky(`_RankListRow`) 높이. 리스트 하단 패딩으로 마지막 행이 sticky에 가리지 않게 함.
+  static const _stickyListBottomPad = 56.0;
+
   RankScreenDto? _screen;
-  /// myEntry: 11위 이하면 리스트에 끼워 넣지 않음. 미참여 오버레이 / 후속 sticky용.
+
+  /// 스냅샷에서 찾은 나. sticky/inline용. (live ripple 없음 — API myEntry 없음)
   RankEntryDto? _myEntryKept;
+  List<RankEntryDto> _listRows = const [];
+  String? _snapshotMinute;
+  int? _nextPageNum;
+  bool _hasMorePages = false;
+  bool _loadingMore = false;
+  bool _inlineMeVisible = false;
+  final ScrollController _scrollController = ScrollController();
+  final GlobalKey _meRowKey = GlobalKey();
   bool _loading = true;
   bool _loadFailed = false;
 
@@ -81,6 +99,7 @@ class _RankScreenState extends State<RankScreen> {
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_onScroll);
     unawaited(_loadScreen());
   }
 
@@ -88,6 +107,7 @@ class _RankScreenState extends State<RankScreen> {
   void didUpdateWidget(covariant RankScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (!oldWidget.isActive && widget.isActive) {
+      _jumpToListTop();
       unawaited(_loadScreen());
     }
   }
@@ -95,6 +115,8 @@ class _RankScreenState extends State<RankScreen> {
   @override
   void dispose() {
     _tickTimer?.cancel();
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -116,12 +138,29 @@ class _RankScreenState extends State<RankScreen> {
       }
       final dto = await SudaApiClient.getRankScreen(accessToken: token);
       if (!mounted) return;
-      // myEntry: 11위 이하면 리스트에 끼워 넣지 않음. 후속용으로만 보관.
-      _myEntryKept = dto.myEntry;
+      _myEntryKept = _resolveMe(dto.myEntry, dto.listEntries, dto.topEntries);
+      _listRows = dto.listEntries;
+      _snapshotMinute = dto.snapshotMinute;
+      _nextPageNum = dto.nextPageNum;
+      _hasMorePages = dto.hasMore;
+      _inlineMeVisible = false;
+      debugPrint(
+        'rank screen loaded rows=${_listRows.length} hasMore=$_hasMorePages '
+        'next=$_nextPageNum total=${dto.total} liveRankSize=${dto.period?.liveRankSize} '
+        'snap=$_snapshotMinute',
+      );
       _applyCountdown(dto.period);
       setState(() {
         _screen = dto;
         _loading = false;
+      });
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        // 탭 복귀·리로드 시 항상 4위부터
+        _jumpToListTop();
+        _updateInlineMeVisibility();
+        // page0(≤50)만으로는 끝이 안 보일 수 있음 → 바로 다음 page 로드 시도
+        unawaited(_loadMore());
       });
       // Claimable 시트: RankScreenDto에 claimable 없음 — 절대 show 하지 않음.
     } catch (_) {
@@ -185,9 +224,178 @@ class _RankScreenState extends State<RankScreen> {
     return null;
   }
 
+  RankEntryDto? _resolveMe(
+    RankEntryDto? hint,
+    List<RankEntryDto> listRows,
+    List<RankEntryDto> topEntries,
+  ) {
+    if (hint != null) return hint.copyWith(isMe: true);
+    final id = widget.user?.id;
+    for (final e in [...topEntries, ...listRows]) {
+      if (e.isMe || (id != null && e.userId == id)) {
+        return e.copyWith(isMe: true);
+      }
+    }
+    return null;
+  }
+
+  List<RankEntryDto> _buildDisplayRows() {
+    final meId = widget.user?.id;
+    final me = _myEntryKept;
+    final base = [..._listRows]..sort((a, b) => a.rank.compareTo(b.rank));
+    return base
+        .map((e) {
+          final isMe = e.isMe ||
+              (meId != null && e.userId == meId) ||
+              (me != null && e.userId == me.userId);
+          return e.copyWith(isMe: isMe);
+        })
+        .toList();
+  }
+
+  void _jumpToListTop() {
+    if (_scrollController.hasClients) {
+      _scrollController.jumpTo(0);
+    }
+  }
+
+  void _onScroll() {
+    _updateInlineMeVisibility();
+    _requestLoadMoreIfNeeded();
+  }
+
+  void _requestLoadMoreIfNeeded() {
+    if (!_hasMorePages || _nextPageNum == null || _loadingMore) return;
+    if (!_scrollController.hasClients) {
+      unawaited(_loadMore());
+      return;
+    }
+    final pos = _scrollController.position;
+    // maxScrollExtent가 작거나(첫 페이지가 화면을 다 못 채움) 하단 근처면 다음 page
+    if (pos.maxScrollExtent <= 240 ||
+        pos.pixels >= pos.maxScrollExtent - 480) {
+      unawaited(_loadMore());
+    }
+  }
+
+  void _updateInlineMeVisibility() {
+    final me = _myEntryKept;
+    if (me == null || me.rank <= 10) {
+      if (_inlineMeVisible) setState(() => _inlineMeVisible = false);
+      return;
+    }
+    if (!_scrollController.hasClients) {
+      if (_inlineMeVisible) setState(() => _inlineMeVisible = false);
+      return;
+    }
+    final ctx = _meRowKey.currentContext;
+    if (ctx == null) {
+      if (_inlineMeVisible) setState(() => _inlineMeVisible = false);
+      return;
+    }
+    final render = ctx.findRenderObject();
+    if (render is! RenderBox || !render.hasSize) return;
+    final viewport = RenderAbstractViewport.maybeOf(render);
+    if (viewport == null) {
+      if (_inlineMeVisible) setState(() => _inlineMeVisible = false);
+      return;
+    }
+    final position = _scrollController.position;
+    final itemTop = viewport.getOffsetToReveal(render, 0.0).offset;
+    final itemBottom = itemTop + render.size.height;
+    final pixels = position.pixels;
+    final visible =
+        itemBottom > pixels && itemTop < pixels + position.viewportDimension;
+    if (visible != _inlineMeVisible) {
+      setState(() => _inlineMeVisible = visible);
+    }
+  }
+
+  Future<void> _loadMore() async {
+    if (_loadingMore || !_hasMorePages || _nextPageNum == null) return;
+    final token = await TokenStorage.loadAccessToken();
+    if (token == null || token.isEmpty) return;
+    final requestingPage = _nextPageNum!;
+    setState(() => _loadingMore = true);
+    try {
+      final page = await SudaApiClient.getRankEntries(
+        accessToken: token,
+        pageNum: requestingPage,
+        snapshotMinute: _snapshotMinute,
+      );
+      if (!mounted) return;
+      debugPrint(
+        'rank loadMore page=$requestingPage entries=${page.entries.length} '
+        'hasMore=${page.hasMore} next=${page.nextPageNum} total=${page.total}',
+      );
+      final merged = [..._listRows];
+      final seen = merged.map((e) => e.userId).toSet();
+      for (final entry in page.entries) {
+        if (entry.rank < 4) continue;
+        if (seen.add(entry.userId)) {
+          merged.add(entry);
+        }
+      }
+      final me = _myEntryKept ??
+          _resolveMe(null, merged, _screen?.topEntries ?? const []);
+      final bool inferredHasMore;
+      final int? inferredNext;
+      if (page.entries.isEmpty) {
+        // 빈 page면 서버 플래그만 신뢰 (무한 재요청 방지)
+        inferredHasMore = page.hasMore;
+        inferredNext = page.nextPageNum;
+      } else {
+        final maxRank = merged.isEmpty
+            ? 0
+            : merged.map((e) => e.rank).reduce((a, b) => a > b ? a : b);
+        inferredHasMore = page.hasMore ||
+            (page.total > 0 && maxRank < page.total);
+        inferredNext = page.nextPageNum ??
+            (inferredHasMore ? requestingPage + 1 : null);
+      }
+      setState(() {
+        _listRows = merged;
+        _nextPageNum = inferredNext;
+        _hasMorePages = inferredHasMore && inferredNext != null;
+        _loadingMore = false;
+        if (me != null) _myEntryKept = me;
+      });
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _updateInlineMeVisibility();
+        if (_myEntryKept == null && _hasMorePages) {
+          unawaited(_loadMore());
+        } else {
+          _requestLoadMoreIfNeeded();
+        }
+      });
+    } catch (e, st) {
+      debugPrint('rank loadMore FAILED page=$requestingPage: $e\n$st');
+      if (!mounted) return;
+      setState(() => _loadingMore = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // Claimable 레이어 자리만 분리 — 현재 child는 본문만, 시트는 띄우지 않음.
+    final periodNull = _screen != null && _screen!.period == null;
+    final showContent =
+        !_loading && !periodNull && !(_loadFailed && _screen == null);
+    final hasMeOnScreen = (_screen?.topEntries ?? const <RankEntryDto>[]).any(
+      (e) => e.isMe,
+    );
+    // 실제 미참여만. (리스트에 내가 있으면 오버레이 금지)
+    final showNotRanked =
+        showContent &&
+        _screen != null &&
+        _myEntryKept == null &&
+        !hasMeOnScreen;
+    final showSticky = showContent &&
+        _myEntryKept != null &&
+        _myEntryKept!.rank > 10 &&
+        !_inlineMeVisible;
+
     return RankClaimableSheet(
       child: AppScaffold(
         showBackButton: false,
@@ -199,10 +407,7 @@ class _RankScreenState extends State<RankScreen> {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [
-                Color(0xFF843DF2),
-                Color(0xFF0D011F),
-              ],
+              colors: [Color(0xFF843DF2), Color(0xFF0D011F)],
             ),
           ),
         ),
@@ -218,22 +423,42 @@ class _RankScreenState extends State<RankScreen> {
           onProfileTap: widget.onNavigateToProfile,
           user: widget.user,
         ),
-        body: _buildBody(context),
+        // GNB와 동일 Stack · 전체 폭 · GNB 위 4px
+        aboveBottomBar: showNotRanked
+            ? _RankNotRankedOverlay(onPlayNow: widget.onNavigateToHome)
+            : showSticky
+            ? _RankMyEntrySticky(
+                entry: _myEntryKept!,
+                defaultProfile: _defaultProfile,
+                premiumBadge: _premiumBadge,
+              )
+            : null,
+        body: _buildBody(
+          context,
+          // sticky 가능 구간은 토글과 무관하게 패딩 유지(나타남/사라짐 점프 방지)
+          listBottomPad: (_myEntryKept != null && _myEntryKept!.rank > 10)
+              ? _stickyListBottomPad
+              : 0,
+        ),
       ),
     );
   }
 
-  Widget _buildBody(BuildContext context) {
+  Widget _buildBody(BuildContext context, {double listBottomPad = 0}) {
     final bottomInset =
         MediaQuery.paddingOf(context).bottom + GnbBar.contentHeight;
     final periodNull = _screen != null && _screen!.period == null;
+    const side = 24.0;
 
     return Padding(
-      padding: EdgeInsets.only(left: 24, right: 24, bottom: bottomInset),
+      padding: EdgeInsets.only(bottom: bottomInset),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _buildHeader(context),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: side),
+            child: _buildHeader(context),
+          ),
           const SizedBox(height: 8),
           if (_loading && _screen == null)
             const Expanded(
@@ -259,46 +484,77 @@ class _RankScreenState extends State<RankScreen> {
             Expanded(
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  // 타이틀·1~3 포디움·Rank/Player/Like 헤더는 고정.
-                  // 4~10위 리스트만 스크롤.
-                  // 미참여(myEntry == null)일 때만 하단 고정 오버레이 (sticky와 배타).
-                  final showNotRanked = _myEntryKept == null;
-                  return Stack(
+                  // 포디움/헤더는 좌우 24. 리스트는 전체 폭(본인 하이라이트 full-bleed).
+                  final contentConstraints = BoxConstraints(
+                    maxWidth: (constraints.maxWidth - side * 2).clamp(
+                      0.0,
+                      double.infinity,
+                    ),
+                    maxHeight: constraints.maxHeight,
+                  );
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          _buildPodium(context, constraints),
-                          const SizedBox(height: 12),
-                          _buildListHeader(context, constraints),
-                          const SizedBox(height: 4),
-                          Expanded(
-                            child: ListView(
-                              padding: EdgeInsets.zero,
-                              physics: const AlwaysScrollableScrollPhysics(),
-                              children: [
-                                for (var r = 4; r <= 10; r++)
-                                  _RankListRow(
-                                    rank: r,
-                                    entry: _entryAt(r),
-                                    defaultProfile: _defaultProfile,
-                                    premiumBadge: _premiumBadge,
-                                  ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      if (showNotRanked)
-                        Positioned(
-                          left: 0,
-                          right: 0,
-                          // GNB와 살짝 간격 (본문 bottomInset이 이미 GNB 높이를 뺌).
-                          bottom: 12,
-                          child: _RankNotRankedOverlay(
-                            onPlayNow: widget.onNavigateToHome,
-                          ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: side),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            _buildPodium(context, contentConstraints),
+                            const SizedBox(height: 12),
+                            _buildListHeader(context, contentConstraints),
+                            const SizedBox(height: 4),
+                          ],
                         ),
+                      ),
+                      Expanded(
+                        child: Builder(
+                          builder: (context) {
+                            final displayRows = _buildDisplayRows()
+                                .where((e) => e.rank >= 4)
+                                .toList();
+                            final itemCount =
+                                displayRows.length + (_loadingMore ? 1 : 0);
+                            return ListView.builder(
+                              controller: _scrollController,
+                              padding: EdgeInsets.only(bottom: listBottomPad),
+                              clipBehavior: Clip.hardEdge,
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              itemCount: itemCount,
+                              itemBuilder: (context, index) {
+                                if (index >= displayRows.length) {
+                                  return const Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 16),
+                                    child: Center(
+                                      child: SizedBox(
+                                        width: 24,
+                                        height: 24,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }
+                                final entry = displayRows[index];
+                                if (_hasMorePages &&
+                                    index >= displayRows.length - 5) {
+                                  unawaited(_loadMore());
+                                }
+                                return _RankListRow(
+                                  key: entry.isMe ? _meRowKey : null,
+                                  rank: entry.rank,
+                                  entry: entry,
+                                  defaultProfile: _defaultProfile,
+                                  premiumBadge: _premiumBadge,
+                                  contentHorizontal: side,
+                                );
+                              },
+                            );
+                          },
+                        ),
+                      ),
                     ],
                   );
                 },
@@ -563,12 +819,12 @@ class _RankScreenState extends State<RankScreen> {
   Widget _buildListHeader(BuildContext context, BoxConstraints _) {
     // BlendMode.overlay는 스크롤 시 레이어 분리로 순백 플래시 → #9742FF 고정.
     final style = Theme.of(context).textTheme.bodyMedium!.copyWith(
-          fontWeight: FontWeight.w700,
-          fontVariations: const [FontVariation('wght', 700)],
-          color: const Color(0xFF9742FF),
-          fontSize: 14,
-          height: 1.0,
-        );
+      fontWeight: FontWeight.w700,
+      fontVariations: const [FontVariation('wght', 700)],
+      color: const Color(0xFF9742FF),
+      fontSize: 14,
+      height: 1.0,
+    );
 
     // Rank/Player: 이전 위치 유지. Like만 top을 더 내려 같은 줄로 맞춤.
     return SizedBox(
@@ -612,6 +868,7 @@ class _PodiumSlot extends StatelessWidget {
 
   final RankEntryDto? entry;
   final double scale;
+
   /// 단(=가로선) 폭 — 아바타·이름·좋아요를 이 폭 기준 가운데 정렬.
   final double stepWidth;
   final bool winnerFrame;
@@ -623,18 +880,24 @@ class _PodiumSlot extends StatelessWidget {
   static const _boxH = 126.0;
   static const _badge = 34.0;
   static const _badgeFont = 22.0;
+
   /// 아바타 112 기준 우하단 뱃지 (기존 104 비율 유지).
   static const _badgeLeft = 84.0;
   static const _badgeTop = 83.0;
-  /// 프로필·뱃지 약간 키움 (레이아웃 동일).
+
+  /// 프로필·뱃지 약간 키움 (레이아웃 동일). 아바타 104→114 중심 고정 확대.
   static const _avatarOuter = 114.0;
   static const _borderW = 3.8;
-  // 왕관 Figma(160,71) − 1위 아바타 박스(167.31,128) + 우측 보정(아바타 키운 뒤 시각 정렬).
+  // 왕관: Figma bbox 상대좌표. 크기 고정, 아바타 확대분(5px)만 위치 보정.
+  // 원래(104 기준) left=-7.31, top=-57 → 114 좌상단 이동분(-5,-5) 반영.
   static const _crownW = 154.77;
   static const _crownH = 118.33;
-  static const _crownLeftOnAvatar = 160.0 - 167.31 + 8.0; // -7.31 → +0.69
-  static const _crownTopOnAvatar = 71.0 - 128.0; // -57
+  static const _crownLeftOnAvatar = -7.31 - 5.0 + 12.0; // -0.31
+  static const _crownTopOnAvatar = -57.0 - 5.0 + 3.0; // -59
   static const _likesToLineGap = 8.0;
+
+  /// 이름 ↔ 좋아요 간격.
+  static const _nameToLikesGap = 5.0;
 
   @override
   Widget build(BuildContext context) {
@@ -667,8 +930,8 @@ class _PodiumSlot extends StatelessWidget {
                     style: winnerFrame
                         ? _RankProfileFrameStyle.winner
                         : (isPremium
-                            ? _RankProfileFrameStyle.premium
-                            : _RankProfileFrameStyle.free),
+                              ? _RankProfileFrameStyle.premium
+                              : _RankProfileFrameStyle.podiumFree),
                     defaultAsset: defaultProfile,
                     outerShadowScale: s,
                   ),
@@ -725,17 +988,13 @@ class _PodiumSlot extends StatelessWidget {
                 ),
                 if (isPremium) ...[
                   const SizedBox(width: 4),
-                  Image.asset(
-                    premiumBadge,
-                    width: attrSize,
-                    height: attrSize,
-                  ),
+                  Image.asset(premiumBadge, width: attrSize, height: attrSize),
                 ],
               ],
             ),
           ),
           if (entry != null) ...[
-            SizedBox(height: 2 * s),
+            SizedBox(height: _nameToLikesGap * s),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
@@ -767,9 +1026,9 @@ class _PodiumSlot extends StatelessWidget {
   }
 }
 
-enum _RankProfileFrameStyle { winner, premium, free }
+enum _RankProfileFrameStyle { winner, premium, free, podiumFree }
 
-/// 1위: 흰→금. 그 외: Profile과 동일 (premium mint→보라 / free mint→어두운 mint).
+/// 1위: 흰→금. 2·3위 일반: 흰→#0CABA8. 그 외: Profile과 동일.
 class _RankProfileFrame extends StatelessWidget {
   const _RankProfileFrame({
     required this.imgPath,
@@ -785,6 +1044,7 @@ class _RankProfileFrame extends StatelessWidget {
   final double borderWidth;
   final _RankProfileFrameStyle style;
   final String defaultAsset;
+
   /// non-null이면 Paywall `_cardShadow`(Offset/Blur 20, #000000 30%) 적용·스케일.
   final double? outerShadowScale;
 
@@ -806,6 +1066,16 @@ class _RankProfileFrame extends StatelessWidget {
     colors: [Color(0xFF80D7CF), Color(0xFF43716D)],
   );
 
+  /// 2·3위 일반 유저 (SVG: 위 #FFFFFF → 아래 #0CABA8).
+  static const _podiumFreeGradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0xFFFFFFFF), Color(0xFF0CABA8)],
+  );
+
+  static const _innerFill = Colors.white;
+  static const _podiumFreeInnerFill = Color(0xFFD9D9D9);
+
   /// `paywall.dart` `_cardShadow`와 동일 스펙.
   static const _figmaOuterShadowColor = Color(0x4D000000);
   static const _figmaOuterShadow = 20.0;
@@ -817,7 +1087,11 @@ class _RankProfileFrame extends StatelessWidget {
       _RankProfileFrameStyle.winner => _winnerGradient,
       _RankProfileFrameStyle.premium => _premiumGradient,
       _RankProfileFrameStyle.free => _freeGradient,
+      _RankProfileFrameStyle.podiumFree => _podiumFreeGradient,
     };
+    final innerFill = style == _RankProfileFrameStyle.podiumFree
+        ? _podiumFreeInnerFill
+        : _innerFill;
     final shadowScale = outerShadowScale;
     final shadows = shadowScale == null
         ? null
@@ -845,15 +1119,18 @@ class _RankProfileFrame extends StatelessWidget {
       child: Container(
         width: inner,
         height: inner,
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: Colors.white,
+          color: innerFill,
         ),
         clipBehavior: Clip.antiAlias,
         child: _RankAvatar(
           imgPath: imgPath,
           size: inner,
           defaultAsset: defaultAsset,
+          placeholderColor: style == _RankProfileFrameStyle.podiumFree
+              ? const Color(0xFF938F99)
+              : null,
         ),
       ),
     );
@@ -896,16 +1173,21 @@ class _PodiumLevelBadge extends StatelessWidget {
 
 class _RankListRow extends StatelessWidget {
   const _RankListRow({
+    super.key,
     required this.rank,
     required this.entry,
     required this.defaultProfile,
     required this.premiumBadge,
+    this.contentHorizontal = 24,
   });
 
   final int rank;
   final RankEntryDto? entry;
   final String defaultProfile;
   final String premiumBadge;
+
+  /// 행 콘텐츠 좌우 inset. isMe 하이라이트는 리스트 전체 폭(각진 모서리).
+  final double contentHorizontal;
 
   static const _listAvatarOuter = 40.0;
   static const _listBorderW = 2.0;
@@ -936,9 +1218,9 @@ class _RankListRow extends StatelessWidget {
             child: Text(
               '$rank',
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700,
-                  ),
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
           Stack(
@@ -967,10 +1249,11 @@ class _RankListRow extends StatelessWidget {
               builder: (context, constraints) {
                 const badgeGap = 4.0;
                 const badgeSize = 14.0;
-                final badgeReserve =
-                    isPremium ? badgeGap + badgeSize : 0.0;
-                final nameMax = (constraints.maxWidth - badgeReserve)
-                    .clamp(0.0, double.infinity);
+                final badgeReserve = isPremium ? badgeGap + badgeSize : 0.0;
+                final nameMax = (constraints.maxWidth - badgeReserve).clamp(
+                  0.0,
+                  double.infinity,
+                );
                 final textDir = Directionality.of(context);
                 final textPainter = TextPainter(
                   text: TextSpan(text: displayName, style: nameStyle),
@@ -996,11 +1279,11 @@ class _RankListRow extends StatelessWidget {
                               velocity: 30,
                               pauseAfterRound: const Duration(seconds: 2),
                               startPadding: 0,
-                              accelerationDuration:
-                                  const Duration(seconds: 1),
+                              accelerationDuration: const Duration(seconds: 1),
                               accelerationCurve: Curves.linear,
-                              decelerationDuration:
-                                  const Duration(milliseconds: 500),
+                              decelerationDuration: const Duration(
+                                milliseconds: 500,
+                              ),
                               decelerationCurve: Curves.easeOut,
                             )
                           : Align(
@@ -1057,10 +1340,15 @@ class _RankListRow extends StatelessWidget {
     );
 
     // softLight는 스크롤 시 레이어 분리로 순백 플래시 → #542493 고정.
+    // isMe: 리스트(=화면) 전체 폭 · 각진 모서리(radius 없음).
     return Container(
+      width: double.infinity,
       margin: const EdgeInsets.symmetric(vertical: 2),
       color: isMe ? const Color(0xFF542493) : null,
-      child: row,
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: contentHorizontal),
+        child: row,
+      ),
     );
   }
 }
@@ -1070,11 +1358,27 @@ class _RankAvatar extends StatelessWidget {
     required this.imgPath,
     required this.size,
     required this.defaultAsset,
+    this.placeholderColor,
   });
 
   final String? imgPath;
   final double size;
   final String defaultAsset;
+  final Color? placeholderColor;
+
+  Widget _placeholder() {
+    final img = Image.asset(
+      defaultAsset,
+      width: size,
+      height: size,
+      fit: BoxFit.cover,
+    );
+    if (placeholderColor == null) return img;
+    return ColorFiltered(
+      colorFilter: ColorFilter.mode(placeholderColor!, BlendMode.srcIn),
+      child: img,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1090,19 +1394,9 @@ class _RankAvatar extends StatelessWidget {
                 width: size,
                 height: size,
                 fit: BoxFit.cover,
-                errorWidget: (_, _, _) => Image.asset(
-                  defaultAsset,
-                  width: size,
-                  height: size,
-                  fit: BoxFit.cover,
-                ),
+                errorWidget: (_, _, _) => _placeholder(),
               )
-            : Image.asset(
-                defaultAsset,
-                width: size,
-                height: size,
-                fit: BoxFit.cover,
-              ),
+            : _placeholder(),
       ),
     );
   }
@@ -1119,23 +1413,44 @@ class _LevelBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final size = compact ? 16.0 : 18.0;
     final fontSize = compact ? 9.0 : 10.0;
-    return _PodiumLevelBadge(
-      level: level,
-      size: size,
-      fontSize: fontSize,
+    return _PodiumLevelBadge(level: level, size: size, fontSize: fontSize);
+  }
+}
+
+/// GNB 위 고정 내 순위. inline 행이 보이면 숨긴다.
+class _RankMyEntrySticky extends StatelessWidget {
+  const _RankMyEntrySticky({
+    required this.entry,
+    required this.defaultProfile,
+    required this.premiumBadge,
+  });
+
+  final RankEntryDto entry;
+  final String defaultProfile;
+  final String premiumBadge;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: _RankListRow(
+        rank: entry.rank,
+        entry: entry,
+        defaultProfile: defaultProfile,
+        premiumBadge: premiumBadge,
+      ),
     );
   }
 }
 
 /// 주간 랭킹 미참여(myEntry == null) 하단 고정 오버레이.
-/// GNB [BackdropFilter] 패턴 재사용. blur 9.2 · #8A38F5 64%.
+/// 화면 전체 폭 · 각진 모서리. blur 9.2 · #8A38F5 64%.
 class _RankNotRankedOverlay extends StatelessWidget {
   const _RankNotRankedOverlay({this.onPlayNow});
 
   final VoidCallback? onPlayNow;
 
   static const _bg = Color(0xA38A38F5); // #8A38F5 @ 64%
-  static const _radius = BorderRadius.all(Radius.circular(24));
   static const _blurSigma = 9.2;
 
   @override
@@ -1143,67 +1458,70 @@ class _RankNotRankedOverlay extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final elevatedBase = Theme.of(context).elevatedButtonTheme.style;
 
-    return ClipRRect(
-      borderRadius: _radius,
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: _blurSigma, sigmaY: _blurSigma),
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.fromLTRB(20, 28, 20, 28),
-          decoration: const BoxDecoration(
-            color: _bg,
-            borderRadius: _radius,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                l10n.rankNotRankedYetTitle,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontFamily: 'ChironGoRoundTC',
-                  fontFamilyFallback: ['ChironHeiHK'],
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.w700,
-                  fontVariations: [FontVariation('wght', 700)],
-                  height: 1.2,
+    return Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.zero,
+      child: ClipRect(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: _blurSigma, sigmaY: _blurSigma),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(20, 28, 20, 28),
+            decoration: const BoxDecoration(
+              color: _bg,
+              borderRadius: BorderRadius.zero,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  l10n.rankNotRankedYetTitle,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontFamily: 'ChironGoRoundTC',
+                    fontFamilyFallback: ['ChironHeiHK'],
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.w700,
+                    fontVariations: [FontVariation('wght', 700)],
+                    height: 1.2,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                l10n.rankNotRankedYetBody,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontFamily: 'ChironGoRoundTC',
-                  fontFamilyFallback: ['ChironHeiHK'],
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w400,
-                  fontStyle: FontStyle.italic,
-                  fontVariations: [FontVariation('wght', 400)],
-                  height: 1.3,
+                const SizedBox(height: 8),
+                Text(
+                  l10n.rankNotRankedYetBody,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontFamily: 'ChironGoRoundTC',
+                    fontFamilyFallback: ['ChironHeiHK'],
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400,
+                    fontStyle: FontStyle.italic,
+                    fontVariations: [FontVariation('wght', 400)],
+                    height: 1.3,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                height: 44,
-                // TODO: rankPlayNow ko/pt 공식 카피 확정 시 ARB 갱신 (현재 en "play now" 유지).
-                child: ElevatedButton(
-                  onPressed: onPlayNow,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.black,
-                    shape: const StadiumBorder(),
-                    elevation: 0,
-                    padding: const EdgeInsets.symmetric(horizontal: 28),
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ).merge(elevatedBase),
-                  child: Text(l10n.rankPlayNow),
+                const SizedBox(height: 20),
+                SizedBox(
+                  height: 44,
+                  // TODO: rankPlayNow ko/pt 공식 카피 확정 시 ARB 갱신 (현재 en "play now" 유지).
+                  child: ElevatedButton(
+                    onPressed: onPlayNow,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.black,
+                      shape: const StadiumBorder(),
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(horizontal: 28),
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ).merge(elevatedBase),
+                    child: Text(l10n.rankPlayNow),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
