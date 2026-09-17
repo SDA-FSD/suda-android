@@ -38,6 +38,10 @@ class DefaultPopup extends StatelessWidget {
   final List<DefaultPopupButton> buttons;
   final bool barrierDismissible;
 
+  /// When true, primary buttons stretch to the card content width.
+  /// Default remains shrink-wrap to label.
+  final bool expandPrimaryButtons;
+
   const DefaultPopup({
     super.key,
     this.topWidget,
@@ -45,6 +49,7 @@ class DefaultPopup extends StatelessWidget {
     this.bodyWidget,
     this.buttons = const [],
     this.barrierDismissible = false,
+    this.expandPrimaryButtons = false,
   });
 
   static Future<void> show(
@@ -54,6 +59,7 @@ class DefaultPopup extends StatelessWidget {
     Widget? bodyWidget,
     List<DefaultPopupButton> buttons = const [],
     bool barrierDismissible = false,
+    bool expandPrimaryButtons = false,
   }) {
     return showDialog<void>(
       context: context,
@@ -66,6 +72,7 @@ class DefaultPopup extends StatelessWidget {
         bodyWidget: bodyWidget,
         buttons: buttons,
         barrierDismissible: barrierDismissible,
+        expandPrimaryButtons: expandPrimaryButtons,
       ),
     );
   }
@@ -254,11 +261,14 @@ class DefaultPopup extends StatelessWidget {
     for (var i = 0; i < buttons.length; i++) {
       if (i > 0) out.add(const SizedBox(height: 20));
       final b = buttons[i];
+      final expandPrimary =
+          expandPrimaryButtons && b.type == DefaultPopupButtonType.primary;
       out.add(
         Align(
           alignment: Alignment.center,
           child: SizedBox(
             height: 44,
+            width: expandPrimary ? double.infinity : null,
             child: switch (b.type) {
               DefaultPopupButtonType.primary => ElevatedButton(
                   onPressed: () => _popThenCallback(context, b.onPressed),

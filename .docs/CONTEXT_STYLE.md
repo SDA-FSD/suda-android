@@ -171,6 +171,7 @@ Text('더 작은 보조', style: theme.labelMini);   // body-tiny2 (extension)
 - **타이틀 타이포**: `textTheme.headlineMedium` + 흰색 (`heading2` 계열)
 - **본문 슬롯(`bodyWidget`)**: 내부 타이포/정렬/추가 위젯 구성은 호출부 책임(자유도 높음)
 - **슬롯 간격 규칙**: `DefaultPopup`은 **topWidget ↔ title ↔ body ↔ buttons** 사이에만 세로 `20`을 보장한다(`bodyWidget` 내부 간격은 강제하지 않음)
+- **primary 버튼 폭**: 기본은 라벨 shrink-wrap. `expandPrimaryButtons: true`면 primary만 카드 콘텐츠 가로 전체(`width: infinity`). Top 3 Rewards 등 호출부 선택.
 - **본문 영역 패딩**: 상 `20`, 좌·우·하 `16`
 - **스크롤/최대 높이**: 카드 높이는 내용에 따라 결정되되, **최대 높이는 화면 높이의 `80%`로 캡**되며 초과 시 **`topWidget + title + body + buttons` 영역만 스크롤**(좌상단 닫기 아이콘은 고정)
 
