@@ -828,4 +828,21 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get rankPlayNow => 'играть сейчас';
+
+  @override
+  String get rankClaimCongratulations => 'Поздравляем!';
+
+  @override
+  String rankClaimFinishedPlace(int place) {
+    return 'Ты занял(а) #$place место в рейтинге этой недели!';
+  }
+
+  @override
+  String get rankClaimYourRewards => 'Твои награды';
+
+  @override
+  String get rankClaim => 'Забрать';
+
+  @override
+  String get rankClaimError => 'Что-то пошло не так. Попробуй ещё раз.';
 }

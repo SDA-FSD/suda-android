@@ -837,4 +837,21 @@ class AppLocalizationsFil extends AppLocalizations {
 
   @override
   String get rankPlayNow => 'maglaro ngayon';
+
+  @override
+  String get rankClaimCongratulations => 'Congratulations!';
+
+  @override
+  String rankClaimFinishedPlace(int place) {
+    return 'Natapos ka sa #$place sa ranking ngayong linggo!';
+  }
+
+  @override
+  String get rankClaimYourRewards => 'Mga Reward Mo';
+
+  @override
+  String get rankClaim => 'Kunin';
+
+  @override
+  String get rankClaimError => 'May nangyaring mali. Subukan ulit.';
 }

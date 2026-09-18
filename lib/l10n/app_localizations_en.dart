@@ -821,4 +821,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rankPlayNow => 'play now';
+
+  @override
+  String get rankClaimCongratulations => 'Congratulations!';
+
+  @override
+  String rankClaimFinishedPlace(int place) {
+    return 'You finished #$place in this week\'s ranking!';
+  }
+
+  @override
+  String get rankClaimYourRewards => 'Your Rewards';
+
+  @override
+  String get rankClaim => 'Claim';
+
+  @override
+  String get rankClaimError => 'Something went wrong. Please try again.';
 }

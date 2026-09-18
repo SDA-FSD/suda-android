@@ -332,5 +332,17 @@
   "rankAnnounceYou": "あなた:",
   "rankAnnounceRank": "順位",
   "rankAnnounceLike": "Like",
-  "rankPlayNow": "今すぐプレイ"
+  "rankPlayNow": "今すぐプレイ",
+  "rankClaimCongratulations": "おめでとうございます！",
+  "rankClaimFinishedPlace": "今週のランキングで{place}位になりました！",
+  "@rankClaimFinishedPlace": {
+    "placeholders": {
+      "place": {
+        "type": "int"
+      }
+    }
+  },
+  "rankClaimYourRewards": "あなたの報酬",
+  "rankClaim": "受け取る",
+  "rankClaimError": "問題が発生しました。もう一度お試しください。"
 }

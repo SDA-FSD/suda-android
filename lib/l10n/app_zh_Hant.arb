@@ -332,5 +332,17 @@
   "rankAnnounceYou": "你：",
   "rankAnnounceRank": "排名",
   "rankAnnounceLike": "Like",
-  "rankPlayNow": "立即開始"
+  "rankPlayNow": "立即開始",
+  "rankClaimCongratulations": "恭喜！",
+  "rankClaimFinishedPlace": "你在本週排行榜中獲得了第{place}名！",
+  "@rankClaimFinishedPlace": {
+    "placeholders": {
+      "place": {
+        "type": "int"
+      }
+    }
+  },
+  "rankClaimYourRewards": "你的獎勵",
+  "rankClaim": "領取",
+  "rankClaimError": "發生問題。請再試一次。"
 }

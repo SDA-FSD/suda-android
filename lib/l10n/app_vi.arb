@@ -332,5 +332,17 @@
   "rankAnnounceYou": "Bạn:",
   "rankAnnounceRank": "Hạng",
   "rankAnnounceLike": "Like",
-  "rankPlayNow": "chơi ngay"
+  "rankPlayNow": "chơi ngay",
+  "rankClaimCongratulations": "Chúc mừng!",
+  "rankClaimFinishedPlace": "Bạn đã xếp hạng #{place} trong bảng xếp hạng tuần này!",
+  "@rankClaimFinishedPlace": {
+    "placeholders": {
+      "place": {
+        "type": "int"
+      }
+    }
+  },
+  "rankClaimYourRewards": "Phần thưởng của bạn",
+  "rankClaim": "Nhận",
+  "rankClaimError": "Đã xảy ra lỗi. Vui lòng thử lại."
 }

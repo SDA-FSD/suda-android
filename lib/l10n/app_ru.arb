@@ -332,5 +332,17 @@
   "rankAnnounceYou": "Вы:",
   "rankAnnounceRank": "Место",
   "rankAnnounceLike": "Like",
-  "rankPlayNow": "играть сейчас"
+  "rankPlayNow": "играть сейчас",
+  "rankClaimCongratulations": "Поздравляем!",
+  "rankClaimFinishedPlace": "Ты занял(а) #{place} место в рейтинге этой недели!",
+  "@rankClaimFinishedPlace": {
+    "placeholders": {
+      "place": {
+        "type": "int"
+      }
+    }
+  },
+  "rankClaimYourRewards": "Твои награды",
+  "rankClaim": "Забрать",
+  "rankClaimError": "Что-то пошло не так. Попробуй ещё раз."
 }

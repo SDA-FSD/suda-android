@@ -810,4 +810,21 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get rankPlayNow => 'अभी खेलें';
+
+  @override
+  String get rankClaimCongratulations => 'बधाई हो!';
+
+  @override
+  String rankClaimFinishedPlace(int place) {
+    return 'आपने इस सप्ताह की रैंकिंग में #$place स्थान हासिल किया!';
+  }
+
+  @override
+  String get rankClaimYourRewards => 'आपके इनाम';
+
+  @override
+  String get rankClaim => 'क्लेम करें';
+
+  @override
+  String get rankClaimError => 'कुछ गलत हो गया। कृपया फिर से कोशिश करें।';
 }

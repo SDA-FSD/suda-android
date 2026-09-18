@@ -800,4 +800,21 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get rankPlayNow => 'เล่นเลย';
+
+  @override
+  String get rankClaimCongratulations => 'ยินดีด้วย!';
+
+  @override
+  String rankClaimFinishedPlace(int place) {
+    return 'คุณได้อันดับ #$place ในจัดอันดับสัปดาห์นี้!';
+  }
+
+  @override
+  String get rankClaimYourRewards => 'รางวัลของคุณ';
+
+  @override
+  String get rankClaim => 'รับรางวัล';
+
+  @override
+  String get rankClaimError => 'เกิดข้อผิดพลาด โปรดลองอีกครั้ง';
 }

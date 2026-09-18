@@ -332,5 +332,17 @@
   "rankAnnounceYou": "أنت:",
   "rankAnnounceRank": "الترتيب",
   "rankAnnounceLike": "Like",
-  "rankPlayNow": "العب الآن"
+  "rankPlayNow": "العب الآن",
+  "rankClaimCongratulations": "تهانينا!",
+  "rankClaimFinishedPlace": "لقد حصلت على المركز #{place} في ترتيب هذا الأسبوع!",
+  "@rankClaimFinishedPlace": {
+    "placeholders": {
+      "place": {
+        "type": "int"
+      }
+    }
+  },
+  "rankClaimYourRewards": "مكافآتك",
+  "rankClaim": "استلام",
+  "rankClaimError": "حدث خطأ ما. يرجى المحاولة مرة أخرى."
 }

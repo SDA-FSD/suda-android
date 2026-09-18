@@ -332,5 +332,17 @@
   "rankAnnounceYou": "Sen:",
   "rankAnnounceRank": "Sıra",
   "rankAnnounceLike": "Like",
-  "rankPlayNow": "şimdi oyna"
+  "rankPlayNow": "şimdi oyna",
+  "rankClaimCongratulations": "Tebrikler!",
+  "rankClaimFinishedPlace": "Bu haftanın sıralamasında #{place}. oldun!",
+  "@rankClaimFinishedPlace": {
+    "placeholders": {
+      "place": {
+        "type": "int"
+      }
+    }
+  },
+  "rankClaimYourRewards": "Ödüllerin",
+  "rankClaim": "Al",
+  "rankClaimError": "Bir şeyler ters gitti. Lütfen tekrar dene."
 }

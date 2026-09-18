@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:ui' show ImageFilter;
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -14,7 +13,9 @@ import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../widgets/gnb_bar.dart';
+import 'rank_claim_sheet.dart';
 import 'rank_claimable_sheet.dart';
+import 'rank_crown_avatar.dart';
 import 'rank_podium_painter.dart';
 import 'top_3_rewards_popup.dart';
 
@@ -32,6 +33,8 @@ class RankScreen extends StatefulWidget {
     this.showNotiboxUnreadBadge = false,
     /// Lab 미리보기: 서버 phase와 무관하게 ANNOUNCE UI 강제.
     this.forceAnnouncePhase = false,
+    /// Lab: Claim 1등 패널을 GNB 위 전면 오버레이로 표시.
+    this.forceClaimPreview = false,
   });
 
   final VoidCallback? onNavigateToHome;
@@ -41,6 +44,7 @@ class RankScreen extends StatefulWidget {
   final UserDto? user;
   final bool showNotiboxUnreadBadge;
   final bool forceAnnouncePhase;
+  final bool forceClaimPreview;
 
   static const String routeName = '/rank';
 
@@ -48,7 +52,8 @@ class RankScreen extends StatefulWidget {
   State<RankScreen> createState() => _RankScreenState();
 }
 
-class _RankScreenState extends State<RankScreen> {
+class _RankScreenState extends State<RankScreen>
+    with SingleTickerProviderStateMixin {
   static const _defaultProfile =
       'assets/images/icons/default_profile_image.png';
   static const _premiumBadge = 'assets/images/icons/premium_verified_badge.png';
@@ -101,10 +106,41 @@ class _RankScreenState extends State<RankScreen> {
   Timer? _tickTimer;
   Duration _remaining = Duration.zero;
 
+  /// Lab `forceClaimPreview` 또는 후속 claimable 연동 시 GNB 위 전면 패널.
+  bool _claimPanelVisible = false;
+  RankEntryDto? _claimEntry;
+  int _claimPlace = 1;
+  /// DefaultPopup(showDialog)과 동일 계열: 페이드 + 살짝 스케일(중앙).
+  late final AnimationController _claimAppearController;
+  late final Animation<double> _claimFade;
+  late final Animation<double> _claimScale;
+
   @override
   void initState() {
     super.initState();
+    _claimAppearController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 150),
+    );
+    final curved = CurvedAnimation(
+      parent: _claimAppearController,
+      curve: Curves.easeOutCubic,
+      reverseCurve: Curves.easeInCubic,
+    );
+    _claimFade = curved;
+    _claimScale = Tween<double>(begin: 0.9, end: 1.0).animate(curved);
     _scrollController.addListener(_onScroll);
+    if (widget.forceClaimPreview) {
+      _claimPanelVisible = true;
+      _claimEntry = RankClaimPanel.labMockFirst(
+        imgPath: widget.user?.profileImgUrl,
+      );
+      _claimPlace = 1;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        unawaited(_claimAppearController.forward());
+      });
+    }
     unawaited(_loadScreen());
   }
 
@@ -120,6 +156,7 @@ class _RankScreenState extends State<RankScreen> {
   @override
   void dispose() {
     _tickTimer?.cancel();
+    _claimAppearController.dispose();
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     super.dispose();
@@ -484,27 +521,36 @@ class _RankScreenState extends State<RankScreen> {
         _myEntryKept!.rank > 10 &&
         !_inlineMeVisible;
 
-    return RankClaimableSheet(
+    final showClaimLayer = _claimEntry != null &&
+        (_claimPanelVisible || _claimAppearController.isAnimating);
+
+    final gnb = GnbBar(
+      isHomeActive: false,
+      isAlarmActive: false,
+      isRankActive: true,
+      isProfileActive: false,
+      showNotiboxUnreadBadge: widget.showNotiboxUnreadBadge,
+      onHomeTap: widget.onNavigateToHome,
+      onAlarmTap: widget.onNavigateToAlarm,
+      onRankTap: () {},
+      onProfileTap: widget.onNavigateToProfile,
+      user: widget.user,
+    );
+
+    // 랭킹 본문 + GNB는 항상 Scaffold. Claim은 GNB 위 풀스크린 레이어
+    // (등장: DefaultPopup과 동일 계열 — dim + 페이드 + 중앙 스케일).
+    final scaffold = RankClaimableSheet(
       child: AppScaffold(
-        showBackButton: widget.forceAnnouncePhase,
+        showBackButton:
+            widget.forceAnnouncePhase || widget.forceClaimPreview,
         usePadding: false,
         bodyTopPadding: 16,
         backgroundColor: const Color(0xFF0D011F),
         background: _buildRankBackground(),
-        bottomNavigationBar: GnbBar(
-          isHomeActive: false,
-          isAlarmActive: false,
-          isRankActive: true,
-          isProfileActive: false,
-          showNotiboxUnreadBadge: widget.showNotiboxUnreadBadge,
-          onHomeTap: widget.onNavigateToHome,
-          onAlarmTap: widget.onNavigateToAlarm,
-          onRankTap: () {},
-          onProfileTap: widget.onNavigateToProfile,
-          user: widget.user,
-        ),
-        // GNB와 동일 Stack · 전체 폭 · GNB 위 4px
-        aboveBottomBar: showNotRanked
+        bottomNavigationBar: gnb,
+        aboveBottomBar: showClaimLayer
+            ? null
+            : showNotRanked
             ? _RankNotRankedOverlay(onPlayNow: widget.onNavigateToHome)
             : showSticky
             ? _RankMyEntrySticky(
@@ -515,13 +561,70 @@ class _RankScreenState extends State<RankScreen> {
             : null,
         body: _buildBody(
           context,
-          // sticky 예약도 COLLECT만 (inline 보일 때도 높이 유지해 점프 방지)
           reserveStickySpace: isCollectRank &&
               _myEntryKept != null &&
               _myEntryKept!.rank > 10,
         ),
       ),
     );
+
+    if (!showClaimLayer) {
+      return scaffold;
+    }
+
+    final bottomPad = MediaQuery.paddingOf(context).bottom;
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        scaffold,
+        Positioned(
+          left: 0,
+          right: 0,
+          top: 0,
+          bottom: bottomPad + GnbBar.contentHeight,
+          child: AnimatedBuilder(
+            animation: _claimAppearController,
+            builder: (context, _) {
+              return Stack(
+                fit: StackFit.expand,
+                children: [
+                  // DefaultPopup dim: black 40%
+                  Opacity(
+                    opacity: _claimAppearController.value.clamp(0.0, 1.0),
+                    child: const ColoredBox(color: Color(0x66000000)),
+                  ),
+                  FadeTransition(
+                    opacity: _claimFade,
+                    child: ScaleTransition(
+                      scale: _claimScale,
+                      alignment: Alignment.center,
+                      child: RankClaimPanel(
+                        entry: _claimEntry!,
+                        place: _claimPlace,
+                        onClaim: () => unawaited(_onClaimPanelClaim()),
+                        paintBackground: true,
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _onClaimPanelClaim() async {
+    // 실 API 전: 페이드/스케일 아웃 후 패널 닫기. Lab 프리뷰는 pop.
+    if (!_claimAppearController.isDismissed) {
+      await _claimAppearController.reverse();
+    }
+    if (!mounted) return;
+    setState(() => _claimPanelVisible = false);
+    if (widget.forceClaimPreview) {
+      Navigator.of(context).maybePop();
+    }
   }
 
   Widget _buildBody(BuildContext context, {bool reserveStickySpace = false}) {
@@ -1036,23 +1139,8 @@ class _PodiumSlot extends StatelessWidget {
   final String premiumBadge;
   final String crownAsset;
 
-  static const _boxH = 126.0;
-  static const _badge = 34.0;
-  static const _badgeFont = 22.0;
-
-  /// 아바타 112 기준 우하단 뱃지 (기존 104 비율 유지).
-  static const _badgeLeft = 84.0;
-  static const _badgeTop = 83.0;
-
-  /// 프로필·뱃지 약간 키움 (레이아웃 동일). 아바타 104→114 중심 고정 확대.
-  static const _avatarOuter = 114.0;
-  static const _borderW = 3.8;
-  // 왕관: Figma bbox 상대좌표. 크기 고정, 아바타 확대분(5px)만 위치 보정.
-  // 원래(104 기준) left=-7.31, top=-57 → 114 좌상단 이동분(-5,-5) 반영.
-  static const _crownW = 154.77;
-  static const _crownH = 118.33;
-  static const _crownLeftOnAvatar = -7.31 - 5.0 + 12.0; // -0.31
-  static const _crownTopOnAvatar = -57.0 - 5.0 + 3.0; // -59
+  static const _boxH = RankCrownAvatar.boxH;
+  static const _avatarOuter = RankCrownAvatar.avatarOuter;
   static const _likesToLineGap = 8.0;
 
   /// 이름 ↔ 좋아요 간격.
@@ -1082,43 +1170,22 @@ class _PodiumSlot extends StatelessWidget {
                 Positioned(
                   top: 0,
                   left: avatarLeft * s,
-                  child: _RankProfileFrame(
+                  child: RankCrownAvatar(
+                    scale: s,
                     imgPath: entry?.imgPath,
-                    outer: _avatarOuter * s,
-                    borderWidth: _borderW * s,
-                    style: winnerFrame
-                        ? _RankProfileFrameStyle.winner
+                    frameStyle: winnerFrame
+                        ? RankProfileFrameStyle.winner
                         : (isPremium
-                              ? _RankProfileFrameStyle.premium
-                              : _RankProfileFrameStyle.podiumFree),
+                              ? RankProfileFrameStyle.premium
+                              : RankProfileFrameStyle.podiumFree),
                     defaultAsset: defaultProfile,
+                    crownAsset: crownAsset,
+                    showCrown: showCrown,
+                    level: entry?.level,
+                    showLevelBadge: entry != null,
                     outerShadowScale: s,
                   ),
                 ),
-                if (entry != null)
-                  Positioned(
-                    left: (avatarLeft + _badgeLeft) * s,
-                    top: _badgeTop * s,
-                    child: _PodiumLevelBadge(
-                      level: entry!.level,
-                      size: _badge * s,
-                      fontSize: _badgeFont * s,
-                    ),
-                  ),
-                if (showCrown)
-                  Positioned(
-                    left: (avatarLeft + _crownLeftOnAvatar) * s,
-                    top: _crownTopOnAvatar * s,
-                    child: IgnorePointer(
-                      child: Image.asset(
-                        crownAsset,
-                        width: _crownW * s,
-                        height: _crownH * s,
-                        fit: BoxFit.fill,
-                        filterQuality: FilterQuality.high,
-                      ),
-                    ),
-                  ),
               ],
             ),
           ),
@@ -1185,148 +1252,6 @@ class _PodiumSlot extends StatelessWidget {
   }
 }
 
-enum _RankProfileFrameStyle { winner, premium, free, podiumFree }
-
-/// 1위: 흰→금. 2·3위 일반: 흰→#0CABA8. 그 외: Profile과 동일.
-class _RankProfileFrame extends StatelessWidget {
-  const _RankProfileFrame({
-    required this.imgPath,
-    required this.outer,
-    required this.borderWidth,
-    required this.style,
-    required this.defaultAsset,
-    this.outerShadowScale,
-  });
-
-  final String? imgPath;
-  final double outer;
-  final double borderWidth;
-  final _RankProfileFrameStyle style;
-  final String defaultAsset;
-
-  /// non-null이면 Paywall `_cardShadow`(Offset/Blur 20, #000000 30%) 적용·스케일.
-  final double? outerShadowScale;
-
-  static const _winnerGradient = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [Color(0xFFFFFFFF), Color(0xFFFFB700)],
-  );
-
-  static const _premiumGradient = LinearGradient(
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-    colors: [Color(0xFF80D7CF), Color(0xFF8A38F5)],
-  );
-
-  static const _freeGradient = LinearGradient(
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-    colors: [Color(0xFF80D7CF), Color(0xFF43716D)],
-  );
-
-  /// 2·3위 일반 유저 (SVG: 위 #FFFFFF → 아래 #0CABA8).
-  static const _podiumFreeGradient = LinearGradient(
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-    colors: [Color(0xFFFFFFFF), Color(0xFF0CABA8)],
-  );
-
-  static const _innerFill = Colors.white;
-  static const _podiumFreeInnerFill = Color(0xFFD9D9D9);
-
-  /// `paywall.dart` `_cardShadow`와 동일 스펙.
-  static const _figmaOuterShadowColor = Color(0x4D000000);
-  static const _figmaOuterShadow = 20.0;
-
-  @override
-  Widget build(BuildContext context) {
-    final inner = (outer - borderWidth * 2).clamp(1.0, outer);
-    final Gradient gradient = switch (style) {
-      _RankProfileFrameStyle.winner => _winnerGradient,
-      _RankProfileFrameStyle.premium => _premiumGradient,
-      _RankProfileFrameStyle.free => _freeGradient,
-      _RankProfileFrameStyle.podiumFree => _podiumFreeGradient,
-    };
-    final innerFill = style == _RankProfileFrameStyle.podiumFree
-        ? _podiumFreeInnerFill
-        : _innerFill;
-    final shadowScale = outerShadowScale;
-    final shadows = shadowScale == null
-        ? null
-        : <BoxShadow>[
-            BoxShadow(
-              color: _figmaOuterShadowColor,
-              offset: Offset(
-                _figmaOuterShadow * shadowScale,
-                _figmaOuterShadow * shadowScale,
-              ),
-              blurRadius: _figmaOuterShadow * shadowScale,
-              spreadRadius: 0,
-            ),
-          ];
-
-    return Container(
-      width: outer,
-      height: outer,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: gradient,
-        boxShadow: shadows,
-      ),
-      alignment: Alignment.center,
-      child: Container(
-        width: inner,
-        height: inner,
-        decoration: BoxDecoration(shape: BoxShape.circle, color: innerFill),
-        clipBehavior: Clip.antiAlias,
-        child: _RankAvatar(
-          imgPath: imgPath,
-          size: inner,
-          defaultAsset: defaultAsset,
-          placeholderColor: style == _RankProfileFrameStyle.podiumFree
-              ? const Color(0xFF938F99)
-              : null,
-        ),
-      ),
-    );
-  }
-}
-
-class _PodiumLevelBadge extends StatelessWidget {
-  const _PodiumLevelBadge({
-    required this.level,
-    required this.size,
-    required this.fontSize,
-  });
-
-  final int level;
-  final double size;
-  final double fontSize;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      alignment: Alignment.center,
-      decoration: const BoxDecoration(
-        color: Color(0xFF0CABA8),
-        shape: BoxShape.circle,
-      ),
-      child: Text(
-        '$level',
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: fontSize,
-          fontWeight: FontWeight.w700,
-          height: 1,
-        ),
-      ),
-    );
-  }
-}
-
 class _RankListRow extends StatelessWidget {
   const _RankListRow({
     super.key,
@@ -1386,13 +1311,13 @@ class _RankListRow extends StatelessWidget {
           Stack(
             clipBehavior: Clip.none,
             children: [
-              _RankProfileFrame(
+              RankProfileFrame(
                 imgPath: entry?.imgPath,
                 outer: _listAvatarOuter,
                 borderWidth: _listBorderW,
                 style: isPremium
-                    ? _RankProfileFrameStyle.premium
-                    : _RankProfileFrameStyle.free,
+                    ? RankProfileFrameStyle.premium
+                    : RankProfileFrameStyle.free,
                 defaultAsset: defaultProfile,
               ),
               if (!isEmpty)
@@ -1516,55 +1441,6 @@ class _RankListRow extends StatelessWidget {
   }
 }
 
-class _RankAvatar extends StatelessWidget {
-  const _RankAvatar({
-    required this.imgPath,
-    required this.size,
-    required this.defaultAsset,
-    this.placeholderColor,
-  });
-
-  final String? imgPath;
-  final double size;
-  final String defaultAsset;
-  final Color? placeholderColor;
-
-  Widget _placeholder() {
-    final img = Image.asset(
-      defaultAsset,
-      width: size,
-      height: size,
-      fit: BoxFit.cover,
-    );
-    if (placeholderColor == null) return img;
-    return ColorFiltered(
-      colorFilter: ColorFilter.mode(placeholderColor!, BlendMode.srcIn),
-      child: img,
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final url = imgPath?.trim();
-    return ClipOval(
-      child: SizedBox(
-        width: size,
-        height: size,
-        child: (url != null && url.isNotEmpty)
-            ? CachedNetworkImage(
-                // 랭킹 imgPath는 풀 URL. CDN prefix 붙이지 않음.
-                imageUrl: url,
-                width: size,
-                height: size,
-                fit: BoxFit.cover,
-                errorWidget: (_, _, _) => _placeholder(),
-              )
-            : _placeholder(),
-      ),
-    );
-  }
-}
-
 class _LevelBadge extends StatelessWidget {
   const _LevelBadge({required this.level, this.compact = false});
 
@@ -1576,7 +1452,7 @@ class _LevelBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final size = compact ? 16.0 : 18.0;
     final fontSize = compact ? 9.0 : 10.0;
-    return _PodiumLevelBadge(level: level, size: size, fontSize: fontSize);
+    return RankPodiumLevelBadge(level: level, size: size, fontSize: fontSize);
   }
 }
 

@@ -814,4 +814,21 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get rankPlayNow => 'chơi ngay';
+
+  @override
+  String get rankClaimCongratulations => 'Chúc mừng!';
+
+  @override
+  String rankClaimFinishedPlace(int place) {
+    return 'Bạn đã xếp hạng #$place trong bảng xếp hạng tuần này!';
+  }
+
+  @override
+  String get rankClaimYourRewards => 'Phần thưởng của bạn';
+
+  @override
+  String get rankClaim => 'Nhận';
+
+  @override
+  String get rankClaimError => 'Đã xảy ra lỗi. Vui lòng thử lại.';
 }

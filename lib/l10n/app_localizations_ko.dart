@@ -780,4 +780,21 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get rankPlayNow => '지금 플레이';
+
+  @override
+  String get rankClaimCongratulations => '축하해요!';
+
+  @override
+  String rankClaimFinishedPlace(int place) {
+    return '이번 주 랭킹에서 $place위를 차지했어요!';
+  }
+
+  @override
+  String get rankClaimYourRewards => '나의 보상';
+
+  @override
+  String get rankClaim => '보상 받기';
+
+  @override
+  String get rankClaimError => '문제가 발생했어요. 다시 시도해주세요.';
 }

@@ -332,5 +332,17 @@
   "rankAnnounceYou": "Você:",
   "rankAnnounceRank": "Posição",
   "rankAnnounceLike": "Like",
-  "rankPlayNow": "jogar agora"
+  "rankPlayNow": "jogar agora",
+  "rankClaimCongratulations": "Parabéns!",
+  "rankClaimFinishedPlace": "Você ficou em Nº{place} lugar no ranking desta semana!",
+  "@rankClaimFinishedPlace": {
+    "placeholders": {
+      "place": {
+        "type": "int"
+      }
+    }
+  },
+  "rankClaimYourRewards": "Suas Recompensas",
+  "rankClaim": "Resgatar",
+  "rankClaimError": "Algo deu errado. Tente novamente."
 }

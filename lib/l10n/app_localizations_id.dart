@@ -827,4 +827,21 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get rankPlayNow => 'main sekarang';
+
+  @override
+  String get rankClaimCongratulations => 'Selamat!';
+
+  @override
+  String rankClaimFinishedPlace(int place) {
+    return 'Kamu finis #$place di peringkat minggu ini!';
+  }
+
+  @override
+  String get rankClaimYourRewards => 'Hadiahmu';
+
+  @override
+  String get rankClaim => 'Klaim';
+
+  @override
+  String get rankClaimError => 'Terjadi kesalahan. Coba lagi.';
 }

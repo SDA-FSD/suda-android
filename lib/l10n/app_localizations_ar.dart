@@ -818,4 +818,21 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get rankPlayNow => 'العب الآن';
+
+  @override
+  String get rankClaimCongratulations => 'تهانينا!';
+
+  @override
+  String rankClaimFinishedPlace(int place) {
+    return 'لقد حصلت على المركز #$place في ترتيب هذا الأسبوع!';
+  }
+
+  @override
+  String get rankClaimYourRewards => 'مكافآتك';
+
+  @override
+  String get rankClaim => 'استلام';
+
+  @override
+  String get rankClaimError => 'حدث خطأ ما. يرجى المحاولة مرة أخرى.';
 }

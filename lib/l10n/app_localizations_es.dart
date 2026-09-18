@@ -830,6 +830,23 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get rankPlayNow => 'jugar ahora';
+
+  @override
+  String get rankClaimCongratulations => '¡Felicidades!';
+
+  @override
+  String rankClaimFinishedPlace(int place) {
+    return '¡Quedaste en el #$place en el ranking de esta semana!';
+  }
+
+  @override
+  String get rankClaimYourRewards => 'Tus recompensas';
+
+  @override
+  String get rankClaim => 'Reclamar';
+
+  @override
+  String get rankClaimError => 'Algo salió mal. Inténtalo de nuevo.';
 }
 
 /// The translations for Spanish Castilian, as used in Latin America and the Caribbean (`es_419`).
@@ -1658,4 +1675,21 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
 
   @override
   String get rankPlayNow => 'jugar ahora';
+
+  @override
+  String get rankClaimCongratulations => '¡Felicidades!';
+
+  @override
+  String rankClaimFinishedPlace(int place) {
+    return '¡Quedaste en el #$place en el ranking de esta semana!';
+  }
+
+  @override
+  String get rankClaimYourRewards => 'Tus recompensas';
+
+  @override
+  String get rankClaim => 'Reclamar';
+
+  @override
+  String get rankClaimError => 'Algo salió mal. Inténtalo de nuevo.';
 }

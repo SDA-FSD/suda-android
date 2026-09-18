@@ -332,5 +332,17 @@
   "rankAnnounceYou": "Du:",
   "rankAnnounceRank": "Rang",
   "rankAnnounceLike": "Like",
-  "rankPlayNow": "jetzt spielen"
+  "rankPlayNow": "jetzt spielen",
+  "rankClaimCongratulations": "Glückwunsch!",
+  "rankClaimFinishedPlace": "Du bist #{place} in dieser Wochenrangliste!",
+  "@rankClaimFinishedPlace": {
+    "placeholders": {
+      "place": {
+        "type": "int"
+      }
+    }
+  },
+  "rankClaimYourRewards": "Deine Belohnungen",
+  "rankClaim": "Abholen",
+  "rankClaimError": "Etwas ist schiefgelaufen. Bitte versuche es erneut."
 }

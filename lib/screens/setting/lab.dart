@@ -210,6 +210,23 @@ class _LabScreenState extends State<LabScreen> {
     );
   }
 
+  Future<void> _openRankClaimPreviewFirst() async {
+    if (!mounted) return;
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (routeContext) => RankScreen(
+          forceClaimPreview: true,
+          forceAnnouncePhase: true,
+          isActive: true,
+          onNavigateToHome: () => Navigator.of(routeContext).pop(),
+          onNavigateToAlarm: () => Navigator.of(routeContext).pop(),
+          onNavigateToProfile: () => Navigator.of(routeContext).pop(),
+        ),
+      ),
+    );
+  }
+
   Future<void> _openFirstCefrLevelScreen() async {
     if (!mounted) return;
     await Navigator.push(
@@ -796,6 +813,11 @@ class _LabScreenState extends State<LabScreen> {
             _buildLabScreenButton(
               label: 'Open Rank Announce Preview',
               onPressed: () => unawaited(_openRankAnnouncePreview()),
+            ),
+            const SizedBox(height: 12),
+            _buildLabScreenButton(
+              label: 'Open Rank Claim Preview (1st)',
+              onPressed: () => unawaited(_openRankClaimPreviewFirst()),
             ),
             _buildSectionDivider(),
             Text(

@@ -332,5 +332,17 @@
   "rankAnnounceYou": "Kamu:",
   "rankAnnounceRank": "Peringkat",
   "rankAnnounceLike": "Like",
-  "rankPlayNow": "main sekarang"
+  "rankPlayNow": "main sekarang",
+  "rankClaimCongratulations": "Selamat!",
+  "rankClaimFinishedPlace": "Kamu finis #{place} di peringkat minggu ini!",
+  "@rankClaimFinishedPlace": {
+    "placeholders": {
+      "place": {
+        "type": "int"
+      }
+    }
+  },
+  "rankClaimYourRewards": "Hadiahmu",
+  "rankClaim": "Klaim",
+  "rankClaimError": "Terjadi kesalahan. Coba lagi."
 }

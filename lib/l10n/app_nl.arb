@@ -332,5 +332,17 @@
   "rankAnnounceYou": "Jij:",
   "rankAnnounceRank": "Rang",
   "rankAnnounceLike": "Like",
-  "rankPlayNow": "nu spelen"
+  "rankPlayNow": "nu spelen",
+  "rankClaimCongratulations": "Gefeliciteerd!",
+  "rankClaimFinishedPlace": "Je bent #{place} geworden in de ranking van deze week!",
+  "@rankClaimFinishedPlace": {
+    "placeholders": {
+      "place": {
+        "type": "int"
+      }
+    }
+  },
+  "rankClaimYourRewards": "Jouw beloningen",
+  "rankClaim": "Claimen",
+  "rankClaimError": "Er ging iets mis. Probeer het opnieuw."
 }

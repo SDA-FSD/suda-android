@@ -824,4 +824,21 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get rankPlayNow => 'nu spelen';
+
+  @override
+  String get rankClaimCongratulations => 'Gefeliciteerd!';
+
+  @override
+  String rankClaimFinishedPlace(int place) {
+    return 'Je bent #$place geworden in de ranking van deze week!';
+  }
+
+  @override
+  String get rankClaimYourRewards => 'Jouw beloningen';
+
+  @override
+  String get rankClaim => 'Claimen';
+
+  @override
+  String get rankClaimError => 'Er ging iets mis. Probeer het opnieuw.';
 }
