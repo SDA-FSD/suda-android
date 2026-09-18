@@ -1,6 +1,7 @@
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../models/rank_models.dart';
@@ -20,7 +21,7 @@ class RankClaimPanel extends StatelessWidget {
   });
 
   final RankEntryDto entry;
-  final int place; // 1|2|3 — 이번 UI는 1 기준
+  final int place; // 1|2|3
   final VoidCallback onClaim;
 
   /// false면 그라데이션 없이 콘텐츠만 (AppScaffold.background에 그라데이션을 둔 경우).
@@ -28,19 +29,26 @@ class RankClaimPanel extends StatelessWidget {
 
   static const _defaultProfile =
       'assets/images/icons/default_profile_image.png';
-  static const _crownAsset = 'assets/images/icons/ranking_1st_crown.png';
+  static const _crown1 = 'assets/images/icons/ranking_1st_crown.png';
+  static const _crown2 = 'assets/images/icons/ranking_2st_crown.png';
+  static const _crown3 = 'assets/images/icons/ranking_3st_crown.png';
+  /// Figma 440×956 풀프레임. 4x 소스 1760×3824, 흰 레이 + 알파(검정=투명).
+  static const _sunburstRewards =
+      'assets/images/sunburst_pattern_rewards.png';
+  static const _sunburstOpacity = 0.55;
   static const _figmaW = 440.0;
   /// 콘텐츠 블록 전체 Y 하향만 (내부 간격·크기 불변). Figma 440 기준 × s.
   static const _contentOffsetY = 40.0;
 
-  /// Lab 1등 목데이터.
-  static RankEntryDto labMockFirst({
+  /// Lab 목데이터.
+  static RankEntryDto labMock({
+    int rank = 1,
     String? imgPath,
     int weeklyLike = 3456,
     String subscribedYn = 'N',
   }) {
     return RankEntryDto(
-      rank: 1,
+      rank: rank,
       name: 'You',
       imgPath: imgPath,
       weeklyLike: weeklyLike,
@@ -50,9 +58,45 @@ class RankClaimPanel extends StatelessWidget {
     );
   }
 
-  /// 1등 배경 — **불투명** (뒤 랭킹 비침 방지). 2·3등 후속.
+  /// Lab 1등 목데이터.
+  static RankEntryDto labMockFirst({
+    String? imgPath,
+    int weeklyLike = 3456,
+    String subscribedYn = 'N',
+  }) {
+    return labMock(
+      rank: 1,
+      imgPath: imgPath,
+      weeklyLike: weeklyLike,
+      subscribedYn: subscribedYn,
+    );
+  }
+
+  static const _place3Bg = Color(0xFF0CABA8);
+
+  /// 등수별 배경 — **불투명** (뒤 랭킹 비침 방지).
   static Widget placeBackground({required int place}) {
-    // place reserved for 2nd/3rd gradients later
+    if (place == 3) {
+      return const ColoredBox(
+        color: _place3Bg,
+        child: SizedBox.expand(),
+      );
+    }
+    if (place == 2) {
+      return const DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFFFF00A6),
+              Color(0xFF8A38F5),
+            ],
+          ),
+        ),
+        child: SizedBox.expand(),
+      );
+    }
     return const DecoratedBox(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -151,6 +195,7 @@ class RankClaimPanel extends StatelessWidget {
                 SizedBox(height: (28 + 40) * s),
                 _ProfileHero(
                   entry: entry,
+                  place: place,
                   avatarScale: avatarScale,
                   watermark: _watermark(place),
                 ),
@@ -160,6 +205,7 @@ class RankClaimPanel extends StatelessWidget {
                     widthFactor: 0.75,
                     child: _YourRewardsCard(
                       scale: s,
+                      overlayBlend: place == 3,
                       title: l10n.rankClaimYourRewards,
                       rows: [
                         (medalAsset, rewardBadge),
@@ -185,10 +231,26 @@ class RankClaimPanel extends StatelessWidget {
         builder: (context, constraints) {
           final child = content(constraints);
           if (!paintBackground) return child;
+          final w = constraints.maxWidth;
           return Stack(
             fit: StackFit.expand,
+            clipBehavior: Clip.hardEdge,
             children: [
               placeBackground(place: place),
+              Positioned(
+                left: 0,
+                width: w,
+                bottom: 0,
+                height: w * (956 / _figmaW),
+                child: Opacity(
+                  opacity: _sunburstOpacity,
+                  child: Image.asset(
+                    _sunburstRewards,
+                    fit: BoxFit.fill,
+                    filterQuality: FilterQuality.medium,
+                  ),
+                ),
+              ),
               child,
             ],
           );
@@ -201,11 +263,13 @@ class RankClaimPanel extends StatelessWidget {
 class _ProfileHero extends StatelessWidget {
   const _ProfileHero({
     required this.entry,
+    required this.place,
     required this.avatarScale,
     required this.watermark,
   });
 
   final RankEntryDto entry;
+  final int place;
   final double avatarScale;
   final String watermark;
 
@@ -227,7 +291,7 @@ class _ProfileHero extends StatelessWidget {
             // st 오른쪽 = 아바타 왼쪽 보더와 겹침
             right: (stageW + avatarOuter) / 2 -
                 RankCrownAvatar.borderW * s -
-                6 * s,
+                14 * s,
             top: (-RankCrownAvatar.crownTopOnAvatar * 0.15) * s - 8 * s,
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -241,7 +305,7 @@ class _ProfileHero extends StatelessWidget {
                     color: Colors.white.withValues(alpha: 0.22),
                     fontWeight: FontWeight.w700,
                     fontVariations: const [FontVariation('wght', 700)],
-                    fontSize: 90,
+                    fontSize: 80,
                     height: 1.0,
                   ),
                 ),
@@ -252,7 +316,7 @@ class _ProfileHero extends StatelessWidget {
                     color: Colors.white.withValues(alpha: 0.22),
                     fontWeight: FontWeight.w700,
                     fontVariations: const [FontVariation('wght', 700)],
-                    fontSize: 60,
+                    fontSize: 50,
                     height: 1.0,
                   ),
                 ),
@@ -265,9 +329,15 @@ class _ProfileHero extends StatelessWidget {
             child: RankCrownAvatar(
               scale: s,
               imgPath: entry.imgPath,
-              frameStyle: RankProfileFrameStyle.winner,
+              frameStyle: place == 1
+                  ? RankProfileFrameStyle.winner
+                  : RankProfileFrameStyle.claimRunnerUp,
               defaultAsset: RankClaimPanel._defaultProfile,
-              crownAsset: RankClaimPanel._crownAsset,
+              crownAsset: switch (place) {
+                2 => RankClaimPanel._crown2,
+                3 => RankClaimPanel._crown3,
+                _ => RankClaimPanel._crown1,
+              },
               showCrown: true,
               showLevelBadge: false,
               outerShadowScale: s,
@@ -334,11 +404,14 @@ class _YourRewardsCard extends StatelessWidget {
     required this.scale,
     required this.title,
     required this.rows,
+    this.overlayBlend = false,
   });
 
   final double scale;
   final String title;
   final List<(String, String)> rows;
+  /// 3등: 카드 fill만 overlay. 텍스트·아이콘은 일반 합성.
+  final bool overlayBlend;
 
   @override
   Widget build(BuildContext context) {
@@ -360,46 +433,64 @@ class _YourRewardsCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(15),
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 11.2, sigmaY: 11.2),
-          child: ColoredBox(
-            color: RankClaimPanel._rewardsBg,
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(20 * s, 16 * s, 20 * s, 16 * s),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    title,
-                    textAlign: TextAlign.center,
-                    style: theme.headlineSmall?.copyWith(color: Colors.white),
-                  ),
-                  SizedBox(height: 12 * s),
-                  for (var i = 0; i < rows.length; i++) ...[
-                    if (i > 0) SizedBox(height: 10 * s),
-                    Row(
-                      children: [
-                        SizedBox(width: 12 * s),
-                        Image.asset(
-                          rows[i].$1,
-                          width: 28 * s,
-                          height: 28 * s,
-                          fit: BoxFit.contain,
-                        ),
-                        SizedBox(width: 12 * s),
-                        Expanded(
-                          child: Text(
-                            rows[i].$2,
-                            style: theme.bodyMedium?.copyWith(
-                              color: Colors.white,
-                              fontStyle: FontStyle.italic,
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: overlayBlend
+                    ? const Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          // 스크롤 레이어 분리 시 페이지 배경이 안 보여
+                          // 단색 3등 배경을 카드 안에서 다시 깔고 overlay.
+                          ColoredBox(color: RankClaimPanel._place3Bg),
+                          _OverlayBlend(
+                            child: ColoredBox(
+                              color: RankClaimPanel._rewardsBg,
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ],
+                        ],
+                      )
+                    : const ColoredBox(color: RankClaimPanel._rewardsBg),
               ),
-            ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(20 * s, 16 * s, 20 * s, 16 * s),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      title,
+                      textAlign: TextAlign.center,
+                      style: theme.headlineSmall?.copyWith(color: Colors.white),
+                    ),
+                    SizedBox(height: 12 * s),
+                    for (var i = 0; i < rows.length; i++) ...[
+                      if (i > 0) SizedBox(height: 10 * s),
+                      Row(
+                        children: [
+                          SizedBox(width: 12 * s),
+                          Image.asset(
+                            rows[i].$1,
+                            width: 28 * s,
+                            height: 28 * s,
+                            fit: BoxFit.contain,
+                          ),
+                          SizedBox(width: 12 * s),
+                          Expanded(
+                            child: Text(
+                              rows[i].$2,
+                              style: theme.bodyMedium?.copyWith(
+                                color: Colors.white,
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -433,6 +524,32 @@ class _ClaimButton extends StatelessWidget {
         child: Text(label),
       ),
     );
+  }
+}
+
+/// CSS `mix-blend-mode: overlay` 대응. fill 전용(텍스트는 부모 Stack에서 srcOver).
+class _OverlayBlend extends SingleChildRenderObjectWidget {
+  const _OverlayBlend({required Widget child}) : super(child: child);
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderOverlayBlend();
+  }
+}
+
+class _RenderOverlayBlend extends RenderProxyBox {
+  @override
+  bool get alwaysNeedsCompositing => child != null;
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (child == null) return;
+    context.canvas.saveLayer(
+      offset & size,
+      Paint()..blendMode = BlendMode.overlay,
+    );
+    context.paintChild(child!, offset);
+    context.canvas.restore();
   }
 }
 

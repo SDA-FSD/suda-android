@@ -212,11 +212,27 @@ class _LabScreenState extends State<LabScreen> {
 
   Future<void> _openRankClaimPreviewFirst() async {
     if (!mounted) return;
+    await _openRankClaimPreview(place: 1);
+  }
+
+  Future<void> _openRankClaimPreviewSecond() async {
+    if (!mounted) return;
+    await _openRankClaimPreview(place: 2);
+  }
+
+  Future<void> _openRankClaimPreviewThird() async {
+    if (!mounted) return;
+    await _openRankClaimPreview(place: 3);
+  }
+
+  Future<void> _openRankClaimPreview({required int place}) async {
+    if (!mounted) return;
     await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (routeContext) => RankScreen(
           forceClaimPreview: true,
+          forceClaimPlace: place,
           forceAnnouncePhase: true,
           isActive: true,
           onNavigateToHome: () => Navigator.of(routeContext).pop(),
@@ -818,6 +834,16 @@ class _LabScreenState extends State<LabScreen> {
             _buildLabScreenButton(
               label: 'Open Rank Claim Preview (1st)',
               onPressed: () => unawaited(_openRankClaimPreviewFirst()),
+            ),
+            const SizedBox(height: 12),
+            _buildLabScreenButton(
+              label: 'Open Rank Claim Preview (2nd)',
+              onPressed: () => unawaited(_openRankClaimPreviewSecond()),
+            ),
+            const SizedBox(height: 12),
+            _buildLabScreenButton(
+              label: 'Open Rank Claim Preview (3rd)',
+              onPressed: () => unawaited(_openRankClaimPreviewThird()),
             ),
             _buildSectionDivider(),
             Text(

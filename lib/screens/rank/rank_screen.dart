@@ -33,8 +33,10 @@ class RankScreen extends StatefulWidget {
     this.showNotiboxUnreadBadge = false,
     /// Lab 미리보기: 서버 phase와 무관하게 ANNOUNCE UI 강제.
     this.forceAnnouncePhase = false,
-    /// Lab: Claim 1등 패널을 GNB 위 전면 오버레이로 표시.
+    /// Lab: Claim 패널을 GNB 위 전면 오버레이로 표시.
     this.forceClaimPreview = false,
+    /// Lab: Claim 등수 (1|2|3). [forceClaimPreview]일 때만 사용.
+    this.forceClaimPlace = 1,
   });
 
   final VoidCallback? onNavigateToHome;
@@ -45,6 +47,7 @@ class RankScreen extends StatefulWidget {
   final bool showNotiboxUnreadBadge;
   final bool forceAnnouncePhase;
   final bool forceClaimPreview;
+  final int forceClaimPlace;
 
   static const String routeName = '/rank';
 
@@ -132,10 +135,11 @@ class _RankScreenState extends State<RankScreen>
     _scrollController.addListener(_onScroll);
     if (widget.forceClaimPreview) {
       _claimPanelVisible = true;
-      _claimEntry = RankClaimPanel.labMockFirst(
+      _claimPlace = widget.forceClaimPlace.clamp(1, 3);
+      _claimEntry = RankClaimPanel.labMock(
+        rank: _claimPlace,
         imgPath: widget.user?.profileImgUrl,
       );
-      _claimPlace = 1;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         unawaited(_claimAppearController.forward());
