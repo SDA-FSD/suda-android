@@ -358,6 +358,15 @@ class AppLocalizationsJa extends AppLocalizations {
   String get reportTitle => '問題を報告';
 
   @override
+  String get profileProgress => '成長';
+
+  @override
+  String get profileDayStreak => '連続学習日';
+
+  @override
+  String get profileWordsSpoken => '話した単語';
+
+  @override
   String get profileHistory => '履歴';
 
   @override

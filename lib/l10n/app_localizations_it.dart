@@ -378,6 +378,15 @@ class AppLocalizationsIt extends AppLocalizations {
   String get reportTitle => 'Segnala un problema';
 
   @override
+  String get profileProgress => 'Progressi';
+
+  @override
+  String get profileDayStreak => 'Giorni consecutivi';
+
+  @override
+  String get profileWordsSpoken => 'Parole pronunciate';
+
+  @override
   String get profileHistory => 'Cronologia';
 
   @override

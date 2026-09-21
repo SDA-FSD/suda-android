@@ -13,15 +13,17 @@ import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../widgets/gnb_bar.dart';
-import 'rank_claim_sheet.dart';
-import 'rank_claimable_sheet.dart';
+import 'rank_claim.dart';
 import 'rank_crown_avatar.dart';
 import 'rank_podium_painter.dart';
 import 'top_3_rewards_popup.dart';
 
+enum _MeRowSlot { below, visible, above }
+
 /// Weekly Ranking Main Screen (GNB Ranking 탭).
 /// GET /v1/rank/period/current + /entries + /entries/me.
 /// sticky/미참여는 `/entries/me`(동일 snapshotMinute). 목록 inline은 userId/isMe.
+/// sticky는 자기 행이 뷰포트보다 **아래**일 때만 (상위 랭커를 보는 중).
 class RankScreen extends StatefulWidget {
   const RankScreen({
     super.key,
@@ -56,7 +58,7 @@ class RankScreen extends StatefulWidget {
 }
 
 class _RankScreenState extends State<RankScreen>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   static const _defaultProfile =
       'assets/images/icons/default_profile_image.png';
   static const _premiumBadge = 'assets/images/icons/premium_verified_badge.png';
@@ -83,8 +85,7 @@ class _RankScreenState extends State<RankScreen>
   /// 포디움 큰 숫자 폰트 크기 (Figma 440 기준 × s).
   static const _podiumNumFontSize = 64.0;
 
-  /// sticky·리스트 행 높이(대략). sticky 아래 예약 영역에 사용. COLLECT만.
-  static const _stickyRowExtent = 56.0;
+  static const _stickyFadeDuration = Duration(milliseconds: 150);
 
   RankScreenDto? _screen;
 
@@ -97,7 +98,11 @@ class _RankScreenState extends State<RankScreen>
   int? _nextPageNum;
   bool _hasMorePages = false;
   bool _loadingMore = false;
-  bool _inlineMeVisible = false;
+  /// 자기 행 vs 리스트 뷰포트. 미로드(키 없음)는 below.
+  _MeRowSlot _meRowSlot = _MeRowSlot.below;
+  /// 로드·탭 복귀 직후는 sticky 즉시. 이후 스크롤 토글만 페이드.
+  bool _stickyFadeEnabled = false;
+  late final AnimationController _stickyFadeController;
   final ScrollController _scrollController = ScrollController();
   final GlobalKey _meRowKey = GlobalKey();
   bool _loading = true;
@@ -109,7 +114,7 @@ class _RankScreenState extends State<RankScreen>
   Timer? _tickTimer;
   Duration _remaining = Duration.zero;
 
-  /// Lab `forceClaimPreview` 또는 후속 claimable 연동 시 GNB 위 전면 패널.
+  /// Lab `forceClaimPreview` 또는 후속 Claim API 연동 시 GNB 위 전면 패널.
   bool _claimPanelVisible = false;
   RankEntryDto? _claimEntry;
   int _claimPlace = 1;
@@ -121,6 +126,10 @@ class _RankScreenState extends State<RankScreen>
   @override
   void initState() {
     super.initState();
+    _stickyFadeController = AnimationController(
+      vsync: this,
+      duration: _stickyFadeDuration,
+    );
     _claimAppearController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 150),
@@ -160,6 +169,7 @@ class _RankScreenState extends State<RankScreen>
   @override
   void dispose() {
     _tickTimer?.cancel();
+    _stickyFadeController.dispose();
     _claimAppearController.dispose();
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
@@ -197,7 +207,8 @@ class _RankScreenState extends State<RankScreen>
       _snapshotMinute = dto.snapshotMinute;
       _nextPageNum = dto.nextPageNum;
       _hasMorePages = dto.hasMore;
-      _inlineMeVisible = false;
+      _meRowSlot = _MeRowSlot.below;
+      _stickyFadeEnabled = false;
       debugPrint(
         'rank screen loaded rows=${_listRows.length} hasMore=$_hasMorePages '
         'next=$_nextPageNum total=${dto.total} liveRankSize=${dto.period?.liveRankSize} '
@@ -208,15 +219,16 @@ class _RankScreenState extends State<RankScreen>
         _screen = dto;
         _loading = false;
       });
+      _syncStickyFade(instant: true);
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         // 탭 복귀·리로드 시 항상 4위부터
         _jumpToListTop();
-        _updateInlineMeVisibility();
+        _updateMeRowSlot();
+        _stickyFadeEnabled = true;
         // 화면 미충전 시만 다음 page (내 순위 탐색용 loadMore 금지 — /me가 담당)
         _requestLoadMoreIfNeeded();
       });
-      // Claimable 시트: RankScreenDto에 claimable 없음 — 절대 show 하지 않음.
     } catch (_) {
       if (!mounted) return;
       setState(() {
@@ -393,7 +405,7 @@ class _RankScreenState extends State<RankScreen>
   }
 
   void _onScroll() {
-    _updateInlineMeVisibility();
+    _updateMeRowSlot();
     _requestLoadMoreIfNeeded();
   }
 
@@ -410,36 +422,53 @@ class _RankScreenState extends State<RankScreen>
     }
   }
 
-  void _updateInlineMeVisibility() {
+  void _updateMeRowSlot() {
+    final next = _computeMeRowSlot();
+    if (next == _meRowSlot) return;
+    _meRowSlot = next;
+    _syncStickyFade();
+  }
+
+  _MeRowSlot _computeMeRowSlot() {
     final me = _myEntryKept;
-    if (me == null || me.rank <= 10) {
-      if (_inlineMeVisible) setState(() => _inlineMeVisible = false);
-      return;
-    }
-    if (!_scrollController.hasClients) {
-      if (_inlineMeVisible) setState(() => _inlineMeVisible = false);
-      return;
-    }
+    if (me == null || me.rank <= 10) return _MeRowSlot.below;
+    if (!_scrollController.hasClients) return _meRowSlot;
     final ctx = _meRowKey.currentContext;
-    if (ctx == null) {
-      if (_inlineMeVisible) setState(() => _inlineMeVisible = false);
-      return;
-    }
+    // 화면 밖이면 builder가 행을 버림. null을 below로 보면 지나간 뒤 append 때 sticky가 다시 켜짐.
+    if (ctx == null) return _meRowSlot;
     final render = ctx.findRenderObject();
-    if (render is! RenderBox || !render.hasSize) return;
+    if (render is! RenderBox || !render.hasSize) return _meRowSlot;
     final viewport = RenderAbstractViewport.maybeOf(render);
-    if (viewport == null) {
-      if (_inlineMeVisible) setState(() => _inlineMeVisible = false);
-      return;
-    }
+    if (viewport == null) return _meRowSlot;
     final position = _scrollController.position;
     final itemTop = viewport.getOffsetToReveal(render, 0.0).offset;
     final itemBottom = itemTop + render.size.height;
     final pixels = position.pixels;
-    final visible =
-        itemBottom > pixels && itemTop < pixels + position.viewportDimension;
-    if (visible != _inlineMeVisible) {
-      setState(() => _inlineMeVisible = visible);
+    // GNB에 가린 구간은 육안 가시 영역에서 제외. sticky 슬롯은 포함(핸드오프).
+    final viewportBottom =
+        pixels + position.viewportDimension - GnbBar.contentHeight;
+    if (itemBottom <= pixels) return _MeRowSlot.above;
+    if (itemTop >= viewportBottom) return _MeRowSlot.below;
+    return _MeRowSlot.visible;
+  }
+
+  void _syncStickyFade({bool instant = false}) {
+    final me = _myEntryKept;
+    final eligible =
+        !_isAnnouncePhase && me != null && me.rank > 10;
+    final wanted = eligible && _meRowSlot == _MeRowSlot.below;
+    if (!eligible) {
+      _stickyFadeController.value = 0;
+      return;
+    }
+    if (instant || !_stickyFadeEnabled) {
+      _stickyFadeController.value = wanted ? 1.0 : 0.0;
+      return;
+    }
+    if (wanted) {
+      unawaited(_stickyFadeController.forward());
+    } else {
+      unawaited(_stickyFadeController.reverse());
     }
   }
 
@@ -491,7 +520,7 @@ class _RankScreenState extends State<RankScreen>
       });
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-        _updateInlineMeVisibility();
+        _updateMeRowSlot();
         _requestLoadMoreIfNeeded();
       });
     } catch (e, st) {
@@ -519,11 +548,10 @@ class _RankScreenState extends State<RankScreen>
         _myEntryResolved &&
         _myEntryKept == null &&
         !hasMeOnScreen;
-    final showSticky =
+    final stickyEligible =
         isCollectRank &&
         _myEntryKept != null &&
-        _myEntryKept!.rank > 10 &&
-        !_inlineMeVisible;
+        _myEntryKept!.rank > 10;
 
     final showClaimLayer = _claimEntry != null &&
         (_claimPanelVisible || _claimAppearController.isAnimating);
@@ -543,8 +571,7 @@ class _RankScreenState extends State<RankScreen>
 
     // 랭킹 본문 + GNB는 항상 Scaffold. Claim은 GNB 위 풀스크린 레이어
     // (등장: DefaultPopup과 동일 계열 — dim + 페이드 + 중앙 스케일).
-    final scaffold = RankClaimableSheet(
-      child: AppScaffold(
+    final scaffold = AppScaffold(
         showBackButton:
             widget.forceAnnouncePhase || widget.forceClaimPreview,
         usePadding: false,
@@ -556,20 +583,27 @@ class _RankScreenState extends State<RankScreen>
             ? null
             : showNotRanked
             ? _RankNotRankedOverlay(onPlayNow: widget.onNavigateToHome)
-            : showSticky
-            ? _RankMyEntrySticky(
-                entry: _myEntryKept!,
-                defaultProfile: _defaultProfile,
-                premiumBadge: _premiumBadge,
+            : stickyEligible
+            ? AnimatedBuilder(
+                animation: _stickyFadeController,
+                builder: (context, child) {
+                  final v = _stickyFadeController.value;
+                  if (v <= 0 && !_stickyFadeController.isAnimating) {
+                    return const SizedBox.shrink();
+                  }
+                  return IgnorePointer(
+                    ignoring: v < 0.05,
+                    child: Opacity(opacity: v, child: child),
+                  );
+                },
+                child: _RankMyEntrySticky(
+                  entry: _myEntryKept!,
+                  defaultProfile: _defaultProfile,
+                  premiumBadge: _premiumBadge,
+                ),
               )
             : null,
-        body: _buildBody(
-          context,
-          reserveStickySpace: isCollectRank &&
-              _myEntryKept != null &&
-              _myEntryKept!.rank > 10,
-        ),
-      ),
+        body: _buildBody(context),
     );
 
     if (!showClaimLayer) {
@@ -631,17 +665,13 @@ class _RankScreenState extends State<RankScreen>
     }
   }
 
-  Widget _buildBody(BuildContext context, {bool reserveStickySpace = false}) {
-    // SafeArea가 시스템 inset을 이미 처리. GNB contentHeight만 본문에서 비움.
-    const bottomInset = GnbBar.contentHeight;
+  Widget _buildBody(BuildContext context) {
     final periodNull = _screen != null && _screen!.period == null;
     const side = 24.0;
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: bottomInset),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
           if (_isAnnouncePhase) const SizedBox(height: 64),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: side),
@@ -757,7 +787,9 @@ class _RankScreenState extends State<RankScreen>
                                 displayRows.length + (_loadingMore ? 1 : 0);
                             return ListView.builder(
                               controller: _scrollController,
-                              padding: EdgeInsets.zero,
+                              padding: const EdgeInsets.only(
+                                bottom: GnbBar.contentHeight,
+                              ),
                               clipBehavior: Clip.hardEdge,
                               physics: const AlwaysScrollableScrollPhysics(),
                               itemCount: itemCount,
@@ -795,15 +827,12 @@ class _RankScreenState extends State<RankScreen>
                           },
                         ),
                       ),
-                      // sticky 오버레이가 덮을 자리. 위 간격 없음(GNB 띄움은 AppScaffold +4). COLLECT만.
-                      if (reserveStickySpace) const SizedBox(height: _stickyRowExtent),
                     ],
                   );
                 },
               ),
             ),
         ],
-      ),
     );
   }
 
@@ -1460,7 +1489,7 @@ class _LevelBadge extends StatelessWidget {
   }
 }
 
-/// GNB 위 고정 내 순위. inline 행이 보이면 숨긴다.
+/// GNB 위 고정 내 순위. 자기 행이 뷰포트보다 아래일 때만 표시.
 class _RankMyEntrySticky extends StatelessWidget {
   const _RankMyEntrySticky({
     required this.entry,

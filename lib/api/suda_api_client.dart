@@ -402,8 +402,8 @@ class SudaApiClient {
     return UserApi.getCurrentUser(accessToken: accessToken);
   }
 
-  static Future<ProfileDto> getUserProfile({required String accessToken}) {
-    return UserApi.getUserProfile(accessToken: accessToken);
+  static Future<MyProfileDto> getMyProfile({required String accessToken}) {
+    return UserApi.getMyProfile(accessToken: accessToken);
   }
 
   /// 에너지 팝업(상품 플래그 필요). 레이블/배지 갱신은 [getUserEnergySimple].

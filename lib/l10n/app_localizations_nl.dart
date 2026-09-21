@@ -375,6 +375,15 @@ class AppLocalizationsNl extends AppLocalizations {
   String get reportTitle => 'Probleem melden';
 
   @override
+  String get profileProgress => 'Voortgang';
+
+  @override
+  String get profileDayStreak => 'Dagen op rij';
+
+  @override
+  String get profileWordsSpoken => 'Gesproken woorden';
+
+  @override
   String get profileHistory => 'Geschiedenis';
 
   @override

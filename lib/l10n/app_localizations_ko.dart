@@ -359,6 +359,15 @@ class AppLocalizationsKo extends AppLocalizations {
   String get reportTitle => '문제 신고';
 
   @override
+  String get profileProgress => '성장';
+
+  @override
+  String get profileDayStreak => '연속 학습일';
+
+  @override
+  String get profileWordsSpoken => '말한 단어';
+
+  @override
   String get profileHistory => '히스토리';
 
   @override

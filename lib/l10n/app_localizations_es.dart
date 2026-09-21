@@ -378,6 +378,15 @@ class AppLocalizationsEs extends AppLocalizations {
   String get reportTitle => 'Reportar un problema';
 
   @override
+  String get profileProgress => 'Progreso';
+
+  @override
+  String get profileDayStreak => 'Racha de días';
+
+  @override
+  String get profileWordsSpoken => 'Palabras habladas';
+
+  @override
   String get profileHistory => 'Historial';
 
   @override
@@ -1221,6 +1230,15 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
 
   @override
   String get reportTitle => 'Reportar un problema';
+
+  @override
+  String get profileProgress => 'Progreso';
+
+  @override
+  String get profileDayStreak => 'Racha de días';
+
+  @override
+  String get profileWordsSpoken => 'Palabras habladas';
 
   @override
   String get profileHistory => 'Historial';

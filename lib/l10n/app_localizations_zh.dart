@@ -355,6 +355,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get reportTitle => '报告问题';
 
   @override
+  String get profileProgress => '成长';
+
+  @override
+  String get profileDayStreak => '连续学习天数';
+
+  @override
+  String get profileWordsSpoken => '说过的单词';
+
+  @override
   String get profileHistory => '历史记录';
 
   @override
@@ -1143,6 +1152,15 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get reportTitle => '报告问题';
 
   @override
+  String get profileProgress => '成长';
+
+  @override
+  String get profileDayStreak => '连续学习天数';
+
+  @override
+  String get profileWordsSpoken => '说过的单词';
+
+  @override
   String get profileHistory => '历史记录';
 
   @override
@@ -1929,6 +1947,15 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get reportTitle => '回報問題';
+
+  @override
+  String get profileProgress => '成長';
+
+  @override
+  String get profileDayStreak => '連續學習天數';
+
+  @override
+  String get profileWordsSpoken => '說過的單字';
 
   @override
   String get profileHistory => '歷史紀錄';

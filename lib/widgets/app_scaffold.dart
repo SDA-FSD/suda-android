@@ -158,7 +158,7 @@ class AppScaffold extends StatelessWidget {
                   Positioned(
                     left: 0,
                     right: 0,
-                    bottom: GnbBar.contentHeight + 4,
+                    bottom: GnbBar.contentHeight,
                     child: aboveBottomBar!,
                   ),
 

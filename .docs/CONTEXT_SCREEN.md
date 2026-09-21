@@ -303,8 +303,8 @@
 ### 스크린 용도
 - 사용자 프로필 화면
 - 로그아웃 기능 제공
-- 사용자 프로필 이미지/이름 및 서비스 사용 지표(Roleplay/Words/Like) 요약을 표시
-- Profile 화면 노출 시점마다(`/v1/users/profile`)를 호출하여 최신 userDto를 받아 화면을 자연스럽게 갱신하고 앱 메모리의 userInfo도 업데이트
+- 사용자 프로필 이미지/이름 및 지표(Level/Like/Friends) 요약 표시
+- Profile 화면 노출 시점마다 `GET /v1/users/my-profile`을 호출해 표면 값을 로컬 갱신. 전역 `_user`/GNB는 이 API로 갱신하지 않음. 기존 `GET /v1/users/profile` 클라 폐기.
 
 ### 이전 스크린 정보 (진입점)
 - **HomeScreen**: GNB의 Profile 버튼 클릭 시
@@ -331,17 +331,16 @@
 - **UI 구성**: `AppScaffold`를 사용하여 표준 레이아웃 적용
   - **상단 여백**: 70 (표준)
   - **헤더**: 우측 설정 아이콘만 노출 (`AppScaffold.actions` 사용)
+  - **로드 전**: 아바타·이름·스탯 값·Progress 카드는 공통 쉬머 (`#2A2A2A`/`#3F3F3F`). 첫 응답 후에만 실데이터
   - **Profile Box**: 
-    - 위치: 상단 여백 80 바로 아래
+    - 위치: 상단 여백 80 바로 아래. 비구독 CTA가 있으면 CTA 아래 gap 24
     - 배경: 박스가 위치한 세로 구간에 화면 좌우 끝까지 닿는 full-bleed 그라데이션 적용
     - 구현: `AppScaffold(usePadding: false)`를 적용하여 그라데이션이 화면 끝까지 닿도록 함
-  - Progress Box: Profile Box 아래 gap 50 이후, 가로 중앙 정렬, 너비는 디바이스의 70%
-    - 텍스트: `body-tiny` (`textTheme.labelSmall`), 흰색, `Lv. {currentLevel}`
-    - 프로그레스 바: height 4, radius 2
-      - 바탕: `#635F5F`
-      - 진행: `#80D7CF` (progressPercentage / 100)
+    - 아바타 `imgPath`: null/empty → `DefaultProfileAvatar` `#FFB700` / `DEFAULT:XXXXXX` → 해당 hex / 그 외 `CdnThumbSlot.profileAvatar` `_150`(없으면 원본). path는 http(s)로 시작하지 않음
+    - 스탯 라벨 영어 하드코딩: Level(`currentLevel`) / Like(`likePoint`) / Friends(`friendCount`)
+  - **구독자 상단 그라데이션**: 탭 상단까지. 아래는 `#121212`
   - **무료 사용자 Premium CTA** (`SubscriptionStatusCache.isSubscribedActive == false`):
-    - 위치: Progress Box 아래 gap 24, 좌우 margin 20 (`_profileHorizontalMargin`)
+    - 위치: Profile Box 바로 위, 아래 gap 24, 좌우 margin 20 (`_profileHorizontalMargin`)
     - 위젯: `ProfileGoPremiumButton` (`lib/widgets/profile_go_premium_button.dart`)
     - l10n: `profileGoPremiumTitle` / `profileGoPremiumExplore` (en Get SUDA Premium·Explore / pt Assine o SUDA Premium·Explorar / ko SUDA Premium 구독·혜택보기)
     - 레이아웃: height 52 pill, 내부 padding 좌 20·우 28, Row(아이콘 28×28 + gap 12 + Expanded 제목 + `SizedBox` gap 20 + Explorar 66×24). 혜택보기는 우측 28px 고정, 제목↔혜택보기 간격은 `SizedBox(width: 20)`로 고정(디바이스 무관)
@@ -351,6 +350,8 @@
     - **글로우 애니메이션**: progress 기반 좌우 왕복(easeInOut 2.4~3.8s/leg). Glow1 별(왼)→오른끝→홈, Glow2 혜택보기(오른)→왼끝→홈. 횡단 중 Y 튕김 0~3회 랜덤 + bob. 소스: `paywall_star_badge.png` blur σ10, opacity ~0.55
     - 탭: pill 전체 → `PaywallScreen.push` → 성공 시 `getUserEnergySimple` 재조회 후 CTA 숨김
     - Profile 탭 활성·복귀 시 `getUserEnergySimple`로 구독 상태 갱신
+- **콘텐츠 탭**: Progress(기본) / Saved / History. l10n `profileProgress`(en Progress · pt Progresso · ko 성장).
+- **Progress 탭**: 좌우·사이 갭 24. 카드 2개(radius 16, 내부 padding 좌우 12·상하 12, fill `#0CABA8` 16% 단색 아래 `#121212` 깔아 테두리 그라데이션이 비치지 않게, 테두리 1px 좌하/우상 `#80D7CF` 100%→좌상/우하 0%). 좌: `streak.png` 20px + gap 5 + `currentStreakDays`(`headlineSmall` 흰) / `profileDayStreak`(bodySmall w700 `#0CABA8`). 우: `wordsSpokenCount` compact(1000→1K, 1200→1.2K, 1149→1.1K 십단위 버림, 1000000→M) / `profileWordsSpoken`(동일).
 - **Profile 히스토리 (S2)**: `GET /rps2/user-histories?pageNum=` (0-based 페이징). 썸네일 3열 그리드 — `imgPath`(`CdnThumbSlot.profileHistory` `_300`, 없으면 원본)·`starResult`·`createdAt`(dd/mm) 기존과 동일. 상단 좌측 **CEFR 알약** + 우측 별 3개. 탭 시 `HistoryScreen(rpUserHistoryId)` → `GET /rps2/user-histories/{id}` 후 Result 본문(애니메이션 없음).
 - **Saved 표현 (Expression 탭)**: 목록 `GET /v1/users/expressions?pageNum=` · 카드 탭 TTS `GET /rps2/user-histories/{rpUserHistoryId}/expressions/{expressionIndex}/sound` (`roleplayResultId` → `rpUserHistoryId`, `TtsResultDto`) · 삭제 `DELETE /v1/users/expressions?rpResultId=…&expressionIndex=…`. 카드 배경 기본·재생 모두 `#FFFFFF`. 오디오 fetch 중 16×16 `CircularProgressIndicator`(strokeWidth 2, `#0CABA8` 70%), 재생 중 `megaphone_fill.png` `#0CABA8`, 기본 `megaphone.png` `#0CABA8`(Result Key Expression 카드와 동일). iOS 재생은 Result와 동일 `SudaTtsAudioPlayer`.
 - **Saved 표현 삭제 확인 팝업**: Saved 탭의 expression 카드에서 `bookmark_on` 탭 시 `DefaultPopup`으로 삭제 confirm 팝업을 띄운다. 상단 버튼(삭제/Remove) 탭 시 팝업을 닫고 `DELETE /v1/users/expressions`를 호출해 목록에서 제거, 하단 버튼(Practice more/더 연습할래요) 탭 시 팝업만 닫는다.

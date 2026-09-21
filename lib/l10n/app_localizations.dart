@@ -809,6 +809,24 @@ abstract class AppLocalizations {
   /// **'Report Issue'**
   String get reportTitle;
 
+  /// No description provided for @profileProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Progress'**
+  String get profileProgress;
+
+  /// No description provided for @profileDayStreak.
+  ///
+  /// In en, this message translates to:
+  /// **'Day Streak'**
+  String get profileDayStreak;
+
+  /// No description provided for @profileWordsSpoken.
+  ///
+  /// In en, this message translates to:
+  /// **'Words Spoken'**
+  String get profileWordsSpoken;
+
   /// No description provided for @profileHistory.
   ///
   /// In en, this message translates to:

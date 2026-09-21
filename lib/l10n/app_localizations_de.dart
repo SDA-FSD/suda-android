@@ -377,6 +377,15 @@ class AppLocalizationsDe extends AppLocalizations {
   String get reportTitle => 'Problem melden';
 
   @override
+  String get profileProgress => 'Fortschritt';
+
+  @override
+  String get profileDayStreak => 'Tage in Folge';
+
+  @override
+  String get profileWordsSpoken => 'Gesprochene Wörter';
+
+  @override
   String get profileHistory => 'Verlauf';
 
   @override

@@ -377,6 +377,15 @@ class AppLocalizationsVi extends AppLocalizations {
   String get reportTitle => 'Báo cáo sự cố';
 
   @override
+  String get profileProgress => 'Tiến trình';
+
+  @override
+  String get profileDayStreak => 'Ngày liên tiếp';
+
+  @override
+  String get profileWordsSpoken => 'Từ đã nói';
+
+  @override
   String get profileHistory => 'Lịch sử';
 
   @override

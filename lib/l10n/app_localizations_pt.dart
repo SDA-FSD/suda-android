@@ -376,6 +376,15 @@ class AppLocalizationsPt extends AppLocalizations {
   String get reportTitle => 'Relatar Problema';
 
   @override
+  String get profileProgress => 'Progresso';
+
+  @override
+  String get profileDayStreak => 'Dias seguidos';
+
+  @override
+  String get profileWordsSpoken => 'Palavras faladas';
+
+  @override
   String get profileHistory => 'Histórico';
 
   @override

@@ -63,6 +63,12 @@ flutter run --flavor dev -t lib/main.dart --dart-define=ENV=dev -d 541F3961-8182
 - **열린 이슈:** `getInitialMessage` hang → `main()` 2초 timeout 유지. 근본 원인 수정 후에도 timeout은 유지
 - 마이크: Opening Start에서만 요청. iOS `PERMISSION_MICROPHONE=1` + `NSMicrophoneUsageDescription` 필수
 - 남은 작업(stg Firebase 등): `CONTEXT_IOS.md`
+- ASC 업로드:
+```bash
+flutter build ipa --flavor {env} -t lib/main.dart --dart-define=ENV={env}
+xcrun altool --upload-app --type ios -f build/ios/ipa/suda.ipa --apiKey "$(cat ~/.appstoreconnect/key_id)" --apiIssuer "$(cat ~/.appstoreconnect/issuer_id)"
+```
+  키는 git 밖 `~/.appstoreconnect/private_keys/AuthKey_*.p8` + `key_id` + `issuer_id`
 
 | 증상 | 조치 |
 |------|------|
@@ -106,7 +112,7 @@ flutter run --flavor dev -t lib/main.dart --dart-define=ENV=dev -d 541F3961-8182
   - `MaterialApp`은 `AppLocalizations.localizationsDelegates`/`supportedLocales`를 사용하며 플랫폼 locale의 region/script를 보존한다. API·동적 콘텐츠(`SudaJson`·맵, Opening `briefingAudio`)는 서버 키 대소문자 구분 BCP 47(`ko-KR`) → languageCode(`ko`) → `en` 순으로 조회한다 (`LanguageUtil.localizationLookupKeys`).
   - **[강제] UI 문자열 추가·변경 시 전체 locale 확장:** 사용자/작업 입력이 `en`·`ko`·`pt`만 있어도, agent는 “나머지 언어 번역할까?”를 **묻지 말고** 위 지원 locale **전부(21개)**의 `app_*.arb`에 동일 키를 즉시 작성·저장한다. `en`을 의미 canonical로, `ko`/`pt`를 문맥 참고로 쓰며, 키·`@` metadata·placeholder 이름/타입·`@@TIME@@`·의도된 개행·ICU 형태를 보존한다. `app_es.arb`는 `es_419`와, `app_zh.arb`는 `zh_Hans`와 locale ID 외 동기화한다. 저장 후 `flutter gen-l10n`까지 수행하고, 생성 Dart도 커밋 대상에 포함한다. 부분 locale만 남기는 것은 금지.
 - `UserDto`: provider/sub/name/email/profileImgUrl, 통계, `metaInfo`(`SudaJson`). `upsertMetaInfo` / `hasMetaInfoValue`
-- Main 복귀 시 `_syncUserOnMainRouteReturn` → `GET /v1/users`. 레벨·진행률은 `GET /v1/users/profile`
+- Main 복귀 시 `_syncUserOnMainRouteReturn` → `GET /v1/users`. Profile 표면 값은 `GET /v1/users/my-profile` (Profile 로컬만. 기존 `/v1/users/profile` 클라 폐기)
 - Tutorial 실노출: `POST /v1/users/tutorial-shown` (실패 무시)
 - Series Overview 첫 진입: `POST /v1/users/first-overview` + 클라 `FIRST_OVERVIEW=Y` 즉시 주입
 
@@ -138,8 +144,8 @@ flutter run --flavor dev -t lib/main.dart --dart-define=ENV=dev -d 541F3961-8182
 ## 6. 스토리지
 - **캐시** (`getTemporaryDirectory` 등): 다시 받을 수 있는 것. OS/캐시삭제로 사라져도 됨. **이미지 작업 전 캐시 사용 여부 확인**
 - **보존** (`getApplicationDocumentsDirectory` / SharedPreferences): 녹음·설정 등. 로그아웃/초기화 때만 삭제
-- **CDN 썸네일** (`lib/utils/cdn_thumbnail.dart`, `lib/widgets/cdn_thumb_image.dart`): 원본 path `…/zj66s0.png` → `{stem}_{size}.{ext}` (`_300` 현행, `_150`/`_500` enum 예약) 후 `cdnBaseUrl` prepend. 파생 파일이 없으면 원본. 슬롯 `CdnThumbSlot`→`CdnThumbSize`.
-  - **작은 노출** (`CdnThumbImage`): Home 가로 행·Similar Topic 3열(`HomeSeriesDto.thumbnailImgPath`)·Episode 탭 좌측 카드(`RpS2SeriesEpisodeDto.thumbnailImgPath`)·Profile 히스토리 그리드(`RpS2SimpleHistoryDto.imgPath`, 프로필 아바타 아님).
+- **CDN 썸네일** (`lib/utils/cdn_thumbnail.dart`, `lib/widgets/cdn_thumb_image.dart`): 원본 path `…/zj66s0.png` → `{stem}_{size}.{ext}` (`_300` 현행, `_150` Profile 아바타, `_500` enum 예약) 후 `cdnBaseUrl` prepend. 파생 파일이 없으면 원본. 슬롯 `CdnThumbSlot`→`CdnThumbSize`.
+  - **작은 노출** (`CdnThumbImage`): Home 가로 행·Similar Topic 3열(`HomeSeriesDto.thumbnailImgPath`)·Episode 탭 좌측 카드(`RpS2SeriesEpisodeDto.thumbnailImgPath`)·Profile 히스토리 그리드(`RpS2SimpleHistoryDto.imgPath`, `_300`)·Profile 아바타(`MyProfileDto.imgPath`, `CdnThumbSlot.profileAvatar` `_150`).
   - **배경**(Overview 히어로·Information·Opening/Playing `RoleplayOverviewBackdrop`): 원본. 메모리에 원본 있으면 즉시 원본, 없으면 `_300` 메모리 히트만 placeholder로 먼저 노출 후 원본 도착 즉시 교체. `_300` 추가 GET 없음.
 
 ## 7. 스크린
@@ -149,9 +155,9 @@ flutter run --flavor dev -t lib/main.dart --dart-define=ENV=dev -d 541F3961-8182
 - Lab: Setting > Lab (`AppConfig.isDev` · `kDebugMode`). **prd release 미노출**. Tutorial 미리보기: 21 locale 선택 후 Open Tutorial (`RoleplayTutorialScreen(preview: true)`). **Open First CEFR Level** / **Open First Profile Image**. **Open Rank Announce Preview**: `RankScreen(forceAnnouncePhase: true)`로 ANNOUNCE UI만 재현(실데이터 로드). **Open Rank Claim Preview (1st|2nd|3rd)**: `RankScreen(forceClaimPreview: true, forceClaimPlace: 1|2|3)` — GNB 위 Claim 패널. **Play Ribbon Burst**: `RibbonBurstEffect` 오버레이 재현
 - Ranking 카운트다운 (`RankScreen`): ≥48h 일 / 24h~48h 1일 / 1h~24h 시 / 1h 미만 분. l10n `rankCountdownDays|Hours|Minutes`(en: `1 day`·`N days left`·`N min`). 시계+문구 색 `#FFFFFF` ~70% 알파
 - Ranking `?` Top 3 Rewards (`top_3_rewards_popup.dart`/`DefaultPopup`): title↔desc 사이 `#D9D9D9` 20% 1px 선. 1~3위 카드 glassy(white fill~10%·border~24%·radius 20, 중첩 blur 없음). place `headlineSmall` 흰 Bold20 중앙. 보상 행 아이콘(`medal_1st|2st|3st`·`like_at_result`·`reward_box`)+`bodyMedium` 흰 Italic16. Okay `expandPrimaryButtons`
-- Ranking Claim 시트 (`rank_claim_sheet.dart`/`RankClaimPanel`): 1~3등 미수령 UI. Dialog 아님 — 랭킹 Scaffold 위 **풀스크린 레이어**(GNB 유지). 등장은 **DefaultPopup과 동일 계열**(dim `#000@40%` + 페이드 + 중앙 스케일 0.9→1, ~150ms). Lab `forceClaimPreview`+`forceClaimPlace`. 1등 배경 `#FF00A6`→35%`#8A38F5`→`#80D7CF` / 2등 `#FF00A6`→`#8A38F5` / 3등 `#0CABA8` 단색. sunburst `sunburst_pattern_rewards.png`(1~3등, 440×956 비율, 하단 정렬, PNG 알파 × opacity 0.55). 2·3등 보더 흰→`#0D7F7D`(`claimRunnerUp`). 워터마크 서수 숫자80+접미사50. Rewards 카드 폭 0.75, 3등 fill만 `BlendMode.overlay`. Like pill `#043B3A@90%`. `avatarScale=s*1.85`. 실 API 후속. l10n `rankClaim*`+`rankTop3*`
+- Ranking Claim (`rank_claim.dart`/`RankClaimPanel`): 1~3등 미수령 UI. Dialog 아님 — 랭킹 Scaffold 위 **풀스크린 레이어**(GNB 유지). 등장은 **DefaultPopup과 동일 계열**(dim `#000@40%` + 페이드 + 중앙 스케일 0.9→1, ~150ms). Lab `forceClaimPreview`+`forceClaimPlace`. 1등 배경 `#FF00A6`→35%`#8A38F5`→`#80D7CF` / 2등 `#FF00A6`→`#8A38F5` / 3등 `#0CABA8` 단색. sunburst `sunburst_pattern_rewards.png`(1~3등, 440×956 비율, 하단 정렬, PNG 알파 × opacity 0.55). 2·3등 보더 흰→`#0D7F7D`(`claimRunnerUp`). 워터마크 서수 숫자80+접미사50. Rewards 카드 폭 0.75, 3등 fill만 `BlendMode.overlay`. Like pill `#043B3A@90%`. `avatarScale=s*1.85`. 실 API 후속. l10n `rankClaim*`+`rankTop3*`
 - Ranking ANNOUNCE phase: 결과 화면 전용 구성 — 타이틀(`rankAnnounceTitle`, Outer Shadow `Offset(0,4)` blur4 `#000000` 25%) + 1~3 포디움 + **You Rank/Like 배지**(포디움 아래 공백 후, 포디움 레이아웃 무변경; 외곽 208×71×`groupScale1.35` rx15 white `softLight`·내부 y12~56 세로 중앙, pill 배경만 `#D9D9D9` rx14 `softLight`·숫자/라벨/아이콘은 순백 일반 합성, `like_at_result.png`; l10n `rankAnnounceYou|Rank|Like`) + **Next Ranking**(배지 아래 gap75; 타이틀 Bold32 white softLight 폭268 `rankAnnounceNextStartsIn` 자연 wrap + 카운트다운 Bold20 순백 `HH:MM:SS`; 남은시간=`nextCollectStartsAt`??`phaseEndsAt`−`serverNow`, ANNOUNCE/Lab은 1초 tick·COLLECT 헤더는 기존 30초) + 배경 장식(`sunburst_pattern.png` 440좌표 left=-255,top=-3,949×949, PNG 알파~14% + `BlendMode.softLight` — 레이어 opacity 이중 적용 금지 → `confetti.png` left=-15,top=12,453×185). 타이틀·포디움 블록 Y+64(내부 간격·크기 유지). 도움말·카운트다운·4위+리스트·sticky·미참여 오버레이는 ANNOUNCE에 없음(COLLECT 전용). Lab `forceAnnouncePhase`는 동일 ANNOUNCE UI 경로. s=contentWidth/440
-- Ranking 탭 복귀·리로드 시 리스트 스크롤은 항상 맨 위(4위부터). sticky/미참여는 **COLLECT만** — `GET /v1/rank/entries/me?snapshotMinute=`(필수, 동일 스냅샷). **ANNOUNCE에는 sticky·미참여·하단 예약 절대 없음**(`!_isAnnouncePhase` + 발표 분기는 포디움만). 목록 밖이면 sticky·스크롤해 inline이면 해제. sticky 시 리스트 아래 행56 예약(위 0, GNB +4). live ripple 없음. 재진입 UI 유지. period+entries 병렬 후 /me.
+- Ranking 탭 복귀·리로드 시 리스트 스크롤은 항상 맨 위(4위부터). sticky/미참여는 **COLLECT만** — `GET /v1/rank/entries/me?snapshotMinute=`(필수, 동일 스냅샷). **ANNOUNCE에는 sticky·미참여 절대 없음**(`!_isAnnouncePhase` + 발표 분기는 포디움만). sticky는 11위+·자기 행이 **GNB 위 가시 뷰포트보다 아래**일 때만. 자기 행이 보이거나 **위로** 지나면 숨김. 화면 밖이면 builder가 행을 버려 키 없음 → 슬롯 유지(below로 리셋 금지, append 때 sticky 재점등 방지). 토글은 fade 150ms, 탭 복귀·첫 페인트는 즉시. 리스트는 Home과 같이 GNB 뒤까지(글래시). sticky는 GNB에 바로 붙임(행 하단 margin 2 유지). 마지막 행은 `ListView` bottom inset=`GnbBar.contentHeight`(항상, 마지막 페이지 전용 아님). 페이드 중 `IgnorePointer`. live ripple 없음. 재진입 UI 유지. period+entries 병렬 후 /me.
 - Ranking 포디움 1~3위: Figma 440 기준 가로 스케일. **4~10 리스트(7행)가 한 화면에 들어가게** 세로가 부족하면 포디움 전체(프로필·왕관·레벨 뱃지 비율 유지)를 축소. 1위 `ranking_1st_crown`+흰→금 링. **1위 외** 프로필 프레임은 Profile과 동일(`subscribedYn`: premium mint→보라 / free mint→어두운 mint). 이름 Bold 14·좋아요 Regular 14·아이콘 14×14. 3위가 2위보다 살짝 아래(Y 212>204). 레벨 뱃지 `#0CABA8` 30
 
 롤플레이 상세: `CONTEXT_ROLEPLAY_S2.md`. Playing 상황 로그: `POST /rps2/sessions/{id}/event-logs` (`event`, `clientOccurredAt` epoch ms). 실패 무시.

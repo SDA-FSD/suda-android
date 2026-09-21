@@ -170,35 +170,52 @@ class QuestResultDto {
   }
 }
 
-class ProfileDto {
-  final UserDto userDto;
+/// `GET /v1/users/my-profile`
+class MyProfileDto {
+  final int id;
+  final String? name;
+  final String? imgPath;
   final int currentLevel;
-  final double progressPercentage;
+  final int claimableRewardLevel;
+  final int likePoint;
+  final int friendCount;
+  final int currentStreakDays;
+  final int wordsSpokenCount;
+  final int progressPercentage;
 
-  /// 레벨업까지 남은 Like 수. 서버가 `GET /v1/users/profile`에 내려줄 때만 채워짐.
-  final int? likesToNextLevel;
-
-  const ProfileDto({
-    required this.userDto,
+  const MyProfileDto({
+    required this.id,
+    this.name,
+    this.imgPath,
     required this.currentLevel,
+    required this.claimableRewardLevel,
+    required this.likePoint,
+    required this.friendCount,
+    required this.currentStreakDays,
+    required this.wordsSpokenCount,
     required this.progressPercentage,
-    this.likesToNextLevel,
   });
 
-  factory ProfileDto.fromJson(Map<String, dynamic> json) {
-    final rawLikes = json['likesToNextLevel'];
-    int? likesToNext;
-    if (rawLikes is int) {
-      likesToNext = rawLikes;
-    } else if (rawLikes is num) {
-      likesToNext = rawLikes.round();
+  factory MyProfileDto.fromJson(Map<String, dynamic> json) {
+    int asInt(dynamic v) {
+      if (v is int) return v;
+      if (v is num) return v.toInt();
+      return 0;
     }
 
-    return ProfileDto(
-      userDto: UserDto.fromJson(json['userDto'] as Map<String, dynamic>),
-      currentLevel: json['currentLevel'] as int? ?? 0,
-      progressPercentage: (json['progressPercentage'] as num?)?.toDouble() ?? 0,
-      likesToNextLevel: likesToNext,
+    final name = json['name'] as String?;
+    final imgPath = json['imgPath'] as String?;
+    return MyProfileDto(
+      id: asInt(json['id']),
+      name: name == null || name.isEmpty ? null : name,
+      imgPath: imgPath == null || imgPath.isEmpty ? null : imgPath,
+      currentLevel: asInt(json['currentLevel']),
+      claimableRewardLevel: asInt(json['claimableRewardLevel']),
+      likePoint: asInt(json['likePoint']),
+      friendCount: asInt(json['friendCount']),
+      currentStreakDays: asInt(json['currentStreakDays']),
+      wordsSpokenCount: asInt(json['wordsSpokenCount']),
+      progressPercentage: asInt(json['progressPercentage']),
     );
   }
 }

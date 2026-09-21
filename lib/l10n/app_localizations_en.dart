@@ -373,6 +373,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reportTitle => 'Report Issue';
 
   @override
+  String get profileProgress => 'Progress';
+
+  @override
+  String get profileDayStreak => 'Day Streak';
+
+  @override
+  String get profileWordsSpoken => 'Words Spoken';
+
+  @override
   String get profileHistory => 'History';
 
   @override

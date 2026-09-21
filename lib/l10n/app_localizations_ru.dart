@@ -374,6 +374,15 @@ class AppLocalizationsRu extends AppLocalizations {
   String get reportTitle => 'Сообщить о проблеме';
 
   @override
+  String get profileProgress => 'Прогресс';
+
+  @override
+  String get profileDayStreak => 'Дней подряд';
+
+  @override
+  String get profileWordsSpoken => 'Произнесённые слова';
+
+  @override
   String get profileHistory => 'История';
 
   @override

@@ -369,6 +369,15 @@ class AppLocalizationsTh extends AppLocalizations {
   String get reportTitle => 'รายงานปัญหา';
 
   @override
+  String get profileProgress => 'ความก้าวหน้า';
+
+  @override
+  String get profileDayStreak => 'วันที่เรียนต่อเนื่อง';
+
+  @override
+  String get profileWordsSpoken => 'คำที่พูด';
+
+  @override
   String get profileHistory => 'ประวัติ';
 
   @override

@@ -376,6 +376,15 @@ class AppLocalizationsMs extends AppLocalizations {
   String get reportTitle => 'Laporkan Masalah';
 
   @override
+  String get profileProgress => 'Progres';
+
+  @override
+  String get profileDayStreak => 'Hari berturut';
+
+  @override
+  String get profileWordsSpoken => 'Perkataan dituturkan';
+
+  @override
   String get profileHistory => 'Sejarah';
 
   @override

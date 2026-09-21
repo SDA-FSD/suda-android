@@ -376,6 +376,15 @@ class AppLocalizationsId extends AppLocalizations {
   String get reportTitle => 'Laporkan masalah';
 
   @override
+  String get profileProgress => 'Progres';
+
+  @override
+  String get profileDayStreak => 'Hari beruntun';
+
+  @override
+  String get profileWordsSpoken => 'Kata diucapkan';
+
+  @override
   String get profileHistory => 'Riwayat';
 
   @override

@@ -374,6 +374,15 @@ class AppLocalizationsHi extends AppLocalizations {
   String get reportTitle => 'समस्या रिपोर्ट करें';
 
   @override
+  String get profileProgress => 'प्रगति';
+
+  @override
+  String get profileDayStreak => 'लगातार दिन';
+
+  @override
+  String get profileWordsSpoken => 'बोले गए शब्द';
+
+  @override
   String get profileHistory => 'हिस्ट्री';
 
   @override

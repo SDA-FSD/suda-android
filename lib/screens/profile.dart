@@ -21,14 +21,34 @@ import '../utils/sub_screen_route.dart';
 import '../widgets/default_popup.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/cdn_thumb_image.dart';
+import '../widgets/default_profile_avatar.dart';
 import '../widgets/gnb_bar.dart';
-import '../widgets/level_progress_bar.dart';
 import '../widgets/suda_label_tabs.dart';
 import 'roleplay/history.dart';
 import 'roleplay/suda_tts_audio_player.dart';
 import 'setting/setting.dart';
 
-enum _ProfileContentTab { history, saved }
+enum _ProfileContentTab { progress, saved, history }
+
+String _formatSpokenCount(int n) {
+  if (n >= 1000000) return _formatCompactCount(n, 1000000, 'M');
+  if (n >= 1000) return _formatCompactCount(n, 1000, 'K');
+  return '$n';
+}
+
+String _formatCompactCount(int n, int unit, String suffix) {
+  final tenths = (n / unit * 10).truncate();
+  if (tenths % 10 == 0) return '${tenths ~/ 10}$suffix';
+  return '${tenths ~/ 10}.${tenths % 10}$suffix';
+}
+
+Color? _parseHexColor(String hex) {
+  final cleaned = hex.trim();
+  if (cleaned.length != 6) return null;
+  final value = int.tryParse(cleaned, radix: 16);
+  if (value == null) return null;
+  return Color(0xFF000000 | value);
+}
 
 class ProfileScreen extends StatefulWidget {
   final VoidCallback? onNavigateToHome;
@@ -61,12 +81,12 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   UserDto? _user;
-  int? _currentLevel;
-  double? _progressPercentage;
+  MyProfileDto? _myProfile;
+  bool _isProfileLoading = true;
   bool _isRefreshing = false;
   bool _showPremiumCta = true;
 
-  _ProfileContentTab _activeTab = _ProfileContentTab.history;
+  _ProfileContentTab _activeTab = _ProfileContentTab.progress;
 
   // 롤플레이 히스토리 페이징
   final List<RpS2SimpleHistoryDto> _historyList = [];
@@ -139,10 +159,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   static const double _historyRefetchBottomThreshold = 200;
   static const double _profileHorizontalMargin = 20;
+  static const Color _shimmerBase = Color(0xFF2A2A2A);
+  static const Color _shimmerHighlight = Color(0xFF3F3F3F);
 
-  final GlobalKey _premiumLevelKey = GlobalKey();
-  /// LevelProgressBar 세로 중앙 Y (레이아웃 기준 px) — 그라데이션 하단 = 여기.
-  double? _gradLevelY;
+  final GlobalKey _premiumTabsKey = GlobalKey();
+  /// 탭 상단 Y (레이아웃 기준 px) — 구독 그라데이션 하단 = 여기.
+  double? _gradTabsY;
 
   /// 탭 재진입·복귀 시 히스토리를 0페이지부터 다시 받을지.
   /// 서버에 더 불러올 페이지가 남아 있거나(`!_isHistoryLastPage`), 스크롤이 목록 끝이 아니면
@@ -319,7 +341,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       setState(() {
         _showPremiumCta = !SubscriptionStatusCache.isSubscribedActive;
         if (_showPremiumCta) {
-          _gradLevelY = null;
+          _gradTabsY = null;
         }
       });
       if (!_showPremiumCta) {
@@ -342,37 +364,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void _schedulePremiumGradientMeasure() {
     if (_showPremiumCta) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _measurePremiumLevelAnchor();
+      _measurePremiumTabsTop();
     });
   }
 
-  void _measurePremiumLevelAnchor() {
+  void _measurePremiumTabsTop() {
     if (!mounted || _showPremiumCta) return;
 
-    final box = _premiumLevelKey.currentContext?.findRenderObject() as RenderBox?;
+    final box = _premiumTabsKey.currentContext?.findRenderObject() as RenderBox?;
     if (box == null || !box.hasSize) {
       _schedulePremiumGradientMeasure();
       return;
     }
 
-    // 레벨바 하단까지 밴드를 잡아, 보라가 바 위치에 오고 그 아래부터 검정
     final scrollDy =
         _scrollController.hasClients ? _scrollController.offset : 0.0;
-    final levelY =
-        box.localToGlobal(Offset(0, box.size.height)).dy + scrollDy;
-    if (_gradLevelY != null && (_gradLevelY! - levelY).abs() < 1.0) {
+    final tabsTop = box.localToGlobal(Offset.zero).dy + scrollDy;
+    if (_gradTabsY != null && (_gradTabsY! - tabsTop).abs() < 1.0) {
       return;
     }
 
-    setState(() => _gradLevelY = levelY);
+    setState(() => _gradTabsY = tabsTop);
   }
 
   Widget? _buildPremiumBackground() {
     if (_showPremiumCta) return null;
 
     final screenH = MediaQuery.sizeOf(context).height;
-    // 그라데이션 하단 = 레벨바 하단. 밴드 안에서 보라를 하단에 두고 검정으로 soft fade.
-    final levelY = (_gradLevelY ?? screenH * 0.32).clamp(80.0, screenH * 0.7);
+    final tabsTop = (_gradTabsY ?? screenH * 0.32).clamp(80.0, screenH * 0.7);
 
     return Stack(
       fit: StackFit.expand,
@@ -383,19 +402,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
           top: 0,
           left: 0,
           right: 0,
-          height: levelY + 1,
+          height: tabsTop + 1,
           child: const DecoratedBox(
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                // 민트→보라 mid로 밴딩 완화, 보라는 하단(레벨바) 근처, 검정은 길게 soft
+                // 민트→보라 mid로 밴딩 완화, 보라는 탭 근처, 검정은 길게 soft
                 colors: [
                   Color(0xFF08897D), // mint
                   Color(0xFF1D7185), // mint→purple 25%
                   Color(0xFF32598D), // 50%
                   Color(0xFF474196), // 75%
-                  Color(0xFF5C299E), // purple — 레벨바 근처
+                  Color(0xFF5C299E), // purple — 탭 근처
                   Color(0xFF4E2583),
                   Color(0xFF361D56),
                   Color(0xFF2A1A3F),
@@ -425,22 +444,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _refreshProfile() async {
     if (_isRefreshing) return;
     _isRefreshing = true;
+    if (_myProfile == null && mounted) {
+      setState(() => _isProfileLoading = true);
+    }
 
     try {
       final token = await TokenStorage.loadAccessToken();
-      if (token == null) return;
+      if (token == null) {
+        if (mounted && _myProfile == null) {
+          setState(() => _isProfileLoading = false);
+        }
+        return;
+      }
 
-      final profile = await SudaApiClient.getUserProfile(accessToken: token);
+      final profile = await SudaApiClient.getMyProfile(accessToken: token);
       if (!mounted) return;
 
       setState(() {
-        _user = profile.userDto;
-        _currentLevel = profile.currentLevel;
-        _progressPercentage = profile.progressPercentage;
+        _myProfile = profile;
+        _isProfileLoading = false;
       });
-      widget.onUserUpdated?.call(profile.userDto);
     } catch (e) {
-      // 프로필 화면은 "자연스럽게 갱신"이 목표라, 실패 시에도 UI는 기존 메모리 값으로 유지
+      if (mounted && _myProfile == null) {
+        setState(() => _isProfileLoading = false);
+      }
     } finally {
       _isRefreshing = false;
     }
@@ -648,22 +675,139 @@ class _ProfileScreenState extends State<ProfileScreen> {
     setState(() => _activeTab = tab);
   }
 
+  int get _activeTabIndex {
+    switch (_activeTab) {
+      case _ProfileContentTab.progress:
+        return 0;
+      case _ProfileContentTab.saved:
+        return 1;
+      case _ProfileContentTab.history:
+        return 2;
+    }
+  }
+
+  _ProfileContentTab _tabFromIndex(int index) {
+    switch (index) {
+      case 0:
+        return _ProfileContentTab.progress;
+      case 1:
+        return _ProfileContentTab.saved;
+      default:
+        return _ProfileContentTab.history;
+    }
+  }
+
+  Widget _nameShimmer() {
+    return Shimmer.fromColors(
+      baseColor: _shimmerBase,
+      highlightColor: _shimmerHighlight,
+      child: Container(
+        width: 140,
+        height: 24,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(6),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProgressSection(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    if (_isProfileLoading && _myProfile == null) {
+      return _buildProgressCardsShimmer();
+    }
+    final profile = _myProfile;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Row(
+        children: [
+          Expanded(
+            child: _ProgressStatCard(
+              top: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Image.asset(
+                    'assets/images/icons/streak.png',
+                    height: 20,
+                    fit: BoxFit.contain,
+                  ),
+                  const SizedBox(width: 5),
+                  Text(
+                    '${profile?.currentStreakDays ?? 0}',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          color: Colors.white,
+                        ),
+                  ),
+                ],
+              ),
+              bottom: l10n.profileDayStreak,
+            ),
+          ),
+          const SizedBox(width: 24),
+          Expanded(
+            child: _ProgressStatCard(
+              top: Text(
+                _formatSpokenCount(profile?.wordsSpokenCount ?? 0),
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      color: Colors.white,
+                    ),
+              ),
+              bottom: l10n.profileWordsSpoken,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProgressCardsShimmer() {
+    Widget card() {
+      return Expanded(
+        child: Shimmer.fromColors(
+          baseColor: _shimmerBase,
+          highlightColor: _shimmerHighlight,
+          child: Container(
+            height: 80,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Row(
+        children: [
+          card(),
+          const SizedBox(width: 24),
+          card(),
+        ],
+      ),
+    );
+  }
+
   Widget _buildContentTabs(BuildContext context) {
     return SudaLabelTabs(
       labelPadding: const EdgeInsets.symmetric(horizontal: 24),
-      selectedIndex:
-          _activeTab == _ProfileContentTab.history ? 0 : 1,
-      onTabChanged: (index) => _setActiveTab(
-        index == 0 ? _ProfileContentTab.history : _ProfileContentTab.saved,
-      ),
+      selectedIndex: _activeTabIndex,
+      onTabChanged: (index) => _setActiveTab(_tabFromIndex(index)),
       tabs: [
         SudaLabelTab(
-          label: SudaTabLabel.l10n((l10n) => l10n.profileHistory),
-          child: _buildHistorySection(context),
+          label: SudaTabLabel.l10n((l10n) => l10n.profileProgress),
+          child: _buildProgressSection(context),
         ),
         SudaLabelTab(
           label: SudaTabLabel.l10n((l10n) => l10n.profileSaved),
           child: _buildSavedSection(context),
+        ),
+        SudaLabelTab(
+          label: SudaTabLabel.l10n((l10n) => l10n.profileHistory),
+          child: _buildHistorySection(context),
         ),
       ],
     );
@@ -980,12 +1124,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context).textTheme;
     final l10n = AppLocalizations.of(context)!;
-    final user = _user ?? widget.user;
-    final name = user?.name ?? '';
-    final profileImgUrl = user?.profileImgUrl;
-    final roleplayCount = user?.roleplayCount ?? 0;
-    final wordsSpokenCount = user?.wordsSpokenCount ?? 0;
-    final likePoint = user?.likePoint ?? 0;
+    final profile = _myProfile;
+    final showProfileShimmer = _isProfileLoading && profile == null;
+    final name = profile?.name ?? '';
 
     if (!_showPremiumCta) {
       _schedulePremiumGradientMeasure();
@@ -1010,7 +1151,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       ],
       usePadding: false, // 풀-폭 그라데이션을 위해 본문 패딩 제거
-      // 구독: LevelProgressBar 중앙 Y까지 그라데이션, 아래는 #121212 솔리드
+      // 구독: 탭 상단까지 그라데이션, 아래는 #121212 솔리드
       background: _buildPremiumBackground(),
       bottomNavigationBar: GnbBar(
         isHomeActive: false,
@@ -1059,6 +1200,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
               children: [
                 const SizedBox(height: 0), // AppScaffold의 top 80 패딩 이후 바로 시작
 
+                if (_showPremiumCta) ...[
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: _profileHorizontalMargin,
+                    ),
+                    child: ProfileGoPremiumButton(
+                      title: l10n.profileGoPremiumTitle,
+                      exploreLabel: l10n.profileGoPremiumExplore,
+                      onTap: () => unawaited(_onPremiumCtaTap()),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                ],
+
                 // profile box
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -1067,8 +1222,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     child: Row(
                       children: [
                         _ProfileAvatar(
-                          profileImgUrl: profileImgUrl,
+                          imgPath: profile?.imgPath,
                           isPremium: !_showPremiumCta,
+                          isLoading: showProfileShimmer,
                         ),
                         Expanded(
                           child: Padding(
@@ -1076,7 +1232,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                if (!_showPremiumCta)
+                                if (showProfileShimmer)
+                                  _nameShimmer()
+                                else if (!_showPremiumCta)
                                   Row(
                                     crossAxisAlignment: CrossAxisAlignment.center,
                                     children: [
@@ -1113,22 +1271,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   children: [
                                     Expanded(
                                       child: _ProfileStat(
-                                        title: 'Role Play',
-                                        value: roleplayCount.toString(),
-                                      ),
-                                    ),
-                                    const _ProfileStatDivider(),
-                                    Expanded(
-                                      child: _ProfileStat(
-                                        title: 'Words',
-                                        value: wordsSpokenCount.toString(),
+                                        title: 'Level',
+                                        value: '${profile?.currentLevel ?? 0}',
+                                        isLoading: showProfileShimmer,
                                       ),
                                     ),
                                     const _ProfileStatDivider(),
                                     Expanded(
                                       child: _ProfileStat(
                                         title: 'Like',
-                                        value: likePoint.toString(),
+                                        value: '${profile?.likePoint ?? 0}',
+                                        isLoading: showProfileShimmer,
+                                      ),
+                                    ),
+                                    const _ProfileStatDivider(),
+                                    Expanded(
+                                      child: _ProfileStat(
+                                        title: 'Friends',
+                                        value: '${profile?.friendCount ?? 0}',
+                                        isLoading: showProfileShimmer,
                                       ),
                                     ),
                                   ],
@@ -1144,46 +1305,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                 const SizedBox(height: 35),
 
-                // progress box
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.7,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Lv. ${_currentLevel ?? 0}',
-                        style: theme.labelSmall?.copyWith(color: Colors.white),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: LevelProgressBar(
-                          key: _premiumLevelKey,
-                          progressPercentage: _progressPercentage ?? 0.0,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                if (_showPremiumCta) ...[
-                  const SizedBox(height: 24),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: _profileHorizontalMargin,
-                    ),
-                    child: ProfileGoPremiumButton(
-                      title: l10n.profileGoPremiumTitle,
-                      exploreLabel: l10n.profileGoPremiumExplore,
-                      onTap: () => unawaited(_onPremiumCtaTap()),
-                    ),
-                  ),
-                ],
-
-                const SizedBox(height: 35),
-
-                // 탭 (History | Saved)
+                // 탭 (Progress | Saved | History)
                 const SizedBox(height: 14),
-                _buildContentTabs(context),
+                KeyedSubtree(
+                  key: _premiumTabsKey,
+                  child: _buildContentTabs(context),
+                ),
               ],
             ),
           ),
@@ -1335,16 +1462,18 @@ class _SavedExpressionCard extends StatelessWidget {
 }
 
 class _ProfileAvatar extends StatelessWidget {
-  final String? profileImgUrl;
+  final String? imgPath;
   final bool isPremium;
+  final bool isLoading;
 
   const _ProfileAvatar({
-    required this.profileImgUrl,
+    required this.imgPath,
     required this.isPremium,
+    required this.isLoading,
   });
 
-  static const String _defaultProfileImage =
-      'assets/images/icons/default_profile_image.png';
+  static const _defaultColor = Color(0xFFFFB700);
+  static const _innerSize = 92.0;
 
   static const _freeBorderGradient = LinearGradient(
     begin: Alignment.topCenter,
@@ -1364,6 +1493,46 @@ class _ProfileAvatar extends StatelessWidget {
     ],
   );
 
+  Widget _defaultAvatar(Color color) {
+    return DefaultProfileAvatar(size: _innerSize, color: color);
+  }
+
+  Widget _shimmerAvatar() {
+    return Shimmer.fromColors(
+      baseColor: const Color(0xFF2A2A2A),
+      highlightColor: const Color(0xFF3F3F3F),
+      child: const DecoratedBox(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          shape: BoxShape.circle,
+        ),
+        child: SizedBox.expand(),
+      ),
+    );
+  }
+
+  Widget _inner() {
+    if (isLoading) return _shimmerAvatar();
+
+    final path = imgPath;
+    if (path == null || path.isEmpty) {
+      return _defaultAvatar(_defaultColor);
+    }
+    if (path.startsWith('DEFAULT:')) {
+      final color = _parseHexColor(path.substring('DEFAULT:'.length));
+      return _defaultAvatar(color ?? _defaultColor);
+    }
+    return CdnThumbImage(
+      path: path,
+      slot: CdnThumbSlot.profileAvatar,
+      width: _innerSize,
+      height: _innerSize,
+      fit: BoxFit.cover,
+      placeholder: (context, url) => _shimmerAvatar(),
+      errorWidget: (context, url, error) => _defaultAvatar(_defaultColor),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -1373,34 +1542,12 @@ class _ProfileAvatar extends StatelessWidget {
         child: Container(
           width: 100,
           height: 100,
-          padding: const EdgeInsets.all(4), // border thickness = 4
+          padding: const EdgeInsets.all(4),
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             gradient: isPremium ? _premiumBorderGradient : _freeBorderGradient,
           ),
-          child: ClipOval(
-            child: (profileImgUrl != null && profileImgUrl!.isNotEmpty)
-                ? Image.network(
-                    profileImgUrl!,
-                    width: 92,
-                    height: 92,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Image.asset(
-                        _defaultProfileImage,
-                        width: 92,
-                        height: 92,
-                        fit: BoxFit.cover,
-                      );
-                    },
-                  )
-                : Image.asset(
-                    _defaultProfileImage,
-                    width: 92,
-                    height: 92,
-                    fit: BoxFit.cover,
-                  ),
-          ),
+          child: ClipOval(child: _inner()),
         ),
       ),
     );
@@ -1410,10 +1557,12 @@ class _ProfileAvatar extends StatelessWidget {
 class _ProfileStat extends StatelessWidget {
   final String title;
   final String value;
+  final bool isLoading;
 
   const _ProfileStat({
     required this.title,
     required this.value,
+    this.isLoading = false,
   });
 
   @override
@@ -1429,10 +1578,24 @@ class _ProfileStat extends StatelessWidget {
             style: theme.bodySmall?.copyWith(color: Colors.white),
           ),
           const SizedBox(height: 4),
-          Text(
-            value,
-            style: theme.bodyMedium?.copyWith(color: const Color(0xFF80D7CF)),
-          ),
+          if (isLoading)
+            Shimmer.fromColors(
+              baseColor: const Color(0xFF2A2A2A),
+              highlightColor: const Color(0xFF3F3F3F),
+              child: Container(
+                width: 28,
+                height: 16,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+            )
+          else
+            Text(
+              value,
+              style: theme.bodyMedium?.copyWith(color: const Color(0xFF80D7CF)),
+            ),
         ],
       ),
     );
@@ -1448,6 +1611,73 @@ class _ProfileStatDivider extends StatelessWidget {
       width: 2,
       height: 44,
       color: const Color(0xFF1E1E1E),
+    );
+  }
+}
+
+class _ProgressStatCard extends StatelessWidget {
+  final Widget top;
+  final String bottom;
+
+  const _ProgressStatCard({
+    required this.top,
+    required this.bottom,
+  });
+
+  static const _fillCenter = Color(0x290CABA8);
+  static const _cardBase = Color(0xFF121212);
+  static const _labelColor = Color(0xFF0CABA8);
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        gradient: const LinearGradient(
+          begin: Alignment.topRight,
+          end: Alignment.bottomLeft,
+          colors: [
+            Color(0xFF80D7CF),
+            Color(0x0080D7CF),
+            Color(0xFF80D7CF),
+          ],
+          stops: [0.0, 0.5, 1.0],
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(1),
+        child: ClipRRect(
+          borderRadius: const BorderRadius.all(Radius.circular(15)),
+          child: ColoredBox(
+            color: _cardBase,
+            child: ColoredBox(
+              color: _fillCenter,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    DefaultTextStyle.merge(
+                      textAlign: TextAlign.center,
+                      child: top,
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      bottom,
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: _labelColor,
+                            fontWeight: FontWeight.w700,
+                            fontVariations: const [FontVariation('wght', 700)],
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

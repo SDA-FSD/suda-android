@@ -49,17 +49,17 @@ class UserApi {
     );
   }
 
-  static Future<ProfileDto> getUserProfile({
+  static Future<MyProfileDto> getMyProfile({
     required String accessToken,
   }) async {
     return await SudaHttpClient.executeWithRefresh(
-      () => _getUserProfileInternal(accessToken),
-      retryWithNewToken: (newToken) => _getUserProfileInternal(newToken),
+      () => _getMyProfileInternal(accessToken),
+      retryWithNewToken: (newToken) => _getMyProfileInternal(newToken),
     );
   }
 
-  static Future<ProfileDto> _getUserProfileInternal(String accessToken) async {
-    final uri = SudaHttpClient.buildUri('/v1/users/profile');
+  static Future<MyProfileDto> _getMyProfileInternal(String accessToken) async {
+    final uri = SudaHttpClient.buildUri('/v1/users/my-profile');
 
     late final http.Response response;
     try {
@@ -82,11 +82,11 @@ class UserApi {
     if (response.statusCode >= 200 && response.statusCode < 300) {
       final Map<String, dynamic> data =
           jsonDecode(response.body) as Map<String, dynamic>;
-      return ProfileDto.fromJson(data);
+      return MyProfileDto.fromJson(data);
     }
 
     throw Exception(
-      'GET /v1/users/profile failed: HTTP ${response.statusCode} ${response.body}',
+      'GET /v1/users/my-profile failed: HTTP ${response.statusCode} ${response.body}',
     );
   }
 

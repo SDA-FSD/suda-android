@@ -375,6 +375,15 @@ class AppLocalizationsTr extends AppLocalizations {
   String get reportTitle => 'Sorun Bildir';
 
   @override
+  String get profileProgress => 'İlerleme';
+
+  @override
+  String get profileDayStreak => 'Gün serisi';
+
+  @override
+  String get profileWordsSpoken => 'Konuşulan kelime';
+
+  @override
   String get profileHistory => 'Geçmiş';
 
   @override

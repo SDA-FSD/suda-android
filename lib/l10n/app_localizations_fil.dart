@@ -382,6 +382,15 @@ class AppLocalizationsFil extends AppLocalizations {
   String get reportTitle => 'I-report ang Problema';
 
   @override
+  String get profileProgress => 'Progreso';
+
+  @override
+  String get profileDayStreak => 'Araw na streak';
+
+  @override
+  String get profileWordsSpoken => 'Mga salitang nasabi';
+
+  @override
   String get profileHistory => 'History';
 
   @override

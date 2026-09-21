@@ -3,7 +3,7 @@ import 'package:flutter/painting.dart';
 
 import '../config/app_config.dart';
 
-/// CDN 파생 썸네일 크기. 파일명 `{stem}_{size}.{ext}` (`_150` / `_500` 예정).
+/// CDN 파생 썸네일 크기. 파일명 `{stem}_{size}.{ext}`.
 enum CdnThumbSize {
   original,
   w150,
@@ -35,8 +35,11 @@ enum CdnThumbSlot {
   /// Series Overview Episode 탭 좌측 카드 (`RpS2SeriesEpisodeDto.thumbnailImgPath`).
   episodeCard(CdnThumbSize.w300),
 
-  /// Profile 히스토리 그리드 (`RpS2SimpleHistoryDto.imgPath`). 프로필 아바타 아님.
+  /// Profile 히스토리 그리드 (`RpS2SimpleHistoryDto.imgPath`).
   profileHistory(CdnThumbSize.w300),
+
+  /// Profile 아바타 (`MyProfileDto.imgPath`, CDN path만).
+  profileAvatar(CdnThumbSize.w150),
 
   /// 배경 LQIP. 메모리 히트일 때만 사용하고 추가 GET 하지 않음.
   backdropPreview(CdnThumbSize.w300);

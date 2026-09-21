@@ -28,4 +28,4 @@ iOS는 골격·로그인·푸시 토큰 `deviceType=IOS`까지 들어갔고, 이
 - 정적 UI 지원 언어는 `Runner/Info.plist`의 `CFBundleLocalizations`와 Xcode `knownRegions`를 `AppLocalizations.supportedLocales`와 함께 유지한다. Flutter fallback용 `es`·`zh`도 등록한다.
 - Export: `ITSAppUsesNonExemptEncryption=false`
 - NSE 버전: `NotificationService.xcconfig`가 Flutter `FLUTTER_BUILD_NAME`/`NUMBER`와 동기화 (ITMS-90473 재발 방지)
-- 업로드: `flutter build ipa --flavor prd` 후 exportArchive upload
+- 업로드 절차: **`.docs/CONTEXT.md` §2 iOS**

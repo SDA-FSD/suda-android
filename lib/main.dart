@@ -320,7 +320,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   }
 
   /// 서브 스크린에서 메인 라우트로 pop 복귀 시 `GET /v1/users`로 전역 `UserDto` 동기화.
-  /// 프로필 표면의 레벨·진행률은 `ProfileScreen`의 `getUserProfile`이 담당(역할 분리).
+  /// 프로필 표면 값은 `ProfileScreen`의 `getMyProfile`이 담당(역할 분리).
   Future<void> _syncUserOnMainRouteReturn() async {
     try {
       final token = await TokenStorage.loadAccessToken();

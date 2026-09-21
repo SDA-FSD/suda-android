@@ -372,6 +372,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get reportTitle => 'الإبلاغ عن مشكلة';
 
   @override
+  String get profileProgress => 'التقدم';
+
+  @override
+  String get profileDayStreak => 'أيام متتالية';
+
+  @override
+  String get profileWordsSpoken => 'كلمات منطوقة';
+
+  @override
   String get profileHistory => 'السجل';
 
   @override
