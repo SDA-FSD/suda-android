@@ -829,19 +829,19 @@ class AppLocalizationsAr extends AppLocalizations {
   String get rankPlayNow => 'العب الآن';
 
   @override
-  String get rankClaimCongratulations => 'تهانينا!';
+  String get rankingRewardClaimCongratulations => 'تهانينا!';
 
   @override
-  String rankClaimFinishedPlace(int place) {
+  String rankingRewardClaimFinishedPlace(int place) {
     return 'لقد حصلت على المركز #$place في ترتيب هذا الأسبوع!';
   }
 
   @override
-  String get rankClaimYourRewards => 'مكافآتك';
+  String get rankingRewardClaimYourRewards => 'مكافآتك';
 
   @override
-  String get rankClaim => 'استلام';
+  String get rankingRewardClaim => 'استلام';
 
   @override
-  String get rankClaimError => 'حدث خطأ ما. يرجى المحاولة مرة أخرى.';
+  String get rankingRewardClaimError => 'حدث خطأ ما. يرجى المحاولة مرة أخرى.';
 }

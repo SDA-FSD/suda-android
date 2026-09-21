@@ -847,19 +847,19 @@ class AppLocalizationsFr extends AppLocalizations {
   String get rankPlayNow => 'jouer maintenant';
 
   @override
-  String get rankClaimCongratulations => 'Félicitations !';
+  String get rankingRewardClaimCongratulations => 'Félicitations !';
 
   @override
-  String rankClaimFinishedPlace(int place) {
+  String rankingRewardClaimFinishedPlace(int place) {
     return 'Tu as terminé #$place au classement de cette semaine !';
   }
 
   @override
-  String get rankClaimYourRewards => 'Tes récompenses';
+  String get rankingRewardClaimYourRewards => 'Tes récompenses';
 
   @override
-  String get rankClaim => 'Récupérer';
+  String get rankingRewardClaim => 'Récupérer';
 
   @override
-  String get rankClaimError => 'Une erreur s’est produite. Réessaie.';
+  String get rankingRewardClaimError => 'Une erreur s’est produite. Réessaie.';
 }

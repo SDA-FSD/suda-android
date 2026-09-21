@@ -336,16 +336,16 @@
   "rankAnnounceRank": "순위",
   "rankAnnounceLike": "Like",
   "rankPlayNow": "지금 플레이",
-  "rankClaimCongratulations": "축하해요!",
-  "rankClaimFinishedPlace": "이번 주 랭킹에서 {place}위를 차지했어요!",
-  "@rankClaimFinishedPlace": {
+  "rankingRewardClaimCongratulations": "축하해요!",
+  "rankingRewardClaimFinishedPlace": "이번 주 랭킹에서 {place}위를 차지했어요!",
+  "@rankingRewardClaimFinishedPlace": {
     "placeholders": {
       "place": {
         "type": "int"
       }
     }
   },
-  "rankClaimYourRewards": "나의 보상",
-  "rankClaim": "보상 받기",
-  "rankClaimError": "문제가 발생했어요. 다시 시도해주세요."
+  "rankingRewardClaimYourRewards": "나의 보상",
+  "rankingRewardClaim": "보상 받기",
+  "rankingRewardClaimError": "문제가 발생했어요. 다시 시도해주세요."
 }

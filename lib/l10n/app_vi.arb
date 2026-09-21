@@ -336,16 +336,16 @@
   "rankAnnounceRank": "Hạng",
   "rankAnnounceLike": "Like",
   "rankPlayNow": "chơi ngay",
-  "rankClaimCongratulations": "Chúc mừng!",
-  "rankClaimFinishedPlace": "Bạn đã xếp hạng #{place} trong bảng xếp hạng tuần này!",
-  "@rankClaimFinishedPlace": {
+  "rankingRewardClaimCongratulations": "Chúc mừng!",
+  "rankingRewardClaimFinishedPlace": "Bạn đã xếp hạng #{place} trong bảng xếp hạng tuần này!",
+  "@rankingRewardClaimFinishedPlace": {
     "placeholders": {
       "place": {
         "type": "int"
       }
     }
   },
-  "rankClaimYourRewards": "Phần thưởng của bạn",
-  "rankClaim": "Nhận",
-  "rankClaimError": "Đã xảy ra lỗi. Vui lòng thử lại."
+  "rankingRewardClaimYourRewards": "Phần thưởng của bạn",
+  "rankingRewardClaim": "Nhận",
+  "rankingRewardClaimError": "Đã xảy ra lỗi. Vui lòng thử lại."
 }

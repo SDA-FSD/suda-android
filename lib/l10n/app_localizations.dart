@@ -1631,35 +1631,35 @@ abstract class AppLocalizations {
   /// **'play now'**
   String get rankPlayNow;
 
-  /// No description provided for @rankClaimCongratulations.
+  /// No description provided for @rankingRewardClaimCongratulations.
   ///
   /// In en, this message translates to:
   /// **'Congratulations!'**
-  String get rankClaimCongratulations;
+  String get rankingRewardClaimCongratulations;
 
-  /// No description provided for @rankClaimFinishedPlace.
+  /// No description provided for @rankingRewardClaimFinishedPlace.
   ///
   /// In en, this message translates to:
   /// **'You finished #{place} in this week\'s ranking!'**
-  String rankClaimFinishedPlace(int place);
+  String rankingRewardClaimFinishedPlace(int place);
 
-  /// No description provided for @rankClaimYourRewards.
+  /// No description provided for @rankingRewardClaimYourRewards.
   ///
   /// In en, this message translates to:
   /// **'Your Rewards'**
-  String get rankClaimYourRewards;
+  String get rankingRewardClaimYourRewards;
 
-  /// No description provided for @rankClaim.
+  /// No description provided for @rankingRewardClaim.
   ///
   /// In en, this message translates to:
   /// **'Claim'**
-  String get rankClaim;
+  String get rankingRewardClaim;
 
-  /// No description provided for @rankClaimError.
+  /// No description provided for @rankingRewardClaimError.
   ///
   /// In en, this message translates to:
   /// **'Something went wrong. Please try again.'**
-  String get rankClaimError;
+  String get rankingRewardClaimError;
 }
 
 class _AppLocalizationsDelegate

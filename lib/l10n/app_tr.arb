@@ -336,16 +336,16 @@
   "rankAnnounceRank": "Sıra",
   "rankAnnounceLike": "Like",
   "rankPlayNow": "şimdi oyna",
-  "rankClaimCongratulations": "Tebrikler!",
-  "rankClaimFinishedPlace": "Bu haftanın sıralamasında #{place}. oldun!",
-  "@rankClaimFinishedPlace": {
+  "rankingRewardClaimCongratulations": "Tebrikler!",
+  "rankingRewardClaimFinishedPlace": "Bu haftanın sıralamasında #{place}. oldun!",
+  "@rankingRewardClaimFinishedPlace": {
     "placeholders": {
       "place": {
         "type": "int"
       }
     }
   },
-  "rankClaimYourRewards": "Ödüllerin",
-  "rankClaim": "Al",
-  "rankClaimError": "Bir şeyler ters gitti. Lütfen tekrar dene."
+  "rankingRewardClaimYourRewards": "Ödüllerin",
+  "rankingRewardClaim": "Al",
+  "rankingRewardClaimError": "Bir şeyler ters gitti. Lütfen tekrar dene."
 }

@@ -840,19 +840,19 @@ class AppLocalizationsMs extends AppLocalizations {
   String get rankPlayNow => 'main sekarang';
 
   @override
-  String get rankClaimCongratulations => 'Tahniah!';
+  String get rankingRewardClaimCongratulations => 'Tahniah!';
 
   @override
-  String rankClaimFinishedPlace(int place) {
+  String rankingRewardClaimFinishedPlace(int place) {
     return 'Anda selesai #$place dalam kedudukan minggu ini!';
   }
 
   @override
-  String get rankClaimYourRewards => 'Ganjaran Anda';
+  String get rankingRewardClaimYourRewards => 'Ganjaran Anda';
 
   @override
-  String get rankClaim => 'Tuntut';
+  String get rankingRewardClaim => 'Tuntut';
 
   @override
-  String get rankClaimError => 'Sesuatu tidak kena. Sila cuba lagi.';
+  String get rankingRewardClaimError => 'Sesuatu tidak kena. Sila cuba lagi.';
 }

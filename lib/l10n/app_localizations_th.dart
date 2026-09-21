@@ -811,19 +811,19 @@ class AppLocalizationsTh extends AppLocalizations {
   String get rankPlayNow => 'เล่นเลย';
 
   @override
-  String get rankClaimCongratulations => 'ยินดีด้วย!';
+  String get rankingRewardClaimCongratulations => 'ยินดีด้วย!';
 
   @override
-  String rankClaimFinishedPlace(int place) {
+  String rankingRewardClaimFinishedPlace(int place) {
     return 'คุณได้อันดับ #$place ในจัดอันดับสัปดาห์นี้!';
   }
 
   @override
-  String get rankClaimYourRewards => 'รางวัลของคุณ';
+  String get rankingRewardClaimYourRewards => 'รางวัลของคุณ';
 
   @override
-  String get rankClaim => 'รับรางวัล';
+  String get rankingRewardClaim => 'รับรางวัล';
 
   @override
-  String get rankClaimError => 'เกิดข้อผิดพลาด โปรดลองอีกครั้ง';
+  String get rankingRewardClaimError => 'เกิดข้อผิดพลาด โปรดลองอีกครั้ง';
 }

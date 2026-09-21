@@ -27,7 +27,7 @@ import '../first_cefr_level.dart';
 import '../first_profile_image.dart';
 import '../paywall/paywall.dart';
 import '../paywall/paywall_completed.dart';
-import '../rank/rank_screen.dart';
+import '../rank/ranking.dart';
 import '../../utils/paywall_impression_screen.dart';
 
 /// Lab에서 재현 가능한 `DefaultPopup` 목록.
@@ -194,12 +194,12 @@ class _LabScreenState extends State<LabScreen> {
     DefaultToast.show(context, _longToastTestMessage, isError: _toastIsWarning);
   }
 
-  Future<void> _openRankAnnouncePreview() async {
+  Future<void> _openRankingAnnouncePreview() async {
     if (!mounted) return;
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (routeContext) => RankScreen(
+        builder: (routeContext) => Ranking(
           forceAnnouncePhase: true,
           isActive: true,
           onNavigateToHome: () => Navigator.of(routeContext).pop(),
@@ -210,29 +210,29 @@ class _LabScreenState extends State<LabScreen> {
     );
   }
 
-  Future<void> _openRankClaimPreviewFirst() async {
+  Future<void> _openRankingRewardClaimPreviewFirst() async {
     if (!mounted) return;
-    await _openRankClaimPreview(place: 1);
+    await _openRankingRewardClaimPreview(place: 1);
   }
 
-  Future<void> _openRankClaimPreviewSecond() async {
+  Future<void> _openRankingRewardClaimPreviewSecond() async {
     if (!mounted) return;
-    await _openRankClaimPreview(place: 2);
+    await _openRankingRewardClaimPreview(place: 2);
   }
 
-  Future<void> _openRankClaimPreviewThird() async {
+  Future<void> _openRankingRewardClaimPreviewThird() async {
     if (!mounted) return;
-    await _openRankClaimPreview(place: 3);
+    await _openRankingRewardClaimPreview(place: 3);
   }
 
-  Future<void> _openRankClaimPreview({required int place}) async {
+  Future<void> _openRankingRewardClaimPreview({required int place}) async {
     if (!mounted) return;
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (routeContext) => RankScreen(
-          forceClaimPreview: true,
-          forceClaimPlace: place,
+        builder: (routeContext) => Ranking(
+          forceRankingRewardClaimPreview: true,
+          forceRankingRewardClaimPlace: place,
           forceAnnouncePhase: true,
           isActive: true,
           onNavigateToHome: () => Navigator.of(routeContext).pop(),
@@ -827,23 +827,23 @@ class _LabScreenState extends State<LabScreen> {
             ),
             const SizedBox(height: 12),
             _buildLabScreenButton(
-              label: 'Open Rank Announce Preview',
-              onPressed: () => unawaited(_openRankAnnouncePreview()),
+              label: 'Open Ranking Announce Preview',
+              onPressed: () => unawaited(_openRankingAnnouncePreview()),
             ),
             const SizedBox(height: 12),
             _buildLabScreenButton(
-              label: 'Open Rank Claim Preview (1st)',
-              onPressed: () => unawaited(_openRankClaimPreviewFirst()),
+              label: 'Open Ranking Reward Claim Preview (1st)',
+              onPressed: () => unawaited(_openRankingRewardClaimPreviewFirst()),
             ),
             const SizedBox(height: 12),
             _buildLabScreenButton(
-              label: 'Open Rank Claim Preview (2nd)',
-              onPressed: () => unawaited(_openRankClaimPreviewSecond()),
+              label: 'Open Ranking Reward Claim Preview (2nd)',
+              onPressed: () => unawaited(_openRankingRewardClaimPreviewSecond()),
             ),
             const SizedBox(height: 12),
             _buildLabScreenButton(
-              label: 'Open Rank Claim Preview (3rd)',
-              onPressed: () => unawaited(_openRankClaimPreviewThird()),
+              label: 'Open Ranking Reward Claim Preview (3rd)',
+              onPressed: () => unawaited(_openRankingRewardClaimPreviewThird()),
             ),
             _buildSectionDivider(),
             Text(

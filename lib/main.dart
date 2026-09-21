@@ -31,7 +31,7 @@ import 'screens/first_profile_image.dart';
 import 'screens/home.dart';
 import 'screens/profile.dart';
 import 'screens/notification_box.dart';
-import 'screens/rank/rank_screen.dart';
+import 'screens/rank/ranking.dart';
 import 'screens/roleplay/history.dart';
 import 'screens/setting/setting.dart';
 import 'screens/setting/announcement_detail.dart';
@@ -982,7 +982,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                             }
                           },
                         ),
-                        RankScreen(
+                        Ranking(
                           onNavigateToHome: _navigateToHome,
                           onNavigateToAlarm: _navigateToAlarm,
                           onNavigateToProfile: _navigateToProfile,

@@ -784,21 +784,21 @@ class AppLocalizationsZh extends AppLocalizations {
   String get rankPlayNow => '立即开始';
 
   @override
-  String get rankClaimCongratulations => '恭喜！';
+  String get rankingRewardClaimCongratulations => '恭喜！';
 
   @override
-  String rankClaimFinishedPlace(int place) {
+  String rankingRewardClaimFinishedPlace(int place) {
     return '你在本周排行榜中获得了第$place名！';
   }
 
   @override
-  String get rankClaimYourRewards => '你的奖励';
+  String get rankingRewardClaimYourRewards => '你的奖励';
 
   @override
-  String get rankClaim => '领取';
+  String get rankingRewardClaim => '领取';
 
   @override
-  String get rankClaimError => '出了点问题。请重试。';
+  String get rankingRewardClaimError => '出了点问题。请重试。';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -1581,21 +1581,21 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get rankPlayNow => '立即开始';
 
   @override
-  String get rankClaimCongratulations => '恭喜！';
+  String get rankingRewardClaimCongratulations => '恭喜！';
 
   @override
-  String rankClaimFinishedPlace(int place) {
+  String rankingRewardClaimFinishedPlace(int place) {
     return '你在本周排行榜中获得了第$place名！';
   }
 
   @override
-  String get rankClaimYourRewards => '你的奖励';
+  String get rankingRewardClaimYourRewards => '你的奖励';
 
   @override
-  String get rankClaim => '领取';
+  String get rankingRewardClaim => '领取';
 
   @override
-  String get rankClaimError => '出了点问题。请重试。';
+  String get rankingRewardClaimError => '出了点问题。请重试。';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -2378,19 +2378,19 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get rankPlayNow => '立即開始';
 
   @override
-  String get rankClaimCongratulations => '恭喜！';
+  String get rankingRewardClaimCongratulations => '恭喜！';
 
   @override
-  String rankClaimFinishedPlace(int place) {
+  String rankingRewardClaimFinishedPlace(int place) {
     return '你在本週排行榜中獲得了第$place名！';
   }
 
   @override
-  String get rankClaimYourRewards => '你的獎勵';
+  String get rankingRewardClaimYourRewards => '你的獎勵';
 
   @override
-  String get rankClaim => '領取';
+  String get rankingRewardClaim => '領取';
 
   @override
-  String get rankClaimError => '發生問題。請再試一次。';
+  String get rankingRewardClaimError => '發生問題。請再試一次。';
 }

@@ -336,16 +336,16 @@
   "rankAnnounceRank": "順位",
   "rankAnnounceLike": "Like",
   "rankPlayNow": "今すぐプレイ",
-  "rankClaimCongratulations": "おめでとうございます！",
-  "rankClaimFinishedPlace": "今週のランキングで{place}位になりました！",
-  "@rankClaimFinishedPlace": {
+  "rankingRewardClaimCongratulations": "おめでとうございます！",
+  "rankingRewardClaimFinishedPlace": "今週のランキングで{place}位になりました！",
+  "@rankingRewardClaimFinishedPlace": {
     "placeholders": {
       "place": {
         "type": "int"
       }
     }
   },
-  "rankClaimYourRewards": "あなたの報酬",
-  "rankClaim": "受け取る",
-  "rankClaimError": "問題が発生しました。もう一度お試しください。"
+  "rankingRewardClaimYourRewards": "あなたの報酬",
+  "rankingRewardClaim": "受け取る",
+  "rankingRewardClaimError": "問題が発生しました。もう一度お試しください。"
 }

@@ -336,16 +336,16 @@
   "rankAnnounceRank": "Место",
   "rankAnnounceLike": "Like",
   "rankPlayNow": "играть сейчас",
-  "rankClaimCongratulations": "Поздравляем!",
-  "rankClaimFinishedPlace": "Ты занял(а) #{place} место в рейтинге этой недели!",
-  "@rankClaimFinishedPlace": {
+  "rankingRewardClaimCongratulations": "Поздравляем!",
+  "rankingRewardClaimFinishedPlace": "Ты занял(а) #{place} место в рейтинге этой недели!",
+  "@rankingRewardClaimFinishedPlace": {
     "placeholders": {
       "place": {
         "type": "int"
       }
     }
   },
-  "rankClaimYourRewards": "Твои награды",
-  "rankClaim": "Забрать",
-  "rankClaimError": "Что-то пошло не так. Попробуй ещё раз."
+  "rankingRewardClaimYourRewards": "Твои награды",
+  "rankingRewardClaim": "Забрать",
+  "rankingRewardClaimError": "Что-то пошло не так. Попробуй ещё раз."
 }

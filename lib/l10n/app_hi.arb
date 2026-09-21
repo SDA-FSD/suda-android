@@ -336,16 +336,16 @@
   "rankAnnounceRank": "रैंक",
   "rankAnnounceLike": "Like",
   "rankPlayNow": "अभी खेलें",
-  "rankClaimCongratulations": "बधाई हो!",
-  "rankClaimFinishedPlace": "आपने इस सप्ताह की रैंकिंग में #{place} स्थान हासिल किया!",
-  "@rankClaimFinishedPlace": {
+  "rankingRewardClaimCongratulations": "बधाई हो!",
+  "rankingRewardClaimFinishedPlace": "आपने इस सप्ताह की रैंकिंग में #{place} स्थान हासिल किया!",
+  "@rankingRewardClaimFinishedPlace": {
     "placeholders": {
       "place": {
         "type": "int"
       }
     }
   },
-  "rankClaimYourRewards": "आपके इनाम",
-  "rankClaim": "क्लेम करें",
-  "rankClaimError": "कुछ गलत हो गया। कृपया फिर से कोशिश करें।"
+  "rankingRewardClaimYourRewards": "आपके इनाम",
+  "rankingRewardClaim": "क्लेम करें",
+  "rankingRewardClaimError": "कुछ गलत हो गया। कृपया फिर से कोशिश करें।"
 }

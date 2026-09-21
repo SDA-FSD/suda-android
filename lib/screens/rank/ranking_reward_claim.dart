@@ -8,11 +8,11 @@ import '../../models/rank_models.dart';
 import '../../utils/default_toast.dart';
 import 'rank_crown_avatar.dart';
 
-/// 1~3등 Claim 전면 패널.
-/// RankScreen에서는 AppScaffold **본문+background**로 쓰고, GNB는 Scaffold 것을 그대로 둔다
+/// 1~3등 Ranking Reward Claim 전면 패널.
+/// Ranking에서는 AppScaffold **본문+background**로 쓰고, GNB는 Scaffold 것을 그대로 둔다
 /// (Stack에 GNB를 따로 올리지 않음). 상단 풀블리드·하단 GNB 위까지.
-class RankClaimPanel extends StatelessWidget {
-  const RankClaimPanel({
+class RankingRewardClaimPanel extends StatelessWidget {
+  const RankingRewardClaimPanel({
     super.key,
     required this.entry,
     required this.place,
@@ -180,14 +180,14 @@ class RankClaimPanel extends StatelessWidget {
                 Transform.translate(
                   offset: Offset(0, -20 * s),
                   child: Text(
-                    l10n.rankClaimCongratulations,
+                    l10n.rankingRewardClaimCongratulations,
                     textAlign: TextAlign.center,
                     style: theme.headlineLarge?.copyWith(color: Colors.white),
                   ),
                 ),
                 SizedBox(height: 8 * s),
                 Text(
-                  l10n.rankClaimFinishedPlace(place),
+                  l10n.rankingRewardClaimFinishedPlace(place),
                   textAlign: TextAlign.center,
                   style: theme.headlineMedium?.copyWith(color: Colors.white),
                 ),
@@ -206,7 +206,7 @@ class RankClaimPanel extends StatelessWidget {
                     child: _YourRewardsCard(
                       scale: s,
                       overlayBlend: place == 3,
-                      title: l10n.rankClaimYourRewards,
+                      title: l10n.rankingRewardClaimYourRewards,
                       rows: [
                         (medalAsset, rewardBadge),
                         ('assets/images/like_at_result.png', rewardLikes),
@@ -216,7 +216,7 @@ class RankClaimPanel extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 28 * s),
-                _ClaimButton(label: l10n.rankClaim, onPressed: onClaim),
+                _RankingRewardClaimButton(label: l10n.rankingRewardClaim, onPressed: onClaim),
                 SizedBox(height: 12 * s),
               ],
             ),
@@ -331,12 +331,12 @@ class _ProfileHero extends StatelessWidget {
               imgPath: entry.imgPath,
               frameStyle: place == 1
                   ? RankProfileFrameStyle.winner
-                  : RankProfileFrameStyle.claimRunnerUp,
-              defaultAsset: RankClaimPanel._defaultProfile,
+                  : RankProfileFrameStyle.rankingRewardClaimRunnerUp,
+              defaultAsset: RankingRewardClaimPanel._defaultProfile,
               crownAsset: switch (place) {
-                2 => RankClaimPanel._crown2,
-                3 => RankClaimPanel._crown3,
-                _ => RankClaimPanel._crown1,
+                2 => RankingRewardClaimPanel._crown2,
+                3 => RankingRewardClaimPanel._crown3,
+                _ => RankingRewardClaimPanel._crown1,
               },
               showCrown: true,
               showLevelBadge: false,
@@ -349,12 +349,12 @@ class _ProfileHero extends StatelessWidget {
             // bottom↑ = 알약만 위로
             bottom: stageH * 0.08 + 4 * s,
             child: Transform.rotate(
-              angle: RankClaimPanel._likePillRadians,
+              angle: RankingRewardClaimPanel._likePillRadians,
               alignment: Alignment.topLeft,
               origin: Offset(14 * s, 11 * s), // 아이콘 중심: 좌 6+8, 상 3+8 (s=avatarScale)
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: RankClaimPanel._likePillBg,
+                  color: RankingRewardClaimPanel._likePillBg,
                   borderRadius: BorderRadius.circular(20 * s),
                   boxShadow: [
                     // RankProfileFrame outer shadow와 동일 (#000@30%, offset/blur 20×scale)
@@ -442,15 +442,15 @@ class _YourRewardsCard extends StatelessWidget {
                         children: [
                           // 스크롤 레이어 분리 시 페이지 배경이 안 보여
                           // 단색 3등 배경을 카드 안에서 다시 깔고 overlay.
-                          ColoredBox(color: RankClaimPanel._place3Bg),
+                          ColoredBox(color: RankingRewardClaimPanel._place3Bg),
                           _OverlayBlend(
                             child: ColoredBox(
-                              color: RankClaimPanel._rewardsBg,
+                              color: RankingRewardClaimPanel._rewardsBg,
                             ),
                           ),
                         ],
                       )
-                    : const ColoredBox(color: RankClaimPanel._rewardsBg),
+                    : const ColoredBox(color: RankingRewardClaimPanel._rewardsBg),
               ),
               Padding(
                 padding: EdgeInsets.fromLTRB(20 * s, 16 * s, 20 * s, 16 * s),
@@ -498,8 +498,8 @@ class _YourRewardsCard extends StatelessWidget {
   }
 }
 
-class _ClaimButton extends StatelessWidget {
-  const _ClaimButton({required this.label, required this.onPressed});
+class _RankingRewardClaimButton extends StatelessWidget {
+  const _RankingRewardClaimButton({required this.label, required this.onPressed});
 
   final String label;
   final VoidCallback onPressed;
@@ -553,7 +553,7 @@ class _RenderOverlayBlend extends RenderProxyBox {
   }
 }
 
-void showRankClaimErrorToast(BuildContext context) {
+void showRankingRewardClaimErrorToast(BuildContext context) {
   final l10n = AppLocalizations.of(context)!;
-  DefaultToast.show(context, l10n.rankClaimError, isError: true);
+  DefaultToast.show(context, l10n.rankingRewardClaimError, isError: true);
 }

@@ -336,16 +336,16 @@
   "rankAnnounceRank": "Kedudukan",
   "rankAnnounceLike": "Like",
   "rankPlayNow": "main sekarang",
-  "rankClaimCongratulations": "Tahniah!",
-  "rankClaimFinishedPlace": "Anda selesai #{place} dalam kedudukan minggu ini!",
-  "@rankClaimFinishedPlace": {
+  "rankingRewardClaimCongratulations": "Tahniah!",
+  "rankingRewardClaimFinishedPlace": "Anda selesai #{place} dalam kedudukan minggu ini!",
+  "@rankingRewardClaimFinishedPlace": {
     "placeholders": {
       "place": {
         "type": "int"
       }
     }
   },
-  "rankClaimYourRewards": "Ganjaran Anda",
-  "rankClaim": "Tuntut",
-  "rankClaimError": "Sesuatu tidak kena. Sila cuba lagi."
+  "rankingRewardClaimYourRewards": "Ganjaran Anda",
+  "rankingRewardClaim": "Tuntut",
+  "rankingRewardClaimError": "Sesuatu tidak kena. Sila cuba lagi."
 }

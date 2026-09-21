@@ -336,16 +336,16 @@
   "rankAnnounceRank": "排名",
   "rankAnnounceLike": "Like",
   "rankPlayNow": "立即開始",
-  "rankClaimCongratulations": "恭喜！",
-  "rankClaimFinishedPlace": "你在本週排行榜中獲得了第{place}名！",
-  "@rankClaimFinishedPlace": {
+  "rankingRewardClaimCongratulations": "恭喜！",
+  "rankingRewardClaimFinishedPlace": "你在本週排行榜中獲得了第{place}名！",
+  "@rankingRewardClaimFinishedPlace": {
     "placeholders": {
       "place": {
         "type": "int"
       }
     }
   },
-  "rankClaimYourRewards": "你的獎勵",
-  "rankClaim": "領取",
-  "rankClaimError": "發生問題。請再試一次。"
+  "rankingRewardClaimYourRewards": "你的獎勵",
+  "rankingRewardClaim": "領取",
+  "rankingRewardClaimError": "發生問題。請再試一次。"
 }

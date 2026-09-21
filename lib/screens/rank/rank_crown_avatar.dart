@@ -1,8 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
-/// 랭킹 프로필 프레임 스타일 (포디움·리스트·Claim 공용).
-enum RankProfileFrameStyle { winner, premium, free, podiumFree, claimRunnerUp }
+/// 랭킹 프로필 프레임 스타일 (포디움·리스트·Ranking Reward Claim 공용).
+enum RankProfileFrameStyle { winner, premium, free, podiumFree, rankingRewardClaimRunnerUp }
 
 /// 왕관+원형 아바타 그룹. 좌표·비율은 동결 — [scale]만 곱한다.
 ///
@@ -149,8 +149,8 @@ class RankProfileFrame extends StatelessWidget {
     colors: [Color(0xFFFFFFFF), Color(0xFF0CABA8)],
   );
 
-  /// Claim 2·3등 보더 (위 #FFFFFF → 아래 #0D7F7D).
-  static const _claimRunnerUpGradient = LinearGradient(
+  /// Ranking Reward Claim 2·3등 보더 (위 #FFFFFF → 아래 #0D7F7D).
+  static const _rankingRewardClaimRunnerUpGradient = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
     colors: [Color(0xFFFFFFFF), Color(0xFF0D7F7D)],
@@ -171,7 +171,7 @@ class RankProfileFrame extends StatelessWidget {
       RankProfileFrameStyle.premium => _premiumGradient,
       RankProfileFrameStyle.free => _freeGradient,
       RankProfileFrameStyle.podiumFree => _podiumFreeGradient,
-      RankProfileFrameStyle.claimRunnerUp => _claimRunnerUpGradient,
+      RankProfileFrameStyle.rankingRewardClaimRunnerUp => _rankingRewardClaimRunnerUpGradient,
     };
     final innerFill = style == RankProfileFrameStyle.podiumFree
         ? _podiumFreeInnerFill

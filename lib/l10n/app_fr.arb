@@ -336,16 +336,16 @@
   "rankAnnounceRank": "Rang",
   "rankAnnounceLike": "Like",
   "rankPlayNow": "jouer maintenant",
-  "rankClaimCongratulations": "Félicitations !",
-  "rankClaimFinishedPlace": "Tu as terminé #{place} au classement de cette semaine !",
-  "@rankClaimFinishedPlace": {
+  "rankingRewardClaimCongratulations": "Félicitations !",
+  "rankingRewardClaimFinishedPlace": "Tu as terminé #{place} au classement de cette semaine !",
+  "@rankingRewardClaimFinishedPlace": {
     "placeholders": {
       "place": {
         "type": "int"
       }
     }
   },
-  "rankClaimYourRewards": "Tes récompenses",
-  "rankClaim": "Récupérer",
-  "rankClaimError": "Une erreur s’est produite. Réessaie."
+  "rankingRewardClaimYourRewards": "Tes récompenses",
+  "rankingRewardClaim": "Récupérer",
+  "rankingRewardClaimError": "Une erreur s’est produite. Réessaie."
 }

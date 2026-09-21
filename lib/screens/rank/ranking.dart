@@ -13,19 +13,19 @@ import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../widgets/gnb_bar.dart';
-import 'rank_claim.dart';
+import 'ranking_reward_claim.dart';
 import 'rank_crown_avatar.dart';
 import 'rank_podium_painter.dart';
 import 'top_3_rewards_popup.dart';
 
 enum _MeRowSlot { below, visible, above }
 
-/// Weekly Ranking Main Screen (GNB Ranking 탭).
+/// Ranking (GNB Ranking 탭).
 /// GET /v1/rank/period/current + /entries + /entries/me.
 /// sticky/미참여는 `/entries/me`(동일 snapshotMinute). 목록 inline은 userId/isMe.
 /// sticky는 자기 행이 뷰포트보다 **아래**일 때만 (상위 랭커를 보는 중).
-class RankScreen extends StatefulWidget {
-  const RankScreen({
+class Ranking extends StatefulWidget {
+  const Ranking({
     super.key,
     this.onNavigateToHome,
     this.onNavigateToAlarm,
@@ -35,10 +35,10 @@ class RankScreen extends StatefulWidget {
     this.showNotiboxUnreadBadge = false,
     /// Lab 미리보기: 서버 phase와 무관하게 ANNOUNCE UI 강제.
     this.forceAnnouncePhase = false,
-    /// Lab: Claim 패널을 GNB 위 전면 오버레이로 표시.
-    this.forceClaimPreview = false,
-    /// Lab: Claim 등수 (1|2|3). [forceClaimPreview]일 때만 사용.
-    this.forceClaimPlace = 1,
+    /// Lab: Ranking Reward Claim 패널을 GNB 위 전면 오버레이로 표시.
+    this.forceRankingRewardClaimPreview = false,
+    /// Lab: Ranking Reward Claim 등수 (1|2|3). [forceRankingRewardClaimPreview]일 때만 사용.
+    this.forceRankingRewardClaimPlace = 1,
   });
 
   final VoidCallback? onNavigateToHome;
@@ -48,16 +48,16 @@ class RankScreen extends StatefulWidget {
   final UserDto? user;
   final bool showNotiboxUnreadBadge;
   final bool forceAnnouncePhase;
-  final bool forceClaimPreview;
-  final int forceClaimPlace;
+  final bool forceRankingRewardClaimPreview;
+  final int forceRankingRewardClaimPlace;
 
   static const String routeName = '/rank';
 
   @override
-  State<RankScreen> createState() => _RankScreenState();
+  State<Ranking> createState() => _RankingState();
 }
 
-class _RankScreenState extends State<RankScreen>
+class _RankingState extends State<Ranking>
     with TickerProviderStateMixin {
   static const _defaultProfile =
       'assets/images/icons/default_profile_image.png';
@@ -114,14 +114,14 @@ class _RankScreenState extends State<RankScreen>
   Timer? _tickTimer;
   Duration _remaining = Duration.zero;
 
-  /// Lab `forceClaimPreview` 또는 후속 Claim API 연동 시 GNB 위 전면 패널.
-  bool _claimPanelVisible = false;
-  RankEntryDto? _claimEntry;
-  int _claimPlace = 1;
+  /// Lab `forceRankingRewardClaimPreview` 또는 후속 Ranking Reward Claim API 연동 시 GNB 위 전면 패널.
+  bool _rankingRewardClaimVisible = false;
+  RankEntryDto? _rankingRewardClaimEntry;
+  int _rankingRewardClaimPlace = 1;
   /// DefaultPopup(showDialog)과 동일 계열: 페이드 + 살짝 스케일(중앙).
-  late final AnimationController _claimAppearController;
-  late final Animation<double> _claimFade;
-  late final Animation<double> _claimScale;
+  late final AnimationController _rankingRewardClaimAppearController;
+  late final Animation<double> _rankingRewardClaimFade;
+  late final Animation<double> _rankingRewardClaimScale;
 
   @override
   void initState() {
@@ -130,35 +130,35 @@ class _RankScreenState extends State<RankScreen>
       vsync: this,
       duration: _stickyFadeDuration,
     );
-    _claimAppearController = AnimationController(
+    _rankingRewardClaimAppearController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 150),
     );
     final curved = CurvedAnimation(
-      parent: _claimAppearController,
+      parent: _rankingRewardClaimAppearController,
       curve: Curves.easeOutCubic,
       reverseCurve: Curves.easeInCubic,
     );
-    _claimFade = curved;
-    _claimScale = Tween<double>(begin: 0.9, end: 1.0).animate(curved);
+    _rankingRewardClaimFade = curved;
+    _rankingRewardClaimScale = Tween<double>(begin: 0.9, end: 1.0).animate(curved);
     _scrollController.addListener(_onScroll);
-    if (widget.forceClaimPreview) {
-      _claimPanelVisible = true;
-      _claimPlace = widget.forceClaimPlace.clamp(1, 3);
-      _claimEntry = RankClaimPanel.labMock(
-        rank: _claimPlace,
+    if (widget.forceRankingRewardClaimPreview) {
+      _rankingRewardClaimVisible = true;
+      _rankingRewardClaimPlace = widget.forceRankingRewardClaimPlace.clamp(1, 3);
+      _rankingRewardClaimEntry = RankingRewardClaimPanel.labMock(
+        rank: _rankingRewardClaimPlace,
         imgPath: widget.user?.profileImgUrl,
       );
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-        unawaited(_claimAppearController.forward());
+        unawaited(_rankingRewardClaimAppearController.forward());
       });
     }
     unawaited(_loadScreen());
   }
 
   @override
-  void didUpdateWidget(covariant RankScreen oldWidget) {
+  void didUpdateWidget(covariant Ranking oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (!oldWidget.isActive && widget.isActive) {
       _jumpToListTop();
@@ -170,7 +170,7 @@ class _RankScreenState extends State<RankScreen>
   void dispose() {
     _tickTimer?.cancel();
     _stickyFadeController.dispose();
-    _claimAppearController.dispose();
+    _rankingRewardClaimAppearController.dispose();
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     super.dispose();
@@ -210,7 +210,7 @@ class _RankScreenState extends State<RankScreen>
       _meRowSlot = _MeRowSlot.below;
       _stickyFadeEnabled = false;
       debugPrint(
-        'rank screen loaded rows=${_listRows.length} hasMore=$_hasMorePages '
+        'ranking loaded rows=${_listRows.length} hasMore=$_hasMorePages '
         'next=$_nextPageNum total=${dto.total} liveRankSize=${dto.period?.liveRankSize} '
         'snap=$_snapshotMinute my=${_myEntryKept?.rank}',
       );
@@ -532,7 +532,7 @@ class _RankScreenState extends State<RankScreen>
 
   @override
   Widget build(BuildContext context) {
-    // Claimable 레이어 자리만 분리 — 현재 child는 본문만, 시트는 띄우지 않음.
+    // Ranking Reward Claim 레이어는 본문 위 풀스크린(GNB 유지).
     final periodNull = _screen != null && _screen!.period == null;
     final showContent =
         !_loading && !periodNull && !(_loadFailed && _screen == null);
@@ -553,8 +553,8 @@ class _RankScreenState extends State<RankScreen>
         _myEntryKept != null &&
         _myEntryKept!.rank > 10;
 
-    final showClaimLayer = _claimEntry != null &&
-        (_claimPanelVisible || _claimAppearController.isAnimating);
+    final showRankingRewardClaimLayer = _rankingRewardClaimEntry != null &&
+        (_rankingRewardClaimVisible || _rankingRewardClaimAppearController.isAnimating);
 
     final gnb = GnbBar(
       isHomeActive: false,
@@ -569,17 +569,17 @@ class _RankScreenState extends State<RankScreen>
       user: widget.user,
     );
 
-    // 랭킹 본문 + GNB는 항상 Scaffold. Claim은 GNB 위 풀스크린 레이어
+    // 랭킹 본문 + GNB는 항상 Scaffold. Ranking Reward Claim은 GNB 위 풀스크린 레이어
     // (등장: DefaultPopup과 동일 계열 — dim + 페이드 + 중앙 스케일).
     final scaffold = AppScaffold(
         showBackButton:
-            widget.forceAnnouncePhase || widget.forceClaimPreview,
+            widget.forceAnnouncePhase || widget.forceRankingRewardClaimPreview,
         usePadding: false,
         bodyTopPadding: 16,
         backgroundColor: const Color(0xFF0D011F),
         background: _buildRankBackground(),
         bottomNavigationBar: gnb,
-        aboveBottomBar: showClaimLayer
+        aboveBottomBar: showRankingRewardClaimLayer
             ? null
             : showNotRanked
             ? _RankNotRankedOverlay(onPlayNow: widget.onNavigateToHome)
@@ -606,7 +606,7 @@ class _RankScreenState extends State<RankScreen>
         body: _buildBody(context),
     );
 
-    if (!showClaimLayer) {
+    if (!showRankingRewardClaimLayer) {
       return scaffold;
     }
 
@@ -621,25 +621,25 @@ class _RankScreenState extends State<RankScreen>
           top: 0,
           bottom: bottomPad + GnbBar.contentHeight,
           child: AnimatedBuilder(
-            animation: _claimAppearController,
+            animation: _rankingRewardClaimAppearController,
             builder: (context, _) {
               return Stack(
                 fit: StackFit.expand,
                 children: [
                   // DefaultPopup dim: black 40%
                   Opacity(
-                    opacity: _claimAppearController.value.clamp(0.0, 1.0),
+                    opacity: _rankingRewardClaimAppearController.value.clamp(0.0, 1.0),
                     child: const ColoredBox(color: Color(0x66000000)),
                   ),
                   FadeTransition(
-                    opacity: _claimFade,
+                    opacity: _rankingRewardClaimFade,
                     child: ScaleTransition(
-                      scale: _claimScale,
+                      scale: _rankingRewardClaimScale,
                       alignment: Alignment.center,
-                      child: RankClaimPanel(
-                        entry: _claimEntry!,
-                        place: _claimPlace,
-                        onClaim: () => unawaited(_onClaimPanelClaim()),
+                      child: RankingRewardClaimPanel(
+                        entry: _rankingRewardClaimEntry!,
+                        place: _rankingRewardClaimPlace,
+                        onClaim: () => unawaited(_onRankingRewardClaim()),
                         paintBackground: true,
                       ),
                     ),
@@ -653,14 +653,14 @@ class _RankScreenState extends State<RankScreen>
     );
   }
 
-  Future<void> _onClaimPanelClaim() async {
+  Future<void> _onRankingRewardClaim() async {
     // 실 API 전: 페이드/스케일 아웃 후 패널 닫기. Lab 프리뷰는 pop.
-    if (!_claimAppearController.isDismissed) {
-      await _claimAppearController.reverse();
+    if (!_rankingRewardClaimAppearController.isDismissed) {
+      await _rankingRewardClaimAppearController.reverse();
     }
     if (!mounted) return;
-    setState(() => _claimPanelVisible = false);
-    if (widget.forceClaimPreview) {
+    setState(() => _rankingRewardClaimVisible = false);
+    if (widget.forceRankingRewardClaimPreview) {
       Navigator.of(context).maybePop();
     }
   }

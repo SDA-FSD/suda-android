@@ -835,19 +835,20 @@ class AppLocalizationsTr extends AppLocalizations {
   String get rankPlayNow => 'şimdi oyna';
 
   @override
-  String get rankClaimCongratulations => 'Tebrikler!';
+  String get rankingRewardClaimCongratulations => 'Tebrikler!';
 
   @override
-  String rankClaimFinishedPlace(int place) {
+  String rankingRewardClaimFinishedPlace(int place) {
     return 'Bu haftanın sıralamasında #$place. oldun!';
   }
 
   @override
-  String get rankClaimYourRewards => 'Ödüllerin';
+  String get rankingRewardClaimYourRewards => 'Ödüllerin';
 
   @override
-  String get rankClaim => 'Al';
+  String get rankingRewardClaim => 'Al';
 
   @override
-  String get rankClaimError => 'Bir şeyler ters gitti. Lütfen tekrar dene.';
+  String get rankingRewardClaimError =>
+      'Bir şeyler ters gitti. Lütfen tekrar dene.';
 }

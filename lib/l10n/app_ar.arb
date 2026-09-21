@@ -336,16 +336,16 @@
   "rankAnnounceRank": "الترتيب",
   "rankAnnounceLike": "Like",
   "rankPlayNow": "العب الآن",
-  "rankClaimCongratulations": "تهانينا!",
-  "rankClaimFinishedPlace": "لقد حصلت على المركز #{place} في ترتيب هذا الأسبوع!",
-  "@rankClaimFinishedPlace": {
+  "rankingRewardClaimCongratulations": "تهانينا!",
+  "rankingRewardClaimFinishedPlace": "لقد حصلت على المركز #{place} في ترتيب هذا الأسبوع!",
+  "@rankingRewardClaimFinishedPlace": {
     "placeholders": {
       "place": {
         "type": "int"
       }
     }
   },
-  "rankClaimYourRewards": "مكافآتك",
-  "rankClaim": "استلام",
-  "rankClaimError": "حدث خطأ ما. يرجى المحاولة مرة أخرى."
+  "rankingRewardClaimYourRewards": "مكافآتك",
+  "rankingRewardClaim": "استلام",
+  "rankingRewardClaimError": "حدث خطأ ما. يرجى المحاولة مرة أخرى."
 }

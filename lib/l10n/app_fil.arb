@@ -336,16 +336,16 @@
   "rankAnnounceRank": "Rank",
   "rankAnnounceLike": "Like",
   "rankPlayNow": "maglaro ngayon",
-  "rankClaimCongratulations": "Congratulations!",
-  "rankClaimFinishedPlace": "Natapos ka sa #{place} sa ranking ngayong linggo!",
-  "@rankClaimFinishedPlace": {
+  "rankingRewardClaimCongratulations": "Congratulations!",
+  "rankingRewardClaimFinishedPlace": "Natapos ka sa #{place} sa ranking ngayong linggo!",
+  "@rankingRewardClaimFinishedPlace": {
     "placeholders": {
       "place": {
         "type": "int"
       }
     }
   },
-  "rankClaimYourRewards": "Mga Reward Mo",
-  "rankClaim": "Kunin",
-  "rankClaimError": "May nangyaring mali. Subukan ulit."
+  "rankingRewardClaimYourRewards": "Mga Reward Mo",
+  "rankingRewardClaim": "Kunin",
+  "rankingRewardClaimError": "May nangyaring mali. Subukan ulit."
 }

@@ -336,16 +336,16 @@
   "rankAnnounceRank": "อันดับ",
   "rankAnnounceLike": "Like",
   "rankPlayNow": "เล่นเลย",
-  "rankClaimCongratulations": "ยินดีด้วย!",
-  "rankClaimFinishedPlace": "คุณได้อันดับ #{place} ในจัดอันดับสัปดาห์นี้!",
-  "@rankClaimFinishedPlace": {
+  "rankingRewardClaimCongratulations": "ยินดีด้วย!",
+  "rankingRewardClaimFinishedPlace": "คุณได้อันดับ #{place} ในจัดอันดับสัปดาห์นี้!",
+  "@rankingRewardClaimFinishedPlace": {
     "placeholders": {
       "place": {
         "type": "int"
       }
     }
   },
-  "rankClaimYourRewards": "รางวัลของคุณ",
-  "rankClaim": "รับรางวัล",
-  "rankClaimError": "เกิดข้อผิดพลาด โปรดลองอีกครั้ง"
+  "rankingRewardClaimYourRewards": "รางวัลของคุณ",
+  "rankingRewardClaim": "รับรางวัล",
+  "rankingRewardClaimError": "เกิดข้อผิดพลาด โปรดลองอีกครั้ง"
 }

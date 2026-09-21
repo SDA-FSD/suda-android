@@ -842,20 +842,20 @@ class AppLocalizationsDe extends AppLocalizations {
   String get rankPlayNow => 'jetzt spielen';
 
   @override
-  String get rankClaimCongratulations => 'Glückwunsch!';
+  String get rankingRewardClaimCongratulations => 'Glückwunsch!';
 
   @override
-  String rankClaimFinishedPlace(int place) {
+  String rankingRewardClaimFinishedPlace(int place) {
     return 'Du bist #$place in dieser Wochenrangliste!';
   }
 
   @override
-  String get rankClaimYourRewards => 'Deine Belohnungen';
+  String get rankingRewardClaimYourRewards => 'Deine Belohnungen';
 
   @override
-  String get rankClaim => 'Abholen';
+  String get rankingRewardClaim => 'Abholen';
 
   @override
-  String get rankClaimError =>
+  String get rankingRewardClaimError =>
       'Etwas ist schiefgelaufen. Bitte versuche es erneut.';
 }

@@ -336,16 +336,16 @@
   "rankAnnounceRank": "Rang",
   "rankAnnounceLike": "Like",
   "rankPlayNow": "nu spelen",
-  "rankClaimCongratulations": "Gefeliciteerd!",
-  "rankClaimFinishedPlace": "Je bent #{place} geworden in de ranking van deze week!",
-  "@rankClaimFinishedPlace": {
+  "rankingRewardClaimCongratulations": "Gefeliciteerd!",
+  "rankingRewardClaimFinishedPlace": "Je bent #{place} geworden in de ranking van deze week!",
+  "@rankingRewardClaimFinishedPlace": {
     "placeholders": {
       "place": {
         "type": "int"
       }
     }
   },
-  "rankClaimYourRewards": "Jouw beloningen",
-  "rankClaim": "Claimen",
-  "rankClaimError": "Er ging iets mis. Probeer het opnieuw."
+  "rankingRewardClaimYourRewards": "Jouw beloningen",
+  "rankingRewardClaim": "Claimen",
+  "rankingRewardClaimError": "Er ging iets mis. Probeer het opnieuw."
 }
