@@ -180,7 +180,7 @@
 
 ### 스크린 용도
 - CEFR 선택 **직후 1회** 기본 프로필 이미지(색상) 선택
-- `PUT /v1/users/profile-img` body `{ "type": "DEFAULT", "value": "1"…"5" }` (좌→우 `#03ABA8`/`#FFB700`/`#FFAAE1`/`#B286EB`/`#054544`)
+- `PUT /v1/users/profile-img` body `{ "type": "DEFAULT", "value": "1"…"4" }` (좌→우 `#FFB700`/`#FFAAE1`/`#B286EB`/`#054544`). 기본·무효 value는 1번 노랑. 이미 저장된 `DEFAULT:03ABA8`은 그대로 표시(피커 엔트리 없음)
 
 ### 이전 스크린 정보 (진입점)
 - **FirstCefrLevelScreen**: `_onFirstCefrLevelComplete` → `main.dart` `_needsFirstProfileImage = true`
@@ -337,7 +337,7 @@
     - 위치: 상단 여백 80 바로 아래. 비구독 CTA가 있으면 CTA 아래 gap 24
     - 배경: 박스가 위치한 세로 구간에 화면 좌우 끝까지 닿는 full-bleed 그라데이션 적용
     - 구현: `AppScaffold(usePadding: false)`를 적용하여 그라데이션이 화면 끝까지 닿도록 함
-    - 아바타 `imgPath`: null/empty → `DefaultProfileAvatar` `#03ABA8`(1번) / `DEFAULT:XXXXXX` → 해당 hex / `NORMAL|RARE|EPIC:path` → 구독 테두리 안쪽 `CharacterRarityFrame`(border 5) + `CdnThumbSlot.profileAvatar` `_150`. path는 http(s)로 시작하지 않음
+    - 아바타 `imgPath`: null/empty → `DefaultProfileAvatar` `#FFB700`(1번) / `DEFAULT:XXXXXX` → 해당 hex / `NORMAL|RARE|EPIC:path` → 구독 테두리 안쪽 `CharacterRarityFrame`(border 5) + `CdnThumbSlot.profileAvatar` `_150`. path는 http(s)로 시작하지 않음
     - 스탯 라벨 영어 하드코딩: Level(`currentLevel`) / Like(`likePoint`) / Friends(`friendCount`)
   - **구독자 상단 그라데이션**: 탭 상단까지. 아래는 `#121212`
   - **무료 사용자 Premium CTA** (`SubscriptionStatusCache.isSubscribedActive == false`):
@@ -435,7 +435,7 @@
 ### 스크린 내부 구현 특이사항
 - 키보드 활성화 시 `resizeToAvoidBottomInset: false` (하단 "계정 삭제"가 키보드와 함께 올라오지 않도록)
 - 진입 시 `GET /v1/users/energy/simple`로 구독 상태 갱신 (`SubscriptionStatusCache`)
-- **아바타**: `UserDto.imgPath`. null/empty·`DEFAULT:03ABA8`는 1번 초록. 캐릭터는 `CharacterRarityFrame`(border 10)+`_150`. 초록 1번이 아니면 X 오버레이 → Confirm 후 `PUT /v1/users/profile-img` `{type:DEFAULT,value:"1"}` + `GET /v1/users`(`MainUserSync`)
+- **아바타**: `UserDto.imgPath`. null/empty·`DEFAULT:FFB700`는 1번 노랑. 캐릭터는 `CharacterRarityFrame`(border 10)+`_150`. 노란 1번이 아니면 X 오버레이 → Confirm 후 `PUT /v1/users/profile-img` `{type:DEFAULT,value:"1"}` + `GET /v1/users`(`MainUserSync`)
 - **Subscription 섹션**
   - 무료 (`isSubscribedActive == false`): Free Plan 카드(`check_green.svg`) → Paywall. l10n `accountFreePlanTitle` / `accountFreePlanSubtitle`
   - 구독 활성: Subscription 헤더 leading. 구독↔카드 간격 **24**(이름/계정 섹션과 동일). **`Change Plan >`는 월간 구독자만** 노출(`subscriptionBasePlanId==bp-premium-monthly`; 연간·미구독은 미표시). (l10n `accountChangePlan` + chevron, 텍스트 `bodySmall` 14·**w700**/`wght` 700·흰색)는 그 간격 안 하단 trailing(`end: 8`, 카드와 `bottom: 12`) → `ChangePlanScreen`. Premium 카드(`premium_verified_badge.png`) — 제목 `accountPremiumTitle`, 부제 `accountPremiumSubtitle`, 갱신일 `accountPremiumRenewsOn`(`subscriptionExpiredAt`, `DateFormat.yMd` 로케일 패턴 · 실패 시 `en`)
@@ -1031,14 +1031,15 @@
 ### 스크린 내부 구현 특이사항
 - 데이터 `GET /v1/users/{userId}/profile`. 배경은 **대상** `subscribedYn`
 - 설정 아이콘·구독 CTA·레벨바·Saved/History 탭 없음. Progress 탭 라벨만 (`SudaLabelTabs` 1개 허용)
-- Level/Like/Friends 표시만. 그 아래 알약(스탯 컬럼과 동일 width)
+- Level/Like/Friends 표시만. 그 아래 알약(스탯 컬럼과 동일 width, 세로 padding 6)
+- 헤더(알약)와 Progress 탭 사이 여백 없음
   - FRIEND: `#0CABA8` 20% + 흰 1px 그라데이션 보더 + `check_raw.png` + `otherUserFriends`. 탭 → Unfriend 팝업(`primaryLight`)
   - OUTGOING_PENDING: `#80D7CF` / 글자 `#0CABA8` / `otherUserRequested`. 탭 → 요청 취소 팝업
   - NONE·INCOMING_PENDING: `#0CABA8` 흰글자 `otherUserAddFriend`. 탭 → 신청 팝업(랭킹 리스트 프레임+레벨뱃지, 가로=팝업 width 30%). POST 후 INCOMING은 즉시 FRIEND
   - REJECTED(쿨다운): 알약은 Add Friend. 탭하면 스토킹 팝업(POST 없음). `409 FRIEND_REQUEST_COOLDOWN`도 동일 Body+OK
   - `409 FRIEND_LIMIT_EXCEEDED`: `limitUserId==대상`이면 상대 한도, 아니면 내 한도
 - Neighbors: 타이틀 항상. 획득 있으면 내 프로필과 같은 가로 스크롤(탭 없음). 0개면 `otherUserNeighborsEmpty`(en No characters collected yet. / pt Nenhum personagem coletado ainda. / ko 아직 획득한 캐릭터가 없습니다.)
-- Achievements: 타이틀 항상. 획득만·탭 없음. 0개면 `otherUserAchievementsEmpty`(en No achievements earned yet. / pt Nenhuma conquista obtida ainda. / ko 아직 획득한 업적이 없습니다.)
+- Achievements: 타이틀 항상. 획득만·탭 없음. 0개면 `otherUserAchievementsEmpty`(en No achievements earned yet. / pt Nenhuma conquista obtida ainda. / ko 아직 획득한 업적이 없습니다.). 1~2개여도 3열 그리드 칸 크기 유지(빈 칸 spacer)
 
 ---
 

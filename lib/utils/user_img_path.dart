@@ -5,11 +5,11 @@ import 'package:flutter/material.dart';
 class UserImgPath {
   static const defaultPrefix = 'DEFAULT:';
   static const nestedRarityBorderWidth = 5.0;
-  static const fallbackHex = '03ABA8';
+  static const fallbackHex = 'FFB700';
   static const fallbackStored = 'DEFAULT:$fallbackHex';
-  static const fallbackColor = Color(0xFF03ABA8);
+  static const fallbackColor = Color(0xFFFFB700);
 
-  /// 빈 슬롯이 아닌 실제 유저의 `imgPath`가 비었을 때 1번 초록으로 표시.
+  /// 빈 슬롯이 아닌 실제 유저의 `imgPath`가 비었을 때 1번 노랑으로 표시.
   static String orFallback(String? raw) {
     final value = raw?.trim() ?? '';
     return value.isEmpty ? fallbackStored : value;

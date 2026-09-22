@@ -25,9 +25,8 @@ class _FirstProfileImageScreenState extends State<FirstProfileImageScreen> {
   /// 포커스 원 = 캐러셀 영역 안에 맞는 최대 정사각. 측면은 이 배율.
   static const _sideCircleScale = 0.4;
 
-  /// value `1`…`5`와 동일 순서.
+  /// value `1`…`4`와 동일 순서.
   static const _optionColors = <Color>[
-    Color(0xFF03ABA8),
     Color(0xFFFFB700),
     Color(0xFFFFAAE1),
     Color(0xFFB286EB),

@@ -478,8 +478,6 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 35),
-                const SizedBox(height: 14),
                 KeyedSubtree(
                   key: _tabsKey,
                   child: SudaLabelTabs(
@@ -660,11 +658,10 @@ class _FriendPill extends StatelessWidget {
     }
 
     final child = SizedBox(
-      height: 44,
       width: double.infinity,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(22),
+          borderRadius: BorderRadius.circular(999),
           gradient: friendsBorder
               ? const LinearGradient(
                   begin: Alignment.topRight,
@@ -680,23 +677,26 @@ class _FriendPill extends StatelessWidget {
           child: DecoratedBox(
             decoration: BoxDecoration(
               color: fill,
-              borderRadius: BorderRadius.circular(21),
+              borderRadius: BorderRadius.circular(999),
             ),
-            child: Center(
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (showCheck) ...[
-                    Image.asset(
-                      'assets/images/icons/check_raw.png',
-                      width: 16,
-                      height: 16,
-                      color: Colors.white,
-                    ),
-                    const SizedBox(width: 6),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              child: Center(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (showCheck) ...[
+                      Image.asset(
+                        'assets/images/icons/check_raw.png',
+                        width: 14,
+                        height: 14,
+                        color: Colors.white,
+                      ),
+                      const SizedBox(width: 6),
+                    ],
+                    Text(label, style: labelStyle.copyWith(color: textColor)),
                   ],
-                  Text(label, style: labelStyle.copyWith(color: textColor)),
-                ],
+                ),
               ),
             ),
           ),

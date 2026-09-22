@@ -25,10 +25,26 @@ class ProfileAchievementsSection extends StatelessWidget {
   static const _popupImageSize = 96.0;
 
   static const _grayscale = ColorFilter.matrix(<double>[
-    0.0808, 0.2718, 0.0274, 0, -12,
-    0.0808, 0.2718, 0.0274, 0, -12,
-    0.0808, 0.2718, 0.0274, 0, -12,
-    0, 0, 0, 1, 0,
+    0.0808,
+    0.2718,
+    0.0274,
+    0,
+    -12,
+    0.0808,
+    0.2718,
+    0.0274,
+    0,
+    -12,
+    0.0808,
+    0.2718,
+    0.0274,
+    0,
+    -12,
+    0,
+    0,
+    0,
+    1,
+    0,
   ]);
 
   @override
@@ -44,23 +60,28 @@ class ProfileAchievementsSection extends StatelessWidget {
         ? source.where((item) => item.unlocked).toList()
         : source;
     if (items.isEmpty) return const SizedBox.shrink();
+    final cells = <RankedPlaceAchievementDto?>[
+      for (var i = 0; i < 3; i++) i < items.length ? items[i] : null,
+    ];
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: _hPad),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          for (var i = 0; i < items.length; i++) ...[
+          for (var i = 0; i < cells.length; i++) ...[
             if (i > 0) const SizedBox(width: _colGap),
             Expanded(
-              child: _AchievementCell(
-                item: items[i],
-                grayscale: _grayscale,
-                titleGap: _titleGap,
-                progressGap: _progressGap,
-                progressColor: _progressColor,
-                popupImageSize: _popupImageSize,
-                tapEnabled: tapEnabled,
-              ),
+              child: cells[i] == null
+                  ? const SizedBox.shrink()
+                  : _AchievementCell(
+                      item: cells[i]!,
+                      grayscale: _grayscale,
+                      titleGap: _titleGap,
+                      progressGap: _progressGap,
+                      progressColor: _progressColor,
+                      popupImageSize: _popupImageSize,
+                      tapEnabled: tapEnabled,
+                    ),
             ),
           ],
         ],

@@ -257,7 +257,7 @@ class RankAvatar extends StatelessWidget {
     if (parsed.isDefault) {
       return DefaultProfileAvatar(
         size: size,
-        color: parsed.defaultColor ?? const Color(0xFF03ABA8),
+        color: parsed.defaultColor ?? UserImgPath.fallbackColor,
       );
     }
     if (parsed.isHttpUrl) {
