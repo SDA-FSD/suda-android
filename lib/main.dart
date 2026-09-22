@@ -31,6 +31,7 @@ import 'screens/first_cefr_level.dart';
 import 'screens/first_profile_image.dart';
 import 'screens/home.dart';
 import 'screens/profile.dart';
+import 'screens/other_user_profile.dart';
 import 'screens/notification_box.dart';
 import 'screens/rank/ranking.dart';
 import 'screens/roleplay/history.dart';
@@ -382,7 +383,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       _navigatorKey,
     );
 
-    debugPrint('[DEBUG] _checkVersionAndAuth: versionCheckPassed=$versionCheckPassed');
+    debugPrint(
+      '[DEBUG] _checkVersionAndAuth: versionCheckPassed=$versionCheckPassed',
+    );
     if (!versionCheckPassed) {
       // 버전 체크 실패 또는 강제 업데이트 필요 시 JWT 처리 진행하지 않음
       if (!mounted) return;
@@ -857,6 +860,23 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   ),
                 ),
               );
+            }
+          });
+          return;
+        }
+        final otherUserId = int.tryParse(segments[1]);
+        if (otherUserId != null) {
+          if (_user?.id == otherUserId) {
+            setState(() => _currentMainScreen = 'profile');
+            unawaited(_syncNotiboxListFirstPage(force: true));
+            return;
+          }
+          unawaited(_syncNotiboxListFirstPage(force: true));
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            final c = _navigatorKey.currentState?.context;
+            if (c != null && c.mounted) {
+              unawaited(OtherUserProfileScreen.open(c, otherUserId));
             }
           });
           return;

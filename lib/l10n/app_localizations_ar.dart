@@ -429,6 +429,73 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get otherUserFriends => 'الأصدقاء';
+
+  @override
+  String get otherUserRequested => 'تم إرسال الطلب';
+
+  @override
+  String get otherUserAddFriend => 'إضافة صديق';
+
+  @override
+  String get otherUserUnfriendTitle => 'إلغاء الصداقة مع هذا المستخدم؟';
+
+  @override
+  String get otherUserUnfriendBody => 'لن تعودا صديقين بعد الآن.';
+
+  @override
+  String get otherUserUnfriendOk => 'إلغاء الصداقة';
+
+  @override
+  String get otherUserUnfriendCancel => 'إلغاء';
+
+  @override
+  String get otherUserCancelRequestTitle => 'إلغاء طلب الصداقة؟';
+
+  @override
+  String get otherUserCancelRequestBody =>
+      'لن تتمكن من إرسال طلب آخر إلى هذا المستخدم لمدة 48 ساعة.';
+
+  @override
+  String get otherUserCancelRequestOk => 'إلغاء الطلب';
+
+  @override
+  String get otherUserKeepRequest => 'الإبقاء على الطلب';
+
+  @override
+  String get otherUserSendRequestTitle => 'إرسال طلب صداقة؟';
+
+  @override
+  String get otherUserSendRequestBody => 'ستصبحان صديقين عند قبول الطلب.';
+
+  @override
+  String get otherUserSendRequestOk => 'إرسال الطلب';
+
+  @override
+  String get otherUserSendRequestCancel => 'إلغاء';
+
+  @override
+  String get otherUserFriendBlockedBody =>
+      'لا يمكنك إرسال طلب صداقة إلى هذا المستخدم الآن.';
+
+  @override
+  String get otherUserFriendOk => 'حسنًا';
+
+  @override
+  String get otherUserFriendLimitSelf =>
+      'لقد وصلت إلى حد 30 صديقًا. أزل صديقًا لإضافة شخص جديد.';
+
+  @override
+  String get otherUserFriendLimitThem =>
+      'وصل هذا الشخص إلى حد 30 صديقًا ولا يمكنه إضافة المزيد.';
+
+  @override
+  String get otherUserNeighborsEmpty => 'لم تُجمع أي شخصيات بعد.';
+
+  @override
+  String get otherUserAchievementsEmpty => 'لم تُحقق أي إنجازات بعد.';
+
+  @override
   String get profileHistory => 'السجل';
 
   @override

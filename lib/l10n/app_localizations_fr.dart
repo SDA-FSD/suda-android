@@ -437,6 +437,77 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get otherUserFriends => 'Amis';
+
+  @override
+  String get otherUserRequested => 'Demande envoyée';
+
+  @override
+  String get otherUserAddFriend => 'Ajouter un ami';
+
+  @override
+  String get otherUserUnfriendTitle => 'Retirer cet utilisateur de vos amis ?';
+
+  @override
+  String get otherUserUnfriendBody =>
+      'Vous et cet utilisateur ne serez plus amis.';
+
+  @override
+  String get otherUserUnfriendOk => 'Retirer';
+
+  @override
+  String get otherUserUnfriendCancel => 'Annuler';
+
+  @override
+  String get otherUserCancelRequestTitle => 'Annuler la demande d’ami ?';
+
+  @override
+  String get otherUserCancelRequestBody =>
+      'Vous ne pourrez plus envoyer de demande à cet utilisateur pendant 48 heures.';
+
+  @override
+  String get otherUserCancelRequestOk => 'Annuler la demande';
+
+  @override
+  String get otherUserKeepRequest => 'Garder la demande';
+
+  @override
+  String get otherUserSendRequestTitle => 'Envoyer une demande d’ami ?';
+
+  @override
+  String get otherUserSendRequestBody =>
+      'Vous deviendrez amis lorsque la demande sera acceptée.';
+
+  @override
+  String get otherUserSendRequestOk => 'Envoyer la demande';
+
+  @override
+  String get otherUserSendRequestCancel => 'Annuler';
+
+  @override
+  String get otherUserFriendBlockedBody =>
+      'Vous ne pouvez pas envoyer de demande d’ami à cet utilisateur pour le moment.';
+
+  @override
+  String get otherUserFriendOk => 'OK';
+
+  @override
+  String get otherUserFriendLimitSelf =>
+      'Vous avez atteint la limite de 30 amis. Supprimez un ami pour en ajouter un nouveau.';
+
+  @override
+  String get otherUserFriendLimitThem =>
+      'Cette personne a atteint la limite de 30 amis et ne peut plus en ajouter.';
+
+  @override
+  String get otherUserNeighborsEmpty =>
+      'Aucun personnage collecté pour le moment.';
+
+  @override
+  String get otherUserAchievementsEmpty =>
+      'Aucun succès obtenu pour le moment.';
+
+  @override
   String get profileHistory => 'Historique';
 
   @override

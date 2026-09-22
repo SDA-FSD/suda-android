@@ -426,6 +426,75 @@ class AppLocalizationsTh extends AppLocalizations {
   }
 
   @override
+  String get otherUserFriends => 'เพื่อน';
+
+  @override
+  String get otherUserRequested => 'ส่งคำขอแล้ว';
+
+  @override
+  String get otherUserAddFriend => 'เพิ่มเพื่อน';
+
+  @override
+  String get otherUserUnfriendTitle => 'เลิกเป็นเพื่อนกับผู้ใช้นี้?';
+
+  @override
+  String get otherUserUnfriendBody =>
+      'คุณกับผู้ใช้นี้จะไม่เป็นเพื่อนกันอีกต่อไป';
+
+  @override
+  String get otherUserUnfriendOk => 'เลิกเป็นเพื่อน';
+
+  @override
+  String get otherUserUnfriendCancel => 'ยกเลิก';
+
+  @override
+  String get otherUserCancelRequestTitle => 'ยกเลิกคำขอเป็นเพื่อน?';
+
+  @override
+  String get otherUserCancelRequestBody =>
+      'คุณจะไม่สามารถส่งคำขอไปยังผู้ใช้นี้ได้อีกเป็นเวลา 48 ชั่วโมง';
+
+  @override
+  String get otherUserCancelRequestOk => 'ยกเลิกคำขอ';
+
+  @override
+  String get otherUserKeepRequest => 'คงคำขอไว้';
+
+  @override
+  String get otherUserSendRequestTitle => 'ส่งคำขอเป็นเพื่อน?';
+
+  @override
+  String get otherUserSendRequestBody =>
+      'คุณจะเป็นเพื่อนกันเมื่ออีกฝ่ายยอมรับคำขอ';
+
+  @override
+  String get otherUserSendRequestOk => 'ส่งคำขอ';
+
+  @override
+  String get otherUserSendRequestCancel => 'ยกเลิก';
+
+  @override
+  String get otherUserFriendBlockedBody =>
+      'ขณะนี้คุณไม่สามารถส่งคำขอเป็นเพื่อนไปยังผู้ใช้นี้ได้';
+
+  @override
+  String get otherUserFriendOk => 'ตกลง';
+
+  @override
+  String get otherUserFriendLimitSelf =>
+      'คุณมีเพื่อนครบ 30 คนแล้ว ลบเพื่อนคนหนึ่งก่อนจึงจะเพิ่มคนใหม่ได้';
+
+  @override
+  String get otherUserFriendLimitThem =>
+      'อีกฝ่ายมีเพื่อนครบ 30 คนแล้ว จึงเพิ่มเพื่อนอีกไม่ได้';
+
+  @override
+  String get otherUserNeighborsEmpty => 'ยังไม่มีตัวละครที่ได้รับ';
+
+  @override
+  String get otherUserAchievementsEmpty => 'ยังไม่มีผลงานที่ได้รับ';
+
+  @override
   String get profileHistory => 'ประวัติ';
 
   @override

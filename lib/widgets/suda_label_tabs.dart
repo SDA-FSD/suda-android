@@ -58,7 +58,7 @@ class SudaLabelTabs extends StatefulWidget {
     this.contentGap = 20,
     this.labelPadding = EdgeInsets.zero,
     this.maintainState = false,
-  }) : assert(tabs.length >= 2, 'SudaLabelTabs requires at least 2 tabs');
+  }) : assert(tabs.isNotEmpty, 'SudaLabelTabs requires at least 1 tab');
 
   @override
   State<SudaLabelTabs> createState() => _SudaLabelTabsState();

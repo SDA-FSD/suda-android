@@ -905,6 +905,132 @@ abstract class AppLocalizations {
   /// **'x {count}'**
   String profileAchievementCount(int count);
 
+  /// No description provided for @otherUserFriends.
+  ///
+  /// In en, this message translates to:
+  /// **'Friends'**
+  String get otherUserFriends;
+
+  /// No description provided for @otherUserRequested.
+  ///
+  /// In en, this message translates to:
+  /// **'Requested'**
+  String get otherUserRequested;
+
+  /// No description provided for @otherUserAddFriend.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Friend'**
+  String get otherUserAddFriend;
+
+  /// No description provided for @otherUserUnfriendTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unfriend this user?'**
+  String get otherUserUnfriendTitle;
+
+  /// No description provided for @otherUserUnfriendBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You and this user will no longer be friends.'**
+  String get otherUserUnfriendBody;
+
+  /// No description provided for @otherUserUnfriendOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Unfriend'**
+  String get otherUserUnfriendOk;
+
+  /// No description provided for @otherUserUnfriendCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get otherUserUnfriendCancel;
+
+  /// No description provided for @otherUserCancelRequestTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel friend request?'**
+  String get otherUserCancelRequestTitle;
+
+  /// No description provided for @otherUserCancelRequestBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You won\'t be able to send another request to this user for 48 hours.'**
+  String get otherUserCancelRequestBody;
+
+  /// No description provided for @otherUserCancelRequestOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel Request'**
+  String get otherUserCancelRequestOk;
+
+  /// No description provided for @otherUserKeepRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep Request'**
+  String get otherUserKeepRequest;
+
+  /// No description provided for @otherUserSendRequestTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Send friend request?'**
+  String get otherUserSendRequestTitle;
+
+  /// No description provided for @otherUserSendRequestBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ll become friends when they accept your request.'**
+  String get otherUserSendRequestBody;
+
+  /// No description provided for @otherUserSendRequestOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Request'**
+  String get otherUserSendRequestOk;
+
+  /// No description provided for @otherUserSendRequestCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get otherUserSendRequestCancel;
+
+  /// No description provided for @otherUserFriendBlockedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You can’t send a friend request to this user right now.'**
+  String get otherUserFriendBlockedBody;
+
+  /// No description provided for @otherUserFriendOk.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get otherUserFriendOk;
+
+  /// No description provided for @otherUserFriendLimitSelf.
+  ///
+  /// In en, this message translates to:
+  /// **'You’ve reached the 30-friend limit. Remove a friend to add someone new.'**
+  String get otherUserFriendLimitSelf;
+
+  /// No description provided for @otherUserFriendLimitThem.
+  ///
+  /// In en, this message translates to:
+  /// **'They’ve reached the 30-friend limit and can’t add any more friends.'**
+  String get otherUserFriendLimitThem;
+
+  /// No description provided for @otherUserNeighborsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No characters collected yet.'**
+  String get otherUserNeighborsEmpty;
+
+  /// No description provided for @otherUserAchievementsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No achievements earned yet.'**
+  String get otherUserAchievementsEmpty;
+
   /// No description provided for @profileHistory.
   ///
   /// In en, this message translates to:

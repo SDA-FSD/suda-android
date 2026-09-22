@@ -882,6 +882,138 @@ class UserApi {
     );
   }
 
+  static Future<OtherUserProfileDto> getOtherUserProfile({
+    required String accessToken,
+    required int userId,
+  }) {
+    return SudaHttpClient.executeWithRefresh(
+      () => _getOtherUserProfileInternal(accessToken, userId),
+      retryWithNewToken: (newToken) =>
+          _getOtherUserProfileInternal(newToken, userId),
+    );
+  }
+
+  static Future<OtherUserProfileDto> _getOtherUserProfileInternal(
+    String accessToken,
+    int userId,
+  ) async {
+    final uri = SudaHttpClient.buildUri('/v1/users/$userId/profile');
+    late final http.Response response;
+    try {
+      response = await SudaHttpClient.client
+          .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+          .timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      rethrow;
+    }
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final Map<String, dynamic> data =
+          jsonDecode(response.body) as Map<String, dynamic>;
+      return OtherUserProfileDto.fromJson(data);
+    }
+    throw Exception(
+      'GET /v1/users/$userId/profile failed: HTTP ${response.statusCode} ${response.body}',
+    );
+  }
+
+  static Future<FriendRelationDto> requestFriend({
+    required String accessToken,
+    required int targetUserId,
+  }) {
+    return _friendWrite(
+      accessToken: accessToken,
+      method: 'POST',
+      path: '/v1/users/friends/$targetUserId',
+    );
+  }
+
+  static Future<FriendRelationDto> cancelFriendRequest({
+    required String accessToken,
+    required int targetUserId,
+  }) {
+    return _friendWrite(
+      accessToken: accessToken,
+      method: 'DELETE',
+      path: '/v1/users/friends/$targetUserId/request',
+    );
+  }
+
+  static Future<FriendRelationDto> unfriend({
+    required String accessToken,
+    required int targetUserId,
+  }) {
+    return _friendWrite(
+      accessToken: accessToken,
+      method: 'DELETE',
+      path: '/v1/users/friends/$targetUserId',
+    );
+  }
+
+  static Future<FriendRelationDto> _friendWrite({
+    required String accessToken,
+    required String method,
+    required String path,
+  }) {
+    return SudaHttpClient.executeWithRefresh(
+      () => _friendWriteInternal(accessToken, method, path),
+      retryWithNewToken: (newToken) =>
+          _friendWriteInternal(newToken, method, path),
+    );
+  }
+
+  static Future<FriendRelationDto> _friendWriteInternal(
+    String accessToken,
+    String method,
+    String path,
+  ) async {
+    final uri = SudaHttpClient.buildUri(path);
+    late final http.Response response;
+    try {
+      final headers = {'Authorization': 'Bearer $accessToken'};
+      if (method == 'POST') {
+        response = await SudaHttpClient.client
+            .post(uri, headers: headers)
+            .timeout(const Duration(seconds: 10));
+      } else {
+        response = await SudaHttpClient.client
+            .delete(uri, headers: headers)
+            .timeout(const Duration(seconds: 10));
+      }
+    } on TimeoutException {
+      rethrow;
+    }
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+    if (response.statusCode == 409) {
+      throw _parseFriendError(response);
+    }
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final Map<String, dynamic> data =
+          jsonDecode(response.body) as Map<String, dynamic>;
+      return FriendRelationDto.fromJson(data);
+    }
+    throw FriendApiException(statusCode: response.statusCode);
+  }
+
+  static FriendApiException _parseFriendError(http.Response response) {
+    try {
+      final decoded = jsonDecode(response.body);
+      if (decoded is Map<String, dynamic>) {
+        return FriendApiException(
+          statusCode: response.statusCode,
+          code: decoded['code'] as String?,
+          limit: (decoded['limit'] as num?)?.toInt(),
+          limitUserId: (decoded['limitUserId'] as num?)?.toInt(),
+        );
+      }
+    } catch (_) {}
+    return FriendApiException(statusCode: response.statusCode);
+  }
+
   static String _parseStringResponse(String body) {
     try {
       final decoded = jsonDecode(body);

@@ -8,6 +8,9 @@ enum DefaultPopupButtonType {
   /// stadium, uses `ElevatedButtonTheme`.
   primary,
 
+  /// Primary inverse: white fill, black label. Unfriend confirm 등.
+  primaryLight,
+
   /// Tertiary: uses `TextButtonTheme`.
   text,
 }
@@ -111,9 +114,9 @@ class DefaultPopup extends StatelessWidget {
         Text(
           title,
           textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                color: Colors.white,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.headlineMedium?.copyWith(color: Colors.white),
         ),
       );
     }
@@ -227,8 +230,7 @@ class DefaultPopup extends StatelessWidget {
                     filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
                     child: DecoratedBox(
                       decoration: BoxDecoration(
-                        borderRadius:
-                            BorderRadius.circular(cardBorderRadius),
+                        borderRadius: BorderRadius.circular(cardBorderRadius),
                         border: Border.all(
                           color: Colors.white.withValues(alpha: 0.36),
                           width: 1,
@@ -262,7 +264,9 @@ class DefaultPopup extends StatelessWidget {
       if (i > 0) out.add(const SizedBox(height: 20));
       final b = buttons[i];
       final expandPrimary =
-          expandPrimaryButtons && b.type == DefaultPopupButtonType.primary;
+          expandPrimaryButtons &&
+          (b.type == DefaultPopupButtonType.primary ||
+              b.type == DefaultPopupButtonType.primaryLight);
       out.add(
         Align(
           alignment: Alignment.center,
@@ -271,26 +275,40 @@ class DefaultPopup extends StatelessWidget {
             width: expandPrimary ? double.infinity : null,
             child: switch (b.type) {
               DefaultPopupButtonType.primary => ElevatedButton(
-                  onPressed: () => _popThenCallback(context, b.onPressed),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0CABA8),
-                    foregroundColor: Colors.white,
+                onPressed: () => _popThenCallback(context, b.onPressed),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF0CABA8),
+                  foregroundColor: Colors.white,
+                  shape: const StadiumBorder(),
+                  elevation: 0,
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ).merge(elevatedBase),
+                child: Text(b.label),
+              ),
+              DefaultPopupButtonType.primaryLight => ElevatedButton(
+                onPressed: () => _popThenCallback(context, b.onPressed),
+                style: (elevatedBase ?? const ButtonStyle()).merge(
+                  ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.black,
                     shape: const StadiumBorder(),
                     elevation: 0,
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ).merge(elevatedBase),
-                  child: Text(b.label),
+                  ),
                 ),
+                child: Text(b.label),
+              ),
               DefaultPopupButtonType.text => TextButton(
-                  onPressed: () => _popThenCallback(context, b.onPressed),
-                  style: TextButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ).merge(textBase),
-                  child: Text(b.label),
-                ),
+                onPressed: () => _popThenCallback(context, b.onPressed),
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ).merge(textBase),
+                child: Text(b.label),
+              ),
             },
           ),
         ),

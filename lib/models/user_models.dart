@@ -10,13 +10,16 @@ class UserEnergyDto {
   final DateTime? unlimitedEndsAt;
   final String subscribedYn;
   final DateTime? subscriptionExpiredAt;
+
   /// Play Billing base plan id (예: `bp-premium-monthly` / `bp-premium-yearly`).
   final String? subscriptionBasePlanId;
+
   /// detail 전용. simple 응답에는 없음 → 기본 `N`.
   final String showEnablePushFreeChargeYn;
   final String showUnlimitedPurchaseYn;
   final String showCapacity6PurchaseYn;
   final String showCapacity7PurchaseYn;
+
   /// detail 응답에서 내려오는 팝업 offer 묶음 id.
   /// simple 응답에는 없음 → 기본값은 빈 문자열(=impression 미수집).
   final String offerSessionId;
@@ -59,9 +62,12 @@ class UserEnergyDto {
       subscriptionBasePlanId: json['subscriptionBasePlanId'] as String?,
       showEnablePushFreeChargeYn:
           json['showEnablePushFreeChargeYn'] as String? ?? 'N',
-      showUnlimitedPurchaseYn: json['showUnlimitedPurchaseYn'] as String? ?? 'N',
-      showCapacity6PurchaseYn: json['showCapacity6PurchaseYn'] as String? ?? 'N',
-      showCapacity7PurchaseYn: json['showCapacity7PurchaseYn'] as String? ?? 'N',
+      showUnlimitedPurchaseYn:
+          json['showUnlimitedPurchaseYn'] as String? ?? 'N',
+      showCapacity6PurchaseYn:
+          json['showCapacity6PurchaseYn'] as String? ?? 'N',
+      showCapacity7PurchaseYn:
+          json['showCapacity7PurchaseYn'] as String? ?? 'N',
       offerSessionId: json['offerSessionId'] as String? ?? '',
     );
   }
@@ -133,6 +139,7 @@ class UserEnergyDto {
 class PurchaseVerifyResultDto {
   final String successYn;
   final String pendingYn;
+
   /// iOS StoreKit finish. AOS는 무시. 기본 `N`.
   final String finishYn;
 
@@ -159,14 +166,10 @@ class PurchaseVerifyResultDto {
 class QuestResultDto {
   final String completeYn;
 
-  const QuestResultDto({
-    required this.completeYn,
-  });
+  const QuestResultDto({required this.completeYn});
 
   factory QuestResultDto.fromJson(Map<String, dynamic> json) {
-    return QuestResultDto(
-      completeYn: json['completeYn'] as String? ?? 'N',
-    );
+    return QuestResultDto(completeYn: json['completeYn'] as String? ?? 'N');
   }
 }
 
@@ -245,20 +248,16 @@ class UserProgressDto {
     }
 
     final claimedRaw = json['claimedCharacters'];
-    final claimedCharacters = claimedRaw is List
-        ? claimedRaw
-            .whereType<Map<String, dynamic>>()
-            .map(ClaimedCharacterPortraitDto.fromJson)
-            .where((item) => item.characterImgPath.isNotEmpty)
-            .toList()
-        : const <ClaimedCharacterPortraitDto>[];
+    final claimedCharacters = _parseClaimedCharacters(claimedRaw);
     return UserProgressDto(
       currentStreakDays: asInt(json['currentStreakDays']),
       wordsSpokenCount: asInt(json['wordsSpokenCount']),
       currentLevel: asInt(json['currentLevel']),
       progressPercentage: asInt(json['progressPercentage']),
       claimableRewardLevel: asInt(json['claimableRewardLevel']),
-      claimableCharacterRewardId: asIntOrNull(json['claimableCharacterRewardId']),
+      claimableCharacterRewardId: asIntOrNull(
+        json['claimableCharacterRewardId'],
+      ),
       claimedCharacters: claimedCharacters,
       achievements: _parseAchievements(json['achievements']),
     );
@@ -306,20 +305,34 @@ class RankedPlaceAchievementDto {
   }
 }
 
+List<ClaimedCharacterPortraitDto> _parseClaimedCharacters(dynamic raw) {
+  if (raw is! List) return const <ClaimedCharacterPortraitDto>[];
+  return raw
+      .whereType<Map<String, dynamic>>()
+      .map(ClaimedCharacterPortraitDto.fromJson)
+      .where((item) => item.characterImgPath.isNotEmpty)
+      .toList();
+}
+
 List<RankedPlaceAchievementDto> _parseAchievements(dynamic raw) {
   final parsed = raw is List
       ? raw
-          .whereType<Map>()
-          .map((e) => RankedPlaceAchievementDto.fromJson(Map<String, dynamic>.from(e)))
-          .where((item) => item.place >= 1 && item.place <= 3)
-          .toList()
+            .whereType<Map>()
+            .map(
+              (e) => RankedPlaceAchievementDto.fromJson(
+                Map<String, dynamic>.from(e),
+              ),
+            )
+            .where((item) => item.place >= 1 && item.place <= 3)
+            .toList()
       : <RankedPlaceAchievementDto>[];
   final byPlace = <int, RankedPlaceAchievementDto>{
     for (final item in parsed) item.place: item,
   };
   final items = [
     for (final place in const [1, 2, 3])
-      byPlace[place] ?? RankedPlaceAchievementDto(place: place, progressCount: 0),
+      byPlace[place] ??
+          RankedPlaceAchievementDto(place: place, progressCount: 0),
   ];
   items.sort((a, b) {
     if (a.unlocked != b.unlocked) {
@@ -334,6 +347,179 @@ List<RankedPlaceAchievementDto> _parseAchievements(dynamic raw) {
     return a.place.compareTo(b.place);
   });
   return items;
+}
+
+enum FriendRelationViewStatus {
+  none,
+  outgoingPending,
+  incomingPending,
+  friend,
+  rejected,
+}
+
+FriendRelationViewStatus friendRelationViewStatusFromJson(dynamic raw) {
+  switch ((raw?.toString() ?? '').toUpperCase()) {
+    case 'OUTGOING_PENDING':
+      return FriendRelationViewStatus.outgoingPending;
+    case 'INCOMING_PENDING':
+      return FriendRelationViewStatus.incomingPending;
+    case 'FRIEND':
+      return FriendRelationViewStatus.friend;
+    case 'REJECTED':
+      return FriendRelationViewStatus.rejected;
+    default:
+      return FriendRelationViewStatus.none;
+  }
+}
+
+class FriendApiException implements Exception {
+  final int statusCode;
+  final String? code;
+  final int? limit;
+  final int? limitUserId;
+
+  const FriendApiException({
+    required this.statusCode,
+    this.code,
+    this.limit,
+    this.limitUserId,
+  });
+
+  bool get isCooldown => code == 'FRIEND_REQUEST_COOLDOWN';
+  bool get isLimitExceeded => code == 'FRIEND_LIMIT_EXCEEDED';
+}
+
+/// `GET /v1/users/{userId}/profile`
+class OtherUserProfileDto {
+  final int id;
+  final String? name;
+  final String? imgPath;
+  final int currentLevel;
+  final int likePoint;
+  final int friendCount;
+  final String subscribedYn;
+  final int currentStreakDays;
+  final int wordsSpokenCount;
+  final List<ClaimedCharacterPortraitDto> claimedCharacters;
+  final List<RankedPlaceAchievementDto> achievements;
+  final FriendRelationViewStatus relationStatus;
+  final DateTime? retryAvailableAt;
+
+  const OtherUserProfileDto({
+    required this.id,
+    this.name,
+    this.imgPath,
+    required this.currentLevel,
+    required this.likePoint,
+    required this.friendCount,
+    this.subscribedYn = 'N',
+    required this.currentStreakDays,
+    required this.wordsSpokenCount,
+    this.claimedCharacters = const [],
+    this.achievements = const [],
+    this.relationStatus = FriendRelationViewStatus.none,
+    this.retryAvailableAt,
+  });
+
+  bool get isPremium => subscribedYn == 'Y';
+
+  OtherUserProfileDto copyWith({
+    FriendRelationViewStatus? relationStatus,
+    int? friendCount,
+    DateTime? retryAvailableAt,
+    bool clearRetryAvailableAt = false,
+  }) {
+    return OtherUserProfileDto(
+      id: id,
+      name: name,
+      imgPath: imgPath,
+      currentLevel: currentLevel,
+      likePoint: likePoint,
+      friendCount: friendCount ?? this.friendCount,
+      subscribedYn: subscribedYn,
+      currentStreakDays: currentStreakDays,
+      wordsSpokenCount: wordsSpokenCount,
+      claimedCharacters: claimedCharacters,
+      achievements: achievements,
+      relationStatus: relationStatus ?? this.relationStatus,
+      retryAvailableAt: clearRetryAvailableAt
+          ? null
+          : (retryAvailableAt ?? this.retryAvailableAt),
+    );
+  }
+
+  factory OtherUserProfileDto.fromJson(Map<String, dynamic> json) {
+    int asInt(dynamic v) {
+      if (v is int) return v;
+      if (v is num) return v.toInt();
+      return 0;
+    }
+
+    DateTime? asTime(dynamic v) {
+      if (v is String && v.isNotEmpty) {
+        return DateTime.tryParse(v);
+      }
+      if (v is int) {
+        return DateTime.fromMillisecondsSinceEpoch(v, isUtc: true);
+      }
+      if (v is num) {
+        return DateTime.fromMillisecondsSinceEpoch(v.toInt(), isUtc: true);
+      }
+      return null;
+    }
+
+    final name = json['name'] as String?;
+    final imgPath = json['imgPath'] as String?;
+    return OtherUserProfileDto(
+      id: asInt(json['id']),
+      name: name == null || name.isEmpty ? null : name,
+      imgPath: imgPath == null || imgPath.isEmpty ? null : imgPath,
+      currentLevel: asInt(json['currentLevel']),
+      likePoint: asInt(json['likePoint']),
+      friendCount: asInt(json['friendCount']),
+      subscribedYn: sudaYnFromJson(json['subscribedYn']),
+      currentStreakDays: asInt(json['currentStreakDays']),
+      wordsSpokenCount: asInt(json['wordsSpokenCount']),
+      claimedCharacters: _parseClaimedCharacters(json['claimedCharacters']),
+      achievements: _parseAchievements(json['achievements']),
+      relationStatus: friendRelationViewStatusFromJson(json['relationStatus']),
+      retryAvailableAt: asTime(json['retryAvailableAt']),
+    );
+  }
+}
+
+class FriendRelationDto {
+  final int? targetUserId;
+  final FriendRelationViewStatus relationStatus;
+  final DateTime? retryAvailableAt;
+
+  const FriendRelationDto({
+    this.targetUserId,
+    this.relationStatus = FriendRelationViewStatus.none,
+    this.retryAvailableAt,
+  });
+
+  factory FriendRelationDto.fromJson(Map<String, dynamic> json) {
+    int? asIntOrNull(dynamic v) {
+      if (v == null) return null;
+      if (v is int) return v;
+      if (v is num) return v.toInt();
+      return int.tryParse(v.toString());
+    }
+
+    DateTime? asTime(dynamic v) {
+      if (v is String && v.isNotEmpty) {
+        return DateTime.tryParse(v);
+      }
+      return null;
+    }
+
+    return FriendRelationDto(
+      targetUserId: asIntOrNull(json['targetUserId']),
+      relationStatus: friendRelationViewStatusFromJson(json['relationStatus']),
+      retryAvailableAt: asTime(json['retryAvailableAt']),
+    );
+  }
 }
 
 class ClaimedCharacterPortraitDto {
@@ -407,8 +593,8 @@ class UserDto {
       metaInfo: json['metaInfo'] == null
           ? null
           : (json['metaInfo'] as List<dynamic>)
-              .map((item) => SudaJson.fromJson(item as Map<String, dynamic>))
-              .toList(),
+                .map((item) => SudaJson.fromJson(item as Map<String, dynamic>))
+                .toList(),
     );
   }
 
@@ -446,10 +632,7 @@ class UserDto {
 extension UserDtoMetaInfoX on UserDto {
   /// Upserts a metaInfo entry (key/value). Keeps other entries untouched.
   /// If [metaInfo] is null/empty, it creates a new list with the given pair.
-  UserDto upsertMetaInfo({
-    required String key,
-    required String value,
-  }) {
+  UserDto upsertMetaInfo({required String key, required String value}) {
     final current = metaInfo ?? const <SudaJson>[];
     final updated = <SudaJson>[
       ...current.where((m) => m.key != key),
@@ -458,10 +641,7 @@ extension UserDtoMetaInfoX on UserDto {
     return copyWith(metaInfo: updated);
   }
 
-  bool hasMetaInfoValue({
-    required String key,
-    required String value,
-  }) {
+  bool hasMetaInfoValue({required String key, required String value}) {
     final current = metaInfo;
     if (current == null || current.isEmpty) return false;
     return current.any((m) => m.key == key && m.value == value);

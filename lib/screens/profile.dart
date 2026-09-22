@@ -27,6 +27,7 @@ import '../widgets/suda_label_tabs.dart';
 import '../widgets/character_rarity_frame.dart';
 import '../widgets/level_up_progress_track.dart';
 import '../widgets/profile_achievements_section.dart';
+import '../widgets/suda_neighbors_row.dart';
 import '../utils/user_img_path.dart';
 import 'reward/reward_unboxing.dart';
 import 'roleplay/history.dart';
@@ -109,6 +110,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final SudaTtsAudioPlayer _savedTtsPlayer = SudaTtsAudioPlayer();
   StreamSubscription<PlayerState>? _savedAudioSub;
   int _savedMegaphoneSeq = 0;
+
   /// 가장 최근 탭한 카드(흰 배경 유지, 목록에서 하나만).
   int? _savedHighlightedExpressionId;
   int? _savedActiveExpressionId;
@@ -164,6 +166,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   static const Color _shimmerHighlight = Color(0xFF3F3F3F);
 
   final GlobalKey _premiumTabsKey = GlobalKey();
+
   /// 탭 상단 Y (레이아웃 기준 px) — 구독 그라데이션 하단 = 여기.
   double? _gradTabsY;
 
@@ -198,7 +201,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         pageNum: pageNum,
       );
       if (!mounted) return;
-      final sameFirstAsCurrent = pageNum == 0 &&
+      final sameFirstAsCurrent =
+          pageNum == 0 &&
           _historyList.isNotEmpty &&
           page.content.isNotEmpty &&
           _historyList.first.id == page.content.first.id;
@@ -287,7 +291,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         final state = _savedListKey.currentState;
         if (state == null) return;
         for (var i = 0; i < items.length; i++) {
-          state.insertItem(startIndex + i, duration: const Duration(milliseconds: 220));
+          state.insertItem(
+            startIndex + i,
+            duration: const Duration(milliseconds: 220),
+          );
         }
       });
     } catch (_) {
@@ -372,14 +379,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void _measurePremiumTabsTop() {
     if (!mounted || _showPremiumCta) return;
 
-    final box = _premiumTabsKey.currentContext?.findRenderObject() as RenderBox?;
+    final box =
+        _premiumTabsKey.currentContext?.findRenderObject() as RenderBox?;
     if (box == null || !box.hasSize) {
       _schedulePremiumGradientMeasure();
       return;
     }
 
-    final scrollDy =
-        _scrollController.hasClients ? _scrollController.offset : 0.0;
+    final scrollDy = _scrollController.hasClients
+        ? _scrollController.offset
+        : 0.0;
     final tabsTop = box.localToGlobal(Offset.zero).dy + scrollDy;
     if (_gradTabsY != null && (_gradTabsY! - tabsTop).abs() < 1.0) {
       return;
@@ -511,8 +520,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _onLevelRewardGiftTap() async {
     final progress = _progress;
     if (progress == null || _claimingLevelReward) return;
-    final rewardLevel =
-        progress.claimableRewardLevel < 3 ? 3 : progress.claimableRewardLevel;
+    final rewardLevel = progress.claimableRewardLevel < 3
+        ? 3
+        : progress.claimableRewardLevel;
     if (progress.currentLevel < rewardLevel) {
       final l10n = AppLocalizations.of(context)!;
       final theme = Theme.of(context).textTheme;
@@ -605,9 +615,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _openHistory(int rpUserHistoryId) async {
     await Navigator.push(
       context,
-      SubScreenRoute(
-        page: HistoryScreen(rpUserHistoryId: rpUserHistoryId),
-      ),
+      SubScreenRoute(page: HistoryScreen(rpUserHistoryId: rpUserHistoryId)),
     );
   }
 
@@ -634,10 +642,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               : SizedBox(width: itemWidth, height: itemHeight),
         );
       }
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: list,
-      );
+      return Row(mainAxisAlignment: MainAxisAlignment.start, children: list);
     }
 
     if (_isLoadingHistory && _historyList.isEmpty) {
@@ -665,9 +670,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             padding: const EdgeInsets.symmetric(horizontal: _historyHPadding),
             child: Text(
               AppLocalizations.of(context)!.profileHistoryEmpty,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.white,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyLarge?.copyWith(color: Colors.white),
               textAlign: TextAlign.center,
             ),
           ),
@@ -688,9 +693,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               item: item,
               width: itemWidth,
               height: itemHeight,
-              onTap: historyId != null
-                  ? () => _openHistory(historyId)
-                  : null,
+              onTap: historyId != null ? () => _openHistory(historyId) : null,
             ),
           );
         }
@@ -828,9 +831,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       const SizedBox(width: 5),
                       Text(
                         '${progress?.currentStreakDays ?? 0}',
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                              color: Colors.white,
-                            ),
+                        style: Theme.of(context).textTheme.headlineSmall
+                            ?.copyWith(color: Colors.white),
                       ),
                     ],
                   ),
@@ -842,9 +844,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: _ProgressStatCard(
                   top: Text(
                     _formatSpokenCount(progress?.wordsSpokenCount ?? 0),
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          color: Colors.white,
-                        ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.headlineSmall?.copyWith(color: Colors.white),
                   ),
                   bottom: l10n.profileWordsSpoken,
                 ),
@@ -860,7 +862,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             progressPercentage: progress?.progressPercentage ?? 0,
             rewardLevel: progress?.claimableRewardLevel ?? 3,
             claiming: _claimingLevelReward,
-            claimable: progress != null &&
+            claimable:
+                progress != null &&
                 progress.claimableCharacterRewardId != null &&
                 progress.currentLevel >=
                     (progress.claimableRewardLevel < 3
@@ -875,24 +878,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
           child: Text(
             l10n.profileSudaNeighbors,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                  fontVariations: const [FontVariation('wght', 700)],
-                ),
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+              fontVariations: const [FontVariation('wght', 700)],
+            ),
           ),
         ),
         const SizedBox(height: 10),
-        _SudaNeighborsRow(portraits: progress?.claimedCharacters ?? const []),
-        const SizedBox(height: 20),
+        SudaNeighborsRow(portraits: progress?.claimedCharacters ?? const []),
+        const SizedBox(height: 36),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Text(
             l10n.profileAchievements,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                  fontVariations: const [FontVariation('wght', 700)],
-                ),
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+              fontVariations: const [FontVariation('wght', 700)],
+            ),
           ),
         ),
         const SizedBox(height: 10),
@@ -925,13 +928,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Row(
-            children: [
-              card(),
-              const SizedBox(width: 24),
-              card(),
-            ],
-          ),
+          child: Row(children: [card(), const SizedBox(width: 24), card()]),
         ),
         const SizedBox(height: 25),
         Padding(
@@ -987,7 +984,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 36),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Shimmer.fromColors(
@@ -1005,7 +1002,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         const SizedBox(height: 10),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
+          padding: const EdgeInsets.symmetric(horizontal: 40),
           child: Shimmer.fromColors(
             baseColor: _shimmerBase,
             highlightColor: _shimmerHighlight,
@@ -1014,8 +1011,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 return Expanded(
                   child: Padding(
                     padding: EdgeInsets.only(
-                      left: index == 0 ? 0 : 6,
-                      right: index == 2 ? 0 : 6,
+                      left: index == 0 ? 0 : 12,
+                      right: index == 2 ? 0 : 12,
                     ),
                     child: AspectRatio(
                       aspectRatio: 1,
@@ -1164,18 +1161,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
     _savedExpressionMutationInFlight = true;
     try {
-    final token = await TokenStorage.loadAccessToken();
-    if (!mounted) return;
-    if (token == null || token.isEmpty) {
-      DefaultToast.show(context, 'HTTP 401 · Request failed', isError: true);
-      return;
-    }
+      final token = await TokenStorage.loadAccessToken();
+      if (!mounted) return;
+      if (token == null || token.isEmpty) {
+        DefaultToast.show(context, 'HTTP 401 · Request failed', isError: true);
+        return;
+      }
 
-    final resultId = item.roleplayResultId;
-    final expressionIndex = item.expressionIndex;
-    if (resultId == null || expressionIndex == null) {
-      return;
-    }
+      final resultId = item.roleplayResultId;
+      final expressionIndex = item.expressionIndex;
+      if (resultId == null || expressionIndex == null) {
+        return;
+      }
 
       await SudaApiClient.deleteUserExpression(
         accessToken: token,
@@ -1202,29 +1199,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
       }
 
       final listState = _savedListKey.currentState;
-      listState?.removeItem(
-        index,
-        (context, animation) {
-          return FadeTransition(
-            opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
-            child: SizeTransition(
-              sizeFactor: CurvedAnimation(parent: animation, curve: Curves.easeInOut),
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 20),
-                child: _SavedExpressionCard(
-                  item: removed,
-                  isHighlighted: false,
-                  isFetching: false,
-                  isPlaying: false,
-                  onTap: () {},
-                  onDeleteTap: () {},
-                ),
+      listState?.removeItem(index, (context, animation) {
+        return FadeTransition(
+          opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
+          child: SizeTransition(
+            sizeFactor: CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeInOut,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 20),
+              child: _SavedExpressionCard(
+                item: removed,
+                isHighlighted: false,
+                isFetching: false,
+                isPlaying: false,
+                onTap: () {},
+                onDeleteTap: () {},
               ),
             ),
-          );
-        },
-        duration: const Duration(milliseconds: 260),
-      );
+          ),
+        );
+      }, duration: const Duration(milliseconds: 260));
       setState(() {});
     } catch (e) {
       if (!mounted) return;
@@ -1280,13 +1276,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Column(
-        children: [
-          box(),
-          const SizedBox(height: 20),
-          box(),
-        ],
-      ),
+      child: Column(children: [box(), const SizedBox(height: 20), box()]),
     );
   }
 
@@ -1303,9 +1293,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Text(
               AppLocalizations.of(context)!.profileSavedEmpty,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.white,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyLarge?.copyWith(color: Colors.white),
               textAlign: TextAlign.center,
             ),
           ),
@@ -1337,9 +1327,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   itemId == _savedActiveExpressionId &&
                   _savedIsPlaying;
               return FadeTransition(
-                opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
+                opacity: CurvedAnimation(
+                  parent: animation,
+                  curve: Curves.easeOut,
+                ),
                 child: SizeTransition(
-                  sizeFactor: CurvedAnimation(parent: animation, curve: Curves.easeInOut),
+                  sizeFactor: CurvedAnimation(
+                    parent: animation,
+                    curve: Curves.easeInOut,
+                  ),
                   child: Padding(
                     padding: const EdgeInsets.only(bottom: 20),
                     child: _SavedExpressionCard(
@@ -1359,7 +1355,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const SizedBox(height: 10),
             _buildSavedShimmer(),
           ],
-          if (_isSavedLastPage && !_isLoadingMoreSaved) const SizedBox(height: 50),
         ],
       ),
     );
@@ -1426,11 +1421,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.black,
-                        Color(0xFF43716D),
-                        Colors.black,
-                      ],
+                      colors: [Colors.black, Color(0xFF43716D), Colors.black],
                       stops: [0.0, 0.5, 1.0],
                     ),
                   ),
@@ -1441,6 +1432,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           // 실제 콘텐츠
           SingleChildScrollView(
             controller: _scrollController,
+            padding: const EdgeInsets.only(bottom: GnbBar.contentHeight),
             child: Column(
               children: [
                 const SizedBox(height: 0), // AppScaffold의 top 80 패딩 이후 바로 시작
@@ -1473,7 +1465,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                         Expanded(
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 12,
+                            ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -1481,15 +1476,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   _nameShimmer()
                                 else if (!_showPremiumCta)
                                   Row(
-                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
                                     children: [
                                       Flexible(
                                         child: Text(
                                           name,
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
-                                          style: theme.headlineMedium
-                                              ?.copyWith(color: Colors.white),
+                                          style: theme.headlineMedium?.copyWith(
+                                            color: Colors.white,
+                                          ),
                                         ),
                                       ),
                                       const SizedBox(width: 8),
@@ -1508,8 +1505,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     name,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: theme.headlineMedium
-                                        ?.copyWith(color: Colors.white),
+                                    style: theme.headlineMedium?.copyWith(
+                                      color: Colors.white,
+                                    ),
                                   ),
                                 const SizedBox(height: 8),
                                 Row(
@@ -1563,7 +1561,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
   }
-
 }
 
 class _SavedExpressionCard extends StatelessWidget {
@@ -1723,19 +1720,13 @@ class _ProfileAvatar extends StatelessWidget {
   static const _freeBorderGradient = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
-    colors: [
-      Color(0xFF80D7CF),
-      Color(0xFF43716D),
-    ],
+    colors: [Color(0xFF80D7CF), Color(0xFF43716D)],
   );
 
   static const _premiumBorderGradient = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
-    colors: [
-      Color(0xFF80D7CF),
-      Color(0xFF8A38F5),
-    ],
+    colors: [Color(0xFF80D7CF), Color(0xFF8A38F5)],
   );
 
   Widget _defaultAvatar(Color color) {
@@ -1747,10 +1738,7 @@ class _ProfileAvatar extends StatelessWidget {
       baseColor: const Color(0xFF2A2A2A),
       highlightColor: const Color(0xFF3F3F3F),
       child: const DecoratedBox(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          shape: BoxShape.circle,
-        ),
+        decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle),
         child: SizedBox.expand(),
       ),
     );
@@ -1764,7 +1752,9 @@ class _ProfileAvatar extends StatelessWidget {
       return ClipOval(child: _defaultAvatar(_defaultColor));
     }
     if (parsed.isDefault) {
-      return ClipOval(child: _defaultAvatar(parsed.defaultColor ?? _defaultColor));
+      return ClipOval(
+        child: _defaultAvatar(parsed.defaultColor ?? _defaultColor),
+      );
     }
     final path = parsed.cdnPath;
     if (path == null || path.isEmpty) {
@@ -1830,10 +1820,7 @@ class _ProfileStat extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            title,
-            style: theme.bodySmall?.copyWith(color: Colors.white),
-          ),
+          Text(title, style: theme.bodySmall?.copyWith(color: Colors.white)),
           const SizedBox(height: 4),
           if (isLoading)
             Shimmer.fromColors(
@@ -1864,104 +1851,7 @@ class _ProfileStatDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 2,
-      height: 44,
-      color: const Color(0xFF1E1E1E),
-    );
-  }
-}
-
-class _SudaNeighborsRow extends StatelessWidget {
-  const _SudaNeighborsRow({required this.portraits});
-
-  static const _size = 70.0;
-  static const _gap = 15.0;
-  static const _gradientWidth = 30.0;
-  static const _hPad = 24.0;
-
-  final List<ClaimedCharacterPortraitDto> portraits;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    return SizedBox(
-      height: _size,
-      width: double.infinity,
-      child: portraits.isEmpty
-          ? Padding(
-              padding: const EdgeInsets.symmetric(horizontal: _hPad),
-              child: Center(
-                child: Text(
-                  l10n.profileSudaNeighborsEmpty,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.white,
-                      ),
-                ),
-              ),
-            )
-          : LayoutBuilder(
-              builder: (context, constraints) {
-                final count = portraits.length;
-                final contentWidth = count * _size + (count - 1) * _gap;
-                final overflow = contentWidth > constraints.maxWidth - _hPad * 2;
-                final list = ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  physics: overflow
-                      ? const BouncingScrollPhysics()
-                      : const NeverScrollableScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(horizontal: _hPad),
-                  itemCount: count,
-                  separatorBuilder: (_, _) => const SizedBox(width: _gap),
-                  itemBuilder: (context, index) {
-                    final item = portraits[index];
-                    return CharacterRarityFrame(
-                      key: ValueKey(
-                        '${item.characterId}:${item.characterImgPath}',
-                      ),
-                      rarity: item.characterRarity,
-                      size: _size,
-                      borderWidth: UserImgPath.nestedRarityBorderWidth,
-                      child: CdnThumbImage(
-                        path: item.characterImgPath,
-                        slot: CdnThumbSlot.characterReward,
-                        width: _size,
-                        height: _size,
-                        fit: BoxFit.cover,
-                      ),
-                    );
-                  },
-                );
-                if (!overflow) return list;
-                return Stack(
-                  children: [
-                    list,
-                    const Positioned(
-                      right: 0,
-                      top: 0,
-                      bottom: 0,
-                      child: IgnorePointer(
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.centerLeft,
-                              end: Alignment.centerRight,
-                              colors: [
-                                Color(0x00121212),
-                                Color(0xFF121212),
-                              ],
-                            ),
-                          ),
-                          child: SizedBox(width: _gradientWidth),
-                        ),
-                      ),
-                    ),
-                  ],
-                );
-              },
-            ),
-    );
+    return Container(width: 2, height: 44, color: const Color(0xFF1E1E1E));
   }
 }
 
@@ -1969,10 +1859,7 @@ class _ProgressStatCard extends StatelessWidget {
   final Widget top;
   final String bottom;
 
-  const _ProgressStatCard({
-    required this.top,
-    required this.bottom,
-  });
+  const _ProgressStatCard({required this.top, required this.bottom});
 
   static const _fillCenter = Color(0x290CABA8);
   static const _cardBase = Color(0xFF121212);
@@ -1986,11 +1873,7 @@ class _ProgressStatCard extends StatelessWidget {
         gradient: const LinearGradient(
           begin: Alignment.topRight,
           end: Alignment.bottomLeft,
-          colors: [
-            Color(0xFF80D7CF),
-            Color(0x0080D7CF),
-            Color(0xFF80D7CF),
-          ],
+          colors: [Color(0xFF80D7CF), Color(0x0080D7CF), Color(0xFF80D7CF)],
           stops: [0.0, 0.5, 1.0],
         ),
       ),
@@ -2003,7 +1886,10 @@ class _ProgressStatCard extends StatelessWidget {
             child: ColoredBox(
               color: _fillCenter,
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 12,
+                ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -2016,10 +1902,10 @@ class _ProgressStatCard extends StatelessWidget {
                       bottom,
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: _labelColor,
-                            fontWeight: FontWeight.w700,
-                            fontVariations: const [FontVariation('wght', 700)],
-                          ),
+                        color: _labelColor,
+                        fontWeight: FontWeight.w700,
+                        fontVariations: const [FontVariation('wght', 700)],
+                      ),
                     ),
                   ],
                 ),
@@ -2141,10 +2027,7 @@ class _HistoryThumbnail extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 if (cefrLevel != null && cefrLevel.isNotEmpty)
-                  _CefrLevelPill(
-                    label: cefrLevel,
-                    height: starSize,
-                  ),
+                  _CefrLevelPill(label: cefrLevel, height: starSize),
                 const Spacer(),
                 Row(
                   mainAxisSize: MainAxisSize.min,
@@ -2195,10 +2078,7 @@ class _HistoryThumbnail extends StatelessWidget {
 }
 
 class _CefrLevelPill extends StatelessWidget {
-  const _CefrLevelPill({
-    required this.label,
-    required this.height,
-  });
+  const _CefrLevelPill({required this.label, required this.height});
 
   final String label;
   final double height;
@@ -2237,10 +2117,7 @@ class _CefrLevelPill extends StatelessWidget {
       child: Text(
         label,
         maxLines: 1,
-        style: theme.labelSmall?.copyWith(
-          color: color,
-          height: 1,
-        ),
+        style: theme.labelSmall?.copyWith(color: color, height: 1),
       ),
     );
   }

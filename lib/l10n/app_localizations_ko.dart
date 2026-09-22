@@ -411,6 +411,72 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
+  String get otherUserFriends => '친구';
+
+  @override
+  String get otherUserRequested => '요청 보냄';
+
+  @override
+  String get otherUserAddFriend => '친구 추가';
+
+  @override
+  String get otherUserUnfriendTitle => '친구를 해제할까요?';
+
+  @override
+  String get otherUserUnfriendBody => '이 사용자와의 친구 관계가 해제됩니다.';
+
+  @override
+  String get otherUserUnfriendOk => '친구 해제';
+
+  @override
+  String get otherUserUnfriendCancel => '취소';
+
+  @override
+  String get otherUserCancelRequestTitle => '친구 요청을 취소할까요?';
+
+  @override
+  String get otherUserCancelRequestBody =>
+      '취소하면 이 사용자에게 48시간 동안 다시 친구 요청을 보낼 수 없습니다.';
+
+  @override
+  String get otherUserCancelRequestOk => '요청 취소';
+
+  @override
+  String get otherUserKeepRequest => '요청 유지';
+
+  @override
+  String get otherUserSendRequestTitle => '친구 요청을 보낼까요?';
+
+  @override
+  String get otherUserSendRequestBody => '상대방이 요청을 수락하면 친구가 됩니다.';
+
+  @override
+  String get otherUserSendRequestOk => '요청 보내기';
+
+  @override
+  String get otherUserSendRequestCancel => '취소';
+
+  @override
+  String get otherUserFriendBlockedBody => '현재 이 사용자에게 친구 요청을 보낼 수 없습니다.';
+
+  @override
+  String get otherUserFriendOk => '확인';
+
+  @override
+  String get otherUserFriendLimitSelf =>
+      '친구는 최대 30명까지 추가할 수 있어요. 새로운 친구를 추가하려면 기존 친구를 삭제해 주세요.';
+
+  @override
+  String get otherUserFriendLimitThem =>
+      '상대방이 친구 30명 한도에 도달해 지금은 친구를 추가할 수 없어요.';
+
+  @override
+  String get otherUserNeighborsEmpty => '아직 획득한 캐릭터가 없습니다.';
+
+  @override
+  String get otherUserAchievementsEmpty => '아직 획득한 업적이 없습니다.';
+
+  @override
   String get profileHistory => '히스토리';
 
   @override

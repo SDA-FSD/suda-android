@@ -407,6 +407,69 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get otherUserFriends => '好友';
+
+  @override
+  String get otherUserRequested => '已发送请求';
+
+  @override
+  String get otherUserAddFriend => '添加好友';
+
+  @override
+  String get otherUserUnfriendTitle => '要解除好友关系吗？';
+
+  @override
+  String get otherUserUnfriendBody => '你将不再与该用户是好友。';
+
+  @override
+  String get otherUserUnfriendOk => '解除好友';
+
+  @override
+  String get otherUserUnfriendCancel => '取消';
+
+  @override
+  String get otherUserCancelRequestTitle => '要取消好友请求吗？';
+
+  @override
+  String get otherUserCancelRequestBody => '取消后，48 小时内无法再次向该用户发送请求。';
+
+  @override
+  String get otherUserCancelRequestOk => '取消请求';
+
+  @override
+  String get otherUserKeepRequest => '保留请求';
+
+  @override
+  String get otherUserSendRequestTitle => '要发送好友请求吗？';
+
+  @override
+  String get otherUserSendRequestBody => '对方接受后即可成为好友。';
+
+  @override
+  String get otherUserSendRequestOk => '发送请求';
+
+  @override
+  String get otherUserSendRequestCancel => '取消';
+
+  @override
+  String get otherUserFriendBlockedBody => '目前无法向该用户发送好友请求。';
+
+  @override
+  String get otherUserFriendOk => '好的';
+
+  @override
+  String get otherUserFriendLimitSelf => '好友人数已达 30 人上限。请先删除一位好友，再添加新的好友。';
+
+  @override
+  String get otherUserFriendLimitThem => '对方已达 30 位好友上限，目前无法再添加好友。';
+
+  @override
+  String get otherUserNeighborsEmpty => '还没有收集到角色。';
+
+  @override
+  String get otherUserAchievementsEmpty => '还没有获得成就。';
+
+  @override
   String get profileHistory => '历史记录';
 
   @override
@@ -1264,6 +1327,69 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   }
 
   @override
+  String get otherUserFriends => '好友';
+
+  @override
+  String get otherUserRequested => '已发送请求';
+
+  @override
+  String get otherUserAddFriend => '添加好友';
+
+  @override
+  String get otherUserUnfriendTitle => '要解除好友关系吗？';
+
+  @override
+  String get otherUserUnfriendBody => '你将不再与该用户是好友。';
+
+  @override
+  String get otherUserUnfriendOk => '解除好友';
+
+  @override
+  String get otherUserUnfriendCancel => '取消';
+
+  @override
+  String get otherUserCancelRequestTitle => '要取消好友请求吗？';
+
+  @override
+  String get otherUserCancelRequestBody => '取消后，48 小时内无法再次向该用户发送请求。';
+
+  @override
+  String get otherUserCancelRequestOk => '取消请求';
+
+  @override
+  String get otherUserKeepRequest => '保留请求';
+
+  @override
+  String get otherUserSendRequestTitle => '要发送好友请求吗？';
+
+  @override
+  String get otherUserSendRequestBody => '对方接受后即可成为好友。';
+
+  @override
+  String get otherUserSendRequestOk => '发送请求';
+
+  @override
+  String get otherUserSendRequestCancel => '取消';
+
+  @override
+  String get otherUserFriendBlockedBody => '目前无法向该用户发送好友请求。';
+
+  @override
+  String get otherUserFriendOk => '好的';
+
+  @override
+  String get otherUserFriendLimitSelf => '好友人数已达 30 人上限。请先删除一位好友，再添加新的好友。';
+
+  @override
+  String get otherUserFriendLimitThem => '对方已达 30 位好友上限，目前无法再添加好友。';
+
+  @override
+  String get otherUserNeighborsEmpty => '还没有收集到角色。';
+
+  @override
+  String get otherUserAchievementsEmpty => '还没有获得成就。';
+
+  @override
   String get profileHistory => '历史记录';
 
   @override
@@ -2119,6 +2245,69 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String profileAchievementCount(int count) {
     return 'x $count';
   }
+
+  @override
+  String get otherUserFriends => '好友';
+
+  @override
+  String get otherUserRequested => '已送出請求';
+
+  @override
+  String get otherUserAddFriend => '新增好友';
+
+  @override
+  String get otherUserUnfriendTitle => '要解除好友關係嗎？';
+
+  @override
+  String get otherUserUnfriendBody => '你將不再與這位使用者是好友。';
+
+  @override
+  String get otherUserUnfriendOk => '解除好友';
+
+  @override
+  String get otherUserUnfriendCancel => '取消';
+
+  @override
+  String get otherUserCancelRequestTitle => '要取消好友邀請嗎？';
+
+  @override
+  String get otherUserCancelRequestBody => '取消後，48 小時內無法再次向這位使用者發送邀請。';
+
+  @override
+  String get otherUserCancelRequestOk => '取消邀請';
+
+  @override
+  String get otherUserKeepRequest => '保留邀請';
+
+  @override
+  String get otherUserSendRequestTitle => '要發送好友邀請嗎？';
+
+  @override
+  String get otherUserSendRequestBody => '對方接受後就會成為好友。';
+
+  @override
+  String get otherUserSendRequestOk => '發送邀請';
+
+  @override
+  String get otherUserSendRequestCancel => '取消';
+
+  @override
+  String get otherUserFriendBlockedBody => '目前無法向這位使用者發送好友邀請。';
+
+  @override
+  String get otherUserFriendOk => '確定';
+
+  @override
+  String get otherUserFriendLimitSelf => '好友人數已達 30 人上限。請先刪除一位好友，再新增新的好友。';
+
+  @override
+  String get otherUserFriendLimitThem => '對方已達 30 位好友上限，目前無法再新增好友。';
+
+  @override
+  String get otherUserNeighborsEmpty => '尚未收集到角色。';
+
+  @override
+  String get otherUserAchievementsEmpty => '尚未獲得成就。';
 
   @override
   String get profileHistory => '歷史紀錄';

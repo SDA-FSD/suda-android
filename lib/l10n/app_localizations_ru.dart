@@ -431,6 +431,74 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
+  String get otherUserFriends => 'Друзья';
+
+  @override
+  String get otherUserRequested => 'Запрос отправлен';
+
+  @override
+  String get otherUserAddFriend => 'Добавить в друзья';
+
+  @override
+  String get otherUserUnfriendTitle => 'Удалить этого пользователя из друзей?';
+
+  @override
+  String get otherUserUnfriendBody => 'Вы больше не будете друзьями.';
+
+  @override
+  String get otherUserUnfriendOk => 'Удалить из друзей';
+
+  @override
+  String get otherUserUnfriendCancel => 'Отмена';
+
+  @override
+  String get otherUserCancelRequestTitle => 'Отменить заявку в друзья?';
+
+  @override
+  String get otherUserCancelRequestBody =>
+      'Вы не сможете отправить этому пользователю новую заявку в течение 48 часов.';
+
+  @override
+  String get otherUserCancelRequestOk => 'Отменить заявку';
+
+  @override
+  String get otherUserKeepRequest => 'Оставить заявку';
+
+  @override
+  String get otherUserSendRequestTitle => 'Отправить заявку в друзья?';
+
+  @override
+  String get otherUserSendRequestBody =>
+      'Вы станете друзьями, когда заявку примут.';
+
+  @override
+  String get otherUserSendRequestOk => 'Отправить заявку';
+
+  @override
+  String get otherUserSendRequestCancel => 'Отмена';
+
+  @override
+  String get otherUserFriendBlockedBody =>
+      'Сейчас вы не можете отправить этому пользователю заявку в друзья.';
+
+  @override
+  String get otherUserFriendOk => 'OK';
+
+  @override
+  String get otherUserFriendLimitSelf =>
+      'Вы достигли лимита в 30 друзей. Удалите друга, чтобы добавить кого-то нового.';
+
+  @override
+  String get otherUserFriendLimitThem =>
+      'Этот пользователь достиг лимита в 30 друзей и не может добавить больше.';
+
+  @override
+  String get otherUserNeighborsEmpty => 'Персонажи пока не собраны.';
+
+  @override
+  String get otherUserAchievementsEmpty => 'Достижения пока не получены.';
+
+  @override
   String get profileHistory => 'История';
 
   @override

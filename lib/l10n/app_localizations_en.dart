@@ -430,6 +430,75 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get otherUserFriends => 'Friends';
+
+  @override
+  String get otherUserRequested => 'Requested';
+
+  @override
+  String get otherUserAddFriend => 'Add Friend';
+
+  @override
+  String get otherUserUnfriendTitle => 'Unfriend this user?';
+
+  @override
+  String get otherUserUnfriendBody =>
+      'You and this user will no longer be friends.';
+
+  @override
+  String get otherUserUnfriendOk => 'Unfriend';
+
+  @override
+  String get otherUserUnfriendCancel => 'Cancel';
+
+  @override
+  String get otherUserCancelRequestTitle => 'Cancel friend request?';
+
+  @override
+  String get otherUserCancelRequestBody =>
+      'You won\'t be able to send another request to this user for 48 hours.';
+
+  @override
+  String get otherUserCancelRequestOk => 'Cancel Request';
+
+  @override
+  String get otherUserKeepRequest => 'Keep Request';
+
+  @override
+  String get otherUserSendRequestTitle => 'Send friend request?';
+
+  @override
+  String get otherUserSendRequestBody =>
+      'You\'ll become friends when they accept your request.';
+
+  @override
+  String get otherUserSendRequestOk => 'Send Request';
+
+  @override
+  String get otherUserSendRequestCancel => 'Cancel';
+
+  @override
+  String get otherUserFriendBlockedBody =>
+      'You can’t send a friend request to this user right now.';
+
+  @override
+  String get otherUserFriendOk => 'OK';
+
+  @override
+  String get otherUserFriendLimitSelf =>
+      'You’ve reached the 30-friend limit. Remove a friend to add someone new.';
+
+  @override
+  String get otherUserFriendLimitThem =>
+      'They’ve reached the 30-friend limit and can’t add any more friends.';
+
+  @override
+  String get otherUserNeighborsEmpty => 'No characters collected yet.';
+
+  @override
+  String get otherUserAchievementsEmpty => 'No achievements earned yet.';
+
+  @override
   String get profileHistory => 'History';
 
   @override

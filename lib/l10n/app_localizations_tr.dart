@@ -431,6 +431,75 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
+  String get otherUserFriends => 'Arkadaşlar';
+
+  @override
+  String get otherUserRequested => 'İstek gönderildi';
+
+  @override
+  String get otherUserAddFriend => 'Arkadaş ekle';
+
+  @override
+  String get otherUserUnfriendTitle => 'Bu kullanıcıyla arkadaşlığı bitir?';
+
+  @override
+  String get otherUserUnfriendBody =>
+      'Sen ve bu kullanıcı artık arkadaş olmayacaksınız.';
+
+  @override
+  String get otherUserUnfriendOk => 'Arkadaşlığı bitir';
+
+  @override
+  String get otherUserUnfriendCancel => 'İptal';
+
+  @override
+  String get otherUserCancelRequestTitle => 'Arkadaşlık isteğini iptal et?';
+
+  @override
+  String get otherUserCancelRequestBody =>
+      'Bu kullanıcıya 48 saat boyunca başka istek gönderemezsin.';
+
+  @override
+  String get otherUserCancelRequestOk => 'İsteği iptal et';
+
+  @override
+  String get otherUserKeepRequest => 'İsteği tut';
+
+  @override
+  String get otherUserSendRequestTitle => 'Arkadaşlık isteği gönder?';
+
+  @override
+  String get otherUserSendRequestBody =>
+      'İstek kabul edildiğinde arkadaş olursunuz.';
+
+  @override
+  String get otherUserSendRequestOk => 'İstek gönder';
+
+  @override
+  String get otherUserSendRequestCancel => 'İptal';
+
+  @override
+  String get otherUserFriendBlockedBody =>
+      'Şu anda bu kullanıcıya arkadaşlık isteği gönderemezsin.';
+
+  @override
+  String get otherUserFriendOk => 'Tamam';
+
+  @override
+  String get otherUserFriendLimitSelf =>
+      '30 arkadaş sınırına ulaştın. Yeni birini eklemek için bir arkadaşı kaldır.';
+
+  @override
+  String get otherUserFriendLimitThem =>
+      'Bu kişi 30 arkadaş sınırına ulaştı ve daha fazla ekleyemez.';
+
+  @override
+  String get otherUserNeighborsEmpty => 'Henüz toplanmış karakter yok.';
+
+  @override
+  String get otherUserAchievementsEmpty => 'Henüz kazanılmış başarı yok.';
+
+  @override
   String get profileHistory => 'Geçmiş';
 
   @override

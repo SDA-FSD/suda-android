@@ -410,6 +410,70 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
+  String get otherUserFriends => 'フレンド';
+
+  @override
+  String get otherUserRequested => 'リクエスト済み';
+
+  @override
+  String get otherUserAddFriend => 'フレンド追加';
+
+  @override
+  String get otherUserUnfriendTitle => 'フレンドを解除しますか？';
+
+  @override
+  String get otherUserUnfriendBody => 'このユーザーとのフレンド関係が解除されます。';
+
+  @override
+  String get otherUserUnfriendOk => 'フレンド解除';
+
+  @override
+  String get otherUserUnfriendCancel => 'キャンセル';
+
+  @override
+  String get otherUserCancelRequestTitle => 'フレンドリクエストをキャンセルしますか？';
+
+  @override
+  String get otherUserCancelRequestBody => 'キャンセルすると、48時間はこのユーザーに再リクエストできません。';
+
+  @override
+  String get otherUserCancelRequestOk => 'リクエストをキャンセル';
+
+  @override
+  String get otherUserKeepRequest => 'リクエストを維持';
+
+  @override
+  String get otherUserSendRequestTitle => 'フレンドリクエストを送りますか？';
+
+  @override
+  String get otherUserSendRequestBody => '相手が承認するとフレンドになります。';
+
+  @override
+  String get otherUserSendRequestOk => 'リクエストを送る';
+
+  @override
+  String get otherUserSendRequestCancel => 'キャンセル';
+
+  @override
+  String get otherUserFriendBlockedBody => '現在、このユーザーにフレンドリクエストを送れません。';
+
+  @override
+  String get otherUserFriendOk => 'OK';
+
+  @override
+  String get otherUserFriendLimitSelf =>
+      'フレンドは最大30人までです。新しいフレンドを追加するには、既存のフレンドを削除してください。';
+
+  @override
+  String get otherUserFriendLimitThem => '相手がフレンド30人の上限に達しているため、今は追加できません。';
+
+  @override
+  String get otherUserNeighborsEmpty => 'まだ獲得したキャラクターはありません。';
+
+  @override
+  String get otherUserAchievementsEmpty => 'まだ獲得した実績はありません。';
+
+  @override
   String get profileHistory => '履歴';
 
   @override

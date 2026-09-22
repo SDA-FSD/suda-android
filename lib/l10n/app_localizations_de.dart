@@ -434,6 +434,75 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get otherUserFriends => 'Freunde';
+
+  @override
+  String get otherUserRequested => 'Angefragt';
+
+  @override
+  String get otherUserAddFriend => 'Freund hinzufügen';
+
+  @override
+  String get otherUserUnfriendTitle => 'Freundschaft beenden?';
+
+  @override
+  String get otherUserUnfriendBody =>
+      'Du und dieser Nutzer seid dann keine Freunde mehr.';
+
+  @override
+  String get otherUserUnfriendOk => 'Freundschaft beenden';
+
+  @override
+  String get otherUserUnfriendCancel => 'Abbrechen';
+
+  @override
+  String get otherUserCancelRequestTitle => 'Freundschaftsanfrage abbrechen?';
+
+  @override
+  String get otherUserCancelRequestBody =>
+      'Du kannst diesem Nutzer 48 Stunden lang keine neue Anfrage senden.';
+
+  @override
+  String get otherUserCancelRequestOk => 'Anfrage abbrechen';
+
+  @override
+  String get otherUserKeepRequest => 'Anfrage behalten';
+
+  @override
+  String get otherUserSendRequestTitle => 'Freundschaftsanfrage senden?';
+
+  @override
+  String get otherUserSendRequestBody =>
+      'Ihr werdet Freunde, wenn die Anfrage angenommen wird.';
+
+  @override
+  String get otherUserSendRequestOk => 'Anfrage senden';
+
+  @override
+  String get otherUserSendRequestCancel => 'Abbrechen';
+
+  @override
+  String get otherUserFriendBlockedBody =>
+      'Du kannst diesem Nutzer gerade keine Freundschaftsanfrage senden.';
+
+  @override
+  String get otherUserFriendOk => 'OK';
+
+  @override
+  String get otherUserFriendLimitSelf =>
+      'Du hast das Limit von 30 Freunden erreicht. Entferne einen Freund, um jemanden Neues hinzuzufügen.';
+
+  @override
+  String get otherUserFriendLimitThem =>
+      'Diese Person hat das Limit von 30 Freunden erreicht und kann keine weiteren hinzufügen.';
+
+  @override
+  String get otherUserNeighborsEmpty => 'Noch keine Charaktere gesammelt.';
+
+  @override
+  String get otherUserAchievementsEmpty => 'Noch keine Erfolge erzielt.';
+
+  @override
   String get profileHistory => 'Verlauf';
 
   @override

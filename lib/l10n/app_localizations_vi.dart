@@ -433,6 +433,75 @@ class AppLocalizationsVi extends AppLocalizations {
   }
 
   @override
+  String get otherUserFriends => 'Bạn bè';
+
+  @override
+  String get otherUserRequested => 'Đã gửi lời mời';
+
+  @override
+  String get otherUserAddFriend => 'Thêm bạn';
+
+  @override
+  String get otherUserUnfriendTitle => 'Hủy kết bạn với người này?';
+
+  @override
+  String get otherUserUnfriendBody =>
+      'Bạn và người này sẽ không còn là bạn bè.';
+
+  @override
+  String get otherUserUnfriendOk => 'Hủy kết bạn';
+
+  @override
+  String get otherUserUnfriendCancel => 'Hủy';
+
+  @override
+  String get otherUserCancelRequestTitle => 'Hủy lời mời kết bạn?';
+
+  @override
+  String get otherUserCancelRequestBody =>
+      'Bạn sẽ không thể gửi lời mời khác tới người này trong 48 giờ.';
+
+  @override
+  String get otherUserCancelRequestOk => 'Hủy lời mời';
+
+  @override
+  String get otherUserKeepRequest => 'Giữ lời mời';
+
+  @override
+  String get otherUserSendRequestTitle => 'Gửi lời mời kết bạn?';
+
+  @override
+  String get otherUserSendRequestBody =>
+      'Các bạn sẽ trở thành bạn bè khi lời mời được chấp nhận.';
+
+  @override
+  String get otherUserSendRequestOk => 'Gửi lời mời';
+
+  @override
+  String get otherUserSendRequestCancel => 'Hủy';
+
+  @override
+  String get otherUserFriendBlockedBody =>
+      'Hiện bạn không thể gửi lời mời kết bạn tới người này.';
+
+  @override
+  String get otherUserFriendOk => 'OK';
+
+  @override
+  String get otherUserFriendLimitSelf =>
+      'Bạn đã đạt giới hạn 30 bạn. Hãy xóa một người bạn để thêm người mới.';
+
+  @override
+  String get otherUserFriendLimitThem =>
+      'Người này đã đạt giới hạn 30 bạn và không thể thêm bạn nữa.';
+
+  @override
+  String get otherUserNeighborsEmpty => 'Chưa thu thập nhân vật nào.';
+
+  @override
+  String get otherUserAchievementsEmpty => 'Chưa đạt thành tựu nào.';
+
+  @override
   String get profileHistory => 'Lịch sử';
 
   @override

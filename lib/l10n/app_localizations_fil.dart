@@ -439,6 +439,75 @@ class AppLocalizationsFil extends AppLocalizations {
   }
 
   @override
+  String get otherUserFriends => 'Mga Kaibigan';
+
+  @override
+  String get otherUserRequested => 'Naipadala ang request';
+
+  @override
+  String get otherUserAddFriend => 'Magdagdag ng kaibigan';
+
+  @override
+  String get otherUserUnfriendTitle => 'I-unfriend ang user na ito?';
+
+  @override
+  String get otherUserUnfriendBody =>
+      'Hindi na kayo magiging magkaibigan ng user na ito.';
+
+  @override
+  String get otherUserUnfriendOk => 'I-unfriend';
+
+  @override
+  String get otherUserUnfriendCancel => 'Cancel';
+
+  @override
+  String get otherUserCancelRequestTitle => 'I-cancel ang friend request?';
+
+  @override
+  String get otherUserCancelRequestBody =>
+      'Hindi ka makakapagpadala ng isa pang request sa user na ito sa loob ng 48 oras.';
+
+  @override
+  String get otherUserCancelRequestOk => 'I-cancel ang request';
+
+  @override
+  String get otherUserKeepRequest => 'Panatilihin ang request';
+
+  @override
+  String get otherUserSendRequestTitle => 'Magpadala ng friend request?';
+
+  @override
+  String get otherUserSendRequestBody =>
+      'Magiging magkaibigan kayo kapag tinanggap ang request.';
+
+  @override
+  String get otherUserSendRequestOk => 'Ipadala ang request';
+
+  @override
+  String get otherUserSendRequestCancel => 'Cancel';
+
+  @override
+  String get otherUserFriendBlockedBody =>
+      'Hindi ka makakapagpadala ng friend request sa user na ito sa ngayon.';
+
+  @override
+  String get otherUserFriendOk => 'OK';
+
+  @override
+  String get otherUserFriendLimitSelf =>
+      'Naabot mo na ang 30-friend limit. Mag-remove ng kaibigan para makapagdagdag ng bago.';
+
+  @override
+  String get otherUserFriendLimitThem =>
+      'Naabot na nila ang 30-friend limit at hindi na sila makakapagdagdag pa.';
+
+  @override
+  String get otherUserNeighborsEmpty => 'Wala pang nakolektang character.';
+
+  @override
+  String get otherUserAchievementsEmpty => 'Wala pang nakuha na achievement.';
+
+  @override
   String get profileHistory => 'History';
 
   @override

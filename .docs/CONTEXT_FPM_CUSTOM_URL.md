@@ -20,6 +20,9 @@
 /v1/users/profile
 /v1/users/my-profile
 /v1/users/progress
+/v1/users/*/profile
+/v1/users/friends/*/request
+/v1/users/friends/*
 /v1/users/character-rewards/claim
 /v1/users/profile-img
 /v1/users/tutorial

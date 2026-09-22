@@ -7,35 +7,43 @@ import 'default_popup.dart';
 
 class ProfileAchievementsSection extends StatelessWidget {
   final List<RankedPlaceAchievementDto> achievements;
+  final bool tapEnabled;
+  final bool unlockedOnly;
 
   const ProfileAchievementsSection({
     super.key,
     required this.achievements,
+    this.tapEnabled = true,
+    this.unlockedOnly = false,
   });
 
-  static const _hPad = 24.0;
-  static const _colGap = 12.0;
+  static const _hPad = 40.0;
+  static const _colGap = 24.0;
   static const _titleGap = 6.0;
   static const _progressGap = 4.0;
   static const _progressColor = Color(0xFF635F5F);
   static const _popupImageSize = 96.0;
 
   static const _grayscale = ColorFilter.matrix(<double>[
-    0.2126, 0.7152, 0.0722, 0, 0,
-    0.2126, 0.7152, 0.0722, 0, 0,
-    0.2126, 0.7152, 0.0722, 0, 0,
+    0.0808, 0.2718, 0.0274, 0, -12,
+    0.0808, 0.2718, 0.0274, 0, -12,
+    0.0808, 0.2718, 0.0274, 0, -12,
     0, 0, 0, 1, 0,
   ]);
 
   @override
   Widget build(BuildContext context) {
-    final items = achievements.isEmpty
+    final source = achievements.isEmpty
         ? const [
             RankedPlaceAchievementDto(place: 1, progressCount: 0),
             RankedPlaceAchievementDto(place: 2, progressCount: 0),
             RankedPlaceAchievementDto(place: 3, progressCount: 0),
           ]
         : achievements;
+    final items = unlockedOnly
+        ? source.where((item) => item.unlocked).toList()
+        : source;
+    if (items.isEmpty) return const SizedBox.shrink();
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: _hPad),
       child: Row(
@@ -51,6 +59,7 @@ class ProfileAchievementsSection extends StatelessWidget {
                 progressGap: _progressGap,
                 progressColor: _progressColor,
                 popupImageSize: _popupImageSize,
+                tapEnabled: tapEnabled,
               ),
             ),
           ],
@@ -102,6 +111,7 @@ class _AchievementCell extends StatelessWidget {
   final double progressGap;
   final Color progressColor;
   final double popupImageSize;
+  final bool tapEnabled;
 
   const _AchievementCell({
     required this.item,
@@ -110,6 +120,7 @@ class _AchievementCell extends StatelessWidget {
     required this.progressGap,
     required this.progressColor,
     required this.popupImageSize,
+    required this.tapEnabled,
   });
 
   @override
@@ -120,7 +131,7 @@ class _AchievementCell extends StatelessWidget {
     final titleStyle = theme.bodySmall?.copyWith(color: Colors.white);
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: () => _showPopup(context, l10n, theme, copy),
+      onTap: tapEnabled ? () => _showPopup(context, l10n, theme, copy) : null,
       child: Column(
         children: [
           AspectRatio(

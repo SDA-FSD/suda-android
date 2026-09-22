@@ -433,6 +433,77 @@ class AppLocalizationsPl extends AppLocalizations {
   }
 
   @override
+  String get otherUserFriends => 'Przyjaciele';
+
+  @override
+  String get otherUserRequested => 'Wysłano zaproszenie';
+
+  @override
+  String get otherUserAddFriend => 'Dodaj znajomego';
+
+  @override
+  String get otherUserUnfriendTitle => 'Usunąć tego użytkownika ze znajomych?';
+
+  @override
+  String get otherUserUnfriendBody =>
+      'Ty i ten użytkownik nie będziecie już znajomymi.';
+
+  @override
+  String get otherUserUnfriendOk => 'Usuń znajomego';
+
+  @override
+  String get otherUserUnfriendCancel => 'Anuluj';
+
+  @override
+  String get otherUserCancelRequestTitle =>
+      'Anulować zaproszenie do znajomych?';
+
+  @override
+  String get otherUserCancelRequestBody =>
+      'Nie będziesz mógł wysłać kolejnego zaproszenia do tego użytkownika przez 48 godzin.';
+
+  @override
+  String get otherUserCancelRequestOk => 'Anuluj zaproszenie';
+
+  @override
+  String get otherUserKeepRequest => 'Zachowaj zaproszenie';
+
+  @override
+  String get otherUserSendRequestTitle => 'Wysłać zaproszenie do znajomych?';
+
+  @override
+  String get otherUserSendRequestBody =>
+      'Zostaniecie znajomymi, gdy zaproszenie zostanie zaakceptowane.';
+
+  @override
+  String get otherUserSendRequestOk => 'Wyślij zaproszenie';
+
+  @override
+  String get otherUserSendRequestCancel => 'Anuluj';
+
+  @override
+  String get otherUserFriendBlockedBody =>
+      'Nie możesz teraz wysłać zaproszenia do znajomych do tego użytkownika.';
+
+  @override
+  String get otherUserFriendOk => 'OK';
+
+  @override
+  String get otherUserFriendLimitSelf =>
+      'Osiągnąłeś limit 30 znajomych. Usuń znajomego, aby dodać kogoś nowego.';
+
+  @override
+  String get otherUserFriendLimitThem =>
+      'Ta osoba osiągnęła limit 30 znajomych i nie może dodać więcej.';
+
+  @override
+  String get otherUserNeighborsEmpty => 'Nie zebrano jeszcze żadnych postaci.';
+
+  @override
+  String get otherUserAchievementsEmpty =>
+      'Nie zdobyto jeszcze żadnych osiągnięć.';
+
+  @override
   String get profileHistory => 'Historia';
 
   @override

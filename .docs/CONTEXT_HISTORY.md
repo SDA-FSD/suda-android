@@ -4,6 +4,10 @@
 
 ---
 
+- **Other User Profile(2026-09-22):** Ranking 포디움·4위+ 리스트의 남 이미지/이름 탭 → SubScreen `OtherUserProfileScreen` (`/profile/{userId}`). `GET /v1/users/{userId}/profile`. 친구 알약 Friends/Requested/Add Friend. INCOMING_PENDING도 Add Friend POST(역방향=수락). REJECTED·409 `FRIEND_REQUEST_COOLDOWN`는 스토킹 팝업. 레벨바·Saved/History 없음. Neighbors/Achievements는 타이틀 유지, 0개면 안내 문구.
+
+- **Profile GNB inset(2026-09-22):** 본문 스크롤 `bottom: GnbBar.contentHeight`. Saved 마지막 페이지 50 스페이서 제거.
+
 - **Achievements(2026-09-22):** Progress 탭 Neighbors 아래 주간 1·2·3위 메달 1행. `GET /v1/users/progress` `achievements`. n은 RANKED distinct periodId. 달성 최근순, Claim 없음, 미해금 place 순. 칸·팝업 모두 탭. 미해금 흑백(팝업 포함). 그리드 `x n`은 0 숨김, 팝업은 `x n`(0 포함).
 
 - **Lv Progress(2026-09-22):** Progress 탭 streak/words와 Neighbors 사이 레벨업 바. `GET /v1/users/progress`에 streak/words/`progressPercentage`/R/`claimableCharacterRewardId`/Neighbors. my-profile은 헤더만. 선물 탭 → `POST /v1/users/character-rewards/claim`(LEVEL_UP, like 없음). RANKED URI 유지.

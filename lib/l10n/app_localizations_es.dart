@@ -435,6 +435,74 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get otherUserFriends => 'Amigos';
+
+  @override
+  String get otherUserRequested => 'Solicitud enviada';
+
+  @override
+  String get otherUserAddFriend => 'Agregar amigo';
+
+  @override
+  String get otherUserUnfriendTitle => '¿Eliminar a este usuario de amigos?';
+
+  @override
+  String get otherUserUnfriendBody => 'Tú y este usuario ya no serán amigos.';
+
+  @override
+  String get otherUserUnfriendOk => 'Eliminar amigo';
+
+  @override
+  String get otherUserUnfriendCancel => 'Cancelar';
+
+  @override
+  String get otherUserCancelRequestTitle => '¿Cancelar solicitud de amistad?';
+
+  @override
+  String get otherUserCancelRequestBody =>
+      'No podrás enviar otra solicitud a este usuario durante 48 horas.';
+
+  @override
+  String get otherUserCancelRequestOk => 'Cancelar solicitud';
+
+  @override
+  String get otherUserKeepRequest => 'Mantener solicitud';
+
+  @override
+  String get otherUserSendRequestTitle => '¿Enviar solicitud de amistad?';
+
+  @override
+  String get otherUserSendRequestBody =>
+      'Serán amigos cuando acepte tu solicitud.';
+
+  @override
+  String get otherUserSendRequestOk => 'Enviar solicitud';
+
+  @override
+  String get otherUserSendRequestCancel => 'Cancelar';
+
+  @override
+  String get otherUserFriendBlockedBody =>
+      'Ahora no puedes enviar una solicitud de amistad a este usuario.';
+
+  @override
+  String get otherUserFriendOk => 'OK';
+
+  @override
+  String get otherUserFriendLimitSelf =>
+      'Alcanzaste el límite de 30 amigos. Elimina a un amigo para agregar a alguien nuevo.';
+
+  @override
+  String get otherUserFriendLimitThem =>
+      'Esta persona alcanzó el límite de 30 amigos y no puede agregar más.';
+
+  @override
+  String get otherUserNeighborsEmpty => 'Aún no hay personajes recolectados.';
+
+  @override
+  String get otherUserAchievementsEmpty => 'Aún no hay logros obtenidos.';
+
+  @override
   String get profileHistory => 'Historial';
 
   @override
@@ -1352,6 +1420,74 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
   String profileAchievementCount(int count) {
     return 'x $count';
   }
+
+  @override
+  String get otherUserFriends => 'Amigos';
+
+  @override
+  String get otherUserRequested => 'Solicitud enviada';
+
+  @override
+  String get otherUserAddFriend => 'Agregar amigo';
+
+  @override
+  String get otherUserUnfriendTitle => '¿Eliminar a este usuario de amigos?';
+
+  @override
+  String get otherUserUnfriendBody => 'Tú y este usuario ya no serán amigos.';
+
+  @override
+  String get otherUserUnfriendOk => 'Eliminar amigo';
+
+  @override
+  String get otherUserUnfriendCancel => 'Cancelar';
+
+  @override
+  String get otherUserCancelRequestTitle => '¿Cancelar solicitud de amistad?';
+
+  @override
+  String get otherUserCancelRequestBody =>
+      'No podrás enviar otra solicitud a este usuario durante 48 horas.';
+
+  @override
+  String get otherUserCancelRequestOk => 'Cancelar solicitud';
+
+  @override
+  String get otherUserKeepRequest => 'Mantener solicitud';
+
+  @override
+  String get otherUserSendRequestTitle => '¿Enviar solicitud de amistad?';
+
+  @override
+  String get otherUserSendRequestBody =>
+      'Serán amigos cuando acepte tu solicitud.';
+
+  @override
+  String get otherUserSendRequestOk => 'Enviar solicitud';
+
+  @override
+  String get otherUserSendRequestCancel => 'Cancelar';
+
+  @override
+  String get otherUserFriendBlockedBody =>
+      'Ahora no puedes enviar una solicitud de amistad a este usuario.';
+
+  @override
+  String get otherUserFriendOk => 'OK';
+
+  @override
+  String get otherUserFriendLimitSelf =>
+      'Alcanzaste el límite de 30 amigos. Elimina a un amigo para agregar a alguien nuevo.';
+
+  @override
+  String get otherUserFriendLimitThem =>
+      'Esta persona alcanzó el límite de 30 amigos y no puede agregar más.';
+
+  @override
+  String get otherUserNeighborsEmpty => 'Aún no hay personajes recolectados.';
+
+  @override
+  String get otherUserAchievementsEmpty => 'Aún no hay logros obtenidos.';
 
   @override
   String get profileHistory => 'Historial';

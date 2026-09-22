@@ -431,6 +431,76 @@ class AppLocalizationsHi extends AppLocalizations {
   }
 
   @override
+  String get otherUserFriends => 'मित्र';
+
+  @override
+  String get otherUserRequested => 'अनुरोध भेजा गया';
+
+  @override
+  String get otherUserAddFriend => 'मित्र जोड़ें';
+
+  @override
+  String get otherUserUnfriendTitle => 'इस उपयोगकर्ता को मित्र से हटाएँ?';
+
+  @override
+  String get otherUserUnfriendBody =>
+      'आप और यह उपयोगकर्ता अब मित्र नहीं रहेंगे।';
+
+  @override
+  String get otherUserUnfriendOk => 'मित्र हटाएँ';
+
+  @override
+  String get otherUserUnfriendCancel => 'रद्द करें';
+
+  @override
+  String get otherUserCancelRequestTitle => 'मित्र अनुरोध रद्द करें?';
+
+  @override
+  String get otherUserCancelRequestBody =>
+      'आप इस उपयोगकर्ता को 48 घंटे तक दूसरा अनुरोध नहीं भेज सकेंगे।';
+
+  @override
+  String get otherUserCancelRequestOk => 'अनुरोध रद्द करें';
+
+  @override
+  String get otherUserKeepRequest => 'अनुरोध रखें';
+
+  @override
+  String get otherUserSendRequestTitle => 'मित्र अनुरोध भेजें?';
+
+  @override
+  String get otherUserSendRequestBody =>
+      'अनुरोध स्वीकार होने पर आप मित्र बन जाएँगे।';
+
+  @override
+  String get otherUserSendRequestOk => 'अनुरोध भेजें';
+
+  @override
+  String get otherUserSendRequestCancel => 'रद्द करें';
+
+  @override
+  String get otherUserFriendBlockedBody =>
+      'आप अभी इस उपयोगकर्ता को मित्र अनुरोध नहीं भेज सकते।';
+
+  @override
+  String get otherUserFriendOk => 'ठीक है';
+
+  @override
+  String get otherUserFriendLimitSelf =>
+      'आप 30 मित्र की सीमा तक पहुँच गए हैं। नया जोड़ने के लिए किसी मित्र को हटाएँ।';
+
+  @override
+  String get otherUserFriendLimitThem =>
+      'वे 30 मित्र की सीमा तक पहुँच गए हैं और और मित्र नहीं जोड़ सकते।';
+
+  @override
+  String get otherUserNeighborsEmpty => 'अभी तक कोई पात्र एकत्र नहीं किया गया।';
+
+  @override
+  String get otherUserAchievementsEmpty =>
+      'अभी तक कोई उपलब्धि प्राप्त नहीं हुई।';
+
+  @override
   String get profileHistory => 'हिस्ट्री';
 
   @override

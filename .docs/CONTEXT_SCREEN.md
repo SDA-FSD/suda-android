@@ -328,6 +328,7 @@
   - **GNB 포함**: 하단 네비게이션 바 필수 포함 (AppScaffold의 `bottomNavigationBar` 사용)
   - GNB 구성: 왼쪽 "Alarm" (회색), 중앙 "Home" (회색), 오른쪽 "Profile" (현재 화면, 흰색)
   - GNB 색상: 검정 (`Colors.black`) - 시스템 네비게이션 바와 색상 통일
+  - 본문 `SingleChildScrollView` bottom inset = `GnbBar.contentHeight`(Ranking과 동일). 배경은 GNB 뒤까지, 마지막 콘텐츠는 GNB 위에. `MediaQuery.padding.bottom`은 SafeArea와 중복하지 않음
 - **UI 구성**: `AppScaffold`를 사용하여 표준 레이아웃 적용
   - **상단 여백**: 70 (표준)
   - **헤더**: 우측 설정 아이콘만 노출 (`AppScaffold.actions` 사용)
@@ -351,7 +352,7 @@
     - 탭: pill 전체 → `PaywallScreen.push` → 성공 시 `getUserEnergySimple` 재조회 후 CTA 숨김
     - Profile 탭 활성·복귀 시 `getUserEnergySimple`로 구독 상태 갱신
 - **콘텐츠 탭**: Progress(기본) / Saved / History. l10n `profileProgress`(en Progress · pt Progresso · ko 성장).
-- **Progress 탭**: 좌우·사이 갭 24. 카드 2개(radius 16, 내부 padding 좌우 12·상하 12, fill `#0CABA8` 16% 단색 아래 `#121212` 깔아 테두리 그라데이션이 비치지 않게, 테두리 1px 좌하/우상 `#80D7CF` 100%→좌상/우하 0%). 좌: `streak.png` 20px + gap 5 + `currentStreakDays`(`headlineSmall` 흰) / `profileDayStreak`(bodySmall w700 `#0CABA8`). 우: `wordsSpokenCount` compact(1000→1K, 1200→1.2K, 1149→1.1K 십단위 버림, 1000000→M) / `profileWordsSpoken`(동일). 카드 아래 gap 25. **Lv Progress** 타이틀 없음. `UserProgressDto`의 `claimableRewardLevel=R`(미수령 LEVEL_UP 3배수). 시작 마커 없음. 바 height 5 스타디움. 안 채운 구간만 점선 1px `#80D7CF`, 채운 구간은 같은 색 솔리드(점선 없음). 눈금 1/3·2/3·끝. 라벨 `Lv.(R-2)` `Lv.(R-1)` `Lv.R`는 바 아래 25, `bodySmall` `#FEFEFE` 38%. 1/3·2/3는 20 글래시 원(DefaultPopup과 동일 blur12·흰보더 36%·frost 18%→10%) + `L≥해당레벨`이면 `check_raw.png`. 선물은 `reward_box.png` 40, 마지막 눈금 정중앙을 덮음. 수령 가능(`L≥R`이고 id 있음)이면 중심 기준 ±0.12rad 주기 회전 떨림(1.2s). 수령 중·불가 시 정지. fill: `S=R-3`; `L≥R`이면 1.0; `L≤S`이면 `(progressPercentage/100)/3`; 아니면 `((L-S)+progressPercentage/100)/3`. 선물만 탭: `L<R` → `DefaultPopup` title `profileLevelProgressReach`(en Reach Lv. {N} to unlock! / ko Lv. {N}에 도달하면 열 수 있어요! / pt Chegue ao Nv. {N} para desbloquear!) + body `profileLevelProgressReachBody`(en Earn Likes… / ko Like를 모아… / pt Ganhe Likes…) `bodyLarge` 흰 중앙 + `profileLevelProgressGotIt`; `L≥R`이고 id 없으면 no-op; id 있으면 `POST /v1/users/character-rewards/claim` → Unboxing → `/progress` 재조회. RANKED claim URI는 그대로. 트랙 → Neighbors 타이틀 gap 20. **SUDA Neighbors** 타이틀(`profileSudaNeighbors`, Progress 탭과 동일 bodySmall w700 흰·밑줄 없음·좌측 정렬). 타이틀 아래 gap 10. `UserProgressDto.claimedCharacters` 원형 70×70·gap 15 한 줄 가로 스크롤(`CharacterRarityFrame` border 5 + `CdnThumbSlot.characterReward` `_150`). 넘칠 때만 우측 30px `#121212` 0%→100% 그라데이션. 빈 목록은 같은 70 높이에 `profileSudaNeighborsEmpty` bodySmall 흰 중앙. 클릭 없음. Neighbors → Achievements 타이틀 gap 20. **Achievements** 타이틀(`profileAchievements`, Neighbors와 동일 스타일). 타이틀 아래 gap 10. 이번 배포 1행 3열(좌→우), 좌우 pad 24, 열 간격 12. `UserProgressDto.achievements` 주간 1·2·3위 메달(`medal_1st.png`/`medal_2st.png`/`medal_3st.png`). 칸: 정사각 이미지 → 제목 `bodySmall` 흰(넘치면 Home RP Marquee) → `profileAchievementCount` `x {n}` `bodySmall` `#635F5F`(n=0이면 행 숨김). n=RANKED 지급의 distinct periodId. 한 번도 없으면 같은 PNG 흑백. 정렬: 달성(`n>0`) `lastGrantedAt` 최근순, Claim 없음, 미해금은 place 1→2→3. 달성·미해금 모두 탭 → `DefaultPopup` 전부 중앙(title / 이미지 / `x {n}` 0포함 / hint / `profileLevelProgressGotIt`). 미해금 팝업 이미지도 흑백. 제목·hint: Champion/Runner-up/3rd Place `profileAchievementWeekly*`.
+- **Progress 탭**: 좌우·사이 갭 24. 카드 2개(radius 16, 내부 padding 좌우 12·상하 12, fill `#0CABA8` 16% 단색 아래 `#121212` 깔아 테두리 그라데이션이 비치지 않게, 테두리 1px 좌하/우상 `#80D7CF` 100%→좌상/우하 0%). 좌: `streak.png` 20px + gap 5 + `currentStreakDays`(`headlineSmall` 흰) / `profileDayStreak`(bodySmall w700 `#0CABA8`). 우: `wordsSpokenCount` compact(1000→1K, 1200→1.2K, 1149→1.1K 십단위 버림, 1000000→M) / `profileWordsSpoken`(동일). 카드 아래 gap 25. **Lv Progress** 타이틀 없음. `UserProgressDto`의 `claimableRewardLevel=R`(미수령 LEVEL_UP 3배수). 시작 마커 없음. 바 height 5 스타디움. 안 채운 구간만 점선 1px `#80D7CF`, 채운 구간은 같은 색 솔리드(점선 없음). 눈금 1/3·2/3·끝. 라벨 `Lv.(R-2)` `Lv.(R-1)` `Lv.R`는 바 아래 25, `bodySmall` `#FEFEFE` 38%. 1/3·2/3는 20 글래시 원(DefaultPopup과 동일 blur12·흰보더 36%·frost 18%→10%) + `L≥해당레벨`이면 `check_raw.png`. 선물은 `reward_box.png` 40, 마지막 눈금 정중앙을 덮음. 수령 가능(`L≥R`이고 id 있음)이면 중심 기준 ±0.12rad 주기 회전 떨림(1.2s). 수령 중·불가 시 정지. fill: `S=R-3`; `L≥R`이면 1.0; `L≤S`이면 `(progressPercentage/100)/3`; 아니면 `((L-S)+progressPercentage/100)/3`. 선물만 탭: `L<R` → `DefaultPopup` title `profileLevelProgressReach`(en Reach Lv. {N} to unlock! / ko Lv. {N}에 도달하면 열 수 있어요! / pt Chegue ao Nv. {N} para desbloquear!) + body `profileLevelProgressReachBody`(en Earn Likes… / ko Like를 모아… / pt Ganhe Likes…) `bodyLarge` 흰 중앙 + `profileLevelProgressGotIt`; `L≥R`이고 id 없으면 no-op; id 있으면 `POST /v1/users/character-rewards/claim` → Unboxing → `/progress` 재조회. RANKED claim URI는 그대로. 트랙 → Neighbors 타이틀 gap 20. **SUDA Neighbors** 타이틀(`profileSudaNeighbors`, Progress 탭과 동일 bodySmall w700 흰·밑줄 없음·좌측 정렬). 타이틀 아래 gap 10. `UserProgressDto.claimedCharacters` 원형 70×70·gap 15 한 줄 가로 스크롤(`CharacterRarityFrame` border 5 + `CdnThumbSlot.characterReward` `_150`). 넘칠 때만 우측 30px `#121212` 0%→100% 그라데이션. 빈 목록은 같은 70 높이에 `profileSudaNeighborsEmpty` bodySmall 흰 중앙. 클릭 없음. Neighbors → Achievements 타이틀 gap 36. **Achievements** 타이틀(`profileAchievements`, Neighbors와 동일 스타일, 좌우 24). 타이틀 아래 gap 10. 이번 배포 1행 3열(좌→우), 뱃지 행 좌우 pad 40, 열 간격 24. `UserProgressDto.achievements` 주간 1·2·3위 메달(`medal_1st.png`/`medal_2st.png`/`medal_3st.png`). 칸: 정사각 이미지 → 제목 `bodySmall` 흰(넘치면 Home RP Marquee) → `profileAchievementCount` `x {n}` `bodySmall` `#635F5F`(n=0이면 행 숨김). n=RANKED 지급의 distinct periodId. 한 번도 없으면 같은 PNG 어두운 흑백(휘도 약 38% + offset -12, 팝업 포함). 정렬: 달성(`n>0`) `lastGrantedAt` 최근순, Claim 없음, 미해금은 place 1→2→3. 달성·미해금 모두 탭 → `DefaultPopup` 전부 중앙(title / 이미지 / `x {n}` 0포함 / hint / `profileLevelProgressGotIt`). 미해금 팝업 이미지도 흑백. 제목·hint: Champion/Runner-up/3rd Place `profileAchievementWeekly*`.
 - **Profile 히스토리 (S2)**: `GET /rps2/user-histories?pageNum=` (0-based 페이징). 썸네일 3열 그리드 — `imgPath`(`CdnThumbSlot.profileHistory` `_300`, 없으면 원본)·`starResult`·`createdAt`(dd/mm) 기존과 동일. 상단 좌측 **CEFR 알약** + 우측 별 3개. 탭 시 `HistoryScreen(rpUserHistoryId)` → `GET /rps2/user-histories/{id}` 후 Result 본문(애니메이션 없음).
 - **Saved 표현 (Expression 탭)**: 목록 `GET /v1/users/expressions?pageNum=` · 카드 탭 TTS `GET /rps2/user-histories/{rpUserHistoryId}/expressions/{expressionIndex}/sound` (`roleplayResultId` → `rpUserHistoryId`, `TtsResultDto`) · 삭제 `DELETE /v1/users/expressions?rpResultId=…&expressionIndex=…`. 카드 배경 기본·재생 모두 `#FFFFFF`. 오디오 fetch 중 16×16 `CircularProgressIndicator`(strokeWidth 2, `#0CABA8` 70%), 재생 중 `megaphone_fill.png` `#0CABA8`, 기본 `megaphone.png` `#0CABA8`(Result Key Expression 카드와 동일). iOS 재생은 Result와 동일 `SudaTtsAudioPlayer`.
 - **Saved 표현 삭제 확인 팝업**: Saved 탭의 expression 카드에서 `bookmark_on` 탭 시 `DefaultPopup`으로 삭제 confirm 팝업을 띄운다. 상단 버튼(삭제/Remove) 탭 시 팝업을 닫고 `DELETE /v1/users/expressions`를 호출해 목록에서 제거, 하단 버튼(Practice more/더 연습할래요) 탭 시 팝업만 닫는다.
@@ -1009,6 +1010,38 @@
 
 ---
 
+## 25. OtherUserProfileScreen
+
+### 스크린 관련 정의 파일
+- **파일 경로**: `lib/screens/other_user_profile.dart`
+- **클래스명**: `OtherUserProfileScreen` (StatefulWidget)
+- **스크린 타입**: **Sub Screen** (좌상단 백버튼. GNB 없음)
+- **appPath**: `/profile/{userId}` (숫자 id. `/profile/history`·`/profile/setting`과 구분). 본인 id면 GNB Profile만 열고 SubScreen은 열지 않음
+
+### 스크린 용도
+- Ranking COLLECT/ANNOUNCE에서 **다른 사용자**의 읽기전용 프로필. 친구 알약만 쓰기.
+
+### 이전 스크린 정보 (진입점)
+- **RankingScreen**: 포디움·4위+ 리스트의 **이미지·이름**. 빈 칸·본인(`isMe`/`user.id`)·Like 숫자·Ranking Reward Claim 패널 제외
+- 푸시 `appPath` `/profile/{userId}`
+
+### 이후 스크린 정보
+- 백 → 이전 스크린. 설정·Paywall·Saved/History 없음
+
+### 스크린 내부 구현 특이사항
+- 데이터 `GET /v1/users/{userId}/profile`. 배경은 **대상** `subscribedYn`
+- 설정 아이콘·구독 CTA·레벨바·Saved/History 탭 없음. Progress 탭 라벨만 (`SudaLabelTabs` 1개 허용)
+- Level/Like/Friends 표시만. 그 아래 알약(스탯 컬럼과 동일 width)
+  - FRIEND: `#0CABA8` 20% + 흰 1px 그라데이션 보더 + `check_raw.png` + `otherUserFriends`. 탭 → Unfriend 팝업(`primaryLight`)
+  - OUTGOING_PENDING: `#80D7CF` / 글자 `#0CABA8` / `otherUserRequested`. 탭 → 요청 취소 팝업
+  - NONE·INCOMING_PENDING: `#0CABA8` 흰글자 `otherUserAddFriend`. 탭 → 신청 팝업(랭킹 리스트 프레임+레벨뱃지, 가로=팝업 width 30%). POST 후 INCOMING은 즉시 FRIEND
+  - REJECTED(쿨다운): 알약은 Add Friend. 탭하면 스토킹 팝업(POST 없음). `409 FRIEND_REQUEST_COOLDOWN`도 동일 Body+OK
+  - `409 FRIEND_LIMIT_EXCEEDED`: `limitUserId==대상`이면 상대 한도, 아니면 내 한도
+- Neighbors: 타이틀 항상. 획득 있으면 내 프로필과 같은 가로 스크롤(탭 없음). 0개면 `otherUserNeighborsEmpty`(en No characters collected yet. / pt Nenhum personagem coletado ainda. / ko 아직 획득한 캐릭터가 없습니다.)
+- Achievements: 타이틀 항상. 획득만·탭 없음. 0개면 `otherUserAchievementsEmpty`(en No achievements earned yet. / pt Nenhuma conquista obtida ainda. / ko 아직 획득한 업적이 없습니다.)
+
+---
+
 ## 스크린 네비게이션 흐름도
 
 ```
@@ -1081,6 +1114,7 @@
 | `/roleplay/overview/{roleplayId}` | RoleplayOverviewScreen (Sub, 딥링크 잔존) | 홈 플로우 아님 |
 | `/profile/history/{rpUserHistoryId}` | HistoryScreen (Sub) | 예: `/profile/history/456`, S2 user-history id |
 | `/profile/setting` | SettingScreen (Sub) | Profile에서 진입 |
+| `/profile/{userId}` | OtherUserProfileScreen (Sub) | 숫자 id. 본인이면 GNB Profile |
 
 - **제외**: Login, Agreement(인증 플로우), RoleplayOpening(role 선택 필수), Playing/Ending/Result/Try Again(세션·플로우 의존).
 

@@ -431,6 +431,43 @@ class SudaApiClient {
     return UserApi.getProgress(accessToken: accessToken);
   }
 
+  static Future<OtherUserProfileDto> getOtherUserProfile({
+    required String accessToken,
+    required int userId,
+  }) {
+    return UserApi.getOtherUserProfile(accessToken: accessToken, userId: userId);
+  }
+
+  static Future<FriendRelationDto> requestFriend({
+    required String accessToken,
+    required int targetUserId,
+  }) {
+    return UserApi.requestFriend(
+      accessToken: accessToken,
+      targetUserId: targetUserId,
+    );
+  }
+
+  static Future<FriendRelationDto> cancelFriendRequest({
+    required String accessToken,
+    required int targetUserId,
+  }) {
+    return UserApi.cancelFriendRequest(
+      accessToken: accessToken,
+      targetUserId: targetUserId,
+    );
+  }
+
+  static Future<FriendRelationDto> unfriend({
+    required String accessToken,
+    required int targetUserId,
+  }) {
+    return UserApi.unfriend(
+      accessToken: accessToken,
+      targetUserId: targetUserId,
+    );
+  }
+
   static Future<List<CharacterRewardClaimDto>> claimCharacterRewards({
     required String accessToken,
     required List<int> userCharacterRewardIds,

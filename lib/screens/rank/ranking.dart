@@ -17,6 +17,7 @@ import '../../widgets/gnb_bar.dart';
 import '../../utils/full_screen_route.dart';
 import '../../utils/user_img_path.dart';
 import '../reward/reward_unboxing.dart';
+import '../other_user_profile.dart';
 import 'ranking_reward_claim.dart';
 import 'rank_crown_avatar.dart';
 import 'rank_podium_painter.dart';
@@ -428,6 +429,13 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
   void _onScroll() {
     _updateMeRowSlot();
     _requestLoadMoreIfNeeded();
+  }
+
+  void _openOtherUserProfile(RankEntryDto? entry) {
+    final id = entry?.userId;
+    if (entry == null || entry.isMe || id == null) return;
+    if (widget.user?.id == id) return;
+    unawaited(OtherUserProfileScreen.open(context, id));
   }
 
   void _requestLoadMoreIfNeeded() {
@@ -971,6 +979,8 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
                                 defaultProfile: _defaultProfile,
                                 premiumBadge: _premiumBadge,
                                 contentHorizontal: side,
+                                onOpenProfile: () =>
+                                    _openOtherUserProfile(entry),
                               );
                             },
                           );
@@ -1217,6 +1227,7 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
                   defaultProfile: _defaultProfile,
                   premiumBadge: _premiumBadge,
                   crownAsset: _podiumCrown,
+                  onOpenProfile: () => _openOtherUserProfile(second),
                 ),
               ),
               // 3위 — 프로필 Y 유지, 슬롯 전체 오른쪽
@@ -1233,6 +1244,7 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
                   defaultProfile: _defaultProfile,
                   premiumBadge: _premiumBadge,
                   crownAsset: _podiumCrown,
+                  onOpenProfile: () => _openOtherUserProfile(third),
                 ),
               ),
               // 1위
@@ -1249,6 +1261,7 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
                   defaultProfile: _defaultProfile,
                   premiumBadge: _premiumBadge,
                   crownAsset: _podiumCrown,
+                  onOpenProfile: () => _openOtherUserProfile(first),
                 ),
               ),
             ],
@@ -1309,9 +1322,11 @@ class _PodiumSlot extends StatelessWidget {
     required this.defaultProfile,
     required this.premiumBadge,
     required this.crownAsset,
+    this.onOpenProfile,
   });
 
   final RankEntryDto? entry;
+  final VoidCallback? onOpenProfile;
   final double scale;
 
   /// 단(=가로선) 폭 — 아바타·이름·좋아요를 이 폭 기준 가운데 정렬.
@@ -1353,55 +1368,67 @@ class _PodiumSlot extends StatelessWidget {
                 Positioned(
                   top: 0,
                   left: avatarLeft * s,
-                  child: RankCrownAvatar(
-                    scale: s,
-                    imgPath: entry == null
-                        ? null
-                        : UserImgPath.orFallback(entry!.imgPath),
-                    frameStyle: winnerFrame
-                        ? RankProfileFrameStyle.winner
-                        : (isPremium
-                              ? RankProfileFrameStyle.premium
-                              : RankProfileFrameStyle.podiumFree),
-                    defaultAsset: defaultProfile,
-                    crownAsset: crownAsset,
-                    showCrown: showCrown,
-                    level: entry?.level,
-                    showLevelBadge: entry != null,
-                    outerShadowScale: s,
+                  child: GestureDetector(
+                    onTap: onOpenProfile,
+                    behavior: HitTestBehavior.opaque,
+                    child: RankCrownAvatar(
+                      scale: s,
+                      imgPath: entry == null
+                          ? null
+                          : UserImgPath.orFallback(entry!.imgPath),
+                      frameStyle: winnerFrame
+                          ? RankProfileFrameStyle.winner
+                          : (isPremium
+                                ? RankProfileFrameStyle.premium
+                                : RankProfileFrameStyle.podiumFree),
+                      defaultAsset: defaultProfile,
+                      crownAsset: crownAsset,
+                      showCrown: showCrown,
+                      level: entry?.level,
+                      showLevelBadge: entry != null,
+                      outerShadowScale: s,
+                    ),
                   ),
                 ),
               ],
             ),
           ),
           SizedBox(height: 4 * s),
-          SizedBox(
-            width: stepWidth * s,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Flexible(
-                  child: Text(
-                    displayName,
-                    maxLines: 1,
-                    softWrap: false,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontFamily: 'ChironHeiHK',
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                      fontVariations: [FontVariation('wght', 700)],
-                      fontSize: attrSize,
-                      height: 1.1,
+          GestureDetector(
+            onTap: onOpenProfile,
+            behavior: HitTestBehavior.opaque,
+            child: SizedBox(
+              width: stepWidth * s,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Flexible(
+                    child: Text(
+                      displayName,
+                      maxLines: 1,
+                      softWrap: false,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontFamily: 'ChironHeiHK',
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        fontVariations: [FontVariation('wght', 700)],
+                        fontSize: attrSize,
+                        height: 1.1,
+                      ),
                     ),
                   ),
-                ),
-                if (isPremium) ...[
-                  const SizedBox(width: 4),
-                  Image.asset(premiumBadge, width: attrSize, height: attrSize),
+                  if (isPremium) ...[
+                    const SizedBox(width: 4),
+                    Image.asset(
+                      premiumBadge,
+                      width: attrSize,
+                      height: attrSize,
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
           if (entry != null) ...[
@@ -1446,12 +1473,14 @@ class _RankListRow extends StatelessWidget {
     required this.premiumBadge,
     this.contentHorizontal = 24,
     this.flushTop = false,
+    this.onOpenProfile,
   });
 
   final int rank;
   final RankEntryDto? entry;
   final String defaultProfile;
   final String premiumBadge;
+  final VoidCallback? onOpenProfile;
 
   /// 행 콘텐츠 좌우 inset. isMe 하이라이트는 리스트 전체 폭(각진 모서리).
   final double contentHorizontal;
@@ -1493,96 +1522,106 @@ class _RankListRow extends StatelessWidget {
               ),
             ),
           ),
-          Stack(
-            clipBehavior: Clip.none,
-            children: [
-              RankProfileFrame(
-                imgPath: entry == null
-                    ? null
-                    : UserImgPath.orFallback(entry!.imgPath),
-                outer: _listAvatarOuter,
-                borderWidth: _listBorderW,
-                style: isPremium
-                    ? RankProfileFrameStyle.premium
-                    : RankProfileFrameStyle.free,
-                defaultAsset: defaultProfile,
-              ),
-              if (!isEmpty)
-                Positioned(
-                  right: -4,
-                  bottom: -4,
-                  child: _LevelBadge(level: entry!.level, compact: true),
+          GestureDetector(
+            onTap: onOpenProfile,
+            behavior: HitTestBehavior.opaque,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                RankProfileFrame(
+                  imgPath: entry == null
+                      ? null
+                      : UserImgPath.orFallback(entry!.imgPath),
+                  outer: _listAvatarOuter,
+                  borderWidth: _listBorderW,
+                  style: isPremium
+                      ? RankProfileFrameStyle.premium
+                      : RankProfileFrameStyle.free,
+                  defaultAsset: defaultProfile,
                 ),
-            ],
+                if (!isEmpty)
+                  Positioned(
+                    right: -4,
+                    bottom: -4,
+                    child: _LevelBadge(level: entry!.level, compact: true),
+                  ),
+              ],
+            ),
           ),
           const SizedBox(width: 10),
           Expanded(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                const badgeGap = 4.0;
-                const badgeSize = 14.0;
-                final badgeReserve = isPremium ? badgeGap + badgeSize : 0.0;
-                final nameMax = (constraints.maxWidth - badgeReserve).clamp(
-                  0.0,
-                  double.infinity,
-                );
-                final textDir = Directionality.of(context);
-                final textPainter = TextPainter(
-                  text: TextSpan(text: displayName, style: nameStyle),
-                  maxLines: 1,
-                  textDirection: textDir,
-                )..layout();
-                final textW = textPainter.width;
-                final needsMarquee = textW > nameMax;
-                final nameW = needsMarquee ? nameMax : textW;
+            child: GestureDetector(
+              onTap: onOpenProfile,
+              behavior: HitTestBehavior.opaque,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  const badgeGap = 4.0;
+                  const badgeSize = 14.0;
+                  final badgeReserve = isPremium ? badgeGap + badgeSize : 0.0;
+                  final nameMax = (constraints.maxWidth - badgeReserve).clamp(
+                    0.0,
+                    double.infinity,
+                  );
+                  final textDir = Directionality.of(context);
+                  final textPainter = TextPainter(
+                    text: TextSpan(text: displayName, style: nameStyle),
+                    maxLines: 1,
+                    textDirection: textDir,
+                  )..layout();
+                  final textW = textPainter.width;
+                  final needsMarquee = textW > nameMax;
+                  final nameW = needsMarquee ? nameMax : textW;
 
-                return Row(
-                  children: [
-                    SizedBox(
-                      width: nameW,
-                      height: 16,
-                      child: needsMarquee
-                          ? Marquee(
-                              text: displayName,
-                              style: nameStyle,
-                              scrollAxis: Axis.horizontal,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              blankSpace: 24,
-                              velocity: 30,
-                              pauseAfterRound: const Duration(seconds: 2),
-                              startPadding: 0,
-                              accelerationDuration: const Duration(seconds: 1),
-                              accelerationCurve: Curves.linear,
-                              decelerationDuration: const Duration(
-                                milliseconds: 500,
-                              ),
-                              decelerationCurve: Curves.easeOut,
-                            )
-                          : Align(
-                              alignment: AlignmentDirectional.centerStart,
-                              child: Text(
-                                displayName,
-                                maxLines: 1,
-                                softWrap: false,
-                                overflow: TextOverflow.clip,
+                  return Row(
+                    children: [
+                      SizedBox(
+                        width: nameW,
+                        height: 16,
+                        child: needsMarquee
+                            ? Marquee(
+                                text: displayName,
                                 style: nameStyle,
+                                scrollAxis: Axis.horizontal,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                blankSpace: 24,
+                                velocity: 30,
+                                pauseAfterRound: const Duration(seconds: 2),
+                                startPadding: 0,
+                                accelerationDuration: const Duration(
+                                  seconds: 1,
+                                ),
+                                accelerationCurve: Curves.linear,
+                                decelerationDuration: const Duration(
+                                  milliseconds: 500,
+                                ),
+                                decelerationCurve: Curves.easeOut,
+                              )
+                            : Align(
+                                alignment: AlignmentDirectional.centerStart,
+                                child: Text(
+                                  displayName,
+                                  maxLines: 1,
+                                  softWrap: false,
+                                  overflow: TextOverflow.clip,
+                                  style: nameStyle,
+                                ),
                               ),
-                            ),
-                    ),
-                    if (isPremium) ...[
-                      const SizedBox(width: badgeGap),
-                      Transform.translate(
-                        offset: const Offset(0, 1),
-                        child: Image.asset(
-                          premiumBadge,
-                          width: badgeSize,
-                          height: badgeSize,
-                        ),
                       ),
+                      if (isPremium) ...[
+                        const SizedBox(width: badgeGap),
+                        Transform.translate(
+                          offset: const Offset(0, 1),
+                          child: Image.asset(
+                            premiumBadge,
+                            width: badgeSize,
+                            height: badgeSize,
+                          ),
+                        ),
+                      ],
                     ],
-                  ],
-                );
-              },
+                  );
+                },
+              ),
             ),
           ),
           Row(

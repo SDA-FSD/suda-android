@@ -433,6 +433,76 @@ class AppLocalizationsMs extends AppLocalizations {
   }
 
   @override
+  String get otherUserFriends => 'Rakan';
+
+  @override
+  String get otherUserRequested => 'Permintaan dihantar';
+
+  @override
+  String get otherUserAddFriend => 'Tambah rakan';
+
+  @override
+  String get otherUserUnfriendTitle => 'Nyahsahabat pengguna ini?';
+
+  @override
+  String get otherUserUnfriendBody =>
+      'Anda dan pengguna ini tidak lagi akan menjadi rakan.';
+
+  @override
+  String get otherUserUnfriendOk => 'Nyahsahabat';
+
+  @override
+  String get otherUserUnfriendCancel => 'Batal';
+
+  @override
+  String get otherUserCancelRequestTitle => 'Batalkan permintaan rakan?';
+
+  @override
+  String get otherUserCancelRequestBody =>
+      'Anda tidak boleh menghantar permintaan lain kepada pengguna ini selama 48 jam.';
+
+  @override
+  String get otherUserCancelRequestOk => 'Batalkan permintaan';
+
+  @override
+  String get otherUserKeepRequest => 'Kekalkan permintaan';
+
+  @override
+  String get otherUserSendRequestTitle => 'Hantar permintaan rakan?';
+
+  @override
+  String get otherUserSendRequestBody =>
+      'Anda akan menjadi rakan apabila permintaan diterima.';
+
+  @override
+  String get otherUserSendRequestOk => 'Hantar permintaan';
+
+  @override
+  String get otherUserSendRequestCancel => 'Batal';
+
+  @override
+  String get otherUserFriendBlockedBody =>
+      'Anda tidak boleh menghantar permintaan rakan kepada pengguna ini buat masa ini.';
+
+  @override
+  String get otherUserFriendOk => 'OK';
+
+  @override
+  String get otherUserFriendLimitSelf =>
+      'Anda telah mencapai had 30 rakan. Buang seorang rakan untuk menambah orang baharu.';
+
+  @override
+  String get otherUserFriendLimitThem =>
+      'Orang ini telah mencapai had 30 rakan dan tidak boleh menambah lagi.';
+
+  @override
+  String get otherUserNeighborsEmpty => 'Belum ada watak yang dikumpulkan.';
+
+  @override
+  String get otherUserAchievementsEmpty =>
+      'Belum ada pencapaian yang diperoleh.';
+
+  @override
   String get profileHistory => 'Sejarah';
 
   @override

@@ -433,6 +433,76 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
+  String get otherUserFriends => 'Teman';
+
+  @override
+  String get otherUserRequested => 'Permintaan terkirim';
+
+  @override
+  String get otherUserAddFriend => 'Tambah teman';
+
+  @override
+  String get otherUserUnfriendTitle => 'Hapus pengguna ini dari teman?';
+
+  @override
+  String get otherUserUnfriendBody =>
+      'Kamu dan pengguna ini tidak akan lagi berteman.';
+
+  @override
+  String get otherUserUnfriendOk => 'Hapus teman';
+
+  @override
+  String get otherUserUnfriendCancel => 'Batal';
+
+  @override
+  String get otherUserCancelRequestTitle => 'Batalkan permintaan pertemanan?';
+
+  @override
+  String get otherUserCancelRequestBody =>
+      'Kamu tidak dapat mengirim permintaan lagi ke pengguna ini selama 48 jam.';
+
+  @override
+  String get otherUserCancelRequestOk => 'Batalkan permintaan';
+
+  @override
+  String get otherUserKeepRequest => 'Pertahankan permintaan';
+
+  @override
+  String get otherUserSendRequestTitle => 'Kirim permintaan pertemanan?';
+
+  @override
+  String get otherUserSendRequestBody =>
+      'Kalian akan berteman setelah permintaan diterima.';
+
+  @override
+  String get otherUserSendRequestOk => 'Kirim permintaan';
+
+  @override
+  String get otherUserSendRequestCancel => 'Batal';
+
+  @override
+  String get otherUserFriendBlockedBody =>
+      'Saat ini kamu tidak dapat mengirim permintaan pertemanan ke pengguna ini.';
+
+  @override
+  String get otherUserFriendOk => 'OK';
+
+  @override
+  String get otherUserFriendLimitSelf =>
+      'Kamu sudah mencapai batas 30 teman. Hapus seorang teman untuk menambahkan orang baru.';
+
+  @override
+  String get otherUserFriendLimitThem =>
+      'Pengguna ini sudah mencapai batas 30 teman dan tidak dapat menambah lagi.';
+
+  @override
+  String get otherUserNeighborsEmpty => 'Belum ada karakter yang dikumpulkan.';
+
+  @override
+  String get otherUserAchievementsEmpty =>
+      'Belum ada pencapaian yang diperoleh.';
+
+  @override
   String get profileHistory => 'Riwayat';
 
   @override
