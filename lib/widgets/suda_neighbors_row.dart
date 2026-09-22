@@ -6,7 +6,12 @@ import 'cdn_thumb_image.dart';
 import 'character_rarity_frame.dart';
 
 class SudaNeighborsRow extends StatelessWidget {
-  const SudaNeighborsRow({super.key, required this.portraits, this.emptyText});
+  const SudaNeighborsRow({
+    super.key,
+    required this.portraits,
+    this.emptyText,
+    this.onCharacterTap,
+  });
 
   static const _size = 70.0;
   static const _borderWidth = 3.0;
@@ -16,6 +21,7 @@ class SudaNeighborsRow extends StatelessWidget {
 
   final List<ClaimedCharacterPortraitDto> portraits;
   final String? emptyText;
+  final ValueChanged<ClaimedCharacterPortraitDto>? onCharacterTap;
 
   @override
   Widget build(BuildContext context) {
@@ -52,19 +58,24 @@ class SudaNeighborsRow extends StatelessWidget {
                   separatorBuilder: (_, _) => const SizedBox(width: _gap),
                   itemBuilder: (context, index) {
                     final item = portraits[index];
-                    return CharacterRarityFrame(
-                      key: ValueKey(
-                        '${item.characterId}:${item.characterImgPath}',
-                      ),
-                      rarity: item.characterRarity,
-                      size: _size,
-                      borderWidth: _borderWidth,
-                      child: CdnThumbImage(
-                        path: item.characterImgPath,
-                        slot: CdnThumbSlot.characterReward,
-                        width: _size,
-                        height: _size,
-                        fit: BoxFit.cover,
+                    return GestureDetector(
+                      onTap: onCharacterTap == null
+                          ? null
+                          : () => onCharacterTap!(item),
+                      child: CharacterRarityFrame(
+                        key: ValueKey(
+                          '${item.characterId}:${item.characterImgPath}',
+                        ),
+                        rarity: item.characterRarity,
+                        size: _size,
+                        borderWidth: _borderWidth,
+                        child: CdnThumbImage(
+                          path: item.characterImgPath,
+                          slot: CdnThumbSlot.characterReward,
+                          width: _size,
+                          height: _size,
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     );
                   },

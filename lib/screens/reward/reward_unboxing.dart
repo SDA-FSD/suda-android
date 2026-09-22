@@ -13,6 +13,7 @@ import '../../services/main_user_sync.dart';
 import '../../utils/full_screen_route.dart';
 import '../../utils/cdn_thumbnail.dart';
 import '../../widgets/character_rarity_frame.dart';
+import '../character.dart';
 import '../../widgets/procedural_sunburst.dart';
 
 enum _UnboxingStage { idle, tense, confirmed, unlocking, done }
@@ -326,6 +327,19 @@ class _RewardUnboxingState extends State<RewardUnboxing>
       setState(() => _stage = _UnboxingStage.done);
       if (_item?.currentImgProgress == _displayTotal) {
         _secretController.forward(from: 0);
+      }
+    });
+  }
+
+  void _onViewCharacter() {
+    final id = _item?.characterId ?? 0;
+    if (id <= 0) return;
+    final route = ModalRoute.of(context);
+    final navigator = Navigator.of(context);
+    unawaited(CharacterScreen.open(context, id));
+    Future<void>.delayed(const Duration(milliseconds: 450), () {
+      if (route != null && route.isActive) {
+        navigator.removeRoute(route);
       }
     });
   }
@@ -769,7 +783,7 @@ class _RewardUnboxingState extends State<RewardUnboxing>
                 const SizedBox(height: 12),
                 _UnboxingCtaButton(
                   label: l10n.rewardUnboxingViewCharacter,
-                  onPressed: _stage == _UnboxingStage.done ? () {} : null,
+                  onPressed: _stage == _UnboxingStage.done ? _onViewCharacter : null,
                 ),
               ],
               const Spacer(),

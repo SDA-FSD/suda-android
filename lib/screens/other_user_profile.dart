@@ -15,6 +15,7 @@ import '../widgets/user_profile_avatar.dart';
 import '../widgets/profile_achievements_section.dart';
 import '../widgets/suda_label_tabs.dart';
 import '../widgets/suda_neighbors_row.dart';
+import 'character.dart';
 import 'rank/rank_crown_avatar.dart';
 
 class OtherUserProfileScreen extends StatefulWidget {
@@ -563,6 +564,7 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
         ),
         const SizedBox(height: 10),
         SudaNeighborsRow(
+          onCharacterTap: (item) => CharacterScreen.open(context, item.characterId),
           portraits: progress?.claimedCharacters ?? const [],
           emptyText: l10n.otherUserNeighborsEmpty,
         ),
@@ -639,7 +641,7 @@ class _FriendPill extends StatelessWidget {
 
     switch (status) {
       case FriendRelationViewStatus.friend:
-        fill = const Color(0x330CABA8);
+        fill = const Color(0x290CABA8);
         textColor = Colors.white;
         label = l10n.otherUserFriends;
         friendsBorder = true;
@@ -665,7 +667,11 @@ class _FriendPill extends StatelessWidget {
               ? const LinearGradient(
                   begin: Alignment.topRight,
                   end: Alignment.bottomLeft,
-                  colors: [Colors.white, Color(0x00FFFFFF), Colors.white],
+                  colors: [
+                    Color(0xFF80D7CF),
+                    Color(0x0080D7CF),
+                    Color(0xFF80D7CF),
+                  ],
                   stops: [0.0, 0.5, 1.0],
                 )
               : null,
@@ -673,28 +679,34 @@ class _FriendPill extends StatelessWidget {
         ),
         child: Padding(
           padding: EdgeInsets.all(friendsBorder ? 1 : 0),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: fill,
-              borderRadius: BorderRadius.circular(999),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 6),
-              child: Center(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (showCheck) ...[
-                      Image.asset(
-                        'assets/images/icons/check_raw.png',
-                        width: 14,
-                        height: 14,
-                        color: Colors.white,
-                      ),
-                      const SizedBox(width: 6),
-                    ],
-                    Text(label, style: labelStyle.copyWith(color: textColor)),
-                  ],
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(999),
+            child: ColoredBox(
+              color: friendsBorder ? const Color(0xFF121212) : fill,
+              child: ColoredBox(
+                color: fill,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  child: Center(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (showCheck) ...[
+                          Image.asset(
+                            'assets/images/icons/check_raw.png',
+                            width: 14,
+                            height: 14,
+                            color: Colors.white,
+                          ),
+                          const SizedBox(width: 6),
+                        ],
+                        Text(
+                          label,
+                          style: labelStyle.copyWith(color: textColor),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),
