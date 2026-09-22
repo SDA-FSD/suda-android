@@ -385,6 +385,13 @@ class AppLocalizationsId extends AppLocalizations {
   String get profileWordsSpoken => 'Kata diucapkan';
 
   @override
+  String get profileSudaNeighbors => 'Tetangga SUDA';
+
+  @override
+  String get profileSudaNeighborsEmpty =>
+      'Buka Kotak Hadiah untuk mengumpulkan karakter baru!';
+
+  @override
   String get profileHistory => 'Riwayat';
 
   @override

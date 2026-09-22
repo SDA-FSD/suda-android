@@ -153,6 +153,8 @@
   "profileProgress": "İlerleme",
   "profileDayStreak": "Gün serisi",
   "profileWordsSpoken": "Konuşulan kelime",
+  "profileSudaNeighbors": "SUDA Komşuları",
+  "profileSudaNeighborsEmpty": "Yeni karakterler biriktirmek için Ödül Kutularını aç!",
   "profileHistory": "Geçmiş",
   "profileSaved": "Kaydedilenler",
   "profileHistoryEmpty": "Henüz geçmiş yok",

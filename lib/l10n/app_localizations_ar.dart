@@ -381,6 +381,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get profileWordsSpoken => 'كلمات منطوقة';
 
   @override
+  String get profileSudaNeighbors => 'جيران SUDA';
+
+  @override
+  String get profileSudaNeighborsEmpty =>
+      'افتح صناديق المكافآت لجمع شخصيات جديدة!';
+
+  @override
   String get profileHistory => 'السجل';
 
   @override

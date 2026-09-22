@@ -153,6 +153,8 @@
   "profileProgress": "Postępy",
   "profileDayStreak": "Dni z rzędu",
   "profileWordsSpoken": "Wypowiedziane słowa",
+  "profileSudaNeighbors": "Sąsiedzi SUDA",
+  "profileSudaNeighborsEmpty": "Otwieraj skrzynki nagród, by zbierać nowe postacie!",
   "profileHistory": "Historia",
   "profileSaved": "Zapisane",
   "profileHistoryEmpty": "Brak historii",

@@ -384,6 +384,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get profileWordsSpoken => 'Konuşulan kelime';
 
   @override
+  String get profileSudaNeighbors => 'SUDA Komşuları';
+
+  @override
+  String get profileSudaNeighborsEmpty =>
+      'Yeni karakterler biriktirmek için Ödül Kutularını aç!';
+
+  @override
   String get profileHistory => 'Geçmiş';
 
   @override

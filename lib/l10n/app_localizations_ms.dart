@@ -385,6 +385,13 @@ class AppLocalizationsMs extends AppLocalizations {
   String get profileWordsSpoken => 'Perkataan dituturkan';
 
   @override
+  String get profileSudaNeighbors => 'Jiran SUDA';
+
+  @override
+  String get profileSudaNeighborsEmpty =>
+      'Buka Kotak Ganjaran untuk kumpulkan watak baharu!';
+
+  @override
   String get profileHistory => 'Sejarah';
 
   @override

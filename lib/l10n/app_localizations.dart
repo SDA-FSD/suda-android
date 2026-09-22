@@ -827,6 +827,18 @@ abstract class AppLocalizations {
   /// **'Words Spoken'**
   String get profileWordsSpoken;
 
+  /// No description provided for @profileSudaNeighbors.
+  ///
+  /// In en, this message translates to:
+  /// **'SUDA Neighbors'**
+  String get profileSudaNeighbors;
+
+  /// No description provided for @profileSudaNeighborsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Reward Boxes to collect new characters!'**
+  String get profileSudaNeighborsEmpty;
+
   /// No description provided for @profileHistory.
   ///
   /// In en, this message translates to:

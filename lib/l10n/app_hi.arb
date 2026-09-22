@@ -153,6 +153,8 @@
   "profileProgress": "प्रगति",
   "profileDayStreak": "लगातार दिन",
   "profileWordsSpoken": "बोले गए शब्द",
+  "profileSudaNeighbors": "SUDA पड़ोसी",
+  "profileSudaNeighborsEmpty": "नए पात्र इकट्ठा करने के लिए रिवॉर्ड बॉक्स खोलें!",
   "profileHistory": "हिस्ट्री",
   "profileSaved": "सेव किए गए",
   "profileHistoryEmpty": "अभी कोई हिस्ट्री नहीं है",

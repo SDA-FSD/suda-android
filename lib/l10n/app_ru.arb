@@ -153,6 +153,8 @@
   "profileProgress": "Прогресс",
   "profileDayStreak": "Дней подряд",
   "profileWordsSpoken": "Произнесённые слова",
+  "profileSudaNeighbors": "Соседи SUDA",
+  "profileSudaNeighborsEmpty": "Открывайте коробки наград, чтобы собирать новых персонажей!",
   "profileHistory": "История",
   "profileSaved": "Сохранённое",
   "profileHistoryEmpty": "Истории пока нет",

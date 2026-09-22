@@ -364,6 +364,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get profileWordsSpoken => '说过的单词';
 
   @override
+  String get profileSudaNeighbors => 'SUDA 邻居';
+
+  @override
+  String get profileSudaNeighborsEmpty => '打开奖励箱，收集新角色！';
+
+  @override
   String get profileHistory => '历史记录';
 
   @override
@@ -1178,6 +1184,12 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get profileWordsSpoken => '说过的单词';
 
   @override
+  String get profileSudaNeighbors => 'SUDA 邻居';
+
+  @override
+  String get profileSudaNeighborsEmpty => '打开奖励箱，收集新角色！';
+
+  @override
   String get profileHistory => '历史记录';
 
   @override
@@ -1990,6 +2002,12 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get profileWordsSpoken => '說過的單字';
+
+  @override
+  String get profileSudaNeighbors => 'SUDA 鄰居';
+
+  @override
+  String get profileSudaNeighborsEmpty => '打開獎勵箱，收集新角色！';
 
   @override
   String get profileHistory => '歷史紀錄';

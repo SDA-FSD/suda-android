@@ -182,6 +182,7 @@ class MyProfileDto {
   final int currentStreakDays;
   final int wordsSpokenCount;
   final int progressPercentage;
+  final List<ClaimedCharacterPortraitDto> claimedCharacters;
 
   const MyProfileDto({
     required this.id,
@@ -194,6 +195,7 @@ class MyProfileDto {
     required this.currentStreakDays,
     required this.wordsSpokenCount,
     required this.progressPercentage,
+    this.claimedCharacters = const [],
   });
 
   factory MyProfileDto.fromJson(Map<String, dynamic> json) {
@@ -205,6 +207,14 @@ class MyProfileDto {
 
     final name = json['name'] as String?;
     final imgPath = json['imgPath'] as String?;
+    final claimedRaw = json['claimedCharacters'];
+    final claimedCharacters = claimedRaw is List
+        ? claimedRaw
+            .whereType<Map<String, dynamic>>()
+            .map(ClaimedCharacterPortraitDto.fromJson)
+            .where((item) => item.characterImgPath.isNotEmpty)
+            .toList()
+        : const <ClaimedCharacterPortraitDto>[];
     return MyProfileDto(
       id: asInt(json['id']),
       name: name == null || name.isEmpty ? null : name,
@@ -216,6 +226,33 @@ class MyProfileDto {
       currentStreakDays: asInt(json['currentStreakDays']),
       wordsSpokenCount: asInt(json['wordsSpokenCount']),
       progressPercentage: asInt(json['progressPercentage']),
+      claimedCharacters: claimedCharacters,
+    );
+  }
+}
+
+class ClaimedCharacterPortraitDto {
+  final int characterId;
+  final String characterRarity;
+  final String characterImgPath;
+
+  const ClaimedCharacterPortraitDto({
+    required this.characterId,
+    required this.characterRarity,
+    required this.characterImgPath,
+  });
+
+  factory ClaimedCharacterPortraitDto.fromJson(Map<String, dynamic> json) {
+    int asInt(dynamic v) {
+      if (v is int) return v;
+      if (v is num) return v.toInt();
+      return 0;
+    }
+
+    return ClaimedCharacterPortraitDto(
+      characterId: asInt(json['characterId']),
+      characterRarity: json['characterRarity'] as String? ?? '',
+      characterImgPath: json['characterImgPath'] as String? ?? '',
     );
   }
 }

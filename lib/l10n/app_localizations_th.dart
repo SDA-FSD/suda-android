@@ -378,6 +378,13 @@ class AppLocalizationsTh extends AppLocalizations {
   String get profileWordsSpoken => 'คำที่พูด';
 
   @override
+  String get profileSudaNeighbors => 'เพื่อนบ้าน SUDA';
+
+  @override
+  String get profileSudaNeighborsEmpty =>
+      'เปิดกล่องรางวัลเพื่อสะสมตัวละครใหม่!';
+
+  @override
   String get profileHistory => 'ประวัติ';
 
   @override

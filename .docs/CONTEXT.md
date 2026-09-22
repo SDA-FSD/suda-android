@@ -112,7 +112,7 @@ xcrun altool --upload-app --type ios -f build/ios/ipa/suda.ipa --apiKey "$(cat ~
   - `MaterialApp`은 `AppLocalizations.localizationsDelegates`/`supportedLocales`를 사용하며 플랫폼 locale의 region/script를 보존한다. API·동적 콘텐츠(`SudaJson`·맵, Opening `briefingAudio`)는 서버 키 대소문자 구분 BCP 47(`ko-KR`) → languageCode(`ko`) → `en` 순으로 조회한다 (`LanguageUtil.localizationLookupKeys`).
   - **[강제] UI 문자열 추가·변경 시 전체 locale 확장:** 사용자/작업 입력이 `en`·`ko`·`pt`만 있어도, agent는 “나머지 언어 번역할까?”를 **묻지 말고** 위 지원 locale **전부(21개)**의 `app_*.arb`에 동일 키를 즉시 작성·저장한다. `en`을 의미 canonical로, `ko`/`pt`를 문맥 참고로 쓰며, 키·`@` metadata·placeholder 이름/타입·`@@TIME@@`·의도된 개행·ICU 형태를 보존한다. `app_es.arb`는 `es_419`와, `app_zh.arb`는 `zh_Hans`와 locale ID 외 동기화한다. 저장 후 `flutter gen-l10n`까지 수행하고, 생성 Dart도 커밋 대상에 포함한다. 부분 locale만 남기는 것은 금지.
 - `UserDto`: provider/sub/name/email/`imgPath`, 통계, `metaInfo`(`SudaJson`). `upsertMetaInfo` / `hasMetaInfoValue`. `imgPath` null/empty는 1번 초록 `#03ABA8` (`UserImgPath.fallbackColor`)
-- Main 복귀 시 `_syncUserOnMainRouteReturn` → `GET /v1/users`. Profile 표면 값은 `GET /v1/users/my-profile` (Profile 로컬만. 기존 `/v1/users/profile` 클라 폐기)
+- Main 복귀 시 `_syncUserOnMainRouteReturn` → `GET /v1/users`. Profile 표면 값은 `GET /v1/users/my-profile` (Profile 로컬만. 기존 `/v1/users/profile` 클라 폐기). `MyProfileDto.claimedCharacters`(`characterId`,`characterRarity`,`characterImgPath`) — 수령·비중복 초상화. Progress 탭 SUDA Neighbors.
 - Tutorial 실노출: `POST /v1/users/tutorial-shown` (실패 무시)
 - Series Overview 첫 진입: `POST /v1/users/first-overview` + 클라 `FIRST_OVERVIEW=Y` 즉시 주입
 

@@ -4,6 +4,8 @@
 
 ---
 
+- **SUDA Neighbors(2026-09-22):** Progress 탭 streak/words 아래 수령 초상화. `GET /v1/users/my-profile` `claimedCharacters`. Epic→Rare→Normal, 같은 rarity는 최근 수령. `duplicatedYn!=Y`. 빈 목록은 70 높이 안내 문구.
+
 - **profileImgUrl 제거(2026-09-22):** 필드·Google picture upsert·`DELETE /v1/users/profile-img`/`PUT .../profile-img/default` 삭제. Account 리셋은 `PUT` `DEFAULT`/`1`. 빈 `imgPath`는 클라 1번 초록 `#03ABA8`. 배포 후 `ALTER TABLE user DROP COLUMN profile_img_url`.
 
 - **프로필 imgPath type(2026-09-22):** `DEFAULT|NORMAL|RARE|EPIC`. 저장 `{TYPE}:{path}`. Unboxing Set as Profile rarity type + GET users. GNB/랭킹 `_150`. 구독 테두리 안 rarity border 5.

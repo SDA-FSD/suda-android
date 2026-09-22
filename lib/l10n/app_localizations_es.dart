@@ -387,6 +387,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get profileWordsSpoken => 'Palabras habladas';
 
   @override
+  String get profileSudaNeighbors => 'Vecinos SUDA';
+
+  @override
+  String get profileSudaNeighborsEmpty =>
+      '¡Abre Cajas de Recompensa y colecciona nuevos personajes!';
+
+  @override
   String get profileHistory => 'Historial';
 
   @override
@@ -1256,6 +1263,13 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
 
   @override
   String get profileWordsSpoken => 'Palabras habladas';
+
+  @override
+  String get profileSudaNeighbors => 'Vecinos SUDA';
+
+  @override
+  String get profileSudaNeighborsEmpty =>
+      '¡Abre Cajas de Recompensa y colecciona nuevos personajes!';
 
   @override
   String get profileHistory => 'Historial';

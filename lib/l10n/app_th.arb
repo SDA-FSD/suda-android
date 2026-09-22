@@ -153,6 +153,8 @@
   "profileProgress": "ความก้าวหน้า",
   "profileDayStreak": "วันที่เรียนต่อเนื่อง",
   "profileWordsSpoken": "คำที่พูด",
+  "profileSudaNeighbors": "เพื่อนบ้าน SUDA",
+  "profileSudaNeighborsEmpty": "เปิดกล่องรางวัลเพื่อสะสมตัวละครใหม่!",
   "profileHistory": "ประวัติ",
   "profileSaved": "บันทึกไว้",
   "profileHistoryEmpty": "ยังไม่มีประวัติ",

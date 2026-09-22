@@ -153,6 +153,8 @@
   "profileProgress": "成长",
   "profileDayStreak": "连续学习天数",
   "profileWordsSpoken": "说过的单词",
+  "profileSudaNeighbors": "SUDA 邻居",
+  "profileSudaNeighborsEmpty": "打开奖励箱，收集新角色！",
   "profileHistory": "历史记录",
   "profileSaved": "收藏",
   "profileHistoryEmpty": "暂无历史记录",

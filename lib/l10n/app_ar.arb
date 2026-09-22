@@ -153,6 +153,8 @@
   "profileProgress": "التقدم",
   "profileDayStreak": "أيام متتالية",
   "profileWordsSpoken": "كلمات منطوقة",
+  "profileSudaNeighbors": "جيران SUDA",
+  "profileSudaNeighborsEmpty": "افتح صناديق المكافآت لجمع شخصيات جديدة!",
   "profileHistory": "السجل",
   "profileSaved": "المحفوظات",
   "profileHistoryEmpty": "لا يوجد سجل بعد",

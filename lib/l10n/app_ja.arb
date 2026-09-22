@@ -153,6 +153,8 @@
   "profileProgress": "成長",
   "profileDayStreak": "連続学習日",
   "profileWordsSpoken": "話した単語",
+  "profileSudaNeighbors": "SUDAの隣人",
+  "profileSudaNeighborsEmpty": "リワードボックスを開けて新しいキャラクターを集めよう！",
   "profileHistory": "履歴",
   "profileSaved": "保存済み",
   "profileHistoryEmpty": "まだ履歴はありません",

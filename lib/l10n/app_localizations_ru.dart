@@ -383,6 +383,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get profileWordsSpoken => 'Произнесённые слова';
 
   @override
+  String get profileSudaNeighbors => 'Соседи SUDA';
+
+  @override
+  String get profileSudaNeighborsEmpty =>
+      'Открывайте коробки наград, чтобы собирать новых персонажей!';
+
+  @override
   String get profileHistory => 'История';
 
   @override

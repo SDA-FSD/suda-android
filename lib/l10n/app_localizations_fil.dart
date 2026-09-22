@@ -391,6 +391,13 @@ class AppLocalizationsFil extends AppLocalizations {
   String get profileWordsSpoken => 'Mga salitang nasabi';
 
   @override
+  String get profileSudaNeighbors => 'Mga Kapitbahay ng SUDA';
+
+  @override
+  String get profileSudaNeighborsEmpty =>
+      'Magbukas ng Reward Boxes para magkolekta ng mga bagong character!';
+
+  @override
   String get profileHistory => 'History';
 
   @override

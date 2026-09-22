@@ -367,6 +367,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get profileWordsSpoken => '話した単語';
 
   @override
+  String get profileSudaNeighbors => 'SUDAの隣人';
+
+  @override
+  String get profileSudaNeighborsEmpty => 'リワードボックスを開けて新しいキャラクターを集めよう！';
+
+  @override
   String get profileHistory => '履歴';
 
   @override

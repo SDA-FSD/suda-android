@@ -382,6 +382,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileWordsSpoken => 'Words Spoken';
 
   @override
+  String get profileSudaNeighbors => 'SUDA Neighbors';
+
+  @override
+  String get profileSudaNeighborsEmpty =>
+      'Open Reward Boxes to collect new characters!';
+
+  @override
   String get profileHistory => 'History';
 
   @override

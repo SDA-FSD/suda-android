@@ -384,6 +384,13 @@ class AppLocalizationsNl extends AppLocalizations {
   String get profileWordsSpoken => 'Gesproken woorden';
 
   @override
+  String get profileSudaNeighbors => 'SUDA-buren';
+
+  @override
+  String get profileSudaNeighborsEmpty =>
+      'Open Beloningsboxen om nieuwe personages te verzamelen!';
+
+  @override
   String get profileHistory => 'Geschiedenis';
 
   @override

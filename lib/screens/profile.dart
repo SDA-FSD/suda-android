@@ -712,47 +712,66 @@ class _ProfileScreenState extends State<ProfileScreen> {
       return _buildProgressCardsShimmer();
     }
     final profile = _myProfile;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Row(
-        children: [
-          Expanded(
-            child: _ProgressStatCard(
-              top: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Image.asset(
-                    'assets/images/icons/streak.png',
-                    height: 20,
-                    fit: BoxFit.contain,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Row(
+            children: [
+              Expanded(
+                child: _ProgressStatCard(
+                  top: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Image.asset(
+                        'assets/images/icons/streak.png',
+                        height: 20,
+                        fit: BoxFit.contain,
+                      ),
+                      const SizedBox(width: 5),
+                      Text(
+                        '${profile?.currentStreakDays ?? 0}',
+                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                              color: Colors.white,
+                            ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 5),
-                  Text(
-                    '${profile?.currentStreakDays ?? 0}',
+                  bottom: l10n.profileDayStreak,
+                ),
+              ),
+              const SizedBox(width: 24),
+              Expanded(
+                child: _ProgressStatCard(
+                  top: Text(
+                    _formatSpokenCount(profile?.wordsSpokenCount ?? 0),
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                           color: Colors.white,
                         ),
                   ),
-                ],
+                  bottom: l10n.profileWordsSpoken,
+                ),
               ),
-              bottom: l10n.profileDayStreak,
-            ),
+            ],
           ),
-          const SizedBox(width: 24),
-          Expanded(
-            child: _ProgressStatCard(
-              top: Text(
-                _formatSpokenCount(profile?.wordsSpokenCount ?? 0),
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      color: Colors.white,
-                    ),
-              ),
-              bottom: l10n.profileWordsSpoken,
-            ),
+        ),
+        const SizedBox(height: 20),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Text(
+            l10n.profileSudaNeighbors,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                  fontVariations: const [FontVariation('wght', 700)],
+                ),
           ),
-        ],
-      ),
+        ),
+        const SizedBox(height: 10),
+        _SudaNeighborsRow(portraits: profile?.claimedCharacters ?? const []),
+      ],
     );
   }
 
@@ -773,15 +792,59 @@ class _ProfileScreenState extends State<ProfileScreen> {
       );
     }
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Row(
-        children: [
-          card(),
-          const SizedBox(width: 24),
-          card(),
-        ],
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Row(
+            children: [
+              card(),
+              const SizedBox(width: 24),
+              card(),
+            ],
+          ),
+        ),
+        const SizedBox(height: 20),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Shimmer.fromColors(
+            baseColor: _shimmerBase,
+            highlightColor: _shimmerHighlight,
+            child: Container(
+              height: 14,
+              width: 140,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Shimmer.fromColors(
+            baseColor: _shimmerBase,
+            highlightColor: _shimmerHighlight,
+            child: Row(
+              children: List.generate(4, (index) {
+                return Padding(
+                  padding: EdgeInsets.only(right: index == 3 ? 0 : 15),
+                  child: Container(
+                    width: 70,
+                    height: 70,
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                );
+              }),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -1617,6 +1680,99 @@ class _ProfileStatDivider extends StatelessWidget {
       width: 2,
       height: 44,
       color: const Color(0xFF1E1E1E),
+    );
+  }
+}
+
+class _SudaNeighborsRow extends StatelessWidget {
+  const _SudaNeighborsRow({required this.portraits});
+
+  static const _size = 70.0;
+  static const _gap = 15.0;
+  static const _gradientWidth = 30.0;
+  static const _hPad = 24.0;
+
+  final List<ClaimedCharacterPortraitDto> portraits;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return SizedBox(
+      height: _size,
+      width: double.infinity,
+      child: portraits.isEmpty
+          ? Padding(
+              padding: const EdgeInsets.symmetric(horizontal: _hPad),
+              child: Center(
+                child: Text(
+                  l10n.profileSudaNeighborsEmpty,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.white,
+                      ),
+                ),
+              ),
+            )
+          : LayoutBuilder(
+              builder: (context, constraints) {
+                final count = portraits.length;
+                final contentWidth = count * _size + (count - 1) * _gap;
+                final overflow = contentWidth > constraints.maxWidth - _hPad * 2;
+                final list = ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  physics: overflow
+                      ? const BouncingScrollPhysics()
+                      : const NeverScrollableScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(horizontal: _hPad),
+                  itemCount: count,
+                  separatorBuilder: (_, _) => const SizedBox(width: _gap),
+                  itemBuilder: (context, index) {
+                    final item = portraits[index];
+                    return CharacterRarityFrame(
+                      key: ValueKey(
+                        '${item.characterId}:${item.characterImgPath}',
+                      ),
+                      rarity: item.characterRarity,
+                      size: _size,
+                      borderWidth: UserImgPath.nestedRarityBorderWidth,
+                      child: CdnThumbImage(
+                        path: item.characterImgPath,
+                        slot: CdnThumbSlot.characterReward,
+                        width: _size,
+                        height: _size,
+                        fit: BoxFit.cover,
+                      ),
+                    );
+                  },
+                );
+                if (!overflow) return list;
+                return Stack(
+                  children: [
+                    list,
+                    const Positioned(
+                      right: 0,
+                      top: 0,
+                      bottom: 0,
+                      child: IgnorePointer(
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.centerLeft,
+                              end: Alignment.centerRight,
+                              colors: [
+                                Color(0x00121212),
+                                Color(0xFF121212),
+                              ],
+                            ),
+                          ),
+                          child: SizedBox(width: _gradientWidth),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
     );
   }
 }

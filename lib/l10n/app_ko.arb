@@ -153,6 +153,8 @@
   "profileProgress": "성장",
   "profileDayStreak": "연속 학습일",
   "profileWordsSpoken": "말한 단어",
+  "profileSudaNeighbors": "SUDA 이웃",
+  "profileSudaNeighborsEmpty": "리워드 박스를 열고 새로운 캐릭터를 모아보세요!",
   "profileHistory": "히스토리",
   "profileSaved": "저장된 표현",
   "profileHistoryEmpty": "아직 롤플레이 결과가 없습니다",

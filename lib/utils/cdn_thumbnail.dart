@@ -47,7 +47,7 @@ enum CdnThumbSlot {
   /// 랭킹 포디움·목록 아바타 (`RankEntryDto.imgPath`의 CDN path).
   rankAvatar(CdnThumbSize.w150),
 
-  /// Reward Unboxing 캐릭터 이미지 (`characterImgPath`).
+  /// Reward Unboxing·Profile SUDA Neighbors 캐릭터 초상화 (`characterImgPath`).
   characterReward(CdnThumbSize.w150),
 
   /// 배경 LQIP. 메모리 히트일 때만 사용하고 추가 GET 하지 않음.

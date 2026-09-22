@@ -153,6 +153,8 @@
   "profileProgress": "Progress",
   "profileDayStreak": "Day Streak",
   "profileWordsSpoken": "Words Spoken",
+  "profileSudaNeighbors": "SUDA Neighbors",
+  "profileSudaNeighborsEmpty": "Open Reward Boxes to collect new characters!",
   "profileHistory": "History",
   "profileSaved": "Saved",
   "profileHistoryEmpty": "No history yet",

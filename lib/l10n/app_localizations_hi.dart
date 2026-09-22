@@ -383,6 +383,13 @@ class AppLocalizationsHi extends AppLocalizations {
   String get profileWordsSpoken => 'बोले गए शब्द';
 
   @override
+  String get profileSudaNeighbors => 'SUDA पड़ोसी';
+
+  @override
+  String get profileSudaNeighborsEmpty =>
+      'नए पात्र इकट्ठा करने के लिए रिवॉर्ड बॉक्स खोलें!';
+
+  @override
   String get profileHistory => 'हिस्ट्री';
 
   @override

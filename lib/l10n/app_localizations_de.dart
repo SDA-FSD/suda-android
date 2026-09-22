@@ -386,6 +386,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get profileWordsSpoken => 'Gesprochene Wörter';
 
   @override
+  String get profileSudaNeighbors => 'SUDA-Nachbarn';
+
+  @override
+  String get profileSudaNeighborsEmpty =>
+      'Öffne Belohnungsboxen, um neue Charaktere zu sammeln!';
+
+  @override
   String get profileHistory => 'Verlauf';
 
   @override

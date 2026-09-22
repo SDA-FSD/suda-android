@@ -368,6 +368,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get profileWordsSpoken => '말한 단어';
 
   @override
+  String get profileSudaNeighbors => 'SUDA 이웃';
+
+  @override
+  String get profileSudaNeighborsEmpty => '리워드 박스를 열고 새로운 캐릭터를 모아보세요!';
+
+  @override
   String get profileHistory => '히스토리';
 
   @override

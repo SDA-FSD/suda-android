@@ -386,6 +386,13 @@ class AppLocalizationsVi extends AppLocalizations {
   String get profileWordsSpoken => 'Từ đã nói';
 
   @override
+  String get profileSudaNeighbors => 'Hàng xóm SUDA';
+
+  @override
+  String get profileSudaNeighborsEmpty =>
+      'Mở Hộp Phần thưởng để sưu tầm nhân vật mới!';
+
+  @override
   String get profileHistory => 'Lịch sử';
 
   @override

@@ -153,6 +153,8 @@
   "profileProgress": "Progression",
   "profileDayStreak": "Jours d’affilée",
   "profileWordsSpoken": "Mots prononcés",
+  "profileSudaNeighbors": "Voisins SUDA",
+  "profileSudaNeighborsEmpty": "Ouvrez des Boîtes de Récompense pour collectionner de nouveaux personnages !",
   "profileHistory": "Historique",
   "profileSaved": "Enregistrées",
   "profileHistoryEmpty": "Aucun historique pour le moment",
