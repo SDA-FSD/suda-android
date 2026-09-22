@@ -136,6 +136,12 @@ class AppLocalizationsTr extends AppLocalizations {
   String get accountName => 'Ad';
 
   @override
+  String get accountChangePicture => 'Fotoğrafı değiştir';
+
+  @override
+  String get changeProfileImageTitle => 'Profil fotoğrafını seç';
+
+  @override
   String get accountInfo => 'Hesap';
 
   @override

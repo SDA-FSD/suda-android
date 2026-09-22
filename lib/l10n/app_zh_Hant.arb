@@ -63,6 +63,8 @@
     }
   },
   "accountName": "姓名",
+  "accountChangePicture": "更換頭像",
+  "changeProfileImageTitle": "選擇你的頭像",
   "accountInfo": "帳號",
   "accountDelete": "刪除帳號",
   "accountDeleteTitle": "要刪除帳號嗎？",

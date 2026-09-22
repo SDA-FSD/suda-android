@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
 import '../models/user_models.dart';
-import '../utils/user_img_path.dart';
 import 'cdn_thumb_image.dart';
 import 'character_rarity_frame.dart';
 
@@ -10,6 +9,7 @@ class SudaNeighborsRow extends StatelessWidget {
   const SudaNeighborsRow({super.key, required this.portraits, this.emptyText});
 
   static const _size = 70.0;
+  static const _borderWidth = 3.0;
   static const _gap = 15.0;
   static const _gradientWidth = 30.0;
   static const _hPad = 24.0;
@@ -58,7 +58,7 @@ class SudaNeighborsRow extends StatelessWidget {
                       ),
                       rarity: item.characterRarity,
                       size: _size,
-                      borderWidth: UserImgPath.nestedRarityBorderWidth,
+                      borderWidth: _borderWidth,
                       child: CdnThumbImage(
                         path: item.characterImgPath,
                         slot: CdnThumbSlot.characterReward,

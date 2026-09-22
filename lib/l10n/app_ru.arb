@@ -63,6 +63,8 @@
     }
   },
   "accountName": "Имя",
+  "accountChangePicture": "Сменить фото",
+  "changeProfileImageTitle": "Выберите фото профиля",
   "accountInfo": "Аккаунт",
   "accountDelete": "Удалить аккаунт",
   "accountDeleteTitle": "Удалить аккаунт?",

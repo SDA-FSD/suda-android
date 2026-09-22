@@ -134,6 +134,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get accountName => 'الاسم';
 
   @override
+  String get accountChangePicture => 'تغيير الصورة';
+
+  @override
+  String get changeProfileImageTitle => 'اختر صورة ملفك الشخصي';
+
+  @override
   String get accountInfo => 'الحساب';
 
   @override

@@ -136,6 +136,12 @@ class AppLocalizationsPl extends AppLocalizations {
   String get accountName => 'Imię';
 
   @override
+  String get accountChangePicture => 'Zmień zdjęcie';
+
+  @override
+  String get changeProfileImageTitle => 'Wybierz zdjęcie profilowe';
+
+  @override
   String get accountInfo => 'Konto';
 
   @override

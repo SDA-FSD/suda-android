@@ -63,6 +63,8 @@
     }
   },
   "accountName": "名前",
+  "accountChangePicture": "写真を変更",
+  "changeProfileImageTitle": "プロフィール写真を選択",
   "accountInfo": "アカウント",
   "accountDelete": "アカウントを削除",
   "accountDeleteTitle": "アカウントを削除しますか？",

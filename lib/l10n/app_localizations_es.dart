@@ -136,6 +136,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get accountName => 'Nombre';
 
   @override
+  String get accountChangePicture => 'Cambiar foto';
+
+  @override
+  String get changeProfileImageTitle => 'Elige tu foto de perfil';
+
+  @override
   String get accountInfo => 'Cuenta';
 
   @override
@@ -1121,6 +1127,12 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
 
   @override
   String get accountName => 'Nombre';
+
+  @override
+  String get accountChangePicture => 'Cambiar foto';
+
+  @override
+  String get changeProfileImageTitle => 'Elige tu foto de perfil';
 
   @override
   String get accountInfo => 'Cuenta';

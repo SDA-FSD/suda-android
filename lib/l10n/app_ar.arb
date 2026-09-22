@@ -63,6 +63,8 @@
     }
   },
   "accountName": "الاسم",
+  "accountChangePicture": "تغيير الصورة",
+  "changeProfileImageTitle": "اختر صورة ملفك الشخصي",
   "accountInfo": "الحساب",
   "accountDelete": "حذف الحساب",
   "accountDeleteTitle": "هل تريد حذف الحساب؟",

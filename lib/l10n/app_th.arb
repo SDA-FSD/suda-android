@@ -63,6 +63,8 @@
     }
   },
   "accountName": "ชื่อ",
+  "accountChangePicture": "เปลี่ยนรูป",
+  "changeProfileImageTitle": "เลือกภาพโปรไฟล์",
   "accountInfo": "บัญชี",
   "accountDelete": "ลบบัญชี",
   "accountDeleteTitle": "ลบบัญชีไหม?",

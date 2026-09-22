@@ -138,6 +138,12 @@ class AppLocalizationsFil extends AppLocalizations {
   String get accountName => 'Pangalan';
 
   @override
+  String get accountChangePicture => 'Palitan ang larawan';
+
+  @override
+  String get changeProfileImageTitle => 'Piliin ang larawan sa profile';
+
+  @override
   String get accountInfo => 'Account';
 
   @override

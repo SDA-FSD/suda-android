@@ -21,14 +21,12 @@ import '../utils/sub_screen_route.dart';
 import '../widgets/default_popup.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/cdn_thumb_image.dart';
-import '../widgets/default_profile_avatar.dart';
 import '../widgets/gnb_bar.dart';
 import '../widgets/suda_label_tabs.dart';
-import '../widgets/character_rarity_frame.dart';
+import '../widgets/user_profile_avatar.dart';
 import '../widgets/level_up_progress_track.dart';
 import '../widgets/profile_achievements_section.dart';
 import '../widgets/suda_neighbors_row.dart';
-import '../utils/user_img_path.dart';
 import 'reward/reward_unboxing.dart';
 import 'roleplay/history.dart';
 import 'roleplay/suda_tts_audio_player.dart';
@@ -1458,10 +1456,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     width: double.infinity,
                     child: Row(
                       children: [
-                        _ProfileAvatar(
+                        UserProfileAvatar(
                           imgPath: profile?.imgPath,
                           isPremium: !_showPremiumCta,
                           isLoading: showProfileShimmer,
+                          size: 100,
                         ),
                         Expanded(
                           child: Padding(
@@ -1697,104 +1696,6 @@ class _SavedExpressionCard extends StatelessWidget {
               ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ProfileAvatar extends StatelessWidget {
-  final String? imgPath;
-  final bool isPremium;
-  final bool isLoading;
-
-  const _ProfileAvatar({
-    required this.imgPath,
-    required this.isPremium,
-    required this.isLoading,
-  });
-
-  static const _defaultColor = UserImgPath.fallbackColor;
-  static const _innerSize = 92.0;
-
-  static const _freeBorderGradient = LinearGradient(
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-    colors: [Color(0xFF80D7CF), Color(0xFF43716D)],
-  );
-
-  static const _premiumBorderGradient = LinearGradient(
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-    colors: [Color(0xFF80D7CF), Color(0xFF8A38F5)],
-  );
-
-  Widget _defaultAvatar(Color color) {
-    return DefaultProfileAvatar(size: _innerSize, color: color);
-  }
-
-  Widget _shimmerAvatar() {
-    return Shimmer.fromColors(
-      baseColor: const Color(0xFF2A2A2A),
-      highlightColor: const Color(0xFF3F3F3F),
-      child: const DecoratedBox(
-        decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-        child: SizedBox.expand(),
-      ),
-    );
-  }
-
-  Widget _inner() {
-    if (isLoading) return _shimmerAvatar();
-
-    final parsed = UserImgPath.parse(imgPath);
-    if (parsed.isEmpty) {
-      return ClipOval(child: _defaultAvatar(_defaultColor));
-    }
-    if (parsed.isDefault) {
-      return ClipOval(
-        child: _defaultAvatar(parsed.defaultColor ?? _defaultColor),
-      );
-    }
-    final path = parsed.cdnPath;
-    if (path == null || path.isEmpty) {
-      return ClipOval(child: _defaultAvatar(_defaultColor));
-    }
-    final image = CdnThumbImage(
-      path: path,
-      slot: CdnThumbSlot.profileAvatar,
-      width: _innerSize,
-      height: _innerSize,
-      fit: BoxFit.cover,
-      placeholder: (context, url) => _shimmerAvatar(),
-      errorWidget: (context, url, error) => _defaultAvatar(_defaultColor),
-    );
-    if (parsed.isCharacter) {
-      return CharacterRarityFrame(
-        rarity: parsed.rarity!,
-        size: _innerSize,
-        borderWidth: UserImgPath.nestedRarityBorderWidth,
-        child: image,
-      );
-    }
-    return ClipOval(child: image);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 100,
-      height: 100,
-      child: Center(
-        child: Container(
-          width: 100,
-          height: 100,
-          padding: const EdgeInsets.all(4),
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            gradient: isPremium ? _premiumBorderGradient : _freeBorderGradient,
-          ),
-          child: _inner(),
         ),
       ),
     );

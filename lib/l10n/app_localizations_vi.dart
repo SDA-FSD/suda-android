@@ -138,6 +138,12 @@ class AppLocalizationsVi extends AppLocalizations {
   String get accountName => 'Tên';
 
   @override
+  String get accountChangePicture => 'Đổi ảnh';
+
+  @override
+  String get changeProfileImageTitle => 'Chọn ảnh đại diện';
+
+  @override
   String get accountInfo => 'Tài khoản';
 
   @override

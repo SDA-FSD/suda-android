@@ -63,6 +63,8 @@
     }
   },
   "accountName": "Tên",
+  "accountChangePicture": "Đổi ảnh",
+  "changeProfileImageTitle": "Chọn ảnh đại diện",
   "accountInfo": "Tài khoản",
   "accountDelete": "Xóa tài khoản",
   "accountDeleteTitle": "Xóa tài khoản?",

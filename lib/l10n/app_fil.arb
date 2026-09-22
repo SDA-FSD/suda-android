@@ -63,6 +63,8 @@
     }
   },
   "accountName": "Pangalan",
+  "accountChangePicture": "Palitan ang larawan",
+  "changeProfileImageTitle": "Piliin ang larawan sa profile",
   "accountInfo": "Account",
   "accountDelete": "I-delete ang Account",
   "accountDeleteTitle": "I-delete ang Account?",

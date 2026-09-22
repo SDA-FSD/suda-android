@@ -63,6 +63,8 @@
     }
   },
   "accountName": "Name",
+  "accountChangePicture": "Bild ändern",
+  "changeProfileImageTitle": "Wähle dein Profilbild",
   "accountInfo": "Konto",
   "accountDelete": "Konto löschen",
   "accountDeleteTitle": "Konto löschen?",

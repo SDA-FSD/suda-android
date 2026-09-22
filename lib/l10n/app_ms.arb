@@ -63,6 +63,8 @@
     }
   },
   "accountName": "Nama",
+  "accountChangePicture": "Tukar gambar",
+  "changeProfileImageTitle": "Pilih gambar profil",
   "accountInfo": "Akaun",
   "accountDelete": "Padam Akaun",
   "accountDeleteTitle": "Padam Akaun?",

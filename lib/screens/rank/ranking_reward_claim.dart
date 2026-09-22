@@ -336,6 +336,7 @@ class _ProfileHero extends StatelessWidget {
               showCrown: true,
               showLevelBadge: false,
               outerShadowScale: s,
+              isPremium: entry.subscribedYn == 'Y',
             ),
           ),
           Positioned(

@@ -132,6 +132,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get accountName => '이름';
 
   @override
+  String get accountChangePicture => '프로필 사진 변경';
+
+  @override
+  String get changeProfileImageTitle => '프로필 사진을 선택하세요';
+
+  @override
   String get accountInfo => '계정';
 
   @override

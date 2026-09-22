@@ -136,6 +136,12 @@ class AppLocalizationsId extends AppLocalizations {
   String get accountName => 'Nama';
 
   @override
+  String get accountChangePicture => 'Ubah foto';
+
+  @override
+  String get changeProfileImageTitle => 'Pilih foto profil';
+
+  @override
   String get accountInfo => 'Akun';
 
   @override

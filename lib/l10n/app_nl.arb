@@ -63,6 +63,8 @@
     }
   },
   "accountName": "Naam",
+  "accountChangePicture": "Foto wijzigen",
+  "changeProfileImageTitle": "Kies je profielfoto",
   "accountInfo": "Account",
   "accountDelete": "Account verwijderen",
   "accountDeleteTitle": "Account verwijderen?",

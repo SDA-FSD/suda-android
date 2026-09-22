@@ -371,6 +371,18 @@ abstract class AppLocalizations {
   /// **'Name'**
   String get accountName;
 
+  /// No description provided for @accountChangePicture.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Picture'**
+  String get accountChangePicture;
+
+  /// No description provided for @changeProfileImageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your Profile Picture'**
+  String get changeProfileImageTitle;
+
   /// No description provided for @accountInfo.
   ///
   /// In en, this message translates to:

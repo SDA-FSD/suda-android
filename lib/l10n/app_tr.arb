@@ -63,6 +63,8 @@
     }
   },
   "accountName": "Ad",
+  "accountChangePicture": "Fotoğrafı değiştir",
+  "changeProfileImageTitle": "Profil fotoğrafını seç",
   "accountInfo": "Hesap",
   "accountDelete": "Hesabı Sil",
   "accountDeleteTitle": "Hesap silinsin mi?",

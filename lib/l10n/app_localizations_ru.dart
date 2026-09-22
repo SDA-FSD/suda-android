@@ -135,6 +135,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get accountName => 'Имя';
 
   @override
+  String get accountChangePicture => 'Сменить фото';
+
+  @override
+  String get changeProfileImageTitle => 'Выберите фото профиля';
+
+  @override
   String get accountInfo => 'Аккаунт';
 
   @override

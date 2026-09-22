@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 
 import '../../utils/user_img_path.dart';
 import '../../widgets/cdn_thumb_image.dart';
-import '../../widgets/character_rarity_frame.dart';
 import '../../widgets/default_profile_avatar.dart';
+import '../../widgets/user_profile_avatar.dart';
 
 /// 랭킹 프로필 프레임 스타일 (포디움·리스트·Ranking Reward Claim 공용).
 enum RankProfileFrameStyle { winner, premium, free, podiumFree, rankingRewardClaimRunnerUp }
@@ -27,6 +27,7 @@ class RankCrownAvatar extends StatelessWidget {
     this.level,
     this.showLevelBadge = false,
     this.outerShadowScale,
+    this.isPremium = false,
   });
 
   final double scale;
@@ -40,6 +41,9 @@ class RankCrownAvatar extends StatelessWidget {
 
   /// non-null이면 Paywall 카드와 동일 outer shadow 적용.
   final double? outerShadowScale;
+
+  /// 전용 링(1위·포디움·Reward Claim) 안쪽에 구독 링을 그릴지.
+  final bool isPremium;
 
   static const avatarOuter = 114.0;
   static const borderW = 3.8;
@@ -76,6 +80,7 @@ class RankCrownAvatar extends StatelessWidget {
               style: frameStyle,
               defaultAsset: defaultAsset,
               outerShadowScale: outerShadowScale,
+              isPremium: isPremium,
             ),
           ),
           if (showLevelBadge && level != null)
@@ -118,6 +123,7 @@ class RankProfileFrame extends StatelessWidget {
     required this.style,
     required this.defaultAsset,
     this.outerShadowScale,
+    this.isPremium = false,
   });
 
   final String? imgPath;
@@ -129,22 +135,12 @@ class RankProfileFrame extends StatelessWidget {
   /// non-null이면 Paywall `_cardShadow`(Offset/Blur 20, #000000 30%) 적용·스케일.
   final double? outerShadowScale;
 
+  final bool isPremium;
+
   static const _winnerGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [Color(0xFFFFFFFF), Color(0xFFFFB700)],
-  );
-
-  static const _premiumGradient = LinearGradient(
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-    colors: [Color(0xFF80D7CF), Color(0xFF8A38F5)],
-  );
-
-  static const _freeGradient = LinearGradient(
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-    colors: [Color(0xFF80D7CF), Color(0xFF43716D)],
   );
 
   /// 2·3위 일반 유저 (SVG: 위 #FFFFFF → 아래 #0CABA8).
@@ -171,12 +167,23 @@ class RankProfileFrame extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final inner = (outer - borderWidth * 2).clamp(1.0, outer);
+    final parsed = UserImgPath.parse(imgPath);
+    final special = switch (style) {
+      RankProfileFrameStyle.winner ||
+      RankProfileFrameStyle.podiumFree ||
+      RankProfileFrameStyle.rankingRewardClaimRunnerUp => true,
+      RankProfileFrameStyle.premium || RankProfileFrameStyle.free => false,
+    };
     final Gradient gradient = switch (style) {
       RankProfileFrameStyle.winner => _winnerGradient,
-      RankProfileFrameStyle.premium => _premiumGradient,
-      RankProfileFrameStyle.free => _freeGradient,
       RankProfileFrameStyle.podiumFree => _podiumFreeGradient,
-      RankProfileFrameStyle.rankingRewardClaimRunnerUp => _rankingRewardClaimRunnerUpGradient,
+      RankProfileFrameStyle.rankingRewardClaimRunnerUp =>
+        _rankingRewardClaimRunnerUpGradient,
+      RankProfileFrameStyle.premium || RankProfileFrameStyle.free =>
+        UserProfileRing.standard(
+          isPremium: style == RankProfileFrameStyle.premium,
+          parsed: parsed,
+        ),
     };
     final innerFill = style == RankProfileFrameStyle.podiumFree
         ? _podiumFreeInnerFill
@@ -217,6 +224,8 @@ class RankProfileFrame extends StatelessWidget {
           placeholderColor: style == RankProfileFrameStyle.podiumFree
               ? const Color(0xFF938F99)
               : null,
+          nestStatusRing: special,
+          isPremium: isPremium,
         ),
       ),
     );
@@ -230,77 +239,90 @@ class RankAvatar extends StatelessWidget {
     required this.size,
     required this.defaultAsset,
     this.placeholderColor,
+    this.nestStatusRing = false,
+    this.isPremium = false,
   });
 
   final String? imgPath;
   final double size;
   final String defaultAsset;
   final Color? placeholderColor;
-
-  Widget _placeholder() {
-    final img = Image.asset(
-      defaultAsset,
-      width: size,
-      height: size,
-      fit: BoxFit.cover,
-    );
-    if (placeholderColor == null) return img;
-    return ColorFiltered(
-      colorFilter: ColorFilter.mode(placeholderColor!, BlendMode.srcIn),
-      child: img,
-    );
-  }
+  final bool nestStatusRing;
+  final bool isPremium;
 
   @override
   Widget build(BuildContext context) {
     final parsed = UserImgPath.parse(imgPath);
+    final nested = nestStatusRing
+        ? UserProfileRing.nested(isPremium: isPremium, parsed: parsed)
+        : null;
+    final border = nested == null ? 0.0 : UserImgPath.nestedRarityBorderWidth;
+    final faceSize = (size - border * 2).clamp(1.0, size);
+    final face = _face(parsed, faceSize);
+    if (nested == null) return face;
+    return UserProfileRing.box(
+      size: size,
+      borderWidth: border,
+      gradient: nested,
+      child: face,
+    );
+  }
+
+  Widget _face(UserImgPath parsed, double faceSize) {
     if (parsed.isDefault) {
       return DefaultProfileAvatar(
-        size: size,
+        size: faceSize,
         color: parsed.defaultColor ?? UserImgPath.fallbackColor,
       );
     }
     if (parsed.isHttpUrl) {
       return ClipOval(
         child: SizedBox(
-          width: size,
-          height: size,
+          width: faceSize,
+          height: faceSize,
           child: CachedNetworkImage(
             imageUrl: parsed.httpUrl!,
-            width: size,
-            height: size,
+            width: faceSize,
+            height: faceSize,
             fit: BoxFit.cover,
-            errorWidget: (_, _, _) => _placeholder(),
+            errorWidget: (_, _, _) => _placeholder(faceSize),
           ),
         ),
       );
     }
     final path = parsed.cdnPath;
     if (path != null && path.isNotEmpty) {
-      final image = CdnThumbImage(
-        path: path,
-        slot: CdnThumbSlot.rankAvatar,
-        width: size,
-        height: size,
-        fit: BoxFit.cover,
-        errorWidget: (_, _, _) => _placeholder(),
+      return ClipOval(
+        child: CdnThumbImage(
+          path: path,
+          slot: CdnThumbSlot.rankAvatar,
+          width: faceSize,
+          height: faceSize,
+          fit: BoxFit.cover,
+          errorWidget: (_, _, _) => _placeholder(faceSize),
+        ),
       );
-      if (parsed.isCharacter) {
-        return CharacterRarityFrame(
-          rarity: parsed.rarity!,
-          size: size,
-          borderWidth: UserImgPath.nestedRarityBorderWidth,
-          child: image,
-        );
-      }
-      return ClipOval(child: image);
     }
     return ClipOval(
       child: SizedBox(
-        width: size,
-        height: size,
-        child: _placeholder(),
+        width: faceSize,
+        height: faceSize,
+        child: _placeholder(faceSize),
       ),
+    );
+  }
+
+  Widget _placeholder(double faceSize) {
+    final img = Image.asset(
+      defaultAsset,
+      width: faceSize,
+      height: faceSize,
+      fit: BoxFit.cover,
+    );
+    if (placeholderColor == null) return img;
+    return ColorFiltered(
+      colorFilter: ColorFilter.mode(placeholderColor!, BlendMode.srcIn),
+      child: img,
     );
   }
 }
@@ -327,13 +349,19 @@ class RankPodiumLevelBadge extends StatelessWidget {
         color: Color(0xFF0CABA8),
         shape: BoxShape.circle,
       ),
-      child: Text(
-        '$level',
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: fontSize,
-          fontWeight: FontWeight.w700,
-          height: 1,
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Text(
+          '$level',
+          maxLines: 1,
+          softWrap: false,
+          textScaler: TextScaler.noScaling,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: fontSize,
+            fontWeight: FontWeight.w700,
+            height: 1,
+          ),
         ),
       ),
     );

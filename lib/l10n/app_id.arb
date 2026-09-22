@@ -63,6 +63,8 @@
     }
   },
   "accountName": "Nama",
+  "accountChangePicture": "Ubah foto",
+  "changeProfileImageTitle": "Pilih foto profil",
   "accountInfo": "Akun",
   "accountDelete": "Hapus akun",
   "accountDeleteTitle": "Hapus akun?",

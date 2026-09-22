@@ -132,6 +132,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get accountName => '姓名';
 
   @override
+  String get accountChangePicture => '更换头像';
+
+  @override
+  String get changeProfileImageTitle => '选择你的头像';
+
+  @override
   String get accountInfo => '账号';
 
   @override
@@ -1052,6 +1058,12 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get accountName => '姓名';
 
   @override
+  String get accountChangePicture => '更换头像';
+
+  @override
+  String get changeProfileImageTitle => '选择你的头像';
+
+  @override
   String get accountInfo => '账号';
 
   @override
@@ -1970,6 +1982,12 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get accountName => '姓名';
+
+  @override
+  String get accountChangePicture => '更換頭像';
+
+  @override
+  String get changeProfileImageTitle => '選擇你的頭像';
 
   @override
   String get accountInfo => '帳號';

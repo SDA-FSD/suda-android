@@ -136,6 +136,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountName => 'Name';
 
   @override
+  String get accountChangePicture => 'Change Picture';
+
+  @override
+  String get changeProfileImageTitle => 'Choose your Profile Picture';
+
+  @override
   String get accountInfo => 'Account';
 
   @override

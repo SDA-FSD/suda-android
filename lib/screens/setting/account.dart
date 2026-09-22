@@ -9,20 +9,17 @@ import '../../l10n/app_localizations.dart';
 import '../../models/user_models.dart';
 import '../../services/auth_service.dart';
 import '../../services/iap_purchase_service.dart';
-import '../../services/main_user_sync.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/subscription_status_cache.dart';
 import '../../services/token_storage.dart';
 import '../../utils/default_toast.dart';
 import '../../utils/sub_screen_route.dart';
-import '../../utils/user_img_path.dart';
 import '../../widgets/app_scaffold.dart';
-import '../../widgets/cdn_thumb_image.dart';
-import '../../widgets/character_rarity_frame.dart';
-import '../../widgets/default_profile_avatar.dart';
+import '../../widgets/user_profile_avatar.dart';
 import '../paywall/paywall.dart';
 import '../../utils/paywall_impression_screen.dart';
 import 'change_plan.dart';
+import 'change_profile_image.dart';
 
 class AccountScreen extends StatefulWidget {
   final VoidCallback? onSignOut;
@@ -37,7 +34,6 @@ class _AccountScreenState extends State<AccountScreen> with SingleTickerProvider
   UserDto? _user;
   bool _isLoading = true;
   bool _showDeleteConfirm = false;
-  bool _showDeleteProfileImgConfirm = false;
   /// 무료 사용자 Free Plan 카드.
   bool _showFreePlanCard = false;
   /// 구독 활성 Premium 카드.
@@ -225,111 +221,29 @@ class _AccountScreenState extends State<AccountScreen> with SingleTickerProvider
     });
   }
 
-  void _openDeleteProfileImgConfirm() {
-    setState(() => _showDeleteProfileImgConfirm = true);
-    _animationController.forward();
-  }
-
-  void _closeDeleteProfileImgConfirm() {
-    _animationController.reverse().then((_) {
-      if (mounted) {
-        setState(() => _showDeleteProfileImgConfirm = false);
-      }
+  Future<void> _openChangeProfileImage() async {
+    final updated = await Navigator.of(context).push<UserDto>(
+      SubScreenRoute(
+        page: ChangeProfileImageScreen(
+          imgPath: _user?.imgPath,
+          isPremium: _showPremiumCard,
+        ),
+      ),
+    );
+    if (!mounted || updated == null) return;
+    setState(() {
+      _user = updated;
+      _nameController.text = updated.name ?? '';
     });
   }
 
-  Future<void> _handleDeleteProfileImage() async {
-    try {
-      final token = await TokenStorage.loadAccessToken();
-      if (token == null) return;
-
-      await SudaApiClient.updateProfileImage(
-        accessToken: token,
-        type: 'DEFAULT',
-        value: '1',
-      );
-      final user = await SudaApiClient.getCurrentUser(accessToken: token);
-      MainUserSync.instance.notifyUserUpdated(user);
-      if (!mounted) return;
-      setState(() {
-        _user = user;
-        _nameController.text = user.name ?? '';
-      });
-      _closeDeleteProfileImgConfirm();
-    } catch (e) {
-      if (mounted) {
-        DefaultToast.show(context, 'Failed to delete profile image: $e', isError: true);
-      }
-    }
-  }
-
-  bool get _canResetProfileImg {
-    final parsed = UserImgPath.parse(_user?.imgPath);
-    if (parsed.isCharacter || parsed.isHttpUrl) return true;
-    if (parsed.isDefault && parsed.defaultColor != UserImgPath.fallbackColor) {
-      return true;
-    }
-    return false;
-  }
-
   Widget _accountAvatar() {
-    final parsed = UserImgPath.parse(_user?.imgPath);
-    const size = 100.0;
-    final Widget face;
-    if (parsed.isCharacter && parsed.cdnPath != null) {
-      face = CharacterRarityFrame(
-        rarity: parsed.rarity!,
-        size: size,
-        child: CdnThumbImage(
-          path: parsed.cdnPath!,
-          slot: CdnThumbSlot.profileAvatar,
-          width: size,
-          height: size,
-          fit: BoxFit.cover,
-          errorWidget: (context, url, error) => const DefaultProfileAvatar(
-            size: size,
-            color: UserImgPath.fallbackColor,
-          ),
-        ),
-      );
-    } else if (parsed.isDefault) {
-      face = DefaultProfileAvatar(
-        size: size,
-        color: parsed.defaultColor ?? UserImgPath.fallbackColor,
-      );
-    } else {
-      face = const DefaultProfileAvatar(
-        size: size,
-        color: UserImgPath.fallbackColor,
-      );
-    }
-
-    final canReset = _canResetProfileImg;
     return GestureDetector(
-      onTap: canReset ? _openDeleteProfileImgConfirm : null,
-      child: SizedBox(
-        width: size,
-        height: size,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            face,
-            if (canReset)
-              ClipOval(
-                child: ColoredBox(
-                  color: const Color(0x80121212),
-                  child: Center(
-                    child: Image.asset(
-                      'assets/images/icons/square_x.png',
-                      width: 32,
-                      height: 32,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        ),
+      onTap: () => unawaited(_openChangeProfileImage()),
+      child: UserProfileAvatar(
+        imgPath: _user?.imgPath,
+        isPremium: _showPremiumCard,
+        size: 100,
       ),
     );
   }
@@ -404,6 +318,16 @@ class _AccountScreenState extends State<AccountScreen> with SingleTickerProvider
                         children: [
                           const SizedBox(height: 24),
                           Center(child: _accountAvatar()),
+                          const SizedBox(height: 8),
+                          GestureDetector(
+                            onTap: () => unawaited(_openChangeProfileImage()),
+                            behavior: HitTestBehavior.opaque,
+                            child: Text(
+                              l10n.accountChangePicture,
+                              textAlign: TextAlign.center,
+                              style: theme.bodySmall?.copyWith(color: Colors.white),
+                            ),
+                          ),
                           const SizedBox(height: 24),
                           Align(
                             alignment: AlignmentDirectional.centerStart,
@@ -729,81 +653,6 @@ class _AccountScreenState extends State<AccountScreen> with SingleTickerProvider
             ),
           ],
 
-        // 프로필 이미지 삭제 확인 레이어 (계정 삭제 레이어와 동일 형태, 문구/동작만 변경)
-        if (_showDeleteProfileImgConfirm) ...[
-          Positioned.fill(
-            child: FadeTransition(
-              opacity: _fadeAnimation,
-              child: GestureDetector(
-                onTap: _closeDeleteProfileImgConfirm,
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-                  child: Container(
-                    color: Colors.black.withOpacity(0.4),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: SlideTransition(
-              position: _slideAnimation,
-              child: Container(
-                width: double.infinity,
-                decoration: const BoxDecoration(
-                  color: Color(0xFF1E1E1E),
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                ),
-                child: SafeArea(
-                  top: false,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const SizedBox(height: 60),
-                      Text(
-                        l10n.accountDeleteProfileImageTitle,
-                        style: theme.headlineMedium?.copyWith(color: Colors.white),
-                      ),
-                      const SizedBox(height: 30),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 24),
-                        child: Text(
-                          l10n.accountDeleteProfileImageContent,
-                          textAlign: TextAlign.center,
-                          style: theme.bodyLarge?.copyWith(color: Colors.white),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      ElevatedButton(
-                        onPressed: _closeDeleteProfileImgConfirm,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF0CABA8),
-                          shape: const StadiumBorder(),
-                          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                          elevation: 0,
-                        ),
-                        child: Text(
-                          l10n.accountGoBack,
-                          style: theme.bodyLarge?.copyWith(color: Colors.white),
-                        ),
-                      ),
-                      const SizedBox(height: 60),
-                      GestureDetector(
-                        onTap: _handleDeleteProfileImage,
-                        child: Text(
-                          l10n.accountDeleteAction,
-                          style: theme.bodySmall?.copyWith(color: const Color(0xFFFF0000)),
-                        ),
-                      ),
-                      const SizedBox(height: 60),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
       ],
     );
   }

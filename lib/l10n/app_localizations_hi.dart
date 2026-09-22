@@ -136,6 +136,12 @@ class AppLocalizationsHi extends AppLocalizations {
   String get accountName => 'नाम';
 
   @override
+  String get accountChangePicture => 'फ़ोटो बदलें';
+
+  @override
+  String get changeProfileImageTitle => 'अपनी प्रोफ़ाइल फ़ोटो चुनें';
+
+  @override
   String get accountInfo => 'अकाउंट';
 
   @override

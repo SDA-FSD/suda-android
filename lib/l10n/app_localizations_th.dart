@@ -133,6 +133,12 @@ class AppLocalizationsTh extends AppLocalizations {
   String get accountName => 'ชื่อ';
 
   @override
+  String get accountChangePicture => 'เปลี่ยนรูป';
+
+  @override
+  String get changeProfileImageTitle => 'เลือกภาพโปรไฟล์';
+
+  @override
   String get accountInfo => 'บัญชี';
 
   @override

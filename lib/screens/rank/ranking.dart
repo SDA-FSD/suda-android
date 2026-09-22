@@ -1387,6 +1387,7 @@ class _PodiumSlot extends StatelessWidget {
                       level: entry?.level,
                       showLevelBadge: entry != null,
                       outerShadowScale: s,
+                      isPremium: isPremium,
                     ),
                   ),
                 ),

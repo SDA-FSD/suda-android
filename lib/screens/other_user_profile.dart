@@ -10,10 +10,8 @@ import '../services/token_storage.dart';
 import '../utils/sub_screen_route.dart';
 import '../utils/user_img_path.dart';
 import '../widgets/app_scaffold.dart';
-import '../widgets/cdn_thumb_image.dart';
-import '../widgets/character_rarity_frame.dart';
 import '../widgets/default_popup.dart';
-import '../widgets/default_profile_avatar.dart';
+import '../widgets/user_profile_avatar.dart';
 import '../widgets/profile_achievements_section.dart';
 import '../widgets/suda_label_tabs.dart';
 import '../widgets/suda_neighbors_row.dart';
@@ -375,10 +373,11 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _ProfileAvatar(
+                      UserProfileAvatar(
                         imgPath: profile?.imgPath,
                         isPremium: isPremium,
                         isLoading: showShimmer,
+                        size: 100,
                       ),
                       Expanded(
                         child: Padding(
@@ -768,83 +767,6 @@ class _SendRequestBody extends StatelessWidget {
         Text(bodyText, textAlign: TextAlign.center, style: textStyle),
       ],
     );
-  }
-}
-
-class _ProfileAvatar extends StatelessWidget {
-  final String? imgPath;
-  final bool isPremium;
-  final bool isLoading;
-
-  const _ProfileAvatar({
-    required this.imgPath,
-    required this.isPremium,
-    required this.isLoading,
-  });
-
-  static const _defaultColor = UserImgPath.fallbackColor;
-  static const _innerSize = 92.0;
-
-  @override
-  Widget build(BuildContext context) {
-    const borderW = 4.0;
-    final inner = ClipOval(child: _inner());
-    return Container(
-      width: _innerSize + borderW * 2,
-      height: _innerSize + borderW * 2,
-      padding: const EdgeInsets.all(borderW),
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: isPremium
-              ? const [Color(0xFF80D7CF), Color(0xFF8A38F5)]
-              : const [Color(0xFF80D7CF), Color(0xFF43716D)],
-        ),
-      ),
-      child: inner,
-    );
-  }
-
-  Widget _inner() {
-    if (isLoading) {
-      return Shimmer.fromColors(
-        baseColor: const Color(0xFF2A2A2A),
-        highlightColor: const Color(0xFF3F3F3F),
-        child: const ColoredBox(color: Colors.white),
-      );
-    }
-    final parsed = UserImgPath.parse(imgPath);
-    if (parsed.isEmpty) {
-      return DefaultProfileAvatar(size: _innerSize, color: _defaultColor);
-    }
-    if (parsed.isDefault) {
-      return DefaultProfileAvatar(
-        size: _innerSize,
-        color: parsed.defaultColor ?? _defaultColor,
-      );
-    }
-    final path = parsed.cdnPath;
-    if (path == null || path.isEmpty) {
-      return DefaultProfileAvatar(size: _innerSize, color: _defaultColor);
-    }
-    final image = CdnThumbImage(
-      path: path,
-      slot: CdnThumbSlot.profileAvatar,
-      width: _innerSize,
-      height: _innerSize,
-      fit: BoxFit.cover,
-    );
-    if (parsed.isCharacter) {
-      return CharacterRarityFrame(
-        rarity: parsed.rarity!,
-        size: _innerSize,
-        borderWidth: UserImgPath.nestedRarityBorderWidth,
-        child: image,
-      );
-    }
-    return ClipOval(child: image);
   }
 }
 

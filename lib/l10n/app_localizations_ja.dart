@@ -132,6 +132,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get accountName => '名前';
 
   @override
+  String get accountChangePicture => '写真を変更';
+
+  @override
+  String get changeProfileImageTitle => 'プロフィール写真を選択';
+
+  @override
   String get accountInfo => 'アカウント';
 
   @override

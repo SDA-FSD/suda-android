@@ -63,6 +63,8 @@
     }
   },
   "accountName": "नाम",
+  "accountChangePicture": "फ़ोटो बदलें",
+  "changeProfileImageTitle": "अपनी प्रोफ़ाइल फ़ोटो चुनें",
   "accountInfo": "अकाउंट",
   "accountDelete": "अकाउंट डिलीट करें",
   "accountDeleteTitle": "अकाउंट डिलीट करें?",
