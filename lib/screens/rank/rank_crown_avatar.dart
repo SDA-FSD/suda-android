@@ -1,6 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
+import '../../utils/user_img_path.dart';
+import '../../widgets/cdn_thumb_image.dart';
+import '../../widgets/character_rarity_frame.dart';
+import '../../widgets/default_profile_avatar.dart';
+
 /// 랭킹 프로필 프레임 스타일 (포디움·리스트·Ranking Reward Claim 공용).
 enum RankProfileFrameStyle { winner, premium, free, podiumFree, rankingRewardClaimRunnerUp }
 
@@ -248,21 +253,53 @@ class RankAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final url = imgPath?.trim();
+    final parsed = UserImgPath.parse(imgPath);
+    if (parsed.isDefault) {
+      return DefaultProfileAvatar(
+        size: size,
+        color: parsed.defaultColor ?? const Color(0xFF03ABA8),
+      );
+    }
+    if (parsed.isHttpUrl) {
+      return ClipOval(
+        child: SizedBox(
+          width: size,
+          height: size,
+          child: CachedNetworkImage(
+            imageUrl: parsed.httpUrl!,
+            width: size,
+            height: size,
+            fit: BoxFit.cover,
+            errorWidget: (_, _, _) => _placeholder(),
+          ),
+        ),
+      );
+    }
+    final path = parsed.cdnPath;
+    if (path != null && path.isNotEmpty) {
+      final image = CdnThumbImage(
+        path: path,
+        slot: CdnThumbSlot.rankAvatar,
+        width: size,
+        height: size,
+        fit: BoxFit.cover,
+        errorWidget: (_, _, _) => _placeholder(),
+      );
+      if (parsed.isCharacter) {
+        return CharacterRarityFrame(
+          rarity: parsed.rarity!,
+          size: size,
+          borderWidth: UserImgPath.nestedRarityBorderWidth,
+          child: image,
+        );
+      }
+      return ClipOval(child: image);
+    }
     return ClipOval(
       child: SizedBox(
         width: size,
         height: size,
-        child: (url != null && url.isNotEmpty)
-            ? CachedNetworkImage(
-                // 랭킹 imgPath는 풀 URL. CDN prefix 붙이지 않음.
-                imageUrl: url,
-                width: size,
-                height: size,
-                fit: BoxFit.cover,
-                errorWidget: (_, _, _) => _placeholder(),
-              )
-            : _placeholder(),
+        child: _placeholder(),
       ),
     );
   }

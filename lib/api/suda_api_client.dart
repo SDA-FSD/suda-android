@@ -521,10 +521,6 @@ class SudaApiClient {
     return UserApi.deleteUser(accessToken: accessToken);
   }
 
-  static Future<void> deleteProfileImage({required String accessToken}) {
-    return UserApi.deleteProfileImage(accessToken: accessToken);
-  }
-
   static Future<void> registerPushToken({
     required String accessToken,
     required String pushToken,

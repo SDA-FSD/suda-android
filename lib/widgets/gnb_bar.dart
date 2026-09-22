@@ -1,9 +1,11 @@
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 
 import '../models/user_models.dart';
+import '../utils/user_img_path.dart';
+import 'cdn_thumb_image.dart';
+import 'default_profile_avatar.dart';
 
 /// Main Screen 하단 GNB. 본문 위에 오버레이, 투명+블러 배경.
 /// 아이콘: Home 12.5% / Alarm 37.5% / Rank 62.5% / Profile 87.5% (각 아이콘 중심).
@@ -189,7 +191,7 @@ class GnbBar extends StatelessWidget {
                               bottom: 0,
                               child: Center(
                                 child: _GnbProfileAvatar(
-                                  profileImgUrl: user?.profileImgUrl,
+                                  imgPath: user?.imgPath,
                                   isActive: isProfileActive,
                                 ),
                               ),
@@ -212,14 +214,11 @@ class GnbBar extends StatelessWidget {
 /// GNB용 프로필 아바타: 비활성 28x28 원형, 활성 24x24 원형 + 흰색 테두리 2
 class _GnbProfileAvatar extends StatelessWidget {
   const _GnbProfileAvatar({
-    this.profileImgUrl,
+    this.imgPath,
     required this.isActive,
   });
 
-  static const String _defaultProfileImage =
-      'assets/images/icons/default_profile_image.png';
-
-  final String? profileImgUrl;
+  final String? imgPath;
   final bool isActive;
 
   @override
@@ -256,23 +255,31 @@ class _GnbProfileAvatar extends StatelessWidget {
   }
 
   Widget _image(double size) {
-    return (profileImgUrl != null && profileImgUrl!.isNotEmpty)
-        ? CachedNetworkImage(
-            imageUrl: profileImgUrl!,
-            width: size,
-            height: size,
-            fit: BoxFit.cover,
-            errorWidget: (context, url, error) => _placeholder(size),
-          )
-        : _placeholder(size);
+    final parsed = UserImgPath.parse(imgPath);
+    if (parsed.isDefault) {
+      return DefaultProfileAvatar(
+        size: size,
+        color: parsed.defaultColor ?? UserImgPath.fallbackColor,
+      );
+    }
+    final path = parsed.cdnPath;
+    if (path != null && path.isNotEmpty) {
+      return CdnThumbImage(
+        path: path,
+        slot: CdnThumbSlot.gnbAvatar,
+        width: size,
+        height: size,
+        fit: BoxFit.cover,
+        errorWidget: (context, url, error) => _placeholder(size),
+      );
+    }
+    return _placeholder(size);
   }
 
   Widget _placeholder(double size) {
-    return Image.asset(
-      _defaultProfileImage,
-      width: size,
-      height: size,
-      fit: BoxFit.cover,
+    return DefaultProfileAvatar(
+      size: size,
+      color: UserImgPath.fallbackColor,
     );
   }
 }

@@ -41,6 +41,12 @@ enum CdnThumbSlot {
   /// Profile 아바타 (`MyProfileDto.imgPath`, CDN path만).
   profileAvatar(CdnThumbSize.w150),
 
+  /// GNB 프로필 아이콘 (`UserDto.imgPath`).
+  gnbAvatar(CdnThumbSize.w150),
+
+  /// 랭킹 포디움·목록 아바타 (`RankEntryDto.imgPath`의 CDN path).
+  rankAvatar(CdnThumbSize.w150),
+
   /// Reward Unboxing 캐릭터 이미지 (`characterImgPath`).
   characterReward(CdnThumbSize.w150),
 

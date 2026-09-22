@@ -44,7 +44,7 @@
 - 시스템 뒤로가기 버튼 클릭 시: Home 탭에서는 앱 종료, Alarm/Profile 탭에서는 Home 탭으로 이동
 
 **GNB 구성**:
-- Alarm / Home / Profile. Profile은 `profileImgUrl` 원형(없으면 default)
+- Alarm / Home / Profile. Profile은 `UserDto.imgPath` (`DEFAULT:HEX` 또는 `{RARITY}:{path}` `_150`, 없으면 default)
 
 **사용 예시**:
 - NotificationBoxScreen (알림함 화면) - Main Screen
@@ -336,7 +336,7 @@
     - 위치: 상단 여백 80 바로 아래. 비구독 CTA가 있으면 CTA 아래 gap 24
     - 배경: 박스가 위치한 세로 구간에 화면 좌우 끝까지 닿는 full-bleed 그라데이션 적용
     - 구현: `AppScaffold(usePadding: false)`를 적용하여 그라데이션이 화면 끝까지 닿도록 함
-    - 아바타 `imgPath`: null/empty → `DefaultProfileAvatar` `#FFB700` / `DEFAULT:XXXXXX` → 해당 hex / 그 외 `CdnThumbSlot.profileAvatar` `_150`(없으면 원본). path는 http(s)로 시작하지 않음
+    - 아바타 `imgPath`: null/empty → `DefaultProfileAvatar` `#03ABA8`(1번) / `DEFAULT:XXXXXX` → 해당 hex / `NORMAL|RARE|EPIC:path` → 구독 테두리 안쪽 `CharacterRarityFrame`(border 5) + `CdnThumbSlot.profileAvatar` `_150`. path는 http(s)로 시작하지 않음
     - 스탯 라벨 영어 하드코딩: Level(`currentLevel`) / Like(`likePoint`) / Friends(`friendCount`)
   - **구독자 상단 그라데이션**: 탭 상단까지. 아래는 `#121212`
   - **무료 사용자 Premium CTA** (`SubscriptionStatusCache.isSubscribedActive == false`):
@@ -434,6 +434,7 @@
 ### 스크린 내부 구현 특이사항
 - 키보드 활성화 시 `resizeToAvoidBottomInset: false` (하단 "계정 삭제"가 키보드와 함께 올라오지 않도록)
 - 진입 시 `GET /v1/users/energy/simple`로 구독 상태 갱신 (`SubscriptionStatusCache`)
+- **아바타**: `UserDto.imgPath`. null/empty·`DEFAULT:03ABA8`는 1번 초록. 캐릭터는 `CharacterRarityFrame`(border 10)+`_150`. 초록 1번이 아니면 X 오버레이 → Confirm 후 `PUT /v1/users/profile-img` `{type:DEFAULT,value:"1"}` + `GET /v1/users`(`MainUserSync`)
 - **Subscription 섹션**
   - 무료 (`isSubscribedActive == false`): Free Plan 카드(`check_green.svg`) → Paywall. l10n `accountFreePlanTitle` / `accountFreePlanSubtitle`
   - 구독 활성: Subscription 헤더 leading. 구독↔카드 간격 **24**(이름/계정 섹션과 동일). **`Change Plan >`는 월간 구독자만** 노출(`subscriptionBasePlanId==bp-premium-monthly`; 연간·미구독은 미표시). (l10n `accountChangePlan` + chevron, 텍스트 `bodySmall` 14·**w700**/`wght` 700·흰색)는 그 간격 안 하단 trailing(`end: 8`, 카드와 `bottom: 12`) → `ChangePlanScreen`. Premium 카드(`premium_verified_badge.png`) — 제목 `accountPremiumTitle`, 부제 `accountPremiumSubtitle`, 갱신일 `accountPremiumRenewsOn`(`subscriptionExpiredAt`, `DateFormat.yMd` 로케일 패턴 · 실패 시 `en`)
@@ -997,7 +998,7 @@
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
 - 마지막 해금 완료 후 좌상단 X / 시스템 백 → 이전 화면(Ranking 등). Claim 레이어는 이미 제거됨.
-- **Set as Profile**: `PUT /v1/users/profile-img` `{type:CHARACTER,value:characterImgPath}` 후 프로필 탭으로 전환하고 Unboxing pop. API 실패여도 이동.
+- **Set as Profile**: `PUT /v1/users/profile-img` `{type:NORMAL|RARE|EPIC,value:characterImgPath}` 후 `GET /v1/users`(`MainUserSync`)·프로필 탭 전환·Unboxing pop. API 실패여도 이동.
 
 ### 스크린 내부 구현 특이사항
 - **루틴:** 등급선정(`reward_box.png` 떨림+약진동, 안내 `rewardUnboxingTapToOpen`) → 탭 → 1.5s 검정 마스크·진동 가속 → 등급확정(rarity 닫힌 박스 fade + 배경 전환 + 강진동) → +1s opened 박스(좌단 정렬로 우측 치우침)·캐릭터 원형 확대·강진동 2회 / +500ms 상단 카피·진행도·CTA·(완료 시) `secret_unlocked.png`.

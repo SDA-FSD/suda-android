@@ -9,6 +9,7 @@ import 'package:vibration/vibration.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
+import '../../services/main_user_sync.dart';
 import '../../utils/full_screen_route.dart';
 import '../../utils/cdn_thumbnail.dart';
 import '../../widgets/character_rarity_frame.dart';
@@ -350,14 +351,20 @@ class _RewardUnboxingState extends State<RewardUnboxing>
     if (_settingProfile || !_isLast) return;
     setState(() => _settingProfile = true);
     final path = _item?.characterImgPath.trim() ?? '';
+    final rarity = (_item?.characterRarity ?? '').trim().toUpperCase();
     try {
       final token = await TokenStorage.loadAccessToken();
       if (token != null && token.isNotEmpty) {
-        await SudaApiClient.updateProfileImage(
-          accessToken: token,
-          type: 'CHARACTER',
-          value: path,
-        );
+        if (path.isNotEmpty &&
+            (rarity == 'NORMAL' || rarity == 'RARE' || rarity == 'EPIC')) {
+          await SudaApiClient.updateProfileImage(
+            accessToken: token,
+            type: rarity,
+            value: path,
+          );
+        }
+        final updated = await SudaApiClient.getCurrentUser(accessToken: token);
+        MainUserSync.instance.notifyUserUpdated(updated);
       }
     } catch (err) {
       debugPrint('[DEBUG] reward unboxing set profile failed: $err');

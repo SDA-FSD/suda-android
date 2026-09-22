@@ -6,14 +6,20 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 
 import '../../l10n/app_localizations.dart';
+import '../../models/user_models.dart';
 import '../../services/auth_service.dart';
 import '../../services/iap_purchase_service.dart';
+import '../../services/main_user_sync.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/subscription_status_cache.dart';
 import '../../services/token_storage.dart';
 import '../../utils/default_toast.dart';
 import '../../utils/sub_screen_route.dart';
+import '../../utils/user_img_path.dart';
 import '../../widgets/app_scaffold.dart';
+import '../../widgets/cdn_thumb_image.dart';
+import '../../widgets/character_rarity_frame.dart';
+import '../../widgets/default_profile_avatar.dart';
 import '../paywall/paywall.dart';
 import '../../utils/paywall_impression_screen.dart';
 import 'change_plan.dart';
@@ -237,14 +243,95 @@ class _AccountScreenState extends State<AccountScreen> with SingleTickerProvider
       final token = await TokenStorage.loadAccessToken();
       if (token == null) return;
 
-      await SudaApiClient.deleteProfileImage(accessToken: token);
-      await _loadUserInfo();
-      if (mounted) _closeDeleteProfileImgConfirm();
+      await SudaApiClient.updateProfileImage(
+        accessToken: token,
+        type: 'DEFAULT',
+        value: '1',
+      );
+      final user = await SudaApiClient.getCurrentUser(accessToken: token);
+      MainUserSync.instance.notifyUserUpdated(user);
+      if (!mounted) return;
+      setState(() {
+        _user = user;
+        _nameController.text = user.name ?? '';
+      });
+      _closeDeleteProfileImgConfirm();
     } catch (e) {
       if (mounted) {
         DefaultToast.show(context, 'Failed to delete profile image: $e', isError: true);
       }
     }
+  }
+
+  bool get _canResetProfileImg {
+    final parsed = UserImgPath.parse(_user?.imgPath);
+    if (parsed.isCharacter || parsed.isHttpUrl) return true;
+    if (parsed.isDefault && parsed.defaultColor != UserImgPath.fallbackColor) {
+      return true;
+    }
+    return false;
+  }
+
+  Widget _accountAvatar() {
+    final parsed = UserImgPath.parse(_user?.imgPath);
+    const size = 100.0;
+    final Widget face;
+    if (parsed.isCharacter && parsed.cdnPath != null) {
+      face = CharacterRarityFrame(
+        rarity: parsed.rarity!,
+        size: size,
+        child: CdnThumbImage(
+          path: parsed.cdnPath!,
+          slot: CdnThumbSlot.profileAvatar,
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+          errorWidget: (context, url, error) => const DefaultProfileAvatar(
+            size: size,
+            color: UserImgPath.fallbackColor,
+          ),
+        ),
+      );
+    } else if (parsed.isDefault) {
+      face = DefaultProfileAvatar(
+        size: size,
+        color: parsed.defaultColor ?? UserImgPath.fallbackColor,
+      );
+    } else {
+      face = const DefaultProfileAvatar(
+        size: size,
+        color: UserImgPath.fallbackColor,
+      );
+    }
+
+    final canReset = _canResetProfileImg;
+    return GestureDetector(
+      onTap: canReset ? _openDeleteProfileImgConfirm : null,
+      child: SizedBox(
+        width: size,
+        height: size,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            face,
+            if (canReset)
+              ClipOval(
+                child: ColoredBox(
+                  color: const Color(0x80121212),
+                  child: Center(
+                    child: Image.asset(
+                      'assets/images/icons/square_x.png',
+                      width: 32,
+                      height: 32,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
   }
 
   Future<void> _handleDeleteAccount() async {
@@ -316,57 +403,7 @@ class _AccountScreenState extends State<AccountScreen> with SingleTickerProvider
                       child: Column(
                         children: [
                           const SizedBox(height: 24),
-                          Center(
-                            child: GestureDetector(
-                              onTap: () {
-                                final hasImage = _user?.profileImgUrl != null &&
-                                    _user!.profileImgUrl!.isNotEmpty;
-                                if (!hasImage) return;
-                                _openDeleteProfileImgConfirm();
-                              },
-                              child: ClipOval(
-                                child: Container(
-                                  width: 100,
-                                  height: 100,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: Colors.grey[800],
-                                    image: (_user?.profileImgUrl != null &&
-                                            _user!.profileImgUrl!.isNotEmpty)
-                                        ? DecorationImage(
-                                            image: NetworkImage(_user!.profileImgUrl!),
-                                            fit: BoxFit.cover,
-                                          )
-                                        : const DecorationImage(
-                                            image: AssetImage(
-                                              'assets/images/icons/default_profile_image.png',
-                                            ),
-                                            fit: BoxFit.cover,
-                                          ),
-                                  ),
-                                  child: (_user?.profileImgUrl != null &&
-                                          _user!.profileImgUrl!.isNotEmpty)
-                                      ? Stack(
-                                          fit: StackFit.expand,
-                                          children: [
-                                            Container(
-                                              color: const Color(0x80121212), // #121212 @ 50%
-                                            ),
-                                            Center(
-                                              child: Image.asset(
-                                                'assets/images/icons/square_x.png',
-                                                width: 32,
-                                                height: 32,
-                                                fit: BoxFit.contain,
-                                              ),
-                                            ),
-                                          ],
-                                        )
-                                      : null,
-                                ),
-                              ),
-                            ),
-                          ),
+                          Center(child: _accountAvatar()),
                           const SizedBox(height: 24),
                           Align(
                             alignment: AlignmentDirectional.centerStart,

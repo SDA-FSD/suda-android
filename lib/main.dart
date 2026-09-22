@@ -1,5 +1,6 @@
 import 'dart:async' show StreamSubscription, TimeoutException, unawaited;
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -39,6 +40,8 @@ import 'utils/sub_screen_route.dart';
 import 'config/app_config.dart';
 import 'utils/language_util.dart';
 import 'utils/iap_busy_overlay.dart';
+import 'utils/cdn_thumbnail.dart';
+import 'utils/user_img_path.dart';
 import 'theme/app_theme.dart';
 import 'widgets/main_reregistration_restricted_popup.dart'
     show
@@ -236,10 +239,21 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   void _onMainUserUpdatedFromSubflow(UserDto user) {
     if (!mounted) return;
-    if (user.profileImgUrl != null && user.profileImgUrl!.isNotEmpty) {
-      precacheImage(NetworkImage(user.profileImgUrl!), context);
-    }
+    _precacheUserAvatar(user);
     setState(() => _user = user);
+  }
+
+  void _precacheUserAvatar(UserDto user) {
+    if (!mounted) return;
+    final parsed = UserImgPath.parse(user.imgPath);
+    final path = parsed.cdnPath;
+    if (path == null || path.isEmpty) return;
+    precacheImage(
+      CachedNetworkImageProvider(
+        CdnThumbUrl.forSlot(path, CdnThumbSlot.gnbAvatar),
+      ),
+      context,
+    );
   }
 
   void _onHomeContentsLoadedForBadge(HomeDto home) {
@@ -327,9 +341,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       if (token == null || !mounted) return;
       final user = await SudaApiClient.getCurrentUser(accessToken: token);
       if (!mounted) return;
-      if (user.profileImgUrl != null && user.profileImgUrl!.isNotEmpty) {
-        precacheImage(NetworkImage(user.profileImgUrl!), context);
-      }
+      _precacheUserAvatar(user);
       setState(() => _user = user);
     } catch (_) {
       // best-effort: 복귀 직후 동기화 실패 시 기존 메모리 상태 유지
@@ -482,11 +494,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       final account = await AuthService.signInSilently();
 
       // 프로필 이미지 프리캐시
-      if (user.profileImgUrl != null && user.profileImgUrl!.isNotEmpty) {
-        if (mounted) {
-          precacheImage(NetworkImage(user.profileImgUrl!), context);
-        }
-      }
+      _precacheUserAvatar(user);
 
       TokenRefreshService.instance.start();
       unawaited(
@@ -581,11 +589,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       }
 
       // 프로필 이미지 프리캐시
-      if (user.profileImgUrl != null && user.profileImgUrl!.isNotEmpty) {
-        if (mounted) {
-          precacheImage(NetworkImage(user.profileImgUrl!), context);
-        }
-      }
+      _precacheUserAvatar(user);
 
       // 6) 상태 업데이트 (화면 전환 트리거)
       TokenRefreshService.instance.start();

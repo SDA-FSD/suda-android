@@ -226,7 +226,7 @@ class UserDto {
   final String? sub;
   final String? name;
   final String? email;
-  final String? profileImgUrl;
+  final String? imgPath;
   final int? roleplayCount;
   final int? wordsSpokenCount;
   final int? likePoint;
@@ -240,7 +240,7 @@ class UserDto {
     this.sub,
     this.name,
     this.email,
-    this.profileImgUrl,
+    this.imgPath,
     this.roleplayCount,
     this.wordsSpokenCount,
     this.likePoint,
@@ -256,7 +256,7 @@ class UserDto {
       sub: json['sub'] as String?,
       name: json['name'] as String?,
       email: json['email'] as String?,
-      profileImgUrl: json['profileImgUrl'] as String?,
+      imgPath: json['imgPath'] as String?,
       roleplayCount: json['roleplayCount'] as int?,
       wordsSpokenCount: json['wordsSpokenCount'] as int?,
       likePoint: json['likePoint'] as int?,
@@ -276,7 +276,7 @@ class UserDto {
     String? sub,
     String? name,
     String? email,
-    String? profileImgUrl,
+    String? imgPath,
     int? roleplayCount,
     int? wordsSpokenCount,
     int? likePoint,
@@ -290,7 +290,7 @@ class UserDto {
       sub: sub ?? this.sub,
       name: name ?? this.name,
       email: email ?? this.email,
-      profileImgUrl: profileImgUrl ?? this.profileImgUrl,
+      imgPath: imgPath ?? this.imgPath,
       roleplayCount: roleplayCount ?? this.roleplayCount,
       wordsSpokenCount: wordsSpokenCount ?? this.wordsSpokenCount,
       likePoint: likePoint ?? this.likePoint,

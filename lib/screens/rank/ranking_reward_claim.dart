@@ -6,6 +6,7 @@ import 'package:flutter/rendering.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/rank_models.dart';
 import '../../utils/default_toast.dart';
+import '../../utils/user_img_path.dart';
 import '../../widgets/gnb_bar.dart';
 import '../../widgets/procedural_sunburst.dart';
 import 'rank_crown_avatar.dart';
@@ -322,7 +323,7 @@ class _ProfileHero extends StatelessWidget {
             left: (stageW - avatarOuter) / 2,
             child: RankCrownAvatar(
               scale: s,
-              imgPath: entry.imgPath,
+              imgPath: UserImgPath.orFallback(entry.imgPath),
               frameStyle: place == 1
                   ? RankProfileFrameStyle.winner
                   : RankProfileFrameStyle.rankingRewardClaimRunnerUp,

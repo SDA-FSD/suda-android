@@ -4,7 +4,11 @@
 
 ---
 
-- **Reward Unboxing 3단계 연출(2026-09-22):** 테스트 UI 제거. 선정→확정→해금. `characterName` DTO. `CharacterRarityFrame`. 마지막 Set as Profile(CHARACTER)/View Character/X.
+- **profileImgUrl 제거(2026-09-22):** 필드·Google picture upsert·`DELETE /v1/users/profile-img`/`PUT .../profile-img/default` 삭제. Account 리셋은 `PUT` `DEFAULT`/`1`. 빈 `imgPath`는 클라 1번 초록 `#03ABA8`. 배포 후 `ALTER TABLE user DROP COLUMN profile_img_url`.
+
+- **프로필 imgPath type(2026-09-22):** `DEFAULT|NORMAL|RARE|EPIC`. 저장 `{TYPE}:{path}`. Unboxing Set as Profile rarity type + GET users. GNB/랭킹 `_150`. 구독 테두리 안 rarity border 5.
+
+- **Reward Unboxing 3단계 연출(2026-09-22):** 테스트 UI 제거. 선정→확정→해금. `characterName` DTO. `CharacterRarityFrame`. 마지막 Set as Profile(NORMAL|RARE|EPIC)/View Character/X.
 
 
 - **에너지 팝업 Enable Notifications(2026-08-11):** detail `showEnablePushFreeChargeYn` + screen home/opening/opening_insufficient. impression `enable_push_free_charge`. 완료 시 팝업 경로만 토스트 + 제거 애니.

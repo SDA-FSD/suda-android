@@ -15,6 +15,7 @@ import '../../services/token_storage.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../widgets/gnb_bar.dart';
 import '../../utils/full_screen_route.dart';
+import '../../utils/user_img_path.dart';
 import '../reward/reward_unboxing.dart';
 import 'ranking_reward_claim.dart';
 import 'rank_crown_avatar.dart';
@@ -167,7 +168,7 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
       );
       _rankingRewardClaimEntry = RankingRewardClaimPanel.labMock(
         rank: _rankingRewardClaimPlace,
-        imgPath: widget.user?.profileImgUrl,
+        imgPath: widget.user?.imgPath,
       );
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
@@ -1354,7 +1355,9 @@ class _PodiumSlot extends StatelessWidget {
                   left: avatarLeft * s,
                   child: RankCrownAvatar(
                     scale: s,
-                    imgPath: entry?.imgPath,
+                    imgPath: entry == null
+                        ? null
+                        : UserImgPath.orFallback(entry!.imgPath),
                     frameStyle: winnerFrame
                         ? RankProfileFrameStyle.winner
                         : (isPremium
@@ -1494,7 +1497,9 @@ class _RankListRow extends StatelessWidget {
             clipBehavior: Clip.none,
             children: [
               RankProfileFrame(
-                imgPath: entry?.imgPath,
+                imgPath: entry == null
+                    ? null
+                    : UserImgPath.orFallback(entry!.imgPath),
                 outer: _listAvatarOuter,
                 borderWidth: _listBorderW,
                 style: isPremium

@@ -24,6 +24,8 @@ import '../widgets/cdn_thumb_image.dart';
 import '../widgets/default_profile_avatar.dart';
 import '../widgets/gnb_bar.dart';
 import '../widgets/suda_label_tabs.dart';
+import '../widgets/character_rarity_frame.dart';
+import '../utils/user_img_path.dart';
 import 'roleplay/history.dart';
 import 'roleplay/suda_tts_audio_player.dart';
 import 'setting/setting.dart';
@@ -40,14 +42,6 @@ String _formatCompactCount(int n, int unit, String suffix) {
   final tenths = (n / unit * 10).truncate();
   if (tenths % 10 == 0) return '${tenths ~/ 10}$suffix';
   return '${tenths ~/ 10}.${tenths % 10}$suffix';
-}
-
-Color? _parseHexColor(String hex) {
-  final cleaned = hex.trim();
-  if (cleaned.length != 6) return null;
-  final value = int.tryParse(cleaned, radix: 16);
-  if (value == null) return null;
-  return Color(0xFF000000 | value);
 }
 
 class ProfileScreen extends StatefulWidget {
@@ -1472,7 +1466,7 @@ class _ProfileAvatar extends StatelessWidget {
     required this.isLoading,
   });
 
-  static const _defaultColor = Color(0xFFFFB700);
+  static const _defaultColor = UserImgPath.fallbackColor;
   static const _innerSize = 92.0;
 
   static const _freeBorderGradient = LinearGradient(
@@ -1514,15 +1508,18 @@ class _ProfileAvatar extends StatelessWidget {
   Widget _inner() {
     if (isLoading) return _shimmerAvatar();
 
-    final path = imgPath;
+    final parsed = UserImgPath.parse(imgPath);
+    if (parsed.isEmpty) {
+      return ClipOval(child: _defaultAvatar(_defaultColor));
+    }
+    if (parsed.isDefault) {
+      return ClipOval(child: _defaultAvatar(parsed.defaultColor ?? _defaultColor));
+    }
+    final path = parsed.cdnPath;
     if (path == null || path.isEmpty) {
-      return _defaultAvatar(_defaultColor);
+      return ClipOval(child: _defaultAvatar(_defaultColor));
     }
-    if (path.startsWith('DEFAULT:')) {
-      final color = _parseHexColor(path.substring('DEFAULT:'.length));
-      return _defaultAvatar(color ?? _defaultColor);
-    }
-    return CdnThumbImage(
+    final image = CdnThumbImage(
       path: path,
       slot: CdnThumbSlot.profileAvatar,
       width: _innerSize,
@@ -1531,6 +1528,15 @@ class _ProfileAvatar extends StatelessWidget {
       placeholder: (context, url) => _shimmerAvatar(),
       errorWidget: (context, url, error) => _defaultAvatar(_defaultColor),
     );
+    if (parsed.isCharacter) {
+      return CharacterRarityFrame(
+        rarity: parsed.rarity!,
+        size: _innerSize,
+        borderWidth: UserImgPath.nestedRarityBorderWidth,
+        child: image,
+      );
+    }
+    return ClipOval(child: image);
   }
 
   @override
@@ -1547,7 +1553,7 @@ class _ProfileAvatar extends StatelessWidget {
             shape: BoxShape.circle,
             gradient: isPremium ? _premiumBorderGradient : _freeBorderGradient,
           ),
-          child: ClipOval(child: _inner()),
+          child: _inner(),
         ),
       ),
     );
