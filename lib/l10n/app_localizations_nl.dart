@@ -142,6 +142,67 @@ class AppLocalizationsNl extends AppLocalizations {
   String get changeProfileImageTitle => 'Kies je profielfoto';
 
   @override
+  String get friendsTitle => 'Vrienden';
+
+  @override
+  String get friendRequestsTab => 'Verzoeken';
+
+  @override
+  String get friendsEmpty => 'Nog geen vrienden';
+
+  @override
+  String get friendRequestsEmpty => 'Nog geen vriendschapsverzoeken.';
+
+  @override
+  String get friendRequestAccept => 'Accepteren';
+
+  @override
+  String get friendRequestDecline => 'Weigeren';
+
+  @override
+  String get characterAge => 'Leeftijd';
+
+  @override
+  String get characterNationality => 'Nationaliteit';
+
+  @override
+  String get characterOccupation => 'Beroep';
+
+  @override
+  String get characterInterests => 'Interesses';
+
+  @override
+  String get characterCollection => 'Collectie';
+
+  @override
+  String get characterSecret => 'Geheim';
+
+  @override
+  String characterSeriesWith(String name) {
+    return 'Series met $name';
+  }
+
+  @override
+  String get characterSetAsProfile => 'Instellen als profiel';
+
+  @override
+  String get characterChangePictureTitle => 'Profielfoto wijzigen?';
+
+  @override
+  String get characterChange => 'Wijzigen';
+
+  @override
+  String get characterCancel => 'Annuleren';
+
+  @override
+  String get characterChangeFailed =>
+      'Je profielfoto kon niet worden gewijzigd. Probeer het opnieuw.';
+
+  @override
+  String get characterSecretLocked =>
+      'Voltooi de collectie om het geheim te ontgrendelen.';
+
+  @override
   String get accountInfo => 'Account';
 
   @override

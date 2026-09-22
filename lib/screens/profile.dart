@@ -27,6 +27,8 @@ import '../widgets/user_profile_avatar.dart';
 import '../widgets/level_up_progress_track.dart';
 import '../widgets/profile_achievements_section.dart';
 import '../widgets/suda_neighbors_row.dart';
+import 'character.dart';
+import 'friends.dart';
 import 'reward/reward_unboxing.dart';
 import 'roleplay/history.dart';
 import 'roleplay/suda_tts_audio_player.dart';
@@ -883,7 +885,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
         const SizedBox(height: 10),
-        SudaNeighborsRow(portraits: progress?.claimedCharacters ?? const []),
+        SudaNeighborsRow(
+          portraits: progress?.claimedCharacters ?? const [],
+          onCharacterTap: (item) => CharacterScreen.open(context, item.characterId),
+        ),
         const SizedBox(height: 36),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -1528,10 +1533,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     ),
                                     const _ProfileStatDivider(),
                                     Expanded(
-                                      child: _ProfileStat(
-                                        title: 'Friends',
-                                        value: '${profile?.friendCount ?? 0}',
-                                        isLoading: showProfileShimmer,
+                                      child: GestureDetector(
+                                        onTap: showProfileShimmer
+                                            ? null
+                                            : () {
+                                                Navigator.of(context).push(
+                                                  SubScreenRoute(
+                                                    page: const FriendsScreen(),
+                                                  ),
+                                                );
+                                              },
+                                        behavior: HitTestBehavior.opaque,
+                                        child: _ProfileStat(
+                                          title: 'Friends',
+                                          value: '${profile?.friendCount ?? 0}',
+                                          isLoading: showProfileShimmer,
+                                        ),
                                       ),
                                     ),
                                   ],

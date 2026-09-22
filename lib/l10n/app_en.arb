@@ -65,6 +65,32 @@
   "accountName": "Name",
   "accountChangePicture": "Change Picture",
   "changeProfileImageTitle": "Choose your Profile Picture",
+  "friendsTitle": "Friends",
+  "friendRequestsTab": "Friend Requests",
+  "friendsEmpty": "No friends yet",
+  "friendRequestsEmpty": "No friend requests yet.",
+  "friendRequestAccept": "Accept",
+  "friendRequestDecline": "Decline",
+  "characterAge": "Age",
+  "characterNationality": "Nationality",
+  "characterOccupation": "Occupation",
+  "characterInterests": "Interests",
+  "characterCollection": "Collection",
+  "characterSecret": "Secret",
+  "characterSeriesWith": "Series with {name}",
+  "@characterSeriesWith": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "characterSetAsProfile": "Set as Profile",
+  "characterChangePictureTitle": "Change Profile Picture?",
+  "characterChange": "Change",
+  "characterCancel": "Cancel",
+  "characterChangeFailed": "Couldn't change your profile picture. Please try again.",
+  "characterSecretLocked": "Complete the collection to unlock the Secret.",
   "accountInfo": "Account",
   "accountDelete": "Delete Account",
   "accountDeleteTitle": "Delete Account?",

@@ -142,6 +142,67 @@ class AppLocalizationsEs extends AppLocalizations {
   String get changeProfileImageTitle => 'Elige tu foto de perfil';
 
   @override
+  String get friendsTitle => 'Amigos';
+
+  @override
+  String get friendRequestsTab => 'Solicitudes';
+
+  @override
+  String get friendsEmpty => 'Aún no tienes amigos';
+
+  @override
+  String get friendRequestsEmpty => 'Aún no hay solicitudes de amistad.';
+
+  @override
+  String get friendRequestAccept => 'Aceptar';
+
+  @override
+  String get friendRequestDecline => 'Rechazar';
+
+  @override
+  String get characterAge => 'Edad';
+
+  @override
+  String get characterNationality => 'Nacionalidad';
+
+  @override
+  String get characterOccupation => 'Ocupación';
+
+  @override
+  String get characterInterests => 'Intereses';
+
+  @override
+  String get characterCollection => 'Colección';
+
+  @override
+  String get characterSecret => 'Secreto';
+
+  @override
+  String characterSeriesWith(String name) {
+    return 'Series con $name';
+  }
+
+  @override
+  String get characterSetAsProfile => 'Establecer como perfil';
+
+  @override
+  String get characterChangePictureTitle => '¿Cambiar la foto de perfil?';
+
+  @override
+  String get characterChange => 'Cambiar';
+
+  @override
+  String get characterCancel => 'Cancelar';
+
+  @override
+  String get characterChangeFailed =>
+      'No se pudo cambiar tu foto de perfil. Inténtalo de nuevo.';
+
+  @override
+  String get characterSecretLocked =>
+      'Completa la colección para desbloquear el Secreto.';
+
+  @override
   String get accountInfo => 'Cuenta';
 
   @override
@@ -1133,6 +1194,67 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
 
   @override
   String get changeProfileImageTitle => 'Elige tu foto de perfil';
+
+  @override
+  String get friendsTitle => 'Amigos';
+
+  @override
+  String get friendRequestsTab => 'Solicitudes';
+
+  @override
+  String get friendsEmpty => 'Aún no tienes amigos';
+
+  @override
+  String get friendRequestsEmpty => 'Aún no hay solicitudes de amistad.';
+
+  @override
+  String get friendRequestAccept => 'Aceptar';
+
+  @override
+  String get friendRequestDecline => 'Rechazar';
+
+  @override
+  String get characterAge => 'Edad';
+
+  @override
+  String get characterNationality => 'Nacionalidad';
+
+  @override
+  String get characterOccupation => 'Ocupación';
+
+  @override
+  String get characterInterests => 'Intereses';
+
+  @override
+  String get characterCollection => 'Colección';
+
+  @override
+  String get characterSecret => 'Secreto';
+
+  @override
+  String characterSeriesWith(String name) {
+    return 'Series con $name';
+  }
+
+  @override
+  String get characterSetAsProfile => 'Establecer como perfil';
+
+  @override
+  String get characterChangePictureTitle => '¿Cambiar la foto de perfil?';
+
+  @override
+  String get characterChange => 'Cambiar';
+
+  @override
+  String get characterCancel => 'Cancelar';
+
+  @override
+  String get characterChangeFailed =>
+      'No se pudo cambiar tu foto de perfil. Inténtalo de nuevo.';
+
+  @override
+  String get characterSecretLocked =>
+      'Completa la colección para desbloquear el Secreto.';
 
   @override
   String get accountInfo => 'Cuenta';

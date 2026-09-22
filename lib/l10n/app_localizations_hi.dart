@@ -142,6 +142,66 @@ class AppLocalizationsHi extends AppLocalizations {
   String get changeProfileImageTitle => 'अपनी प्रोफ़ाइल फ़ोटो चुनें';
 
   @override
+  String get friendsTitle => 'मित्र';
+
+  @override
+  String get friendRequestsTab => 'मित्र अनुरोध';
+
+  @override
+  String get friendsEmpty => 'अभी कोई मित्र नहीं';
+
+  @override
+  String get friendRequestsEmpty => 'अभी कोई मित्र अनुरोध नहीं है.';
+
+  @override
+  String get friendRequestAccept => 'स्वीकार करें';
+
+  @override
+  String get friendRequestDecline => 'अस्वीकार करें';
+
+  @override
+  String get characterAge => 'आयु';
+
+  @override
+  String get characterNationality => 'राष्ट्रीयता';
+
+  @override
+  String get characterOccupation => 'पेशा';
+
+  @override
+  String get characterInterests => 'रुचियाँ';
+
+  @override
+  String get characterCollection => 'संग्रह';
+
+  @override
+  String get characterSecret => 'रहस्य';
+
+  @override
+  String characterSeriesWith(String name) {
+    return '$name वाली सीरीज़';
+  }
+
+  @override
+  String get characterSetAsProfile => 'प्रोफ़ाइल के रूप में सेट करें';
+
+  @override
+  String get characterChangePictureTitle => 'प्रोफ़ाइल फ़ोटो बदलें?';
+
+  @override
+  String get characterChange => 'बदलें';
+
+  @override
+  String get characterCancel => 'रद्द करें';
+
+  @override
+  String get characterChangeFailed =>
+      'प्रोफ़ाइल फ़ोटो नहीं बदल सकी. कृपया फिर कोशिश करें.';
+
+  @override
+  String get characterSecretLocked => 'रहस्य खोलने के लिए संग्रह पूरा करें.';
+
+  @override
   String get accountInfo => 'अकाउंट';
 
   @override

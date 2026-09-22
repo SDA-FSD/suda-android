@@ -138,6 +138,65 @@ class AppLocalizationsZh extends AppLocalizations {
   String get changeProfileImageTitle => '选择你的头像';
 
   @override
+  String get friendsTitle => '好友';
+
+  @override
+  String get friendRequestsTab => '好友请求';
+
+  @override
+  String get friendsEmpty => '还没有好友';
+
+  @override
+  String get friendRequestsEmpty => '还没有好友请求。';
+
+  @override
+  String get friendRequestAccept => '接受';
+
+  @override
+  String get friendRequestDecline => '拒绝';
+
+  @override
+  String get characterAge => '年龄';
+
+  @override
+  String get characterNationality => '国籍';
+
+  @override
+  String get characterOccupation => '职业';
+
+  @override
+  String get characterInterests => '兴趣';
+
+  @override
+  String get characterCollection => '收藏';
+
+  @override
+  String get characterSecret => '秘密';
+
+  @override
+  String characterSeriesWith(String name) {
+    return '$name 出场的系列';
+  }
+
+  @override
+  String get characterSetAsProfile => '设为头像';
+
+  @override
+  String get characterChangePictureTitle => '要更换头像吗？';
+
+  @override
+  String get characterChange => '更换';
+
+  @override
+  String get characterCancel => '取消';
+
+  @override
+  String get characterChangeFailed => '无法更换头像。请重试。';
+
+  @override
+  String get characterSecretLocked => '完成收藏即可解锁秘密。';
+
+  @override
   String get accountInfo => '账号';
 
   @override
@@ -1064,6 +1123,65 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get changeProfileImageTitle => '选择你的头像';
 
   @override
+  String get friendsTitle => '好友';
+
+  @override
+  String get friendRequestsTab => '好友请求';
+
+  @override
+  String get friendsEmpty => '还没有好友';
+
+  @override
+  String get friendRequestsEmpty => '还没有好友请求。';
+
+  @override
+  String get friendRequestAccept => '接受';
+
+  @override
+  String get friendRequestDecline => '拒绝';
+
+  @override
+  String get characterAge => '年龄';
+
+  @override
+  String get characterNationality => '国籍';
+
+  @override
+  String get characterOccupation => '职业';
+
+  @override
+  String get characterInterests => '兴趣';
+
+  @override
+  String get characterCollection => '收藏';
+
+  @override
+  String get characterSecret => '秘密';
+
+  @override
+  String characterSeriesWith(String name) {
+    return '$name 出场的系列';
+  }
+
+  @override
+  String get characterSetAsProfile => '设为头像';
+
+  @override
+  String get characterChangePictureTitle => '要更换头像吗？';
+
+  @override
+  String get characterChange => '更换';
+
+  @override
+  String get characterCancel => '取消';
+
+  @override
+  String get characterChangeFailed => '无法更换头像。请重试。';
+
+  @override
+  String get characterSecretLocked => '完成收藏即可解锁秘密。';
+
+  @override
   String get accountInfo => '账号';
 
   @override
@@ -1988,6 +2106,65 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get changeProfileImageTitle => '選擇你的頭像';
+
+  @override
+  String get friendsTitle => '好友';
+
+  @override
+  String get friendRequestsTab => '好友請求';
+
+  @override
+  String get friendsEmpty => '還沒有好友';
+
+  @override
+  String get friendRequestsEmpty => '還沒有好友請求。';
+
+  @override
+  String get friendRequestAccept => '接受';
+
+  @override
+  String get friendRequestDecline => '拒絕';
+
+  @override
+  String get characterAge => '年齡';
+
+  @override
+  String get characterNationality => '國籍';
+
+  @override
+  String get characterOccupation => '職業';
+
+  @override
+  String get characterInterests => '興趣';
+
+  @override
+  String get characterCollection => '收藏';
+
+  @override
+  String get characterSecret => '秘密';
+
+  @override
+  String characterSeriesWith(String name) {
+    return '$name 出場的系列';
+  }
+
+  @override
+  String get characterSetAsProfile => '設為頭像';
+
+  @override
+  String get characterChangePictureTitle => '要更換頭像嗎？';
+
+  @override
+  String get characterChange => '更換';
+
+  @override
+  String get characterCancel => '取消';
+
+  @override
+  String get characterChangeFailed => '無法更換頭像。請再試一次。';
+
+  @override
+  String get characterSecretLocked => '完成收藏即可解鎖秘密。';
 
   @override
   String get accountInfo => '帳號';

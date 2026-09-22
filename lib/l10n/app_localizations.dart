@@ -383,6 +383,120 @@ abstract class AppLocalizations {
   /// **'Choose your Profile Picture'**
   String get changeProfileImageTitle;
 
+  /// No description provided for @friendsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Friends'**
+  String get friendsTitle;
+
+  /// No description provided for @friendRequestsTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Friend Requests'**
+  String get friendRequestsTab;
+
+  /// No description provided for @friendsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No friends yet'**
+  String get friendsEmpty;
+
+  /// No description provided for @friendRequestsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No friend requests yet.'**
+  String get friendRequestsEmpty;
+
+  /// No description provided for @friendRequestAccept.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept'**
+  String get friendRequestAccept;
+
+  /// No description provided for @friendRequestDecline.
+  ///
+  /// In en, this message translates to:
+  /// **'Decline'**
+  String get friendRequestDecline;
+
+  /// No description provided for @characterAge.
+  ///
+  /// In en, this message translates to:
+  /// **'Age'**
+  String get characterAge;
+
+  /// No description provided for @characterNationality.
+  ///
+  /// In en, this message translates to:
+  /// **'Nationality'**
+  String get characterNationality;
+
+  /// No description provided for @characterOccupation.
+  ///
+  /// In en, this message translates to:
+  /// **'Occupation'**
+  String get characterOccupation;
+
+  /// No description provided for @characterInterests.
+  ///
+  /// In en, this message translates to:
+  /// **'Interests'**
+  String get characterInterests;
+
+  /// No description provided for @characterCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection'**
+  String get characterCollection;
+
+  /// No description provided for @characterSecret.
+  ///
+  /// In en, this message translates to:
+  /// **'Secret'**
+  String get characterSecret;
+
+  /// No description provided for @characterSeriesWith.
+  ///
+  /// In en, this message translates to:
+  /// **'Series with {name}'**
+  String characterSeriesWith(String name);
+
+  /// No description provided for @characterSetAsProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Set as Profile'**
+  String get characterSetAsProfile;
+
+  /// No description provided for @characterChangePictureTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Profile Picture?'**
+  String get characterChangePictureTitle;
+
+  /// No description provided for @characterChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get characterChange;
+
+  /// No description provided for @characterCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get characterCancel;
+
+  /// No description provided for @characterChangeFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t change your profile picture. Please try again.'**
+  String get characterChangeFailed;
+
+  /// No description provided for @characterSecretLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete the collection to unlock the Secret.'**
+  String get characterSecretLocked;
+
   /// No description provided for @accountInfo.
   ///
   /// In en, this message translates to:

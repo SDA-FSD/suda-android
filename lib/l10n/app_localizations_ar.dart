@@ -140,6 +140,66 @@ class AppLocalizationsAr extends AppLocalizations {
   String get changeProfileImageTitle => 'اختر صورة ملفك الشخصي';
 
   @override
+  String get friendsTitle => 'الأصدقاء';
+
+  @override
+  String get friendRequestsTab => 'طلبات الصداقة';
+
+  @override
+  String get friendsEmpty => 'لا يوجد أصدقاء بعد';
+
+  @override
+  String get friendRequestsEmpty => 'لا توجد طلبات صداقة بعد.';
+
+  @override
+  String get friendRequestAccept => 'قبول';
+
+  @override
+  String get friendRequestDecline => 'رفض';
+
+  @override
+  String get characterAge => 'العمر';
+
+  @override
+  String get characterNationality => 'الجنسية';
+
+  @override
+  String get characterOccupation => 'المهنة';
+
+  @override
+  String get characterInterests => 'الاهتمامات';
+
+  @override
+  String get characterCollection => 'المجموعة';
+
+  @override
+  String get characterSecret => 'السر';
+
+  @override
+  String characterSeriesWith(String name) {
+    return 'سلسلة مع $name';
+  }
+
+  @override
+  String get characterSetAsProfile => 'تعيين كصورة للملف';
+
+  @override
+  String get characterChangePictureTitle => 'تغيير صورة الملف الشخصي؟';
+
+  @override
+  String get characterChange => 'تغيير';
+
+  @override
+  String get characterCancel => 'إلغاء';
+
+  @override
+  String get characterChangeFailed =>
+      'تعذر تغيير صورة الملف الشخصي. حاول مرة أخرى.';
+
+  @override
+  String get characterSecretLocked => 'أكمل المجموعة لفتح السر.';
+
+  @override
   String get accountInfo => 'الحساب';
 
   @override

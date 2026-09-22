@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../../models/character_detail.dart';
 import '../../models/character_reward_models.dart';
 import '../../models/roleplay_models.dart';
 import '../../models/user_models.dart';
@@ -916,6 +917,95 @@ class UserApi {
     }
     throw Exception(
       'GET /v1/users/$userId/profile failed: HTTP ${response.statusCode} ${response.body}',
+    );
+  }
+
+  static Future<CharacterDetailDto> getCharacter({
+    required String accessToken,
+    required int characterId,
+  }) {
+    return SudaHttpClient.executeWithRefresh(
+      () => _getCharacterInternal(accessToken, characterId),
+      retryWithNewToken: (newToken) =>
+          _getCharacterInternal(newToken, characterId),
+    );
+  }
+
+  static Future<CharacterDetailDto> _getCharacterInternal(
+    String accessToken,
+    int characterId,
+  ) async {
+    final uri = SudaHttpClient.buildUri('/v1/characters/$characterId');
+    late final http.Response response;
+    try {
+      response = await SudaHttpClient.client
+          .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+          .timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      rethrow;
+    }
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final Map<String, dynamic> data =
+          jsonDecode(response.body) as Map<String, dynamic>;
+      return CharacterDetailDto.fromJson(data);
+    }
+    throw Exception(
+      'GET /v1/characters/$characterId failed: HTTP ${response.statusCode} ${response.body}',
+    );
+  }
+
+  static Future<FriendListDto> getFriends({required String accessToken}) {
+    return SudaHttpClient.executeWithRefresh(
+      () => _getFriendsInternal(accessToken),
+      retryWithNewToken: (newToken) => _getFriendsInternal(newToken),
+    );
+  }
+
+  static Future<FriendListDto> _getFriendsInternal(String accessToken) async {
+    final uri = SudaHttpClient.buildUri('/v1/users/friends');
+    late final http.Response response;
+    try {
+      response = await SudaHttpClient.client
+          .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+          .timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      rethrow;
+    }
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final Map<String, dynamic> data =
+          jsonDecode(response.body) as Map<String, dynamic>;
+      return FriendListDto.fromJson(data);
+    }
+    throw Exception(
+      'GET /v1/users/friends failed: HTTP ${response.statusCode} ${response.body}',
+    );
+  }
+
+  static Future<FriendRelationDto> acceptFriend({
+    required String accessToken,
+    required int targetUserId,
+  }) {
+    return _friendWrite(
+      accessToken: accessToken,
+      method: 'POST',
+      path: '/v1/users/friends/$targetUserId/accept',
+    );
+  }
+
+  static Future<FriendRelationDto> rejectFriend({
+    required String accessToken,
+    required int targetUserId,
+  }) {
+    return _friendWrite(
+      accessToken: accessToken,
+      method: 'POST',
+      path: '/v1/users/friends/$targetUserId/reject',
     );
   }
 

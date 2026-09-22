@@ -138,6 +138,65 @@ class AppLocalizationsKo extends AppLocalizations {
   String get changeProfileImageTitle => '프로필 사진을 선택하세요';
 
   @override
+  String get friendsTitle => '친구';
+
+  @override
+  String get friendRequestsTab => '친구 요청';
+
+  @override
+  String get friendsEmpty => '아직 친구가 없습니다';
+
+  @override
+  String get friendRequestsEmpty => '아직 받은 친구 요청이 없습니다.';
+
+  @override
+  String get friendRequestAccept => '수락';
+
+  @override
+  String get friendRequestDecline => '거절';
+
+  @override
+  String get characterAge => '나이';
+
+  @override
+  String get characterNationality => '국적';
+
+  @override
+  String get characterOccupation => '직업';
+
+  @override
+  String get characterInterests => '관심사';
+
+  @override
+  String get characterCollection => '컬렉션';
+
+  @override
+  String get characterSecret => '비밀';
+
+  @override
+  String characterSeriesWith(String name) {
+    return '$name 등장 시리즈';
+  }
+
+  @override
+  String get characterSetAsProfile => '프로필로 설정';
+
+  @override
+  String get characterChangePictureTitle => '프로필 사진을 변경할까요?';
+
+  @override
+  String get characterChange => '변경';
+
+  @override
+  String get characterCancel => '취소';
+
+  @override
+  String get characterChangeFailed => '프로필 사진을 변경하지 못했어요. 다시 시도해 주세요.';
+
+  @override
+  String get characterSecretLocked => '콜렉션을 완성하면 비밀을 해금할 수 있습니다.';
+
+  @override
   String get accountInfo => '계정';
 
   @override

@@ -142,6 +142,67 @@ class AppLocalizationsMs extends AppLocalizations {
   String get changeProfileImageTitle => 'Pilih gambar profil';
 
   @override
+  String get friendsTitle => 'Rakan';
+
+  @override
+  String get friendRequestsTab => 'Permintaan rakan';
+
+  @override
+  String get friendsEmpty => 'Belum ada rakan';
+
+  @override
+  String get friendRequestsEmpty => 'Tiada permintaan rakan buat masa ini.';
+
+  @override
+  String get friendRequestAccept => 'Terima';
+
+  @override
+  String get friendRequestDecline => 'Tolak';
+
+  @override
+  String get characterAge => 'Umur';
+
+  @override
+  String get characterNationality => 'Kewarganegaraan';
+
+  @override
+  String get characterOccupation => 'Pekerjaan';
+
+  @override
+  String get characterInterests => 'Minat';
+
+  @override
+  String get characterCollection => 'Koleksi';
+
+  @override
+  String get characterSecret => 'Rahsia';
+
+  @override
+  String characterSeriesWith(String name) {
+    return 'Siri dengan $name';
+  }
+
+  @override
+  String get characterSetAsProfile => 'Tetapkan sebagai profil';
+
+  @override
+  String get characterChangePictureTitle => 'Tukar gambar profil?';
+
+  @override
+  String get characterChange => 'Tukar';
+
+  @override
+  String get characterCancel => 'Batal';
+
+  @override
+  String get characterChangeFailed =>
+      'Tidak dapat menukar gambar profil. Sila cuba lagi.';
+
+  @override
+  String get characterSecretLocked =>
+      'Lengkapkan koleksi untuk membuka Rahsia.';
+
+  @override
   String get accountInfo => 'Akaun';
 
   @override

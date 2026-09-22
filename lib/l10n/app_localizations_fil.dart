@@ -144,6 +144,67 @@ class AppLocalizationsFil extends AppLocalizations {
   String get changeProfileImageTitle => 'Piliin ang larawan sa profile';
 
   @override
+  String get friendsTitle => 'Mga kaibigan';
+
+  @override
+  String get friendRequestsTab => 'Mga friend request';
+
+  @override
+  String get friendsEmpty => 'Wala pang kaibigan';
+
+  @override
+  String get friendRequestsEmpty => 'Wala pang friend request.';
+
+  @override
+  String get friendRequestAccept => 'Tanggapin';
+
+  @override
+  String get friendRequestDecline => 'Tanggihan';
+
+  @override
+  String get characterAge => 'Edad';
+
+  @override
+  String get characterNationality => 'Nasyonalidad';
+
+  @override
+  String get characterOccupation => 'Trabaho';
+
+  @override
+  String get characterInterests => 'Mga interes';
+
+  @override
+  String get characterCollection => 'Koleksyon';
+
+  @override
+  String get characterSecret => 'Lihim';
+
+  @override
+  String characterSeriesWith(String name) {
+    return 'Mga series kasama si $name';
+  }
+
+  @override
+  String get characterSetAsProfile => 'Itakda bilang profile';
+
+  @override
+  String get characterChangePictureTitle => 'Palitan ang larawan sa profile?';
+
+  @override
+  String get characterChange => 'Palitan';
+
+  @override
+  String get characterCancel => 'Kanselahin';
+
+  @override
+  String get characterChangeFailed =>
+      'Hindi napalitan ang larawan sa profile. Subukan ulit.';
+
+  @override
+  String get characterSecretLocked =>
+      'Kumpletuhin ang koleksyon para ma-unlock ang Lihim.';
+
+  @override
   String get accountInfo => 'Account';
 
   @override

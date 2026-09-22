@@ -522,6 +522,72 @@ class FriendRelationDto {
   }
 }
 
+class FriendUserDto {
+  final int userId;
+  final String? name;
+  final String subscribedYn;
+  final String? imgPath;
+  final int level;
+
+  const FriendUserDto({
+    required this.userId,
+    this.name,
+    this.subscribedYn = 'N',
+    this.imgPath,
+    this.level = 0,
+  });
+
+  bool get isPremium => subscribedYn == 'Y';
+
+  factory FriendUserDto.fromJson(Map<String, dynamic> json) {
+    int asInt(dynamic v) {
+      if (v is int) return v;
+      if (v is num) return v.toInt();
+      return 0;
+    }
+
+    final name = json['name'] as String?;
+    final imgPath = json['imgPath'] as String?;
+    return FriendUserDto(
+      userId: asInt(json['userId']),
+      name: name == null || name.isEmpty ? null : name,
+      subscribedYn: sudaYnFromJson(json['subscribedYn']),
+      imgPath: imgPath == null || imgPath.isEmpty ? null : imgPath,
+      level: asInt(json['level']),
+    );
+  }
+}
+
+class FriendListDto {
+  final int friendCount;
+  final List<FriendUserDto> friends;
+  final List<FriendUserDto> incomingRequests;
+
+  const FriendListDto({
+    required this.friendCount,
+    this.friends = const [],
+    this.incomingRequests = const [],
+  });
+
+  factory FriendListDto.fromJson(Map<String, dynamic> json) {
+    List<FriendUserDto> users(dynamic raw) {
+      if (raw is! List) return const [];
+      return raw
+          .whereType<Map>()
+          .map((item) => FriendUserDto.fromJson(Map<String, dynamic>.from(item)))
+          .where((item) => item.userId > 0)
+          .toList();
+    }
+
+    final count = json['friendCount'];
+    return FriendListDto(
+      friendCount: count is num ? count.toInt() : 0,
+      friends: users(json['friends']),
+      incomingRequests: users(json['incomingRequests']),
+    );
+  }
+}
+
 class ClaimedCharacterPortraitDto {
   final int characterId;
   final String characterRarity;

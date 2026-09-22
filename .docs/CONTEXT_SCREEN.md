@@ -338,7 +338,7 @@
     - 배경: 박스가 위치한 세로 구간에 화면 좌우 끝까지 닿는 full-bleed 그라데이션 적용
     - 구현: `AppScaffold(usePadding: false)`를 적용하여 그라데이션이 화면 끝까지 닿도록 함
     - 아바타 `imgPath`: `UserProfileAvatar` 단일 링(구독 / 비구독 캐릭터 등급 / 무료). null/empty·기본색은 `DefaultProfileAvatar`. 캐릭터는 `CdnThumbSlot.profileAvatar` `_150`. path는 http(s)로 시작하지 않음
-    - 스탯 라벨 영어 하드코딩: Level(`currentLevel`) / Like(`likePoint`) / Friends(`friendCount`)
+    - 스탯 라벨 영어 하드코딩: Level(`currentLevel`) / Like(`likePoint`) / Friends(`friendCount`). Friends 칸만 탭 → `FriendsScreen`. Level/Like·타인 프로필 Friends 숫자는 이동 없음
   - **구독자 상단 그라데이션**: 탭 상단까지. 아래는 `#121212`
   - **무료 사용자 Premium CTA** (`SubscriptionStatusCache.isSubscribedActive == false`):
     - 위치: Profile Box 바로 위, 아래 gap 24, 좌우 margin 20 (`_profileHorizontalMargin`)
@@ -361,6 +361,52 @@
   - `onNavigateToAlarm`: Alarm 화면으로 이동 시 호출되는 콜백 (VoidCallback?)
   - `onSignOut`: 로그아웃 시 호출되는 콜백 (VoidCallback?)
   - `user`: 앱 메모리에 저장된 사용자 정보 (UserDto?)
+
+---
+
+## 3.1 FriendsScreen
+
+### 스크린 관련 정의 파일
+- **파일 경로**: `lib/screens/friends.dart`
+- **클래스명**: `FriendsScreen`
+- **스크린 타입**: **Sub Screen**
+- **appPath**: 해당 없음
+
+### 이전 스크린 정보 (진입점)
+- **ProfileScreen**: 내 프로필 Friends 라벨+숫자 칸 탭. 타인 프로필에서는 열리지 않음
+
+### 이후 스크린 정보
+- **OtherUserProfileScreen**: 엔트리(아바타·이름) 탭. Accept/Decline 버튼은 이동하지 않음
+
+### 스크린 내부 구현 특이사항
+- 배경 세로 그라데이션 `#121212` → `#295062`. 헤더 `friendsTitle`(en Friends / pt Amigos / ko 친구)
+- `SudaLabelTabs` 2개. Friends=`friendsTitle`. Friend Requests=`friendRequestsTab`(en Friend Requests / pt Solicitações / ko 친구 요청)
+- `GET /v1/users/friends` 1회. 서버 순서 그대로, 페이징 없음. 아바타는 랭킹 리스트와 동일(외경 40·링 2·우하단 레벨 16, `_150`). 이름 Bold 14 말줄임, 구독 뱃지 14. 등수·좋아요 없음
+- Friends 탭 빈 목록 `friendsEmpty`(bodyLarge 흰, 탭 아래 영역 정중앙)
+- 요청 탭 우측에 Accept(`#0CABA8`)·Decline(`#353535`). 알약, bodySmall 흰, 텍스트 상하 5·좌우 10. 성공 시 목록 재조회. 409 한도는 타인 프로필과 같은 OK 팝업(`otherUserFriendLimitSelf|Them`). 그 외 실패는 `otherUserFriendBlockedBody`
+- 요청 없음 `friendRequestsEmpty`(같은 중앙 정렬)
+
+---
+
+## 3.2 CharacterScreen
+
+### 스크린 관련 정의 파일
+- **파일 경로**: `lib/screens/character.dart`
+- **클래스명**: `CharacterScreen`
+- **스크린 타입**: **Full Screen** (`FullScreenRoute` bottomUp, X → pop)
+- **appPath**: 해당 없음
+
+### 이전 스크린 정보 (진입점)
+- **RewardUnboxing**: 마지막 해금의 View Character. 올라온 뒤 언박싱 route 제거
+- **ProfileScreen / OtherUserProfileScreen**: SUDA 이웃 초상 탭. 소유·프로필 설정은 로그인한 사용자 기준
+
+### 스크린 내부 구현 특이사항
+- `GET /v1/characters/{id}` + `GET /v1/users`(현재 `imgPath`)
+- 배경: NORMAL `#03430A`→`#71A431` 88% / RARE `#0C0752`→29% `#049FFF`→`#93D6FF` / EPIC `#330371`→`#DF3FF8`
+- 상단 5:5. 좌 `rpImgPaths[0]` 등급 링·CDN 원본. 우 이름 `headlineMedium` 흰 + `[Normal|Rare|Epic]` `bodySmall`. 한 줄 갭 후 Age/Nationality/Occupation/Interests. 라벨 Bold, 값 없으면 행 숨김. Personality는 `personalities`만 알약(`#635F5F`, labelSmall italic 흰, gap 10)
+- Collection: 최소 3칸, `rpImgPaths`가 더 길면 그 수만큼 가로 스크롤. 갭 24. 소유 칸 `_150`. 현재 프로필이면 우하단 `#0CABA8` 30 체크. 소유·비설정이면 아래 `characterSetAsProfile` → 확인 팝업 후 `PUT /v1/users/profile-img`. 실패 토스트 `characterChangeFailed`. 미소유·빈 칸은 `#570B3C` 64% + 등급색 `lock.png`(원 폭 40%). 탭은 소유 칸만. 확대 오버레이의 Set as Profile은 현재 프로필이 아닐 때만
+- Secret: 폭은 본문 90%. 잠금 높이 130, 같은 자물쇠. 탭 시 `characterSecretLocked`. `secrets`가 응답에 있을 때만 줄바꿈 텍스트, 높이는 텍스트에 맞춤
+- Series: 없으면 영역 숨김. 있으면 홈 썸네일 3열·하단 롤링 제목. 탭 → Series Overview
 
 ---
 
@@ -1035,7 +1081,7 @@
 - 설정 아이콘·구독 CTA·레벨바·Saved/History 탭 없음. Progress 탭 라벨만 (`SudaLabelTabs` 1개 허용)
 - Level/Like/Friends 표시만. 그 아래 알약(스탯 컬럼과 동일 width, 세로 padding 6)
 - 헤더(알약)와 Progress 탭 사이 여백 없음
-  - FRIEND: `#0CABA8` 20% + 흰 1px 그라데이션 보더 + `check_raw.png` + `otherUserFriends`. 탭 → Unfriend 팝업(`primaryLight`)
+  - FRIEND: streak 카드와 동일. 테두리 1px `#80D7CF` 100%→0%→100%(우상→좌하), 안쪽 `#121212` 위 `#0CABA8` 16%. `check_raw.png` + `otherUserFriends`. 탭 → Unfriend 팝업(`primaryLight`)
   - OUTGOING_PENDING: `#80D7CF` / 글자 `#0CABA8` / `otherUserRequested`. 탭 → 요청 취소 팝업
   - NONE·INCOMING_PENDING: `#0CABA8` 흰글자 `otherUserAddFriend`. 탭 → 신청 팝업(랭킹 리스트 프레임+레벨뱃지, 가로=팝업 width 30%). POST 후 INCOMING은 즉시 FRIEND
   - REJECTED(쿨다운): 알약은 Add Friend. 탭하면 스토킹 팝업(POST 없음). `409 FRIEND_REQUEST_COOLDOWN`도 동일 Body+OK

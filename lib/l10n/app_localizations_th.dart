@@ -139,6 +139,66 @@ class AppLocalizationsTh extends AppLocalizations {
   String get changeProfileImageTitle => 'เลือกภาพโปรไฟล์';
 
   @override
+  String get friendsTitle => 'เพื่อน';
+
+  @override
+  String get friendRequestsTab => 'คำขอเป็นเพื่อน';
+
+  @override
+  String get friendsEmpty => 'ยังไม่มีเพื่อน';
+
+  @override
+  String get friendRequestsEmpty => 'ยังไม่มีคำขอเป็นเพื่อน';
+
+  @override
+  String get friendRequestAccept => 'ยอมรับ';
+
+  @override
+  String get friendRequestDecline => 'ปฏิเสธ';
+
+  @override
+  String get characterAge => 'อายุ';
+
+  @override
+  String get characterNationality => 'สัญชาติ';
+
+  @override
+  String get characterOccupation => 'อาชีพ';
+
+  @override
+  String get characterInterests => 'ความสนใจ';
+
+  @override
+  String get characterCollection => 'คอลเลกชัน';
+
+  @override
+  String get characterSecret => 'ความลับ';
+
+  @override
+  String characterSeriesWith(String name) {
+    return 'ซีรีส์ที่มี $name';
+  }
+
+  @override
+  String get characterSetAsProfile => 'ตั้งเป็นรูปโปรไฟล์';
+
+  @override
+  String get characterChangePictureTitle => 'เปลี่ยนรูปโปรไฟล์หรือไม่?';
+
+  @override
+  String get characterChange => 'เปลี่ยน';
+
+  @override
+  String get characterCancel => 'ยกเลิก';
+
+  @override
+  String get characterChangeFailed =>
+      'เปลี่ยนรูปโปรไฟล์ไม่สำเร็จ โปรดลองอีกครั้ง';
+
+  @override
+  String get characterSecretLocked => 'สะสมให้ครบเพื่อปลดล็อกความลับ';
+
+  @override
   String get accountInfo => 'บัญชี';
 
   @override

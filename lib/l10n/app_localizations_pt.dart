@@ -143,6 +143,68 @@ class AppLocalizationsPt extends AppLocalizations {
   String get changeProfileImageTitle => 'Escolha sua foto de perfil';
 
   @override
+  String get friendsTitle => 'Amigos';
+
+  @override
+  String get friendRequestsTab => 'Solicitações';
+
+  @override
+  String get friendsEmpty => 'Você ainda não tem amigos';
+
+  @override
+  String get friendRequestsEmpty =>
+      'Nenhuma solicitação de amizade no momento.';
+
+  @override
+  String get friendRequestAccept => 'Aceitar';
+
+  @override
+  String get friendRequestDecline => 'Recusar';
+
+  @override
+  String get characterAge => 'Idade';
+
+  @override
+  String get characterNationality => 'Nacionalidade';
+
+  @override
+  String get characterOccupation => 'Ocupação';
+
+  @override
+  String get characterInterests => 'Interesses';
+
+  @override
+  String get characterCollection => 'Coleção';
+
+  @override
+  String get characterSecret => 'Segredo';
+
+  @override
+  String characterSeriesWith(String name) {
+    return 'Séries com $name';
+  }
+
+  @override
+  String get characterSetAsProfile => 'Definir como perfil';
+
+  @override
+  String get characterChangePictureTitle => 'Alterar foto de perfil?';
+
+  @override
+  String get characterChange => 'Alterar';
+
+  @override
+  String get characterCancel => 'Cancelar';
+
+  @override
+  String get characterChangeFailed =>
+      'Não foi possível alterar sua foto de perfil. Tente novamente.';
+
+  @override
+  String get characterSecretLocked =>
+      'Complete a coleção para desbloquear o Segredo.';
+
+  @override
   String get accountInfo => 'Conta';
 
   @override

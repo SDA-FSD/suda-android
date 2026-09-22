@@ -142,6 +142,67 @@ class AppLocalizationsId extends AppLocalizations {
   String get changeProfileImageTitle => 'Pilih foto profil';
 
   @override
+  String get friendsTitle => 'Teman';
+
+  @override
+  String get friendRequestsTab => 'Permintaan pertemanan';
+
+  @override
+  String get friendsEmpty => 'Belum ada teman';
+
+  @override
+  String get friendRequestsEmpty => 'Belum ada permintaan pertemanan.';
+
+  @override
+  String get friendRequestAccept => 'Terima';
+
+  @override
+  String get friendRequestDecline => 'Tolak';
+
+  @override
+  String get characterAge => 'Usia';
+
+  @override
+  String get characterNationality => 'Kewarganegaraan';
+
+  @override
+  String get characterOccupation => 'Pekerjaan';
+
+  @override
+  String get characterInterests => 'Minat';
+
+  @override
+  String get characterCollection => 'Koleksi';
+
+  @override
+  String get characterSecret => 'Rahasia';
+
+  @override
+  String characterSeriesWith(String name) {
+    return 'Seri dengan $name';
+  }
+
+  @override
+  String get characterSetAsProfile => 'Jadikan foto profil';
+
+  @override
+  String get characterChangePictureTitle => 'Ubah foto profil?';
+
+  @override
+  String get characterChange => 'Ubah';
+
+  @override
+  String get characterCancel => 'Batal';
+
+  @override
+  String get characterChangeFailed =>
+      'Tidak dapat mengubah foto profil. Coba lagi.';
+
+  @override
+  String get characterSecretLocked =>
+      'Selesaikan koleksi untuk membuka Rahasia.';
+
+  @override
   String get accountInfo => 'Akun';
 
   @override

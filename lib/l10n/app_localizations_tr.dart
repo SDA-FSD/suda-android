@@ -142,6 +142,67 @@ class AppLocalizationsTr extends AppLocalizations {
   String get changeProfileImageTitle => 'Profil fotoğrafını seç';
 
   @override
+  String get friendsTitle => 'Arkadaşlar';
+
+  @override
+  String get friendRequestsTab => 'Arkadaşlık istekleri';
+
+  @override
+  String get friendsEmpty => 'Henüz arkadaşın yok';
+
+  @override
+  String get friendRequestsEmpty => 'Henüz arkadaşlık isteği yok.';
+
+  @override
+  String get friendRequestAccept => 'Kabul et';
+
+  @override
+  String get friendRequestDecline => 'Reddet';
+
+  @override
+  String get characterAge => 'Yaş';
+
+  @override
+  String get characterNationality => 'Uyruk';
+
+  @override
+  String get characterOccupation => 'Meslek';
+
+  @override
+  String get characterInterests => 'İlgi alanları';
+
+  @override
+  String get characterCollection => 'Koleksiyon';
+
+  @override
+  String get characterSecret => 'Sır';
+
+  @override
+  String characterSeriesWith(String name) {
+    return '$name içeren diziler';
+  }
+
+  @override
+  String get characterSetAsProfile => 'Profil yap';
+
+  @override
+  String get characterChangePictureTitle =>
+      'Profil fotoğrafı değiştirilsin mi?';
+
+  @override
+  String get characterChange => 'Değiştir';
+
+  @override
+  String get characterCancel => 'İptal';
+
+  @override
+  String get characterChangeFailed =>
+      'Profil fotoğrafı değiştirilemedi. Lütfen tekrar deneyin.';
+
+  @override
+  String get characterSecretLocked => 'Sırrı açmak için koleksiyonu tamamla.';
+
+  @override
   String get accountInfo => 'Hesap';
 
   @override

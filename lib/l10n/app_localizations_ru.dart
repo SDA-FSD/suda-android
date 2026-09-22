@@ -141,6 +141,67 @@ class AppLocalizationsRu extends AppLocalizations {
   String get changeProfileImageTitle => 'Выберите фото профиля';
 
   @override
+  String get friendsTitle => 'Друзья';
+
+  @override
+  String get friendRequestsTab => 'Запросы в друзья';
+
+  @override
+  String get friendsEmpty => 'Пока нет друзей';
+
+  @override
+  String get friendRequestsEmpty => 'Пока нет запросов в друзья.';
+
+  @override
+  String get friendRequestAccept => 'Принять';
+
+  @override
+  String get friendRequestDecline => 'Отклонить';
+
+  @override
+  String get characterAge => 'Возраст';
+
+  @override
+  String get characterNationality => 'Национальность';
+
+  @override
+  String get characterOccupation => 'Профессия';
+
+  @override
+  String get characterInterests => 'Интересы';
+
+  @override
+  String get characterCollection => 'Коллекция';
+
+  @override
+  String get characterSecret => 'Секрет';
+
+  @override
+  String characterSeriesWith(String name) {
+    return 'Серии с $name';
+  }
+
+  @override
+  String get characterSetAsProfile => 'Сделать фото профиля';
+
+  @override
+  String get characterChangePictureTitle => 'Изменить фото профиля?';
+
+  @override
+  String get characterChange => 'Изменить';
+
+  @override
+  String get characterCancel => 'Отмена';
+
+  @override
+  String get characterChangeFailed =>
+      'Не удалось изменить фото профиля. Попробуйте ещё раз.';
+
+  @override
+  String get characterSecretLocked =>
+      'Соберите коллекцию, чтобы открыть секрет.';
+
+  @override
   String get accountInfo => 'Аккаунт';
 
   @override

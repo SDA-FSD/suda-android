@@ -144,6 +144,67 @@ class AppLocalizationsVi extends AppLocalizations {
   String get changeProfileImageTitle => 'Chọn ảnh đại diện';
 
   @override
+  String get friendsTitle => 'Bạn bè';
+
+  @override
+  String get friendRequestsTab => 'Lời mời kết bạn';
+
+  @override
+  String get friendsEmpty => 'Chưa có bạn bè';
+
+  @override
+  String get friendRequestsEmpty => 'Chưa có lời mời kết bạn.';
+
+  @override
+  String get friendRequestAccept => 'Chấp nhận';
+
+  @override
+  String get friendRequestDecline => 'Từ chối';
+
+  @override
+  String get characterAge => 'Tuổi';
+
+  @override
+  String get characterNationality => 'Quốc tịch';
+
+  @override
+  String get characterOccupation => 'Nghề nghiệp';
+
+  @override
+  String get characterInterests => 'Sở thích';
+
+  @override
+  String get characterCollection => 'Bộ sưu tập';
+
+  @override
+  String get characterSecret => 'Bí mật';
+
+  @override
+  String characterSeriesWith(String name) {
+    return 'Series có $name';
+  }
+
+  @override
+  String get characterSetAsProfile => 'Đặt làm ảnh đại diện';
+
+  @override
+  String get characterChangePictureTitle => 'Đổi ảnh đại diện?';
+
+  @override
+  String get characterChange => 'Đổi';
+
+  @override
+  String get characterCancel => 'Hủy';
+
+  @override
+  String get characterChangeFailed =>
+      'Không thể đổi ảnh đại diện. Vui lòng thử lại.';
+
+  @override
+  String get characterSecretLocked =>
+      'Hoàn thành bộ sưu tập để mở khóa Bí mật.';
+
+  @override
   String get accountInfo => 'Tài khoản';
 
   @override

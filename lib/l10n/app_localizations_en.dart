@@ -142,6 +142,67 @@ class AppLocalizationsEn extends AppLocalizations {
   String get changeProfileImageTitle => 'Choose your Profile Picture';
 
   @override
+  String get friendsTitle => 'Friends';
+
+  @override
+  String get friendRequestsTab => 'Friend Requests';
+
+  @override
+  String get friendsEmpty => 'No friends yet';
+
+  @override
+  String get friendRequestsEmpty => 'No friend requests yet.';
+
+  @override
+  String get friendRequestAccept => 'Accept';
+
+  @override
+  String get friendRequestDecline => 'Decline';
+
+  @override
+  String get characterAge => 'Age';
+
+  @override
+  String get characterNationality => 'Nationality';
+
+  @override
+  String get characterOccupation => 'Occupation';
+
+  @override
+  String get characterInterests => 'Interests';
+
+  @override
+  String get characterCollection => 'Collection';
+
+  @override
+  String get characterSecret => 'Secret';
+
+  @override
+  String characterSeriesWith(String name) {
+    return 'Series with $name';
+  }
+
+  @override
+  String get characterSetAsProfile => 'Set as Profile';
+
+  @override
+  String get characterChangePictureTitle => 'Change Profile Picture?';
+
+  @override
+  String get characterChange => 'Change';
+
+  @override
+  String get characterCancel => 'Cancel';
+
+  @override
+  String get characterChangeFailed =>
+      'Couldn\'t change your profile picture. Please try again.';
+
+  @override
+  String get characterSecretLocked =>
+      'Complete the collection to unlock the Secret.';
+
+  @override
   String get accountInfo => 'Account';
 
   @override

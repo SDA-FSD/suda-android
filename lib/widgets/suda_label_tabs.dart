@@ -48,6 +48,9 @@ class SudaLabelTabs extends StatefulWidget {
   /// true면 비선택 탭 child도 [IndexedStack]으로 유지(상태·초기 로드 보존).
   final bool maintainState;
 
+  /// true면 탭 콘텐츠가 남은 높이를 채운다. 부모 높이가 유한해야 한다.
+  final bool expandContent;
+
   const SudaLabelTabs({
     super.key,
     required this.tabs,
@@ -58,6 +61,7 @@ class SudaLabelTabs extends StatefulWidget {
     this.contentGap = 20,
     this.labelPadding = EdgeInsets.zero,
     this.maintainState = false,
+    this.expandContent = false,
   }) : assert(tabs.length >= 1, 'SudaLabelTabs requires at least 1 tab');
 
   @override
@@ -157,23 +161,29 @@ class _SudaLabelTabsState extends State<SudaLabelTabs> {
           ),
         ),
         SizedBox(height: widget.contentGap),
-        if (widget.maintainState)
-          // Offstage: 비선택 탭은 레이아웃 높이 0, 상태는 유지
-          Stack(
-            alignment: Alignment.topCenter,
-            children: [
-              for (var i = 0; i < widget.tabs.length; i++)
-                Offstage(
-                  offstage: i != _effectiveIndex,
-                  child: TickerMode(
-                    enabled: i == _effectiveIndex,
-                    child: widget.tabs[i].child,
-                  ),
-                ),
-            ],
-          )
+        if (widget.expandContent)
+          Expanded(child: _tabBody())
         else
-          widget.tabs[_effectiveIndex].child,
+          _tabBody(),
+      ],
+    );
+  }
+
+  Widget _tabBody() {
+    if (!widget.maintainState) {
+      return widget.tabs[_effectiveIndex].child;
+    }
+    return Stack(
+      alignment: Alignment.topCenter,
+      children: [
+        for (var i = 0; i < widget.tabs.length; i++)
+          Offstage(
+            offstage: i != _effectiveIndex,
+            child: TickerMode(
+              enabled: i == _effectiveIndex,
+              child: widget.tabs[i].child,
+            ),
+          ),
       ],
     );
   }

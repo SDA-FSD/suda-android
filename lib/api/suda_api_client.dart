@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import '../models/character_detail.dart';
 import '../models/character_reward_models.dart';
 import '../models/auth_models.dart';
 import '../models/home_models.dart';
@@ -436,6 +437,40 @@ class SudaApiClient {
     required int userId,
   }) {
     return UserApi.getOtherUserProfile(accessToken: accessToken, userId: userId);
+  }
+
+  static Future<CharacterDetailDto> getCharacter({
+    required String accessToken,
+    required int characterId,
+  }) {
+    return UserApi.getCharacter(
+      accessToken: accessToken,
+      characterId: characterId,
+    );
+  }
+
+  static Future<FriendListDto> getFriends({required String accessToken}) {
+    return UserApi.getFriends(accessToken: accessToken);
+  }
+
+  static Future<FriendRelationDto> acceptFriend({
+    required String accessToken,
+    required int targetUserId,
+  }) {
+    return UserApi.acceptFriend(
+      accessToken: accessToken,
+      targetUserId: targetUserId,
+    );
+  }
+
+  static Future<FriendRelationDto> rejectFriend({
+    required String accessToken,
+    required int targetUserId,
+  }) {
+    return UserApi.rejectFriend(
+      accessToken: accessToken,
+      targetUserId: targetUserId,
+    );
   }
 
   static Future<FriendRelationDto> requestFriend({

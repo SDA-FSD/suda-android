@@ -138,6 +138,65 @@ class AppLocalizationsJa extends AppLocalizations {
   String get changeProfileImageTitle => 'プロフィール写真を選択';
 
   @override
+  String get friendsTitle => '友達';
+
+  @override
+  String get friendRequestsTab => '友達リクエスト';
+
+  @override
+  String get friendsEmpty => 'まだ友達がいません';
+
+  @override
+  String get friendRequestsEmpty => 'まだ友達リクエストはありません。';
+
+  @override
+  String get friendRequestAccept => '承認';
+
+  @override
+  String get friendRequestDecline => '拒否';
+
+  @override
+  String get characterAge => '年齢';
+
+  @override
+  String get characterNationality => '国籍';
+
+  @override
+  String get characterOccupation => '職業';
+
+  @override
+  String get characterInterests => '興味';
+
+  @override
+  String get characterCollection => 'コレクション';
+
+  @override
+  String get characterSecret => '秘密';
+
+  @override
+  String characterSeriesWith(String name) {
+    return '$name の登場シリーズ';
+  }
+
+  @override
+  String get characterSetAsProfile => 'プロフィールに設定';
+
+  @override
+  String get characterChangePictureTitle => 'プロフィール写真を変更しますか？';
+
+  @override
+  String get characterChange => '変更';
+
+  @override
+  String get characterCancel => 'キャンセル';
+
+  @override
+  String get characterChangeFailed => 'プロフィール写真を変更できませんでした。もう一度お試しください。';
+
+  @override
+  String get characterSecretLocked => 'コレクションを完成させると秘密を解放できます。';
+
+  @override
   String get accountInfo => 'アカウント';
 
   @override
