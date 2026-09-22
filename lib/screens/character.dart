@@ -101,7 +101,6 @@ class _CharacterScreenState extends State<CharacterScreen> {
   Future<void> _confirmSetProfile(String path) async {
     final detail = _detail;
     if (detail == null || _savingProfile || _isCurrentProfile(path)) return;
-    var confirmed = false;
     await DefaultPopup.show(
       context,
       titleText: AppLocalizations.of(context)!.characterChangePictureTitle,
@@ -110,7 +109,7 @@ class _CharacterScreenState extends State<CharacterScreen> {
         DefaultPopupButton(
           type: DefaultPopupButtonType.primary,
           label: AppLocalizations.of(context)!.characterChange,
-          onPressed: () => confirmed = true,
+          onPressed: () => unawaited(_applySetProfile(path)),
         ),
         DefaultPopupButton(
           type: DefaultPopupButtonType.text,
@@ -119,7 +118,11 @@ class _CharacterScreenState extends State<CharacterScreen> {
         ),
       ],
     );
-    if (!confirmed || !mounted) return;
+  }
+
+  Future<void> _applySetProfile(String path) async {
+    final detail = _detail;
+    if (!mounted || detail == null || _savingProfile) return;
     setState(() => _savingProfile = true);
     try {
       final token = await TokenStorage.loadAccessToken();
@@ -261,10 +264,24 @@ class _CharacterScreenState extends State<CharacterScreen> {
             fit: BoxFit.cover,
             errorWidget: (_, _, _) => const ColoredBox(color: Color(0xFF2A2A2A)),
           );
-    return CharacterRarityFrame(
-      rarity: detail.rarity,
-      size: size,
-      child: image,
+    return SizedBox(
+      width: size,
+      height: size,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          DecoratedBox(
+            decoration: _downRightCircleShadow(size),
+            child: const SizedBox.expand(),
+          ),
+          CharacterRarityFrame(
+            rarity: detail.rarity,
+            size: size,
+            borderWidth: 5,
+            child: image,
+          ),
+        ],
+      ),
     );
   }
 
@@ -405,6 +422,10 @@ class _CharacterScreenState extends State<CharacterScreen> {
             child: Stack(
               clipBehavior: Clip.none,
               children: [
+                DecoratedBox(
+                  decoration: _downRightCircleShadow(size),
+                  child: const SizedBox.expand(),
+                ),
                 if (owned)
                   ClipOval(
                     child: CdnThumbImage(
@@ -555,7 +576,7 @@ class _CharacterScreenState extends State<CharacterScreen> {
                     ),
                   ),
                   if (!current && detail != null) ...[
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 48),
                     _ZoomSetButton(
                       onTap: _savingProfile
                           ? null
@@ -587,23 +608,16 @@ class _ZoomSetButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.white,
-      shape: const StadiumBorder(),
-      child: InkWell(
-        customBorder: const StadiumBorder(),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          child: Text(
-            AppLocalizations.of(context)!.characterSetAsProfile,
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: Colors.black,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-      ),
+    final elevatedBase = Theme.of(context).elevatedButtonTheme.style;
+    return ElevatedButton(
+      onPressed: onTap,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFF0CABA8),
+        foregroundColor: Colors.white,
+        shape: const StadiumBorder(),
+        elevation: 0,
+      ).merge(elevatedBase),
+      child: Text(AppLocalizations.of(context)!.characterSetAsProfile),
     );
   }
 }
@@ -631,6 +645,19 @@ class _ProfilePreview extends StatelessWidget {
       ),
     );
   }
+}
+
+BoxDecoration _downRightCircleShadow(double size) {
+  return BoxDecoration(
+    shape: BoxShape.circle,
+    boxShadow: [
+      BoxShadow(
+        color: const Color(0x66000000),
+        offset: Offset(size * 0.04, size * 0.08),
+        blurRadius: size * 0.16,
+      ),
+    ],
+  );
 }
 
 LinearGradient _background(String rarity) {
