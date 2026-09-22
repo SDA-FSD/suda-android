@@ -374,6 +374,43 @@ class AppLocalizationsKo extends AppLocalizations {
   String get profileSudaNeighborsEmpty => '리워드 박스를 열고 새로운 캐릭터를 모아보세요!';
 
   @override
+  String profileLevelProgressReach(int level) {
+    return 'Lv. $level에 도달하면 열 수 있어요!';
+  }
+
+  @override
+  String get profileLevelProgressReachBody => 'Like를 모아 레벨을 올리고 보상 상자를 받아보세요.';
+
+  @override
+  String get profileLevelProgressGotIt => '확인';
+
+  @override
+  String get profileAchievements => '업적';
+
+  @override
+  String get profileAchievementWeeklyChampion => '주간 챔피언';
+
+  @override
+  String get profileAchievementWeeklyRunnerUp => '주간 준우승';
+
+  @override
+  String get profileAchievementWeeklyThird => '주간 3위';
+
+  @override
+  String get profileAchievementWeeklyChampionHint => '주간 랭킹에서 1위를 달성하세요.';
+
+  @override
+  String get profileAchievementWeeklyRunnerUpHint => '주간 랭킹에서 2위를 달성하세요.';
+
+  @override
+  String get profileAchievementWeeklyThirdHint => '주간 랭킹에서 3위를 달성하세요.';
+
+  @override
+  String profileAchievementCount(int count) {
+    return 'x $count';
+  }
+
+  @override
   String get profileHistory => '히스토리';
 
   @override

@@ -392,6 +392,47 @@ class AppLocalizationsPl extends AppLocalizations {
       'Otwieraj skrzynki nagród, by zbierać nowe postacie!';
 
   @override
+  String profileLevelProgressReach(int level) {
+    return 'Osiągnij poz. $level, aby odblokować!';
+  }
+
+  @override
+  String get profileLevelProgressReachBody =>
+      'Zbieraj polubienia i awansuj, by odebrać Skrzynkę Nagród.';
+
+  @override
+  String get profileLevelProgressGotIt => 'Rozumiem';
+
+  @override
+  String get profileAchievements => 'Osiągnięcia';
+
+  @override
+  String get profileAchievementWeeklyChampion => 'Mistrz tygodnia';
+
+  @override
+  String get profileAchievementWeeklyRunnerUp => 'Wicemistrz tygodnia';
+
+  @override
+  String get profileAchievementWeeklyThird => '3. miejsce tygodnia';
+
+  @override
+  String get profileAchievementWeeklyChampionHint =>
+      'Zajmij 1. miejsce w rankingu tygodniowym.';
+
+  @override
+  String get profileAchievementWeeklyRunnerUpHint =>
+      'Zajmij 2. miejsce w rankingu tygodniowym.';
+
+  @override
+  String get profileAchievementWeeklyThirdHint =>
+      'Zajmij 3. miejsce w rankingu tygodniowym.';
+
+  @override
+  String profileAchievementCount(int count) {
+    return 'x $count';
+  }
+
+  @override
   String get profileHistory => 'Historia';
 
   @override

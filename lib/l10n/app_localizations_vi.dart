@@ -393,6 +393,46 @@ class AppLocalizationsVi extends AppLocalizations {
       'Mở Hộp Phần thưởng để sưu tầm nhân vật mới!';
 
   @override
+  String profileLevelProgressReach(int level) {
+    return 'Đạt Lv. $level để mở khóa!';
+  }
+
+  @override
+  String get profileLevelProgressReachBody =>
+      'Kiếm Like và lên cấp để nhận Hộp Phần thưởng.';
+
+  @override
+  String get profileLevelProgressGotIt => 'Đã hiểu';
+
+  @override
+  String get profileAchievements => 'Thành tựu';
+
+  @override
+  String get profileAchievementWeeklyChampion => 'Nhà vô địch tuần';
+
+  @override
+  String get profileAchievementWeeklyRunnerUp => 'Á quân tuần';
+
+  @override
+  String get profileAchievementWeeklyThird => 'Hạng 3 tuần';
+
+  @override
+  String get profileAchievementWeeklyChampionHint =>
+      'Về nhất bảng xếp hạng tuần.';
+
+  @override
+  String get profileAchievementWeeklyRunnerUpHint =>
+      'Về nhì bảng xếp hạng tuần.';
+
+  @override
+  String get profileAchievementWeeklyThirdHint => 'Về ba bảng xếp hạng tuần.';
+
+  @override
+  String profileAchievementCount(int count) {
+    return 'x $count';
+  }
+
+  @override
   String get profileHistory => 'Lịch sử';
 
   @override

@@ -839,6 +839,72 @@ abstract class AppLocalizations {
   /// **'Open Reward Boxes to collect new characters!'**
   String get profileSudaNeighborsEmpty;
 
+  /// No description provided for @profileLevelProgressReach.
+  ///
+  /// In en, this message translates to:
+  /// **'Reach Lv. {level} to unlock!'**
+  String profileLevelProgressReach(int level);
+
+  /// No description provided for @profileLevelProgressReachBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Earn Likes and level up to claim your Reward Box.'**
+  String get profileLevelProgressReachBody;
+
+  /// No description provided for @profileLevelProgressGotIt.
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get profileLevelProgressGotIt;
+
+  /// No description provided for @profileAchievements.
+  ///
+  /// In en, this message translates to:
+  /// **'Achievements'**
+  String get profileAchievements;
+
+  /// No description provided for @profileAchievementWeeklyChampion.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly Champion'**
+  String get profileAchievementWeeklyChampion;
+
+  /// No description provided for @profileAchievementWeeklyRunnerUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly Runner-up'**
+  String get profileAchievementWeeklyRunnerUp;
+
+  /// No description provided for @profileAchievementWeeklyThird.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly 3rd Place'**
+  String get profileAchievementWeeklyThird;
+
+  /// No description provided for @profileAchievementWeeklyChampionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish 1st in the Weekly Ranking.'**
+  String get profileAchievementWeeklyChampionHint;
+
+  /// No description provided for @profileAchievementWeeklyRunnerUpHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish 2nd in the Weekly Ranking.'**
+  String get profileAchievementWeeklyRunnerUpHint;
+
+  /// No description provided for @profileAchievementWeeklyThirdHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish 3rd in the Weekly Ranking.'**
+  String get profileAchievementWeeklyThirdHint;
+
+  /// No description provided for @profileAchievementCount.
+  ///
+  /// In en, this message translates to:
+  /// **'x {count}'**
+  String profileAchievementCount(int count);
+
   /// No description provided for @profileHistory.
   ///
   /// In en, this message translates to:

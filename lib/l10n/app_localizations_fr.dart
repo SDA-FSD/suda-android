@@ -396,6 +396,47 @@ class AppLocalizationsFr extends AppLocalizations {
       'Ouvrez des Boîtes de Récompense pour collectionner de nouveaux personnages !';
 
   @override
+  String profileLevelProgressReach(int level) {
+    return 'Atteignez le Nv. $level pour débloquer !';
+  }
+
+  @override
+  String get profileLevelProgressReachBody =>
+      'Gagnez des Likes et montez de niveau pour récupérer votre Boîte de Récompense.';
+
+  @override
+  String get profileLevelProgressGotIt => 'Compris';
+
+  @override
+  String get profileAchievements => 'Succès';
+
+  @override
+  String get profileAchievementWeeklyChampion => 'Champion de la semaine';
+
+  @override
+  String get profileAchievementWeeklyRunnerUp => 'Vice-champion de la semaine';
+
+  @override
+  String get profileAchievementWeeklyThird => '3e place de la semaine';
+
+  @override
+  String get profileAchievementWeeklyChampionHint =>
+      'Terminez 1er du classement hebdomadaire.';
+
+  @override
+  String get profileAchievementWeeklyRunnerUpHint =>
+      'Terminez 2e du classement hebdomadaire.';
+
+  @override
+  String get profileAchievementWeeklyThirdHint =>
+      'Terminez 3e du classement hebdomadaire.';
+
+  @override
+  String profileAchievementCount(int count) {
+    return 'x $count';
+  }
+
+  @override
   String get profileHistory => 'Historique';
 
   @override

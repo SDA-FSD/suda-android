@@ -370,6 +370,43 @@ class AppLocalizationsZh extends AppLocalizations {
   String get profileSudaNeighborsEmpty => '打开奖励箱，收集新角色！';
 
   @override
+  String profileLevelProgressReach(int level) {
+    return '达到 Lv. $level 即可解锁！';
+  }
+
+  @override
+  String get profileLevelProgressReachBody => '收集 Like 并升级，领取你的奖励箱。';
+
+  @override
+  String get profileLevelProgressGotIt => '知道了';
+
+  @override
+  String get profileAchievements => '成就';
+
+  @override
+  String get profileAchievementWeeklyChampion => '每周冠军';
+
+  @override
+  String get profileAchievementWeeklyRunnerUp => '每周亚军';
+
+  @override
+  String get profileAchievementWeeklyThird => '每周季军';
+
+  @override
+  String get profileAchievementWeeklyChampionHint => '在每周排行榜中获得第1名。';
+
+  @override
+  String get profileAchievementWeeklyRunnerUpHint => '在每周排行榜中获得第2名。';
+
+  @override
+  String get profileAchievementWeeklyThirdHint => '在每周排行榜中获得第3名。';
+
+  @override
+  String profileAchievementCount(int count) {
+    return 'x $count';
+  }
+
+  @override
   String get profileHistory => '历史记录';
 
   @override
@@ -1190,6 +1227,43 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get profileSudaNeighborsEmpty => '打开奖励箱，收集新角色！';
 
   @override
+  String profileLevelProgressReach(int level) {
+    return '达到 Lv. $level 即可解锁！';
+  }
+
+  @override
+  String get profileLevelProgressReachBody => '收集 Like 并升级，领取你的奖励箱。';
+
+  @override
+  String get profileLevelProgressGotIt => '知道了';
+
+  @override
+  String get profileAchievements => '成就';
+
+  @override
+  String get profileAchievementWeeklyChampion => '每周冠军';
+
+  @override
+  String get profileAchievementWeeklyRunnerUp => '每周亚军';
+
+  @override
+  String get profileAchievementWeeklyThird => '每周季军';
+
+  @override
+  String get profileAchievementWeeklyChampionHint => '在每周排行榜中获得第1名。';
+
+  @override
+  String get profileAchievementWeeklyRunnerUpHint => '在每周排行榜中获得第2名。';
+
+  @override
+  String get profileAchievementWeeklyThirdHint => '在每周排行榜中获得第3名。';
+
+  @override
+  String profileAchievementCount(int count) {
+    return 'x $count';
+  }
+
+  @override
   String get profileHistory => '历史记录';
 
   @override
@@ -2008,6 +2082,43 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get profileSudaNeighborsEmpty => '打開獎勵箱，收集新角色！';
+
+  @override
+  String profileLevelProgressReach(int level) {
+    return '達到 Lv. $level 即可解鎖！';
+  }
+
+  @override
+  String get profileLevelProgressReachBody => '收集 Like 並升級，領取你的獎勵箱。';
+
+  @override
+  String get profileLevelProgressGotIt => '知道了';
+
+  @override
+  String get profileAchievements => '成就';
+
+  @override
+  String get profileAchievementWeeklyChampion => '每週冠軍';
+
+  @override
+  String get profileAchievementWeeklyRunnerUp => '每週亞軍';
+
+  @override
+  String get profileAchievementWeeklyThird => '每週季軍';
+
+  @override
+  String get profileAchievementWeeklyChampionHint => '在每週排行榜中獲得第1名。';
+
+  @override
+  String get profileAchievementWeeklyRunnerUpHint => '在每週排行榜中獲得第2名。';
+
+  @override
+  String get profileAchievementWeeklyThirdHint => '在每週排行榜中獲得第3名。';
+
+  @override
+  String profileAchievementCount(int count) {
+    return 'x $count';
+  }
 
   @override
   String get profileHistory => '歷史紀錄';

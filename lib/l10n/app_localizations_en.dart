@@ -389,6 +389,47 @@ class AppLocalizationsEn extends AppLocalizations {
       'Open Reward Boxes to collect new characters!';
 
   @override
+  String profileLevelProgressReach(int level) {
+    return 'Reach Lv. $level to unlock!';
+  }
+
+  @override
+  String get profileLevelProgressReachBody =>
+      'Earn Likes and level up to claim your Reward Box.';
+
+  @override
+  String get profileLevelProgressGotIt => 'Got it';
+
+  @override
+  String get profileAchievements => 'Achievements';
+
+  @override
+  String get profileAchievementWeeklyChampion => 'Weekly Champion';
+
+  @override
+  String get profileAchievementWeeklyRunnerUp => 'Weekly Runner-up';
+
+  @override
+  String get profileAchievementWeeklyThird => 'Weekly 3rd Place';
+
+  @override
+  String get profileAchievementWeeklyChampionHint =>
+      'Finish 1st in the Weekly Ranking.';
+
+  @override
+  String get profileAchievementWeeklyRunnerUpHint =>
+      'Finish 2nd in the Weekly Ranking.';
+
+  @override
+  String get profileAchievementWeeklyThirdHint =>
+      'Finish 3rd in the Weekly Ranking.';
+
+  @override
+  String profileAchievementCount(int count) {
+    return 'x $count';
+  }
+
+  @override
   String get profileHistory => 'History';
 
   @override

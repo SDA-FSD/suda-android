@@ -19,6 +19,8 @@
 /v1/users
 /v1/users/profile
 /v1/users/my-profile
+/v1/users/progress
+/v1/users/character-rewards/claim
 /v1/users/profile-img
 /v1/users/tutorial
 /v1/users/tutorial-shown

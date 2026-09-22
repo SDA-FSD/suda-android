@@ -391,6 +391,47 @@ class AppLocalizationsNl extends AppLocalizations {
       'Open Beloningsboxen om nieuwe personages te verzamelen!';
 
   @override
+  String profileLevelProgressReach(int level) {
+    return 'Bereik Lv. $level om te ontgrendelen!';
+  }
+
+  @override
+  String get profileLevelProgressReachBody =>
+      'Verdien Likes en level up om je Beloningsbox te claimen.';
+
+  @override
+  String get profileLevelProgressGotIt => 'Begrepen';
+
+  @override
+  String get profileAchievements => 'Prestaties';
+
+  @override
+  String get profileAchievementWeeklyChampion => 'Weekkampioen';
+
+  @override
+  String get profileAchievementWeeklyRunnerUp => 'Weekrunner-up';
+
+  @override
+  String get profileAchievementWeeklyThird => '3e plaats van de week';
+
+  @override
+  String get profileAchievementWeeklyChampionHint =>
+      'Eindig als 1e in de wekelijkse ranking.';
+
+  @override
+  String get profileAchievementWeeklyRunnerUpHint =>
+      'Eindig als 2e in de wekelijkse ranking.';
+
+  @override
+  String get profileAchievementWeeklyThirdHint =>
+      'Eindig als 3e in de wekelijkse ranking.';
+
+  @override
+  String profileAchievementCount(int count) {
+    return 'x $count';
+  }
+
+  @override
   String get profileHistory => 'Geschiedenis';
 
   @override

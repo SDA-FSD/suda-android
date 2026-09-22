@@ -373,6 +373,43 @@ class AppLocalizationsJa extends AppLocalizations {
   String get profileSudaNeighborsEmpty => 'リワードボックスを開けて新しいキャラクターを集めよう！';
 
   @override
+  String profileLevelProgressReach(int level) {
+    return 'Lv. $levelに到達すると開けます！';
+  }
+
+  @override
+  String get profileLevelProgressReachBody => 'Likeを集めてレベルアップし、リワードボックスを受け取ろう。';
+
+  @override
+  String get profileLevelProgressGotIt => 'OK';
+
+  @override
+  String get profileAchievements => '実績';
+
+  @override
+  String get profileAchievementWeeklyChampion => '週間チャンピオン';
+
+  @override
+  String get profileAchievementWeeklyRunnerUp => '週間準優勝';
+
+  @override
+  String get profileAchievementWeeklyThird => '週間3位';
+
+  @override
+  String get profileAchievementWeeklyChampionHint => '週間ランキングで1位を獲得しよう。';
+
+  @override
+  String get profileAchievementWeeklyRunnerUpHint => '週間ランキングで2位を獲得しよう。';
+
+  @override
+  String get profileAchievementWeeklyThirdHint => '週間ランキングで3位を獲得しよう。';
+
+  @override
+  String profileAchievementCount(int count) {
+    return 'x $count';
+  }
+
+  @override
   String get profileHistory => '履歴';
 
   @override

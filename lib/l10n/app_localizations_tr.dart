@@ -391,6 +391,46 @@ class AppLocalizationsTr extends AppLocalizations {
       'Yeni karakterler biriktirmek için Ödül Kutularını aç!';
 
   @override
+  String profileLevelProgressReach(int level) {
+    return 'Açmak için Sv. $level seviyesine ulaş!';
+  }
+
+  @override
+  String get profileLevelProgressReachBody =>
+      'Like kazan, seviye atla ve Ödül Kutunu al.';
+
+  @override
+  String get profileLevelProgressGotIt => 'Anladım';
+
+  @override
+  String get profileAchievements => 'Başarılar';
+
+  @override
+  String get profileAchievementWeeklyChampion => 'Haftanın Şampiyonu';
+
+  @override
+  String get profileAchievementWeeklyRunnerUp => 'Haftanın İkincisi';
+
+  @override
+  String get profileAchievementWeeklyThird => 'Haftanın 3.\'sü';
+
+  @override
+  String get profileAchievementWeeklyChampionHint =>
+      'Haftalık Sıralamada 1. ol.';
+
+  @override
+  String get profileAchievementWeeklyRunnerUpHint =>
+      'Haftalık Sıralamada 2. ol.';
+
+  @override
+  String get profileAchievementWeeklyThirdHint => 'Haftalık Sıralamada 3. ol.';
+
+  @override
+  String profileAchievementCount(int count) {
+    return 'x $count';
+  }
+
+  @override
   String get profileHistory => 'Geçmiş';
 
   @override

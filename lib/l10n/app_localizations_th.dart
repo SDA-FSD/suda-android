@@ -385,6 +385,47 @@ class AppLocalizationsTh extends AppLocalizations {
       'เปิดกล่องรางวัลเพื่อสะสมตัวละครใหม่!';
 
   @override
+  String profileLevelProgressReach(int level) {
+    return 'ไปให้ถึง Lv. $level เพื่อปลดล็อก!';
+  }
+
+  @override
+  String get profileLevelProgressReachBody =>
+      'สะสม Like และเลเวลอัพเพื่อรับกล่องรางวัล';
+
+  @override
+  String get profileLevelProgressGotIt => 'เข้าใจแล้ว';
+
+  @override
+  String get profileAchievements => 'ความสำเร็จ';
+
+  @override
+  String get profileAchievementWeeklyChampion => 'แชมป์ประจำสัปดาห์';
+
+  @override
+  String get profileAchievementWeeklyRunnerUp => 'รองแชมป์ประจำสัปดาห์';
+
+  @override
+  String get profileAchievementWeeklyThird => 'อันดับ 3 ประจำสัปดาห์';
+
+  @override
+  String get profileAchievementWeeklyChampionHint =>
+      'จบอันดับ 1 ในการจัดอันดับรายสัปดาห์';
+
+  @override
+  String get profileAchievementWeeklyRunnerUpHint =>
+      'จบอันดับ 2 ในการจัดอันดับรายสัปดาห์';
+
+  @override
+  String get profileAchievementWeeklyThirdHint =>
+      'จบอันดับ 3 ในการจัดอันดับรายสัปดาห์';
+
+  @override
+  String profileAchievementCount(int count) {
+    return 'x $count';
+  }
+
+  @override
   String get profileHistory => 'ประวัติ';
 
   @override

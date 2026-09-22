@@ -4,7 +4,11 @@
 
 ---
 
-- **SUDA Neighbors(2026-09-22):** Progress 탭 streak/words 아래 수령 초상화. `GET /v1/users/my-profile` `claimedCharacters`. Epic→Rare→Normal, 같은 rarity는 최근 수령. `duplicatedYn!=Y`. 빈 목록은 70 높이 안내 문구.
+- **Achievements(2026-09-22):** Progress 탭 Neighbors 아래 주간 1·2·3위 메달 1행. `GET /v1/users/progress` `achievements`. n은 RANKED distinct periodId. 달성 최근순, Claim 없음, 미해금 place 순. 칸·팝업 모두 탭. 미해금 흑백(팝업 포함). 그리드 `x n`은 0 숨김, 팝업은 `x n`(0 포함).
+
+- **Lv Progress(2026-09-22):** Progress 탭 streak/words와 Neighbors 사이 레벨업 바. `GET /v1/users/progress`에 streak/words/`progressPercentage`/R/`claimableCharacterRewardId`/Neighbors. my-profile은 헤더만. 선물 탭 → `POST /v1/users/character-rewards/claim`(LEVEL_UP, like 없음). RANKED URI 유지.
+
+- **SUDA Neighbors(2026-09-22):** Progress 탭 streak/words 아래 수령 초상화. 지금은 `GET /v1/users/progress` `claimedCharacters`. Epic→Rare→Normal, 같은 rarity는 최근 수령. `duplicatedYn!=Y`. 빈 목록은 70 높이 안내 문구.
 
 - **profileImgUrl 제거(2026-09-22):** 필드·Google picture upsert·`DELETE /v1/users/profile-img`/`PUT .../profile-img/default` 삭제. Account 리셋은 `PUT` `DEFAULT`/`1`. 빈 `imgPath`는 클라 1번 초록 `#03ABA8`. 배포 후 `ALTER TABLE user DROP COLUMN profile_img_url`.
 

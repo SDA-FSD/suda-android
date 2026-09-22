@@ -25,7 +25,10 @@ import '../widgets/default_profile_avatar.dart';
 import '../widgets/gnb_bar.dart';
 import '../widgets/suda_label_tabs.dart';
 import '../widgets/character_rarity_frame.dart';
+import '../widgets/level_up_progress_track.dart';
+import '../widgets/profile_achievements_section.dart';
 import '../utils/user_img_path.dart';
+import 'reward/reward_unboxing.dart';
 import 'roleplay/history.dart';
 import 'roleplay/suda_tts_audio_player.dart';
 import 'setting/setting.dart';
@@ -76,9 +79,13 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   UserDto? _user;
   MyProfileDto? _myProfile;
+  UserProgressDto? _progress;
   bool _isProfileLoading = true;
-  bool _isRefreshing = false;
+  bool _isProgressLoading = true;
   bool _showPremiumCta = true;
+  bool _claimingLevelReward = false;
+  int _myProfileRequestId = 0;
+  int _progressRequestId = 0;
 
   _ProfileContentTab _activeTab = _ProfileContentTab.progress;
 
@@ -435,9 +442,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Future<void> _refreshProfile() async {
-    if (_isRefreshing) return;
-    _isRefreshing = true;
+  Future<void> _refreshProfile() {
+    return Future.wait([_loadMyProfile(), _loadProgress()]);
+  }
+
+  Future<void> _loadMyProfile() async {
+    final requestId = ++_myProfileRequestId;
     if (_myProfile == null && mounted) {
       setState(() => _isProfileLoading = true);
     }
@@ -445,25 +455,110 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       final token = await TokenStorage.loadAccessToken();
       if (token == null) {
-        if (mounted && _myProfile == null) {
+        if (!mounted || requestId != _myProfileRequestId) return;
+        if (_myProfile == null) {
           setState(() => _isProfileLoading = false);
         }
         return;
       }
 
       final profile = await SudaApiClient.getMyProfile(accessToken: token);
-      if (!mounted) return;
+      if (!mounted || requestId != _myProfileRequestId) return;
 
       setState(() {
         _myProfile = profile;
         _isProfileLoading = false;
       });
     } catch (e) {
-      if (mounted && _myProfile == null) {
+      if (!mounted || requestId != _myProfileRequestId) return;
+      if (_myProfile == null) {
         setState(() => _isProfileLoading = false);
       }
+    }
+  }
+
+  Future<void> _loadProgress() async {
+    final requestId = ++_progressRequestId;
+    if (_progress == null && mounted) {
+      setState(() => _isProgressLoading = true);
+    }
+
+    try {
+      final token = await TokenStorage.loadAccessToken();
+      if (token == null) {
+        if (!mounted || requestId != _progressRequestId) return;
+        if (_progress == null) {
+          setState(() => _isProgressLoading = false);
+        }
+        return;
+      }
+
+      final progress = await SudaApiClient.getProgress(accessToken: token);
+      if (!mounted || requestId != _progressRequestId) return;
+
+      setState(() {
+        _progress = progress;
+        _isProgressLoading = false;
+      });
+    } catch (e) {
+      if (!mounted || requestId != _progressRequestId) return;
+      if (_progress == null) {
+        setState(() => _isProgressLoading = false);
+      }
+    }
+  }
+
+  Future<void> _onLevelRewardGiftTap() async {
+    final progress = _progress;
+    if (progress == null || _claimingLevelReward) return;
+    final rewardLevel =
+        progress.claimableRewardLevel < 3 ? 3 : progress.claimableRewardLevel;
+    if (progress.currentLevel < rewardLevel) {
+      final l10n = AppLocalizations.of(context)!;
+      final theme = Theme.of(context).textTheme;
+      await DefaultPopup.show(
+        context,
+        titleText: l10n.profileLevelProgressReach(rewardLevel),
+        bodyWidget: Text(
+          l10n.profileLevelProgressReachBody,
+          style: theme.bodyLarge?.copyWith(color: Colors.white),
+          textAlign: TextAlign.center,
+        ),
+        expandPrimaryButtons: true,
+        buttons: [
+          DefaultPopupButton(
+            type: DefaultPopupButtonType.primary,
+            label: l10n.profileLevelProgressGotIt,
+            onPressed: () {},
+          ),
+        ],
+      );
+      return;
+    }
+    final rewardId = progress.claimableCharacterRewardId;
+    if (rewardId == null) return;
+
+    setState(() => _claimingLevelReward = true);
+    try {
+      final token = await TokenStorage.loadAccessToken();
+      if (token == null || token.isEmpty) return;
+      final items = await SudaApiClient.claimCharacterRewards(
+        accessToken: token,
+        userCharacterRewardIds: [rewardId],
+      );
+      if (!mounted) return;
+      if (items.isEmpty) return;
+      await RewardUnboxing.preload(context, items);
+      if (!mounted) return;
+      await RewardUnboxing.push(context, items);
+      if (!mounted) return;
+      await _loadProgress();
+    } catch (e) {
+      debugPrint('[DEBUG] level-up reward claim failed: $e');
     } finally {
-      _isRefreshing = false;
+      if (mounted) {
+        setState(() => _claimingLevelReward = false);
+      }
     }
   }
 
@@ -708,10 +803,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildProgressSection(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    if (_isProfileLoading && _myProfile == null) {
+    if (_isProgressLoading && _progress == null) {
       return _buildProgressCardsShimmer();
     }
-    final profile = _myProfile;
+    final progress = _progress;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -732,7 +827,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       const SizedBox(width: 5),
                       Text(
-                        '${profile?.currentStreakDays ?? 0}',
+                        '${progress?.currentStreakDays ?? 0}',
                         style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                               color: Colors.white,
                             ),
@@ -746,7 +841,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Expanded(
                 child: _ProgressStatCard(
                   top: Text(
-                    _formatSpokenCount(profile?.wordsSpokenCount ?? 0),
+                    _formatSpokenCount(progress?.wordsSpokenCount ?? 0),
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                           color: Colors.white,
                         ),
@@ -755,6 +850,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
             ],
+          ),
+        ),
+        const SizedBox(height: 25),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: LevelUpProgressTrack(
+            currentLevel: progress?.currentLevel ?? 0,
+            progressPercentage: progress?.progressPercentage ?? 0,
+            rewardLevel: progress?.claimableRewardLevel ?? 3,
+            claiming: _claimingLevelReward,
+            claimable: progress != null &&
+                progress.claimableCharacterRewardId != null &&
+                progress.currentLevel >=
+                    (progress.claimableRewardLevel < 3
+                        ? 3
+                        : progress.claimableRewardLevel),
+            onGiftTap: () => unawaited(_onLevelRewardGiftTap()),
           ),
         ),
         const SizedBox(height: 20),
@@ -770,7 +882,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
         const SizedBox(height: 10),
-        _SudaNeighborsRow(portraits: profile?.claimedCharacters ?? const []),
+        _SudaNeighborsRow(portraits: progress?.claimedCharacters ?? const []),
+        const SizedBox(height: 20),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Text(
+            l10n.profileAchievements,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                  fontVariations: const [FontVariation('wght', 700)],
+                ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        ProfileAchievementsSection(
+          achievements: progress?.achievements ?? const [],
+        ),
       ],
     );
   }
@@ -805,6 +933,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ],
           ),
         ),
+        const SizedBox(height: 25),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Shimmer.fromColors(
+            baseColor: _shimmerBase,
+            highlightColor: _shimmerHighlight,
+            child: Container(
+              height: 88,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          ),
+        ),
         const SizedBox(height: 20),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -837,6 +980,51 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     decoration: const BoxDecoration(
                       color: Colors.white,
                       shape: BoxShape.circle,
+                    ),
+                  ),
+                );
+              }),
+            ),
+          ),
+        ),
+        const SizedBox(height: 20),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Shimmer.fromColors(
+            baseColor: _shimmerBase,
+            highlightColor: _shimmerHighlight,
+            child: Container(
+              height: 14,
+              width: 110,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Shimmer.fromColors(
+            baseColor: _shimmerBase,
+            highlightColor: _shimmerHighlight,
+            child: Row(
+              children: List.generate(3, (index) {
+                return Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      left: index == 0 ? 0 : 6,
+                      right: index == 2 ? 0 : 6,
+                    ),
+                    child: AspectRatio(
+                      aspectRatio: 1,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
                     ),
                   ),
                 );

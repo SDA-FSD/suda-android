@@ -390,6 +390,47 @@ class AppLocalizationsHi extends AppLocalizations {
       'नए पात्र इकट्ठा करने के लिए रिवॉर्ड बॉक्स खोलें!';
 
   @override
+  String profileLevelProgressReach(int level) {
+    return 'अनलॉक करने के लिए Lv. $level तक पहुँचें!';
+  }
+
+  @override
+  String get profileLevelProgressReachBody =>
+      'Like कमाएँ और लेवल बढ़ाकर अपना रिवॉर्ड बॉक्स पाएँ।';
+
+  @override
+  String get profileLevelProgressGotIt => 'समझ गया';
+
+  @override
+  String get profileAchievements => 'उपलब्धियाँ';
+
+  @override
+  String get profileAchievementWeeklyChampion => 'साप्ताहिक चैंपियन';
+
+  @override
+  String get profileAchievementWeeklyRunnerUp => 'साप्ताहिक रनर-अप';
+
+  @override
+  String get profileAchievementWeeklyThird => 'साप्ताहिक तीसरा स्थान';
+
+  @override
+  String get profileAchievementWeeklyChampionHint =>
+      'साप्ताहिक रैंकिंग में पहला स्थान हासिल करें।';
+
+  @override
+  String get profileAchievementWeeklyRunnerUpHint =>
+      'साप्ताहिक रैंकिंग में दूसरा स्थान हासिल करें।';
+
+  @override
+  String get profileAchievementWeeklyThirdHint =>
+      'साप्ताहिक रैंकिंग में तीसरा स्थान हासिल करें।';
+
+  @override
+  String profileAchievementCount(int count) {
+    return 'x $count';
+  }
+
+  @override
   String get profileHistory => 'हिस्ट्री';
 
   @override

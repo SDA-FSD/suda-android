@@ -155,6 +155,31 @@
   "profileWordsSpoken": "Words Spoken",
   "profileSudaNeighbors": "SUDA Neighbors",
   "profileSudaNeighborsEmpty": "Open Reward Boxes to collect new characters!",
+  "profileLevelProgressReach": "Reach Lv. {level} to unlock!",
+  "@profileLevelProgressReach": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "profileLevelProgressReachBody": "Earn Likes and level up to claim your Reward Box.",
+  "profileLevelProgressGotIt": "Got it",
+  "profileAchievements": "Achievements",
+  "profileAchievementWeeklyChampion": "Weekly Champion",
+  "profileAchievementWeeklyRunnerUp": "Weekly Runner-up",
+  "profileAchievementWeeklyThird": "Weekly 3rd Place",
+  "profileAchievementWeeklyChampionHint": "Finish 1st in the Weekly Ranking.",
+  "profileAchievementWeeklyRunnerUpHint": "Finish 2nd in the Weekly Ranking.",
+  "profileAchievementWeeklyThirdHint": "Finish 3rd in the Weekly Ranking.",
+  "profileAchievementCount": "x {count}",
+  "@profileAchievementCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "profileHistory": "History",
   "profileSaved": "Saved",
   "profileHistoryEmpty": "No history yet",

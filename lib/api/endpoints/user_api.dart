@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../../models/character_reward_models.dart';
 import '../../models/roleplay_models.dart';
 import '../../models/user_models.dart';
 import '../client/suda_http_client.dart';
@@ -88,6 +89,106 @@ class UserApi {
     throw Exception(
       'GET /v1/users/my-profile failed: HTTP ${response.statusCode} ${response.body}',
     );
+  }
+
+  static Future<UserProgressDto> getProgress({
+    required String accessToken,
+  }) async {
+    return await SudaHttpClient.executeWithRefresh(
+      () => _getProgressInternal(accessToken),
+      retryWithNewToken: (newToken) => _getProgressInternal(newToken),
+    );
+  }
+
+  static Future<UserProgressDto> _getProgressInternal(String accessToken) async {
+    final uri = SudaHttpClient.buildUri('/v1/users/progress');
+
+    late final http.Response response;
+    try {
+      response = await SudaHttpClient.client
+          .get(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      rethrow;
+    }
+
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final Map<String, dynamic> data =
+          jsonDecode(response.body) as Map<String, dynamic>;
+      return UserProgressDto.fromJson(data);
+    }
+
+    throw Exception(
+      'GET /v1/users/progress failed: HTTP ${response.statusCode} ${response.body}',
+    );
+  }
+
+  static Future<List<CharacterRewardClaimDto>> claimCharacterRewards({
+    required String accessToken,
+    required List<int> userCharacterRewardIds,
+  }) {
+    return SudaHttpClient.executeWithRefresh(
+      () => _claimCharacterRewardsInternal(accessToken, userCharacterRewardIds),
+      retryWithNewToken: (newToken) =>
+          _claimCharacterRewardsInternal(newToken, userCharacterRewardIds),
+    );
+  }
+
+  static Future<List<CharacterRewardClaimDto>> _claimCharacterRewardsInternal(
+    String accessToken,
+    List<int> userCharacterRewardIds,
+  ) async {
+    final uri = SudaHttpClient.buildUri('/v1/users/character-rewards/claim');
+    late final http.Response response;
+    try {
+      response = await SudaHttpClient.client
+          .post(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+              'Content-Type': 'application/json',
+            },
+            body: jsonEncode(userCharacterRewardIds),
+          )
+          .timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      rethrow;
+    }
+
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw Exception(
+        'POST /v1/users/character-rewards/claim failed: HTTP ${response.statusCode} ${response.body}',
+      );
+    }
+
+    final raw = response.body.trim();
+    if (raw.isEmpty || raw == 'null') {
+      return const [];
+    }
+    final data = jsonDecode(raw);
+    if (data is! List) {
+      throw Exception(
+        'POST /v1/users/character-rewards/claim unexpected body: ${response.body}',
+      );
+    }
+    return [
+      for (final e in data)
+        if (e is Map)
+          CharacterRewardClaimDto.fromJson(Map<String, dynamic>.from(e)),
+    ];
   }
 
   static Future<void> updateName({

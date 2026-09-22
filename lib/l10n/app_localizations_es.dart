@@ -394,6 +394,47 @@ class AppLocalizationsEs extends AppLocalizations {
       '¡Abre Cajas de Recompensa y colecciona nuevos personajes!';
 
   @override
+  String profileLevelProgressReach(int level) {
+    return '¡Llega al Nv. $level para desbloquear!';
+  }
+
+  @override
+  String get profileLevelProgressReachBody =>
+      'Gana Likes y sube de nivel para reclamar tu Caja de Recompensa.';
+
+  @override
+  String get profileLevelProgressGotIt => 'Entendido';
+
+  @override
+  String get profileAchievements => 'Logros';
+
+  @override
+  String get profileAchievementWeeklyChampion => 'Campeón semanal';
+
+  @override
+  String get profileAchievementWeeklyRunnerUp => 'Subcampeón semanal';
+
+  @override
+  String get profileAchievementWeeklyThird => '3.er lugar semanal';
+
+  @override
+  String get profileAchievementWeeklyChampionHint =>
+      'Queda en 1.er lugar en el Ranking Semanal.';
+
+  @override
+  String get profileAchievementWeeklyRunnerUpHint =>
+      'Queda en 2.º lugar en el Ranking Semanal.';
+
+  @override
+  String get profileAchievementWeeklyThirdHint =>
+      'Queda en 3.er lugar en el Ranking Semanal.';
+
+  @override
+  String profileAchievementCount(int count) {
+    return 'x $count';
+  }
+
+  @override
   String get profileHistory => 'Historial';
 
   @override
@@ -1270,6 +1311,47 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
   @override
   String get profileSudaNeighborsEmpty =>
       '¡Abre Cajas de Recompensa y colecciona nuevos personajes!';
+
+  @override
+  String profileLevelProgressReach(int level) {
+    return '¡Llega al Nv. $level para desbloquear!';
+  }
+
+  @override
+  String get profileLevelProgressReachBody =>
+      'Gana Likes y sube de nivel para reclamar tu Caja de Recompensa.';
+
+  @override
+  String get profileLevelProgressGotIt => 'Entendido';
+
+  @override
+  String get profileAchievements => 'Logros';
+
+  @override
+  String get profileAchievementWeeklyChampion => 'Campeón semanal';
+
+  @override
+  String get profileAchievementWeeklyRunnerUp => 'Subcampeón semanal';
+
+  @override
+  String get profileAchievementWeeklyThird => '3.er lugar semanal';
+
+  @override
+  String get profileAchievementWeeklyChampionHint =>
+      'Queda en 1.er lugar en el Ranking Semanal.';
+
+  @override
+  String get profileAchievementWeeklyRunnerUpHint =>
+      'Queda en 2.º lugar en el Ranking Semanal.';
+
+  @override
+  String get profileAchievementWeeklyThirdHint =>
+      'Queda en 3.er lugar en el Ranking Semanal.';
+
+  @override
+  String profileAchievementCount(int count) {
+    return 'x $count';
+  }
 
   @override
   String get profileHistory => 'Historial';

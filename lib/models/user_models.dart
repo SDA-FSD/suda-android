@@ -176,26 +176,16 @@ class MyProfileDto {
   final String? name;
   final String? imgPath;
   final int currentLevel;
-  final int claimableRewardLevel;
   final int likePoint;
   final int friendCount;
-  final int currentStreakDays;
-  final int wordsSpokenCount;
-  final int progressPercentage;
-  final List<ClaimedCharacterPortraitDto> claimedCharacters;
 
   const MyProfileDto({
     required this.id,
     this.name,
     this.imgPath,
     required this.currentLevel,
-    required this.claimableRewardLevel,
     required this.likePoint,
     required this.friendCount,
-    required this.currentStreakDays,
-    required this.wordsSpokenCount,
-    required this.progressPercentage,
-    this.claimedCharacters = const [],
   });
 
   factory MyProfileDto.fromJson(Map<String, dynamic> json) {
@@ -207,6 +197,53 @@ class MyProfileDto {
 
     final name = json['name'] as String?;
     final imgPath = json['imgPath'] as String?;
+    return MyProfileDto(
+      id: asInt(json['id']),
+      name: name == null || name.isEmpty ? null : name,
+      imgPath: imgPath == null || imgPath.isEmpty ? null : imgPath,
+      currentLevel: asInt(json['currentLevel']),
+      likePoint: asInt(json['likePoint']),
+      friendCount: asInt(json['friendCount']),
+    );
+  }
+}
+
+/// `GET /v1/users/progress`
+class UserProgressDto {
+  final int currentStreakDays;
+  final int wordsSpokenCount;
+  final int currentLevel;
+  final int progressPercentage;
+  final int claimableRewardLevel;
+  final int? claimableCharacterRewardId;
+  final List<ClaimedCharacterPortraitDto> claimedCharacters;
+  final List<RankedPlaceAchievementDto> achievements;
+
+  const UserProgressDto({
+    required this.currentStreakDays,
+    required this.wordsSpokenCount,
+    required this.currentLevel,
+    required this.progressPercentage,
+    required this.claimableRewardLevel,
+    this.claimableCharacterRewardId,
+    this.claimedCharacters = const [],
+    this.achievements = const [],
+  });
+
+  factory UserProgressDto.fromJson(Map<String, dynamic> json) {
+    int asInt(dynamic v) {
+      if (v is int) return v;
+      if (v is num) return v.toInt();
+      return 0;
+    }
+
+    int? asIntOrNull(dynamic v) {
+      if (v == null) return null;
+      if (v is int) return v;
+      if (v is num) return v.toInt();
+      return int.tryParse(v.toString());
+    }
+
     final claimedRaw = json['claimedCharacters'];
     final claimedCharacters = claimedRaw is List
         ? claimedRaw
@@ -215,20 +252,88 @@ class MyProfileDto {
             .where((item) => item.characterImgPath.isNotEmpty)
             .toList()
         : const <ClaimedCharacterPortraitDto>[];
-    return MyProfileDto(
-      id: asInt(json['id']),
-      name: name == null || name.isEmpty ? null : name,
-      imgPath: imgPath == null || imgPath.isEmpty ? null : imgPath,
-      currentLevel: asInt(json['currentLevel']),
-      claimableRewardLevel: asInt(json['claimableRewardLevel']),
-      likePoint: asInt(json['likePoint']),
-      friendCount: asInt(json['friendCount']),
+    return UserProgressDto(
       currentStreakDays: asInt(json['currentStreakDays']),
       wordsSpokenCount: asInt(json['wordsSpokenCount']),
+      currentLevel: asInt(json['currentLevel']),
       progressPercentage: asInt(json['progressPercentage']),
+      claimableRewardLevel: asInt(json['claimableRewardLevel']),
+      claimableCharacterRewardId: asIntOrNull(json['claimableCharacterRewardId']),
       claimedCharacters: claimedCharacters,
+      achievements: _parseAchievements(json['achievements']),
     );
   }
+}
+
+class RankedPlaceAchievementDto {
+  final int place;
+  final int progressCount;
+  final DateTime? lastGrantedAt;
+
+  const RankedPlaceAchievementDto({
+    required this.place,
+    required this.progressCount,
+    this.lastGrantedAt,
+  });
+
+  bool get unlocked => progressCount > 0;
+
+  factory RankedPlaceAchievementDto.fromJson(Map<String, dynamic> json) {
+    int asInt(dynamic v) {
+      if (v is int) return v;
+      if (v is num) return v.toInt();
+      return 0;
+    }
+
+    DateTime? asTime(dynamic v) {
+      if (v is String && v.isNotEmpty) {
+        return DateTime.tryParse(v);
+      }
+      if (v is int) {
+        return DateTime.fromMillisecondsSinceEpoch(v, isUtc: true);
+      }
+      if (v is num) {
+        return DateTime.fromMillisecondsSinceEpoch(v.toInt(), isUtc: true);
+      }
+      return null;
+    }
+
+    return RankedPlaceAchievementDto(
+      place: asInt(json['place']),
+      progressCount: asInt(json['progressCount']),
+      lastGrantedAt: asTime(json['lastGrantedAt']),
+    );
+  }
+}
+
+List<RankedPlaceAchievementDto> _parseAchievements(dynamic raw) {
+  final parsed = raw is List
+      ? raw
+          .whereType<Map>()
+          .map((e) => RankedPlaceAchievementDto.fromJson(Map<String, dynamic>.from(e)))
+          .where((item) => item.place >= 1 && item.place <= 3)
+          .toList()
+      : <RankedPlaceAchievementDto>[];
+  final byPlace = <int, RankedPlaceAchievementDto>{
+    for (final item in parsed) item.place: item,
+  };
+  final items = [
+    for (final place in const [1, 2, 3])
+      byPlace[place] ?? RankedPlaceAchievementDto(place: place, progressCount: 0),
+  ];
+  items.sort((a, b) {
+    if (a.unlocked != b.unlocked) {
+      return a.unlocked ? -1 : 1;
+    }
+    if (a.unlocked) {
+      final at = a.lastGrantedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+      final bt = b.lastGrantedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+      final recency = bt.compareTo(at);
+      if (recency != 0) return recency;
+    }
+    return a.place.compareTo(b.place);
+  });
+  return items;
 }
 
 class ClaimedCharacterPortraitDto {

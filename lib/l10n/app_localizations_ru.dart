@@ -390,6 +390,47 @@ class AppLocalizationsRu extends AppLocalizations {
       'Открывайте коробки наград, чтобы собирать новых персонажей!';
 
   @override
+  String profileLevelProgressReach(int level) {
+    return 'Достигни ур. $level, чтобы открыть!';
+  }
+
+  @override
+  String get profileLevelProgressReachBody =>
+      'Собирай лайки и повышай уровень, чтобы получить коробку награды.';
+
+  @override
+  String get profileLevelProgressGotIt => 'Понятно';
+
+  @override
+  String get profileAchievements => 'Достижения';
+
+  @override
+  String get profileAchievementWeeklyChampion => 'Чемпион недели';
+
+  @override
+  String get profileAchievementWeeklyRunnerUp => 'Вице-чемпион недели';
+
+  @override
+  String get profileAchievementWeeklyThird => '3-е место недели';
+
+  @override
+  String get profileAchievementWeeklyChampionHint =>
+      'Займите 1-е место в еженедельном рейтинге.';
+
+  @override
+  String get profileAchievementWeeklyRunnerUpHint =>
+      'Займите 2-е место в еженедельном рейтинге.';
+
+  @override
+  String get profileAchievementWeeklyThirdHint =>
+      'Займите 3-е место в еженедельном рейтинге.';
+
+  @override
+  String profileAchievementCount(int count) {
+    return 'x $count';
+  }
+
+  @override
   String get profileHistory => 'История';
 
   @override

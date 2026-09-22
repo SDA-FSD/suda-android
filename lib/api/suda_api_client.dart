@@ -427,6 +427,20 @@ class SudaApiClient {
     return UserApi.getMyProfile(accessToken: accessToken);
   }
 
+  static Future<UserProgressDto> getProgress({required String accessToken}) {
+    return UserApi.getProgress(accessToken: accessToken);
+  }
+
+  static Future<List<CharacterRewardClaimDto>> claimCharacterRewards({
+    required String accessToken,
+    required List<int> userCharacterRewardIds,
+  }) {
+    return UserApi.claimCharacterRewards(
+      accessToken: accessToken,
+      userCharacterRewardIds: userCharacterRewardIds,
+    );
+  }
+
   /// 에너지 팝업(상품 플래그 필요). 레이블/배지 갱신은 [getUserEnergySimple].
   static Future<UserEnergyDto> getUserEnergy({
     required String accessToken,

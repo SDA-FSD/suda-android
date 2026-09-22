@@ -394,6 +394,47 @@ class AppLocalizationsIt extends AppLocalizations {
       'Apri le Reward Box per collezionare nuovi personaggi!';
 
   @override
+  String profileLevelProgressReach(int level) {
+    return 'Raggiungi il Lv. $level per sbloccare!';
+  }
+
+  @override
+  String get profileLevelProgressReachBody =>
+      'Guadagna Like e sali di livello per ritirare la tua Reward Box.';
+
+  @override
+  String get profileLevelProgressGotIt => 'Ho capito';
+
+  @override
+  String get profileAchievements => 'Obiettivi';
+
+  @override
+  String get profileAchievementWeeklyChampion => 'Campione settimanale';
+
+  @override
+  String get profileAchievementWeeklyRunnerUp => 'Vicecampione settimanale';
+
+  @override
+  String get profileAchievementWeeklyThird => '3° posto settimanale';
+
+  @override
+  String get profileAchievementWeeklyChampionHint =>
+      'Arriva 1° nella Classifica settimanale.';
+
+  @override
+  String get profileAchievementWeeklyRunnerUpHint =>
+      'Arriva 2° nella Classifica settimanale.';
+
+  @override
+  String get profileAchievementWeeklyThirdHint =>
+      'Arriva 3° nella Classifica settimanale.';
+
+  @override
+  String profileAchievementCount(int count) {
+    return 'x $count';
+  }
+
+  @override
   String get profileHistory => 'Cronologia';
 
   @override

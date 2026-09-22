@@ -388,6 +388,47 @@ class AppLocalizationsAr extends AppLocalizations {
       'افتح صناديق المكافآت لجمع شخصيات جديدة!';
 
   @override
+  String profileLevelProgressReach(int level) {
+    return 'اوصل إلى Lv. $level لفتح الصندوق!';
+  }
+
+  @override
+  String get profileLevelProgressReachBody =>
+      'اجمع الإعجابات وارتقِ بالمستوى لاستلام صندوق المكافأة.';
+
+  @override
+  String get profileLevelProgressGotIt => 'حسنًا';
+
+  @override
+  String get profileAchievements => 'الإنجازات';
+
+  @override
+  String get profileAchievementWeeklyChampion => 'بطل الأسبوع';
+
+  @override
+  String get profileAchievementWeeklyRunnerUp => 'وصيف الأسبوع';
+
+  @override
+  String get profileAchievementWeeklyThird => 'المركز الثالث الأسبوعي';
+
+  @override
+  String get profileAchievementWeeklyChampionHint =>
+      'احصل على المركز الأول في التصنيف الأسبوعي.';
+
+  @override
+  String get profileAchievementWeeklyRunnerUpHint =>
+      'احصل على المركز الثاني في التصنيف الأسبوعي.';
+
+  @override
+  String get profileAchievementWeeklyThirdHint =>
+      'احصل على المركز الثالث في التصنيف الأسبوعي.';
+
+  @override
+  String profileAchievementCount(int count) {
+    return 'x $count';
+  }
+
+  @override
   String get profileHistory => 'السجل';
 
   @override

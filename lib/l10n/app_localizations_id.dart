@@ -392,6 +392,47 @@ class AppLocalizationsId extends AppLocalizations {
       'Buka Kotak Hadiah untuk mengumpulkan karakter baru!';
 
   @override
+  String profileLevelProgressReach(int level) {
+    return 'Capai Lv. $level untuk membuka!';
+  }
+
+  @override
+  String get profileLevelProgressReachBody =>
+      'Dapatkan Like dan naik level untuk klaim Kotak Hadiahmu.';
+
+  @override
+  String get profileLevelProgressGotIt => 'Mengerti';
+
+  @override
+  String get profileAchievements => 'Pencapaian';
+
+  @override
+  String get profileAchievementWeeklyChampion => 'Juara Mingguan';
+
+  @override
+  String get profileAchievementWeeklyRunnerUp => 'Runner-up Mingguan';
+
+  @override
+  String get profileAchievementWeeklyThird => 'Peringkat ke-3 Mingguan';
+
+  @override
+  String get profileAchievementWeeklyChampionHint =>
+      'Finis di peringkat 1 pada Peringkat Mingguan.';
+
+  @override
+  String get profileAchievementWeeklyRunnerUpHint =>
+      'Finis di peringkat 2 pada Peringkat Mingguan.';
+
+  @override
+  String get profileAchievementWeeklyThirdHint =>
+      'Finis di peringkat 3 pada Peringkat Mingguan.';
+
+  @override
+  String profileAchievementCount(int count) {
+    return 'x $count';
+  }
+
+  @override
   String get profileHistory => 'Riwayat';
 
   @override

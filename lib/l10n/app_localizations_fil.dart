@@ -398,6 +398,47 @@ class AppLocalizationsFil extends AppLocalizations {
       'Magbukas ng Reward Boxes para magkolekta ng mga bagong character!';
 
   @override
+  String profileLevelProgressReach(int level) {
+    return 'Abutin ang Lv. $level para ma-unlock!';
+  }
+
+  @override
+  String get profileLevelProgressReachBody =>
+      'Mag-earn ng Likes at mag-level up para kunin ang Reward Box.';
+
+  @override
+  String get profileLevelProgressGotIt => 'Okay';
+
+  @override
+  String get profileAchievements => 'Mga Achievement';
+
+  @override
+  String get profileAchievementWeeklyChampion => 'Lingguhang Champion';
+
+  @override
+  String get profileAchievementWeeklyRunnerUp => 'Lingguhang Runner-up';
+
+  @override
+  String get profileAchievementWeeklyThird => 'Ika-3 sa Linggo';
+
+  @override
+  String get profileAchievementWeeklyChampionHint =>
+      'Tapusin nang 1st sa Weekly Ranking.';
+
+  @override
+  String get profileAchievementWeeklyRunnerUpHint =>
+      'Tapusin nang 2nd sa Weekly Ranking.';
+
+  @override
+  String get profileAchievementWeeklyThirdHint =>
+      'Tapusin nang 3rd sa Weekly Ranking.';
+
+  @override
+  String profileAchievementCount(int count) {
+    return 'x $count';
+  }
+
+  @override
   String get profileHistory => 'History';
 
   @override
