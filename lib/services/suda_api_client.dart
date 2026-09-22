@@ -1,6 +1,7 @@
 export '../api/suda_api_client.dart';
 export '../models/auth_models.dart';
 export '../models/common_models.dart';
+export '../models/character_reward_models.dart';
 export '../models/home_models.dart';
 export '../models/pagination.dart';
 export '../models/rank_models.dart';

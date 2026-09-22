@@ -347,5 +347,10 @@
   },
   "rankingRewardClaimYourRewards": "Ganjaran Anda",
   "rankingRewardClaim": "Tuntut",
-  "rankingRewardClaimError": "Sesuatu tidak kena. Sila cuba lagi."
+  "rankingRewardClaimError": "Sesuatu tidak kena. Sila cuba lagi.",
+  "rewardUnboxingTapToOpen": "Ketik kotak untuk buka",
+  "rewardUnboxingNewCharacter": "Watak baharu!",
+  "rewardUnboxingYouGot": "Anda mendapat {characterName}!",
+  "rewardUnboxingSetAsProfile": "Tetapkan sebagai profil",
+  "rewardUnboxingViewCharacter": "Lihat watak"
 }

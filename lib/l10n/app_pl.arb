@@ -347,5 +347,10 @@
   },
   "rankingRewardClaimYourRewards": "Twoje nagrody",
   "rankingRewardClaim": "Odbierz",
-  "rankingRewardClaimError": "Coś poszło nie tak. Spróbuj ponownie."
+  "rankingRewardClaimError": "Coś poszło nie tak. Spróbuj ponownie.",
+  "rewardUnboxingTapToOpen": "Stuknij pudełko, aby otworzyć",
+  "rewardUnboxingNewCharacter": "Nowa postać!",
+  "rewardUnboxingYouGot": "Zdobywasz {characterName}!",
+  "rewardUnboxingSetAsProfile": "Ustaw jako profil",
+  "rewardUnboxingViewCharacter": "Zobacz postać"
 }

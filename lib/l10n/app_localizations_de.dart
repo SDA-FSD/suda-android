@@ -858,4 +858,21 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get rankingRewardClaimError =>
       'Etwas ist schiefgelaufen. Bitte versuche es erneut.';
+
+  @override
+  String get rewardUnboxingTapToOpen => 'Tippe auf die Box, um sie zu öffnen';
+
+  @override
+  String get rewardUnboxingNewCharacter => 'Neuer Charakter!';
+
+  @override
+  String rewardUnboxingYouGot(String characterName) {
+    return 'Du hast $characterName erhalten!';
+  }
+
+  @override
+  String get rewardUnboxingSetAsProfile => 'Als Profilbild';
+
+  @override
+  String get rewardUnboxingViewCharacter => 'Charakter ansehen';
 }

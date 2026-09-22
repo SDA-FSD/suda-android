@@ -854,4 +854,21 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get rankingRewardClaimError => 'Coś poszło nie tak. Spróbuj ponownie.';
+
+  @override
+  String get rewardUnboxingTapToOpen => 'Stuknij pudełko, aby otworzyć';
+
+  @override
+  String get rewardUnboxingNewCharacter => 'Nowa postać!';
+
+  @override
+  String rewardUnboxingYouGot(String characterName) {
+    return 'Zdobywasz $characterName!';
+  }
+
+  @override
+  String get rewardUnboxingSetAsProfile => 'Ustaw jako profil';
+
+  @override
+  String get rewardUnboxingViewCharacter => 'Zobacz postać';
 }

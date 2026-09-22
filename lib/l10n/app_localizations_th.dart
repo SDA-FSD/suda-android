@@ -826,4 +826,21 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get rankingRewardClaimError => 'เกิดข้อผิดพลาด โปรดลองอีกครั้ง';
+
+  @override
+  String get rewardUnboxingTapToOpen => 'แตะกล่องเพื่อเปิด';
+
+  @override
+  String get rewardUnboxingNewCharacter => 'ตัวละครใหม่!';
+
+  @override
+  String rewardUnboxingYouGot(String characterName) {
+    return 'คุณได้ $characterName!';
+  }
+
+  @override
+  String get rewardUnboxingSetAsProfile => 'ตั้งเป็นโปรไฟล์';
+
+  @override
+  String get rewardUnboxingViewCharacter => 'ดูตัวละคร';
 }

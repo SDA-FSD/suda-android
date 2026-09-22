@@ -347,5 +347,10 @@
   },
   "rankingRewardClaimYourRewards": "Hadiahmu",
   "rankingRewardClaim": "Klaim",
-  "rankingRewardClaimError": "Terjadi kesalahan. Coba lagi."
+  "rankingRewardClaimError": "Terjadi kesalahan. Coba lagi.",
+  "rewardUnboxingTapToOpen": "Ketuk kotak untuk membuka",
+  "rewardUnboxingNewCharacter": "Karakter baru!",
+  "rewardUnboxingYouGot": "Kamu mendapat {characterName}!",
+  "rewardUnboxingSetAsProfile": "Jadikan foto profil",
+  "rewardUnboxingViewCharacter": "Lihat karakter"
 }

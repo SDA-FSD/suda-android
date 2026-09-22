@@ -347,5 +347,10 @@
   },
   "rankingRewardClaimYourRewards": "Ödüllerin",
   "rankingRewardClaim": "Al",
-  "rankingRewardClaimError": "Bir şeyler ters gitti. Lütfen tekrar dene."
+  "rankingRewardClaimError": "Bir şeyler ters gitti. Lütfen tekrar dene.",
+  "rewardUnboxingTapToOpen": "Açmak için kutuya dokun",
+  "rewardUnboxingNewCharacter": "Yeni karakter!",
+  "rewardUnboxingYouGot": "{characterName} kazandın!",
+  "rewardUnboxingSetAsProfile": "Profil yap",
+  "rewardUnboxingViewCharacter": "Karakteri gör"
 }

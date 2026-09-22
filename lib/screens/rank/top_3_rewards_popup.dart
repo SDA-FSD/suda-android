@@ -35,25 +35,25 @@ class _Top3RewardsBody extends StatelessWidget {
       (
         l10n.rankTop3Place1,
         [
-          ('assets/images/icons/medal_1st.png', l10n.rankTop3Badge1),
+          ('assets/images/achievement/medal_1st.png', l10n.rankTop3Badge1),
           ('assets/images/like_at_result.png', l10n.rankTop3Likes100),
-          ('assets/images/icons/reward_box.png', l10n.rankTop3Box3),
+          ('assets/images/achievement/reward_box.png', l10n.rankTop3Box3),
         ],
       ),
       (
         l10n.rankTop3Place2,
         [
-          ('assets/images/icons/medal_2st.png', l10n.rankTop3Badge2),
+          ('assets/images/achievement/medal_2st.png', l10n.rankTop3Badge2),
           ('assets/images/like_at_result.png', l10n.rankTop3Likes60),
-          ('assets/images/icons/reward_box.png', l10n.rankTop3Box2),
+          ('assets/images/achievement/reward_box.png', l10n.rankTop3Box2),
         ],
       ),
       (
         l10n.rankTop3Place3,
         [
-          ('assets/images/icons/medal_3st.png', l10n.rankTop3Badge3),
+          ('assets/images/achievement/medal_3st.png', l10n.rankTop3Badge3),
           ('assets/images/like_at_result.png', l10n.rankTop3Likes50),
-          ('assets/images/icons/reward_box.png', l10n.rankTop3Box1),
+          ('assets/images/achievement/reward_box.png', l10n.rankTop3Box1),
         ],
       ),
     ];

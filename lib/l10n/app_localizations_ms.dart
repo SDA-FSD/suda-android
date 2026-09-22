@@ -855,4 +855,21 @@ class AppLocalizationsMs extends AppLocalizations {
 
   @override
   String get rankingRewardClaimError => 'Sesuatu tidak kena. Sila cuba lagi.';
+
+  @override
+  String get rewardUnboxingTapToOpen => 'Ketik kotak untuk buka';
+
+  @override
+  String get rewardUnboxingNewCharacter => 'Watak baharu!';
+
+  @override
+  String rewardUnboxingYouGot(String characterName) {
+    return 'Anda mendapat $characterName!';
+  }
+
+  @override
+  String get rewardUnboxingSetAsProfile => 'Tetapkan sebagai profil';
+
+  @override
+  String get rewardUnboxingViewCharacter => 'Lihat watak';
 }

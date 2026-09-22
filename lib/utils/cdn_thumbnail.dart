@@ -41,6 +41,9 @@ enum CdnThumbSlot {
   /// Profile 아바타 (`MyProfileDto.imgPath`, CDN path만).
   profileAvatar(CdnThumbSize.w150),
 
+  /// Reward Unboxing 캐릭터 이미지 (`characterImgPath`).
+  characterReward(CdnThumbSize.w150),
+
   /// 배경 LQIP. 메모리 히트일 때만 사용하고 추가 GET 하지 않음.
   backdropPreview(CdnThumbSize.w300);
 

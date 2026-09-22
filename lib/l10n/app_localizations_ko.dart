@@ -806,4 +806,21 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get rankingRewardClaimError => '문제가 발생했어요. 다시 시도해주세요.';
+
+  @override
+  String get rewardUnboxingTapToOpen => '상자를 탭해서 열어보세요';
+
+  @override
+  String get rewardUnboxingNewCharacter => '새로운 캐릭터!';
+
+  @override
+  String rewardUnboxingYouGot(String characterName) {
+    return '$characterName 를 획득했어요!';
+  }
+
+  @override
+  String get rewardUnboxingSetAsProfile => '프로필로 설정';
+
+  @override
+  String get rewardUnboxingViewCharacter => '캐릭터 보기';
 }

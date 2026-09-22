@@ -806,4 +806,21 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get rankingRewardClaimError => '問題が発生しました。もう一度お試しください。';
+
+  @override
+  String get rewardUnboxingTapToOpen => 'ボックスをタップして開けましょう';
+
+  @override
+  String get rewardUnboxingNewCharacter => '新しいキャラクター！';
+
+  @override
+  String rewardUnboxingYouGot(String characterName) {
+    return '$characterName をゲット！';
+  }
+
+  @override
+  String get rewardUnboxingSetAsProfile => 'プロフィールに設定';
+
+  @override
+  String get rewardUnboxingViewCharacter => 'キャラクターを見る';
 }

@@ -28,6 +28,8 @@ import '../first_profile_image.dart';
 import '../paywall/paywall.dart';
 import '../paywall/paywall_completed.dart';
 import '../rank/ranking.dart';
+import '../reward/reward_unboxing.dart';
+import '../../models/character_reward_models.dart';
 import '../../utils/paywall_impression_screen.dart';
 
 /// Lab에서 재현 가능한 `DefaultPopup` 목록.
@@ -223,6 +225,14 @@ class _LabScreenState extends State<LabScreen> {
   Future<void> _openRankingRewardClaimPreviewThird() async {
     if (!mounted) return;
     await _openRankingRewardClaimPreview(place: 3);
+  }
+
+  Future<void> _openRewardUnboxingPreview() async {
+    if (!mounted) return;
+    final items = CharacterRewardClaimDto.labUnboxingPreviewItems();
+    await RewardUnboxing.preload(context, items);
+    if (!mounted) return;
+    await RewardUnboxing.push(context, items);
   }
 
   Future<void> _openRankingRewardClaimPreview({required int place}) async {
@@ -844,6 +854,11 @@ class _LabScreenState extends State<LabScreen> {
             _buildLabScreenButton(
               label: 'Open Ranking Reward Claim Preview (3rd)',
               onPressed: () => unawaited(_openRankingRewardClaimPreviewThird()),
+            ),
+            const SizedBox(height: 12),
+            _buildLabScreenButton(
+              label: 'Open Reward Unboxing',
+              onPressed: () => unawaited(_openRewardUnboxingPreview()),
             ),
             _buildSectionDivider(),
             Text(

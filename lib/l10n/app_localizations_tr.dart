@@ -851,4 +851,21 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get rankingRewardClaimError =>
       'Bir şeyler ters gitti. Lütfen tekrar dene.';
+
+  @override
+  String get rewardUnboxingTapToOpen => 'Açmak için kutuya dokun';
+
+  @override
+  String get rewardUnboxingNewCharacter => 'Yeni karakter!';
+
+  @override
+  String rewardUnboxingYouGot(String characterName) {
+    return '$characterName kazandın!';
+  }
+
+  @override
+  String get rewardUnboxingSetAsProfile => 'Profil yap';
+
+  @override
+  String get rewardUnboxingViewCharacter => 'Karakteri gör';
 }

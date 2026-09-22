@@ -347,5 +347,10 @@
   },
   "rankingRewardClaimYourRewards": "你的獎勵",
   "rankingRewardClaim": "領取",
-  "rankingRewardClaimError": "發生問題。請再試一次。"
+  "rankingRewardClaimError": "發生問題。請再試一次。",
+  "rewardUnboxingTapToOpen": "點一下禮盒打開",
+  "rewardUnboxingNewCharacter": "新角色！",
+  "rewardUnboxingYouGot": "獲得了{characterName}！",
+  "rewardUnboxingSetAsProfile": "設為頭像",
+  "rewardUnboxingViewCharacter": "查看角色"
 }

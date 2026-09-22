@@ -347,5 +347,10 @@
   },
   "rankingRewardClaimYourRewards": "आपके इनाम",
   "rankingRewardClaim": "क्लेम करें",
-  "rankingRewardClaimError": "कुछ गलत हो गया। कृपया फिर से कोशिश करें।"
+  "rankingRewardClaimError": "कुछ गलत हो गया। कृपया फिर से कोशिश करें।",
+  "rewardUnboxingTapToOpen": "खोलने के लिए बॉक्स पर टैप करें",
+  "rewardUnboxingNewCharacter": "नया कैरेक्टर!",
+  "rewardUnboxingYouGot": "आपको {characterName} मिला!",
+  "rewardUnboxingSetAsProfile": "प्रोफ़ाइल बनाएं",
+  "rewardUnboxingViewCharacter": "कैरेक्टर देखें"
 }

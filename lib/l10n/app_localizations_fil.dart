@@ -863,4 +863,21 @@ class AppLocalizationsFil extends AppLocalizations {
 
   @override
   String get rankingRewardClaimError => 'May nangyaring mali. Subukan ulit.';
+
+  @override
+  String get rewardUnboxingTapToOpen => 'I-tap ang box para mabuksan';
+
+  @override
+  String get rewardUnboxingNewCharacter => 'Bagong character!';
+
+  @override
+  String rewardUnboxingYouGot(String characterName) {
+    return 'Nakuha mo si $characterName!';
+  }
+
+  @override
+  String get rewardUnboxingSetAsProfile => 'Itakda bilang Profile';
+
+  @override
+  String get rewardUnboxingViewCharacter => 'Tingnan ang Character';
 }

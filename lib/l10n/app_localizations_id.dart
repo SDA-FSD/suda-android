@@ -853,4 +853,21 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get rankingRewardClaimError => 'Terjadi kesalahan. Coba lagi.';
+
+  @override
+  String get rewardUnboxingTapToOpen => 'Ketuk kotak untuk membuka';
+
+  @override
+  String get rewardUnboxingNewCharacter => 'Karakter baru!';
+
+  @override
+  String rewardUnboxingYouGot(String characterName) {
+    return 'Kamu mendapat $characterName!';
+  }
+
+  @override
+  String get rewardUnboxingSetAsProfile => 'Jadikan foto profil';
+
+  @override
+  String get rewardUnboxingViewCharacter => 'Lihat karakter';
 }

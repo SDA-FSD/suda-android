@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import '../models/character_reward_models.dart';
 import '../models/auth_models.dart';
 import '../models/home_models.dart';
 import '../models/pagination.dart';
@@ -50,6 +51,26 @@ class SudaApiClient {
     return RankApi.getMyEntry(
       accessToken: accessToken,
       snapshotMinute: snapshotMinute,
+    );
+  }
+
+  static Future<List<int>> getRankingRewardClaimableIds({
+    required String accessToken,
+    required int periodId,
+  }) {
+    return RankApi.getRankingRewardClaimableIds(
+      accessToken: accessToken,
+      periodId: periodId,
+    );
+  }
+
+  static Future<List<CharacterRewardClaimDto>> claimRankingCharacterRewards({
+    required String accessToken,
+    required List<int> userCharacterRewardIds,
+  }) {
+    return RankApi.claimRankingCharacterRewards(
+      accessToken: accessToken,
+      userCharacterRewardIds: userCharacterRewardIds,
     );
   }
 

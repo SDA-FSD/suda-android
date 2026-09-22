@@ -347,5 +347,10 @@
   },
   "rankingRewardClaimYourRewards": "Твои награды",
   "rankingRewardClaim": "Забрать",
-  "rankingRewardClaimError": "Что-то пошло не так. Попробуй ещё раз."
+  "rankingRewardClaimError": "Что-то пошло не так. Попробуй ещё раз.",
+  "rewardUnboxingTapToOpen": "Нажми на коробку, чтобы открыть",
+  "rewardUnboxingNewCharacter": "Новый персонаж!",
+  "rewardUnboxingYouGot": "Ты получил(а) {characterName}!",
+  "rewardUnboxingSetAsProfile": "Сделать аватаром",
+  "rewardUnboxingViewCharacter": "Смотреть персонажа"
 }

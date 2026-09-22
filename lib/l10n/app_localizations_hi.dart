@@ -837,4 +837,21 @@ class AppLocalizationsHi extends AppLocalizations {
   @override
   String get rankingRewardClaimError =>
       'कुछ गलत हो गया। कृपया फिर से कोशिश करें।';
+
+  @override
+  String get rewardUnboxingTapToOpen => 'खोलने के लिए बॉक्स पर टैप करें';
+
+  @override
+  String get rewardUnboxingNewCharacter => 'नया कैरेक्टर!';
+
+  @override
+  String rewardUnboxingYouGot(String characterName) {
+    return 'आपको $characterName मिला!';
+  }
+
+  @override
+  String get rewardUnboxingSetAsProfile => 'प्रोफ़ाइल बनाएं';
+
+  @override
+  String get rewardUnboxingViewCharacter => 'कैरेक्टर देखें';
 }

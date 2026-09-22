@@ -354,5 +354,17 @@
   },
   "rankingRewardClaimYourRewards": "Your Rewards",
   "rankingRewardClaim": "Claim",
-  "rankingRewardClaimError": "Something went wrong. Please try again."
+  "rankingRewardClaimError": "Something went wrong. Please try again.",
+  "rewardUnboxingTapToOpen": "Tap the box to open",
+  "rewardUnboxingNewCharacter": "New Character!",
+  "rewardUnboxingYouGot": "You got {characterName}!",
+  "@rewardUnboxingYouGot": {
+    "placeholders": {
+      "characterName": {
+        "type": "String"
+      }
+    }
+  },
+  "rewardUnboxingSetAsProfile": "Set as Profile",
+  "rewardUnboxingViewCharacter": "View Character"
 }

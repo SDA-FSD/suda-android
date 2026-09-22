@@ -347,5 +347,10 @@
   },
   "rankingRewardClaimYourRewards": "مكافآتك",
   "rankingRewardClaim": "استلام",
-  "rankingRewardClaimError": "حدث خطأ ما. يرجى المحاولة مرة أخرى."
+  "rankingRewardClaimError": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
+  "rewardUnboxingTapToOpen": "اضغط على الصندوق لفتحه",
+  "rewardUnboxingNewCharacter": "شخصية جديدة!",
+  "rewardUnboxingYouGot": "لقد حصلت على {characterName}!",
+  "rewardUnboxingSetAsProfile": "تعيين كصورة الملف",
+  "rewardUnboxingViewCharacter": "عرض الشخصية"
 }

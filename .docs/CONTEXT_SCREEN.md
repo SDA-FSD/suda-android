@@ -27,8 +27,8 @@
 - 시스템 뒤로가기 처리: `WillPopScope` 또는 `PopScope`로 앱 종료 처리
 - 전체 화면을 독립적으로 구성
 - 전환 방식은 기본 일반 노출을 유지하고, 필요할 때만 optional transition으로 확장
-- optional transition 예시: `bottom-up` (기존 화면을 아래에서부터 덮으며 올라오는 Full Screen)
-- `bottom-up`은 **새 스크린 타입이 아니라 Full Screen의 선택 가능한 진입 효과**로 취급
+- optional transition 예시: `bottom-up` (아래에서 올라옴), `fade` (전체 fade-in/out). `lib/utils/full_screen_route.dart` `FullScreenRoute` + `FullScreenTransition`
+- 둘 다 **새 스크린 타입이 아니라 Full Screen의 선택 가능한 진입 효과**로 취급
 
 ---
 
@@ -975,6 +975,36 @@
 - **배경 그라디언트**: Paywall과 동일. glow `#AB6AFF` 등 기존 스펙 유지.
 - **아이콘**: `premium_unlocked_check.png` / 혜택 `white_check_icon.png`
 - **문구/버튼**: l10n Continue/X → `pop(true)`
+
+---
+
+## 24. RewardUnboxing
+
+### 스크린 관련 정의 파일
+- **파일 경로**: `lib/screens/reward/reward_unboxing.dart`
+- **클래스명**: `RewardUnboxing` (StatefulWidget)
+- **스크린 타입**: **Full Screen** (GNB 없음)
+- **전환 방식**: `FullScreenRoute` + `FullScreenTransition.fade` (200ms / reverse 150ms). 서브 슬라이드·뒤로가기 화살표 없음.
+- **appPath**: 해당 없음
+- **공용 위젯**: `lib/widgets/character_rarity_frame.dart` `CharacterRarityFrame` — 등급 원형 테두리(상→하, 두께 10)
+
+### 스크린 용도
+- 캐릭터 보상 언박싱. `List<CharacterRewardClaimDto>` n건을 한 건씩 3단계 루틴으로 연출. Ranking·Profile 공용(Profile 진입은 후속).
+
+### 이전 스크린 정보 (진입점)
+- **Ranking** Ranking Reward Claim 성공(`POST /v1/rank/character-rewards/claim` 1건+) 후 `_150` 프리로드 → fade로 Unboxing 덮은 뒤 Claim 레이어 제거. `onNavigateToProfile` 전달.
+- Profile 업적/레벨업 보상: 후속
+
+### 이후 스크린 정보 (이동 가능한 다른 스크린)
+- 마지막 해금 완료 후 좌상단 X / 시스템 백 → 이전 화면(Ranking 등). Claim 레이어는 이미 제거됨.
+- **Set as Profile**: `PUT /v1/users/profile-img` `{type:CHARACTER,value:characterImgPath}` 후 프로필 탭으로 전환하고 Unboxing pop. API 실패여도 이동.
+
+### 스크린 내부 구현 특이사항
+- **루틴:** 등급선정(`reward_box.png` 떨림+약진동, 안내 `rewardUnboxingTapToOpen`) → 탭 → 1.5s 검정 마스크·진동 가속 → 등급확정(rarity 닫힌 박스 fade + 배경 전환 + 강진동) → +1s opened 박스(좌단 정렬로 우측 치우침)·캐릭터 원형 확대·강진동 2회 / +500ms 상단 카피·진행도·CTA·(완료 시) `secret_unlocked.png`.
+- **비마지막:** `Open Next Box`(영어, Claim 흰 필)로 다음 건 선정부터 재시작.
+- **마지막:** `Set as Profile` + `View Character`(동일 흰 필, View는 무동작) + 해금 완료 후 `close.svg`.
+- **프리로드**: `RewardUnboxing.preload` — path 비면 스킵, 실패 무시.
+- DTO `characterName`은 claim 응답에서 파싱.
 
 ---
 

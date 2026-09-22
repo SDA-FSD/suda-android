@@ -9,10 +9,13 @@ import 'package:marquee/marquee.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/rank_models.dart';
 import '../../models/user_models.dart';
+import '../../models/character_reward_models.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../widgets/gnb_bar.dart';
+import '../../utils/full_screen_route.dart';
+import '../reward/reward_unboxing.dart';
 import 'ranking_reward_claim.dart';
 import 'rank_crown_avatar.dart';
 import 'rank_podium_painter.dart';
@@ -33,10 +36,13 @@ class Ranking extends StatefulWidget {
     this.isActive = false,
     this.user,
     this.showNotiboxUnreadBadge = false,
+
     /// Lab 미리보기: 서버 phase와 무관하게 ANNOUNCE UI 강제.
     this.forceAnnouncePhase = false,
+
     /// Lab: Ranking Reward Claim 패널을 GNB 위 전면 오버레이로 표시.
     this.forceRankingRewardClaimPreview = false,
+
     /// Lab: Ranking Reward Claim 등수 (1|2|3). [forceRankingRewardClaimPreview]일 때만 사용.
     this.forceRankingRewardClaimPlace = 1,
   });
@@ -57,8 +63,7 @@ class Ranking extends StatefulWidget {
   State<Ranking> createState() => _RankingState();
 }
 
-class _RankingState extends State<Ranking>
-    with TickerProviderStateMixin {
+class _RankingState extends State<Ranking> with TickerProviderStateMixin {
   static const _defaultProfile =
       'assets/images/icons/default_profile_image.png';
   static const _premiumBadge = 'assets/images/icons/premium_verified_badge.png';
@@ -91,6 +96,7 @@ class _RankingState extends State<Ranking>
 
   /// `/entries/me` 결과. null = 미참여(스냅샷 기준). live ripple 없음.
   RankEntryDto? _myEntryKept;
+
   /// `/entries/me` 호출 완료 여부. false면 sticky/미참여 판정 보류.
   bool _myEntryResolved = false;
   List<RankEntryDto> _listRows = const [];
@@ -98,8 +104,10 @@ class _RankingState extends State<Ranking>
   int? _nextPageNum;
   bool _hasMorePages = false;
   bool _loadingMore = false;
+
   /// 자기 행 vs 리스트 뷰포트. 미로드(키 없음)는 below.
   _MeRowSlot _meRowSlot = _MeRowSlot.below;
+
   /// 로드·탭 복귀 직후는 sticky 즉시. 이후 스크롤 토글만 페이드.
   bool _stickyFadeEnabled = false;
   late final AnimationController _stickyFadeController;
@@ -114,10 +122,16 @@ class _RankingState extends State<Ranking>
   Timer? _tickTimer;
   Duration _remaining = Duration.zero;
 
-  /// Lab `forceRankingRewardClaimPreview` 또는 후속 Ranking Reward Claim API 연동 시 GNB 위 전면 패널.
+  /// Lab `forceRankingRewardClaimPreview` 또는 claimable API 후 GNB 위 전면 패널.
   bool _rankingRewardClaimVisible = false;
   RankEntryDto? _rankingRewardClaimEntry;
   int _rankingRewardClaimPlace = 1;
+
+  /// GET claimable 응답. Claim POST body.
+  List<int> _rankingRewardClaimableIds = const [];
+  int _rankingRewardClaimLoadGen = 0;
+  bool _rankingRewardClaimSubmitting = false;
+
   /// DefaultPopup(showDialog)과 동일 계열: 페이드 + 살짝 스케일(중앙).
   late final AnimationController _rankingRewardClaimAppearController;
   late final Animation<double> _rankingRewardClaimFade;
@@ -140,11 +154,17 @@ class _RankingState extends State<Ranking>
       reverseCurve: Curves.easeInCubic,
     );
     _rankingRewardClaimFade = curved;
-    _rankingRewardClaimScale = Tween<double>(begin: 0.9, end: 1.0).animate(curved);
+    _rankingRewardClaimScale = Tween<double>(
+      begin: 0.9,
+      end: 1.0,
+    ).animate(curved);
     _scrollController.addListener(_onScroll);
     if (widget.forceRankingRewardClaimPreview) {
       _rankingRewardClaimVisible = true;
-      _rankingRewardClaimPlace = widget.forceRankingRewardClaimPlace.clamp(1, 3);
+      _rankingRewardClaimPlace = widget.forceRankingRewardClaimPlace.clamp(
+        1,
+        3,
+      );
       _rankingRewardClaimEntry = RankingRewardClaimPanel.labMock(
         rank: _rankingRewardClaimPlace,
         imgPath: widget.user?.profileImgUrl,
@@ -220,6 +240,7 @@ class _RankingState extends State<Ranking>
         _loading = false;
       });
       _syncStickyFade(instant: true);
+      unawaited(_maybeShowRankingRewardClaim(dto));
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         // 탭 복귀·리로드 시 항상 4위부터
@@ -248,8 +269,7 @@ class _RankingState extends State<Ranking>
       return;
     }
     // COLLECT: 현재 phase 종료(발표 시작). ANNOUNCE/Lab미리보기: 다음 주간 랭킹(COLLECT) 시작.
-    final announceUi =
-        period.phase == 'ANNOUNCE' || widget.forceAnnouncePhase;
+    final announceUi = period.phase == 'ANNOUNCE' || widget.forceAnnouncePhase;
     final ends = announceUi
         ? (period.nextCollectStartsAt ?? period.phaseEndsAt)
         : period.phaseEndsAt;
@@ -454,8 +474,7 @@ class _RankingState extends State<Ranking>
 
   void _syncStickyFade({bool instant = false}) {
     final me = _myEntryKept;
-    final eligible =
-        !_isAnnouncePhase && me != null && me.rank > 10;
+    final eligible = !_isAnnouncePhase && me != null && me.rank > 10;
     final wanted = eligible && _meRowSlot == _MeRowSlot.below;
     if (!eligible) {
       _stickyFadeController.value = 0;
@@ -549,12 +568,12 @@ class _RankingState extends State<Ranking>
         _myEntryKept == null &&
         !hasMeOnScreen;
     final stickyEligible =
-        isCollectRank &&
-        _myEntryKept != null &&
-        _myEntryKept!.rank > 10;
+        isCollectRank && _myEntryKept != null && _myEntryKept!.rank > 10;
 
-    final showRankingRewardClaimLayer = _rankingRewardClaimEntry != null &&
-        (_rankingRewardClaimVisible || _rankingRewardClaimAppearController.isAnimating);
+    final showRankingRewardClaimLayer =
+        _rankingRewardClaimEntry != null &&
+        (_rankingRewardClaimVisible ||
+            _rankingRewardClaimAppearController.isAnimating);
 
     final gnb = GnbBar(
       isHomeActive: false,
@@ -569,57 +588,53 @@ class _RankingState extends State<Ranking>
       user: widget.user,
     );
 
-    // 랭킹 본문 + GNB는 항상 Scaffold. Ranking Reward Claim은 GNB 위 풀스크린 레이어
+    // 랭킹 본문 + GNB는 Scaffold. Ranking Reward Claim은 풀스크린 레이어
     // (등장: DefaultPopup과 동일 계열 — dim + 페이드 + 중앙 스케일).
+    // 배경은 GNB 뒤까지, GNB는 레이어 위에 다시 올려 글래시.
     final scaffold = AppScaffold(
-        showBackButton:
-            widget.forceAnnouncePhase || widget.forceRankingRewardClaimPreview,
-        usePadding: false,
-        bodyTopPadding: 16,
-        backgroundColor: const Color(0xFF0D011F),
-        background: _buildRankBackground(),
-        bottomNavigationBar: gnb,
-        aboveBottomBar: showRankingRewardClaimLayer
-            ? null
-            : showNotRanked
-            ? _RankNotRankedOverlay(onPlayNow: widget.onNavigateToHome)
-            : stickyEligible
-            ? AnimatedBuilder(
-                animation: _stickyFadeController,
-                builder: (context, child) {
-                  final v = _stickyFadeController.value;
-                  if (v <= 0 && !_stickyFadeController.isAnimating) {
-                    return const SizedBox.shrink();
-                  }
-                  return IgnorePointer(
-                    ignoring: v < 0.05,
-                    child: Opacity(opacity: v, child: child),
-                  );
-                },
-                child: _RankMyEntrySticky(
-                  entry: _myEntryKept!,
-                  defaultProfile: _defaultProfile,
-                  premiumBadge: _premiumBadge,
-                ),
-              )
-            : null,
-        body: _buildBody(context),
+      showBackButton:
+          widget.forceAnnouncePhase || widget.forceRankingRewardClaimPreview,
+      usePadding: false,
+      bodyTopPadding: 16,
+      backgroundColor: const Color(0xFF0D011F),
+      background: _buildRankBackground(),
+      bottomNavigationBar: showRankingRewardClaimLayer ? null : gnb,
+      aboveBottomBar: showRankingRewardClaimLayer
+          ? null
+          : showNotRanked
+          ? _RankNotRankedOverlay(onPlayNow: widget.onNavigateToHome)
+          : stickyEligible
+          ? AnimatedBuilder(
+              animation: _stickyFadeController,
+              builder: (context, child) {
+                final v = _stickyFadeController.value;
+                if (v <= 0 && !_stickyFadeController.isAnimating) {
+                  return const SizedBox.shrink();
+                }
+                return IgnorePointer(
+                  ignoring: v < 0.05,
+                  child: Opacity(opacity: v, child: child),
+                );
+              },
+              child: _RankMyEntrySticky(
+                entry: _myEntryKept!,
+                defaultProfile: _defaultProfile,
+                premiumBadge: _premiumBadge,
+              ),
+            )
+          : null,
+      body: _buildBody(context),
     );
 
     if (!showRankingRewardClaimLayer) {
       return scaffold;
     }
 
-    final bottomPad = MediaQuery.paddingOf(context).bottom;
     return Stack(
       fit: StackFit.expand,
       children: [
         scaffold,
-        Positioned(
-          left: 0,
-          right: 0,
-          top: 0,
-          bottom: bottomPad + GnbBar.contentHeight,
+        Positioned.fill(
           child: AnimatedBuilder(
             animation: _rankingRewardClaimAppearController,
             builder: (context, _) {
@@ -628,7 +643,10 @@ class _RankingState extends State<Ranking>
                 children: [
                   // DefaultPopup dim: black 40%
                   Opacity(
-                    opacity: _rankingRewardClaimAppearController.value.clamp(0.0, 1.0),
+                    opacity: _rankingRewardClaimAppearController.value.clamp(
+                      0.0,
+                      1.0,
+                    ),
                     child: const ColoredBox(color: Color(0x66000000)),
                   ),
                   FadeTransition(
@@ -639,7 +657,10 @@ class _RankingState extends State<Ranking>
                       child: RankingRewardClaimPanel(
                         entry: _rankingRewardClaimEntry!,
                         place: _rankingRewardClaimPlace,
-                        onClaim: () => unawaited(_onRankingRewardClaim()),
+                        submitting: _rankingRewardClaimSubmitting,
+                        onClaim: _rankingRewardClaimSubmitting
+                            ? null
+                            : () => unawaited(_onRankingRewardClaim()),
                         paintBackground: true,
                       ),
                     ),
@@ -649,20 +670,146 @@ class _RankingState extends State<Ranking>
             },
           ),
         ),
+        Positioned(left: 0, right: 0, bottom: 0, child: gnb),
       ],
     );
   }
 
+  Future<void> _maybeShowRankingRewardClaim(RankScreenDto dto) async {
+    if (widget.forceRankingRewardClaimPreview) return;
+    if (dto.period?.phase != 'ANNOUNCE') return;
+    final periodId = dto.period?.periodId;
+    if (periodId == null) return;
+    final me = dto.myEntry;
+    if (me == null) return;
+    final place = me.rank;
+    if (place < 1 || place > 3) return;
+
+    final gen = ++_rankingRewardClaimLoadGen;
+    try {
+      final token = await TokenStorage.loadAccessToken();
+      if (token == null || token.isEmpty) return;
+      final ids = await SudaApiClient.getRankingRewardClaimableIds(
+        accessToken: token,
+        periodId: periodId,
+      );
+      if (!mounted || gen != _rankingRewardClaimLoadGen) return;
+      if (ids.isEmpty) return;
+      _rankingRewardClaimableIds = ids;
+      debugPrint(
+        'ranking reward claimable periodId=$periodId place=$place '
+        'ids=$_rankingRewardClaimableIds',
+      );
+      setState(() {
+        _rankingRewardClaimVisible = true;
+        _rankingRewardClaimPlace = place;
+        _rankingRewardClaimEntry = me;
+      });
+      unawaited(_rankingRewardClaimAppearController.forward());
+    } catch (err) {
+      debugPrint('ranking reward claimable failed: $err');
+    }
+  }
+
   Future<void> _onRankingRewardClaim() async {
-    // 실 API 전: 페이드/스케일 아웃 후 패널 닫기. Lab 프리뷰는 pop.
+    if (_rankingRewardClaimSubmitting) return;
+    _rankingRewardClaimSubmitting = true;
+    setState(() {});
+    List<CharacterRewardClaimDto> items;
+    try {
+      if (widget.forceRankingRewardClaimPreview &&
+          _rankingRewardClaimableIds.isEmpty) {
+        items = [CharacterRewardClaimDto.labMock()];
+      } else {
+        final token = await TokenStorage.loadAccessToken();
+        if (token == null || token.isEmpty) {
+          throw Exception('no token');
+        }
+        items = await SudaApiClient.claimRankingCharacterRewards(
+          accessToken: token,
+          userCharacterRewardIds: _rankingRewardClaimableIds,
+        );
+      }
+    } catch (err) {
+      debugPrint('ranking reward claim failed: $err');
+      if (mounted) {
+        setState(() => _rankingRewardClaimSubmitting = false);
+        showRankingRewardClaimErrorToast(context);
+      }
+      return;
+    }
+    if (!mounted) return;
+    if (items.isEmpty) {
+      await _dismissRankingRewardClaim();
+      if (widget.forceRankingRewardClaimPreview && mounted) {
+        Navigator.of(context).maybePop();
+      }
+      return;
+    }
+    await RewardUnboxing.preload(context, items);
+    if (!mounted) return;
+    _pushRewardUnboxingThenHideClaim(items);
+  }
+
+  /// Unboxing fade-in으로 Claim을 덮은 뒤에 Claim 레이어를 제거. 랭킹 본문 플래시 방지.
+  void _pushRewardUnboxingThenHideClaim(List<CharacterRewardClaimDto> items) {
+    final route = FullScreenRoute<void>(
+      page: RewardUnboxing(
+        items: items,
+        onNavigateToProfile: widget.onNavigateToProfile,
+      ),
+      transition: FullScreenTransition.fade,
+    );
+    unawaited(Navigator.of(context).push(route));
+
+    void hideClaim() {
+      if (!mounted) return;
+      _rankingRewardClaimAppearController.value = 0;
+      setState(() {
+        _rankingRewardClaimVisible = false;
+        _rankingRewardClaimSubmitting = false;
+        _rankingRewardClaimableIds = const [];
+      });
+    }
+
+    void listen(Animation<double> anim) {
+      if (anim.status == AnimationStatus.completed) {
+        hideClaim();
+        return;
+      }
+      late final void Function(AnimationStatus) listener;
+      listener = (status) {
+        if (status != AnimationStatus.completed) return;
+        anim.removeStatusListener(listener);
+        hideClaim();
+      };
+      anim.addStatusListener(listener);
+    }
+
+    final existing = route.animation;
+    if (existing != null) {
+      listen(existing);
+      return;
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final anim = route.animation;
+      if (anim == null) {
+        hideClaim();
+        return;
+      }
+      listen(anim);
+    });
+  }
+
+  Future<void> _dismissRankingRewardClaim() async {
     if (!_rankingRewardClaimAppearController.isDismissed) {
       await _rankingRewardClaimAppearController.reverse();
     }
     if (!mounted) return;
-    setState(() => _rankingRewardClaimVisible = false);
-    if (widget.forceRankingRewardClaimPreview) {
-      Navigator.of(context).maybePop();
-    }
+    setState(() {
+      _rankingRewardClaimVisible = false;
+      _rankingRewardClaimSubmitting = false;
+    });
   }
 
   Widget _buildBody(BuildContext context) {
@@ -672,167 +819,169 @@ class _RankingState extends State<Ranking>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-          if (_isAnnouncePhase) const SizedBox(height: 64),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: side),
-            child: _isAnnouncePhase
-                ? _buildAnnounceHeader(context)
-                : _buildHeader(context),
-          ),
-          const SizedBox(height: 8),
-          if (_loading && _screen == null)
-            const Expanded(
-              child: Center(
-                child: CircularProgressIndicator(color: Colors.white),
-              ),
-            )
-          else if (periodNull)
-            const Expanded(child: SizedBox.shrink())
-          else if (_loadFailed && _screen == null)
-            Expanded(
-              child: Center(
-                child: TextButton(
-                  onPressed: () => unawaited(_loadScreen()),
-                  child: const Text(
-                    'Retry',
-                    style: TextStyle(color: Colors.white),
-                  ),
+        if (_isAnnouncePhase) const SizedBox(height: 64),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: side),
+          child: _isAnnouncePhase
+              ? _buildAnnounceHeader(context)
+              : _buildHeader(context),
+        ),
+        const SizedBox(height: 8),
+        if (_loading && _screen == null)
+          const Expanded(
+            child: Center(
+              child: CircularProgressIndicator(color: Colors.white),
+            ),
+          )
+        else if (periodNull)
+          const Expanded(child: SizedBox.shrink())
+        else if (_loadFailed && _screen == null)
+          Expanded(
+            child: Center(
+              child: TextButton(
+                onPressed: () => unawaited(_loadScreen()),
+                child: const Text(
+                  'Retry',
+                  style: TextStyle(color: Colors.white),
                 ),
               ),
-            )
-          else if (_isAnnouncePhase)
-            Expanded(
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  // ANNOUNCE: 타이틀 + 1~3 포디움 + (아래) You Rank/Like 배지.
-                  // 포디움 레이아웃/스케일은 그대로 — 배지만 포디움 아래 공백 후 추가.
-                  final contentConstraints = BoxConstraints(
-                    maxWidth: (constraints.maxWidth - side * 2).clamp(
-                      0.0,
-                      double.infinity,
+            ),
+          )
+        else if (_isAnnouncePhase)
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                // ANNOUNCE: 타이틀 + 1~3 포디움 + (아래) You Rank/Like 배지.
+                // 포디움 레이아웃/스케일은 그대로 — 배지만 포디움 아래 공백 후 추가.
+                final contentConstraints = BoxConstraints(
+                  maxWidth: (constraints.maxWidth - side * 2).clamp(
+                    0.0,
+                    double.infinity,
+                  ),
+                  maxHeight: constraints.maxHeight,
+                );
+                final s = contentConstraints.maxWidth / _figmaFrameW;
+                // 포디움 SizedBox 하단(figma 71+369+22=462) → 배지 top 493 → 간격 31.
+                final badgeGap =
+                    (493.0 -
+                        (_figmaPodiumOriginY + _figmaPodiumH + _podiumDown)) *
+                    s;
+                final me = _myEntryKept;
+                // 배지 하단(493+71=564) → Next Ranking 타이틀 y=639 → 간격 75.
+                final nextGap = 75 * s;
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: side),
+                  child: Align(
+                    alignment: Alignment.topCenter,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _buildPodium(context, contentConstraints),
+                        if (me != null) ...[
+                          SizedBox(
+                            height: badgeGap.clamp(0.0, double.infinity),
+                          ),
+                          _AnnounceYouBadge(
+                            scale: s * _AnnounceYouBadge.groupScale,
+                            rank: me.rank,
+                            weeklyLike: me.weeklyLike,
+                          ),
+                        ],
+                        SizedBox(height: nextGap),
+                        _AnnounceNextRankingBlock(
+                          scale: s,
+                          countdownText: formatRemainingHms(_remaining),
+                        ),
+                      ],
                     ),
-                    maxHeight: constraints.maxHeight,
-                  );
-                  final s = contentConstraints.maxWidth / _figmaFrameW;
-                  // 포디움 SizedBox 하단(figma 71+369+22=462) → 배지 top 493 → 간격 31.
-                  final badgeGap =
-                      (493.0 -
-                          (_figmaPodiumOriginY + _figmaPodiumH + _podiumDown)) *
-                      s;
-                  final me = _myEntryKept;
-                  // 배지 하단(493+71=564) → Next Ranking 타이틀 y=639 → 간격 75.
-                  final nextGap = 75 * s;
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: side),
-                    child: Align(
-                      alignment: Alignment.topCenter,
+                  ),
+                );
+              },
+            ),
+          )
+        else
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                // 포디움/헤더는 좌우 24. 리스트는 전체 폭(본인 하이라이트 full-bleed).
+                final contentConstraints = BoxConstraints(
+                  maxWidth: (constraints.maxWidth - side * 2).clamp(
+                    0.0,
+                    double.infinity,
+                  ),
+                  maxHeight: constraints.maxHeight,
+                );
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: side),
                       child: Column(
-                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           _buildPodium(context, contentConstraints),
-                          if (me != null) ...[
-                            SizedBox(height: badgeGap.clamp(0.0, double.infinity)),
-                            _AnnounceYouBadge(
-                              scale: s * _AnnounceYouBadge.groupScale,
-                              rank: me.rank,
-                              weeklyLike: me.weeklyLike,
-                            ),
-                          ],
-                          SizedBox(height: nextGap),
-                          _AnnounceNextRankingBlock(
-                            scale: s,
-                            countdownText: formatRemainingHms(_remaining),
-                          ),
+                          const SizedBox(height: 12),
+                          _buildListHeader(context, contentConstraints),
+                          const SizedBox(height: 4),
                         ],
                       ),
                     ),
-                  );
-                },
-              ),
-            )
-          else
-            Expanded(
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  // 포디움/헤더는 좌우 24. 리스트는 전체 폭(본인 하이라이트 full-bleed).
-                  final contentConstraints = BoxConstraints(
-                    maxWidth: (constraints.maxWidth - side * 2).clamp(
-                      0.0,
-                      double.infinity,
-                    ),
-                    maxHeight: constraints.maxHeight,
-                  );
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: side),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            _buildPodium(context, contentConstraints),
-                            const SizedBox(height: 12),
-                            _buildListHeader(context, contentConstraints),
-                            const SizedBox(height: 4),
-                          ],
-                        ),
-                      ),
-                      Expanded(
-                        child: Builder(
-                          builder: (context) {
-                            final displayRows = _buildDisplayRows()
-                                .where((e) => e.rank >= 4)
-                                .toList();
-                            final itemCount =
-                                displayRows.length + (_loadingMore ? 1 : 0);
-                            return ListView.builder(
-                              controller: _scrollController,
-                              padding: const EdgeInsets.only(
-                                bottom: GnbBar.contentHeight,
-                              ),
-                              clipBehavior: Clip.hardEdge,
-                              physics: const AlwaysScrollableScrollPhysics(),
-                              itemCount: itemCount,
-                              itemBuilder: (context, index) {
-                                if (index >= displayRows.length) {
-                                  return const Padding(
-                                    padding: EdgeInsets.symmetric(vertical: 16),
-                                    child: Center(
-                                      child: SizedBox(
-                                        width: 24,
-                                        height: 24,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          color: Colors.white,
-                                        ),
+                    Expanded(
+                      child: Builder(
+                        builder: (context) {
+                          final displayRows = _buildDisplayRows()
+                              .where((e) => e.rank >= 4)
+                              .toList();
+                          final itemCount =
+                              displayRows.length + (_loadingMore ? 1 : 0);
+                          return ListView.builder(
+                            controller: _scrollController,
+                            padding: const EdgeInsets.only(
+                              bottom: GnbBar.contentHeight,
+                            ),
+                            clipBehavior: Clip.hardEdge,
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            itemCount: itemCount,
+                            itemBuilder: (context, index) {
+                              if (index >= displayRows.length) {
+                                return const Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 16),
+                                  child: Center(
+                                    child: SizedBox(
+                                      width: 24,
+                                      height: 24,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.white,
                                       ),
                                     ),
-                                  );
-                                }
-                                final entry = displayRows[index];
-                                if (_hasMorePages &&
-                                    index >= displayRows.length - 5) {
-                                  unawaited(_loadMore());
-                                }
-                                return _RankListRow(
-                                  key: entry.isMe ? _meRowKey : null,
-                                  rank: entry.rank,
-                                  entry: entry,
-                                  defaultProfile: _defaultProfile,
-                                  premiumBadge: _premiumBadge,
-                                  contentHorizontal: side,
+                                  ),
                                 );
-                              },
-                            );
-                          },
-                        ),
+                              }
+                              final entry = displayRows[index];
+                              if (_hasMorePages &&
+                                  index >= displayRows.length - 5) {
+                                unawaited(_loadMore());
+                              }
+                              return _RankListRow(
+                                key: entry.isMe ? _meRowKey : null,
+                                rank: entry.rank,
+                                entry: entry,
+                                defaultProfile: _defaultProfile,
+                                premiumBadge: _premiumBadge,
+                                contentHorizontal: side,
+                              );
+                            },
+                          );
+                        },
                       ),
-                    ],
-                  );
-                },
-              ),
+                    ),
+                  ],
+                );
+              },
             ),
-        ],
+          ),
+      ],
     );
   }
 
@@ -1727,11 +1876,19 @@ class _AnnounceYouBadge extends StatelessWidget {
     final iconSize = 14 * s;
 
     // pill 내부: Rank 값 좌우 여유(figma pill70 / value79 → 9). Like: icon+값.
-    final rankValueW = _measure(rankStr, valueStyle.copyWith(fontSize: valueFs));
-    final likeValueW = _measure(likeStr, valueStyle.copyWith(fontSize: valueFs));
+    final rankValueW = _measure(
+      rankStr,
+      valueStyle.copyWith(fontSize: valueFs),
+    );
+    final likeValueW = _measure(
+      likeStr,
+      valueStyle.copyWith(fontSize: valueFs),
+    );
     final rankPillW = (rankValueW + 18 * s).clamp(52 * s, double.infinity);
-    final likePillW =
-        (iconSize + 2 * s + likeValueW + 12 * s).clamp(52 * s, double.infinity);
+    final likePillW = (iconSize + 2 * s + likeValueW + 12 * s).clamp(
+      52 * s,
+      double.infinity,
+    );
 
     // Like pill이 Rank pill과 겹치면 오른쪽으로 민다 (기본 x=139).
     final rankPillLeft = 70 * s;
@@ -1824,10 +1981,7 @@ class _AnnounceYouBadge extends StatelessWidget {
                     filterQuality: FilterQuality.medium,
                   ),
                   SizedBox(width: 2 * s),
-                  Text(
-                    likeStr,
-                    style: valueStyle.copyWith(fontSize: valueFs),
-                  ),
+                  Text(likeStr, style: valueStyle.copyWith(fontSize: valueFs)),
                 ],
               ),
             ),

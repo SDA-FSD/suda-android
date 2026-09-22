@@ -855,4 +855,21 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get rankingRewardClaimError =>
       'Что-то пошло не так. Попробуй ещё раз.';
+
+  @override
+  String get rewardUnboxingTapToOpen => 'Нажми на коробку, чтобы открыть';
+
+  @override
+  String get rewardUnboxingNewCharacter => 'Новый персонаж!';
+
+  @override
+  String rewardUnboxingYouGot(String characterName) {
+    return 'Ты получил(а) $characterName!';
+  }
+
+  @override
+  String get rewardUnboxingSetAsProfile => 'Сделать аватаром';
+
+  @override
+  String get rewardUnboxingViewCharacter => 'Смотреть персонажа';
 }

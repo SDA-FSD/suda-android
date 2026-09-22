@@ -347,5 +347,10 @@
   },
   "rankingRewardClaimYourRewards": "나의 보상",
   "rankingRewardClaim": "보상 받기",
-  "rankingRewardClaimError": "문제가 발생했어요. 다시 시도해주세요."
+  "rankingRewardClaimError": "문제가 발생했어요. 다시 시도해주세요.",
+  "rewardUnboxingTapToOpen": "상자를 탭해서 열어보세요",
+  "rewardUnboxingNewCharacter": "새로운 캐릭터!",
+  "rewardUnboxingYouGot": "{characterName} 를 획득했어요!",
+  "rewardUnboxingSetAsProfile": "프로필로 설정",
+  "rewardUnboxingViewCharacter": "캐릭터 보기"
 }

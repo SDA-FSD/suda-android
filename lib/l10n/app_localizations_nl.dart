@@ -851,4 +851,21 @@ class AppLocalizationsNl extends AppLocalizations {
   @override
   String get rankingRewardClaimError =>
       'Er ging iets mis. Probeer het opnieuw.';
+
+  @override
+  String get rewardUnboxingTapToOpen => 'Tik op de doos om te openen';
+
+  @override
+  String get rewardUnboxingNewCharacter => 'Nieuw personage!';
+
+  @override
+  String rewardUnboxingYouGot(String characterName) {
+    return 'Je hebt $characterName gekregen!';
+  }
+
+  @override
+  String get rewardUnboxingSetAsProfile => 'Als profiel instellen';
+
+  @override
+  String get rewardUnboxingViewCharacter => 'Personage bekijken';
 }

@@ -347,5 +347,10 @@
   },
   "rankingRewardClaimYourRewards": "Jouw beloningen",
   "rankingRewardClaim": "Claimen",
-  "rankingRewardClaimError": "Er ging iets mis. Probeer het opnieuw."
+  "rankingRewardClaimError": "Er ging iets mis. Probeer het opnieuw.",
+  "rewardUnboxingTapToOpen": "Tik op de doos om te openen",
+  "rewardUnboxingNewCharacter": "Nieuw personage!",
+  "rewardUnboxingYouGot": "Je hebt {characterName} gekregen!",
+  "rewardUnboxingSetAsProfile": "Als profiel instellen",
+  "rewardUnboxingViewCharacter": "Personage bekijken"
 }

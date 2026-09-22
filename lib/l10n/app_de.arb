@@ -347,5 +347,10 @@
   },
   "rankingRewardClaimYourRewards": "Deine Belohnungen",
   "rankingRewardClaim": "Abholen",
-  "rankingRewardClaimError": "Etwas ist schiefgelaufen. Bitte versuche es erneut."
+  "rankingRewardClaimError": "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
+  "rewardUnboxingTapToOpen": "Tippe auf die Box, um sie zu öffnen",
+  "rewardUnboxingNewCharacter": "Neuer Charakter!",
+  "rewardUnboxingYouGot": "Du hast {characterName} erhalten!",
+  "rewardUnboxingSetAsProfile": "Als Profilbild",
+  "rewardUnboxingViewCharacter": "Charakter ansehen"
 }

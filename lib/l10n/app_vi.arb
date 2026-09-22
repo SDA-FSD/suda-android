@@ -347,5 +347,10 @@
   },
   "rankingRewardClaimYourRewards": "Phần thưởng của bạn",
   "rankingRewardClaim": "Nhận",
-  "rankingRewardClaimError": "Đã xảy ra lỗi. Vui lòng thử lại."
+  "rankingRewardClaimError": "Đã xảy ra lỗi. Vui lòng thử lại.",
+  "rewardUnboxingTapToOpen": "Chạm vào hộp để mở",
+  "rewardUnboxingNewCharacter": "Nhân vật mới!",
+  "rewardUnboxingYouGot": "Bạn đã nhận được {characterName}!",
+  "rewardUnboxingSetAsProfile": "Đặt làm ảnh đại diện",
+  "rewardUnboxingViewCharacter": "Xem nhân vật"
 }

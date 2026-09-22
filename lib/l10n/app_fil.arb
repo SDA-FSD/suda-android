@@ -347,5 +347,10 @@
   },
   "rankingRewardClaimYourRewards": "Mga Reward Mo",
   "rankingRewardClaim": "Kunin",
-  "rankingRewardClaimError": "May nangyaring mali. Subukan ulit."
+  "rankingRewardClaimError": "May nangyaring mali. Subukan ulit.",
+  "rewardUnboxingTapToOpen": "I-tap ang box para mabuksan",
+  "rewardUnboxingNewCharacter": "Bagong character!",
+  "rewardUnboxingYouGot": "Nakuha mo si {characterName}!",
+  "rewardUnboxingSetAsProfile": "Itakda bilang Profile",
+  "rewardUnboxingViewCharacter": "Tingnan ang Character"
 }

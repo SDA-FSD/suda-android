@@ -3,14 +3,37 @@ import 'package:flutter/material.dart';
 enum FullScreenTransition {
   defaultTransition,
   bottomUp,
+  fade,
 }
 
 /// Full Screen용 공통 Route.
 ///
 /// 기본값은 기존 Full Screen처럼 별도 전환 효과 없이 즉시 노출되고,
-/// 필요 시에만 bottom-up 슬라이드 인을 선택적으로 적용한다.
+/// 필요 시에만 bottom-up / fade를 선택적으로 적용한다. 새 스크린 타입 아님.
 class FullScreenRoute<T> extends PageRouteBuilder<T> {
   final Widget page;
+
+  static Duration _forwardDuration(FullScreenTransition transition) {
+    switch (transition) {
+      case FullScreenTransition.bottomUp:
+        return const Duration(milliseconds: 450);
+      case FullScreenTransition.fade:
+        return const Duration(milliseconds: 200);
+      case FullScreenTransition.defaultTransition:
+        return Duration.zero;
+    }
+  }
+
+  static Duration _reverseDuration(FullScreenTransition transition) {
+    switch (transition) {
+      case FullScreenTransition.bottomUp:
+        return const Duration(milliseconds: 280);
+      case FullScreenTransition.fade:
+        return const Duration(milliseconds: 150);
+      case FullScreenTransition.defaultTransition:
+        return Duration.zero;
+    }
+  }
 
   FullScreenRoute({
     required this.page,
@@ -30,16 +53,21 @@ class FullScreenRoute<T> extends PageRouteBuilder<T> {
                  position: animation.drive(tween),
                  child: child,
                );
+             case FullScreenTransition.fade:
+               return FadeTransition(
+                 opacity: CurvedAnimation(
+                   parent: animation,
+                   curve: Curves.easeOut,
+                   reverseCurve: Curves.easeIn,
+                 ),
+                 child: child,
+               );
              case FullScreenTransition.defaultTransition:
                return child;
            }
          },
-         transitionDuration: transition == FullScreenTransition.bottomUp
-             ? const Duration(milliseconds: 450)
-             : Duration.zero,
-         reverseTransitionDuration: transition == FullScreenTransition.bottomUp
-             ? const Duration(milliseconds: 280)
-             : Duration.zero,
+         transitionDuration: _forwardDuration(transition),
+         reverseTransitionDuration: _reverseDuration(transition),
          opaque: true,
          barrierColor: Colors.transparent,
        );

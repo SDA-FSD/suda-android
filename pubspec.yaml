@@ -98,6 +98,7 @@ flutter:
     - assets/images/
     - assets/images/small_posters/
     - assets/images/icons/
+    - assets/images/achievement/
     - assets/images/buttons/
     - assets/images/tutorial/
     - assets/fonts/packs/

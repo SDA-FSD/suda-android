@@ -347,5 +347,10 @@
   },
   "rankingRewardClaimYourRewards": "あなたの報酬",
   "rankingRewardClaim": "受け取る",
-  "rankingRewardClaimError": "問題が発生しました。もう一度お試しください。"
+  "rankingRewardClaimError": "問題が発生しました。もう一度お試しください。",
+  "rewardUnboxingTapToOpen": "ボックスをタップして開けましょう",
+  "rewardUnboxingNewCharacter": "新しいキャラクター！",
+  "rewardUnboxingYouGot": "{characterName} をゲット！",
+  "rewardUnboxingSetAsProfile": "プロフィールに設定",
+  "rewardUnboxingViewCharacter": "キャラクターを見る"
 }

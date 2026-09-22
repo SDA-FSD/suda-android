@@ -799,6 +799,23 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get rankingRewardClaimError => '出了点问题。请重试。';
+
+  @override
+  String get rewardUnboxingTapToOpen => '点按礼盒打开';
+
+  @override
+  String get rewardUnboxingNewCharacter => '新角色！';
+
+  @override
+  String rewardUnboxingYouGot(String characterName) {
+    return '获得了$characterName！';
+  }
+
+  @override
+  String get rewardUnboxingSetAsProfile => '设为头像';
+
+  @override
+  String get rewardUnboxingViewCharacter => '查看角色';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -1596,6 +1613,23 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get rankingRewardClaimError => '出了点问题。请重试。';
+
+  @override
+  String get rewardUnboxingTapToOpen => '点按礼盒打开';
+
+  @override
+  String get rewardUnboxingNewCharacter => '新角色！';
+
+  @override
+  String rewardUnboxingYouGot(String characterName) {
+    return '获得了$characterName！';
+  }
+
+  @override
+  String get rewardUnboxingSetAsProfile => '设为头像';
+
+  @override
+  String get rewardUnboxingViewCharacter => '查看角色';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -2393,4 +2427,21 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get rankingRewardClaimError => '發生問題。請再試一次。';
+
+  @override
+  String get rewardUnboxingTapToOpen => '點一下禮盒打開';
+
+  @override
+  String get rewardUnboxingNewCharacter => '新角色！';
+
+  @override
+  String rewardUnboxingYouGot(String characterName) {
+    return '獲得了$characterName！';
+  }
+
+  @override
+  String get rewardUnboxingSetAsProfile => '設為頭像';
+
+  @override
+  String get rewardUnboxingViewCharacter => '查看角色';
 }

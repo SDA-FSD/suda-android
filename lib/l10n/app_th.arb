@@ -347,5 +347,10 @@
   },
   "rankingRewardClaimYourRewards": "รางวัลของคุณ",
   "rankingRewardClaim": "รับรางวัล",
-  "rankingRewardClaimError": "เกิดข้อผิดพลาด โปรดลองอีกครั้ง"
+  "rankingRewardClaimError": "เกิดข้อผิดพลาด โปรดลองอีกครั้ง",
+  "rewardUnboxingTapToOpen": "แตะกล่องเพื่อเปิด",
+  "rewardUnboxingNewCharacter": "ตัวละครใหม่!",
+  "rewardUnboxingYouGot": "คุณได้ {characterName}!",
+  "rewardUnboxingSetAsProfile": "ตั้งเป็นโปรไฟล์",
+  "rewardUnboxingViewCharacter": "ดูตัวละคร"
 }

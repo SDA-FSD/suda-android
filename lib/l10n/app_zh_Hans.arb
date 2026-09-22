@@ -347,5 +347,10 @@
   },
   "rankingRewardClaimYourRewards": "你的奖励",
   "rankingRewardClaim": "领取",
-  "rankingRewardClaimError": "出了点问题。请重试。"
+  "rankingRewardClaimError": "出了点问题。请重试。",
+  "rewardUnboxingTapToOpen": "点按礼盒打开",
+  "rewardUnboxingNewCharacter": "新角色！",
+  "rewardUnboxingYouGot": "获得了{characterName}！",
+  "rewardUnboxingSetAsProfile": "设为头像",
+  "rewardUnboxingViewCharacter": "查看角色"
 }

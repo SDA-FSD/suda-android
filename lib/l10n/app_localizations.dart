@@ -1660,6 +1660,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Something went wrong. Please try again.'**
   String get rankingRewardClaimError;
+
+  /// No description provided for @rewardUnboxingTapToOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the box to open'**
+  String get rewardUnboxingTapToOpen;
+
+  /// No description provided for @rewardUnboxingNewCharacter.
+  ///
+  /// In en, this message translates to:
+  /// **'New Character!'**
+  String get rewardUnboxingNewCharacter;
+
+  /// No description provided for @rewardUnboxingYouGot.
+  ///
+  /// In en, this message translates to:
+  /// **'You got {characterName}!'**
+  String rewardUnboxingYouGot(String characterName);
+
+  /// No description provided for @rewardUnboxingSetAsProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Set as Profile'**
+  String get rewardUnboxingSetAsProfile;
+
+  /// No description provided for @rewardUnboxingViewCharacter.
+  ///
+  /// In en, this message translates to:
+  /// **'View Character'**
+  String get rewardUnboxingViewCharacter;
 }
 
 class _AppLocalizationsDelegate

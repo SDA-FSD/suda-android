@@ -856,6 +856,23 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get rankingRewardClaimError => 'Algo salió mal. Inténtalo de nuevo.';
+
+  @override
+  String get rewardUnboxingTapToOpen => 'Toca la caja para abrirla';
+
+  @override
+  String get rewardUnboxingNewCharacter => '¡Nuevo personaje!';
+
+  @override
+  String rewardUnboxingYouGot(String characterName) {
+    return '¡Conseguiste a $characterName!';
+  }
+
+  @override
+  String get rewardUnboxingSetAsProfile => 'Usar en el perfil';
+
+  @override
+  String get rewardUnboxingViewCharacter => 'Ver personaje';
 }
 
 /// The translations for Spanish Castilian, as used in Latin America and the Caribbean (`es_419`).
@@ -1710,4 +1727,21 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
 
   @override
   String get rankingRewardClaimError => 'Algo salió mal. Inténtalo de nuevo.';
+
+  @override
+  String get rewardUnboxingTapToOpen => 'Toca la caja para abrirla';
+
+  @override
+  String get rewardUnboxingNewCharacter => '¡Nuevo personaje!';
+
+  @override
+  String rewardUnboxingYouGot(String characterName) {
+    return '¡Conseguiste a $characterName!';
+  }
+
+  @override
+  String get rewardUnboxingSetAsProfile => 'Usar en el perfil';
+
+  @override
+  String get rewardUnboxingViewCharacter => 'Ver personaje';
 }

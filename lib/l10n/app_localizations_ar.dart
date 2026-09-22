@@ -844,4 +844,21 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get rankingRewardClaimError => 'حدث خطأ ما. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get rewardUnboxingTapToOpen => 'اضغط على الصندوق لفتحه';
+
+  @override
+  String get rewardUnboxingNewCharacter => 'شخصية جديدة!';
+
+  @override
+  String rewardUnboxingYouGot(String characterName) {
+    return 'لقد حصلت على $characterName!';
+  }
+
+  @override
+  String get rewardUnboxingSetAsProfile => 'تعيين كصورة الملف';
+
+  @override
+  String get rewardUnboxingViewCharacter => 'عرض الشخصية';
 }

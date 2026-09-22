@@ -840,4 +840,21 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get rankingRewardClaimError => 'Đã xảy ra lỗi. Vui lòng thử lại.';
+
+  @override
+  String get rewardUnboxingTapToOpen => 'Chạm vào hộp để mở';
+
+  @override
+  String get rewardUnboxingNewCharacter => 'Nhân vật mới!';
+
+  @override
+  String rewardUnboxingYouGot(String characterName) {
+    return 'Bạn đã nhận được $characterName!';
+  }
+
+  @override
+  String get rewardUnboxingSetAsProfile => 'Đặt làm ảnh đại diện';
+
+  @override
+  String get rewardUnboxingViewCharacter => 'Xem nhân vật';
 }

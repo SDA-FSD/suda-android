@@ -6,11 +6,12 @@ import 'package:flutter/rendering.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/rank_models.dart';
 import '../../utils/default_toast.dart';
+import '../../widgets/gnb_bar.dart';
+import '../../widgets/procedural_sunburst.dart';
 import 'rank_crown_avatar.dart';
 
 /// 1~3등 Ranking Reward Claim 전면 패널.
-/// Ranking에서는 AppScaffold **본문+background**로 쓰고, GNB는 Scaffold 것을 그대로 둔다
-/// (Stack에 GNB를 따로 올리지 않음). 상단 풀블리드·하단 GNB 위까지.
+/// 배경·sunburst는 화면 하단(GNB 뒤)까지. 콘텐츠는 GNB 위 inset.
 class RankingRewardClaimPanel extends StatelessWidget {
   const RankingRewardClaimPanel({
     super.key,
@@ -18,11 +19,13 @@ class RankingRewardClaimPanel extends StatelessWidget {
     required this.place,
     required this.onClaim,
     this.paintBackground = true,
+    this.submitting = false,
   });
 
   final RankEntryDto entry;
   final int place; // 1|2|3
-  final VoidCallback onClaim;
+  final VoidCallback? onClaim;
+  final bool submitting;
 
   /// false면 그라데이션 없이 콘텐츠만 (AppScaffold.background에 그라데이션을 둔 경우).
   final bool paintBackground;
@@ -32,10 +35,6 @@ class RankingRewardClaimPanel extends StatelessWidget {
   static const _crown1 = 'assets/images/icons/ranking_1st_crown.png';
   static const _crown2 = 'assets/images/icons/ranking_2st_crown.png';
   static const _crown3 = 'assets/images/icons/ranking_3st_crown.png';
-  /// Figma 440×956 풀프레임. 4x 소스 1760×3824, 흰 레이 + 알파(검정=투명).
-  static const _sunburstRewards =
-      'assets/images/sunburst_pattern_rewards.png';
-  static const _sunburstOpacity = 0.55;
   static const _figmaW = 440.0;
   /// 콘텐츠 블록 전체 Y 하향만 (내부 간격·크기 불변). Figma 440 기준 × s.
   static const _contentOffsetY = 40.0;
@@ -135,6 +134,9 @@ class RankingRewardClaimPanel extends StatelessWidget {
     Widget content(BoxConstraints constraints) {
       final w = constraints.maxWidth;
       final s = (w / _figmaW).clamp(0.75, 1.35);
+      final bottomInset = paintBackground
+          ? GnbBar.contentHeight + MediaQuery.paddingOf(context).bottom
+          : 0.0;
       final avatarScale = s * 1.85;
       final rewardLikes = switch (place) {
         2 => l10n.rankTop3Likes60,
@@ -152,9 +154,9 @@ class RankingRewardClaimPanel extends StatelessWidget {
         _ => l10n.rankTop3Box3,
       };
       final medalAsset = switch (place) {
-        2 => 'assets/images/icons/medal_2st.png',
-        3 => 'assets/images/icons/medal_3st.png',
-        _ => 'assets/images/icons/medal_1st.png',
+        2 => 'assets/images/achievement/medal_2st.png',
+        3 => 'assets/images/achievement/medal_3st.png',
+        _ => 'assets/images/achievement/medal_1st.png',
       };
 
       return Padding(
@@ -172,7 +174,7 @@ class RankingRewardClaimPanel extends StatelessWidget {
               24 * s,
               (20 + _contentOffsetY) * s,
               24 * s,
-              24 * s,
+              24 * s + bottomInset,
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -210,13 +212,17 @@ class RankingRewardClaimPanel extends StatelessWidget {
                       rows: [
                         (medalAsset, rewardBadge),
                         ('assets/images/like_at_result.png', rewardLikes),
-                        ('assets/images/icons/reward_box.png', rewardBox),
+                        ('assets/images/achievement/reward_box.png', rewardBox),
                       ],
                     ),
                   ),
                 ),
                 SizedBox(height: 28 * s),
-                _RankingRewardClaimButton(label: l10n.rankingRewardClaim, onPressed: onClaim),
+                _RankingRewardClaimButton(
+                  label: l10n.rankingRewardClaim,
+                  onPressed: submitting ? null : onClaim,
+                  submitting: submitting,
+                ),
                 SizedBox(height: 12 * s),
               ],
             ),
@@ -231,25 +237,13 @@ class RankingRewardClaimPanel extends StatelessWidget {
         builder: (context, constraints) {
           final child = content(constraints);
           if (!paintBackground) return child;
-          final w = constraints.maxWidth;
           return Stack(
             fit: StackFit.expand,
             clipBehavior: Clip.hardEdge,
             children: [
               placeBackground(place: place),
-              Positioned(
-                left: 0,
-                width: w,
-                bottom: 0,
-                height: w * (956 / _figmaW),
-                child: Opacity(
-                  opacity: _sunburstOpacity,
-                  child: Image.asset(
-                    _sunburstRewards,
-                    fit: BoxFit.fill,
-                    filterQuality: FilterQuality.medium,
-                  ),
-                ),
+              const ProceduralSunburstOverlay(
+                focal: SunburstFocal.bottomCenter,
               ),
               child,
             ],
@@ -499,10 +493,15 @@ class _YourRewardsCard extends StatelessWidget {
 }
 
 class _RankingRewardClaimButton extends StatelessWidget {
-  const _RankingRewardClaimButton({required this.label, required this.onPressed});
+  const _RankingRewardClaimButton({
+    required this.label,
+    this.onPressed,
+    this.submitting = false,
+  });
 
   final String label;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
+  final bool submitting;
 
   @override
   Widget build(BuildContext context) {
@@ -510,10 +509,12 @@ class _RankingRewardClaimButton extends StatelessWidget {
     return SizedBox(
       height: 52,
       child: ElevatedButton(
-        onPressed: onPressed,
+        onPressed: submitting ? null : onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.white,
           foregroundColor: Colors.black,
+          disabledBackgroundColor: Colors.white,
+          disabledForegroundColor: Colors.black,
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           minimumSize: const Size(198, 52),
@@ -521,7 +522,16 @@ class _RankingRewardClaimButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(26),
           ),
         ).merge(elevated),
-        child: Text(label),
+        child: submitting
+            ? const SizedBox(
+                width: 22,
+                height: 22,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.2,
+                  color: Colors.black,
+                ),
+              )
+            : Text(label),
       ),
     );
   }

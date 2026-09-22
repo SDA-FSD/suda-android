@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
+import '../../models/character_reward_models.dart';
 import '../../models/rank_models.dart';
 import '../client/suda_http_client.dart';
 
@@ -103,6 +104,103 @@ class RankApi {
       );
     }
     return RankPeriodDto.fromJson(data);
+  }
+
+  /// GET /v1/rank/character-rewards/claimable?periodId= — `List<Long>` 미수령 RANKED reward id.
+  static Future<List<int>> getRankingRewardClaimableIds({
+    required String accessToken,
+    required int periodId,
+  }) {
+    return SudaHttpClient.executeWithRefresh(
+      () => _getRankingRewardClaimableIdsInternal(accessToken, periodId),
+      retryWithNewToken: (newToken) =>
+          _getRankingRewardClaimableIdsInternal(newToken, periodId),
+    );
+  }
+
+  static Future<List<int>> _getRankingRewardClaimableIdsInternal(
+    String accessToken,
+    int periodId,
+  ) async {
+    final response = await _get(
+      '/v1/rank/character-rewards/claimable',
+      accessToken,
+      {'periodId': '$periodId'},
+    );
+    final data = jsonDecode(response.body);
+    if (data is! List) {
+      throw Exception(
+        'GET /v1/rank/character-rewards/claimable unexpected body: ${response.body}',
+      );
+    }
+    return data.map((e) => (e as num).toInt()).toList();
+  }
+
+  /// POST /v1/rank/character-rewards/claim — body `List<Long>`, 200 수령분.
+  static Future<List<CharacterRewardClaimDto>> claimRankingCharacterRewards({
+    required String accessToken,
+    required List<int> userCharacterRewardIds,
+  }) {
+    return SudaHttpClient.executeWithRefresh(
+      () => _claimRankingCharacterRewardsInternal(
+        accessToken,
+        userCharacterRewardIds,
+      ),
+      retryWithNewToken: (newToken) => _claimRankingCharacterRewardsInternal(
+        newToken,
+        userCharacterRewardIds,
+      ),
+    );
+  }
+
+  static Future<List<CharacterRewardClaimDto>>
+      _claimRankingCharacterRewardsInternal(
+    String accessToken,
+    List<int> userCharacterRewardIds,
+  ) async {
+    final uri = SudaHttpClient.buildUri('/v1/rank/character-rewards/claim');
+    late final http.Response response;
+    try {
+      response = await SudaHttpClient.client
+          .post(
+            uri,
+            headers: {
+              ..._headers,
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $accessToken',
+            },
+            body: jsonEncode(userCharacterRewardIds),
+          )
+          .timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      rethrow;
+    }
+
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw Exception(
+        'POST /v1/rank/character-rewards/claim failed: HTTP ${response.statusCode} ${response.body}',
+      );
+    }
+
+    final raw = response.body.trim();
+    if (raw.isEmpty || raw == 'null') {
+      return const [];
+    }
+    final data = jsonDecode(raw);
+    if (data is! List) {
+      throw Exception(
+        'POST /v1/rank/character-rewards/claim unexpected body: ${response.body}',
+      );
+    }
+    return [
+      for (final e in data)
+        if (e is Map)
+          CharacterRewardClaimDto.fromJson(Map<String, dynamic>.from(e)),
+    ];
   }
 
   static Future<RankEntryPageDto> getRankEntries({
