@@ -403,8 +403,8 @@
 ### 스크린 내부 구현 특이사항
 - `GET /v1/characters/{id}` + `GET /v1/users`(현재 `imgPath`)
 - 배경: NORMAL `#03430A`→`#71A431` 88% / RARE `#0C0752`→29% `#049FFF`→`#93D6FF` / EPIC `#330371`→`#DF3FF8`
-- 상단 5:5. 좌 `rpImgPaths[0]` 등급 링·CDN 원본. 우 이름 `headlineMedium` 흰 + `[Normal|Rare|Epic]` `bodySmall`. 한 줄 갭 후 Age/Nationality/Occupation/Interests. 라벨 Bold, 값 없으면 행 숨김. Personality는 `personalities`만 알약(`#635F5F`, labelSmall italic 흰, gap 10)
-- Collection: 최소 3칸, `rpImgPaths`가 더 길면 그 수만큼 가로 스크롤. 갭 24. 소유 칸 `_150`. 현재 프로필이면 우하단 `#0CABA8` 30 체크. 소유·비설정이면 아래 `characterSetAsProfile` → 확인 팝업 후 `PUT /v1/users/profile-img`. 실패 토스트 `characterChangeFailed`. 미소유·빈 칸은 `#570B3C` 64% + 등급색 `lock.png`(원 폭 40%). 탭은 소유 칸만. 확대 오버레이의 Set as Profile은 현재 프로필이 아닐 때만
+- 상단 4:6. 우측 블록 start 마진 20. 좌 `rpImgPaths[0]` 등급 링·CDN 원본. 우 이름 `headlineMedium` 흰 + `[Normal|Rare|Epic]` `bodySmall`. 한 줄 갭 후 Age/Nationality/Occupation/Interests. 라벨 Bold, 값 없으면 행 숨김. Personality는 `personalities`만 알약(`#635F5F`, labelSmall italic 흰, gap 10)
+- Collection: 최소 3칸, `rpImgPaths`가 더 길면 그 수만큼 가로 스크롤. 갭 24. 소유 칸 `_150`. 현재 프로필이면 우하단 `#0CABA8` 30 체크. 소유·비설정이면 아래 `characterSetAsProfile` → 확인 팝업(미리보기 원형은 등급 테두리 없음. 컬렉션·확대 공통) 후 `PUT /v1/users/profile-img` `{type, value}`. 저장값만 `TYPE:value`. `GET /v1/users`의 imgPath가 그 값과 같으면 체크·문구를 옮기고, 아니면 실패 토스트. 실패 토스트 `characterChangeFailed`. 미소유·빈 칸은 `#570B3C` 64% + 등급색 `lock.png`(원 폭 40%). 탭은 소유 칸만. 확대 오버레이의 Set as Profile은 현재 프로필이 아닐 때만
 - Secret: 폭은 본문 90%. 잠금 높이 130, 같은 자물쇠. 탭 시 `characterSecretLocked`. `secrets`가 응답에 있을 때만 줄바꿈 텍스트, 높이는 텍스트에 맞춤
 - Series: 없으면 영역 숨김. 있으면 홈 썸네일 3열·하단 롤링 제목. 탭 → Series Overview
 

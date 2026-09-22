@@ -74,6 +74,22 @@ class _CharacterScreenState extends State<CharacterScreen> {
     }
   }
 
+  /// 저장값 `RARE:/path`가 아니라 요청 `{type, value}`의 value.
+  String _profileImageValue(String path) {
+    final parsed = UserImgPath.parse(path);
+    if (parsed.isCharacter && parsed.cdnPath != null && parsed.cdnPath!.isNotEmpty) {
+      return parsed.cdnPath!;
+    }
+    return path.trim();
+  }
+
+  bool _imgPathApplied(String? imgPath, {required String type, required String value}) {
+    final parsed = UserImgPath.parse(imgPath);
+    return parsed.isCharacter &&
+        parsed.cdnPath == value &&
+        CharacterRarityFrame.normalize(parsed.rarity ?? '') == type;
+  }
+
   bool _isCurrentProfile(String path) {
     final parsed = UserImgPath.parse(_imgPath);
     final rarity = CharacterRarityFrame.normalize(_detail?.rarity ?? '');
@@ -89,7 +105,7 @@ class _CharacterScreenState extends State<CharacterScreen> {
     await DefaultPopup.show(
       context,
       titleText: AppLocalizations.of(context)!.characterChangePictureTitle,
-      bodyWidget: _ProfilePreview(path: path, rarity: detail.rarity),
+      bodyWidget: _ProfilePreview(path: path),
       buttons: [
         DefaultPopupButton(
           type: DefaultPopupButtonType.primary,
@@ -108,14 +124,24 @@ class _CharacterScreenState extends State<CharacterScreen> {
     try {
       final token = await TokenStorage.loadAccessToken();
       if (token == null) return;
+      final type = CharacterRarityFrame.normalize(detail.rarity);
+      final value = _profileImageValue(path);
       await SudaApiClient.updateProfileImage(
         accessToken: token,
-        type: CharacterRarityFrame.normalize(detail.rarity),
-        value: path,
+        type: type,
+        value: value,
       );
       final user = await SudaApiClient.getCurrentUser(accessToken: token);
-      MainUserSync.instance.notifyUserUpdated(user);
       if (!mounted) return;
+      if (!_imgPathApplied(user.imgPath, type: type, value: value)) {
+        DefaultToast.show(
+          context,
+          AppLocalizations.of(context)!.characterChangeFailed,
+          isError: true,
+        );
+        return;
+      }
+      MainUserSync.instance.notifyUserUpdated(user);
       setState(() {
         _imgPath = user.imgPath;
         _zoomPath = null;
@@ -199,21 +225,25 @@ class _CharacterScreenState extends State<CharacterScreen> {
   Widget _header(CharacterDetailDto detail, TextTheme theme) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final size = constraints.maxWidth / 2;
+        final leftWidth = constraints.maxWidth * 0.4;
+        final rightWidth = constraints.maxWidth * 0.6;
         return IntrinsicHeight(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               SizedBox(
-                width: size,
+                width: leftWidth,
                 child: Align(
                   alignment: Alignment.topCenter,
-                  child: _hero(detail, size),
+                  child: _hero(detail, leftWidth),
                 ),
               ),
               SizedBox(
-                width: size,
-                child: _facts(detail, theme),
+                width: rightWidth,
+                child: Padding(
+                  padding: const EdgeInsetsDirectional.only(start: 20),
+                  child: _facts(detail, theme),
+                ),
               ),
             ],
           ),
@@ -487,10 +517,13 @@ class _CharacterScreenState extends State<CharacterScreen> {
           runSpacing: gap,
           children: [
             for (final item in detail.series)
-              SeriesThumbnail(
-                item: item,
+              SizedBox(
                 width: width,
-                onTap: () => SeriesRouter.pushOverview(context, item.id),
+                child: SeriesThumbnail(
+                  item: item,
+                  width: width,
+                  onTap: () => SeriesRouter.pushOverview(context, item.id),
+                ),
               ),
           ],
         );
@@ -576,20 +609,25 @@ class _ZoomSetButton extends StatelessWidget {
 }
 
 class _ProfilePreview extends StatelessWidget {
-  const _ProfilePreview({required this.path, required this.rarity});
+  const _ProfilePreview({required this.path});
 
   final String path;
-  final String rarity;
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.sizeOf(context).width * 0.8 * 0.3;
-    return CharacterRarityFrame(
-      rarity: rarity,
-      size: size,
-      child: CachedNetworkImage(
-        imageUrl: CdnThumbUrl.original(path),
-        fit: BoxFit.cover,
+    return Center(
+      child: SizedBox(
+        width: size,
+        height: size,
+        child: ClipOval(
+          child: CachedNetworkImage(
+            imageUrl: CdnThumbUrl.original(path),
+            width: size,
+            height: size,
+            fit: BoxFit.cover,
+          ),
+        ),
       ),
     );
   }
