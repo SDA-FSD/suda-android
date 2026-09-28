@@ -107,6 +107,28 @@ class RewardUnboxing extends StatefulWidget {
     }
   }
 
+  static Color _rarityLabelColor(String rarity) {
+    switch (CharacterRarityFrame.normalize(rarity)) {
+      case 'RARE':
+        return const Color(0xFF00D0FF);
+      case 'EPIC':
+        return const Color(0xFFDF3FF8);
+      default:
+        return const Color(0xFF71A431);
+    }
+  }
+
+  static String _rarityTagLabel(String rarity) {
+    switch (CharacterRarityFrame.normalize(rarity)) {
+      case 'RARE':
+        return 'Rare';
+      case 'EPIC':
+        return 'Epic';
+      default:
+        return 'Normal';
+    }
+  }
+
   @override
   State<RewardUnboxing> createState() => _RewardUnboxingState();
 }
@@ -615,6 +637,27 @@ class _RewardUnboxingState extends State<RewardUnboxing>
                   ),
                 ),
               ),
+              Positioned(
+                left: pos.dx + (charSize / 2) * math.cos(-math.pi / 4),
+                top: pos.dy + (charSize / 2) * math.sin(-math.pi / 4),
+                child: IgnorePointer(
+                  child: FractionalTranslation(
+                    translation: const Offset(-0.32, -0.68),
+                    child: Opacity(
+                      opacity: t,
+                      child: _RarityPill(
+                        label: RewardUnboxing._rarityTagLabel(
+                          item.characterRarity,
+                        ),
+                        color: RewardUnboxing._rarityLabelColor(
+                          item.characterRarity,
+                        ),
+                        diameter: charSize,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ],
           );
         },
@@ -651,36 +694,20 @@ class _RewardUnboxingState extends State<RewardUnboxing>
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (item.isNewCharacter)
+                    Text(
+                      l10n.rewardUnboxingNewCharacter,
+                      textAlign: TextAlign.center,
+                      style: theme.bodySmall?.merge(shadowStyle),
+                    ),
                   Text(
-                    l10n.rewardUnboxingNewCharacter,
+                    l10n.rewardUnboxingYouGot(
+                      item.characterName.trim().isEmpty
+                          ? '—'
+                          : item.characterName,
+                    ),
                     textAlign: TextAlign.center,
-                    style: theme.bodySmall?.merge(shadowStyle),
+                    style: theme.headlineLarge?.merge(shadowStyle),
                   ),
-                IntrinsicWidth(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text(
-                        l10n.rewardUnboxingYouGot(
-                          item.characterName.trim().isEmpty
-                              ? '—'
-                              : item.characterName,
-                        ),
-                        textAlign: TextAlign.center,
-                        style: theme.headlineLarge?.merge(shadowStyle),
-                      ),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: Text(
-                          CharacterRarityFrame.englishLabel(
-                            item.characterRarity,
-                          ),
-                          style: theme.bodySmall?.merge(shadowStyle),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
                 ],
               ),
             ),
@@ -812,6 +839,46 @@ class _RewardUnboxingState extends State<RewardUnboxing>
               width: 24,
               height: 24,
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _RarityPill extends StatelessWidget {
+  const _RarityPill({
+    required this.label,
+    required this.color,
+    required this.diameter,
+  });
+
+  final String label;
+  final Color color;
+  final double diameter;
+
+  @override
+  Widget build(BuildContext context) {
+    final fontSize = diameter * 0.072;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: Colors.white, width: diameter * 0.012),
+      ),
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: fontSize * 0.7,
+          vertical: fontSize * 0.28,
+        ),
+        child: Text(
+          label,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: Colors.white,
+            fontSize: fontSize,
+            fontWeight: FontWeight.w700,
+            fontVariations: const [FontVariation('wght', 700)],
+            height: 1.1,
           ),
         ),
       ),
