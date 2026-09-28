@@ -34,6 +34,8 @@ class HomeScreen extends StatefulWidget {
   final ValueChanged<HomeDto>? onHomeContentsLoaded;
   final ValueChanged<String>? onOpenAppPath;
   final bool showNotiboxUnreadBadge;
+  final bool showRankUnreadBadge;
+  final bool showProfileUnreadBadge;
 
   const HomeScreen({
     super.key,
@@ -46,6 +48,8 @@ class HomeScreen extends StatefulWidget {
     this.onHomeContentsLoaded,
     this.onOpenAppPath,
     this.showNotiboxUnreadBadge = false,
+    this.showRankUnreadBadge = false,
+    this.showProfileUnreadBadge = false,
   });
 
   @override
@@ -364,6 +368,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             isRankActive: false,
             isProfileActive: false,
             showNotiboxUnreadBadge: widget.showNotiboxUnreadBadge,
+            showRankUnreadBadge: widget.showRankUnreadBadge,
+            showProfileUnreadBadge: widget.showProfileUnreadBadge,
             onHomeTap: () {},
             onAlarmTap: widget.onNavigateToAlarm,
             onRankTap: widget.onNavigateToRank,

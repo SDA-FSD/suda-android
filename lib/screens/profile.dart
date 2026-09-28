@@ -59,6 +59,9 @@ class ProfileScreen extends StatefulWidget {
   /// Profile 탭이 활성인 상태에서 서브 스크린에서 pop으로 복귀할 때마다 증가
   final int? profileReturnCounter;
   final bool showNotiboxUnreadBadge;
+  final bool showRankUnreadBadge;
+  final bool showProfileUnreadBadge;
+  final VoidCallback? onGnbBadgesStale;
 
   const ProfileScreen({
     super.key,
@@ -71,6 +74,9 @@ class ProfileScreen extends StatefulWidget {
     this.isActive = false,
     this.profileReturnCounter,
     this.showNotiboxUnreadBadge = false,
+    this.showRankUnreadBadge = false,
+    this.showProfileUnreadBadge = false,
+    this.onGnbBadgesStale,
   });
 
   @override
@@ -563,6 +569,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       await RewardUnboxing.push(context, items);
       if (!mounted) return;
       await _loadProgress();
+      widget.onGnbBadgesStale?.call();
     } catch (e) {
       debugPrint('[DEBUG] level-up reward claim failed: $e');
     } finally {
@@ -1402,6 +1409,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         isRankActive: false,
         isProfileActive: true,
         showNotiboxUnreadBadge: widget.showNotiboxUnreadBadge,
+        showRankUnreadBadge: widget.showRankUnreadBadge,
+        showProfileUnreadBadge: widget.showProfileUnreadBadge,
         onHomeTap: widget.onNavigateToHome,
         onAlarmTap: widget.onNavigateToAlarm,
         onRankTap: widget.onNavigateToRank,

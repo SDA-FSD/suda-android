@@ -55,6 +55,10 @@ class SudaApiClient {
     );
   }
 
+  static Future<bool> markRankSeen({required String accessToken}) {
+    return RankApi.markSeen(accessToken: accessToken);
+  }
+
   static Future<List<int>> getRankingRewardClaimableIds({
     required String accessToken,
     required int periodId,

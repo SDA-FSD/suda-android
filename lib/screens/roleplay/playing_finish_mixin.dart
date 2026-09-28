@@ -8,6 +8,7 @@ import '../../config/app_config.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/series_models.dart';
 import '../../routes/roleplay_router.dart';
+import '../../services/rank_like_overlay.dart';
 import '../../services/series_state_service.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
@@ -176,6 +177,14 @@ mixin PlayingFinishMixin<T extends StatefulWidget>
     }
 
     SeriesStateService.instance.setCachedUserHistory(history);
+    final sessionLike = history.likePoint ?? 0;
+    final historyId = history.id;
+    if (historyId != null && sessionLike > 0) {
+      RankLikeOverlay.recordSessionLike(
+        historyId: historyId,
+        delta: sessionLike,
+      );
+    }
 
     if (isLastEpisode) {
       RoleplayRouter.replaceWithEnding(context);

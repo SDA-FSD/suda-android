@@ -18,6 +18,8 @@ class GnbBar extends StatelessWidget {
     required this.isRankActive,
     required this.isProfileActive,
     this.showNotiboxUnreadBadge = false,
+    this.showRankUnreadBadge = false,
+    this.showProfileUnreadBadge = false,
     this.onHomeTap,
     this.onAlarmTap,
     this.onRankTap,
@@ -30,6 +32,8 @@ class GnbBar extends StatelessWidget {
   final bool isRankActive;
   final bool isProfileActive;
   final bool showNotiboxUnreadBadge;
+  final bool showRankUnreadBadge;
+  final bool showProfileUnreadBadge;
   final VoidCallback? onHomeTap;
   final VoidCallback? onAlarmTap;
   final VoidCallback? onRankTap;
@@ -147,23 +151,10 @@ class GnbBar extends StatelessWidget {
                                       fit: BoxFit.contain,
                                     ),
                                     if (showNotiboxUnreadBadge)
-                                      Positioned(
+                                      const Positioned(
                                         right: -2,
                                         top: -3,
-                                        child: Container(
-                                          width: 9,
-                                          height: 9,
-                                          decoration: BoxDecoration(
-                                            color: const Color(0xFFFF5252),
-                                            shape: BoxShape.circle,
-                                            boxShadow: const [
-                                              BoxShadow(
-                                                color: Color(0x66FF5252),
-                                                blurRadius: 3,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
+                                        child: _GnbUnreadDot(),
                                       ),
                                   ],
                                 ),
@@ -175,12 +166,23 @@ class GnbBar extends StatelessWidget {
                               top: 0,
                               bottom: 0,
                               child: Center(
-                                child: Image.asset(
-                                  isRankActive
-                                      ? 'assets/images/icons/gnb_ranking_pressed.png'
-                                      : 'assets/images/icons/gnb_ranking.png',
-                                  width: iconSize,
-                                  fit: BoxFit.contain,
+                                child: Stack(
+                                  clipBehavior: Clip.none,
+                                  children: [
+                                    Image.asset(
+                                      isRankActive
+                                          ? 'assets/images/icons/gnb_ranking_pressed.png'
+                                          : 'assets/images/icons/gnb_ranking.png',
+                                      width: iconSize,
+                                      fit: BoxFit.contain,
+                                    ),
+                                    if (showRankUnreadBadge)
+                                      const Positioned(
+                                        right: -2,
+                                        top: -3,
+                                        child: _GnbUnreadDot(),
+                                      ),
+                                  ],
                                 ),
                               ),
                             ),
@@ -190,9 +192,20 @@ class GnbBar extends StatelessWidget {
                               top: 0,
                               bottom: 0,
                               child: Center(
-                                child: _GnbProfileAvatar(
-                                  imgPath: user?.imgPath,
-                                  isActive: isProfileActive,
+                                child: Stack(
+                                  clipBehavior: Clip.none,
+                                  children: [
+                                    _GnbProfileAvatar(
+                                      imgPath: user?.imgPath,
+                                      isActive: isProfileActive,
+                                    ),
+                                    if (showProfileUnreadBadge)
+                                      const Positioned(
+                                        right: -2,
+                                        top: -3,
+                                        child: _GnbUnreadDot(),
+                                      ),
+                                  ],
                                 ),
                               ),
                             ),
@@ -206,6 +219,29 @@ class GnbBar extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// GNB 아이콘 우상단 미확인 점. 종·랭킹·프로필이 같은 모양을 쓴다.
+class _GnbUnreadDot extends StatelessWidget {
+  const _GnbUnreadDot();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 9,
+      height: 9,
+      decoration: const BoxDecoration(
+        color: Color(0xFFFF5252),
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: Color(0x66FF5252),
+            blurRadius: 3,
+          ),
+        ],
       ),
     );
   }

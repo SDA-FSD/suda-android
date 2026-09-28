@@ -1,15 +1,18 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:marquee/marquee.dart';
+import 'package:vibration/vibration.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../models/rank_models.dart';
 import '../../models/user_models.dart';
 import '../../models/character_reward_models.dart';
+import '../../services/rank_like_overlay.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
 import '../../widgets/app_scaffold.dart';
@@ -38,6 +41,10 @@ class Ranking extends StatefulWidget {
     this.isActive = false,
     this.user,
     this.showNotiboxUnreadBadge = false,
+    this.showRankUnreadBadge = false,
+    this.showProfileUnreadBadge = false,
+    this.onRankSeen,
+    this.onGnbBadgesStale,
 
     /// Lab 미리보기: 서버 phase와 무관하게 ANNOUNCE UI 강제.
     this.forceAnnouncePhase = false,
@@ -47,6 +54,9 @@ class Ranking extends StatefulWidget {
 
     /// Lab: Ranking Reward Claim 등수 (1|2|3). [forceRankingRewardClaimPreview]일 때만 사용.
     this.forceRankingRewardClaimPlace = 1,
+
+    /// Lab: 목데이터로 내 등수·Like 상승 애니만 재생. API를 부르지 않는다.
+    this.rankBumpPreview,
   });
 
   final VoidCallback? onNavigateToHome;
@@ -55,9 +65,14 @@ class Ranking extends StatefulWidget {
   final bool isActive;
   final UserDto? user;
   final bool showNotiboxUnreadBadge;
+  final bool showRankUnreadBadge;
+  final bool showProfileUnreadBadge;
+  final VoidCallback? onRankSeen;
+  final VoidCallback? onGnbBadgesStale;
   final bool forceAnnouncePhase;
   final bool forceRankingRewardClaimPreview;
   final int forceRankingRewardClaimPlace;
+  final RankBumpPreview? rankBumpPreview;
 
   static const String routeName = '/rank';
 
@@ -96,8 +111,14 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
 
   RankScreenDto? _screen;
 
-  /// `/entries/me` 결과. null = 미참여(스냅샷 기준). live ripple 없음.
+  /// `/entries/me` 결과. null = 미참여(스냅샷 기준). 보정 애니 중에는 as-is.
   RankEntryDto? _myEntryKept;
+
+  /// 스냅샷 원본. 재배치 기준이라 보정으로 덮지 않는다.
+  RankEntryDto? _serverMyEntry;
+
+  /// 세션 Like 보정. 리스트 이동 애니 중에는 레이아웃에 쓰지 않는다.
+  RankPersonalization? _applied;
 
   /// `/entries/me` 호출 완료 여부. false면 sticky/미참여 판정 보류.
   bool _myEntryResolved = false;
@@ -113,6 +134,21 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
   /// 로드·탭 복귀 직후는 sticky 즉시. 이후 스크롤 토글만 페이드.
   bool _stickyFadeEnabled = false;
   late final AnimationController _stickyFadeController;
+
+  /// 등수·Like 동시 보간, 보이는 행의 이동. 1초.
+  late final AnimationController _bumpController;
+  Timer? _bumpStartTimer;
+  final List<Timer> _bumpHapticTimers = [];
+  int _bumpHapticGen = 0;
+  RankPersonalization? _queuedBump;
+  int _bumpGen = 0;
+  bool _bumpAnimating = false;
+  bool _bumpListMotion = false;
+  int _bumpFromRank = 0;
+  int _bumpFromLike = 0;
+  int _bumpToRank = 0;
+  int _bumpToLike = 0;
+  double _bumpRowHeight = 56;
   final ScrollController _scrollController = ScrollController();
   final GlobalKey _meRowKey = GlobalKey();
   bool _loading = true;
@@ -146,6 +182,10 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
       vsync: this,
       duration: _stickyFadeDuration,
     );
+    _bumpController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    )..addListener(_onBumpTick);
     _rankingRewardClaimAppearController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 150),
@@ -161,6 +201,10 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
       end: 1.0,
     ).animate(curved);
     _scrollController.addListener(_onScroll);
+    if (widget.rankBumpPreview != null) {
+      _installBumpPreview(widget.rankBumpPreview!);
+      return;
+    }
     if (widget.forceRankingRewardClaimPreview) {
       _rankingRewardClaimVisible = true;
       _rankingRewardClaimPlace = widget.forceRankingRewardClaimPlace.clamp(
@@ -182,6 +226,7 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
   @override
   void didUpdateWidget(covariant Ranking oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (widget.rankBumpPreview != null) return;
     if (!oldWidget.isActive && widget.isActive) {
       _jumpToListTop();
       unawaited(_loadScreen());
@@ -191,6 +236,10 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
   @override
   void dispose() {
     _tickTimer?.cancel();
+    _bumpStartTimer?.cancel();
+    _stopBumpHaptics();
+    _bumpController.removeListener(_onBumpTick);
+    _bumpController.dispose();
     _stickyFadeController.dispose();
     _rankingRewardClaimAppearController.dispose();
     _scrollController.removeListener(_onScroll);
@@ -222,8 +271,15 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
       }
       final dto = await SudaApiClient.getRankScreen(accessToken: token);
       if (!mounted) return;
-      // sticky 기준은 /entries/me. 목록 page isMe 스캔으로 덮지 않음.
-      _myEntryKept = dto.myEntry;
+      _bumpStartTimer?.cancel();
+      _stopBumpHaptics();
+      _queuedBump = null;
+      _bumpGen++;
+      _bumpController.stop();
+      _bumpAnimating = false;
+      _bumpListMotion = false;
+      _screen = dto;
+      _serverMyEntry = dto.myEntry;
       _myEntryResolved = true;
       _listRows = dto.listEntries;
       _snapshotMinute = dto.snapshotMinute;
@@ -231,18 +287,37 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
       _hasMorePages = dto.hasMore;
       _meRowSlot = _MeRowSlot.below;
       _stickyFadeEnabled = false;
+      _applied = null;
+      _queuedBump = null;
+      final personalization = _resolvePersonalization();
+      if (personalization != null && personalization.animate) {
+        _myEntryKept = _serverMyEntry;
+        _queuedBump = personalization;
+      } else {
+        _applied = personalization;
+        _myEntryKept = _entryAfterPersonalization(personalization);
+        if (personalization != null && personalization.rankChanged) {
+          RankLikeOverlay.markPresented(personalization.historyIds);
+        }
+      }
       debugPrint(
         'ranking loaded rows=${_listRows.length} hasMore=$_hasMorePages '
         'next=$_nextPageNum total=${dto.total} liveRankSize=${dto.period?.liveRankSize} '
-        'snap=$_snapshotMinute my=${_myEntryKept?.rank}',
+        'snap=$_snapshotMinute my=${_serverMyEntry?.rank} '
+        'bump=${personalization?.nowRank}/${personalization?.nowLike} '
+        'animate=${personalization?.animate}',
       );
       _applyCountdown(dto.period);
       setState(() {
-        _screen = dto;
         _loading = false;
       });
       _syncStickyFade(instant: true);
       unawaited(_maybeShowRankingRewardClaim(dto));
+      if (widget.rankBumpPreview == null &&
+          !widget.forceAnnouncePhase &&
+          !widget.forceRankingRewardClaimPreview) {
+        unawaited(_markRankSeen());
+      }
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         // 탭 복귀·리로드 시 항상 4위부터
@@ -251,6 +326,10 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
         _stickyFadeEnabled = true;
         // 화면 미충전 시만 다음 page (내 순위 탐색용 loadMore 금지 — /me가 담당)
         _requestLoadMoreIfNeeded();
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          _startQueuedBump();
+        });
       });
     } catch (_) {
       if (!mounted) return;
@@ -259,6 +338,315 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
         _loadFailed = true;
       });
     }
+  }
+
+  Future<void> _markRankSeen() async {
+    try {
+      final token = await TokenStorage.loadAccessToken();
+      if (token == null || token.isEmpty) return;
+      final recorded = await SudaApiClient.markRankSeen(accessToken: token);
+      if (!mounted || !recorded) return;
+      widget.onRankSeen?.call();
+    } catch (err) {
+      debugPrint('rank seen failed: $err');
+    }
+  }
+
+  RankPersonalization? _resolvePersonalization() {
+    if (_isAnnouncePhase) return null;
+    return RankLikeOverlay.resolve(
+      collect: _screen?.period?.phase == 'COLLECT',
+      snapshotMinute: _snapshotMinute,
+      me: _serverMyEntry,
+      board: _serverBoard(),
+    );
+  }
+
+  RankEntryDto? _entryAfterPersonalization(RankPersonalization? personalization) {
+    final me = _serverMyEntry;
+    if (me == null || personalization == null) return me;
+    return me.copyWith(
+      rank: personalization.rankChanged ? personalization.nowRank : me.rank,
+      weeklyLike: personalization.nowLike,
+      isMe: true,
+    );
+  }
+
+  void _installBumpPreview(RankBumpPreview preview) {
+    final meId = widget.user?.id ?? -1;
+    final board = <RankEntryDto>[
+      for (var rank = 1; rank <= 30; rank++)
+        RankEntryDto(
+          rank: rank,
+          userId: rank == preview.fromRank ? meId : 9000 + rank,
+          name: rank == preview.fromRank
+              ? ((widget.user?.name ?? '').trim().isEmpty
+                    ? 'You'
+                    : widget.user!.name!.trim())
+              : 'Player $rank',
+          imgPath: rank == preview.fromRank ? widget.user?.imgPath : null,
+          weeklyLike: rank == preview.fromRank
+              ? preview.fromLike
+              : 800 - rank * 5,
+          subscribedYn: 'N',
+          level: rank == preview.fromRank ? 4 : 2,
+          isMe: rank == preview.fromRank,
+        ),
+    ];
+    final me = board.firstWhere((e) => e.isMe);
+    final period = RankPeriodDto(
+      periodId: 1,
+      phase: 'COLLECT',
+      serverNow: DateTime.now().toUtc(),
+      phaseEndsAt: DateTime.now().toUtc().add(const Duration(days: 2)),
+      liveRankSize: board.length,
+    );
+    _screen = RankScreenDto(
+      period: period,
+      total: board.length,
+      topEntries: board.where((e) => e.rank <= 10).toList(),
+      myEntry: me,
+      listEntries: board.where((e) => e.rank >= 4).toList(),
+    );
+    _serverMyEntry = me;
+    _myEntryKept = me;
+    _myEntryResolved = true;
+    _listRows = _screen!.listEntries;
+    _hasMorePages = false;
+    _loading = false;
+    _loadFailed = false;
+    if (preview.fromRank > 10) {
+      _stickyFadeController.value = 1;
+    }
+    _applyCountdown(period);
+    _queuedBump = RankPersonalization(
+      asIsRank: preview.fromRank,
+      asIsLike: preview.fromLike,
+      nowRank: preview.toRank,
+      nowLike: preview.toLike,
+      rankChanged: preview.toRank < preview.fromRank,
+      animate: true,
+      historyIds: const [-1],
+    );
+    _bumpStartTimer = Timer(const Duration(milliseconds: 500), () {
+      if (!mounted) return;
+      _jumpToListTop();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _startQueuedBump();
+      });
+    });
+  }
+
+  void _onBumpTick() {
+    if (!mounted || !_bumpAnimating) return;
+    setState(() {});
+  }
+
+  double get _bumpT => Curves.easeInOutCubic.transform(_bumpController.value);
+
+  void _startQueuedBump() {
+    final personalization = _queuedBump;
+    if (personalization == null || !personalization.animate || !mounted) return;
+    _queuedBump = null;
+    final generation = ++_bumpGen;
+    final box = _meRowKey.currentContext?.findRenderObject();
+    if (box is RenderBox && box.hasSize && box.size.height >= 1) {
+      _bumpRowHeight = box.size.height;
+    } else {
+      _bumpRowHeight = 56;
+    }
+    final inList =
+        personalization.asIsRank >= 4 &&
+        (personalization.asIsRank <= 10 || _isMeRowInListViewport());
+    setState(() {
+      _bumpFromRank = personalization.asIsRank;
+      _bumpFromLike = personalization.asIsLike;
+      _bumpToRank = personalization.nowRank;
+      _bumpToLike = personalization.nowLike;
+      _bumpListMotion = inList;
+      _bumpAnimating = true;
+    });
+    RankLikeOverlay.markPresented(personalization.historyIds);
+    _startBumpHaptics();
+    _bumpController.forward(from: 0).whenComplete(() {
+      if (!mounted || generation != _bumpGen) return;
+      setState(() {
+        _bumpAnimating = false;
+        _bumpListMotion = false;
+        _applied = personalization;
+        _myEntryKept = _entryAfterPersonalization(personalization);
+      });
+      _stopBumpHaptics();
+      _updateMeRowSlot();
+    });
+  }
+
+  void _startBumpHaptics() {
+    _cancelBumpHapticTimers();
+    final generation = _bumpHapticGen;
+    _scheduleBumpHaptic(generation, 40, 50, 140);
+    _scheduleBumpHaptic(generation, 360, 80, 255);
+    _scheduleBumpHaptic(generation, 720, 40, 120);
+  }
+
+  void _scheduleBumpHaptic(
+    int generation,
+    int delayMs,
+    int durationMs,
+    int amplitude,
+  ) {
+    _bumpHapticTimers.add(
+      Timer(Duration(milliseconds: delayMs), () {
+        if (!mounted || generation != _bumpHapticGen || !_bumpAnimating) {
+          return;
+        }
+        unawaited(_vibrateBump(durationMs, amplitude));
+      }),
+    );
+  }
+
+  Future<void> _vibrateBump(int durationMs, int amplitude) async {
+    try {
+      await Vibration.vibrate(duration: durationMs, amplitude: amplitude);
+    } catch (_) {}
+  }
+
+  void _cancelBumpHapticTimers() {
+    _bumpHapticGen++;
+    for (final timer in _bumpHapticTimers) {
+      timer.cancel();
+    }
+    _bumpHapticTimers.clear();
+  }
+
+  void _stopBumpHaptics() {
+    _cancelBumpHapticTimers();
+    unawaited(_vibrateCancel());
+  }
+
+  Future<void> _vibrateCancel() async {
+    try {
+      await Vibration.cancel();
+    } catch (_) {}
+  }
+
+  bool _isMeRowInListViewport() {
+    final ctx = _meRowKey.currentContext;
+    if (ctx == null || !_scrollController.hasClients) return false;
+    final render = ctx.findRenderObject();
+    if (render is! RenderBox || !render.hasSize) return false;
+    final viewport = RenderAbstractViewport.maybeOf(render);
+    if (viewport == null) return false;
+    final position = _scrollController.position;
+    final itemTop = viewport.getOffsetToReveal(render, 0.0).offset;
+    final itemBottom = itemTop + render.size.height;
+    final pixels = position.pixels;
+    final viewportBottom =
+        pixels + position.viewportDimension - GnbBar.contentHeight;
+    return itemBottom > pixels && itemTop < viewportBottom;
+  }
+
+  List<RankEntryDto> _serverBoard() {
+    final byUser = <int, RankEntryDto>{};
+    final noId = <RankEntryDto>[];
+    void add(RankEntryDto entry) {
+      final id = entry.userId;
+      if (id == null) {
+        noId.add(entry);
+        return;
+      }
+      byUser[id] = entry;
+    }
+
+    for (final entry in _screen?.topEntries ?? const <RankEntryDto>[]) {
+      add(entry);
+    }
+    for (final entry in _listRows) {
+      add(entry);
+    }
+    final meId = _serverMyEntry?.userId ?? widget.user?.id;
+    final board = [...byUser.values, ...noId]
+      ..sort((a, b) => a.rank.compareTo(b.rank));
+    return [
+      for (final entry in board)
+        entry.copyWith(
+          isMe: entry.isMe || (meId != null && entry.userId == meId),
+        ),
+    ];
+  }
+
+  List<RankEntryDto> _layoutBoard() {
+    final server = _serverBoard();
+    final applied = _applied;
+    if (applied == null || !applied.rankChanged || _bumpListMotion) {
+      return server;
+    }
+    RankEntryDto? me;
+    for (final entry in server) {
+      if (entry.isMe) {
+        me = entry;
+        break;
+      }
+    }
+    me ??= _serverMyEntry;
+    if (me == null) return server;
+    return RankLikeOverlay.reorder(
+      board: server,
+      me: me,
+      nowRank: applied.nowRank,
+      nowLike: applied.nowLike,
+    );
+  }
+
+  int _shownRank(RankEntryDto entry) {
+    if (!_bumpAnimating || !_bumpListMotion) return entry.rank;
+    final t = _bumpT;
+    if (entry.isMe) return _lerpInt(_bumpFromRank, _bumpToRank, t);
+    if (entry.rank >= _bumpToRank && entry.rank < _bumpFromRank) {
+      return _lerpInt(entry.rank, entry.rank + 1, t);
+    }
+    return entry.rank;
+  }
+
+  int _shownLike(RankEntryDto entry) {
+    if (!entry.isMe) return entry.weeklyLike;
+    if (_bumpAnimating) return _lerpInt(_bumpFromLike, _bumpToLike, _bumpT);
+    final applied = _applied;
+    if (applied != null) return applied.nowLike;
+    return entry.weeklyLike;
+  }
+
+  double _rowShift(RankEntryDto entry) {
+    if (!_bumpListMotion) return 0;
+    if (entry.isMe) {
+      if (_bumpToRank <= 3) {
+        final index = _asIsListIndexOfMe();
+        if (index == null) return 0;
+        return -(index + 1) * _bumpRowHeight;
+      }
+      return (_bumpToRank - _bumpFromRank) * _bumpRowHeight;
+    }
+    if (entry.rank >= 4 &&
+        entry.rank >= _bumpToRank &&
+        entry.rank < _bumpFromRank) {
+      return _bumpRowHeight;
+    }
+    return 0;
+  }
+
+  int? _asIsListIndexOfMe() {
+    var index = 0;
+    for (final entry in _serverBoard()) {
+      if (entry.rank < 4) continue;
+      if (entry.isMe) return index;
+      index++;
+    }
+    return null;
+  }
+
+  static int _lerpInt(int from, int to, double t) {
+    return (from + (to - from) * t).round();
   }
 
   void _applyCountdown(RankPeriodDto? period) {
@@ -400,25 +788,22 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
   }
 
   RankEntryDto? _entryAt(int rank) {
-    final list = _screen?.topEntries ?? const <RankEntryDto>[];
-    for (final e in list) {
-      if (e.rank == rank) return e;
+    for (final entry in _layoutBoard()) {
+      if (entry.rank != rank) continue;
+      if (entry.isMe && _bumpAnimating) {
+        return entry.copyWith(
+          weeklyLike: _lerpInt(_bumpFromLike, _bumpToLike, _bumpT),
+        );
+      }
+      if (entry.isMe && _applied != null && !_applied!.rankChanged) {
+        return entry.copyWith(weeklyLike: _applied!.nowLike);
+      }
+      return entry;
     }
     return null;
   }
 
-  List<RankEntryDto> _buildDisplayRows() {
-    final meId = widget.user?.id;
-    final me = _myEntryKept;
-    final base = [..._listRows]..sort((a, b) => a.rank.compareTo(b.rank));
-    return base.map((e) {
-      final isMe =
-          e.isMe ||
-          (meId != null && e.userId == meId) ||
-          (me != null && e.userId == me.userId);
-      return e.copyWith(isMe: isMe);
-    }).toList();
-  }
+  List<RankEntryDto> _buildDisplayRows() => _layoutBoard();
 
   void _jumpToListTop() {
     if (_scrollController.hasClients) {
@@ -439,6 +824,7 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
   }
 
   void _requestLoadMoreIfNeeded() {
+    if (_queuedBump != null || _bumpAnimating) return;
     if (!_hasMorePages || _nextPageNum == null || _loadingMore) return;
     if (!_scrollController.hasClients) {
       unawaited(_loadMore());
@@ -501,6 +887,7 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
   }
 
   Future<void> _loadMore() async {
+    if (_queuedBump != null || _bumpAnimating) return;
     if (_loadingMore || !_hasMorePages || _nextPageNum == null) return;
     final token = await TokenStorage.loadAccessToken();
     if (token == null || token.isEmpty) return;
@@ -590,6 +977,8 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
       isRankActive: true,
       isProfileActive: false,
       showNotiboxUnreadBadge: widget.showNotiboxUnreadBadge,
+      showRankUnreadBadge: widget.showRankUnreadBadge,
+      showProfileUnreadBadge: widget.showProfileUnreadBadge,
       onHomeTap: widget.onNavigateToHome,
       onAlarmTap: widget.onNavigateToAlarm,
       onRankTap: () {},
@@ -602,7 +991,9 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
     // 배경은 GNB 뒤까지, GNB는 레이어 위에 다시 올려 글래시.
     final scaffold = AppScaffold(
       showBackButton:
-          widget.forceAnnouncePhase || widget.forceRankingRewardClaimPreview,
+          widget.forceAnnouncePhase ||
+          widget.forceRankingRewardClaimPreview ||
+          widget.rankBumpPreview != null,
       usePadding: false,
       bodyTopPadding: 16,
       backgroundColor: const Color(0xFF0D011F),
@@ -627,6 +1018,14 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
               },
               child: _RankMyEntrySticky(
                 entry: _myEntryKept!,
+                displayRank: _bumpAnimating && !_bumpListMotion
+                    ? _lerpInt(_bumpFromRank, _bumpToRank, _bumpT)
+                    : null,
+                displayLike: _bumpAnimating && !_bumpListMotion
+                    ? _lerpInt(_bumpFromLike, _bumpToLike, _bumpT)
+                    : null,
+                pulseValues: _bumpAnimating && !_bumpListMotion,
+                pulseT: _bumpT,
                 defaultProfile: _defaultProfile,
                 premiumBadge: _premiumBadge,
               ),
@@ -754,6 +1153,9 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
         Navigator.of(context).maybePop();
       }
       return;
+    }
+    if (!widget.forceRankingRewardClaimPreview) {
+      widget.onGnbBadgesStale?.call();
     }
     await RewardUnboxing.preload(context, items);
     if (!mounted) return;
@@ -972,15 +1374,29 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
                                   index >= displayRows.length - 5) {
                                 unawaited(_loadMore());
                               }
-                              return _RankListRow(
-                                key: entry.isMe ? _meRowKey : null,
-                                rank: entry.rank,
-                                entry: entry,
-                                defaultProfile: _defaultProfile,
-                                premiumBadge: _premiumBadge,
-                                contentHorizontal: side,
-                                onOpenProfile: () =>
-                                    _openOtherUserProfile(entry),
+                              final shift = _rowShift(entry) * _bumpT;
+                              return Transform.translate(
+                                offset: Offset(0, shift),
+                                child: _RankListRow(
+                                  key: entry.isMe
+                                      ? _meRowKey
+                                      : ValueKey(entry.userId ?? entry.rank),
+                                  rank: _shownRank(entry),
+                                  likeOverride: entry.isMe
+                                      ? _shownLike(entry)
+                                      : null,
+                                  pulseValues:
+                                      entry.isMe &&
+                                      _bumpAnimating &&
+                                      _bumpListMotion,
+                                  pulseT: _bumpT,
+                                  entry: entry,
+                                  defaultProfile: _defaultProfile,
+                                  premiumBadge: _premiumBadge,
+                                  contentHorizontal: side,
+                                  onOpenProfile: () =>
+                                      _openOtherUserProfile(entry),
+                                ),
                               );
                             },
                           );
@@ -1474,6 +1890,9 @@ class _RankListRow extends StatelessWidget {
     required this.premiumBadge,
     this.contentHorizontal = 24,
     this.flushTop = false,
+    this.likeOverride,
+    this.pulseValues = false,
+    this.pulseT = 0,
     this.onOpenProfile,
   });
 
@@ -1489,6 +1908,13 @@ class _RankListRow extends StatelessWidget {
   /// sticky: 상단 margin 제거(하이라이트가 위로 붙음). 하단만 2 유지.
   final bool flushTop;
 
+  /// 보정 애니 중 표시 Like. null이면 [entry.weeklyLike].
+  final int? likeOverride;
+
+  /// 등수·Like가 올라가는 1초. bold로 커졌다 작아진다.
+  final bool pulseValues;
+  final double pulseT;
+
   static const _listAvatarOuter = 40.0;
   static const _listBorderW = 2.0;
 
@@ -1499,7 +1925,9 @@ class _RankListRow extends StatelessWidget {
     final displayName = (isEmpty || name.isEmpty) ? '—' : name;
     final isMe = entry?.isMe == true;
     final isPremium = !isEmpty && entry!.subscribedYn == 'Y';
-    final likeText = isEmpty ? '—' : '${entry!.weeklyLike}';
+    final likeText = isEmpty
+        ? '—'
+        : '${likeOverride ?? entry!.weeklyLike}';
     const nameStyle = TextStyle(
       fontFamily: 'ChironHeiHK',
       color: Colors.white,
@@ -1515,9 +1943,13 @@ class _RankListRow extends StatelessWidget {
         children: [
           SizedBox(
             width: 28,
-            child: Text(
-              '$rank',
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+            child: _RankPulseValue(
+              pulse: pulseValues,
+              t: pulseT,
+              text: '$rank',
+              style: (Theme.of(context).textTheme.titleSmall ??
+                      const TextStyle(fontSize: 14))
+                  .copyWith(
                 color: Colors.white,
                 fontWeight: FontWeight.w700,
               ),
@@ -1634,8 +2066,10 @@ class _RankListRow extends StatelessWidget {
                 height: 14,
               ),
               const SizedBox(width: 4),
-              Text(
-                likeText,
+              _RankPulseValue(
+                pulse: pulseValues,
+                t: pulseT,
+                text: likeText,
                 style: const TextStyle(
                   fontFamily: 'ChironHeiHK',
                   color: Colors.white,
@@ -1683,24 +2117,68 @@ class _LevelBadge extends StatelessWidget {
   }
 }
 
+/// 올라가는 1초 동안 등수·Like 숫자를 bold로 키웠다 줄인다.
+class _RankPulseValue extends StatelessWidget {
+  const _RankPulseValue({
+    required this.text,
+    required this.style,
+    required this.pulse,
+    required this.t,
+  });
+
+  final String text;
+  final TextStyle style;
+  final bool pulse;
+  final double t;
+
+  @override
+  Widget build(BuildContext context) {
+    final shown = pulse
+        ? style.copyWith(
+            fontWeight: FontWeight.w900,
+            fontVariations: const [FontVariation('wght', 900)],
+          )
+        : style;
+    final child = Text(text, style: shown);
+    if (!pulse) return child;
+    final scale = 1 + 0.34 * math.sin(t.clamp(0.0, 1.0) * math.pi);
+    return Transform.scale(
+      scale: scale,
+      alignment: Alignment.center,
+      child: child,
+    );
+  }
+}
+
 /// GNB 위 고정 내 순위. 자기 행이 뷰포트보다 아래일 때만 표시.
 class _RankMyEntrySticky extends StatelessWidget {
   const _RankMyEntrySticky({
     required this.entry,
     required this.defaultProfile,
     required this.premiumBadge,
+    this.displayRank,
+    this.displayLike,
+    this.pulseValues = false,
+    this.pulseT = 0,
   });
 
   final RankEntryDto entry;
   final String defaultProfile;
   final String premiumBadge;
+  final int? displayRank;
+  final int? displayLike;
+  final bool pulseValues;
+  final double pulseT;
 
   @override
   Widget build(BuildContext context) {
     return Material(
       color: Colors.transparent,
       child: _RankListRow(
-        rank: entry.rank,
+        rank: displayRank ?? entry.rank,
+        likeOverride: displayLike,
+        pulseValues: pulseValues,
+        pulseT: pulseT,
         entry: entry,
         defaultProfile: defaultProfile,
         premiumBadge: premiumBadge,

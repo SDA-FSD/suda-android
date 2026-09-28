@@ -234,6 +234,38 @@ class RankApi {
     return RankEntryPageDto.fromJson(data);
   }
 
+  /// POST /v1/rank/seen — COLLECT에서 이번 스냅샷 등수를 본 것으로 기록.
+  static Future<bool> markSeen({required String accessToken}) {
+    return SudaHttpClient.executeWithRefresh(
+      () => _markSeen(accessToken),
+      retryWithNewToken: _markSeen,
+    );
+  }
+
+  static Future<bool> _markSeen(String accessToken) async {
+    final uri = SudaHttpClient.buildUri('/v1/rank/seen');
+    final response = await SudaHttpClient.client
+        .post(
+          uri,
+          headers: {
+            ..._headers,
+            'Authorization': 'Bearer $accessToken',
+          },
+        )
+        .timeout(const Duration(seconds: 10));
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw Exception(
+        'POST /v1/rank/seen failed: HTTP ${response.statusCode} ${response.body}',
+      );
+    }
+    final data = jsonDecode(response.body);
+    if (data is! Map) return false;
+    return data['recordedYn'] == 'Y';
+  }
+
   static Future<http.Response> _get(
     String path,
     String accessToken, [

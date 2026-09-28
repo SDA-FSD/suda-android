@@ -65,6 +65,8 @@ class NotificationBoxScreen extends StatefulWidget {
     this.isActive = false,
     this.user,
     this.showNotiboxUnreadBadge = false,
+    this.showRankUnreadBadge = false,
+    this.showProfileUnreadBadge = false,
     this.onFirstPageUnreadDetected,
     this.focusNotificationId,
     this.onFocusAnchorConsumed,
@@ -77,6 +79,8 @@ class NotificationBoxScreen extends StatefulWidget {
   final bool isActive;
   final UserDto? user;
   final bool showNotiboxUnreadBadge;
+  final bool showRankUnreadBadge;
+  final bool showProfileUnreadBadge;
   /// 첫 페이지(0) 조회 직후·펼침 읽음 처리 직후 등, 목록 기준 미읽음 존재 여부.
   /// [allPagesLoaded]는 notibox를 끝(빈 페이지)까지 로드했을 때만 true — GNB 배지와 서버 플래그 불일치 보정에 사용.
   final void Function(bool hasUnread, {bool allPagesLoaded})? onFirstPageUnreadDetected;
@@ -327,6 +331,8 @@ class _NotificationBoxScreenState extends State<NotificationBoxScreen> {
         isRankActive: false,
         isProfileActive: false,
         showNotiboxUnreadBadge: widget.showNotiboxUnreadBadge,
+        showRankUnreadBadge: widget.showRankUnreadBadge,
+        showProfileUnreadBadge: widget.showProfileUnreadBadge,
         onHomeTap: widget.onNavigateToHome,
         onAlarmTap: widget.onNavigateToAlarm,
         onRankTap: widget.onNavigateToRank,

@@ -9,6 +9,7 @@ import '../../effects/ribbon_burst_effect.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/series_models.dart';
 import '../../routes/roleplay_router.dart';
+import '../../services/rank_like_overlay.dart';
 import '../../services/series_state_service.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/default_toast.dart';
@@ -194,6 +195,22 @@ class _LabScreenState extends State<LabScreen> {
 
   void _showTestToastLong() {
     DefaultToast.show(context, _longToastTestMessage, isError: _toastIsWarning);
+  }
+
+  Future<void> _openRankingBumpPreview(RankBumpPreview preview) async {
+    if (!mounted) return;
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (routeContext) => Ranking(
+          rankBumpPreview: preview,
+          isActive: true,
+          onNavigateToHome: () => Navigator.of(routeContext).pop(),
+          onNavigateToAlarm: () => Navigator.of(routeContext).pop(),
+          onNavigateToProfile: () => Navigator.of(routeContext).pop(),
+        ),
+      ),
+    );
   }
 
   Future<void> _openRankingAnnouncePreview() async {
@@ -834,6 +851,18 @@ class _LabScreenState extends State<LabScreen> {
             Text(
               'Ranking',
               style: theme.headlineSmall?.copyWith(color: Colors.white),
+            ),
+            const SizedBox(height: 12),
+            _buildLabScreenButton(
+              label: 'Play Ranking Bump (on screen)',
+              onPressed: () =>
+                  unawaited(_openRankingBumpPreview(RankBumpPreview.onScreen)),
+            ),
+            const SizedBox(height: 12),
+            _buildLabScreenButton(
+              label: 'Play Ranking Bump (sticky)',
+              onPressed: () =>
+                  unawaited(_openRankingBumpPreview(RankBumpPreview.sticky)),
             ),
             const SizedBox(height: 12),
             _buildLabScreenButton(

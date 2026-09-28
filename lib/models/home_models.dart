@@ -16,6 +16,8 @@ class HomeDto {
   final DateTime? restStartsAt;
   final DateTime? restEndsAt;
   final String notiboxUnreadYn;
+  final String rankBadgeYn;
+  final String profileBadgeYn;
   final List<MainHomeBannerDto> banners;
   final List<HomeSeriesGroupDto> seriesList;
 
@@ -24,6 +26,8 @@ class HomeDto {
     this.restStartsAt,
     this.restEndsAt,
     this.notiboxUnreadYn = 'N',
+    this.rankBadgeYn = 'N',
+    this.profileBadgeYn = 'N',
     required this.banners,
     required this.seriesList,
   });
@@ -72,6 +76,8 @@ class HomeDto {
       restStartsAt: parseInstant(json['restStartsAt']),
       restEndsAt: parseInstant(json['restEndsAt']),
       notiboxUnreadYn: notiboxUnreadYn,
+      rankBadgeYn: sudaYnFromJson(json['rankBadgeYn']),
+      profileBadgeYn: sudaYnFromJson(json['profileBadgeYn']),
       banners: banners,
       seriesList: seriesList,
     );

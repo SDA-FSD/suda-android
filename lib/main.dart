@@ -150,6 +150,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   /// 마지막 홈 `getHomeContents`의 `notiboxUnreadYn` (`onHomeContentsLoaded`만 갱신)
   String _homeNotiboxUnreadYn = 'N';
+  String _homeRankBadgeYn = 'N';
+  String _homeProfileBadgeYn = 'N';
 
   /// `GET /v1/users/notification?pageNum=0` 기준 미읽음 존재 여부
   bool _notiboxHasUnreadFromAlarmList = false;
@@ -161,6 +163,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   bool get _showNotiboxUnreadBadge =>
       _homeNotiboxUnreadYn == 'Y' || _notiboxHasUnreadFromAlarmList;
+
+  bool get _showRankUnreadBadge => _homeRankBadgeYn == 'Y';
+
+  bool get _showProfileUnreadBadge => _homeProfileBadgeYn == 'Y';
 
   /// resumed / onMessage / 서브→메인 복귀 등에서 연속 호출 완화
   static const _notiboxListSyncCooldown = Duration(seconds: 2);
@@ -259,7 +265,22 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   void _onHomeContentsLoadedForBadge(HomeDto home) {
     if (!mounted) return;
-    setState(() => _homeNotiboxUnreadYn = home.notiboxUnreadYn);
+    setState(() {
+      _homeNotiboxUnreadYn = home.notiboxUnreadYn;
+      _homeRankBadgeYn = home.rankBadgeYn;
+      _homeProfileBadgeYn = home.profileBadgeYn;
+    });
+  }
+
+  Future<void> _refreshGnbBadges() async {
+    final token = await TokenStorage.loadAccessToken();
+    if (token == null || token.isEmpty) return;
+    try {
+      final home = await SudaApiClient.getHomeContents(accessToken: token);
+      _onHomeContentsLoadedForBadge(home);
+    } catch (e) {
+      debugPrint('[DEBUG] gnb badge refresh failed: $e');
+    }
   }
 
   static const int _notiboxApiPageSize = 10;
@@ -980,6 +1001,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                           homeTabSelectedCounter: _homeTabSelectedCounter,
                           isActive: _currentMainScreen == 'home',
                           showNotiboxUnreadBadge: _showNotiboxUnreadBadge,
+                          showRankUnreadBadge: _showRankUnreadBadge,
+                          showProfileUnreadBadge: _showProfileUnreadBadge,
                           onHomeContentsLoaded: _onHomeContentsLoadedForBadge,
                           onOpenAppPath: (path) {
                             _applyPendingPushNavigation(
@@ -995,6 +1018,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                           isActive: _currentMainScreen == 'alarm',
                           user: _user,
                           showNotiboxUnreadBadge: _showNotiboxUnreadBadge,
+                          showRankUnreadBadge: _showRankUnreadBadge,
+                          showProfileUnreadBadge: _showProfileUnreadBadge,
                           onFirstPageUnreadDetected:
                               _onNotificationFirstPageUnread,
                           focusNotificationId: _notiboxAnchorNotificationId,
@@ -1013,6 +1038,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                           isActive: _currentMainScreen == 'rank',
                           user: _user,
                           showNotiboxUnreadBadge: _showNotiboxUnreadBadge,
+                          showRankUnreadBadge: _showRankUnreadBadge,
+                          showProfileUnreadBadge: _showProfileUnreadBadge,
+                          onRankSeen: () {
+                            if (mounted) setState(() => _homeRankBadgeYn = 'N');
+                          },
+                          onGnbBadgesStale: () => unawaited(_refreshGnbBadges()),
                         ),
                         ProfileScreen(
                           onNavigateToHome: _navigateToHome,
@@ -1028,6 +1059,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                           isActive: _currentMainScreen == 'profile',
                           profileReturnCounter: _profileReturnCounter,
                           showNotiboxUnreadBadge: _showNotiboxUnreadBadge,
+                          showRankUnreadBadge: _showRankUnreadBadge,
+                          showProfileUnreadBadge: _showProfileUnreadBadge,
+                          onGnbBadgesStale: () => unawaited(_refreshGnbBadges()),
                         ),
                       ],
                     ),
