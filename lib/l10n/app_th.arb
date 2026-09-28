@@ -142,6 +142,7 @@
   "feedbackSend": "ส่ง",
   "feedbackSuccess": "ขอบคุณสำหรับความคิดเห็น",
   "speechFeedbackUnavailable": "ไม่มีฟีดแบ็ก",
+  "speechFeedbackNoRecording": "ไม่มีไฟล์เสียงที่บันทึกไว้",
   "microphonePermissionDenied": "เริ่มไม่ได้หากไม่อนุญาตให้ใช้ไมโครโฟน",
   "holdMicrophoneToSpeak": "กดไมโครโฟนค้างไว้แล้วพูด",
   "roleplayTypeMessagePlaceholder": "พิมพ์ข้อความ...",

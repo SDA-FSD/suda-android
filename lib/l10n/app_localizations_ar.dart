@@ -347,6 +347,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get speechFeedbackUnavailable => 'لا توجد ملاحظات متاحة.';
 
   @override
+  String get speechFeedbackNoRecording => 'لا يوجد تسجيل متاح.';
+
+  @override
   String get microphonePermissionDenied =>
       'لا يمكن البدء من دون إذن الميكروفون.';
 

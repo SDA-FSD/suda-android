@@ -352,6 +352,9 @@ class AppLocalizationsVi extends AppLocalizations {
   String get speechFeedbackUnavailable => 'Không có feedback.';
 
   @override
+  String get speechFeedbackNoRecording => 'Không có bản ghi âm.';
+
+  @override
   String get microphonePermissionDenied =>
       'Không thể bắt đầu khi chưa có quyền dùng micrô.';
 

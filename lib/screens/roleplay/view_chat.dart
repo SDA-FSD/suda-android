@@ -59,6 +59,8 @@ class _ViewChatScreenState extends State<ViewChatScreen> {
   int? _playingMsgId;
   int? _loadingMsgId;
   int? _feedbackTtsMsgId;
+  int? _improvedMsgId;
+  bool _improvedPlaying = false;
 
   List<RpS2UserHistoryMsgDto> get _messages => widget.history.messages;
 
@@ -104,6 +106,8 @@ class _ViewChatScreenState extends State<ViewChatScreen> {
       _playingMsgId = null;
       _loadingMsgId = null;
       _feedbackTtsMsgId = null;
+      _improvedMsgId = null;
+      _improvedPlaying = false;
     });
   }
 
@@ -166,6 +170,8 @@ class _ViewChatScreenState extends State<ViewChatScreen> {
       _playingMsgId = msgId;
       _loadingMsgId = msgId;
       _feedbackTtsMsgId = null;
+      _improvedMsgId = null;
+      _improvedPlaying = false;
     });
 
     try {
@@ -275,7 +281,90 @@ class _ViewChatScreenState extends State<ViewChatScreen> {
       _playingMsgId = null;
       _loadingMsgId = null;
       _feedbackTtsMsgId = null;
+      _improvedMsgId = null;
+      _improvedPlaying = false;
     });
+  }
+
+  Future<void> _stopImprovedSentence(int rpMsgId) async {
+    if (_improvedMsgId != rpMsgId) return;
+    await _stopPlayback();
+  }
+
+  Future<void> _onImprovedTap(int rpMsgId) async {
+    if (_isAutoPlaying) {
+      setState(() => _isAutoPlaying = false);
+    }
+    _playSeq++;
+    final seq = _playSeq;
+    _audioSub?.cancel();
+    _audioSub = null;
+    await _ttsPlayer.stop();
+
+    if (!mounted || seq != _playSeq) return;
+    setState(() {
+      _playingMsgId = null;
+      _loadingMsgId = null;
+      _feedbackTtsMsgId = null;
+      _improvedMsgId = rpMsgId;
+      _improvedPlaying = false;
+    });
+
+    final historyId = widget.history.id;
+    final token = await TokenStorage.loadAccessToken();
+    if (!mounted || seq != _playSeq) return;
+    if (historyId == null || token == null) {
+      setState(() {
+        _improvedMsgId = null;
+        _improvedPlaying = false;
+      });
+      return;
+    }
+
+    try {
+      final tts = await SudaApiClient.getRpS2UserHistoryImprovedSentenceAudio(
+        accessToken: token,
+        rpUserHistoryId: historyId,
+        rpMsgId: rpMsgId,
+      );
+      if (!mounted || seq != _playSeq) return;
+
+      final source = await _prepareAudio(
+        cdnYn: tts.cdnYn,
+        cdnPath: tts.cdnPath,
+        soundBytes: tts.sound,
+      );
+      if (!mounted || seq != _playSeq) return;
+      if (source == null) {
+        setState(() {
+          _improvedMsgId = null;
+          _improvedPlaying = false;
+        });
+        return;
+      }
+
+      setState(() => _improvedPlaying = true);
+      _audioSub = _ttsPlayer.playerStateStream.listen((state) {
+        if (state.processingState == ProcessingState.completed) {
+          _audioSub?.cancel();
+          _audioSub = null;
+          if (!mounted || seq != _playSeq) return;
+          setState(() {
+            _improvedMsgId = null;
+            _improvedPlaying = false;
+          });
+        }
+      });
+      await _ttsPlayer.play();
+    } catch (_) {
+      _audioSub?.cancel();
+      _audioSub = null;
+      if (!mounted || seq != _playSeq) return;
+      setState(() {
+        _improvedMsgId = null;
+        _improvedPlaying = false;
+      });
+    }
   }
 
   Future<void> _stopFeedbackTts(int rpMsgId) async {
@@ -301,6 +390,8 @@ class _ViewChatScreenState extends State<ViewChatScreen> {
       _playingMsgId = null;
       _loadingMsgId = null;
       _feedbackTtsMsgId = null;
+      _improvedMsgId = null;
+      _improvedPlaying = false;
     });
 
     final historyId = widget.history.id;
@@ -434,6 +525,18 @@ class _ViewChatScreenState extends State<ViewChatScreen> {
           onAudioTap: () => unawaited(_onPlayTap(message)),
           onLoadAndPlayFeedbackAudio: _loadAndPlayFeedbackAudio,
           onStopFeedbackAudio: _stopFeedbackTts,
+          improvedFetching:
+              message.id != null &&
+              _improvedMsgId == message.id &&
+              !_improvedPlaying,
+          improvedPlaying:
+              message.id != null &&
+              _improvedMsgId == message.id &&
+              _improvedPlaying,
+          onImprovedTap: message.id == null
+              ? () {}
+              : () => unawaited(_onImprovedTap(message.id!)),
+          onStopImprovedAudio: _stopImprovedSentence,
         );
       case _kRoleAiCharacter:
         return _buildAiBubble(context, bodyWidth, message, text);
@@ -629,6 +732,10 @@ class _ViewChatUserCard extends StatefulWidget {
     required this.onAudioTap,
     required this.onLoadAndPlayFeedbackAudio,
     required this.onStopFeedbackAudio,
+    required this.improvedFetching,
+    required this.improvedPlaying,
+    required this.onImprovedTap,
+    required this.onStopImprovedAudio,
   });
 
   final RpS2UserHistoryMsgDto message;
@@ -644,6 +751,10 @@ class _ViewChatUserCard extends StatefulWidget {
     required VoidCallback onReadyToPlay,
   }) onLoadAndPlayFeedbackAudio;
   final Future<void> Function(int rpMsgId) onStopFeedbackAudio;
+  final bool improvedFetching;
+  final bool improvedPlaying;
+  final VoidCallback onImprovedTap;
+  final Future<void> Function(int rpMsgId) onStopImprovedAudio;
 
   @override
   State<_ViewChatUserCard> createState() => _ViewChatUserCardState();
@@ -653,8 +764,14 @@ class _ViewChatUserCardState extends State<_ViewChatUserCard> {
   static const String _megaphonePng = 'assets/images/icons/megaphone.png';
   static const String _megaphoneFillPng =
       'assets/images/icons/megaphone_fill.png';
-  static const Color _megaphoneTintActive = Color(0xFF0CABA8);
-  static const Color _megaphoneSpinnerColor = Color(0xFF054544);
+  static const Color _scoreBoxBorderColor = Color(0xFFD9D9D9);
+  static const Color _feedbackDividerLabelColor = Color(0xFF777373);
+  static const Color _improvedSentenceColor = Color(0xFF0CABA8);
+  static const double _megaphoneIconSize = 24;
+  static const double _megaphoneHitSize = 40;
+  static const double _sectionGap = 12;
+  static const double _scoreBoxRadius = 12;
+  static const double _scoreBoxPadding = 12;
   static const Duration _expandDuration = Duration(milliseconds: 300);
   static const Curve _expandCurve = Curves.easeInOutCubic;
 
@@ -670,8 +787,13 @@ class _ViewChatUserCardState extends State<_ViewChatUserCard> {
 
   bool get _hasScore => widget.feedback?.score != null;
 
+  bool get _hasImprovedSentence {
+    final sentence = widget.feedback?.improvedSentence?.trim();
+    return sentence != null && sentence.isNotEmpty;
+  }
+
   void _onFeedbackTap() {
-    if (!_hasFeedbackContent && !_hasScore) return;
+    if (!_hasFeedbackContent && !_hasScore && !_hasImprovedSentence) return;
     unawaited(_onFeedbackTapAsync());
   }
 
@@ -681,6 +803,7 @@ class _ViewChatUserCardState extends State<_ViewChatUserCard> {
       final rpMsgId = widget.message.id;
       if (rpMsgId != null) {
         unawaited(widget.onStopFeedbackAudio(rpMsgId));
+        unawaited(widget.onStopImprovedAudio(rpMsgId));
       }
       setState(() => _expanded = false);
       return;
@@ -718,15 +841,154 @@ class _ViewChatUserCardState extends State<_ViewChatUserCard> {
     });
   }
 
+  void _onMegaphoneTap() {
+    if (!widget.audioInputEnabled) {
+      DefaultToast.show(
+        context,
+        AppLocalizations.of(context)!.speechFeedbackNoRecording,
+      );
+      return;
+    }
+    widget.onAudioTap();
+  }
+
+  Widget _buildMegaphoneAudioIcon({
+    required Color color,
+    required bool isLoading,
+    required bool isPlaying,
+  }) {
+    if (isLoading) {
+      return SizedBox(
+        width: _megaphoneIconSize,
+        height: _megaphoneIconSize,
+        child: Center(
+          child: SizedBox(
+            width: 16,
+            height: 16,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: color,
+            ),
+          ),
+        ),
+      );
+    }
+    return Image.asset(
+      isPlaying ? _megaphoneFillPng : _megaphonePng,
+      width: _megaphoneIconSize,
+      height: _megaphoneIconSize,
+      fit: BoxFit.contain,
+      color: color,
+      colorBlendMode: BlendMode.srcIn,
+    );
+  }
+
+  Widget _buildUserSpeechLine(
+    BuildContext context, {
+    required Color speechColor,
+  }) {
+    final theme = Theme.of(context).textTheme;
+    final playing = widget.isPlaying && !widget.isLoading;
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          GestureDetector(
+            onTap: _onMegaphoneTap,
+            behavior: HitTestBehavior.opaque,
+            child: SizedBox(
+              width: _megaphoneHitSize,
+              height: _megaphoneHitSize,
+              child: Center(
+                child: _buildMegaphoneAudioIcon(
+                  color: speechColor,
+                  isLoading: widget.isLoading,
+                  isPlaying: widget.isPlaying,
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(
+                _userSpeech,
+                style: theme.bodyLarge?.copyWith(
+                  color: speechColor,
+                  fontWeight: playing ? FontWeight.w700 : FontWeight.w400,
+                  fontVariations: [
+                    FontVariation('wght', playing ? 700 : 400),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildImprovedSentenceLine(BuildContext context) {
+    final sentence = widget.feedback?.improvedSentence?.trim();
+    if (sentence == null || sentence.isEmpty) {
+      return const SizedBox(width: double.infinity);
+    }
+
+    final theme = Theme.of(context).textTheme;
+    final playing = widget.improvedPlaying;
+    return Padding(
+      padding: const EdgeInsets.only(top: _sectionGap),
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            GestureDetector(
+              onTap: widget.onImprovedTap,
+              behavior: HitTestBehavior.opaque,
+              child: SizedBox(
+                width: _megaphoneHitSize,
+                height: _megaphoneHitSize,
+                child: Center(
+                  child: _buildMegaphoneAudioIcon(
+                    color: _improvedSentenceColor,
+                    isLoading: widget.improvedFetching,
+                    isPlaying: widget.improvedPlaying,
+                  ),
+                ),
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(
+                  sentence,
+                  style: theme.bodyLarge?.copyWith(
+                    color: _improvedSentenceColor,
+                    fontWeight: playing ? FontWeight.w700 : FontWeight.w400,
+                    fontVariations: [
+                      FontVariation('wght', playing ? 700 : 400),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildExpandedFeedbackText(BuildContext context) {
     final theme = Theme.of(context).textTheme;
     final feedbackText = widget.feedback?.feedback?.trim();
-    if (!_expanded || feedbackText == null || feedbackText.isEmpty) {
+    if (feedbackText == null || feedbackText.isEmpty) {
       return const SizedBox(width: double.infinity);
     }
 
     return Padding(
-      padding: const EdgeInsets.only(top: 8),
+      padding: const EdgeInsets.only(top: _sectionGap),
       child: Text(
         feedbackText,
         style: theme.bodySmall?.copyWith(
@@ -736,41 +998,67 @@ class _ViewChatUserCardState extends State<_ViewChatUserCard> {
     );
   }
 
-  Widget _buildExpandedScorePanel(BuildContext context) {
-    final gradeStyle =
-        _ViewChatGradeStyle.resolve(widget.feedback?.grade);
-    if (!_expanded || widget.feedback?.score == null) {
+  Widget _buildExpandedScoreBox(BuildContext context) {
+    final gradeStyle = _ViewChatGradeStyle.resolve(widget.feedback?.grade);
+    if (widget.feedback?.score == null) {
       return const SizedBox(width: double.infinity);
     }
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
-      child: _ViewChatScorePanel(
-        score: widget.feedback!.score,
-        barColor: gradeStyle?.color ?? _ViewChatGradeStyle.gradeA,
+      padding: const EdgeInsets.only(top: _sectionGap),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(_scoreBoxRadius),
+          border: Border.all(color: _scoreBoxBorderColor, width: 1),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(_scoreBoxPadding),
+          child: _ViewChatScorePanel(
+            score: widget.feedback!.score,
+            barColor: gradeStyle?.color ?? _ViewChatGradeStyle.gradeA,
+          ),
+        ),
       ),
     );
   }
 
-  Widget _buildScoreSpeechDivider() {
-    if (!_expanded || widget.feedback?.score == null) {
-      return const SizedBox.shrink();
-    }
-
-    return const Padding(
-      padding: EdgeInsets.only(bottom: 8),
-      child: ColoredBox(
-        color: Color(0xFFD9D9D9),
-        child: SizedBox(width: double.infinity, height: 1),
+  Widget _buildExpandedDivider(Color cardColor) {
+    return Padding(
+      padding: const EdgeInsets.only(top: _sectionGap),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          const ColoredBox(
+            color: _scoreBoxBorderColor,
+            child: SizedBox(width: double.infinity, height: 1),
+          ),
+          ColoredBox(
+            color: cardColor,
+            child: const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 10),
+              child: Text(
+                'Feedback',
+                style: TextStyle(
+                  fontFamily: 'ChironGoRoundTC',
+                  fontFamilyFallback: ['ChironHeiHK'],
+                  fontSize: 12,
+                  fontWeight: FontWeight.w400,
+                  fontVariations: [FontVariation('wght', 400)],
+                  color: _feedbackDividerLabelColor,
+                  height: 1.2,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context).textTheme;
-    final showScorePanel = _expanded && _hasScore;
-    final showFeedbackButton = _hasFeedbackContent || _hasScore;
+    final showFeedbackButton =
+        _hasFeedbackContent || _hasScore || _hasImprovedSentence;
     final cardColor = widget.isActive ? const Color(0xFF80D7CF) : Colors.white;
     final speechColor =
         widget.isActive ? const Color(0xFF054544) : _exprTextPrimary;
@@ -804,79 +1092,34 @@ class _ViewChatUserCardState extends State<_ViewChatUserCard> {
               children: [
                 if (widget.feedback != null)
                   _ViewChatGradeBadge(grade: widget.feedback!.grade),
+                const SizedBox(height: 8),
+                _buildUserSpeechLine(context, speechColor: speechColor),
                 AnimatedSize(
                   duration: _expandDuration,
                   curve: _expandCurve,
                   alignment: Alignment.topCenter,
                   clipBehavior: Clip.hardEdge,
-                  child: _buildExpandedScorePanel(context),
+                  child: _expanded
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            _buildExpandedDivider(cardColor),
+                            _buildImprovedSentenceLine(context),
+                            _buildExpandedFeedbackText(context),
+                            _buildExpandedScoreBox(context),
+                          ],
+                        )
+                      : const SizedBox(width: double.infinity),
                 ),
-                AnimatedSize(
-                  duration: _expandDuration,
-                  curve: _expandCurve,
-                  alignment: Alignment.topCenter,
-                  clipBehavior: Clip.hardEdge,
-                  child: _buildScoreSpeechDivider(),
-                ),
-                if (!showScorePanel) const SizedBox(height: 8),
-                Text(
-                  _userSpeech,
-                  style: theme.bodyLarge?.copyWith(
-                    color: speechColor,
-                  ),
-                ),
-                AnimatedSize(
-                  duration: _expandDuration,
-                  curve: _expandCurve,
-                  alignment: Alignment.topCenter,
-                  clipBehavior: Clip.hardEdge,
-                  child: _buildExpandedFeedbackText(context),
-                ),
-                if (widget.audioInputEnabled || showFeedbackButton) ...[
-                  const SizedBox(height: 12),
-                  Row(
-                    mainAxisAlignment: widget.audioInputEnabled
-                        ? MainAxisAlignment.spaceBetween
-                        : MainAxisAlignment.end,
-                    children: [
-                      if (widget.audioInputEnabled)
-                        GestureDetector(
-                          onTap: widget.onAudioTap,
-                          behavior: HitTestBehavior.opaque,
-                          child: widget.isLoading
-                              ? SizedBox(
-                                  width: 24,
-                                  height: 24,
-                                  child: Center(
-                                    child: SizedBox(
-                                      width: 16,
-                                      height: 16,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: _megaphoneSpinnerColor
-                                            .withValues(alpha: 0.7),
-                                      ),
-                                    ),
-                                  ),
-                                )
-                              : Image.asset(
-                                  widget.isPlaying
-                                      ? _megaphoneFillPng
-                                      : _megaphonePng,
-                                  width: 24,
-                                  height: 24,
-                                  fit: BoxFit.contain,
-                                  color: _megaphoneTintActive,
-                                  colorBlendMode: BlendMode.srcIn,
-                                ),
-                        ),
-                      if (showFeedbackButton)
-                        _ViewChatFeedbackButton(
-                          onTap: _onFeedbackTap,
-                          expanded: _expanded,
-                          loading: _feedbackAudioLoading,
-                        ),
-                    ],
+                if (showFeedbackButton) ...[
+                  const SizedBox(height: _sectionGap),
+                  Align(
+                    alignment: AlignmentDirectional.centerEnd,
+                    child: _ViewChatFeedbackButton(
+                      onTap: _onFeedbackTap,
+                      expanded: _expanded,
+                      loading: _feedbackAudioLoading,
+                    ),
                   ),
                 ],
               ],

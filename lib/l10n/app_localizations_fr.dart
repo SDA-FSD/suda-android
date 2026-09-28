@@ -353,6 +353,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get speechFeedbackUnavailable => 'Aucun feedback disponible.';
 
   @override
+  String get speechFeedbackNoRecording => 'Aucun enregistrement disponible.';
+
+  @override
   String get microphonePermissionDenied =>
       'Impossible de commencer sans autoriser l’accès au micro.';
 

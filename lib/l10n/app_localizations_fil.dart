@@ -354,6 +354,9 @@ class AppLocalizationsFil extends AppLocalizations {
   String get speechFeedbackUnavailable => 'Walang available na feedback.';
 
   @override
+  String get speechFeedbackNoRecording => 'Walang recording na available.';
+
+  @override
   String get microphonePermissionDenied =>
       'Hindi makapagsimula nang walang pahintulot sa microphone.';
 

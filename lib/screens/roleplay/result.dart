@@ -96,6 +96,8 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
   int? _speechFeedbackActiveMsgId;
   bool _speechFeedbackIsPlaying = false;
   int? _feedbackTtsMsgId;
+  int? _improvedSentenceMsgId;
+  bool _improvedSentenceIsPlaying = false;
 
   RpS2UserHistoryDto? get _s2History =>
       SeriesStateService.instance.cachedUserHistory;
@@ -682,6 +684,8 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
       _speechFeedbackActiveMsgId = null;
       _speechFeedbackIsPlaying = false;
       _feedbackTtsMsgId = null;
+      _improvedSentenceMsgId = null;
+      _improvedSentenceIsPlaying = false;
     });
 
     final historyId = _s2History?.id;
@@ -771,6 +775,8 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
       _speechFeedbackActiveMsgId = rpMsgId;
       _speechFeedbackIsPlaying = false;
       _feedbackTtsMsgId = null;
+      _improvedSentenceMsgId = null;
+      _improvedSentenceIsPlaying = false;
     });
 
     final historyId = _s2History?.id;
@@ -844,6 +850,97 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
     }
   }
 
+  Future<void> _stopImprovedSentence(int rpMsgId) async {
+    if (_improvedSentenceMsgId != rpMsgId) return;
+    _keyExpressionMegaphoneSeq++;
+    _keyExpressionAudioSub?.cancel();
+    _keyExpressionAudioSub = null;
+    await _ttsPlayer.stop();
+    if (!mounted) return;
+    setState(() {
+      _improvedSentenceMsgId = null;
+      _improvedSentenceIsPlaying = false;
+    });
+  }
+
+  Future<void> _onImprovedSentenceTap(int rpMsgId) async {
+    _keyExpressionMegaphoneSeq++;
+    final seq = _keyExpressionMegaphoneSeq;
+    _keyExpressionAudioSub?.cancel();
+    _keyExpressionAudioSub = null;
+    await _ttsPlayer.stop();
+
+    if (!mounted) return;
+    setState(() {
+      _keyExpressionActiveIndex = null;
+      _keyExpressionIsPlaying = false;
+      _speechFeedbackActiveMsgId = null;
+      _speechFeedbackIsPlaying = false;
+      _feedbackTtsMsgId = null;
+      _improvedSentenceMsgId = rpMsgId;
+      _improvedSentenceIsPlaying = false;
+    });
+
+    final historyId = _s2History?.id;
+    final token = await TokenStorage.loadAccessToken();
+    if (!mounted || seq != _keyExpressionMegaphoneSeq) return;
+
+    if (token == null || historyId == null) {
+      setState(() {
+        _improvedSentenceMsgId = null;
+        _improvedSentenceIsPlaying = false;
+      });
+      return;
+    }
+
+    try {
+      final tts = await SudaApiClient.getRpS2UserHistoryImprovedSentenceAudio(
+        accessToken: token,
+        rpUserHistoryId: historyId,
+        rpMsgId: rpMsgId,
+      );
+      if (!mounted || seq != _keyExpressionMegaphoneSeq) return;
+
+      final source = await _prepareKeyExpressionAudio(
+        cdnYn: tts.cdnYn,
+        cdnPath: tts.cdnPath,
+        soundBytes: tts.sound,
+      );
+      if (!mounted || seq != _keyExpressionMegaphoneSeq) return;
+
+      if (source == null) {
+        setState(() {
+          _improvedSentenceMsgId = null;
+          _improvedSentenceIsPlaying = false;
+        });
+        return;
+      }
+
+      setState(() => _improvedSentenceIsPlaying = true);
+
+      _keyExpressionAudioSub = _ttsPlayer.playerStateStream.listen((state) {
+        if (state.processingState == ProcessingState.completed) {
+          _keyExpressionAudioSub?.cancel();
+          _keyExpressionAudioSub = null;
+          if (!mounted || seq != _keyExpressionMegaphoneSeq) return;
+          setState(() {
+            _improvedSentenceMsgId = null;
+            _improvedSentenceIsPlaying = false;
+          });
+        }
+      });
+      await _ttsPlayer.play();
+    } catch (_) {
+      _keyExpressionAudioSub?.cancel();
+      _keyExpressionAudioSub = null;
+      if (!mounted || seq != _keyExpressionMegaphoneSeq) return;
+      setState(() {
+        _improvedSentenceMsgId = null;
+        _improvedSentenceIsPlaying = false;
+      });
+    }
+  }
+
   Future<void> _stopFeedbackTts(int rpMsgId) async {
     if (_feedbackTtsMsgId != rpMsgId) return;
     _keyExpressionMegaphoneSeq++;
@@ -873,6 +970,8 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
       _speechFeedbackActiveMsgId = null;
       _speechFeedbackIsPlaying = false;
       _feedbackTtsMsgId = null;
+      _improvedSentenceMsgId = null;
+      _improvedSentenceIsPlaying = false;
     });
 
     final historyId = _s2History?.id;
@@ -1143,6 +1242,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
             onUnlockedAfterPaywall: _refreshUserHistoryAfterSpeechFeedbackUnlock,
             onLoadAndPlayFeedbackAudio: _loadAndPlayFeedbackAudio,
             onStopFeedbackAudio: _stopFeedbackTts,
+            onStopImprovedAudio: _stopImprovedSentence,
             userSpeech: message.content ?? '',
             audioInputEnabled: message.audioInputYn == 'Y',
             fetchingActive:
@@ -1152,6 +1252,14 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
                 _speechFeedbackActiveMsgId == message.id &&
                 _speechFeedbackIsPlaying,
             onAudioTap: () => unawaited(_onSpeechFeedbackAudioTap(message.id!)),
+            improvedFetching:
+                _improvedSentenceMsgId == message.id &&
+                !_improvedSentenceIsPlaying,
+            improvedPlaying:
+                _improvedSentenceMsgId == message.id &&
+                _improvedSentenceIsPlaying,
+            onImprovedTap: () =>
+                unawaited(_onImprovedSentenceTap(message.id!)),
           ),
       ];
     }
@@ -1183,6 +1291,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
           onUnlockedAfterPaywall: _refreshUserHistoryAfterSpeechFeedbackUnlock,
           onLoadAndPlayFeedbackAudio: _loadAndPlayFeedbackAudio,
           onStopFeedbackAudio: _stopFeedbackTts,
+          onStopImprovedAudio: _stopImprovedSentence,
           userSpeech: message.content ?? '',
           audioInputEnabled: message.audioInputYn == 'Y',
           fetchingActive:
@@ -1192,6 +1301,13 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
               _speechFeedbackActiveMsgId == messageId &&
               _speechFeedbackIsPlaying,
           onAudioTap: () => unawaited(_onSpeechFeedbackAudioTap(messageId)),
+          improvedFetching:
+              _improvedSentenceMsgId == messageId &&
+              !_improvedSentenceIsPlaying,
+          improvedPlaying:
+              _improvedSentenceMsgId == messageId &&
+              _improvedSentenceIsPlaying,
+          onImprovedTap: () => unawaited(_onImprovedSentenceTap(messageId)),
         ),
       );
     }
@@ -1703,11 +1819,15 @@ class _SpeechFeedbackRow extends StatefulWidget {
     required this.onUnlockedAfterPaywall,
     required this.onLoadAndPlayFeedbackAudio,
     required this.onStopFeedbackAudio,
+    required this.onStopImprovedAudio,
     required this.userSpeech,
     required this.audioInputEnabled,
     required this.fetchingActive,
     required this.playingActive,
     required this.onAudioTap,
+    required this.improvedFetching,
+    required this.improvedPlaying,
+    required this.onImprovedTap,
   });
 
   final int? rpMsgId;
@@ -1720,11 +1840,15 @@ class _SpeechFeedbackRow extends StatefulWidget {
     required VoidCallback onReadyToPlay,
   }) onLoadAndPlayFeedbackAudio;
   final Future<void> Function(int rpMsgId) onStopFeedbackAudio;
+  final Future<void> Function(int rpMsgId) onStopImprovedAudio;
   final String userSpeech;
   final bool audioInputEnabled;
   final bool fetchingActive;
   final bool playingActive;
   final VoidCallback onAudioTap;
+  final bool improvedFetching;
+  final bool improvedPlaying;
+  final VoidCallback onImprovedTap;
 
   @override
   State<_SpeechFeedbackRow> createState() => _SpeechFeedbackRowState();
@@ -1734,9 +1858,15 @@ class _SpeechFeedbackRowState extends State<_SpeechFeedbackRow> {
   static const String _megaphonePng = 'assets/images/icons/megaphone.png';
   static const String _megaphoneFillPng =
       'assets/images/icons/megaphone_fill.png';
-  static const Color _megaphoneTintActive = Color(0xFF0CABA8);
   static const Color _feedbackTextColor = Color(0xFF635F5F);
-  static const Color _scoreSpeechDividerColor = Color(0xFFD9D9D9);
+  static const Color _scoreBoxBorderColor = Color(0xFFD9D9D9);
+  static const Color _feedbackDividerLabelColor = Color(0xFF777373);
+  static const Color _improvedSentenceColor = Color(0xFF0CABA8);
+  static const double _megaphoneIconSize = 24;
+  static const double _megaphoneHitSize = 40;
+  static const double _sectionGap = 12;
+  static const double _scoreBoxRadius = 12;
+  static const double _scoreBoxPadding = 12;
 
   static const Duration _expandDuration = Duration(milliseconds: 300);
   static const Curve _expandCurve = Curves.easeInOutCubic;
@@ -1751,6 +1881,7 @@ class _SpeechFeedbackRowState extends State<_SpeechFeedbackRow> {
       final rpMsgId = widget.rpMsgId;
       if (rpMsgId != null) {
         unawaited(widget.onStopFeedbackAudio(rpMsgId));
+        unawaited(widget.onStopImprovedAudio(rpMsgId));
       }
       setState(() => _expanded = false);
       return;
@@ -1811,21 +1942,33 @@ class _SpeechFeedbackRowState extends State<_SpeechFeedbackRow> {
     });
   }
 
+  void _onMegaphoneTap() {
+    if (!widget.audioInputEnabled) {
+      DefaultToast.show(
+        context,
+        AppLocalizations.of(context)!.speechFeedbackNoRecording,
+      );
+      return;
+    }
+    widget.onAudioTap();
+  }
+
   Widget _buildMegaphoneAudioIcon({
     required bool isLoading,
     required bool isPlaying,
+    required Color color,
   }) {
     if (isLoading) {
       return SizedBox(
-        width: 24,
-        height: 24,
+        width: _megaphoneIconSize,
+        height: _megaphoneIconSize,
         child: Center(
           child: SizedBox(
             width: 16,
             height: 16,
             child: CircularProgressIndicator(
               strokeWidth: 2,
-              color: _megaphoneTintActive.withValues(alpha: 0.7),
+              color: color,
             ),
           ),
         ),
@@ -1833,26 +1976,119 @@ class _SpeechFeedbackRowState extends State<_SpeechFeedbackRow> {
     }
     return Image.asset(
       isPlaying ? _megaphoneFillPng : _megaphonePng,
-      width: 24,
-      height: 24,
+      width: _megaphoneIconSize,
+      height: _megaphoneIconSize,
       fit: BoxFit.contain,
-      color: _megaphoneTintActive,
+      color: color,
       colorBlendMode: BlendMode.srcIn,
+    );
+  }
+
+  Widget _buildUserSpeechLine(BuildContext context, {required Color speechColor}) {
+    final theme = Theme.of(context).textTheme;
+    final playing = widget.playingActive;
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          GestureDetector(
+            onTap: _onMegaphoneTap,
+            behavior: HitTestBehavior.opaque,
+            child: SizedBox(
+              width: _megaphoneHitSize,
+              height: _megaphoneHitSize,
+              child: Center(
+                child: _buildMegaphoneAudioIcon(
+                  isLoading: widget.fetchingActive,
+                  isPlaying: playing,
+                  color: speechColor,
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(
+                widget.userSpeech,
+                style: theme.bodyLarge?.copyWith(
+                  color: speechColor,
+                  fontWeight: playing ? FontWeight.w700 : FontWeight.w400,
+                  fontVariations: [
+                    FontVariation('wght', playing ? 700 : 400),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildImprovedSentenceLine(BuildContext context) {
+    final sentence = widget.feedback?.improvedSentence?.trim();
+    if (sentence == null || sentence.isEmpty) {
+      return const SizedBox(width: double.infinity);
+    }
+
+    final theme = Theme.of(context).textTheme;
+    final playing = widget.improvedPlaying;
+    return Padding(
+      padding: const EdgeInsets.only(top: _sectionGap),
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            GestureDetector(
+              onTap: widget.onImprovedTap,
+              behavior: HitTestBehavior.opaque,
+              child: SizedBox(
+                width: _megaphoneHitSize,
+                height: _megaphoneHitSize,
+                child: Center(
+                  child: _buildMegaphoneAudioIcon(
+                    isLoading: widget.improvedFetching,
+                    isPlaying: playing,
+                    color: _improvedSentenceColor,
+                  ),
+                ),
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(
+                  sentence,
+                  style: theme.bodyLarge?.copyWith(
+                    color: _improvedSentenceColor,
+                    fontWeight: playing ? FontWeight.w700 : FontWeight.w400,
+                    fontVariations: [
+                      FontVariation('wght', playing ? 700 : 400),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
   Widget _buildExpandedFeedbackText(BuildContext context) {
     final theme = Theme.of(context).textTheme;
     final feedbackText = widget.feedback?.feedback?.trim();
-    final hasFeedback =
-        feedbackText != null && feedbackText.isNotEmpty;
+    final hasFeedback = feedbackText != null && feedbackText.isNotEmpty;
 
-    if (!_expanded || !hasFeedback) {
+    if (!hasFeedback) {
       return const SizedBox(width: double.infinity);
     }
 
     return Padding(
-      padding: const EdgeInsets.only(top: 8),
+      padding: const EdgeInsets.only(top: _sectionGap),
       child: Text(
         feedbackText,
         style: theme.bodySmall?.copyWith(
@@ -1862,41 +2098,66 @@ class _SpeechFeedbackRowState extends State<_SpeechFeedbackRow> {
     );
   }
 
-  Widget _buildExpandedScorePanel(BuildContext context) {
+  Widget _buildExpandedScoreBox(BuildContext context) {
     final gradeStyle =
         _SpeechFeedbackGradeStyle.resolve(widget.feedback?.grade);
-    if (!_expanded || widget.feedback?.score == null) {
+    if (widget.feedback?.score == null) {
       return const SizedBox(width: double.infinity);
     }
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
-      child: _SpeechFeedbackScorePanel(
-        score: widget.feedback!.score,
-        barColor: gradeStyle?.color ?? _SpeechFeedbackGradeStyle.gradeA,
+      padding: const EdgeInsets.only(top: _sectionGap),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(_scoreBoxRadius),
+          border: Border.all(color: _scoreBoxBorderColor, width: 1),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(_scoreBoxPadding),
+          child: _SpeechFeedbackScorePanel(
+            score: widget.feedback!.score,
+            barColor: gradeStyle?.color ?? _SpeechFeedbackGradeStyle.gradeA,
+          ),
+        ),
       ),
     );
   }
 
-  Widget _buildScoreSpeechDivider() {
-    if (!_expanded || widget.feedback?.score == null) {
-      return const SizedBox.shrink();
-    }
-
+  Widget _buildExpandedDivider() {
     return const Padding(
-      padding: EdgeInsets.only(bottom: 8),
-      child: ColoredBox(
-        color: _scoreSpeechDividerColor,
-        child: SizedBox(width: double.infinity, height: 1),
+      padding: EdgeInsets.only(top: _sectionGap),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          ColoredBox(
+            color: _scoreBoxBorderColor,
+            child: SizedBox(width: double.infinity, height: 1),
+          ),
+          ColoredBox(
+            color: Colors.white,
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 10),
+              child: Text(
+                'Feedback',
+                style: TextStyle(
+                  fontFamily: 'ChironGoRoundTC',
+                  fontFamilyFallback: ['ChironHeiHK'],
+                  fontSize: 12,
+                  fontWeight: FontWeight.w400,
+                  fontVariations: [FontVariation('wght', 400)],
+                  color: _feedbackDividerLabelColor,
+                  height: 1.2,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context).textTheme;
-    final showScorePanel = _expanded && widget.feedback?.score != null;
-
     final card = AnimatedSize(
       duration: _expandDuration,
       curve: _expandCurve,
@@ -1908,55 +2169,33 @@ class _SpeechFeedbackRowState extends State<_SpeechFeedbackRow> {
           mainAxisSize: MainAxisSize.min,
           children: [
             _SpeechFeedbackGradeBadge(grade: widget.feedback?.grade),
+            const SizedBox(height: 8),
+            _buildUserSpeechLine(context, speechColor: _exprTextPrimary),
             AnimatedSize(
               duration: _expandDuration,
               curve: _expandCurve,
               alignment: Alignment.topCenter,
               clipBehavior: Clip.hardEdge,
-              child: _buildExpandedScorePanel(context),
+              child: _expanded
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _buildExpandedDivider(),
+                        _buildImprovedSentenceLine(context),
+                        _buildExpandedFeedbackText(context),
+                        _buildExpandedScoreBox(context),
+                      ],
+                    )
+                  : const SizedBox(width: double.infinity),
             ),
-            AnimatedSize(
-              duration: _expandDuration,
-              curve: _expandCurve,
-              alignment: Alignment.topCenter,
-              clipBehavior: Clip.hardEdge,
-              child: _buildScoreSpeechDivider(),
-            ),
-            if (!showScorePanel) const SizedBox(height: 8),
-            Text(
-              widget.userSpeech,
-              style: theme.bodyLarge?.copyWith(
-                color: _exprTextPrimary,
+            const SizedBox(height: _sectionGap),
+            Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: _SpeechFeedbackFeedbackButton(
+                onTap: () => unawaited(_onFeedbackTap()),
+                expanded: _expanded,
+                loading: _feedbackAudioLoading || _subscriptionGateLoading,
               ),
-            ),
-            AnimatedSize(
-              duration: _expandDuration,
-              curve: _expandCurve,
-              alignment: Alignment.topCenter,
-              clipBehavior: Clip.hardEdge,
-              child: _buildExpandedFeedbackText(context),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: widget.audioInputEnabled
-                  ? MainAxisAlignment.spaceBetween
-                  : MainAxisAlignment.end,
-              children: [
-                if (widget.audioInputEnabled)
-                  GestureDetector(
-                    onTap: widget.onAudioTap,
-                    behavior: HitTestBehavior.opaque,
-                    child: _buildMegaphoneAudioIcon(
-                      isLoading: widget.fetchingActive,
-                      isPlaying: widget.playingActive,
-                    ),
-                  ),
-                _SpeechFeedbackFeedbackButton(
-                  onTap: () => unawaited(_onFeedbackTap()),
-                  expanded: _expanded,
-                  loading: _feedbackAudioLoading || _subscriptionGateLoading,
-                ),
-              ],
             ),
           ],
         ),

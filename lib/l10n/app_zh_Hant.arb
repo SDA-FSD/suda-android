@@ -142,6 +142,7 @@
   "feedbackSend": "送出",
   "feedbackSuccess": "感謝你的回饋。",
   "speechFeedbackUnavailable": "沒有可用的回饋。",
+  "speechFeedbackNoRecording": "沒有可用的錄音。",
   "microphonePermissionDenied": "未取得麥克風權限，無法開始。",
   "holdMicrophoneToSpeak": "按住麥克風說話",
   "roleplayTypeMessagePlaceholder": "輸入你的回覆⋯⋯",

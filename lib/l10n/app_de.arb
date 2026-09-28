@@ -142,6 +142,7 @@
   "feedbackSend": "Senden",
   "feedbackSuccess": "Danke für dein Feedback.",
   "speechFeedbackUnavailable": "Kein Feedback verfügbar.",
+  "speechFeedbackNoRecording": "Keine Aufnahme verfügbar.",
   "microphonePermissionDenied": "Zum Starten ist der Mikrofonzugriff erforderlich.",
   "holdMicrophoneToSpeak": "Mikrofon gedrückt halten und sprechen",
   "roleplayTypeMessagePlaceholder": "Nachricht eingeben ...",

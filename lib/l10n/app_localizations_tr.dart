@@ -351,6 +351,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get speechFeedbackUnavailable => 'Geri bildirim mevcut değil.';
 
   @override
+  String get speechFeedbackNoRecording => 'Kayıt yok.';
+
+  @override
   String get microphonePermissionDenied => 'Mikrofon izni olmadan başlanamaz.';
 
   @override

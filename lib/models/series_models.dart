@@ -470,8 +470,14 @@ class RpS2UserFeedbackVo {
   final String? grade;
   final RpS2ScoreVo? score;
   final String? feedback;
+  final String? improvedSentence;
 
-  const RpS2UserFeedbackVo({this.grade, this.score, this.feedback});
+  const RpS2UserFeedbackVo({
+    this.grade,
+    this.score,
+    this.feedback,
+    this.improvedSentence,
+  });
 
   factory RpS2UserFeedbackVo.fromJson(Map<String, dynamic> json) {
     return RpS2UserFeedbackVo(
@@ -480,6 +486,7 @@ class RpS2UserFeedbackVo {
           ? null
           : RpS2ScoreVo.fromJson(json['score'] as Map<String, dynamic>),
       feedback: json['feedback'] as String?,
+      improvedSentence: json['improvedSentence'] as String?,
     );
   }
 }

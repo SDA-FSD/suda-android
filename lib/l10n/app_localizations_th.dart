@@ -344,6 +344,9 @@ class AppLocalizationsTh extends AppLocalizations {
   String get speechFeedbackUnavailable => 'ไม่มีฟีดแบ็ก';
 
   @override
+  String get speechFeedbackNoRecording => 'ไม่มีไฟล์เสียงที่บันทึกไว้';
+
+  @override
   String get microphonePermissionDenied =>
       'เริ่มไม่ได้หากไม่อนุญาตให้ใช้ไมโครโฟน';
 

@@ -142,6 +142,7 @@
   "feedbackSend": "전송",
   "feedbackSuccess": "피드백을 보내주셔서 감사합니다.",
   "speechFeedbackUnavailable": "피드백이 없습니다.",
+  "speechFeedbackNoRecording": "녹음된 음성이 없습니다.",
   "microphonePermissionDenied": "마이크 권한이 없어서 시작할 수 없습니다.",
   "holdMicrophoneToSpeak": "마이크를 길게 누르고 말하세요",
   "roleplayTypeMessagePlaceholder": "여기에 메시지를 입력하세요.",

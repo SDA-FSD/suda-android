@@ -142,6 +142,7 @@
   "feedbackSend": "发送",
   "feedbackSuccess": "感谢你的反馈。",
   "speechFeedbackUnavailable": "没有可用的反馈。",
+  "speechFeedbackNoRecording": "没有可用的录音。",
   "microphonePermissionDenied": "未获得麦克风权限，无法开始。",
   "holdMicrophoneToSpeak": "按住麦克风说话",
   "roleplayTypeMessagePlaceholder": "输入你的回复…",

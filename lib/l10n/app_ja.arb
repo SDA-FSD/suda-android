@@ -142,6 +142,7 @@
   "feedbackSend": "送信",
   "feedbackSuccess": "ご意見をお寄せいただきありがとうございます。",
   "speechFeedbackUnavailable": "フィードバックはありません。",
+  "speechFeedbackNoRecording": "録音がありません。",
   "microphonePermissionDenied": "マイクの使用を許可しないと開始できません。",
   "holdMicrophoneToSpeak": "マイクボタンを長押しして話す",
   "roleplayTypeMessagePlaceholder": "メッセージを入力…",

@@ -142,6 +142,7 @@
   "feedbackSend": "Kirim",
   "feedbackSuccess": "Terima kasih atas masukan Anda.",
   "speechFeedbackUnavailable": "Feedback tidak tersedia.",
+  "speechFeedbackNoRecording": "Tidak ada rekaman.",
   "microphonePermissionDenied": "Tidak dapat memulai tanpa izin mikrofon.",
   "holdMicrophoneToSpeak": "Tekan dan tahan mikrofon untuk berbicara",
   "roleplayTypeMessagePlaceholder": "Ketik pesan Anda...",

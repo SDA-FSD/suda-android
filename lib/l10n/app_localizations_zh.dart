@@ -333,6 +333,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get speechFeedbackUnavailable => '没有可用的反馈。';
 
   @override
+  String get speechFeedbackNoRecording => '没有可用的录音。';
+
+  @override
   String get microphonePermissionDenied => '未获得麦克风权限，无法开始。';
 
   @override
@@ -1321,6 +1324,9 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get speechFeedbackUnavailable => '没有可用的反馈。';
 
   @override
+  String get speechFeedbackNoRecording => '没有可用的录音。';
+
+  @override
   String get microphonePermissionDenied => '未获得麦克风权限，无法开始。';
 
   @override
@@ -2307,6 +2313,9 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get speechFeedbackUnavailable => '沒有可用的回饋。';
+
+  @override
+  String get speechFeedbackNoRecording => '沒有可用的錄音。';
 
   @override
   String get microphonePermissionDenied => '未取得麥克風權限，無法開始。';

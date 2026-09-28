@@ -761,6 +761,12 @@ abstract class AppLocalizations {
   /// **'No feedback available.'**
   String get speechFeedbackUnavailable;
 
+  /// No description provided for @speechFeedbackNoRecording.
+  ///
+  /// In en, this message translates to:
+  /// **'No recording available.'**
+  String get speechFeedbackNoRecording;
+
   /// No description provided for @microphonePermissionDenied.
   ///
   /// In en, this message translates to:

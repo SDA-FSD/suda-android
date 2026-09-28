@@ -350,6 +350,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get speechFeedbackUnavailable => 'Фидбек недоступен.';
 
   @override
+  String get speechFeedbackNoRecording => 'Нет доступной записи.';
+
+  @override
   String get microphonePermissionDenied =>
       'Без доступа к микрофону начать нельзя.';
 

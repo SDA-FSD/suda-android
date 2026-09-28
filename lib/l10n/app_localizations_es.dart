@@ -351,6 +351,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get speechFeedbackUnavailable => 'No hay feedback disponible.';
 
   @override
+  String get speechFeedbackNoRecording => 'No hay grabación disponible.';
+
+  @override
   String get microphonePermissionDenied =>
       'No se puede empezar sin permiso para usar el micrófono.';
 
@@ -1406,6 +1409,9 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
 
   @override
   String get speechFeedbackUnavailable => 'No hay feedback disponible.';
+
+  @override
+  String get speechFeedbackNoRecording => 'No hay grabación disponible.';
 
   @override
   String get microphonePermissionDenied =>

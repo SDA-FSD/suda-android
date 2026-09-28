@@ -142,6 +142,7 @@
   "feedbackSend": "Gönder",
   "feedbackSuccess": "Geri bildirimin için teşekkürler.",
   "speechFeedbackUnavailable": "Geri bildirim mevcut değil.",
+  "speechFeedbackNoRecording": "Kayıt yok.",
   "microphonePermissionDenied": "Mikrofon izni olmadan başlanamaz.",
   "holdMicrophoneToSpeak": "Konuşmak için mikrofona basılı tut",
   "roleplayTypeMessagePlaceholder": "Mesajını yaz...",

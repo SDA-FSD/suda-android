@@ -142,6 +142,7 @@
   "feedbackSend": "Hantar",
   "feedbackSuccess": "Terima kasih atas maklum balas anda.",
   "speechFeedbackUnavailable": "Feedback tidak tersedia.",
+  "speechFeedbackNoRecording": "Tiada rakaman tersedia.",
   "microphonePermissionDenied": "Tidak dapat bermula tanpa kebenaran mikrofon.",
   "holdMicrophoneToSpeak": "Tekan dan tahan mikrofon untuk bercakap",
   "roleplayTypeMessagePlaceholder": "Taip mesej anda...",

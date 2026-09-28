@@ -349,6 +349,9 @@ class AppLocalizationsNl extends AppLocalizations {
   String get speechFeedbackUnavailable => 'Geen feedback beschikbaar.';
 
   @override
+  String get speechFeedbackNoRecording => 'Geen opname beschikbaar.';
+
+  @override
   String get microphonePermissionDenied =>
       'Je kunt niet starten zonder toegang tot de microfoon.';
 

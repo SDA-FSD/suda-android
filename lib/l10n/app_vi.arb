@@ -142,6 +142,7 @@
   "feedbackSend": "Gửi",
   "feedbackSuccess": "Cảm ơn bạn đã góp ý.",
   "speechFeedbackUnavailable": "Không có feedback.",
+  "speechFeedbackNoRecording": "Không có bản ghi âm.",
   "microphonePermissionDenied": "Không thể bắt đầu khi chưa có quyền dùng micrô.",
   "holdMicrophoneToSpeak": "Nhấn giữ micrô để nói",
   "roleplayTypeMessagePlaceholder": "Nhập câu trả lời...",

@@ -142,6 +142,7 @@
   "feedbackSend": "إرسال",
   "feedbackSuccess": "شكرًا لك على ملاحظاتك.",
   "speechFeedbackUnavailable": "لا توجد ملاحظات متاحة.",
+  "speechFeedbackNoRecording": "لا يوجد تسجيل متاح.",
   "microphonePermissionDenied": "لا يمكن البدء من دون إذن الميكروفون.",
   "holdMicrophoneToSpeak": "اضغط مطولًا على الميكروفون للتحدث",
   "roleplayTypeMessagePlaceholder": "اكتب رسالتك...",

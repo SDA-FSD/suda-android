@@ -142,6 +142,7 @@
   "feedbackSend": "Ipadala",
   "feedbackSuccess": "Salamat sa feedback mo.",
   "speechFeedbackUnavailable": "Walang available na feedback.",
+  "speechFeedbackNoRecording": "Walang recording na available.",
   "microphonePermissionDenied": "Hindi makapagsimula nang walang pahintulot sa microphone.",
   "holdMicrophoneToSpeak": "Pindutin nang matagal ang mic para magsalita",
   "roleplayTypeMessagePlaceholder": "I-type ang mensahe mo...",

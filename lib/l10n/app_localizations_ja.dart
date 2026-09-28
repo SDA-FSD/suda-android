@@ -335,6 +335,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get speechFeedbackUnavailable => 'フィードバックはありません。';
 
   @override
+  String get speechFeedbackNoRecording => '録音がありません。';
+
+  @override
   String get microphonePermissionDenied => 'マイクの使用を許可しないと開始できません。';
 
   @override
