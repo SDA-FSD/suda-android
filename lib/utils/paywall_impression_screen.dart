@@ -7,7 +7,11 @@ class PaywallImpressionScreen {
 
   static const String profile = 'profile';
   static const String account = 'account';
-  static const String speechFeedback = 'speech_feedback';
+  /// Pre-split aggregate; legacy DB/Redis only — app no longer sends.
+  static const String speechFeedbackLegacy = 'speech_feedback';
+  static const String speechFeedbackRpResult = 'speech_feedback_rp_result';
+  static const String speechFeedbackHistory = 'speech_feedback_history';
+  static const String speechFeedbackViewChat = 'speech_feedback_view_chat';
   static const String lab = 'lab';
 
   static String energyPopup(String energyOfferScreen) =>

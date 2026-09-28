@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../screens/paywall/paywall.dart';
-import '../utils/paywall_impression_screen.dart';
 
 /// Speech Feedback 펼침: 서버 `feedbackLockedYn` 기준.
 ///
@@ -10,6 +9,7 @@ import '../utils/paywall_impression_screen.dart';
 ///   **자동 펼침 없음**(재탭 시 펼침).
 Future<bool> ensureSpeechFeedbackUnlocked(
   BuildContext context, {
+  required String paywallScreen,
   required String feedbackLockedYn,
   Future<void> Function()? onUnlockedAfterPaywall,
 }) async {
@@ -17,7 +17,7 @@ Future<bool> ensureSpeechFeedbackUnlocked(
 
   final subscribed = await PaywallScreen.push<bool>(
     context,
-    screen: PaywallImpressionScreen.speechFeedback,
+    screen: paywallScreen,
   );
   if (!context.mounted) return false;
   if (subscribed == true) {

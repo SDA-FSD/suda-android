@@ -19,6 +19,7 @@ import '../../services/roleplay_state_service.dart';
 import '../../services/series_state_service.dart';
 import '../../services/token_storage.dart';
 import '../../utils/default_toast.dart';
+import '../../utils/paywall_impression_screen.dart';
 import '../../utils/speech_feedback_premium.dart';
 import '../../utils/sub_screen_route.dart';
 import '../../utils/suda_json_util.dart';
@@ -1912,6 +1913,9 @@ class _SpeechFeedbackRowState extends State<_SpeechFeedbackRow> {
     }
     final allowed = await ensureSpeechFeedbackUnlocked(
       context,
+      paywallScreen: widget.profileHistory
+          ? PaywallImpressionScreen.speechFeedbackHistory
+          : PaywallImpressionScreen.speechFeedbackRpResult,
       feedbackLockedYn: widget.feedbackLockedYn,
       onUnlockedAfterPaywall: widget.onUnlockedAfterPaywall,
     );

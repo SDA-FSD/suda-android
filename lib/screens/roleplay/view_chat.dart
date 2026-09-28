@@ -10,6 +10,7 @@ import '../../l10n/app_localizations.dart';
 import '../../models/series_models.dart';
 import '../../services/token_storage.dart';
 import '../../utils/default_toast.dart';
+import '../../utils/paywall_impression_screen.dart';
 import '../../utils/speech_feedback_premium.dart';
 import '../../widgets/app_scaffold.dart';
 import 'suda_tts_audio_player.dart';
@@ -812,6 +813,7 @@ class _ViewChatUserCardState extends State<_ViewChatUserCard> {
     // 잠금 엣지 시 Paywall만(히스토리 재조회는 Result/History에서 처리).
     final allowed = await ensureSpeechFeedbackUnlocked(
       context,
+      paywallScreen: PaywallImpressionScreen.speechFeedbackViewChat,
       feedbackLockedYn: widget.feedbackLockedYn,
     );
     if (!mounted || !allowed) return;
