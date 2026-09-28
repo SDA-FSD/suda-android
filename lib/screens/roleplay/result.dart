@@ -1108,6 +1108,12 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
     if (mounted) setState(() {});
   }
 
+  RpS2UserFeedbackVo? _lockedSpeechFeedbackGrade(RpS2UserFeedbackVo? feedback) {
+    final grade = feedback?.grade?.trim();
+    if (grade == null || grade.isEmpty) return null;
+    return RpS2UserFeedbackVo(grade: grade);
+  }
+
   List<Widget> _buildSpeechFeedbackRows(BuildContext context) {
     final history = _s2History;
     if (history == null) return const [];
@@ -1131,7 +1137,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
         for (final message in userMessages)
           _SpeechFeedbackRow(
             rpMsgId: message.id,
-            feedback: null,
+            feedback: _lockedSpeechFeedbackGrade(speechFeedback?[message.id]),
             feedbackLockedYn: history.feedbackLockedYn,
             profileHistory: widget.profileHistory,
             onUnlockedAfterPaywall: _refreshUserHistoryAfterSpeechFeedbackUnlock,

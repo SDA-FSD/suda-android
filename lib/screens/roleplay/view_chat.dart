@@ -685,7 +685,7 @@ class _ViewChatUserCardState extends State<_ViewChatUserCard> {
       setState(() => _expanded = false);
       return;
     }
-    // View Chat: feedback null이면 버튼 미노출. lock 시 speechFeedback null.
+    // View Chat: score·feedback 본문 없으면 버튼 미노출. lock 시 grade만.
     // 잠금 엣지 시 Paywall만(히스토리 재조회는 Result/History에서 처리).
     final allowed = await ensureSpeechFeedbackUnlocked(
       context,

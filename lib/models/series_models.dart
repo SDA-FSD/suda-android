@@ -337,7 +337,7 @@ class RpS2UserHistoryDto {
   final int? words;
   final int? likePoint;
   final List<RpS2KeyExpressionVo> keyExpressions;
-  /// `feedbackLockedYn == 'Y'`이면 서버가 null로 내려줌.
+  /// `feedbackLockedYn == 'Y'`이면 grade만. score·feedback 본문은 null.
   final Map<int, RpS2UserFeedbackVo>? speechFeedback;
   /// `'Y'`면 Speech Feedback 잠금(Feedback 탭 → Paywall). 미수신 시 `'N'`.
   final String feedbackLockedYn;
