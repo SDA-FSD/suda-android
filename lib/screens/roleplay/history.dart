@@ -117,6 +117,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       exitViaPop: true,
       showCloseButton: false,
       showReportLink: false,
+      profileHistory: true,
     );
   }
 }

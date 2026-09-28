@@ -347,6 +347,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get feedbackSuccess => 'Спасибо за обратную связь.';
 
   @override
+  String get speechFeedbackUnavailable => 'Фидбек недоступен.';
+
+  @override
   String get microphonePermissionDenied =>
       'Без доступа к микрофону начать нельзя.';
 

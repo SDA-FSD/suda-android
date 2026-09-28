@@ -141,6 +141,7 @@
   "feedbackPlaceholder": "Расскажите, что вы думаете, предложите улучшение или сообщите о проблеме...",
   "feedbackSend": "Отправить",
   "feedbackSuccess": "Спасибо за обратную связь.",
+  "speechFeedbackUnavailable": "Фидбек недоступен.",
   "microphonePermissionDenied": "Без доступа к микрофону начать нельзя.",
   "holdMicrophoneToSpeak": "Удерживайте кнопку микрофона и говорите",
   "roleplayTypeMessagePlaceholder": "Введите сообщение...",

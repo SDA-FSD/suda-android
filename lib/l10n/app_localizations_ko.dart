@@ -332,6 +332,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get feedbackSuccess => '피드백을 보내주셔서 감사합니다.';
 
   @override
+  String get speechFeedbackUnavailable => '피드백이 없습니다.';
+
+  @override
   String get microphonePermissionDenied => '마이크 권한이 없어서 시작할 수 없습니다.';
 
   @override

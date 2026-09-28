@@ -345,6 +345,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get feedbackSuccess => 'फ़ीडबैक देने के लिए धन्यवाद।';
 
   @override
+  String get speechFeedbackUnavailable => 'कोई फ़ीडबैक उपलब्ध नहीं।';
+
+  @override
   String get microphonePermissionDenied =>
       'माइक्रोफ़ोन की अनुमति के बिना शुरू नहीं कर सकते।';
 

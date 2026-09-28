@@ -39,12 +39,16 @@ class RoleplayResultScreen extends StatefulWidget {
   final bool exitViaPop;
   final bool showReportLink;
 
+  /// Profile History 상세. 잠긴 Speech Feedback은 구독 원장 조회 후 토스트 또는 Paywall.
+  final bool profileHistory;
+
   const RoleplayResultScreen({
     super.key,
     this.showCloseButton = true,
     this.skipEntranceAnimation = false,
     this.exitViaPop = false,
     this.showReportLink = true,
+    this.profileHistory = false,
   });
 
   @override
@@ -1129,6 +1133,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
             rpMsgId: message.id,
             feedback: null,
             feedbackLockedYn: history.feedbackLockedYn,
+            profileHistory: widget.profileHistory,
             onUnlockedAfterPaywall: _refreshUserHistoryAfterSpeechFeedbackUnlock,
             onLoadAndPlayFeedbackAudio: _loadAndPlayFeedbackAudio,
             onStopFeedbackAudio: _stopFeedbackTts,
@@ -1168,6 +1173,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
           rpMsgId: messageId,
           feedback: feedback,
           feedbackLockedYn: history.feedbackLockedYn,
+          profileHistory: widget.profileHistory,
           onUnlockedAfterPaywall: _refreshUserHistoryAfterSpeechFeedbackUnlock,
           onLoadAndPlayFeedbackAudio: _loadAndPlayFeedbackAudio,
           onStopFeedbackAudio: _stopFeedbackTts,
@@ -1687,6 +1693,7 @@ class _SpeechFeedbackRow extends StatefulWidget {
     required this.rpMsgId,
     required this.feedback,
     required this.feedbackLockedYn,
+    required this.profileHistory,
     required this.onUnlockedAfterPaywall,
     required this.onLoadAndPlayFeedbackAudio,
     required this.onStopFeedbackAudio,
@@ -1700,6 +1707,7 @@ class _SpeechFeedbackRow extends StatefulWidget {
   final int? rpMsgId;
   final RpS2UserFeedbackVo? feedback;
   final String feedbackLockedYn;
+  final bool profileHistory;
   final Future<void> Function() onUnlockedAfterPaywall;
   final Future<bool> Function(
     int rpMsgId, {
@@ -1729,9 +1737,10 @@ class _SpeechFeedbackRowState extends State<_SpeechFeedbackRow> {
 
   bool _expanded = false;
   bool _feedbackAudioLoading = false;
+  bool _subscriptionGateLoading = false;
 
   Future<void> _onFeedbackTap() async {
-    if (_feedbackAudioLoading) return;
+    if (_feedbackAudioLoading || _subscriptionGateLoading) return;
     if (_expanded) {
       final rpMsgId = widget.rpMsgId;
       if (rpMsgId != null) {
@@ -1739,6 +1748,30 @@ class _SpeechFeedbackRowState extends State<_SpeechFeedbackRow> {
       }
       setState(() => _expanded = false);
       return;
+    }
+    if (widget.profileHistory && widget.feedbackLockedYn == 'Y') {
+      setState(() => _subscriptionGateLoading = true);
+      var subscribed = false;
+      try {
+        final token = await TokenStorage.loadAccessToken();
+        if (token != null && token.isNotEmpty) {
+          final yn = await SudaApiClient.getUserSubscribedYn(
+            accessToken: token,
+          );
+          subscribed = yn == 'Y';
+        }
+      } catch (_) {
+        subscribed = false;
+      }
+      if (!mounted) return;
+      setState(() => _subscriptionGateLoading = false);
+      if (subscribed) {
+        DefaultToast.show(
+          context,
+          AppLocalizations.of(context)!.speechFeedbackUnavailable,
+        );
+        return;
+      }
     }
     final allowed = await ensureSpeechFeedbackUnlocked(
       context,
@@ -1915,7 +1948,7 @@ class _SpeechFeedbackRowState extends State<_SpeechFeedbackRow> {
                 _SpeechFeedbackFeedbackButton(
                   onTap: () => unawaited(_onFeedbackTap()),
                   expanded: _expanded,
-                  loading: _feedbackAudioLoading,
+                  loading: _feedbackAudioLoading || _subscriptionGateLoading,
                 ),
               ],
             ),

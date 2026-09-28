@@ -141,6 +141,7 @@
   "feedbackPlaceholder": "请分享你的想法、建议或遇到的问题…",
   "feedbackSend": "发送",
   "feedbackSuccess": "感谢你的反馈。",
+  "speechFeedbackUnavailable": "没有可用的反馈。",
   "microphonePermissionDenied": "未获得麦克风权限，无法开始。",
   "holdMicrophoneToSpeak": "按住麦克风说话",
   "roleplayTypeMessagePlaceholder": "输入你的回复…",

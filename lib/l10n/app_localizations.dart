@@ -755,6 +755,12 @@ abstract class AppLocalizations {
   /// **'Thank you for your feedback.'**
   String get feedbackSuccess;
 
+  /// No description provided for @speechFeedbackUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No feedback available.'**
+  String get speechFeedbackUnavailable;
+
   /// No description provided for @microphonePermissionDenied.
   ///
   /// In en, this message translates to:

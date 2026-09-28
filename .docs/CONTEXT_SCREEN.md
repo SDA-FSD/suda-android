@@ -902,7 +902,7 @@
 ### 스크린 내부 구현 특이사항
 - 박스레이어: 별 + titles + Mission/Words/Like (`rps2_mission_on/off.png`). 1초 후 상단 이동 + `LikeProgressEffect`.
 - 본문: Key Expression + Speech Feedback + Got it!/Report. History는 동일 본문·Report 없음(`showReportLink: false`).
-- Speech Feedback 펼침: `feedbackLockedYn`. `'Y'` Paywall, `'N'` feedback TTS 후 펼침+재생.
+- Speech Feedback 펼침: `feedbackLockedYn`. Result `'Y'` Paywall. Profile History `'Y'`는 구독 조회 후 토스트 또는 Paywall. `'N'` feedback TTS 후 펼침+재생.
 - Key Expression 카드 탭: `GET …/expressions/{i}/sound`. 북마크 POST/DELETE 동일 경로.
 - iOS TTS(Key Expression·Speech Feedback): `SudaTtsAudioPlayer` — Playing과 동일 파일 재생. History·View Chat 공유.
 - 시스템 뒤로가기 = Got it! (`PopScope`).
@@ -1156,6 +1156,7 @@
 | appPath | 스크린 | 비고 |
 |---------|--------|------|
 | `/home` | HomeScreen (Main, Home 탭) | GNB Home |
+| `/rank` | Ranking (Main, Ranking 탭) | GNB Ranking |
 | `/box` | NotificationBoxScreen (Main, Alarm 탭) | GNB Alarm |
 | `/app/notification/{id}` | NotificationBoxScreen (Main, Alarm 탭) | 푸시: 해당 알림 id 카드 펼침·목록 상단 정렬 |
 | `/profile` | ProfileScreen (Main, Profile 탭) | GNB Profile |

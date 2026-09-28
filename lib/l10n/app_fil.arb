@@ -141,6 +141,7 @@
   "feedbackPlaceholder": "Ibahagi ang opinyon, mungkahi, o anumang problemang naranasan mo...",
   "feedbackSend": "Ipadala",
   "feedbackSuccess": "Salamat sa feedback mo.",
+  "speechFeedbackUnavailable": "Walang available na feedback.",
   "microphonePermissionDenied": "Hindi makapagsimula nang walang pahintulot sa microphone.",
   "holdMicrophoneToSpeak": "Pindutin nang matagal ang mic para magsalita",
   "roleplayTypeMessagePlaceholder": "I-type ang mensahe mo...",

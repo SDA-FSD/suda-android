@@ -349,6 +349,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get feedbackSuccess => 'Obrigado pelo seu feedback.';
 
   @override
+  String get speechFeedbackUnavailable => 'Feedback indisponível.';
+
+  @override
   String get microphonePermissionDenied =>
       'Não é possível iniciar sem permissão do microfone.';
 

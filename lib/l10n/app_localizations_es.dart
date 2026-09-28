@@ -348,6 +348,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get feedbackSuccess => 'Gracias por tus comentarios.';
 
   @override
+  String get speechFeedbackUnavailable => 'No hay feedback disponible.';
+
+  @override
   String get microphonePermissionDenied =>
       'No se puede empezar sin permiso para usar el micrófono.';
 
@@ -1400,6 +1403,9 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
 
   @override
   String get feedbackSuccess => 'Gracias por tus comentarios.';
+
+  @override
+  String get speechFeedbackUnavailable => 'No hay feedback disponible.';
 
   @override
   String get microphonePermissionDenied =>

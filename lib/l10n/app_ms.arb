@@ -141,6 +141,7 @@
   "feedbackPlaceholder": "Kongsi pendapat, cadangan atau sebarang masalah yang anda hadapi...",
   "feedbackSend": "Hantar",
   "feedbackSuccess": "Terima kasih atas maklum balas anda.",
+  "speechFeedbackUnavailable": "Feedback tidak tersedia.",
   "microphonePermissionDenied": "Tidak dapat bermula tanpa kebenaran mikrofon.",
   "holdMicrophoneToSpeak": "Tekan dan tahan mikrofon untuk bercakap",
   "roleplayTypeMessagePlaceholder": "Taip mesej anda...",

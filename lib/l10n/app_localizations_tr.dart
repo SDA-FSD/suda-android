@@ -348,6 +348,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get feedbackSuccess => 'Geri bildirimin için teşekkürler.';
 
   @override
+  String get speechFeedbackUnavailable => 'Geri bildirim mevcut değil.';
+
+  @override
   String get microphonePermissionDenied => 'Mikrofon izni olmadan başlanamaz.';
 
   @override

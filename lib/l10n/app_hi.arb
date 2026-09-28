@@ -141,6 +141,7 @@
   "feedbackPlaceholder": "अपने विचार, सुझाव या सामने आई कोई समस्या बताएँ...",
   "feedbackSend": "भेजें",
   "feedbackSuccess": "फ़ीडबैक देने के लिए धन्यवाद।",
+  "speechFeedbackUnavailable": "कोई फ़ीडबैक उपलब्ध नहीं।",
   "microphonePermissionDenied": "माइक्रोफ़ोन की अनुमति के बिना शुरू नहीं कर सकते।",
   "holdMicrophoneToSpeak": "बोलने के लिए माइक्रोफ़ोन दबाकर रखें",
   "roleplayTypeMessagePlaceholder": "अपना मैसेज लिखें...",

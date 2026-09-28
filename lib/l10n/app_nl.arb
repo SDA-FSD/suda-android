@@ -141,6 +141,7 @@
   "feedbackPlaceholder": "Deel je mening, suggesties of problemen...",
   "feedbackSend": "Versturen",
   "feedbackSuccess": "Bedankt voor je feedback.",
+  "speechFeedbackUnavailable": "Geen feedback beschikbaar.",
   "microphonePermissionDenied": "Je kunt niet starten zonder toegang tot de microfoon.",
   "holdMicrophoneToSpeak": "Houd de microfoon ingedrukt om te praten",
   "roleplayTypeMessagePlaceholder": "Typ je bericht...",

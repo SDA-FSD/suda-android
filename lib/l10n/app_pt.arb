@@ -141,6 +141,7 @@
   "feedbackPlaceholder": "Compartilhe seus pensamentos, sugestões ou problemas que você encontrou...",
   "feedbackSend": "Enviar",
   "feedbackSuccess": "Obrigado pelo seu feedback.",
+  "speechFeedbackUnavailable": "Feedback indisponível.",
   "microphonePermissionDenied": "Não é possível iniciar sem permissão do microfone.",
   "holdMicrophoneToSpeak": "Segure o microfone para falar",
   "roleplayTypeMessagePlaceholder": "Digite sua resposta…",

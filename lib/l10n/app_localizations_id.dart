@@ -347,6 +347,9 @@ class AppLocalizationsId extends AppLocalizations {
   String get feedbackSuccess => 'Terima kasih atas masukan Anda.';
 
   @override
+  String get speechFeedbackUnavailable => 'Feedback tidak tersedia.';
+
+  @override
   String get microphonePermissionDenied =>
       'Tidak dapat memulai tanpa izin mikrofon.';
 

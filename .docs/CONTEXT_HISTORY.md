@@ -4,6 +4,8 @@
 
 ---
 
+- **Profile History 잠긴 Speech Feedback(2026-09-28):** History 상세만 `GET /v1/users/subscription`. 구독 Y면 토스트 `speechFeedbackUnavailable`·접힘 유지. N·실패는 Paywall. Result Paywall·구독 성공 재조회는 유지. 최신 1건 재해금 없음.
+
 - **Other User Profile(2026-09-22):** Ranking 포디움·4위+ 리스트의 남 이미지/이름 탭 → SubScreen `OtherUserProfileScreen` (`/profile/{userId}`). `GET /v1/users/{userId}/profile`. 친구 알약 Friends/Requested/Add Friend. INCOMING_PENDING도 Add Friend POST(역방향=수락). REJECTED·409 `FRIEND_REQUEST_COOLDOWN`는 스토킹 팝업. 레벨바·Saved/History 없음. Neighbors/Achievements는 타이틀 유지, 0개면 안내 문구.
 
 - **Profile GNB inset(2026-09-22):** 본문 스크롤 `bottom: GnbBar.contentHeight`. Saved 마지막 페이지 50 스페이서 제거.
@@ -30,6 +32,6 @@
 - **Opening 마이크(2026-08):** 자동 재개 없음. Start→status/request→영구거부 시 설정 안내. `PERMISSION_MICROPHONE=1`.
 - **Sign in with Apple(2026-07):** `POST /v1/auth/apple`. iOS local/dev/prd, AOS dev/prd. local·stg AOS 미지원.
 - **iOS Google Sign-In 이원화:** non-prod 558349 / prd 841694. plist 빌드 복사. `getInitialMessage` 2초 timeout 유지.
-- **Speech Feedback 잠금:** `feedbackLockedYn`. Y→Paywall, N→펼침. View Chat은 feedback null이면 버튼 없음.
+- **Speech Feedback 잠금:** `feedbackLockedYn`. Result Y→Paywall. Profile History Y→구독 조회 후 토스트 또는 Paywall. N→펼침. View Chat은 feedback null이면 버튼 없음.
 - **에너지 simple/detail 분기·Playing 소비:** simple은 배지/상태, detail은 팝업. 발화 처리마다 -1.
 - **Home v2 / Series Overview:** `GET /v2/home/contents`, 썸네일 → Series Overview.

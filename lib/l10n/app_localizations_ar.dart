@@ -344,6 +344,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get feedbackSuccess => 'شكرًا لك على ملاحظاتك.';
 
   @override
+  String get speechFeedbackUnavailable => 'لا توجد ملاحظات متاحة.';
+
+  @override
   String get microphonePermissionDenied =>
       'لا يمكن البدء من دون إذن الميكروفون.';
 

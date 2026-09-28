@@ -348,6 +348,9 @@ class AppLocalizationsMs extends AppLocalizations {
   String get feedbackSuccess => 'Terima kasih atas maklum balas anda.';
 
   @override
+  String get speechFeedbackUnavailable => 'Feedback tidak tersedia.';
+
+  @override
   String get microphonePermissionDenied =>
       'Tidak dapat bermula tanpa kebenaran mikrofon.';
 

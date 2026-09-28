@@ -141,6 +141,7 @@
   "feedbackPlaceholder": "ご意見、ご要望、お困りの点などをお聞かせください…",
   "feedbackSend": "送信",
   "feedbackSuccess": "ご意見をお寄せいただきありがとうございます。",
+  "speechFeedbackUnavailable": "フィードバックはありません。",
   "microphonePermissionDenied": "マイクの使用を許可しないと開始できません。",
   "holdMicrophoneToSpeak": "マイクボタンを長押しして話す",
   "roleplayTypeMessagePlaceholder": "メッセージを入力…",

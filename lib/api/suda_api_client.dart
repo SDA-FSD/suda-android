@@ -565,6 +565,13 @@ class SudaApiClient {
     );
   }
 
+  /// 구독 원장 `subscribedYn`만 (`GET /v1/users/subscription`). 에너지 캐시 갱신 없음.
+  static Future<String> getUserSubscribedYn({
+    required String accessToken,
+  }) {
+    return UserApi.getUserSubscribedYn(accessToken: accessToken);
+  }
+
   /// 배지·Playing·구독 상태 등 레이블/상태 갱신 (`GET /v1/users/energy/simple`).
   static Future<UserEnergyDto> getUserEnergySimple({
     required String accessToken,

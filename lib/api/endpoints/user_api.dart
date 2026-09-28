@@ -535,6 +535,50 @@ class UserApi {
     }
   }
 
+  /// `GET /v1/users/subscription` — 구독 원장 `subscribedYn`만. 에너지 캐시 갱신 없음.
+  static Future<String> getUserSubscribedYn({
+    required String accessToken,
+  }) {
+    return SudaHttpClient.executeWithRefresh(
+      () => _getUserSubscribedYnInternal(accessToken),
+      retryWithNewToken: (newToken) => _getUserSubscribedYnInternal(newToken),
+    );
+  }
+
+  static Future<String> _getUserSubscribedYnInternal(String accessToken) async {
+    final uri = SudaHttpClient.buildUri('/v1/users/subscription');
+
+    late final http.Response response;
+    try {
+      response = await SudaHttpClient.client
+          .get(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      rethrow;
+    }
+
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final Map<String, dynamic> data =
+          jsonDecode(response.body) as Map<String, dynamic>;
+      final yn = data['subscribedYn'];
+      if (yn is String && yn.isNotEmpty) return yn;
+      throw Exception('GET /v1/users/subscription failed: empty subscribedYn');
+    }
+
+    throw Exception(
+      'GET /v1/users/subscription failed: HTTP ${response.statusCode} ${response.body}',
+    );
+  }
+
   static Future<UserEnergyDto> _getUserEnergyAt(
     String path,
     String accessToken, {
