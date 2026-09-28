@@ -62,7 +62,8 @@ class _ProfileImageChoice {
   String get previewPath => stored;
 }
 
-/// Settings > Account 에서 진입하는 프로필 이미지 선택 Sub Screen.
+/// Profile 상단 아바타 또는 Settings > Account 에서 진입하는 프로필 이미지 선택 Sub Screen.
+/// 닫기·뒤로가기는 [Navigator.pop]으로 진입한 화면으로 돌아간다.
 class ChangeProfileImageScreen extends StatefulWidget {
   const ChangeProfileImageScreen({
     super.key,

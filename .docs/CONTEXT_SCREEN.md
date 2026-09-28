@@ -325,6 +325,7 @@
   - `Navigator.push()`로 iOS 스타일 슬라이드 애니메이션으로 표시
 - **HistoryScreen** (Sub Screen): 롤플레이 히스토리 썸네일 탭 시 진입 (`rpUserHistoryId` 전달)
   - `Navigator.push(SubScreenRoute(page: HistoryScreen(rpUserHistoryId: …)))` 로 진입
+- **ChangeProfileImageScreen** (Sub Screen): 상단 좌측 아바타 탭 시 (`imgPath`, 구독 여부 전달). 로드 전 쉬머는 탭 없음. 닫기·뒤로가기는 `Navigator.pop`으로 **Profile** 복귀 (Setting > Account 경로와 별개). 변경 성공 pop의 `UserDto.imgPath`는 헤더에 즉시 반영. 복귀 재조회도 그대로
 
 ### 스크린 내부 구현 특이사항
 - **스크린 타입 특성**: Main Screen
@@ -340,7 +341,7 @@
     - 위치: 상단 여백 80 바로 아래. 비구독 CTA가 있으면 CTA 아래 gap 24
     - 배경: 박스가 위치한 세로 구간에 화면 좌우 끝까지 닿는 full-bleed 그라데이션 적용
     - 구현: `AppScaffold(usePadding: false)`를 적용하여 그라데이션이 화면 끝까지 닿도록 함
-    - 아바타 `imgPath`: `UserProfileAvatar` 단일 링(구독 / 비구독 캐릭터 등급 / 무료). null/empty·기본색은 `DefaultProfileAvatar`. 캐릭터는 `CdnThumbSlot.profileAvatar` `_150`. path는 http(s)로 시작하지 않음
+    - 아바타 `imgPath`: `UserProfileAvatar` 단일 링(구독 / 비구독 캐릭터 등급 / 무료). null/empty·기본색은 `DefaultProfileAvatar`. 캐릭터는 `CdnThumbSlot.profileAvatar` `_150`. path는 http(s)로 시작하지 않음. 탭 → `ChangeProfileImageScreen`
     - 스탯 라벨 영어 하드코딩: Level(`currentLevel`) / Like(`likePoint`) / Friends(`friendCount`). Friends 칸만 탭 → `FriendsScreen`. Level/Like·타인 프로필 Friends 숫자는 이동 없음
   - **구독자 상단 그라데이션**: 탭 상단까지. 아래는 `#121212`
   - **무료 사용자 Premium CTA** (`SubscriptionStatusCache.isSubscribedActive == false`):
@@ -486,7 +487,7 @@
 - 키보드 활성화 시 `resizeToAvoidBottomInset: false` (하단 "계정 삭제"가 키보드와 함께 올라오지 않도록)
 - 진입 시 `GET /v1/users/energy/simple`로 구독 상태 갱신 (`SubscriptionStatusCache`)
 - **아바타**: `UserProfileAvatar` 단일 링(외경 100). 탭 → `ChangeProfileImageScreen`. 바로 아래 `accountChangePicture`(`bodySmall` 흰색 중앙)도 같은 이동. X 오버레이·기본값 리셋 확인 없음
-- **ChangeProfileImageScreen** (`lib/screens/setting/change_profile_image.dart`): Sub Screen. 앱바 제목 없음·뒤로가기. 본문 `changeProfileImageTitle`(`headlineLarge` 흰색 중앙). 그 아래 현재 선택 미리보기(공통 링, 디스플레이 폭 50%, 캐릭터는 CDN 원본). 그리드 5열 고정(간격 8, 미만이어도 칸 너비 유지, 좌→우). 데이터는 `GET /v1/users/progress` `claimedCharacters` 서버 순·`characterImgPath` 중복 제거 후 기본 4색(`1`…`4`) append. 그리드 캐릭터는 `_150`, 테두리 없음, 선택만 흰 2px. 현재 `imgPath`가 목록에 없으면 1번 노랑 선택. Done(영어 고정, 흰 알약·검정, 폭 50%)은 선택이 있을 때만 `PUT /v1/users/profile-img`. 현재와 같으면 API 없이 pop. 성공 시 `GET /v1/users` + `MainUserSync` 후 Account에 `UserDto` 반환. 섹션 간격 24
+- **ChangeProfileImageScreen** (`lib/screens/setting/change_profile_image.dart`): Sub Screen. 진입은 Account 아바타/`accountChangePicture` 또는 Profile 상단 좌측 아바타. pop은 각 진입 화면. 앱바 제목 없음·뒤로가기. 본문 `changeProfileImageTitle`(`headlineLarge` 흰색 중앙). 그 아래 현재 선택 미리보기(공통 링, 디스플레이 폭 50%, 캐릭터는 CDN 원본). 그리드 5열 고정(간격 8, 미만이어도 칸 너비 유지, 좌→우). 데이터는 `GET /v1/users/progress` `claimedCharacters` 서버 순·`characterImgPath` 중복 제거 후 기본 4색(`1`…`4`) append. 그리드 캐릭터는 `_150`, 테두리 없음, 선택만 흰 2px. 현재 `imgPath`가 목록에 없으면 1번 노랑 선택. Done(영어 고정, 흰 알약·검정, 폭 50%)은 선택이 있을 때만 `PUT /v1/users/profile-img`. 현재와 같으면 API 없이 pop. 성공 시 `GET /v1/users` + `MainUserSync` 후 진입 화면에 `UserDto` 반환. 섹션 간격 24
 - **Subscription 섹션**
   - 무료 (`isSubscribedActive == false`): Free Plan 카드(`check_green.svg`) → Paywall. l10n `accountFreePlanTitle` / `accountFreePlanSubtitle`
   - 구독 활성: Subscription 헤더 leading. 구독↔카드 간격 **24**(이름/계정 섹션과 동일). **`Change Plan >`는 월간 구독자만** 노출(`subscriptionBasePlanId==bp-premium-monthly`; 연간·미구독은 미표시). (l10n `accountChangePlan` + chevron, 텍스트 `bodySmall` 14·**w700**/`wght` 700·흰색)는 그 간격 안 하단 trailing(`end: 8`, 카드와 `bottom: 12`) → `ChangePlanScreen`. Premium 카드(`premium_verified_badge.png`) — 제목 `accountPremiumTitle`, 부제 `accountPremiumSubtitle`, 갱신일 `accountPremiumRenewsOn`(`subscriptionExpiredAt`, `DateFormat.yMd` 로케일 패턴 · 실패 시 `en`)

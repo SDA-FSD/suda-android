@@ -32,6 +32,7 @@ import 'friends.dart';
 import 'reward/reward_unboxing.dart';
 import 'roleplay/history.dart';
 import 'roleplay/suda_tts_audio_player.dart';
+import 'setting/change_profile_image.dart';
 import 'setting/setting.dart';
 
 enum _ProfileContentTab { progress, saved, history }
@@ -603,6 +604,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
         DefaultToast.show(context, 'Logout failed: $error', isError: true);
       }
     }
+  }
+
+  Future<void> _openChangeProfileImage() async {
+    final profile = _myProfile;
+    if (profile == null) return;
+    final updated = await Navigator.of(context).push<UserDto>(
+      SubScreenRoute(
+        page: ChangeProfileImageScreen(
+          imgPath: profile.imgPath,
+          isPremium: !_showPremiumCta,
+        ),
+      ),
+    );
+    if (!mounted || updated == null) return;
+    final imgPath = updated.imgPath;
+    setState(() {
+      _myProfile = MyProfileDto(
+        id: profile.id,
+        name: profile.name,
+        imgPath: imgPath == null || imgPath.isEmpty ? null : imgPath,
+        currentLevel: profile.currentLevel,
+        likePoint: profile.likePoint,
+        friendCount: profile.friendCount,
+      );
+    });
   }
 
   Future<void> _openSettings() async {
@@ -1470,11 +1496,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     width: double.infinity,
                     child: Row(
                       children: [
-                        UserProfileAvatar(
-                          imgPath: profile?.imgPath,
-                          isPremium: !_showPremiumCta,
-                          isLoading: showProfileShimmer,
-                          size: 100,
+                        GestureDetector(
+                          onTap: showProfileShimmer
+                              ? null
+                              : () => unawaited(_openChangeProfileImage()),
+                          child: UserProfileAvatar(
+                            imgPath: profile?.imgPath,
+                            isPremium: !_showPremiumCta,
+                            isLoading: showProfileShimmer,
+                            size: 100,
+                          ),
                         ),
                         Expanded(
                           child: Padding(
