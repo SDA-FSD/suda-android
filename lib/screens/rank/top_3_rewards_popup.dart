@@ -87,6 +87,7 @@ class _RewardRankBlock extends StatelessWidget {
   final String place;
   final List<(String, String)> items;
 
+  static const _dividerColor = Color(0x33D9D9D9); // #D9D9D9 @ 20%, title 가로선 동일
   // DefaultPopup glassy 계열: white fill ~10% + border ~24% (중첩 blur 없음)
   static const _cardBg = Color(0x1AFFFFFF); // white @ 10%
   static const _cardBorder = Color(0x3DFFFFFF); // white @ 24%
@@ -110,33 +111,49 @@ class _RewardRankBlock extends StatelessWidget {
       ),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              place,
-              textAlign: TextAlign.center,
-              style: placeStyle,
-            ),
-            const SizedBox(height: 10),
-            for (var i = 0; i < items.length; i++) ...[
-              if (i > 0) const SizedBox(height: 8),
-              Row(
-                children: [
-                  Image.asset(
-                    items[i].$1,
-                    width: _iconSize,
-                    height: _iconSize,
-                    fit: BoxFit.contain,
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(items[i].$2, style: itemStyle),
-                  ),
-                ],
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(right: 12),
+                child: Align(
+                  alignment: Alignment.center,
+                  child: Text(place, style: placeStyle),
+                ),
+              ),
+              const ColoredBox(
+                color: _dividerColor,
+                child: SizedBox(width: 1),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    for (var i = 0; i < items.length; i++) ...[
+                      if (i > 0) const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Image.asset(
+                            items[i].$1,
+                            width: _iconSize,
+                            height: _iconSize,
+                            fit: BoxFit.contain,
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(items[i].$2, style: itemStyle),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ],
+                ),
               ),
             ],
-          ],
+          ),
         ),
       ),
     );
