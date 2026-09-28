@@ -225,6 +225,10 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
       );
       if (!mounted) return;
       final updated = overview.copyWith(bestScoreMap: bestScoreMap);
+      final unlockAdvanced = seriesOverviewUnlockAdvanced(
+        before: overview,
+        after: updated,
+      );
       SeriesStateService.instance.setSeriesOverview(
         seriesId: widget.seriesId,
         overview: updated,
@@ -232,7 +236,10 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
       );
       setState(() {
         _overview = updated;
-        _episodeContentKey++;
+        // 해금이 한 칸 전진하면 같은 State에서 스크롤·하이라이트·버튼을 애니메이션한다.
+        if (!unlockAdvanced) {
+          _episodeContentKey++;
+        }
         _scrollToUnlockToken++;
       });
     } catch (_) {}

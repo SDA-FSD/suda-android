@@ -1,4 +1,8 @@
+import 'dart:async' show Timer, unawaited;
+import 'dart:ui' show lerpDouble;
+
 import 'package:flutter/material.dart';
+import 'package:vibration/vibration.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../../l10n/app_localizations.dart';
@@ -8,6 +12,39 @@ import '../../../utils/suda_json_util.dart';
 import '../../../widgets/cdn_thumb_image.dart';
 
 enum _EpisodePlayButtonKind { replay, unlock, locked }
+
+/// `bestScoreMap`에 없는 첫 에피소드. 전부 완료면 null.
+int? seriesOverviewFirstUnlockIndex(RpS2SeriesOverviewDto overview) {
+  for (var i = 0; i < overview.episodes.length; i++) {
+    if (!overview.bestScoreMap.containsKey(overview.episodes[i].id)) {
+      return i;
+    }
+  }
+  return null;
+}
+
+/// 진행대기가 정확히 다음 1칸으로 옮겨졌고, 그 칸은 아직 점수가 없을 때.
+bool seriesOverviewUnlockAdvanced({
+  required RpS2SeriesOverviewDto before,
+  required RpS2SeriesOverviewDto after,
+}) {
+  final beforeEpisodes = before.episodes;
+  final afterEpisodes = after.episodes;
+  if (beforeEpisodes.isEmpty ||
+      beforeEpisodes.length != afterEpisodes.length) {
+    return false;
+  }
+  for (var i = 0; i < beforeEpisodes.length; i++) {
+    if (beforeEpisodes[i].id != afterEpisodes[i].id) return false;
+  }
+  final from = seriesOverviewFirstUnlockIndex(before);
+  final to = seriesOverviewFirstUnlockIndex(after);
+  if (from == null || to == null || to != from + 1) return false;
+  final completedId = beforeEpisodes[from].id;
+  if (!after.bestScoreMap.containsKey(completedId)) return false;
+  if (after.bestScoreMap.containsKey(afterEpisodes[to].id)) return false;
+  return true;
+}
 
 class SeriesEpisodeTabContent extends StatefulWidget {
   final RpS2SeriesOverviewDto overview;
@@ -25,7 +62,8 @@ class SeriesEpisodeTabContent extends StatefulWidget {
   State<SeriesEpisodeTabContent> createState() => _SeriesEpisodeTabContentState();
 }
 
-class _SeriesEpisodeTabContentState extends State<SeriesEpisodeTabContent> {
+class _SeriesEpisodeTabContentState extends State<SeriesEpisodeTabContent>
+    with SingleTickerProviderStateMixin {
   static const _episodeLabelColor = Color(0xFF635F5F);
   static const _mint = Color(0xFF0CABA8);
   static const _tealDark = Color(0xFF054544);
@@ -44,67 +82,218 @@ class _SeriesEpisodeTabContentState extends State<SeriesEpisodeTabContent> {
   static const _playButtonHeight = 38.0;
   static const _summaryButtonGap = 4.0;
   static const _scrollToUnlockDuration = Duration(milliseconds: 450);
-  static const _floatingHeaderReserve = 56.0;
+  static const _unlockAdvanceHold = Duration(milliseconds: 300);
+  static const _unlockAdvanceDuration = Duration(milliseconds: 1000);
+  /// 1s 안의 비율은 기존 컷(자물쇠 180, 슬라이드 220)과 같다.
+  static const _lockPopEnd = 180 / 520;
+  static const _playSlideEnd = (180 + 220) / 520;
 
+  final GlobalKey _listKey = GlobalKey();
   final GlobalKey _unlockBlockKey = GlobalKey();
-  int _lastScrollToken = -1;
+  final GlobalKey _advanceFromKey = GlobalKey();
+  late final AnimationController _advanceController;
 
-  RpS2SeriesOverviewDto get overview => widget.overview;
+  int _lastScrollToken = -1;
+  int _advanceGeneration = 0;
+  int _anchorAttempts = 0;
+  int? _advanceFrom;
+  int? _advanceTo;
+  bool _anchorsReady = false;
+  bool _advanceTicksEnabled = false;
+  bool _episodeButtonsLocked = false;
+  bool _unlockHapticPlayed = false;
+  Timer? _advanceHoldTimer;
+  RpS2SeriesOverviewDto? _heldOverview;
+  double _fromTop = 0;
+  double _toTop = 0;
+  double _fromHeight = 0;
+  double _toHeight = 0;
+
+  RpS2SeriesOverviewDto get overview => _heldOverview ?? widget.overview;
+
+  bool get _isAdvancing => _advanceFrom != null && _advanceTo != null;
 
   @override
   void initState() {
     super.initState();
+    _advanceController = AnimationController(
+      vsync: this,
+      duration: _unlockAdvanceDuration,
+    );
+    _advanceController.addListener(() {
+      if (!mounted || !_advanceTicksEnabled || _advanceFrom == null) return;
+      _playUnlockHapticIfNeeded();
+      setState(() {});
+    });
+    _advanceController.addStatusListener((status) {
+      if (status != AnimationStatus.completed || !mounted) return;
+      if (!_advanceTicksEnabled) return;
+      setState(() {
+        _advanceFrom = null;
+        _advanceTo = null;
+        _anchorsReady = false;
+        _advanceTicksEnabled = false;
+      });
+    });
     _scheduleScrollToUnlock();
   }
 
   @override
   void didUpdateWidget(SeriesEpisodeTabContent oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.scrollToUnlockToken != oldWidget.scrollToUnlockToken ||
-        widget.overview != oldWidget.overview) {
-      _scheduleScrollToUnlock();
+    final advanced = seriesOverviewUnlockAdvanced(
+      before: oldWidget.overview,
+      after: widget.overview,
+    );
+    if (advanced) {
+      final generation = ++_advanceGeneration;
+      _advanceHoldTimer?.cancel();
+      _advanceTicksEnabled = false;
+      _advanceFrom = null;
+      _advanceTo = null;
+      _anchorsReady = false;
+      _anchorAttempts = 0;
+      _heldOverview = oldWidget.overview;
+      _episodeButtonsLocked = true;
+      _unlockHapticPlayed = false;
+      if (_advanceController.value != 0) {
+        _advanceController.value = 0;
+      }
+      final from = seriesOverviewFirstUnlockIndex(oldWidget.overview);
+      final to = seriesOverviewFirstUnlockIndex(widget.overview);
+      _advanceHoldTimer = Timer(_unlockAdvanceHold, () {
+        if (!mounted || generation != _advanceGeneration) return;
+        setState(() {
+          _heldOverview = null;
+          _advanceFrom = from;
+          _advanceTo = to;
+          _anchorsReady = false;
+          _anchorAttempts = 0;
+        });
+        _scheduleScrollToUnlock(advanceGeneration: generation);
+      });
+      return;
     }
+    final overviewChanged = widget.overview != oldWidget.overview;
+    final tokenChanged =
+        widget.scrollToUnlockToken != oldWidget.scrollToUnlockToken;
+    if (!overviewChanged && !tokenChanged) return;
+
+    _advanceHoldTimer?.cancel();
+    _heldOverview = null;
+    _episodeButtonsLocked = false;
+    if (_isAdvancing) {
+      _advanceTicksEnabled = false;
+      _advanceController.stop();
+      _advanceFrom = null;
+      _advanceTo = null;
+      _anchorsReady = false;
+    }
+    _scheduleScrollToUnlock();
   }
 
-  void _scheduleScrollToUnlock() {
-    if (_lastScrollToken == widget.scrollToUnlockToken) return;
+  @override
+  void dispose() {
+    _advanceHoldTimer?.cancel();
+    _advanceController.dispose();
+    super.dispose();
+  }
+
+  void _scheduleScrollToUnlock({int? advanceGeneration}) {
+    if (advanceGeneration == null &&
+        _lastScrollToken == widget.scrollToUnlockToken) {
+      return;
+    }
     _lastScrollToken = widget.scrollToUnlockToken;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
+      if (advanceGeneration != null) {
+        _beginAdvanceMotion(advanceGeneration);
+        return;
+      }
       _scrollToUnlockIfNeeded();
     });
   }
 
-  void _scrollToUnlockIfNeeded() {
+  void _beginAdvanceMotion(int generation) {
+    if (!mounted || !_isAdvancing || generation != _advanceGeneration) return;
+    if (!_tryCaptureAnchors()) {
+      if (_anchorAttempts++ >= 5) {
+        _advanceTicksEnabled = false;
+        _advanceFrom = null;
+        _advanceTo = null;
+        _anchorsReady = false;
+        _episodeButtonsLocked = false;
+        if (mounted) setState(() {});
+        return;
+      }
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _beginAdvanceMotion(generation);
+      });
+      return;
+    }
+    _anchorAttempts = 0;
+    _episodeButtonsLocked = false;
+    setState(() {});
+    _advanceTicksEnabled = true;
+    _advanceController.forward(from: 0);
+    _scrollToUnlockIfNeeded(duration: _unlockAdvanceDuration);
+  }
+
+  void _playUnlockHapticIfNeeded() {
+    if (_unlockHapticPlayed || _advanceController.value < _lockPopEnd) return;
+    _unlockHapticPlayed = true;
+    unawaited(_vibrateUnlock());
+  }
+
+  /// 자물쇠가 사라지고 Play가 들어오기 시작하는 순간. 짧은 강타 뒤 무거운 한 방.
+  Future<void> _vibrateUnlock() async {
+    try {
+      await Vibration.vibrate(
+        pattern: [0, 30, 40, 160],
+        intensities: [0, 255, 0, 255],
+        sharpness: 1,
+      );
+    } catch (_) {}
+  }
+
+  bool _tryCaptureAnchors() {
+    final listBox = _listKey.currentContext?.findRenderObject();
+    final fromBox = _advanceFromKey.currentContext?.findRenderObject();
+    final toBox = _unlockBlockKey.currentContext?.findRenderObject();
+    if (listBox is! RenderBox ||
+        !listBox.hasSize ||
+        fromBox is! RenderBox ||
+        !fromBox.hasSize ||
+        toBox is! RenderBox ||
+        !toBox.hasSize) {
+      return false;
+    }
+    _fromTop = listBox.globalToLocal(fromBox.localToGlobal(Offset.zero)).dy;
+    _toTop = listBox.globalToLocal(toBox.localToGlobal(Offset.zero)).dy;
+    _fromHeight = fromBox.size.height;
+    _toHeight = toBox.size.height;
+    _anchorsReady = true;
+    return true;
+  }
+
+  void _scrollToUnlockIfNeeded({Duration? duration}) {
+    final targetIndex = _isAdvancing
+        ? _advanceTo
+        : seriesOverviewFirstUnlockIndex(overview);
+    if (targetIndex == null || targetIndex <= 0) return;
+
     final targetContext = _unlockBlockKey.currentContext;
     if (targetContext == null) return;
-
     final renderObject = targetContext.findRenderObject();
     if (renderObject is! RenderBox || !renderObject.hasSize) return;
 
-    final media = MediaQuery.of(targetContext);
-    final top = renderObject.localToGlobal(Offset.zero).dy;
-    final bottom = top + renderObject.size.height;
-    final visibleTop = media.padding.top + _floatingHeaderReserve;
-    final visibleBottom = media.size.height - media.padding.bottom;
-
-    if (bottom > visibleTop && top < visibleBottom) return;
-
     Scrollable.ensureVisible(
       targetContext,
-      duration: _scrollToUnlockDuration,
+      duration: duration ?? _scrollToUnlockDuration,
       curve: Curves.easeInOut,
-      alignment: 0.35,
+      alignment: 0.5,
     );
-  }
-
-  int? _firstUnlockIndex() {
-    for (int i = 0; i < overview.episodes.length; i++) {
-      if (!overview.bestScoreMap.containsKey(overview.episodes[i].id)) {
-        return i;
-      }
-    }
-    return null;
   }
 
   _EpisodePlayButtonKind _buttonKind(int index, int? firstUnlockIndex) {
@@ -225,93 +414,47 @@ class _SeriesEpisodeTabContentState extends State<SeriesEpisodeTabContent> {
             );
   }
 
+  Widget _playLabelRow(BuildContext context, AppLocalizations l10n) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Image.asset(
+          'assets/images/icons/play.png',
+          width: 11,
+          height: 14,
+        ),
+        const SizedBox(width: 10),
+        Text(
+          l10n.seriesOverviewPlay,
+          style: _playLabelStyle(context, color: Colors.white),
+        ),
+      ],
+    );
+  }
+
+  static const _playRadius = BorderRadius.all(Radius.circular(_playButtonHeight / 2));
+
   Widget _buildPlayButton(
     BuildContext context,
     AppLocalizations l10n,
     _EpisodePlayButtonKind kind,
     VoidCallback? onTap,
   ) {
-    const radius = BorderRadius.all(Radius.circular(_playButtonHeight / 2));
-
-    Widget inner;
     switch (kind) {
       case _EpisodePlayButtonKind.replay:
-        inner = DecoratedBox(
-          decoration: BoxDecoration(
-            borderRadius: radius,
-            color: Colors.transparent,
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Image.asset(
-                'assets/images/icons/play.png',
-                width: 11,
-                height: 14,
-              ),
-              const SizedBox(width: 10),
-              Text(
-                l10n.seriesOverviewPlay,
-                style: _playLabelStyle(context, color: Colors.white),
-              ),
-            ],
-          ),
-        );
-        return GestureDetector(
+        return _replayChrome(
+          context,
           onTap: onTap,
-          behavior: HitTestBehavior.opaque,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              borderRadius: radius,
-              gradient: const LinearGradient(
-                colors: [_mint, _tealDark],
-              ),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(1),
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  borderRadius: radius,
-                  color: Theme.of(context).scaffoldBackgroundColor,
-                ),
-                child: SizedBox(
-                  height: _playButtonHeight,
-                  width: double.infinity,
-                  child: inner,
-                ),
-              ),
-            ),
-          ),
+          borderWidth: 1,
+          innerColor: Theme.of(context).scaffoldBackgroundColor,
+          edgeColor: _tealDark,
+          child: _playLabelRow(context, l10n),
         );
       case _EpisodePlayButtonKind.unlock:
-        return GestureDetector(
+        return _solidPlayButton(
           onTap: onTap,
-          behavior: HitTestBehavior.opaque,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: _mint,
-              borderRadius: radius,
-            ),
-            child: SizedBox(
-              height: _playButtonHeight,
-              width: double.infinity,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Image.asset(
-                    'assets/images/icons/play.png',
-                    width: 11,
-                    height: 14,
-                  ),
-                  const SizedBox(width: 10),
-                  Text(
-                    l10n.seriesOverviewPlay,
-                    style: _playLabelStyle(context, color: Colors.white),
-                  ),
-                ],
-              ),
-            ),
-          ),
+          color: _mint,
+          child: _playLabelRow(context, l10n),
         );
       case _EpisodePlayButtonKind.locked:
         return GestureDetector(
@@ -319,33 +462,191 @@ class _SeriesEpisodeTabContentState extends State<SeriesEpisodeTabContent> {
             DefaultToast.show(context, l10n.seriesOverviewEpisodeLockedToast);
           },
           behavior: HitTestBehavior.opaque,
+          child: _lockedChrome(
+            context,
+            l10n,
+            iconScale: 1,
+            labelOpacity: 1,
+          ),
+        );
+    }
+  }
+
+  /// 채움 Play(t=0)에서 테두리 Play(t=1)로 모프.
+  Widget _buildReplayMorphButton(
+    BuildContext context,
+    AppLocalizations l10n,
+    double t,
+    VoidCallback? onTap,
+  ) {
+    final scaffold = Theme.of(context).scaffoldBackgroundColor;
+    return _replayChrome(
+      context,
+      onTap: onTap,
+      borderWidth: t,
+      innerColor: Color.lerp(_mint, scaffold, t)!,
+      edgeColor: Color.lerp(_mint, _tealDark, t)!,
+      child: _playLabelRow(context, l10n),
+    );
+  }
+
+  /// 자물쇠가 커졌다 사라진 뒤, 진행대기 Play가 오른쪽에서 들어온다.
+  Widget _buildUnlockArriveButton(
+    BuildContext context,
+    AppLocalizations l10n,
+    VoidCallback? onTap,
+  ) {
+    final t = _advanceController.value;
+    final lockT = (t / _lockPopEnd).clamp(0.0, 1.0);
+    final double iconScale;
+    final double lockOpacity;
+    if (lockT < 0.4) {
+      iconScale = lerpDouble(1, 1.25, lockT / 0.4)!;
+      lockOpacity = 1;
+    } else {
+      final shrink = (lockT - 0.4) / 0.6;
+      iconScale = lerpDouble(1.25, 0, shrink)!;
+      lockOpacity = 1 - shrink;
+    }
+    final slideT = ((t - _lockPopEnd) / (_playSlideEnd - _lockPopEnd))
+        .clamp(0.0, 1.0);
+    final slide = Curves.easeOutCubic.transform(slideT);
+
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: SizedBox(
+        height: _playButtonHeight,
+        width: double.infinity,
+        child: Stack(
+          clipBehavior: Clip.none,
+          alignment: Alignment.center,
+          children: [
+            _lockedChrome(
+              context,
+              l10n,
+              iconScale: iconScale,
+              labelOpacity: lockOpacity,
+            ),
+            if (t >= _lockPopEnd)
+              ClipRRect(
+                borderRadius: _playRadius,
+                child: FractionalTranslation(
+                  translation: Offset(1 - slide, 0),
+                  child: _solidPlayButton(
+                    onTap: null,
+                    color: _mint,
+                    child: _playLabelRow(context, l10n),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _replayChrome(
+    BuildContext context, {
+    required double borderWidth,
+    required Color innerColor,
+    required Color edgeColor,
+    required Widget child,
+    VoidCallback? onTap,
+  }) {
+    final innerRadius = BorderRadius.circular(
+      (_playButtonHeight / 2 - borderWidth).clamp(0.0, _playButtonHeight / 2),
+    );
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: _playRadius,
+          gradient: LinearGradient(
+            colors: [_mint, edgeColor],
+          ),
+        ),
+        child: Padding(
+          padding: EdgeInsets.all(borderWidth),
           child: DecoratedBox(
             decoration: BoxDecoration(
-              color: _lockedFill,
-              borderRadius: radius,
+              borderRadius: innerRadius,
+              color: innerColor,
             ),
             child: SizedBox(
               height: _playButtonHeight,
               width: double.infinity,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Image.asset(
-                    'assets/images/icons/lock.png',
-                    width: 24,
-                    height: 24,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    l10n.seriesOverviewLocked,
-                    style: _playLabelStyle(context, color: _lockedText),
-                  ),
-                ],
-              ),
+              child: child,
             ),
           ),
-        );
-    }
+        ),
+      ),
+    );
+  }
+
+  Widget _solidPlayButton({
+    required Color color,
+    required Widget child,
+    VoidCallback? onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: _playRadius,
+        ),
+        child: SizedBox(
+          height: _playButtonHeight,
+          width: double.infinity,
+          child: child,
+        ),
+      ),
+    );
+  }
+
+  Widget _lockedChrome(
+    BuildContext context,
+    AppLocalizations l10n, {
+    required double iconScale,
+    required double labelOpacity,
+  }) {
+    return DecoratedBox(
+      decoration: const BoxDecoration(
+        color: _lockedFill,
+        borderRadius: _playRadius,
+      ),
+      child: SizedBox(
+        height: _playButtonHeight,
+        width: double.infinity,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Transform.scale(
+              scale: iconScale,
+              child: Opacity(
+                opacity: labelOpacity.clamp(0.0, 1.0),
+                child: Image.asset(
+                  'assets/images/icons/lock.png',
+                  width: 24,
+                  height: 24,
+                ),
+              ),
+            ),
+            const SizedBox(width: 4),
+            Opacity(
+              opacity: labelOpacity.clamp(0.0, 1.0),
+              child: Text(
+                l10n.seriesOverviewLocked,
+                style: _playLabelStyle(context, color: _lockedText),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _wrapUnlockBlockHighlight(Widget child) {
@@ -353,12 +654,12 @@ class _SeriesEpisodeTabContentState extends State<SeriesEpisodeTabContent> {
       clipBehavior: Clip.none,
       fit: StackFit.passthrough,
       children: [
-        Positioned(
+        const Positioned(
           left: -_unlockBlockHorizontalBleed,
           right: -_unlockBlockHorizontalBleed,
           top: -_unlockBlockVerticalBleed,
           bottom: -_unlockBlockVerticalBleed,
-          child: const ColoredBox(color: _unlockBlockBackground),
+          child: ColoredBox(color: _unlockBlockBackground),
         ),
         child,
       ],
@@ -371,6 +672,8 @@ class _SeriesEpisodeTabContentState extends State<SeriesEpisodeTabContent> {
     int episodeNumber,
     _EpisodePlayButtonKind buttonKind, {
     Key? blockKey,
+    bool highlight = false,
+    Widget? playButton,
   }) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context).textTheme;
@@ -435,15 +738,16 @@ class _SeriesEpisodeTabContentState extends State<SeriesEpisodeTabContent> {
                 ],
                 const Spacer(),
                 const SizedBox(height: _summaryButtonGap),
-                _buildPlayButton(
-                  context,
-                  l10n,
-                  buttonKind,
-                  buttonKind == _EpisodePlayButtonKind.replay ||
-                          buttonKind == _EpisodePlayButtonKind.unlock
-                      ? () => widget.onPlayEpisode?.call(episode)
-                      : null,
-                ),
+                playButton ??
+                    _buildPlayButton(
+                      context,
+                      l10n,
+                      buttonKind,
+                      buttonKind == _EpisodePlayButtonKind.replay ||
+                              buttonKind == _EpisodePlayButtonKind.unlock
+                          ? () => widget.onPlayEpisode?.call(episode)
+                          : null,
+                    ),
               ],
             ),
           ),
@@ -452,7 +756,7 @@ class _SeriesEpisodeTabContentState extends State<SeriesEpisodeTabContent> {
     );
 
     Widget result = block;
-    if (buttonKind == _EpisodePlayButtonKind.unlock) {
+    if (highlight) {
       result = _wrapUnlockBlockHighlight(block);
     }
     if (blockKey != null) {
@@ -466,9 +770,15 @@ class _SeriesEpisodeTabContentState extends State<SeriesEpisodeTabContent> {
     final episodes = overview.episodes;
     if (episodes.isEmpty) return const SizedBox.shrink();
 
-    final firstUnlockIndex = _firstUnlockIndex();
+    final l10n = AppLocalizations.of(context)!;
+    final firstUnlockIndex = seriesOverviewFirstUnlockIndex(overview);
+    final showMovingHighlight = _isAdvancing && _anchorsReady;
+    final travel = showMovingHighlight
+        ? Curves.easeInOut.transform(_advanceController.value)
+        : 0.0;
 
-    return Column(
+    final column = Column(
+      key: _listKey,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         for (int i = 0; i < episodes.length; i++) ...[
@@ -478,10 +788,73 @@ class _SeriesEpisodeTabContentState extends State<SeriesEpisodeTabContent> {
             episodes[i],
             i + 1,
             _buttonKind(i, firstUnlockIndex),
-            blockKey: i == firstUnlockIndex ? _unlockBlockKey : null,
+            blockKey: _blockKeyFor(i, firstUnlockIndex),
+            highlight: _showsStaticHighlight(i, firstUnlockIndex),
+            playButton: _playButtonFor(context, l10n, i, episodes[i]),
           ),
         ],
       ],
     );
+
+    if (!showMovingHighlight) return _ignoreEpisodeButtons(column);
+
+    final top = lerpDouble(_fromTop, _toTop, travel)! - _unlockBlockVerticalBleed;
+    final height =
+        lerpDouble(_fromHeight, _toHeight, travel)! +
+        _unlockBlockVerticalBleed * 2;
+
+    return _ignoreEpisodeButtons(
+      Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Positioned(
+            left: -_unlockBlockHorizontalBleed,
+            right: -_unlockBlockHorizontalBleed,
+            top: top,
+            height: height,
+            child: const IgnorePointer(
+              child: ColoredBox(color: _unlockBlockBackground),
+            ),
+          ),
+          column,
+        ],
+      ),
+    );
+  }
+
+  Widget _ignoreEpisodeButtons(Widget child) {
+    if (!_episodeButtonsLocked) return child;
+    return IgnorePointer(child: child);
+  }
+
+  Key? _blockKeyFor(int index, int? firstUnlockIndex) {
+    if (_isAdvancing && index == _advanceFrom) return _advanceFromKey;
+    if (index == firstUnlockIndex) return _unlockBlockKey;
+    return null;
+  }
+
+  bool _showsStaticHighlight(int index, int? firstUnlockIndex) {
+    if (_isAdvancing) {
+      return !_anchorsReady && index == _advanceFrom;
+    }
+    return index == firstUnlockIndex;
+  }
+
+  Widget? _playButtonFor(
+    BuildContext context,
+    AppLocalizations l10n,
+    int index,
+    RpS2SeriesEpisodeDto episode,
+  ) {
+    if (!_isAdvancing) return null;
+    void onPlay() => widget.onPlayEpisode?.call(episode);
+    if (index == _advanceFrom) {
+      final t = Curves.easeInOut.transform(_advanceController.value);
+      return _buildReplayMorphButton(context, l10n, t, onPlay);
+    }
+    if (index == _advanceTo) {
+      return _buildUnlockArriveButton(context, l10n, onPlay);
+    }
+    return null;
   }
 }
