@@ -4,6 +4,8 @@
 
 ---
 
+- **Change Profile Image 펼침(2026-09-29):** 선택지는 캐릭터당 첫 장과 기본 4색. 2장 이상이면 그 줄 아래에 그 캐릭터의 초상을 1번째부터 펼쳐 고른다. 1장은 펼치지 않음.
+
 - **SUDA Neighbors 캐릭터당 1장(2026-09-29):** 내·타인 프로필 이웃은 `neighborCharacters`. 캐릭터당 보유 카탈로그의 가장 앞 장. 순서는 `claimedCharacters`에서 그 캐릭터의 첫 등장. 프로필 이미지 변경은 `claimedCharacters` 전체.
 
 - **Profile History 잠긴 Speech Feedback(2026-09-28):** History 상세만 `GET /v1/users/subscription`. 구독 Y면 토스트 `speechFeedbackUnavailable`·접힘 유지. N·실패는 Paywall. Result Paywall·구독 성공 재조회는 유지. 최신 1건 재해금 없음.

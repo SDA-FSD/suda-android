@@ -20,13 +20,20 @@ class _ProfileImageChoice {
     required this.value,
     this.cdnPath,
     this.color,
+    this.characterId,
   });
 
   factory _ProfileImageChoice.character({
     required String type,
     required String path,
+    required int characterId,
   }) {
-    return _ProfileImageChoice._(type: type, value: path, cdnPath: path);
+    return _ProfileImageChoice._(
+      type: type,
+      value: path,
+      cdnPath: path,
+      characterId: characterId,
+    );
   }
 
   factory _ProfileImageChoice.fallback(int index) {
@@ -48,6 +55,7 @@ class _ProfileImageChoice {
   final String value;
   final String? cdnPath;
   final Color? color;
+  final int? characterId;
 
   bool get isDefault => color != null;
 
@@ -79,12 +87,24 @@ class ChangeProfileImageScreen extends StatefulWidget {
       _ChangeProfileImageScreenState();
 }
 
+class _CharacterPortraits {
+  const _CharacterPortraits({required this.characterId, required this.images});
+
+  final int characterId;
+  final List<_ProfileImageChoice> images;
+
+  bool get expandable => images.length > 1;
+}
+
 class _ChangeProfileImageScreenState extends State<ChangeProfileImageScreen> {
   static const _gap = 8.0;
   static const _sectionGap = 24.0;
+  static const _columns = 5;
 
-  List<_ProfileImageChoice> _items = const [];
+  List<_CharacterPortraits> _characters = const [];
+  List<_ProfileImageChoice> _defaults = const [];
   _ProfileImageChoice? _selected;
+  int? _openCharacterId;
   bool _ready = false;
   bool _saving = false;
 
@@ -94,13 +114,20 @@ class _ChangeProfileImageScreenState extends State<ChangeProfileImageScreen> {
     unawaited(_load());
   }
 
+  List<_ProfileImageChoice> get _tiles => [
+    for (final group in _characters) group.images.first,
+    ..._defaults,
+  ];
+
   Future<void> _load() async {
     List<ClaimedCharacterPortraitDto> portraits = const [];
+    List<ClaimedCharacterPortraitDto> neighbors = const [];
     try {
       final token = await TokenStorage.loadAccessToken();
       if (token != null) {
         final progress = await SudaApiClient.getProgress(accessToken: token);
         portraits = progress.claimedCharacters;
+        neighbors = progress.neighborCharacters;
       }
     } catch (e) {
       if (mounted) {
@@ -108,50 +135,137 @@ class _ChangeProfileImageScreenState extends State<ChangeProfileImageScreen> {
       }
     }
     if (!mounted) return;
-    final items = _buildItems(portraits);
+    final characters = _buildCharacters(portraits, neighbors);
+    final defaults = [
+      for (var i = 0; i < _ProfileImageChoice.defaults.length; i++)
+        _ProfileImageChoice.fallback(i),
+    ];
+    final selected = _match(widget.imgPath, characters, defaults);
     setState(() {
-      _items = items;
-      _selected = _match(widget.imgPath, items);
+      _characters = characters;
+      _defaults = defaults;
+      _selected = selected;
+      _openCharacterId = _openedBy(selected, characters);
       _ready = true;
     });
   }
 
-  List<_ProfileImageChoice> _buildItems(
+  List<_CharacterPortraits> _buildCharacters(
     List<ClaimedCharacterPortraitDto> portraits,
+    List<ClaimedCharacterPortraitDto> neighbors,
   ) {
-    final seen = <String>{};
-    final items = <_ProfileImageChoice>[];
+    final byId = <int, List<ClaimedCharacterPortraitDto>>{};
+    final seenOrder = <int>[];
     for (final portrait in portraits) {
+      if (portrait.characterId <= 0) continue;
       final path = portrait.characterImgPath.trim();
-      if (path.isEmpty || !seen.add(path)) continue;
-      items.add(
-        _ProfileImageChoice.character(
-          type: CharacterRarityFrame.normalize(portrait.characterRarity),
-          path: path,
+      if (path.isEmpty) continue;
+      final group = byId.putIfAbsent(portrait.characterId, () {
+        seenOrder.add(portrait.characterId);
+        return [];
+      });
+      if (group.any((item) => item.characterImgPath.trim() == path)) continue;
+      group.add(portrait);
+    }
+
+    final order = <int>[];
+    final firstPath = <int, String>{};
+    for (final neighbor in neighbors) {
+      if (neighbor.characterId <= 0 || !byId.containsKey(neighbor.characterId)) {
+        continue;
+      }
+      if (order.contains(neighbor.characterId)) continue;
+      order.add(neighbor.characterId);
+      final path = neighbor.characterImgPath.trim();
+      if (path.isNotEmpty) firstPath[neighbor.characterId] = path;
+    }
+    for (final id in seenOrder) {
+      if (!order.contains(id)) order.add(id);
+    }
+
+    return [
+      for (final id in order)
+        _CharacterPortraits(
+          characterId: id,
+          images: _orderedImages(byId[id]!, firstPath[id]),
         ),
-      );
-    }
-    for (var i = 0; i < _ProfileImageChoice.defaults.length; i++) {
-      items.add(_ProfileImageChoice.fallback(i));
-    }
-    return items;
+    ];
   }
 
-  _ProfileImageChoice _match(String? raw, List<_ProfileImageChoice> items) {
+  List<_ProfileImageChoice> _orderedImages(
+    List<ClaimedCharacterPortraitDto> newestFirst,
+    String? firstImagePath,
+  ) {
+    final ordered = newestFirst.reversed.toList();
+    if (firstImagePath != null && firstImagePath.isNotEmpty) {
+      final index = ordered.indexWhere(
+        (item) => item.characterImgPath.trim() == firstImagePath,
+      );
+      if (index > 0) {
+        final first = ordered.removeAt(index);
+        ordered.insert(0, first);
+      }
+    }
+    return [
+      for (final portrait in ordered)
+        _ProfileImageChoice.character(
+          type: CharacterRarityFrame.normalize(portrait.characterRarity),
+          path: portrait.characterImgPath.trim(),
+          characterId: portrait.characterId,
+        ),
+    ];
+  }
+
+  _ProfileImageChoice _match(
+    String? raw,
+    List<_CharacterPortraits> characters,
+    List<_ProfileImageChoice> defaults,
+  ) {
     final parsed = UserImgPath.parse(raw);
     if (parsed.isCharacter) {
-      for (final item in items) {
-        if (item.cdnPath == parsed.cdnPath && item.type == parsed.rarity) {
-          return item;
+      for (final group in characters) {
+        for (final item in group.images) {
+          if (item.cdnPath == parsed.cdnPath && item.type == parsed.rarity) {
+            return item;
+          }
         }
       }
     }
     if (parsed.isDefault && parsed.defaultColor != null) {
-      for (final item in items) {
+      for (final item in defaults) {
         if (item.color == parsed.defaultColor) return item;
       }
     }
-    return items.firstWhere((item) => item.value == '1' && item.isDefault);
+    return defaults.firstWhere((item) => item.value == '1');
+  }
+
+  int? _openedBy(
+    _ProfileImageChoice selected,
+    List<_CharacterPortraits> characters,
+  ) {
+    final id = selected.characterId;
+    if (id == null) return null;
+    for (final group in characters) {
+      if (group.characterId == id && group.expandable) return id;
+    }
+    return null;
+  }
+
+  void _onTileTap(_ProfileImageChoice item) {
+    final id = item.characterId;
+    _CharacterPortraits? group;
+    if (id != null) {
+      for (final candidate in _characters) {
+        if (candidate.characterId == id) {
+          group = candidate;
+          break;
+        }
+      }
+    }
+    setState(() {
+      _selected = group == null ? item : group.images.first;
+      _openCharacterId = group != null && group.expandable ? group.characterId : null;
+    });
   }
 
   bool _sameAsCurrent(_ProfileImageChoice selected) {
@@ -232,23 +346,80 @@ class _ChangeProfileImageScreenState extends State<ChangeProfileImageScreen> {
   Widget _grid(_ProfileImageChoice selected) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final cell = (constraints.maxWidth - _gap * 4) / 5;
-        return Wrap(
-          spacing: _gap,
-          runSpacing: _gap,
-          children: [
-            for (var i = 0; i < _items.length; i++)
-              SizedBox(
-                width: cell,
-                height: cell,
-                child: GestureDetector(
-                  onTap: () => setState(() => _selected = _items[i]),
-                  child: _gridFace(_items[i], cell, identical(_items[i], selected)),
+        final cell = (constraints.maxWidth - _gap * (_columns - 1)) / _columns;
+        final tiles = _tiles;
+        final openRow = _openRow(tiles);
+        final children = <Widget>[];
+        for (var i = 0; i < tiles.length; i++) {
+          final item = tiles[i];
+          final expanded =
+              item.characterId != null && item.characterId == _openCharacterId;
+          children.add(
+            SizedBox(
+              width: cell,
+              height: cell,
+              child: GestureDetector(
+                onTap: () => _onTileTap(item),
+                child: _gridFace(
+                  item,
+                  cell,
+                  identical(item, selected) && !expanded,
                 ),
               ),
-          ],
-        );
+            ),
+          );
+          final endOfRow = i % _columns == _columns - 1 || i == tiles.length - 1;
+          if (endOfRow && openRow != null && i ~/ _columns == openRow) {
+            children.add(_expansion(selected, cell, constraints.maxWidth));
+          }
+        }
+        return Wrap(spacing: _gap, runSpacing: _gap, children: children);
       },
+    );
+  }
+
+  int? _openRow(List<_ProfileImageChoice> tiles) {
+    final id = _openCharacterId;
+    if (id == null) return null;
+    final index = tiles.indexWhere((item) => item.characterId == id);
+    if (index < 0) return null;
+    return index ~/ _columns;
+  }
+
+  Widget _expansion(_ProfileImageChoice selected, double cell, double width) {
+    _CharacterPortraits? group;
+    for (final candidate in _characters) {
+      if (candidate.characterId == _openCharacterId) {
+        group = candidate;
+        break;
+      }
+    }
+    final images = group?.images ?? const <_ProfileImageChoice>[];
+    final contentWidth = images.isEmpty
+        ? 0.0
+        : images.length * cell + (images.length - 1) * _gap;
+    return SizedBox(
+      width: width,
+      height: cell,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        physics: contentWidth > width
+            ? const BouncingScrollPhysics()
+            : const NeverScrollableScrollPhysics(),
+        itemCount: images.length,
+        separatorBuilder: (_, _) => const SizedBox(width: _gap),
+        itemBuilder: (context, index) {
+          final item = images[index];
+          return SizedBox(
+            width: cell,
+            height: cell,
+            child: GestureDetector(
+              onTap: () => setState(() => _selected = item),
+              child: _gridFace(item, cell, identical(item, selected)),
+            ),
+          );
+        },
+      ),
     );
   }
 
