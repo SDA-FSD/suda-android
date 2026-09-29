@@ -220,6 +220,7 @@ class UserProgressDto {
   final int claimableRewardLevel;
   final int? claimableCharacterRewardId;
   final List<ClaimedCharacterPortraitDto> claimedCharacters;
+  final List<ClaimedCharacterPortraitDto> neighborCharacters;
   final List<RankedPlaceAchievementDto> achievements;
 
   const UserProgressDto({
@@ -230,6 +231,7 @@ class UserProgressDto {
     required this.claimableRewardLevel,
     this.claimableCharacterRewardId,
     this.claimedCharacters = const [],
+    this.neighborCharacters = const [],
     this.achievements = const [],
   });
 
@@ -247,8 +249,7 @@ class UserProgressDto {
       return int.tryParse(v.toString());
     }
 
-    final claimedRaw = json['claimedCharacters'];
-    final claimedCharacters = _parseClaimedCharacters(claimedRaw);
+    final claimedCharacters = _parseClaimedCharacters(json['claimedCharacters']);
     return UserProgressDto(
       currentStreakDays: asInt(json['currentStreakDays']),
       wordsSpokenCount: asInt(json['wordsSpokenCount']),
@@ -259,6 +260,7 @@ class UserProgressDto {
         json['claimableCharacterRewardId'],
       ),
       claimedCharacters: claimedCharacters,
+      neighborCharacters: _parseNeighborCharacters(json, claimedCharacters),
       achievements: _parseAchievements(json['achievements']),
     );
   }
@@ -303,6 +305,14 @@ class RankedPlaceAchievementDto {
       lastGrantedAt: asTime(json['lastGrantedAt']),
     );
   }
+}
+
+List<ClaimedCharacterPortraitDto> _parseNeighborCharacters(
+  Map<String, dynamic> json,
+  List<ClaimedCharacterPortraitDto> claimed,
+) {
+  if (!json.containsKey('neighborCharacters')) return claimed;
+  return _parseClaimedCharacters(json['neighborCharacters']);
 }
 
 List<ClaimedCharacterPortraitDto> _parseClaimedCharacters(dynamic raw) {
@@ -401,6 +411,7 @@ class OtherUserProfileDto {
   final int currentStreakDays;
   final int wordsSpokenCount;
   final List<ClaimedCharacterPortraitDto> claimedCharacters;
+  final List<ClaimedCharacterPortraitDto> neighborCharacters;
   final List<RankedPlaceAchievementDto> achievements;
   final FriendRelationViewStatus relationStatus;
   final DateTime? retryAvailableAt;
@@ -416,6 +427,7 @@ class OtherUserProfileDto {
     required this.currentStreakDays,
     required this.wordsSpokenCount,
     this.claimedCharacters = const [],
+    this.neighborCharacters = const [],
     this.achievements = const [],
     this.relationStatus = FriendRelationViewStatus.none,
     this.retryAvailableAt,
@@ -440,6 +452,7 @@ class OtherUserProfileDto {
       currentStreakDays: currentStreakDays,
       wordsSpokenCount: wordsSpokenCount,
       claimedCharacters: claimedCharacters,
+      neighborCharacters: neighborCharacters,
       achievements: achievements,
       relationStatus: relationStatus ?? this.relationStatus,
       retryAvailableAt: clearRetryAvailableAt
@@ -470,6 +483,7 @@ class OtherUserProfileDto {
 
     final name = json['name'] as String?;
     final imgPath = json['imgPath'] as String?;
+    final claimedCharacters = _parseClaimedCharacters(json['claimedCharacters']);
     return OtherUserProfileDto(
       id: asInt(json['id']),
       name: name == null || name.isEmpty ? null : name,
@@ -480,7 +494,8 @@ class OtherUserProfileDto {
       subscribedYn: sudaYnFromJson(json['subscribedYn']),
       currentStreakDays: asInt(json['currentStreakDays']),
       wordsSpokenCount: asInt(json['wordsSpokenCount']),
-      claimedCharacters: _parseClaimedCharacters(json['claimedCharacters']),
+      claimedCharacters: claimedCharacters,
+      neighborCharacters: _parseNeighborCharacters(json, claimedCharacters),
       achievements: _parseAchievements(json['achievements']),
       relationStatus: friendRelationViewStatusFromJson(json['relationStatus']),
       retryAvailableAt: asTime(json['retryAvailableAt']),

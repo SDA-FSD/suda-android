@@ -565,7 +565,7 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
         const SizedBox(height: 10),
         SudaNeighborsRow(
           onCharacterTap: (item) => CharacterScreen.open(context, item.characterId),
-          portraits: progress?.claimedCharacters ?? const [],
+          portraits: progress?.neighborCharacters ?? const [],
           emptyText: l10n.otherUserNeighborsEmpty,
         ),
         const SizedBox(height: 36),

@@ -919,7 +919,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         const SizedBox(height: 10),
         SudaNeighborsRow(
-          portraits: progress?.claimedCharacters ?? const [],
+          portraits: progress?.neighborCharacters ?? const [],
           onCharacterTap: (item) => CharacterScreen.open(context, item.characterId),
         ),
         const SizedBox(height: 36),

@@ -4,6 +4,8 @@
 
 ---
 
+- **SUDA Neighbors 캐릭터당 1장(2026-09-29):** 내·타인 프로필 이웃은 `neighborCharacters`. 캐릭터당 보유 카탈로그의 가장 앞 장. 순서는 `claimedCharacters`에서 그 캐릭터의 첫 등장. 프로필 이미지 변경은 `claimedCharacters` 전체.
+
 - **Profile History 잠긴 Speech Feedback(2026-09-28):** History 상세만 `GET /v1/users/subscription`. 구독 Y면 토스트 `speechFeedbackUnavailable`·접힘 유지. N·실패는 Paywall. Result Paywall·구독 성공 재조회는 유지. 최신 1건 재해금 없음.
 
 - **Other User Profile(2026-09-22):** Ranking 포디움·4위+ 리스트의 남 이미지/이름 탭 → SubScreen `OtherUserProfileScreen` (`/profile/{userId}`). `GET /v1/users/{userId}/profile`. 친구 알약 Friends/Requested/Add Friend. INCOMING_PENDING도 Add Friend POST(역방향=수락). REJECTED·409 `FRIEND_REQUEST_COOLDOWN`는 스토킹 팝업. 레벨바·Saved/History 없음. Neighbors/Achievements는 타이틀 유지, 0개면 안내 문구.
