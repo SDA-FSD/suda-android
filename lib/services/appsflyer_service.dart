@@ -8,6 +8,8 @@ import 'package:suda/config/app_config.dart';
 /// 운영(prd) 환경에서만 SDK를 초기화한다.
 class AppsflyerService {
   static const String _devKey = 'HB9bSEm3Gw6siaicgKTAyK';
+  /// ASC Apple ID. iOS만 필수. 없으면 릴리스에서 이벤트가 iOS 앱에 안 붙는다.
+  static const String _iosAppId = '6798914572';
   static const String _reportedOrdersKey = 'af_reported_order_ids';
   static const int _reportedOrdersCap = 200;
   static bool _initialized = false;
@@ -26,6 +28,7 @@ class AppsflyerService {
     try {
       final options = AppsFlyerOptions(
         afDevKey: _devKey,
+        appId: _iosAppId,
         showDebug: true,
         manualStart: true,
       );
