@@ -12,6 +12,7 @@ import '../api/suda_api_client.dart';
 import '../models/user_models.dart';
 import '../utils/iap_obfuscated_account_id.dart';
 import '../utils/iap_price_format.dart';
+import 'appsflyer_service.dart';
 import 'iap_price_cache.dart';
 import 'perf_monitoring_service.dart';
 import 'token_storage.dart';
@@ -89,6 +90,10 @@ class IapPurchaseService with WidgetsBindingObserver {
   /// Paywall SUBS: mount `paywallSessionId` + 선택 basePlanId(verify·탭 impression).
   String? _pendingPaywallSessionId;
   String? _pendingBasePlanId;
+  /// Change Plan은 즉시 청구가 없어 false. 그 외 구매는 true.
+  bool _pendingReportRevenue = false;
+  double? _pendingRevenue;
+  String? _pendingCurrencyCode;
   Timer? _resumeGraceTimer;
   Timer? _iosUiWatchdogTimer;
   bool _lifecycleObserving = false;
@@ -116,6 +121,9 @@ class IapPurchaseService with WidgetsBindingObserver {
   String? _detachedOfferSessionId;
   String? _detachedPaywallSessionId;
   String? _detachedBasePlanId;
+  bool _detachedReportRevenue = false;
+  double? _detachedRevenue;
+  String? _detachedCurrencyCode;
 
   final Set<String> _verifiedPurchaseTokens = {};
   final Set<String> _verifyingPurchaseTokens = {};
@@ -586,6 +594,7 @@ class IapPurchaseService with WidgetsBindingObserver {
         consumable: false,
         cacheBasePlanId: newBasePlanId,
         verifyBasePlanId: newBasePlanId,
+        reportRevenue: false,
       );
     }
 
@@ -628,6 +637,7 @@ class IapPurchaseService with WidgetsBindingObserver {
         ),
         consumable: false,
         cacheBasePlanId: newBasePlanId,
+        reportRevenue: false,
         changeSubscriptionParam: ChangeSubscriptionParam(
           oldPurchaseDetails: oldPurchase,
           replacementMode: ReplacementMode.withoutProration,
@@ -697,6 +707,7 @@ class IapPurchaseService with WidgetsBindingObserver {
     String? offerSessionId,
     String? paywallSessionId,
     String? verifyBasePlanId,
+    bool reportRevenue = true,
   }) async {
     if (_cannotStartPurchase(productId)) {
       return IapPurchaseResult.storeDismissed;
@@ -721,6 +732,9 @@ class IapPurchaseService with WidgetsBindingObserver {
     final trimmedPlan = verifyBasePlanId?.trim();
     _pendingBasePlanId =
         (trimmedPlan != null && trimmedPlan.isNotEmpty) ? trimmedPlan : null;
+    _pendingReportRevenue = reportRevenue;
+    _pendingRevenue = null;
+    _pendingCurrencyCode = null;
     _purchaseUpdateReceived = false;
     _storeLaunchAttempted = false;
     _processingNoticeShown = false;
@@ -764,12 +778,15 @@ class IapPurchaseService with WidgetsBindingObserver {
         return IapPurchaseResult.unavailable;
       }
 
+      _pendingRevenue = product.rawPrice;
+      _pendingCurrencyCode = product.currencyCode;
       if (product.price.isNotEmpty) {
         await IapPriceCache.save(
           product.id,
           product.price,
           basePlanId: cacheBasePlanId,
         );
+        await _saveRevenueMeta(product, productId, cacheBasePlanId);
       }
 
       final PurchaseParam purchaseParam;
@@ -921,6 +938,7 @@ class IapPurchaseService with WidgetsBindingObserver {
             purchase.productID,
             pending: _pendingBasePlanId,
           ),
+          reportRevenue: _pendingReportRevenue,
         );
         await _maybeFinish(purchase, verify);
         if (!verify.isSuccess) {
@@ -1060,6 +1078,7 @@ class IapPurchaseService with WidgetsBindingObserver {
           purchase.productID,
           pending: useDetached ? _detachedBasePlanId : null,
         ),
+        reportRevenue: !useDetached || _detachedReportRevenue,
       );
       await _maybeFinish(purchase, verify);
       if (useDetached) _clearDetachedPending();
@@ -1098,6 +1117,7 @@ class IapPurchaseService with WidgetsBindingObserver {
     String? offerSessionId,
     String? paywallSessionId,
     String? basePlanId,
+    bool reportRevenue = false,
   }) async {
     debugPrint(
       '[DEBUG] IapPurchaseService verify start: productId=${purchase.productID}, '
@@ -1144,6 +1164,19 @@ class IapPurchaseService with WidgetsBindingObserver {
       if (result.isSuccess && purchaseToken.isNotEmpty) {
         _verifiedPurchaseTokens.add(purchaseToken);
       }
+      if (reportRevenue && result.isSuccess && !result.isPending) {
+        final plan = _basePlanIdForVerify(
+          purchase.productID,
+          pending: basePlanId,
+        );
+        try {
+          await _reportAppsflyerPurchase(purchase, plan);
+        } catch (e, st) {
+          debugPrint(
+            '[DEBUG] IapPurchaseService AF purchase report failed: $e\n$st',
+          );
+        }
+      }
       return result;
     } finally {
       _verifyingPurchaseTokens.remove(purchaseToken);
@@ -1154,6 +1187,92 @@ class IapPurchaseService with WidgetsBindingObserver {
     final trimmed = pending?.trim();
     if (trimmed != null && trimmed.isNotEmpty) return trimmed;
     return basePlanIdForProductId(productId);
+  }
+
+  Future<void> _saveRevenueMeta(
+    ProductDetails product,
+    String productId,
+    String? basePlanId,
+  ) async {
+    final subscription = isSubscriptionProductId(productId);
+    await IapPriceCache.saveMeta(
+      IapPriceMeta(
+        formattedPrice: product.price,
+        rawPrice: product.rawPrice,
+        currencyCode: product.currencyCode,
+        currencySymbol: product.currencySymbol,
+        locale: IapPriceFormat.resolveLocale(product),
+      ),
+      productId: subscription ? productPremium : productId,
+      basePlanId: subscription ? basePlanId : null,
+    );
+  }
+
+  /// 구매 시작 때 붙잡아 둔 스토어 가격. 없으면 가격 캐시.
+  /// AOS 구독은 base plan이 없으면 월/연을 추측하지 않는다.
+  Future<({double rawPrice, String currencyCode})?> _revenuePrice(
+    String productId,
+    String? basePlanId,
+  ) async {
+    final pendingCurrency = _pendingCurrencyCode?.trim() ?? '';
+    if (_pendingProductId == productId &&
+        _pendingRevenue != null &&
+        _pendingRevenue! > 0 &&
+        pendingCurrency.length == 3) {
+      return (rawPrice: _pendingRevenue!, currencyCode: pendingCurrency);
+    }
+    final detachedCurrency = _detachedCurrencyCode?.trim() ?? '';
+    if (_detachedProductId == productId &&
+        _detachedRevenue != null &&
+        _detachedRevenue! > 0 &&
+        detachedCurrency.length == 3) {
+      return (rawPrice: _detachedRevenue!, currencyCode: detachedCurrency);
+    }
+    final meta = await _loadRevenueMeta(productId, basePlanId);
+    final currency = meta?.currencyCode.trim() ?? '';
+    if (meta == null || meta.rawPrice <= 0 || currency.length != 3) {
+      return null;
+    }
+    return (rawPrice: meta.rawPrice, currencyCode: currency);
+  }
+
+  Future<IapPriceMeta?> _loadRevenueMeta(String productId, String? basePlanId) {
+    if (!isSubscriptionProductId(productId)) {
+      return IapPriceCache.loadMeta(productId: productId);
+    }
+    final plan = (basePlanId != null && basePlanId.isNotEmpty)
+        ? basePlanId
+        : basePlanIdForProductId(productId);
+    if (plan == null || plan.isEmpty) return Future<IapPriceMeta?>.value(null);
+    return IapPriceCache.loadMeta(
+      productId: productPremium,
+      basePlanId: plan,
+    );
+  }
+
+  Future<void> _reportAppsflyerPurchase(
+    PurchaseDetails purchase,
+    String? basePlanId,
+  ) async {
+    final productId = purchase.productID;
+    if (productId.isEmpty) return;
+    final subscription = isSubscriptionProductId(productId);
+    final price = await _revenuePrice(productId, basePlanId);
+    if (price == null) {
+      debugPrint(
+        '[DEBUG] IapPurchaseService AF purchase skip no price '
+        'productId=$productId basePlanId=$basePlanId',
+      );
+      return;
+    }
+    await AppsflyerService.logPurchase(
+      subscription: subscription,
+      revenue: price.rawPrice,
+      currencyCode: price.currencyCode,
+      contentId: productId,
+      orderId: purchase.purchaseID,
+      basePlanId: subscription ? basePlanId : null,
+    );
   }
 
   Future<void> _maybeFinish(
@@ -1288,6 +1407,9 @@ class IapPurchaseService with WidgetsBindingObserver {
     _detachedOfferSessionId = _pendingOfferSessionId;
     _detachedPaywallSessionId = _pendingPaywallSessionId;
     _detachedBasePlanId = _pendingBasePlanId;
+    _detachedReportRevenue = _pendingReportRevenue;
+    _detachedRevenue = _pendingRevenue;
+    _detachedCurrencyCode = _pendingCurrencyCode;
   }
 
   void _clearDetachedPending() {
@@ -1296,6 +1418,9 @@ class IapPurchaseService with WidgetsBindingObserver {
     _detachedOfferSessionId = null;
     _detachedPaywallSessionId = null;
     _detachedBasePlanId = null;
+    _detachedReportRevenue = false;
+    _detachedRevenue = null;
+    _detachedCurrencyCode = null;
   }
 
   void _armRestoreGrace(Duration duration) {
@@ -1391,6 +1516,9 @@ class IapPurchaseService with WidgetsBindingObserver {
     _pendingOfferSessionId = null;
     _pendingPaywallSessionId = null;
     _pendingBasePlanId = null;
+    _pendingReportRevenue = false;
+    _pendingRevenue = null;
+    _pendingCurrencyCode = null;
     _purchaseUpdateReceived = false;
     _storeLaunchAttempted = false;
   }
@@ -1556,6 +1684,7 @@ class IapPurchaseService with WidgetsBindingObserver {
             purchase.productID,
             pending: basePlanId,
           ),
+          reportRevenue: _detachedReportRevenue,
         );
         await _maybeFinish(purchase, verify);
         if (!verify.isSuccess) continue;
