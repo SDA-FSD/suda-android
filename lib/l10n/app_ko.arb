@@ -71,6 +71,8 @@
   "friendRequestsEmpty": "아직 받은 친구 요청이 없습니다.",
   "friendRequestAccept": "수락",
   "friendRequestDecline": "거절",
+  "friendsShareLink": "링크 공유",
+  "friendsShareBody": "SUDA에서 같이 영어 연습해요.",
   "characterAge": "나이",
   "characterNationality": "국적",
   "characterOccupation": "직업",

@@ -160,6 +160,13 @@ class AppLocalizationsMs extends AppLocalizations {
   String get friendRequestDecline => 'Tolak';
 
   @override
+  String get friendsShareLink => 'Kongsi pautan';
+
+  @override
+  String get friendsShareBody =>
+      'Jom berlatih bertutur bahasa Inggeris di SUDA.';
+
+  @override
   String get characterAge => 'Umur';
 
   @override

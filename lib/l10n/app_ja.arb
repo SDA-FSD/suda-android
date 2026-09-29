@@ -71,6 +71,8 @@
   "friendRequestsEmpty": "まだ友達リクエストはありません。",
   "friendRequestAccept": "承認",
   "friendRequestDecline": "拒否",
+  "friendsShareLink": "リンクを共有",
+  "friendsShareBody": "SUDAで一緒に英語を練習しよう。",
   "characterAge": "年齢",
   "characterNationality": "国籍",
   "characterOccupation": "職業",

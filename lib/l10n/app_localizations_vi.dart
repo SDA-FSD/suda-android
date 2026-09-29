@@ -162,6 +162,12 @@ class AppLocalizationsVi extends AppLocalizations {
   String get friendRequestDecline => 'Từ chối';
 
   @override
+  String get friendsShareLink => 'Chia sẻ liên kết';
+
+  @override
+  String get friendsShareBody => 'Cùng luyện nói tiếng Anh trên SUDA nhé.';
+
+  @override
   String get characterAge => 'Tuổi';
 
   @override

@@ -156,6 +156,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get friendRequestDecline => '거절';
 
   @override
+  String get friendsShareLink => '링크 공유';
+
+  @override
+  String get friendsShareBody => 'SUDA에서 같이 영어 연습해요.';
+
+  @override
   String get characterAge => '나이';
 
   @override

@@ -156,6 +156,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get friendRequestDecline => '拒绝';
 
   @override
+  String get friendsShareLink => '分享链接';
+
+  @override
+  String get friendsShareBody => '在 SUDA 一起练习英语吧。';
+
+  @override
   String get characterAge => '年龄';
 
   @override
@@ -1147,6 +1153,12 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get friendRequestDecline => '拒绝';
 
   @override
+  String get friendsShareLink => '分享链接';
+
+  @override
+  String get friendsShareBody => '在 SUDA 一起练习英语吧。';
+
+  @override
   String get characterAge => '年龄';
 
   @override
@@ -2136,6 +2148,12 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get friendRequestDecline => '拒絕';
+
+  @override
+  String get friendsShareLink => '分享連結';
+
+  @override
+  String get friendsShareBody => '在 SUDA 一起練習英語吧。';
 
   @override
   String get characterAge => '年齡';

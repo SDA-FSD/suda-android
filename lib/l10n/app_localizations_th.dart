@@ -157,6 +157,12 @@ class AppLocalizationsTh extends AppLocalizations {
   String get friendRequestDecline => 'ปฏิเสธ';
 
   @override
+  String get friendsShareLink => 'แชร์ลิงก์';
+
+  @override
+  String get friendsShareBody => 'มาฝึกพูดภาษาอังกฤษด้วยกันบน SUDA';
+
+  @override
   String get characterAge => 'อายุ';
 
   @override

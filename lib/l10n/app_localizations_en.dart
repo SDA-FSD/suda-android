@@ -160,6 +160,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get friendRequestDecline => 'Decline';
 
   @override
+  String get friendsShareLink => 'Share Link';
+
+  @override
+  String get friendsShareBody => 'Practice speaking English with me on SUDA.';
+
+  @override
   String get characterAge => 'Age';
 
   @override

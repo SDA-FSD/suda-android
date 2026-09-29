@@ -160,6 +160,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get friendRequestDecline => 'Rechazar';
 
   @override
+  String get friendsShareLink => 'Compartir enlace';
+
+  @override
+  String get friendsShareBody => 'Practiquemos inglés juntos en SUDA.';
+
+  @override
   String get characterAge => 'Edad';
 
   @override
@@ -1218,6 +1224,12 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
 
   @override
   String get friendRequestDecline => 'Rechazar';
+
+  @override
+  String get friendsShareLink => 'Compartir enlace';
+
+  @override
+  String get friendsShareBody => 'Practiquemos inglés juntos en SUDA.';
 
   @override
   String get characterAge => 'Edad';

@@ -419,6 +419,18 @@ abstract class AppLocalizations {
   /// **'Decline'**
   String get friendRequestDecline;
 
+  /// No description provided for @friendsShareLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Share Link'**
+  String get friendsShareLink;
+
+  /// No description provided for @friendsShareBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Practice speaking English with me on SUDA.'**
+  String get friendsShareBody;
+
   /// No description provided for @characterAge.
   ///
   /// In en, this message translates to:

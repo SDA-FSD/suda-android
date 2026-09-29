@@ -160,6 +160,12 @@ class AppLocalizationsNl extends AppLocalizations {
   String get friendRequestDecline => 'Weigeren';
 
   @override
+  String get friendsShareLink => 'Link delen';
+
+  @override
+  String get friendsShareBody => 'Laten we samen Engels oefenen op SUDA.';
+
+  @override
   String get characterAge => 'Leeftijd';
 
   @override

@@ -159,6 +159,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get friendRequestDecline => 'Отклонить';
 
   @override
+  String get friendsShareLink => 'Поделиться ссылкой';
+
+  @override
+  String get friendsShareBody => 'Давай вместе практиковать английский в SUDA.';
+
+  @override
   String get characterAge => 'Возраст';
 
   @override

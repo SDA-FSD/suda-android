@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../l10n/app_localizations.dart';
 import '../services/suda_api_client.dart';
@@ -26,6 +27,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
       'assets/images/icons/default_profile_image.png';
   static const _premiumBadge =
       'assets/images/icons/premium_verified_badge.png';
+  static const _shareUrl = 'https://sudatalk.kr/public/share';
 
   List<FriendUserDto> _friends = const [];
   List<FriendUserDto> _requests = const [];
@@ -128,6 +130,21 @@ class _FriendsScreenState extends State<FriendsScreen> {
     OtherUserProfileScreen.open(context, user.userId);
   }
 
+  Future<void> _shareLink(BuildContext originContext) async {
+    final l10n = AppLocalizations.of(context)!;
+    final text = '${l10n.friendsShareBody}\n$_shareUrl';
+    Rect? origin;
+    final box = originContext.findRenderObject();
+    if (box is RenderBox && box.hasSize) {
+      origin = box.localToGlobal(Offset.zero) & box.size;
+    }
+    try {
+      await SharePlus.instance.share(
+        ShareParams(text: text, sharePositionOrigin: origin),
+      );
+    } catch (_) {}
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -144,26 +161,63 @@ class _FriendsScreenState extends State<FriendsScreen> {
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator(color: Colors.white))
-          : SudaLabelTabs(
-              expandContent: true,
-              tabs: [
-                SudaLabelTab(
-                  label: SudaTabLabel.l10n((l10n) => l10n.friendsTitle),
-                  child: _list(
-                    users: _friends,
-                    empty: l10n.friendsEmpty,
+          : Column(
+              children: [
+                Expanded(
+                  child: SudaLabelTabs(
+                    expandContent: true,
+                    tabs: [
+                      SudaLabelTab(
+                        label: SudaTabLabel.l10n((l10n) => l10n.friendsTitle),
+                        child: _list(
+                          users: _friends,
+                          empty: l10n.friendsEmpty,
+                        ),
+                      ),
+                      SudaLabelTab(
+                        label: SudaTabLabel.l10n(
+                          (l10n) => l10n.friendRequestsTab,
+                        ),
+                        child: _list(
+                          users: _requests,
+                          empty: l10n.friendRequestsEmpty,
+                          showResponse: true,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                SudaLabelTab(
-                  label: SudaTabLabel.l10n((l10n) => l10n.friendRequestsTab),
-                  child: _list(
-                    users: _requests,
-                    empty: l10n.friendRequestsEmpty,
-                    showResponse: true,
-                  ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 12, bottom: 8),
+                  child: Center(child: _shareButton()),
                 ),
               ],
             ),
+    );
+  }
+
+  Widget _shareButton() {
+    final l10n = AppLocalizations.of(context)!;
+    final elevatedBase = Theme.of(context).elevatedButtonTheme.style;
+    return Builder(
+      builder: (buttonContext) {
+        return SizedBox(
+          height: 44,
+          child: ElevatedButton(
+            onPressed: () => unawaited(_shareLink(buttonContext)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: Colors.black,
+              shape: const StadiumBorder(),
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(horizontal: 28),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ).merge(elevatedBase),
+            child: Text(l10n.friendsShareLink),
+          ),
+        );
+      },
     );
   }
 

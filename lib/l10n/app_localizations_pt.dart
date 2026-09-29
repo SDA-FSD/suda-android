@@ -162,6 +162,12 @@ class AppLocalizationsPt extends AppLocalizations {
   String get friendRequestDecline => 'Recusar';
 
   @override
+  String get friendsShareLink => 'Compartilhar link';
+
+  @override
+  String get friendsShareBody => 'Vamos praticar inglês no SUDA.';
+
+  @override
   String get characterAge => 'Idade';
 
   @override

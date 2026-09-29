@@ -389,6 +389,7 @@
 - Friends 탭 빈 목록 `friendsEmpty`(bodyLarge 흰, 탭 아래 영역 정중앙)
 - 요청 탭 우측에 Accept(`#0CABA8`)·Decline(`#353535`). 알약, bodySmall 흰, 텍스트 상하 5·좌우 10. 성공 시 목록 재조회. 409 한도는 타인 프로필과 같은 OK 팝업(`otherUserFriendLimitSelf|Them`). 그 외 실패는 `otherUserFriendBlockedBody`
 - 요청 없음 `friendRequestsEmpty`(같은 중앙 정렬)
+- 두 탭 공통 하단 고정 `friendsShareLink`(en Share Link / pt Compartilhar link / ko 링크 공유). 랭킹 play now와 같은 흰 알약·검정·높이 44·내용 너비·가로 중앙. 탭 시 OS Share Sheet. 본문은 `friendsShareBody` + 줄바꿈 + `https://sudatalk.kr/public/share`
 
 ---
 

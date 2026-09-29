@@ -162,6 +162,13 @@ class AppLocalizationsFil extends AppLocalizations {
   String get friendRequestDecline => 'Tanggihan';
 
   @override
+  String get friendsShareLink => 'Ibahagi ang link';
+
+  @override
+  String get friendsShareBody =>
+      'Magpraktis tayo ng pagsasalita ng Ingles sa SUDA.';
+
+  @override
   String get characterAge => 'Edad';
 
   @override

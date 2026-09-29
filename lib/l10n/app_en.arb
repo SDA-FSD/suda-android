@@ -71,6 +71,8 @@
   "friendRequestsEmpty": "No friend requests yet.",
   "friendRequestAccept": "Accept",
   "friendRequestDecline": "Decline",
+  "friendsShareLink": "Share Link",
+  "friendsShareBody": "Practice speaking English with me on SUDA.",
   "characterAge": "Age",
   "characterNationality": "Nationality",
   "characterOccupation": "Occupation",

@@ -71,6 +71,8 @@
   "friendRequestsEmpty": "لا توجد طلبات صداقة بعد.",
   "friendRequestAccept": "قبول",
   "friendRequestDecline": "رفض",
+  "friendsShareLink": "مشاركة الرابط",
+  "friendsShareBody": "لنتدرّب على التحدث بالإنجليزية معًا على SUDA.",
   "characterAge": "العمر",
   "characterNationality": "الجنسية",
   "characterOccupation": "المهنة",

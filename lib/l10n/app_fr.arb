@@ -71,6 +71,8 @@
   "friendRequestsEmpty": "Aucune demande d'ami pour le moment.",
   "friendRequestAccept": "Accepter",
   "friendRequestDecline": "Refuser",
+  "friendsShareLink": "Partager le lien",
+  "friendsShareBody": "Entraînons-nous à parler anglais ensemble sur SUDA.",
   "characterAge": "Âge",
   "characterNationality": "Nationalité",
   "characterOccupation": "Profession",

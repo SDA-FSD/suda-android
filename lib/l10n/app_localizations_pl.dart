@@ -160,6 +160,13 @@ class AppLocalizationsPl extends AppLocalizations {
   String get friendRequestDecline => 'Odrzuć';
 
   @override
+  String get friendsShareLink => 'Udostępnij link';
+
+  @override
+  String get friendsShareBody =>
+      'Poćwiczmy razem mówienie po angielsku w SUDA.';
+
+  @override
   String get characterAge => 'Wiek';
 
   @override

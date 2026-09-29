@@ -160,6 +160,12 @@ class AppLocalizationsId extends AppLocalizations {
   String get friendRequestDecline => 'Tolak';
 
   @override
+  String get friendsShareLink => 'Bagikan tautan';
+
+  @override
+  String get friendsShareBody => 'Ayo latihan bicara bahasa Inggris di SUDA.';
+
+  @override
   String get characterAge => 'Usia';
 
   @override

@@ -71,6 +71,8 @@
   "friendRequestsEmpty": "ยังไม่มีคำขอเป็นเพื่อน",
   "friendRequestAccept": "ยอมรับ",
   "friendRequestDecline": "ปฏิเสธ",
+  "friendsShareLink": "แชร์ลิงก์",
+  "friendsShareBody": "มาฝึกพูดภาษาอังกฤษด้วยกันบน SUDA",
   "characterAge": "อายุ",
   "characterNationality": "สัญชาติ",
   "characterOccupation": "อาชีพ",

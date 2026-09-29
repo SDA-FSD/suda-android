@@ -160,6 +160,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get friendRequestDecline => 'Reddet';
 
   @override
+  String get friendsShareLink => 'Bağlantıyı paylaş';
+
+  @override
+  String get friendsShareBody =>
+      'SUDA\'da birlikte İngilizce konuşma pratiği yapalım.';
+
+  @override
   String get characterAge => 'Yaş';
 
   @override

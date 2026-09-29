@@ -162,6 +162,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get friendRequestDecline => 'Refuser';
 
   @override
+  String get friendsShareLink => 'Partager le lien';
+
+  @override
+  String get friendsShareBody =>
+      'Entraînons-nous à parler anglais ensemble sur SUDA.';
+
+  @override
   String get characterAge => 'Âge';
 
   @override
