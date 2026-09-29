@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../config/app_config.dart';
 import '../l10n/app_localizations.dart';
 import '../services/suda_api_client.dart';
 import '../services/token_storage.dart';
@@ -27,7 +28,6 @@ class _FriendsScreenState extends State<FriendsScreen> {
       'assets/images/icons/default_profile_image.png';
   static const _premiumBadge =
       'assets/images/icons/premium_verified_badge.png';
-  static const _shareUrl = 'https://sudatalk.kr/public/share';
 
   List<FriendUserDto> _friends = const [];
   List<FriendUserDto> _requests = const [];
@@ -132,7 +132,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
 
   Future<void> _shareLink(BuildContext originContext) async {
     final l10n = AppLocalizations.of(context)!;
-    final text = '${l10n.friendsShareBody}\n$_shareUrl';
+    final text = '${l10n.friendsShareBody}\n${AppConfig.sharePageUrl}';
     Rect? origin;
     final box = originContext.findRenderObject();
     if (box is RenderBox && box.hasSize) {

@@ -4,7 +4,7 @@
 
 ---
 
-- **Friends Share Link(2026-09-29):** 두 탭 하단 흰 알약. OS Share Sheet에 `friendsShareBody`와 `https://sudatalk.kr/public/share`. 점프 페이지는 suda-web `/public/share`.
+- **Friends Share Link(2026-09-29):** 두 탭 하단 흰 알약. OS Share Sheet에 `friendsShareBody`와 `AppConfig.sharePageUrl`(dev `https://dev-sudatalk.kr/public/share`, 그 외 운영). 점프 페이지는 suda-web `/public/share`.
 
 - **Change Profile Image 펼침(2026-09-29):** 선택지는 캐릭터당 한 장과 기본 4색. 2장 이상이면 그 줄 아래 둥근 띠가 열리고, 같은 칸·다른 칸으로 닫힌다. 열린 초상을 고르면 닫히며 목록 칸이 그 장으로 바뀐다. 1장은 열리지 않음.
 

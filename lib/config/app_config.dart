@@ -37,6 +37,16 @@ class AppConfig {
     }
   }
 
+  /// 친구 공유 점프. dev만 `dev-sudatalk.kr`, 그 외는 운영 웹.
+  static String get sharePageUrl {
+    switch (env) {
+      case 'dev':
+        return 'https://dev-sudatalk.kr/public/share';
+      default:
+        return 'https://sudatalk.kr/public/share';
+    }
+  }
+
   // 환경별 CDN Base URL
   static String get cdnBaseUrl {
     switch (env) {
