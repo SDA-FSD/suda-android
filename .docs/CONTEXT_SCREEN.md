@@ -1046,7 +1046,7 @@
 - 캐릭터 보상 언박싱. `List<CharacterRewardClaimDto>` n건을 한 건씩 3단계 루틴으로 연출. Ranking·Profile Progress 레벨업 선물 공용.
 
 ### 이전 스크린 정보 (진입점)
-- **Ranking** Ranking Reward Claim 성공(`POST /v1/rank/character-rewards/claim` 1건+) 후 `_150` 프리로드 → fade로 Unboxing 덮은 뒤 Claim 레이어 제거. `onNavigateToProfile` 전달.
+- **Ranking** Ranking Reward Claim 성공(`POST /v1/rank/character-rewards/claim` 1건+) 후 큰 캐릭터 원본·컬렉션 `_150` 프리로드 → fade로 Unboxing 덮은 뒤 Claim 레이어 제거. `onNavigateToProfile` 전달.
 - **Profile Progress** 레벨업 선물 탭 성공(`POST /v1/users/character-rewards/claim` 1건+) 후 동일 Unboxing. 닫히면 `/progress` 재조회.
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
@@ -1054,11 +1054,11 @@
 - **Set as Profile**: `PUT /v1/users/profile-img` `{type:NORMAL|RARE|EPIC,value:characterImgPath}` 후 `GET /v1/users`(`MainUserSync`)·프로필 탭 전환·Unboxing pop. API 실패여도 이동.
 
 ### 스크린 내부 구현 특이사항
-- **루틴:** 등급선정(`reward_box.png` 떨림+약진동, 안내 `rewardUnboxingTapToOpen`) → 탭 → 1.5s 검정 마스크·진동 가속 → 등급확정(rarity 닫힌 박스 fade + 배경 전환 + 강진동) → +1s opened 박스(좌단 정렬로 우측 치우침)·캐릭터 원형 확대·강진동 2회 / +500ms 상단 카피·진행도·CTA·(완료 시) `secret_unlocked.png`.
+- **루틴:** 등급선정(`reward_box.png` 떨림+약진동, 안내 `rewardUnboxingTapToOpen`) → 탭 → 1.5s 검정 마스크·진동 가속 → 등급확정(rarity 닫힌 박스 fade + 배경 전환 + 강진동) → +1s opened 박스(좌단 정렬로 우측 치우침)·캐릭터 원형 확대·강진동 2회 / +500ms 상단 카피·컬렉션 구멍·CTA. 구멍은 `rpImgPaths`(3 미만이면 3·가운데, 4칸부터 가로 스크롤·왼쪽 끝에서 시작, 지름 56, 열린 상자 하단에 24px 겹침). 보유는 수령 직전 `ownedImgPaths`를 `_150`로, 같은 path는 왼쪽부터 소진. 해금 칸은 reveal 후 화면 밖이면 400ms 중앙 슬라이드 뒤 자물쇠→초상. 그 다음 완료 시 `secret_unlocked.png`.
 - **비마지막:** `Open Next Box`(영어, Claim 흰 필)로 다음 건 선정부터 재시작.
 - **마지막:** `Set as Profile` + `View Character`(동일 흰 필, View는 무동작) + 해금 완료 후 `close.svg`.
-- **프리로드**: `RewardUnboxing.preload` — path 비면 스킵, 실패 무시.
-- DTO `characterName`은 claim 응답에서 파싱.
+- **프리로드**: `RewardUnboxing.preload` — 큰 캐릭터 원본, 컬렉션은 `profileAvatar` `_150`. 실패 무시.
+- DTO: `characterName`, `rpImgPaths`(구멍 원장), `ownedImgPaths`(이번 수령 직전). Lab 샘플은 같은 초상 path를 반복한다.
 
 ---
 

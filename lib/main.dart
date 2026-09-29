@@ -153,6 +153,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   String _homeRankBadgeYn = 'N';
   String _homeProfileBadgeYn = 'N';
 
+  /// `GET /v2/home/badges` 세대. 늦게 도착한 응답은 버린다.
+  int _gnbBadgeRefreshGen = 0;
+
   /// `GET /v1/users/notification?pageNum=0` 기준 미읽음 존재 여부
   bool _notiboxHasUnreadFromAlarmList = false;
   DateTime? _lastNotiboxListSyncAttemptAt;
@@ -273,11 +276,16 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   }
 
   Future<void> _refreshGnbBadges() async {
+    final gen = ++_gnbBadgeRefreshGen;
     final token = await TokenStorage.loadAccessToken();
     if (token == null || token.isEmpty) return;
     try {
-      final home = await SudaApiClient.getHomeContents(accessToken: token);
-      _onHomeContentsLoadedForBadge(home);
+      final badges = await SudaApiClient.getGnbBadges(accessToken: token);
+      if (!mounted || gen != _gnbBadgeRefreshGen) return;
+      setState(() {
+        _homeRankBadgeYn = badges.rankBadgeYn;
+        _homeProfileBadgeYn = badges.profileBadgeYn;
+      });
     } catch (e) {
       debugPrint('[DEBUG] gnb badge refresh failed: $e');
     }
@@ -662,6 +670,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       _homeTabSelectedCounter++;
     });
     unawaited(_syncNotiboxListFirstPage(force: true));
+    unawaited(_refreshGnbBadges());
   }
 
   /// GNB를 통한 화면 전환
@@ -669,6 +678,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     setState(() {
       _currentMainScreen = 'alarm';
     });
+    unawaited(_refreshGnbBadges());
   }
 
   /// GNB를 통한 화면 전환
@@ -685,6 +695,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       _currentMainScreen = 'profile';
     });
     unawaited(_syncNotiboxListFirstPage(force: true));
+    unawaited(_refreshGnbBadges());
   }
 
   /// 동의 완료 시 호출
@@ -758,6 +769,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           _notiboxAnchorNotificationId = id;
         });
         unawaited(_syncNotiboxListFirstPage(force: true));
+        unawaited(_refreshGnbBadges());
         return;
       }
     }
@@ -769,6 +781,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         _notiboxAnchorNotificationId = pending.notificationId;
       });
       unawaited(_syncNotiboxListFirstPage(force: true));
+      unawaited(_refreshGnbBadges());
       return;
     }
 
@@ -783,10 +796,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         case 'home':
           setState(() => _currentMainScreen = 'home');
           unawaited(_syncNotiboxListFirstPage(force: true));
+          unawaited(_refreshGnbBadges());
           return;
         case 'box':
           setState(() => _currentMainScreen = 'alarm');
           unawaited(_syncNotiboxListFirstPage(force: true));
+          unawaited(_refreshGnbBadges());
           return;
         case 'rank':
           setState(() => _currentMainScreen = 'rank');
@@ -795,6 +810,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         case 'profile':
           setState(() => _currentMainScreen = 'profile');
           unawaited(_syncNotiboxListFirstPage(force: true));
+          unawaited(_refreshGnbBadges());
           return;
       }
     }
@@ -807,6 +823,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         if (id != null) {
           setState(() => _currentMainScreen = 'home');
           unawaited(_syncNotiboxListFirstPage(force: true));
+          unawaited(_refreshGnbBadges());
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (!mounted) return;
             RoleplayRouter.pushOverview(
@@ -823,6 +840,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         if (noticeId != null) {
           setState(() => _currentMainScreen = 'profile');
           unawaited(_syncNotiboxListFirstPage(force: true));
+          unawaited(_refreshGnbBadges());
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (!mounted) return;
             final c = _navigatorKey.currentState?.context;
@@ -846,6 +864,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           if (rpUserHistoryId != null) {
             setState(() => _currentMainScreen = 'profile');
             unawaited(_syncNotiboxListFirstPage(force: true));
+            unawaited(_refreshGnbBadges());
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (!mounted) return;
               final c = _navigatorKey.currentState?.context;
@@ -864,6 +883,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         if (segments.length >= 2 && segments[1] == 'setting') {
           setState(() => _currentMainScreen = 'profile');
           unawaited(_syncNotiboxListFirstPage(force: true));
+          unawaited(_refreshGnbBadges());
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (!mounted) return;
             final c = _navigatorKey.currentState?.context;
@@ -890,6 +910,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           if (_user?.id == otherUserId) {
             setState(() => _currentMainScreen = 'profile');
             unawaited(_syncNotiboxListFirstPage(force: true));
+            unawaited(_refreshGnbBadges());
             return;
           }
           unawaited(_syncNotiboxListFirstPage(force: true));
@@ -973,6 +994,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                     });
                     unawaited(_syncUserOnMainRouteReturn());
                     unawaited(_syncNotiboxListFirstPage(force: true));
+                    unawaited(_refreshGnbBadges());
                   },
                   child: PopScope(
                     canPop: _currentMainScreen == 'home',
@@ -983,6 +1005,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                           _homeTabSelectedCounter++;
                         });
                         unawaited(_syncNotiboxListFirstPage(force: true));
+                        unawaited(_refreshGnbBadges());
                       }
                     },
                     child: IndexedStack(

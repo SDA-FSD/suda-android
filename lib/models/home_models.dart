@@ -84,6 +84,24 @@ class HomeDto {
   }
 }
 
+/// GET /v2/home/badges 응답. 랭킹·프로필 GNB 점만.
+class GnbBadgeDto {
+  final String rankBadgeYn;
+  final String profileBadgeYn;
+
+  const GnbBadgeDto({
+    this.rankBadgeYn = 'N',
+    this.profileBadgeYn = 'N',
+  });
+
+  factory GnbBadgeDto.fromJson(Map<String, dynamic> json) {
+    return GnbBadgeDto(
+      rankBadgeYn: sudaYnFromJson(json['rankBadgeYn']),
+      profileBadgeYn: sudaYnFromJson(json['profileBadgeYn']),
+    );
+  }
+}
+
 class MainHomeBannerDto {
   final String imgPath;
   final List<SudaJson> overlayText;

@@ -11,7 +11,7 @@ import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
 import '../../services/main_user_sync.dart';
 import '../../utils/full_screen_route.dart';
-import '../../utils/cdn_thumbnail.dart';
+import '../../widgets/cdn_thumb_image.dart';
 import '../../widgets/character_rarity_frame.dart';
 import '../character.dart';
 import '../../widgets/procedural_sunburst.dart';
@@ -43,6 +43,11 @@ class RewardUnboxing extends StatefulWidget {
   /// opened 박스 에셋 표시 배율(닫힌 박스 대비).
   static const _openedDisplayScale = 1.10;
 
+  static const _collectionSize = 56.0;
+  static const _collectionGap = 12.0;
+  /// 열린 상자 하단을 이만큼 넘어 올라간다.
+  static const _collectionBoxOverlap = 24.0;
+
   static const _textShadow = Shadow(
     offset: Offset(0, 4),
     blurRadius: 4,
@@ -65,24 +70,45 @@ class RewardUnboxing extends StatefulWidget {
     );
   }
 
-  /// `characterImgPath` CDN 원본 프리로드. 실패는 무시.
+  /// 큰 캐릭터는 CDN 원본, 컬렉션 칸은 `_150`. 실패는 무시.
   static Future<void> preload(
     BuildContext context,
     List<CharacterRewardClaimDto> items,
   ) async {
-    final futures = <Future<void>>[];
+    final originals = <String>{};
+    final thumbs = <String>{};
     for (final item in items) {
-      final path = item.characterImgPath.trim();
-      if (path.isEmpty) continue;
-      final url = CdnThumbUrl.original(path);
-      futures.add(() async {
-        try {
-          await precacheImage(CachedNetworkImageProvider(url), context);
-        } catch (_) {}
-      }());
+      final reveal = item.characterImgPath.trim();
+      if (reveal.isNotEmpty) originals.add(reveal);
+      final plan = _CollectionPlan.of(item);
+      for (var i = 0; i < plan.catalog.length && i < plan.owned.length; i++) {
+        if (!plan.owned[i]) continue;
+        final path = plan.catalog[i].trim();
+        if (path.isNotEmpty) thumbs.add(path);
+      }
+      final unlock = plan.unlockIndex;
+      if (unlock != null && unlock < plan.catalog.length) {
+        final path = plan.catalog[unlock].trim();
+        if (path.isNotEmpty) thumbs.add(path);
+      }
+    }
+    final futures = <Future<void>>[];
+    for (final path in originals) {
+      futures.add(_precache(context, CdnThumbUrl.original(path)));
+    }
+    for (final path in thumbs) {
+      futures.add(
+        _precache(context, CdnThumbUrl.forSlot(path, CdnThumbSlot.profileAvatar)),
+      );
     }
     if (futures.isEmpty) return;
     await Future.wait(futures);
+  }
+
+  static Future<void> _precache(BuildContext context, String url) async {
+    try {
+      await precacheImage(CachedNetworkImageProvider(url), context);
+    } catch (_) {}
   }
 
   static String _closedBoxAsset(String rarity) {
@@ -147,6 +173,8 @@ class _RewardUnboxingState extends State<RewardUnboxing>
   late final AnimationController _uiController;
   late final AnimationController _revealController;
   late final AnimationController _secretController;
+  late final AnimationController _slotController;
+  late final ScrollController _collectionScroll;
 
   late final Animation<double> _wobble;
 
@@ -239,6 +267,11 @@ class _RewardUnboxingState extends State<RewardUnboxing>
       vsync: this,
       duration: const Duration(milliseconds: 400),
     );
+    _slotController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 620),
+    );
+    _collectionScroll = ScrollController();
     _startIdleWobble();
   }
 
@@ -253,6 +286,8 @@ class _RewardUnboxingState extends State<RewardUnboxing>
     _uiController.dispose();
     _revealController.dispose();
     _secretController.dispose();
+    _slotController.dispose();
+    _collectionScroll.dispose();
     super.dispose();
   }
 
@@ -345,12 +380,55 @@ class _RewardUnboxingState extends State<RewardUnboxing>
     setState(() => _stage = _UnboxingStage.unlocking);
     unawaited(_vibeStrongTwice());
     _revealController.forward(from: 0).whenComplete(() {
-      if (!mounted) return;
-      setState(() => _stage = _UnboxingStage.done);
-      if (_item?.currentImgProgress == _displayTotal) {
-        _secretController.forward(from: 0);
-      }
+      unawaited(_finishUnlock());
     });
+  }
+
+  Future<void> _finishUnlock() async {
+    if (!mounted || _stage != _UnboxingStage.unlocking) return;
+    await _slideUnlockIntoCenter();
+    if (!mounted || _stage != _UnboxingStage.unlocking) return;
+    final item = _item;
+    final plan = item == null ? null : _CollectionPlan.of(item);
+    if (plan != null && plan.unlockIndex != null) {
+      try {
+        await _slotController.forward(from: 0);
+      } on TickerCanceled {
+        return;
+      }
+    }
+    if (!mounted || _stage != _UnboxingStage.unlocking) return;
+    setState(() => _stage = _UnboxingStage.done);
+    if (item != null && item.currentImgProgress == _displayTotal) {
+      _secretController.forward(from: 0);
+    }
+  }
+
+  Future<void> _slideUnlockIntoCenter() async {
+    final item = _item;
+    if (item == null || !_collectionScroll.hasClients) return;
+    final plan = _CollectionPlan.of(item);
+    final index = plan.unlockIndex;
+    if (index == null || plan.count <= 3) return;
+    final position = _collectionScroll.position;
+    final start = index * (RewardUnboxing._collectionSize + RewardUnboxing._collectionGap);
+    final end = start + RewardUnboxing._collectionSize;
+    final viewStart = position.pixels;
+    final viewEnd = viewStart + position.viewportDimension;
+    if (start >= viewStart - 0.5 && end <= viewEnd + 0.5) return;
+    final target =
+        (start + RewardUnboxing._collectionSize / 2) - position.viewportDimension / 2;
+    final clamped = target.clamp(0.0, position.maxScrollExtent);
+    if ((clamped - position.pixels).abs() < 0.5) return;
+    try {
+      await _collectionScroll.animateTo(
+        clamped,
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOut,
+      );
+    } catch (_) {
+      return;
+    }
   }
 
   void _onViewCharacter() {
@@ -374,7 +452,11 @@ class _RewardUnboxingState extends State<RewardUnboxing>
     _uiController.value = 0;
     _revealController.value = 0;
     _secretController.value = 0;
+    _slotController.value = 0;
     _tenseWobbleController.value = 0;
+    if (_collectionScroll.hasClients) {
+      _collectionScroll.jumpTo(0);
+    }
     setState(() {
       _index += 1;
       _stage = _UnboxingStage.idle;
@@ -755,7 +837,6 @@ class _RewardUnboxingState extends State<RewardUnboxing>
     final item = _item;
     if (item == null) return const SizedBox.shrink();
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context).textTheme;
     final boxW = size.width * 0.55;
     final boxH = boxW * RewardUnboxing._closedBoxAspect;
     final openedW =
@@ -782,41 +863,194 @@ class _RewardUnboxingState extends State<RewardUnboxing>
         },
         child: FadeTransition(
           opacity: _uiController,
-          child: Column(
+          child: Stack(
+            clipBehavior: Clip.none,
             children: [
-              const Spacer(),
-              Text(
-                '${item.currentImgProgress} / $_displayTotal',
-                textAlign: TextAlign.center,
-                style: theme.headlineMedium?.copyWith(
-                  color: Colors.white,
-                  shadows: const [RewardUnboxing._textShadow],
-                ),
+              Column(
+                children: [
+                  const Spacer(),
+                  if (!_isLast)
+                    Center(
+                      child: _UnboxingCtaButton(
+                        label: 'Open Next Box',
+                        onPressed: _stage == _UnboxingStage.done
+                            ? _onOpenNext
+                            : null,
+                      ),
+                    )
+                  else ...[
+                    Center(
+                      child: _UnboxingCtaButton(
+                        label: l10n.rewardUnboxingSetAsProfile,
+                        onPressed: _stage == _UnboxingStage.done
+                            ? _onSetAsProfile
+                            : null,
+                        submitting: _settingProfile,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Center(
+                      child: _UnboxingCtaButton(
+                        label: l10n.rewardUnboxingViewCharacter,
+                        onPressed: _stage == _UnboxingStage.done
+                            ? _onViewCharacter
+                            : null,
+                      ),
+                    ),
+                  ],
+                  const Spacer(),
+                ],
               ),
-              const SizedBox(height: 20),
-              if (!_isLast)
-                _UnboxingCtaButton(
-                  label: 'Open Next Box',
-                  onPressed: _stage == _UnboxingStage.done ? _onOpenNext : null,
-                )
-              else ...[
-                _UnboxingCtaButton(
-                  label: l10n.rewardUnboxingSetAsProfile,
-                  onPressed: _stage == _UnboxingStage.done
-                      ? _onSetAsProfile
-                      : null,
-                  submitting: _settingProfile,
-                ),
-                const SizedBox(height: 12),
-                _UnboxingCtaButton(
-                  label: l10n.rewardUnboxingViewCharacter,
-                  onPressed: _stage == _UnboxingStage.done ? _onViewCharacter : null,
-                ),
-              ],
-              const Spacer(),
+              Positioned(
+                left: 0,
+                right: 0,
+                top: -RewardUnboxing._collectionBoxOverlap,
+                child: _buildCollection(item),
+              ),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildCollection(CharacterRewardClaimDto item) {
+    final plan = _CollectionPlan.of(item);
+    final slots = [
+      for (var i = 0; i < plan.count; i++) _buildCollectionSlot(item, plan, i),
+    ];
+    if (plan.count <= 3) {
+      return Align(
+        alignment: Alignment.center,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (var i = 0; i < slots.length; i++) ...[
+              if (i > 0) const SizedBox(width: RewardUnboxing._collectionGap),
+              slots[i],
+            ],
+          ],
+        ),
+      );
+    }
+    return SizedBox(
+      height: RewardUnboxing._collectionSize,
+      child: ListView.separated(
+        controller: _collectionScroll,
+        scrollDirection: Axis.horizontal,
+        itemCount: slots.length,
+        separatorBuilder: (_, _) =>
+            const SizedBox(width: RewardUnboxing._collectionGap),
+        itemBuilder: (_, index) => slots[index],
+      ),
+    );
+  }
+
+  Widget _buildCollectionSlot(
+    CharacterRewardClaimDto item,
+    _CollectionPlan plan,
+    int index,
+  ) {
+    final size = RewardUnboxing._collectionSize;
+    final path = index < plan.catalog.length ? plan.catalog[index].trim() : '';
+    final owned = plan.owned[index];
+    final unlocking = plan.unlockIndex == index;
+    if (!unlocking) {
+      return _collectionFace(
+        size: size,
+        rarity: item.characterRarity,
+        path: owned ? path : '',
+        showLock: !owned,
+        lockOpacity: 1,
+        portraitScale: 1,
+      );
+    }
+    return AnimatedBuilder(
+      animation: _slotController,
+      builder: (context, _) {
+        final t = _slotController.value;
+        final lockOpacity = _unlockLockOpacity(t);
+        return _collectionFace(
+          size: size,
+          rarity: item.characterRarity,
+          path: t > 0 ? path : '',
+          showLock: lockOpacity > 0,
+          lockOpacity: lockOpacity,
+          portraitScale: _unlockPortraitScale(t),
+        );
+      },
+    );
+  }
+
+  Widget _collectionFace({
+    required double size,
+    required String rarity,
+    required String path,
+    required bool showLock,
+    required double lockOpacity,
+    required double portraitScale,
+  }) {
+    return SizedBox(
+      width: size,
+      height: size,
+      child: Stack(
+        alignment: Alignment.center,
+        clipBehavior: Clip.none,
+        children: [
+          DecoratedBox(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0x66000000),
+                  offset: Offset(size * 0.04, size * 0.08),
+                  blurRadius: size * 0.16,
+                ),
+              ],
+            ),
+            child: const SizedBox.expand(),
+          ),
+          if (path.isNotEmpty)
+            Transform.scale(
+              scale: portraitScale,
+              child: ClipOval(
+                child: CdnThumbImage(
+                  path: path,
+                  slot: CdnThumbSlot.profileAvatar,
+                  width: size,
+                  height: size,
+                  fit: BoxFit.cover,
+                  fadeInDuration: Duration.zero,
+                  fadeOutDuration: Duration.zero,
+                ),
+              ),
+            ),
+          if (showLock)
+            Opacity(
+              opacity: lockOpacity,
+              child: Transform.scale(
+                scale: 0.6 + 0.4 * lockOpacity,
+                child: DecoratedBox(
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Color(0xA3570B3C),
+                  ),
+                  child: SizedBox(
+                    width: size,
+                    height: size,
+                    child: Center(
+                      child: Image.asset(
+                        'assets/images/icons/lock.png',
+                        width: size * 0.4,
+                        height: size * 0.4,
+                        color: _collectionLockColor(rarity),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -1050,5 +1284,83 @@ class _UnboxingCtaButton extends StatelessWidget {
             : Text(label),
       ),
     );
+  }
+}
+
+class _CollectionPlan {
+  const _CollectionPlan({
+    required this.catalog,
+    required this.owned,
+    required this.unlockIndex,
+  });
+
+  final List<String> catalog;
+  final List<bool> owned;
+  final int? unlockIndex;
+
+  int get count => owned.length;
+
+  static _CollectionPlan of(CharacterRewardClaimDto item) {
+    final catalog = [for (final raw in item.rpImgPaths) raw.trim()];
+    final count = catalog.length < 3 ? 3 : catalog.length;
+    final remaining = <String, int>{};
+    for (final raw in item.ownedImgPaths) {
+      final path = raw.trim();
+      if (path.isEmpty) continue;
+      remaining[path] = (remaining[path] ?? 0) + 1;
+    }
+    final owned = List<bool>.filled(count, false);
+    for (var i = 0; i < catalog.length && i < count; i++) {
+      final path = catalog[i];
+      final left = remaining[path] ?? 0;
+      if (path.isNotEmpty && left > 0) {
+        owned[i] = true;
+        remaining[path] = left - 1;
+      }
+    }
+    final target = item.characterImgPath.trim();
+    int? unlock;
+    if (target.isNotEmpty) {
+      for (var i = 0; i < catalog.length && i < count; i++) {
+        if (!owned[i] && catalog[i] == target) {
+          unlock = i;
+          break;
+        }
+      }
+    }
+    return _CollectionPlan(
+      catalog: catalog,
+      owned: owned,
+      unlockIndex: unlock,
+    );
+  }
+}
+
+double _unlockLockOpacity(double t) {
+  const lockEnd = 200 / 620;
+  if (t >= lockEnd) return 0;
+  return 1 - Curves.easeIn.transform(t / lockEnd);
+}
+
+double _unlockPortraitScale(double t) {
+  const lockEnd = 200 / 620;
+  if (t <= lockEnd) return 0.72;
+  final local = ((t - lockEnd) / (1 - lockEnd)).clamp(0.0, 1.0);
+  if (local < 0.62) {
+    final u = Curves.easeOut.transform(local / 0.62);
+    return 0.72 + (1.06 - 0.72) * u;
+  }
+  final u = Curves.easeIn.transform((local - 0.62) / 0.38);
+  return 1.06 + (1.0 - 1.06) * u;
+}
+
+Color _collectionLockColor(String rarity) {
+  switch (CharacterRarityFrame.normalize(rarity)) {
+    case 'RARE':
+      return const Color(0xFF09A7C0);
+    case 'EPIC':
+      return const Color(0xFF853DB5);
+    default:
+      return const Color(0xFF70A230);
   }
 }

@@ -29,6 +29,10 @@ class SudaApiClient {
     return HomeApi.getHomeContents(accessToken: accessToken);
   }
 
+  static Future<GnbBadgeDto> getGnbBadges({required String accessToken}) {
+    return HomeApi.getGnbBadges(accessToken: accessToken);
+  }
+
   static Future<RankScreenDto> getRankScreen({required String accessToken}) {
     return RankApi.getRankScreen(accessToken: accessToken);
   }

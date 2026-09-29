@@ -345,11 +345,13 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
       final token = await TokenStorage.loadAccessToken();
       if (token == null || token.isEmpty) return;
       final recorded = await SudaApiClient.markRankSeen(accessToken: token);
-      if (!mounted || !recorded) return;
-      widget.onRankSeen?.call();
+      if (!mounted) return;
+      if (recorded) widget.onRankSeen?.call();
     } catch (err) {
       debugPrint('rank seen failed: $err');
     }
+    if (!mounted) return;
+    widget.onGnbBadgesStale?.call();
   }
 
   RankPersonalization? _resolvePersonalization() {

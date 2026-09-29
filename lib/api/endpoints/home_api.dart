@@ -48,6 +48,46 @@ class HomeApi {
     );
   }
 
+  static Future<GnbBadgeDto> getGnbBadges({
+    required String accessToken,
+  }) async {
+    return await SudaHttpClient.executeWithRefresh(
+      () => _getGnbBadgesInternal(accessToken),
+      retryWithNewToken: (newToken) => _getGnbBadgesInternal(newToken),
+    );
+  }
+
+  static Future<GnbBadgeDto> _getGnbBadgesInternal(String accessToken) async {
+    final uri = SudaHttpClient.buildUri('/v2/home/badges');
+    late final http.Response response;
+    try {
+      response = await SudaHttpClient.client
+          .get(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      rethrow;
+    }
+
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final Map<String, dynamic> data =
+          jsonDecode(response.body) as Map<String, dynamic>;
+      return GnbBadgeDto.fromJson(data);
+    }
+
+    throw Exception(
+      'GET /v2/home/badges failed: HTTP ${response.statusCode} ${response.body}',
+    );
+  }
+
   static Future<SudaAppPage<HomeSeriesDto>> getSeriesByCategory({
     required String accessToken,
     required String categoryEnumValue,

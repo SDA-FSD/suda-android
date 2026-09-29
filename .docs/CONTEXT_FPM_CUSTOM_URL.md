@@ -15,6 +15,7 @@
 /v1/latest-version
 /v1/purchases/verify
 /v2/home/contents
+/v2/home/badges
 /v2/home/series
 /v1/users
 /v1/users/profile
