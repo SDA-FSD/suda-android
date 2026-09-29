@@ -101,8 +101,11 @@ class _ChangeProfileImageScreenState extends State<ChangeProfileImageScreen> {
   static const _sectionGap = 24.0;
   static const _columns = 5;
 
+  static const _openDuration = Duration(milliseconds: 220);
+
   List<_CharacterPortraits> _characters = const [];
   List<_ProfileImageChoice> _defaults = const [];
+  final Map<int, _ProfileImageChoice> _faces = {};
   _ProfileImageChoice? _selected;
   int? _openCharacterId;
   bool _ready = false;
@@ -115,9 +118,30 @@ class _ChangeProfileImageScreenState extends State<ChangeProfileImageScreen> {
   }
 
   List<_ProfileImageChoice> get _tiles => [
-    for (final group in _characters) group.images.first,
+    for (final group in _characters) _face(group),
     ..._defaults,
   ];
+
+  _ProfileImageChoice _face(_CharacterPortraits group) {
+    return _faces[group.characterId] ?? group.images.first;
+  }
+
+  _CharacterPortraits? _groupOf(int? characterId) {
+    if (characterId == null) return null;
+    for (final group in _characters) {
+      if (group.characterId == characterId) return group;
+    }
+    return null;
+  }
+
+  List<_ProfileImageChoice> _panelImages(_CharacterPortraits group) {
+    final face = _face(group);
+    return [
+      face,
+      for (final image in group.images)
+        if (!identical(image, face)) image,
+    ];
+  }
 
   Future<void> _load() async {
     List<ClaimedCharacterPortraitDto> portraits = const [];
@@ -144,8 +168,18 @@ class _ChangeProfileImageScreenState extends State<ChangeProfileImageScreen> {
     setState(() {
       _characters = characters;
       _defaults = defaults;
+      _faces
+        ..clear()
+        ..addEntries(
+          characters.map(
+            (group) => MapEntry(
+              group.characterId,
+              group.images.contains(selected) ? selected : group.images.first,
+            ),
+          ),
+        );
       _selected = selected;
-      _openCharacterId = _openedBy(selected, characters);
+      _openCharacterId = null;
       _ready = true;
     });
   }
@@ -239,32 +273,28 @@ class _ChangeProfileImageScreenState extends State<ChangeProfileImageScreen> {
     return defaults.firstWhere((item) => item.value == '1');
   }
 
-  int? _openedBy(
-    _ProfileImageChoice selected,
-    List<_CharacterPortraits> characters,
-  ) {
-    final id = selected.characterId;
-    if (id == null) return null;
-    for (final group in characters) {
-      if (group.characterId == id && group.expandable) return id;
-    }
-    return null;
+  void _onTileTap(_ProfileImageChoice item) {
+    final group = _groupOf(item.characterId);
+    setState(() {
+      if (group == null || !group.expandable) {
+        _selected = item;
+        _openCharacterId = null;
+        return;
+      }
+      _selected = _face(group);
+      _openCharacterId = _openCharacterId == group.characterId
+          ? null
+          : group.characterId;
+    });
   }
 
-  void _onTileTap(_ProfileImageChoice item) {
+  void _onPanelTap(_ProfileImageChoice item) {
     final id = item.characterId;
-    _CharacterPortraits? group;
-    if (id != null) {
-      for (final candidate in _characters) {
-        if (candidate.characterId == id) {
-          group = candidate;
-          break;
-        }
-      }
-    }
+    if (id == null) return;
     setState(() {
-      _selected = group == null ? item : group.images.first;
-      _openCharacterId = group != null && group.expandable ? group.characterId : null;
+      _faces[id] = item;
+      _selected = item;
+      _openCharacterId = null;
     });
   }
 
@@ -348,74 +378,123 @@ class _ChangeProfileImageScreenState extends State<ChangeProfileImageScreen> {
       builder: (context, constraints) {
         final cell = (constraints.maxWidth - _gap * (_columns - 1)) / _columns;
         final tiles = _tiles;
-        final openRow = _openRow(tiles);
-        final children = <Widget>[];
-        for (var i = 0; i < tiles.length; i++) {
-          final item = tiles[i];
-          final expanded =
-              item.characterId != null && item.characterId == _openCharacterId;
-          children.add(
-            SizedBox(
-              width: cell,
-              height: cell,
-              child: GestureDetector(
-                onTap: () => _onTileTap(item),
-                child: _gridFace(
-                  item,
-                  cell,
-                  identical(item, selected) && !expanded,
-                ),
+        final rowCount = tiles.isEmpty
+            ? 0
+            : (tiles.length + _columns - 1) ~/ _columns;
+        return Column(
+          children: [
+            for (var row = 0; row < rowCount; row++) ...[
+              if (row > 0) const SizedBox(height: _gap),
+              _tileRow(
+                tiles.skip(row * _columns).take(_columns).toList(),
+                cell,
+                selected,
               ),
-            ),
-          );
-          final endOfRow = i % _columns == _columns - 1 || i == tiles.length - 1;
-          if (endOfRow && openRow != null && i ~/ _columns == openRow) {
-            children.add(_expansion(selected, cell, constraints.maxWidth));
-          }
-        }
-        return Wrap(spacing: _gap, runSpacing: _gap, children: children);
+              _panelSlot(row, tiles, cell),
+            ],
+          ],
+        );
       },
     );
   }
 
-  int? _openRow(List<_ProfileImageChoice> tiles) {
-    final id = _openCharacterId;
-    if (id == null) return null;
-    final index = tiles.indexWhere((item) => item.characterId == id);
-    if (index < 0) return null;
-    return index ~/ _columns;
-  }
-
-  Widget _expansion(_ProfileImageChoice selected, double cell, double width) {
-    _CharacterPortraits? group;
-    for (final candidate in _characters) {
-      if (candidate.characterId == _openCharacterId) {
-        group = candidate;
-        break;
-      }
-    }
-    final images = group?.images ?? const <_ProfileImageChoice>[];
-    final contentWidth = images.isEmpty
-        ? 0.0
-        : images.length * cell + (images.length - 1) * _gap;
-    return SizedBox(
-      width: width,
-      height: cell,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        physics: contentWidth > width
-            ? const BouncingScrollPhysics()
-            : const NeverScrollableScrollPhysics(),
-        itemCount: images.length,
-        separatorBuilder: (_, _) => const SizedBox(width: _gap),
-        itemBuilder: (context, index) {
-          final item = images[index];
-          return SizedBox(
+  Widget _tileRow(
+    List<_ProfileImageChoice> tiles,
+    double cell,
+    _ProfileImageChoice selected,
+  ) {
+    return Row(
+      children: [
+        for (var i = 0; i < _columns; i++) ...[
+          if (i > 0) const SizedBox(width: _gap),
+          SizedBox(
             width: cell,
             height: cell,
-            child: GestureDetector(
-              onTap: () => setState(() => _selected = item),
-              child: _gridFace(item, cell, identical(item, selected)),
+            child: i < tiles.length
+                ? GestureDetector(
+                    onTap: () => _onTileTap(tiles[i]),
+                    child: _gridFace(
+                      tiles[i],
+                      cell,
+                      selected: identical(tiles[i], selected) &&
+                          tiles[i].characterId != _openCharacterId,
+                      dimmed: tiles[i].characterId != null &&
+                          tiles[i].characterId == _openCharacterId,
+                    ),
+                  )
+                : null,
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _panelSlot(int row, List<_ProfileImageChoice> tiles, double cell) {
+    final openId = _openCharacterId;
+    final openIndex = openId == null
+        ? -1
+        : tiles.indexWhere((item) => item.characterId == openId);
+    final group = openIndex >= 0 && openIndex ~/ _columns == row
+        ? _groupOf(openId)
+        : null;
+    final images = group == null
+        ? const <_ProfileImageChoice>[]
+        : _panelImages(group);
+    return AnimatedSize(
+      duration: _openDuration,
+      curve: Curves.easeOutCubic,
+      alignment: Alignment.topCenter,
+      child: images.isEmpty
+          ? const SizedBox(width: double.infinity, height: 0)
+          : Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: const Color(0x14FFFFFF),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: const Color(0x3380D7CF)),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 12,
+                  ),
+                  child: _centeredPortraits(images, cell),
+                ),
+              ),
+            ),
+    );
+  }
+
+  Widget _centeredPortraits(List<_ProfileImageChoice> images, double cell) {
+    return SizedBox(
+      height: cell,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minWidth: constraints.maxWidth),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  for (var i = 0; i < images.length; i++) ...[
+                    if (i > 0) const SizedBox(width: _gap),
+                    SizedBox(
+                      width: cell,
+                      height: cell,
+                      child: GestureDetector(
+                        onTap: () => _onPanelTap(images[i]),
+                        child: _gridFace(
+                          images[i],
+                          cell,
+                          selected: identical(images[i], _selected),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
             ),
           );
         },
@@ -423,7 +502,12 @@ class _ChangeProfileImageScreenState extends State<ChangeProfileImageScreen> {
     );
   }
 
-  Widget _gridFace(_ProfileImageChoice item, double size, bool selected) {
+  Widget _gridFace(
+    _ProfileImageChoice item,
+    double size, {
+    required bool selected,
+    bool dimmed = false,
+  }) {
     final Widget face;
     final path = item.cdnPath;
     if (path != null) {
@@ -444,12 +528,24 @@ class _ChangeProfileImageScreenState extends State<ChangeProfileImageScreen> {
         color: item.color ?? UserImgPath.fallbackColor,
       );
     }
-    return Container(
-      foregroundDecoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: selected ? Border.all(color: Colors.white, width: 2) : null,
-      ),
-      child: ClipOval(child: face),
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        Container(
+          foregroundDecoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: selected ? Border.all(color: Colors.white, width: 2) : null,
+          ),
+          child: ClipOval(child: face),
+        ),
+        if (dimmed)
+          const DecoratedBox(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Color(0x99000000),
+            ),
+          ),
+      ],
     );
   }
 
