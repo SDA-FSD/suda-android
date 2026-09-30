@@ -17,6 +17,7 @@ import '../../services/main_user_sync.dart';
 import '../../services/perf_monitoring_service.dart';
 import '../../services/roleplay_state_service.dart';
 import '../../services/series_state_service.dart';
+import '../../screens/paywall/paywall.dart';
 import '../../services/token_storage.dart';
 import '../../utils/default_toast.dart';
 import '../../utils/paywall_impression_screen.dart';
@@ -345,20 +346,63 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
   Future<void> _navigateToOverview(BuildContext context) async {
     if (_isLeavingToOverview) return;
     setState(() => _isLeavingToOverview = true);
-    final token = await TokenStorage.loadAccessToken();
-    if (!mounted) return;
-    if (token != null && token.isNotEmpty) {
-      try {
-        final user = await SudaApiClient.getCurrentUser(accessToken: token);
-        if (!mounted) return;
-        MainUserSync.instance.notifyUserUpdated(user);
-        RoleplayStateService.instance.setUser(user);
-      } catch (_) {
-        // best-effort: ignore
+    await _refreshCurrentUser();
+    if (!context.mounted) return;
+
+    final locked = _s2History?.feedbackLockedYn == 'Y';
+    if (!locked) {
+      RoleplayRouter.popToOverview(context);
+      return;
+    }
+
+    final nav = Navigator.of(context);
+    final resultRoute = ModalRoute.of(context);
+    final secondary = resultRoute?.secondaryAnimation;
+    if (resultRoute == null || secondary == null) {
+      RoleplayRouter.popToOverview(context);
+      return;
+    }
+
+    SeriesStateService.instance
+      ..markBestScoreRefreshPending()
+      ..markProfileHistoryRefreshPending();
+
+    var resultRemoved = false;
+    void onCovered(AnimationStatus status) {
+      if (status != AnimationStatus.completed) return;
+      secondary.removeStatusListener(onCovered);
+      resultRemoved = true;
+      if (resultRoute.isActive) {
+        nav.removeRoute(resultRoute);
       }
     }
-    if (!mounted) return;
-    RoleplayRouter.popToOverview(this.context);
+
+    secondary.addStatusListener(onCovered);
+    final subscribed = await PaywallScreen.push<bool>(
+      context,
+      screen: PaywallImpressionScreen.rpResultGotIt,
+    );
+    secondary.removeStatusListener(onCovered);
+    if (!resultRemoved) {
+      if (!context.mounted) return;
+      RoleplayRouter.popToOverview(context);
+      return;
+    }
+    if (subscribed == true) {
+      await _refreshCurrentUser();
+    }
+  }
+
+  Future<void> _refreshCurrentUser() async {
+    final token = await TokenStorage.loadAccessToken();
+    if (token == null || token.isEmpty) return;
+    try {
+      final user = await SudaApiClient.getCurrentUser(accessToken: token);
+      MainUserSync.instance.notifyUserUpdated(user);
+      RoleplayStateService.instance.setUser(user);
+    } catch (_) {
+      // best-effort: ignore
+    }
   }
 
   Widget _buildStarsRow() {

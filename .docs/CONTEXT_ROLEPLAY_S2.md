@@ -322,7 +322,7 @@ Home (시리즈 썸네일)
     - **펼침/접힘(View Chat USER)**: USER 말풍선 카드 영역 탭 또는 Feedback pill 탭. lock Y여도 접힘 grade는 노출. score·feedback 본문 없으면 Feedback 버튼 미노출. 펼침 TTS는 Result와 동일 API·스피너.
     - **재생**: 메가폰은 발화 왼쪽(항상). `audioInputYn == 'Y'`만 `GET /rps2/user-histories/{rpUserHistoryId}/messages/{rpMsgId}/audio`(`TtsResultDto`, `rpMsgId` = `speechFeedback` 키 = `messages[].id`). `N`은 토스트 `speechFeedbackNoRecording`. fetch 중 16×16 `CircularProgressIndicator`(strokeWidth 2, 발화색). 재생 중 `megaphone_fill.png` 같은 색 + 발화 w700. Key Expression·Feedback TTS 등 다른 재생 중이면 중단 후 우선 적용.
     - **iOS TTS**: Result Key Expression·Speech Feedback·View Chat·**Profile Saved**는 `SudaTtsAudioPlayer` (`suda_tts_audio_player.dart`). Playing과 같이 byte[]·CDN을 임시 파일로 `setFilePath` + `audio_session` speech. `Uri.dataFromBytes` 미사용(첫 생성 byte[] 무음 방지). AOS는 HTTP/`data:` URI.
-  - Footer: Got it! / Report(S1과 동일 UX) — S2는 `POST /rps2/user-histories/{rpUserHistoryId}/report`. **Profile History 진입**(`showReportLink: false`) 시 Report 링크 미노출.
+  - Footer: Got it! / Report(S1과 동일 UX) — S2는 `POST /rps2/user-histories/{rpUserHistoryId}/report`. **Profile History 진입**(`showReportLink: false`, `exitViaPop`)은 Report 없음·페이월 없이 pop. 정상 종료 Result의 Got it·시스템 뒤로가기는 `feedbackLockedYn=='Y'`일 때 Paywall `rp_result_got_it`(Result 위, 전환 후 Result 제거, 닫히면 Overview). `'N'`은 `popToOverview`.
 ### 4-6. RoleplayOverviewScreen (딥링크 잔존)
 
 - `lib/screens/roleplay/overview.dart` — S1 단일 RP Overview. Play→Opening 연결 없음. appPath `/roleplay/overview/{id}` 용.
