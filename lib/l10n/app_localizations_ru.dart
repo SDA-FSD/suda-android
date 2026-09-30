@@ -61,6 +61,48 @@ class AppLocalizationsRu extends AppLocalizations {
   String get pushNotificationsDesc => 'Получайте напоминания и важные новости.';
 
   @override
+  String get pushPracticeReminders => 'Напоминания о практике';
+
+  @override
+  String get pushPracticeRemindersDesc =>
+      'Получайте напоминания, чтобы продолжать практику разговорного английского.';
+
+  @override
+  String get pushEnergyUpdates => 'Обновления энергии';
+
+  @override
+  String get pushEnergyUpdatesDesc =>
+      'Получайте уведомление, когда энергия полностью восстановится.';
+
+  @override
+  String get pushLearningUpdates => 'Новости обучения';
+
+  @override
+  String get pushLearningUpdatesDesc =>
+      'Получайте новости о новых ролевых играх и учебных функциях.';
+
+  @override
+  String get pushNewsEvents => 'Новости и события';
+
+  @override
+  String get pushNewsEventsDesc =>
+      'Получайте последние новости, события и объявления SUDA.';
+
+  @override
+  String get pushRankingUpdates => 'Обновления рейтинга';
+
+  @override
+  String get pushRankingUpdatesDesc =>
+      'Получайте обновления о еженедельном рейтинге, результатах и наградах.';
+
+  @override
+  String get pushSocialUpdates => 'Социальные обновления';
+
+  @override
+  String get pushSocialUpdatesDesc =>
+      'Получайте обновления о заявках в друзья и другой социальной активности.';
+
+  @override
   String get settingsFeedback => 'Обратная связь';
 
   @override

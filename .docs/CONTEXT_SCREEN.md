@@ -542,6 +542,7 @@
 - OFF→ON 시 OS 알림 권한 확인. 막혀 있으면 설정 앱 안내, PUT 생략. **iOS는 FCM `getNotificationSettings`**(`authorized`/`provisional`, `notDetermined`면 `requestPermission`). AOS는 기존 `Permission.notification.isGranted`. iOS `permission_handler` 알림 매크로 없음(항상 denied).
 - iOS OFF→ON 성공 후 `POST /v1/users/push-token`을 한 번 더 호출(Home APNs 타이밍 보완). 실FCM 토큰이 있을 때만. AOS는 기존 Home 등록만.
 - API: ON 시 `PUT /v1/users/push-agreement?agreementYn=Y`, OFF 시 `PUT /v1/users/push-agreement?agreementYn=N`
+- 마스터 블럭 아래 8px + 1px 구분선(`#353535`) + 8px 뒤 같은 디자인의 세부 블럭 6개. 진입 시 `GET /v1/users/push-agreement`로 초기값. 각 토글은 통합 ON일 때만 `PUT /v1/users/push-agreement/categories`에 해당 `*Yn`. 통합 OFF면 세부 블럭은 opacity 0.4로 딤드하고 토글은 받지 않는다(저장값은 유지). `completeYn=Y`로 바로 닫히면 세부 조회는 하지 않는다
 - 응답: `QuestResultDto { completeYn }`
   - `completeYn == 'Y'`: `Navigator.pop(true)`로 자동 복귀. 에너지 팝업 진입이면 토스트(`energyEnablePushCompleted`) + 슬롯 제거 애니 + detail 재조회. Setting 경로는 토스트 없음
   - `completeYn != 'Y'`(N 포함): 추가 토스트 없이 기존처럼 토글 상태만 반영

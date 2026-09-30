@@ -60,6 +60,42 @@ class AppLocalizationsZh extends AppLocalizations {
   String get pushNotificationsDesc => '接收提醒和重要更新。';
 
   @override
+  String get pushPracticeReminders => '练习提醒';
+
+  @override
+  String get pushPracticeRemindersDesc => '提醒你坚持英语口语练习。';
+
+  @override
+  String get pushEnergyUpdates => '能量通知';
+
+  @override
+  String get pushEnergyUpdatesDesc => '能量充满时通知你。';
+
+  @override
+  String get pushLearningUpdates => '学习动态';
+
+  @override
+  String get pushLearningUpdatesDesc => '获取新角色扮演和学习功能的更新。';
+
+  @override
+  String get pushNewsEvents => '新闻与活动';
+
+  @override
+  String get pushNewsEventsDesc => '获取 SUDA 的最新消息、活动和公告。';
+
+  @override
+  String get pushRankingUpdates => '排名更新';
+
+  @override
+  String get pushRankingUpdatesDesc => '获取每周排名、结果和奖励的更新。';
+
+  @override
+  String get pushSocialUpdates => '社交动态';
+
+  @override
+  String get pushSocialUpdatesDesc => '获取好友请求和其他社交动态的通知。';
+
+  @override
   String get settingsFeedback => '意见反馈';
 
   @override
@@ -1057,6 +1093,42 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get pushNotificationsDesc => '接收提醒和重要更新。';
 
   @override
+  String get pushPracticeReminders => '练习提醒';
+
+  @override
+  String get pushPracticeRemindersDesc => '提醒你坚持英语口语练习。';
+
+  @override
+  String get pushEnergyUpdates => '能量通知';
+
+  @override
+  String get pushEnergyUpdatesDesc => '能量充满时通知你。';
+
+  @override
+  String get pushLearningUpdates => '学习动态';
+
+  @override
+  String get pushLearningUpdatesDesc => '获取新角色扮演和学习功能的更新。';
+
+  @override
+  String get pushNewsEvents => '新闻与活动';
+
+  @override
+  String get pushNewsEventsDesc => '获取 SUDA 的最新消息、活动和公告。';
+
+  @override
+  String get pushRankingUpdates => '排名更新';
+
+  @override
+  String get pushRankingUpdatesDesc => '获取每周排名、结果和奖励的更新。';
+
+  @override
+  String get pushSocialUpdates => '社交动态';
+
+  @override
+  String get pushSocialUpdatesDesc => '获取好友请求和其他社交动态的通知。';
+
+  @override
   String get settingsFeedback => '意见反馈';
 
   @override
@@ -2052,6 +2124,42 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get pushNotificationsDesc => '接收提醒和重要更新。';
+
+  @override
+  String get pushPracticeReminders => '練習提醒';
+
+  @override
+  String get pushPracticeRemindersDesc => '提醒你持續進行英語口說練習。';
+
+  @override
+  String get pushEnergyUpdates => '能量通知';
+
+  @override
+  String get pushEnergyUpdatesDesc => '能量充滿時通知你。';
+
+  @override
+  String get pushLearningUpdates => '學習動態';
+
+  @override
+  String get pushLearningUpdatesDesc => '取得新角色扮演與學習功能的更新。';
+
+  @override
+  String get pushNewsEvents => '新聞與活動';
+
+  @override
+  String get pushNewsEventsDesc => '取得 SUDA 的最新消息、活動和公告。';
+
+  @override
+  String get pushRankingUpdates => '排名更新';
+
+  @override
+  String get pushRankingUpdatesDesc => '取得每週排名、結果和獎勵的更新。';
+
+  @override
+  String get pushSocialUpdates => '社群動態';
+
+  @override
+  String get pushSocialUpdatesDesc => '取得好友邀請和其他社群動態的通知。';
 
   @override
   String get settingsFeedback => '意見回饋';

@@ -60,6 +60,47 @@ class AppLocalizationsTh extends AppLocalizations {
   String get pushNotificationsDesc => 'รับการเตือนและอัปเดตสำคัญ';
 
   @override
+  String get pushPracticeReminders => 'การแจ้งเตือนการฝึก';
+
+  @override
+  String get pushPracticeRemindersDesc =>
+      'รับการแจ้งเตือนเพื่อฝึกพูดภาษาอังกฤษอย่างต่อเนื่อง';
+
+  @override
+  String get pushEnergyUpdates => 'อัปเดตพลังงาน';
+
+  @override
+  String get pushEnergyUpdatesDesc =>
+      'รับการแจ้งเตือนเมื่อพลังงานของคุณชาร์จเต็ม';
+
+  @override
+  String get pushLearningUpdates => 'อัปเดตการเรียนรู้';
+
+  @override
+  String get pushLearningUpdatesDesc =>
+      'รับข่าวเกี่ยวกับโรลเพลย์ใหม่และฟีเจอร์การเรียนรู้';
+
+  @override
+  String get pushNewsEvents => 'ข่าวสารและกิจกรรม';
+
+  @override
+  String get pushNewsEventsDesc => 'รับข่าวสาร กิจกรรม และประกาศล่าสุดจาก SUDA';
+
+  @override
+  String get pushRankingUpdates => 'อัปเดตอันดับ';
+
+  @override
+  String get pushRankingUpdatesDesc =>
+      'รับอัปเดตเกี่ยวกับอันดับประจำสัปดาห์ ผลลัพธ์ และรางวัล';
+
+  @override
+  String get pushSocialUpdates => 'อัปเดตโซเชียล';
+
+  @override
+  String get pushSocialUpdatesDesc =>
+      'รับอัปเดตเกี่ยวกับคำขอเป็นเพื่อนและกิจกรรมโซเชียลอื่นๆ';
+
+  @override
   String get settingsFeedback => 'ความคิดเห็น';
 
   @override

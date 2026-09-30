@@ -62,6 +62,48 @@ class AppLocalizationsEn extends AppLocalizations {
       'Receive reminders and important updates.';
 
   @override
+  String get pushPracticeReminders => 'Practice Reminders';
+
+  @override
+  String get pushPracticeRemindersDesc =>
+      'Get reminders to keep up your English speaking practice.';
+
+  @override
+  String get pushEnergyUpdates => 'Energy Updates';
+
+  @override
+  String get pushEnergyUpdatesDesc =>
+      'Get notified when your Energy is fully recharged.';
+
+  @override
+  String get pushLearningUpdates => 'Learning Updates';
+
+  @override
+  String get pushLearningUpdatesDesc =>
+      'Get updates about new roleplays and learning features.';
+
+  @override
+  String get pushNewsEvents => 'News & Events';
+
+  @override
+  String get pushNewsEventsDesc =>
+      'Get the latest news, events, and announcements from SUDA.';
+
+  @override
+  String get pushRankingUpdates => 'Ranking Updates';
+
+  @override
+  String get pushRankingUpdatesDesc =>
+      'Get updates on weekly rankings, results, and rewards.';
+
+  @override
+  String get pushSocialUpdates => 'Social Updates';
+
+  @override
+  String get pushSocialUpdatesDesc =>
+      'Get updates on friend requests and other social activity.';
+
+  @override
   String get settingsFeedback => 'Feedback';
 
   @override

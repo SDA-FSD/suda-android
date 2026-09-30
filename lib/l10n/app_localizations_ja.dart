@@ -60,6 +60,42 @@ class AppLocalizationsJa extends AppLocalizations {
   String get pushNotificationsDesc => 'リマインダーや重要なお知らせを受け取ります。';
 
   @override
+  String get pushPracticeReminders => '練習リマインダー';
+
+  @override
+  String get pushPracticeRemindersDesc => '英語のスピーキング練習を続けられるようにリマインドします。';
+
+  @override
+  String get pushEnergyUpdates => 'エネルギー通知';
+
+  @override
+  String get pushEnergyUpdatesDesc => 'エネルギーが満タンになるとお知らせします。';
+
+  @override
+  String get pushLearningUpdates => '学習アップデート';
+
+  @override
+  String get pushLearningUpdatesDesc => '新しいロールプレイや学習機能のお知らせを受け取ります。';
+
+  @override
+  String get pushNewsEvents => 'ニュースとイベント';
+
+  @override
+  String get pushNewsEventsDesc => 'SUDAの最新ニュース、イベント、お知らせを受け取ります。';
+
+  @override
+  String get pushRankingUpdates => 'ランキングアップデート';
+
+  @override
+  String get pushRankingUpdatesDesc => '週間ランキング、結果、報酬のお知らせを受け取ります。';
+
+  @override
+  String get pushSocialUpdates => 'ソーシャルアップデート';
+
+  @override
+  String get pushSocialUpdatesDesc => '友だちリクエストやその他のソーシャル活動のお知らせを受け取ります。';
+
+  @override
   String get settingsFeedback => 'ご意見・ご要望';
 
   @override

@@ -239,6 +239,78 @@ abstract class AppLocalizations {
   /// **'Receive reminders and important updates.'**
   String get pushNotificationsDesc;
 
+  /// No description provided for @pushPracticeReminders.
+  ///
+  /// In en, this message translates to:
+  /// **'Practice Reminders'**
+  String get pushPracticeReminders;
+
+  /// No description provided for @pushPracticeRemindersDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Get reminders to keep up your English speaking practice.'**
+  String get pushPracticeRemindersDesc;
+
+  /// No description provided for @pushEnergyUpdates.
+  ///
+  /// In en, this message translates to:
+  /// **'Energy Updates'**
+  String get pushEnergyUpdates;
+
+  /// No description provided for @pushEnergyUpdatesDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Get notified when your Energy is fully recharged.'**
+  String get pushEnergyUpdatesDesc;
+
+  /// No description provided for @pushLearningUpdates.
+  ///
+  /// In en, this message translates to:
+  /// **'Learning Updates'**
+  String get pushLearningUpdates;
+
+  /// No description provided for @pushLearningUpdatesDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Get updates about new roleplays and learning features.'**
+  String get pushLearningUpdatesDesc;
+
+  /// No description provided for @pushNewsEvents.
+  ///
+  /// In en, this message translates to:
+  /// **'News & Events'**
+  String get pushNewsEvents;
+
+  /// No description provided for @pushNewsEventsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Get the latest news, events, and announcements from SUDA.'**
+  String get pushNewsEventsDesc;
+
+  /// No description provided for @pushRankingUpdates.
+  ///
+  /// In en, this message translates to:
+  /// **'Ranking Updates'**
+  String get pushRankingUpdates;
+
+  /// No description provided for @pushRankingUpdatesDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Get updates on weekly rankings, results, and rewards.'**
+  String get pushRankingUpdatesDesc;
+
+  /// No description provided for @pushSocialUpdates.
+  ///
+  /// In en, this message translates to:
+  /// **'Social Updates'**
+  String get pushSocialUpdates;
+
+  /// No description provided for @pushSocialUpdatesDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Get updates on friend requests and other social activity.'**
+  String get pushSocialUpdatesDesc;
+
   /// No description provided for @settingsFeedback.
   ///
   /// In en, this message translates to:

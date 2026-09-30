@@ -62,6 +62,48 @@ class AppLocalizationsHi extends AppLocalizations {
   String get pushNotificationsDesc => 'रिमाइंडर और ज़रूरी अपडेट पाएँ।';
 
   @override
+  String get pushPracticeReminders => 'अभ्यास रिमाइंडर';
+
+  @override
+  String get pushPracticeRemindersDesc =>
+      'अंग्रेज़ी बोलने का अभ्यास जारी रखने के लिए रिमाइंडर पाएँ।';
+
+  @override
+  String get pushEnergyUpdates => 'एनर्जी अपडेट';
+
+  @override
+  String get pushEnergyUpdatesDesc =>
+      'जब आपकी एनर्जी पूरी तरह चार्ज हो जाए तो सूचना पाएँ।';
+
+  @override
+  String get pushLearningUpdates => 'लर्निंग अपडेट';
+
+  @override
+  String get pushLearningUpdatesDesc =>
+      'नए रोलप्ले और लर्निंग फ़ीचर की खबरें पाएँ।';
+
+  @override
+  String get pushNewsEvents => 'समाचार और इवेंट';
+
+  @override
+  String get pushNewsEventsDesc =>
+      'SUDA की ताज़ा खबरें, इवेंट और घोषणाएँ पाएँ।';
+
+  @override
+  String get pushRankingUpdates => 'रैंकिंग अपडेट';
+
+  @override
+  String get pushRankingUpdatesDesc =>
+      'साप्ताहिक रैंकिंग, नतीजे और इनाम की खबरें पाएँ।';
+
+  @override
+  String get pushSocialUpdates => 'सोशल अपडेट';
+
+  @override
+  String get pushSocialUpdatesDesc =>
+      'मित्र अनुरोध और अन्य सामाजिक गतिविधि की खबरें पाएँ।';
+
+  @override
   String get settingsFeedback => 'फ़ीडबैक';
 
   @override

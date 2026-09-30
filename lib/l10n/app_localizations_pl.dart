@@ -62,6 +62,48 @@ class AppLocalizationsPl extends AppLocalizations {
       'Otrzymuj przypomnienia i ważne aktualizacje.';
 
   @override
+  String get pushPracticeReminders => 'Przypomnienia o praktyce';
+
+  @override
+  String get pushPracticeRemindersDesc =>
+      'Otrzymuj przypomnienia, aby kontynuować ćwiczenie mówienia po angielsku.';
+
+  @override
+  String get pushEnergyUpdates => 'Aktualizacje energii';
+
+  @override
+  String get pushEnergyUpdatesDesc =>
+      'Otrzymaj powiadomienie, gdy Twoja energia zostanie w pełni naładowana.';
+
+  @override
+  String get pushLearningUpdates => 'Aktualizacje nauki';
+
+  @override
+  String get pushLearningUpdatesDesc =>
+      'Otrzymuj nowości o nowych odgrywaniach ról i funkcjach nauki.';
+
+  @override
+  String get pushNewsEvents => 'Aktualności i wydarzenia';
+
+  @override
+  String get pushNewsEventsDesc =>
+      'Otrzymuj najnowsze wiadomości, wydarzenia i ogłoszenia od SUDA.';
+
+  @override
+  String get pushRankingUpdates => 'Aktualizacje rankingu';
+
+  @override
+  String get pushRankingUpdatesDesc =>
+      'Otrzymuj aktualizacje tygodniowego rankingu, wyników i nagród.';
+
+  @override
+  String get pushSocialUpdates => 'Aktualizacje społecznościowe';
+
+  @override
+  String get pushSocialUpdatesDesc =>
+      'Otrzymuj aktualizacje próśb o znajomość i innej aktywności społecznościowej.';
+
+  @override
   String get settingsFeedback => 'Prześlij opinię';
 
   @override

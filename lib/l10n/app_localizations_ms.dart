@@ -62,6 +62,48 @@ class AppLocalizationsMs extends AppLocalizations {
       'Terima peringatan dan kemas kini penting.';
 
   @override
+  String get pushPracticeReminders => 'Peringatan latihan';
+
+  @override
+  String get pushPracticeRemindersDesc =>
+      'Terima peringatan untuk meneruskan latihan bertutur bahasa Inggeris.';
+
+  @override
+  String get pushEnergyUpdates => 'Kemas kini Tenaga';
+
+  @override
+  String get pushEnergyUpdatesDesc =>
+      'Terima pemberitahuan apabila Tenaga anda diisi sepenuhnya.';
+
+  @override
+  String get pushLearningUpdates => 'Kemas kini pembelajaran';
+
+  @override
+  String get pushLearningUpdatesDesc =>
+      'Terima berita tentang roleplay baharu dan ciri pembelajaran.';
+
+  @override
+  String get pushNewsEvents => 'Berita & acara';
+
+  @override
+  String get pushNewsEventsDesc =>
+      'Terima berita, acara dan pengumuman terkini daripada SUDA.';
+
+  @override
+  String get pushRankingUpdates => 'Kemas kini kedudukan';
+
+  @override
+  String get pushRankingUpdatesDesc =>
+      'Terima kemas kini tentang kedudukan mingguan, keputusan dan ganjaran.';
+
+  @override
+  String get pushSocialUpdates => 'Kemas kini sosial';
+
+  @override
+  String get pushSocialUpdatesDesc =>
+      'Terima kemas kini tentang permintaan rakan dan aktiviti sosial lain.';
+
+  @override
   String get settingsFeedback => 'Maklum Balas';
 
   @override

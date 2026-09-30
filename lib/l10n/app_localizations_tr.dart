@@ -62,6 +62,47 @@ class AppLocalizationsTr extends AppLocalizations {
       'Hatırlatmaları ve önemli güncellemeleri al.';
 
   @override
+  String get pushPracticeReminders => 'Pratik hatırlatmaları';
+
+  @override
+  String get pushPracticeRemindersDesc =>
+      'İngilizce konuşma pratiğine devam etmen için hatırlatmalar al.';
+
+  @override
+  String get pushEnergyUpdates => 'Enerji güncellemeleri';
+
+  @override
+  String get pushEnergyUpdatesDesc => 'Enerjin tamamen dolduğunda bildirim al.';
+
+  @override
+  String get pushLearningUpdates => 'Öğrenme güncellemeleri';
+
+  @override
+  String get pushLearningUpdatesDesc =>
+      'Yeni roleplay\'ler ve öğrenme özellikleri hakkında haber al.';
+
+  @override
+  String get pushNewsEvents => 'Haberler ve etkinlikler';
+
+  @override
+  String get pushNewsEventsDesc =>
+      'SUDA\'nın en son haberlerini, etkinliklerini ve duyurularını al.';
+
+  @override
+  String get pushRankingUpdates => 'Sıralama güncellemeleri';
+
+  @override
+  String get pushRankingUpdatesDesc =>
+      'Haftalık sıralama, sonuçlar ve ödüller hakkında güncelleme al.';
+
+  @override
+  String get pushSocialUpdates => 'Sosyal güncellemeler';
+
+  @override
+  String get pushSocialUpdatesDesc =>
+      'Arkadaşlık istekleri ve diğer sosyal etkinlikler hakkında güncelleme al.';
+
+  @override
   String get settingsFeedback => 'Geri Bildirim';
 
   @override

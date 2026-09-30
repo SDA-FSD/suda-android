@@ -63,6 +63,48 @@ class AppLocalizationsNl extends AppLocalizations {
       'Ontvang herinneringen en belangrijke updates.';
 
   @override
+  String get pushPracticeReminders => 'Oefenherinneringen';
+
+  @override
+  String get pushPracticeRemindersDesc =>
+      'Ontvang herinneringen om je Engelse spreekvaardigheid te blijven oefenen.';
+
+  @override
+  String get pushEnergyUpdates => 'Energie-updates';
+
+  @override
+  String get pushEnergyUpdatesDesc =>
+      'Krijg een melding wanneer je energie volledig is opgeladen.';
+
+  @override
+  String get pushLearningUpdates => 'Leerupdates';
+
+  @override
+  String get pushLearningUpdatesDesc =>
+      'Ontvang updates over nieuwe roleplays en leerfuncties.';
+
+  @override
+  String get pushNewsEvents => 'Nieuws en evenementen';
+
+  @override
+  String get pushNewsEventsDesc =>
+      'Ontvang het laatste nieuws, evenementen en aankondigingen van SUDA.';
+
+  @override
+  String get pushRankingUpdates => 'Ranking-updates';
+
+  @override
+  String get pushRankingUpdatesDesc =>
+      'Ontvang updates over wekelijkse rankings, resultaten en beloningen.';
+
+  @override
+  String get pushSocialUpdates => 'Sociale updates';
+
+  @override
+  String get pushSocialUpdatesDesc =>
+      'Ontvang updates over vriendschapsverzoeken en andere sociale activiteit.';
+
+  @override
   String get settingsFeedback => 'Feedback';
 
   @override

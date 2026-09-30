@@ -700,6 +700,32 @@ class SudaApiClient {
     );
   }
 
+  static Future<PushAgreementDto> getPushAgreement({
+    required String accessToken,
+  }) {
+    return UserApi.getPushAgreement(accessToken: accessToken);
+  }
+
+  static Future<void> updatePushCategories({
+    required String accessToken,
+    String? practiceRemindersYn,
+    String? energyUpdatesYn,
+    String? learningUpdatesYn,
+    String? newsEventsYn,
+    String? rankingUpdatesYn,
+    String? socialUpdatesYn,
+  }) {
+    return UserApi.updatePushCategories(
+      accessToken: accessToken,
+      practiceRemindersYn: practiceRemindersYn,
+      energyUpdatesYn: energyUpdatesYn,
+      learningUpdatesYn: learningUpdatesYn,
+      newsEventsYn: newsEventsYn,
+      rankingUpdatesYn: rankingUpdatesYn,
+      socialUpdatesYn: socialUpdatesYn,
+    );
+  }
+
   static Future<void> sendFeedback({
     required String accessToken,
     required String content,

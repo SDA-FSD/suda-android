@@ -62,6 +62,48 @@ class AppLocalizationsId extends AppLocalizations {
       'Dapatkan pengingat dan pembaruan penting.';
 
   @override
+  String get pushPracticeReminders => 'Pengingat latihan';
+
+  @override
+  String get pushPracticeRemindersDesc =>
+      'Dapatkan pengingat untuk terus berlatih berbicara bahasa Inggris.';
+
+  @override
+  String get pushEnergyUpdates => 'Pembaruan Energi';
+
+  @override
+  String get pushEnergyUpdatesDesc =>
+      'Dapatkan notifikasi saat Energi Anda terisi penuh.';
+
+  @override
+  String get pushLearningUpdates => 'Pembaruan belajar';
+
+  @override
+  String get pushLearningUpdatesDesc =>
+      'Dapatkan kabar tentang roleplay baru dan fitur belajar.';
+
+  @override
+  String get pushNewsEvents => 'Berita & acara';
+
+  @override
+  String get pushNewsEventsDesc =>
+      'Dapatkan berita, acara, dan pengumuman terbaru dari SUDA.';
+
+  @override
+  String get pushRankingUpdates => 'Pembaruan peringkat';
+
+  @override
+  String get pushRankingUpdatesDesc =>
+      'Dapatkan pembaruan tentang peringkat mingguan, hasil, dan hadiah.';
+
+  @override
+  String get pushSocialUpdates => 'Pembaruan sosial';
+
+  @override
+  String get pushSocialUpdatesDesc =>
+      'Dapatkan pembaruan tentang permintaan pertemanan dan aktivitas sosial lainnya.';
+
+  @override
   String get settingsFeedback => 'Masukan';
 
   @override

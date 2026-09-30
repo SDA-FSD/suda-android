@@ -61,6 +61,47 @@ class AppLocalizationsAr extends AppLocalizations {
   String get pushNotificationsDesc => 'تلقَّ التذكيرات والتحديثات المهمة.';
 
   @override
+  String get pushPracticeReminders => 'تذكيرات التدريب';
+
+  @override
+  String get pushPracticeRemindersDesc =>
+      'احصل على تذكيرات لمواصلة تدريب التحدث بالإنجليزية.';
+
+  @override
+  String get pushEnergyUpdates => 'تحديثات الطاقة';
+
+  @override
+  String get pushEnergyUpdatesDesc => 'احصل على إشعار عند اكتمال شحن طاقتك.';
+
+  @override
+  String get pushLearningUpdates => 'تحديثات التعلم';
+
+  @override
+  String get pushLearningUpdatesDesc =>
+      'احصل على أخبار عن لعب الأدوار الجديدة وميزات التعلم.';
+
+  @override
+  String get pushNewsEvents => 'الأخبار والفعاليات';
+
+  @override
+  String get pushNewsEventsDesc =>
+      'احصل على آخر الأخبار والفعاليات وإعلانات SUDA.';
+
+  @override
+  String get pushRankingUpdates => 'تحديثات الترتيب';
+
+  @override
+  String get pushRankingUpdatesDesc =>
+      'احصل على تحديثات عن الترتيب الأسبوعي والنتائج والمكافآت.';
+
+  @override
+  String get pushSocialUpdates => 'التحديثات الاجتماعية';
+
+  @override
+  String get pushSocialUpdatesDesc =>
+      'احصل على تحديثات عن طلبات الصداقة والأنشطة الاجتماعية الأخرى.';
+
+  @override
   String get settingsFeedback => 'الملاحظات';
 
   @override

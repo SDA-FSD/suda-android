@@ -62,6 +62,48 @@ class AppLocalizationsEs extends AppLocalizations {
       'Recibe recordatorios y actualizaciones importantes.';
 
   @override
+  String get pushPracticeReminders => 'Recordatorios de práctica';
+
+  @override
+  String get pushPracticeRemindersDesc =>
+      'Recibe recordatorios para mantener tu práctica de conversación en inglés.';
+
+  @override
+  String get pushEnergyUpdates => 'Actualizaciones de energía';
+
+  @override
+  String get pushEnergyUpdatesDesc =>
+      'Recibe una notificación cuando tu Energía esté completamente recargada.';
+
+  @override
+  String get pushLearningUpdates => 'Novedades de aprendizaje';
+
+  @override
+  String get pushLearningUpdatesDesc =>
+      'Recibe novedades sobre nuevos roleplays y funciones de aprendizaje.';
+
+  @override
+  String get pushNewsEvents => 'Noticias y eventos';
+
+  @override
+  String get pushNewsEventsDesc =>
+      'Recibe las últimas noticias, eventos y anuncios de SUDA.';
+
+  @override
+  String get pushRankingUpdates => 'Actualizaciones del ranking';
+
+  @override
+  String get pushRankingUpdatesDesc =>
+      'Recibe actualizaciones sobre el ranking semanal, resultados y recompensas.';
+
+  @override
+  String get pushSocialUpdates => 'Actualizaciones sociales';
+
+  @override
+  String get pushSocialUpdatesDesc =>
+      'Recibe actualizaciones sobre solicitudes de amistad y otra actividad social.';
+
+  @override
   String get settingsFeedback => 'Comentarios';
 
   @override
@@ -1126,6 +1168,48 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
   @override
   String get pushNotificationsDesc =>
       'Recibe recordatorios y actualizaciones importantes.';
+
+  @override
+  String get pushPracticeReminders => 'Recordatorios de práctica';
+
+  @override
+  String get pushPracticeRemindersDesc =>
+      'Recibe recordatorios para mantener tu práctica de conversación en inglés.';
+
+  @override
+  String get pushEnergyUpdates => 'Actualizaciones de energía';
+
+  @override
+  String get pushEnergyUpdatesDesc =>
+      'Recibe una notificación cuando tu Energía esté completamente recargada.';
+
+  @override
+  String get pushLearningUpdates => 'Novedades de aprendizaje';
+
+  @override
+  String get pushLearningUpdatesDesc =>
+      'Recibe novedades sobre nuevos roleplays y funciones de aprendizaje.';
+
+  @override
+  String get pushNewsEvents => 'Noticias y eventos';
+
+  @override
+  String get pushNewsEventsDesc =>
+      'Recibe las últimas noticias, eventos y anuncios de SUDA.';
+
+  @override
+  String get pushRankingUpdates => 'Actualizaciones del ranking';
+
+  @override
+  String get pushRankingUpdatesDesc =>
+      'Recibe actualizaciones sobre el ranking semanal, resultados y recompensas.';
+
+  @override
+  String get pushSocialUpdates => 'Actualizaciones sociales';
+
+  @override
+  String get pushSocialUpdatesDesc =>
+      'Recibe actualizaciones sobre solicitudes de amistad y otra actividad social.';
 
   @override
   String get settingsFeedback => 'Comentarios';

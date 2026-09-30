@@ -651,6 +651,91 @@ class UserApi {
     );
   }
 
+  static Future<PushAgreementDto> getPushAgreement({
+    required String accessToken,
+  }) async {
+    final uri = SudaHttpClient.buildUri('/v1/users/push-agreement');
+
+    late final http.Response response;
+    try {
+      response = await SudaHttpClient.client
+          .get(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      rethrow;
+    }
+
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final Map<String, dynamic> data =
+          jsonDecode(response.body) as Map<String, dynamic>;
+      return PushAgreementDto.fromJson(data);
+    }
+
+    throw Exception(
+      'GET /v1/users/push-agreement failed: HTTP ${response.statusCode} ${response.body}',
+    );
+  }
+
+  static Future<void> updatePushCategories({
+    required String accessToken,
+    String? practiceRemindersYn,
+    String? energyUpdatesYn,
+    String? learningUpdatesYn,
+    String? newsEventsYn,
+    String? rankingUpdatesYn,
+    String? socialUpdatesYn,
+  }) async {
+    final uri = SudaHttpClient.buildUri('/v1/users/push-agreement/categories');
+    final body = <String, String>{};
+    void put(String key, String? value) {
+      if (value != null) body[key] = value;
+    }
+
+    put('practiceRemindersYn', practiceRemindersYn);
+    put('energyUpdatesYn', energyUpdatesYn);
+    put('learningUpdatesYn', learningUpdatesYn);
+    put('newsEventsYn', newsEventsYn);
+    put('rankingUpdatesYn', rankingUpdatesYn);
+    put('socialUpdatesYn', socialUpdatesYn);
+
+    late final http.Response response;
+    try {
+      response = await SudaHttpClient.client
+          .put(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+              'Content-Type': 'application/json',
+            },
+            body: jsonEncode(body),
+          )
+          .timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      rethrow;
+    }
+
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return;
+    }
+
+    throw Exception(
+      'PUT /v1/users/push-agreement/categories failed: HTTP ${response.statusCode} ${response.body}',
+    );
+  }
+
   static QuestResultDto _parseQuestResultResponse(String body) {
     try {
       final decoded = jsonDecode(body);

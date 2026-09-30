@@ -60,6 +60,42 @@ class AppLocalizationsKo extends AppLocalizations {
   String get pushNotificationsDesc => '중요한 알림과 업데이트를 받아보세요.';
 
   @override
+  String get pushPracticeReminders => '학습 리마인드';
+
+  @override
+  String get pushPracticeRemindersDesc => '꾸준히 영어 말하기를 연습할 수 있도록 알려드려요.';
+
+  @override
+  String get pushEnergyUpdates => '에너지 알림';
+
+  @override
+  String get pushEnergyUpdatesDesc => '에너지가 모두 충전되면 알려드려요.';
+
+  @override
+  String get pushLearningUpdates => '학습 업데이트';
+
+  @override
+  String get pushLearningUpdatesDesc => '새로운 롤플레이와 학습 기능 소식을 받아보세요.';
+
+  @override
+  String get pushNewsEvents => '소식 및 이벤트';
+
+  @override
+  String get pushNewsEventsDesc => 'SUDA의 최신 소식과 이벤트, 공지사항을 받아보세요.';
+
+  @override
+  String get pushRankingUpdates => '랭킹 업데이트';
+
+  @override
+  String get pushRankingUpdatesDesc => '주간 랭킹, 결과 및 보상 소식을 받아보세요.';
+
+  @override
+  String get pushSocialUpdates => '소셜 업데이트';
+
+  @override
+  String get pushSocialUpdatesDesc => '친구 요청 및 기타 소셜 활동에 대한 알림을 받아보세요.';
+
+  @override
   String get settingsFeedback => '피드백';
 
   @override

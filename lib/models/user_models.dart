@@ -162,6 +162,40 @@ class PurchaseVerifyResultDto {
   bool get shouldFinish => finishYn == 'Y';
 }
 
+/// GET /v1/users/push-agreement
+class PushAgreementDto {
+  final String agreementYn;
+  final String practiceRemindersYn;
+  final String energyUpdatesYn;
+  final String learningUpdatesYn;
+  final String newsEventsYn;
+  final String rankingUpdatesYn;
+  final String socialUpdatesYn;
+
+  const PushAgreementDto({
+    required this.agreementYn,
+    required this.practiceRemindersYn,
+    required this.energyUpdatesYn,
+    required this.learningUpdatesYn,
+    required this.newsEventsYn,
+    required this.rankingUpdatesYn,
+    required this.socialUpdatesYn,
+  });
+
+  factory PushAgreementDto.fromJson(Map<String, dynamic> json) {
+    String yn(String key) => json[key] as String? ?? 'Y';
+    return PushAgreementDto(
+      agreementYn: json['agreementYn'] as String? ?? 'N',
+      practiceRemindersYn: yn('practiceRemindersYn'),
+      energyUpdatesYn: yn('energyUpdatesYn'),
+      learningUpdatesYn: yn('learningUpdatesYn'),
+      newsEventsYn: yn('newsEventsYn'),
+      rankingUpdatesYn: yn('rankingUpdatesYn'),
+      socialUpdatesYn: yn('socialUpdatesYn'),
+    );
+  }
+}
+
 /// PUT /v1/users/push-agreement 응답
 class QuestResultDto {
   final String completeYn;

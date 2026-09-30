@@ -64,6 +64,48 @@ class AppLocalizationsVi extends AppLocalizations {
       'Nhận lời nhắc và các cập nhật quan trọng.';
 
   @override
+  String get pushPracticeReminders => 'Nhắc luyện tập';
+
+  @override
+  String get pushPracticeRemindersDesc =>
+      'Nhận lời nhắc để duy trì việc luyện nói tiếng Anh.';
+
+  @override
+  String get pushEnergyUpdates => 'Cập nhật năng lượng';
+
+  @override
+  String get pushEnergyUpdatesDesc =>
+      'Nhận thông báo khi Năng lượng của bạn được sạc đầy.';
+
+  @override
+  String get pushLearningUpdates => 'Cập nhật học tập';
+
+  @override
+  String get pushLearningUpdatesDesc =>
+      'Nhận tin về roleplay mới và tính năng học tập.';
+
+  @override
+  String get pushNewsEvents => 'Tin tức và sự kiện';
+
+  @override
+  String get pushNewsEventsDesc =>
+      'Nhận tin tức, sự kiện và thông báo mới nhất từ SUDA.';
+
+  @override
+  String get pushRankingUpdates => 'Cập nhật bảng xếp hạng';
+
+  @override
+  String get pushRankingUpdatesDesc =>
+      'Nhận cập nhật về bảng xếp hạng tuần, kết quả và phần thưởng.';
+
+  @override
+  String get pushSocialUpdates => 'Cập nhật xã hội';
+
+  @override
+  String get pushSocialUpdatesDesc =>
+      'Nhận cập nhật về lời mời kết bạn và hoạt động xã hội khác.';
+
+  @override
   String get settingsFeedback => 'Góp ý';
 
   @override

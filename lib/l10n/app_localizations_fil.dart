@@ -64,6 +64,48 @@ class AppLocalizationsFil extends AppLocalizations {
       'Makatanggap ng mga paalala at mahahalagang update.';
 
   @override
+  String get pushPracticeReminders => 'Mga paalala sa pagsasanay';
+
+  @override
+  String get pushPracticeRemindersDesc =>
+      'Makatanggap ng mga paalala para magpatuloy sa pagsasanay ng pagsasalita ng Ingles.';
+
+  @override
+  String get pushEnergyUpdates => 'Mga update sa Energy';
+
+  @override
+  String get pushEnergyUpdatesDesc =>
+      'Maabisuhan kapag puno na ang iyong Energy.';
+
+  @override
+  String get pushLearningUpdates => 'Mga update sa pag-aaral';
+
+  @override
+  String get pushLearningUpdatesDesc =>
+      'Makatanggap ng mga update tungkol sa mga bagong roleplay at feature sa pag-aaral.';
+
+  @override
+  String get pushNewsEvents => 'Balita at mga event';
+
+  @override
+  String get pushNewsEventsDesc =>
+      'Makatanggap ng mga pinakabagong balita, event, at anunsyo mula sa SUDA.';
+
+  @override
+  String get pushRankingUpdates => 'Mga update sa ranking';
+
+  @override
+  String get pushRankingUpdatesDesc =>
+      'Makatanggap ng mga update sa lingguhang ranking, resulta, at mga reward.';
+
+  @override
+  String get pushSocialUpdates => 'Mga social update';
+
+  @override
+  String get pushSocialUpdatesDesc =>
+      'Makatanggap ng mga update sa mga friend request at iba pang social na aktibidad.';
+
+  @override
   String get settingsFeedback => 'Feedback';
 
   @override
