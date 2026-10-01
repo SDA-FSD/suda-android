@@ -547,6 +547,22 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get achievementSceneStealer => '抢戏达人';
+
+  @override
+  String achievementSceneStealerHint(int count) {
+    return '完成 $count 次角色扮演。';
+  }
+
+  @override
+  String get achievementOnARoll => '势不可挡';
+
+  @override
+  String achievementOnARollHint(int count) {
+    return '连续学习 $count 天。';
+  }
+
+  @override
   String get otherUserFriends => '好友';
 
   @override
@@ -1607,6 +1623,22 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   }
 
   @override
+  String get achievementSceneStealer => '抢戏达人';
+
+  @override
+  String achievementSceneStealerHint(int count) {
+    return '完成 $count 次角色扮演。';
+  }
+
+  @override
+  String get achievementOnARoll => '势不可挡';
+
+  @override
+  String achievementOnARollHint(int count) {
+    return '连续学习 $count 天。';
+  }
+
+  @override
   String get otherUserFriends => '好友';
 
   @override
@@ -2664,6 +2696,22 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   @override
   String achievementTalkativeHint(int count) {
     return '總共說出 $count 個單字。';
+  }
+
+  @override
+  String get achievementSceneStealer => '搶戲達人';
+
+  @override
+  String achievementSceneStealerHint(int count) {
+    return '完成 $count 次角色扮演。';
+  }
+
+  @override
+  String get achievementOnARoll => '勢不可擋';
+
+  @override
+  String achievementOnARollHint(int count) {
+    return '連續學習 $count 天。';
   }
 
   @override

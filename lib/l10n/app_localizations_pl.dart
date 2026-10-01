@@ -581,6 +581,22 @@ class AppLocalizationsPl extends AppLocalizations {
   }
 
   @override
+  String get achievementSceneStealer => 'Złodziej sceny';
+
+  @override
+  String achievementSceneStealerHint(int count) {
+    return 'Ukończ $count odgrywań ról.';
+  }
+
+  @override
+  String get achievementOnARoll => 'Na fali';
+
+  @override
+  String achievementOnARollHint(int count) {
+    return 'Ćwicz przez $count dni z rzędu.';
+  }
+
+  @override
   String get otherUserFriends => 'Przyjaciele';
 
   @override

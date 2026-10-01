@@ -576,6 +576,22 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get achievementSceneStealer => 'سارق المشهد';
+
+  @override
+  String achievementSceneStealerHint(int count) {
+    return 'أكمل $count من تمثيل الأدوار.';
+  }
+
+  @override
+  String get achievementOnARoll => 'متواصل';
+
+  @override
+  String achievementOnARollHint(int count) {
+    return 'تدرّب $count أيام متتالية.';
+  }
+
+  @override
   String get otherUserFriends => 'الأصدقاء';
 
   @override

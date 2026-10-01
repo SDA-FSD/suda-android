@@ -579,6 +579,22 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
+  String get achievementSceneStealer => 'Вор сцены';
+
+  @override
+  String achievementSceneStealerHint(int count) {
+    return 'Завершите $count ролевых игр.';
+  }
+
+  @override
+  String get achievementOnARoll => 'На кураже';
+
+  @override
+  String achievementOnARollHint(int count) {
+    return 'Занимайтесь $count дней подряд.';
+  }
+
+  @override
   String get otherUserFriends => 'Друзья';
 
   @override

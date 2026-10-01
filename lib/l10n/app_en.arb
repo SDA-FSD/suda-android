@@ -224,6 +224,16 @@
   "achievementHintSeekerHint": "Use hints {count} times during Roleplays.",
   "achievementTalkative": "Talkative",
   "achievementTalkativeHint": "Speak a total of {count} words.",
+  "achievementSceneStealer": "Scene Stealer",
+  "achievementSceneStealerHint": "Complete {count} Roleplays.",
+  "achievementOnARoll": "On a Roll",
+  "achievementOnARollHint": "Practice for {count} days in a row.",
+  "@achievementSceneStealerHint": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "@achievementOnARollHint": {
+    "placeholders": { "count": { "type": "int" } }
+  },
   "@achievementPocketGuideHint": {
     "placeholders": {
       "count": {

@@ -551,6 +551,22 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
+  String get achievementSceneStealer => '씬 스틸러';
+
+  @override
+  String achievementSceneStealerHint(int count) {
+    return '롤플레이를 $count회 완료하세요.';
+  }
+
+  @override
+  String get achievementOnARoll => '불꽃질주';
+
+  @override
+  String achievementOnARollHint(int count) {
+    return '$count일 연속으로 학습하세요.';
+  }
+
+  @override
   String get otherUserFriends => '친구';
 
   @override

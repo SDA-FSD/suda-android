@@ -583,6 +583,22 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get achievementSceneStealer => 'Robaescenas';
+
+  @override
+  String achievementSceneStealerHint(int count) {
+    return 'Completa $count Roleplays.';
+  }
+
+  @override
+  String get achievementOnARoll => 'Imparable';
+
+  @override
+  String achievementOnARollHint(int count) {
+    return 'Practica $count días seguidos.';
+  }
+
+  @override
   String get otherUserFriends => 'Amigos';
 
   @override
@@ -1715,6 +1731,22 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
   @override
   String achievementTalkativeHint(int count) {
     return 'Di un total de $count palabras.';
+  }
+
+  @override
+  String get achievementSceneStealer => 'Robaescenas';
+
+  @override
+  String achievementSceneStealerHint(int count) {
+    return 'Completa $count Roleplays.';
+  }
+
+  @override
+  String get achievementOnARoll => 'Imparable';
+
+  @override
+  String achievementOnARollHint(int count) {
+    return 'Practica $count días seguidos.';
   }
 
   @override

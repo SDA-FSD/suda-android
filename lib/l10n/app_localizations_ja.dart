@@ -550,6 +550,22 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
+  String get achievementSceneStealer => 'シーンスティーラー';
+
+  @override
+  String achievementSceneStealerHint(int count) {
+    return 'ロールプレイを$count回完了してください。';
+  }
+
+  @override
+  String get achievementOnARoll => '連勝街道';
+
+  @override
+  String achievementOnARollHint(int count) {
+    return '$count日連続で学習してください。';
+  }
+
+  @override
   String get otherUserFriends => 'フレンド';
 
   @override

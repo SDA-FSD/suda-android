@@ -581,6 +581,22 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
+  String get achievementSceneStealer => 'Pencuri Adegan';
+
+  @override
+  String achievementSceneStealerHint(int count) {
+    return 'Selesaikan $count Roleplay.';
+  }
+
+  @override
+  String get achievementOnARoll => 'Tak Terbendung';
+
+  @override
+  String achievementOnARollHint(int count) {
+    return 'Berlatih $count hari berturut-turut.';
+  }
+
+  @override
   String get otherUserFriends => 'Teman';
 
   @override

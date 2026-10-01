@@ -579,6 +579,22 @@ class AppLocalizationsHi extends AppLocalizations {
   }
 
   @override
+  String get achievementSceneStealer => 'सीन स्टीलर';
+
+  @override
+  String achievementSceneStealerHint(int count) {
+    return '$count रोलप्ले पूरे करें।';
+  }
+
+  @override
+  String get achievementOnARoll => 'लगातार जोश';
+
+  @override
+  String achievementOnARollHint(int count) {
+    return 'लगातार $count दिन अभ्यास करें।';
+  }
+
+  @override
   String get otherUserFriends => 'मित्र';
 
   @override

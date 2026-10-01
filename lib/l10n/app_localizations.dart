@@ -1169,6 +1169,30 @@ abstract class AppLocalizations {
   /// **'Speak a total of {count} words.'**
   String achievementTalkativeHint(int count);
 
+  /// No description provided for @achievementSceneStealer.
+  ///
+  /// In en, this message translates to:
+  /// **'Scene Stealer'**
+  String get achievementSceneStealer;
+
+  /// No description provided for @achievementSceneStealerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete {count} Roleplays.'**
+  String achievementSceneStealerHint(int count);
+
+  /// No description provided for @achievementOnARoll.
+  ///
+  /// In en, this message translates to:
+  /// **'On a Roll'**
+  String get achievementOnARoll;
+
+  /// No description provided for @achievementOnARollHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Practice for {count} days in a row.'**
+  String achievementOnARollHint(int count);
+
   /// No description provided for @otherUserFriends.
   ///
   /// In en, this message translates to:

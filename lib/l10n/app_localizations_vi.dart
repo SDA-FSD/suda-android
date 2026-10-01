@@ -581,6 +581,22 @@ class AppLocalizationsVi extends AppLocalizations {
   }
 
   @override
+  String get achievementSceneStealer => 'Cướp diễn';
+
+  @override
+  String achievementSceneStealerHint(int count) {
+    return 'Hoàn thành $count Roleplay.';
+  }
+
+  @override
+  String get achievementOnARoll => 'Thăng hoa';
+
+  @override
+  String achievementOnARollHint(int count) {
+    return 'Luyện tập $count ngày liên tiếp.';
+  }
+
+  @override
   String get otherUserFriends => 'Bạn bè';
 
   @override

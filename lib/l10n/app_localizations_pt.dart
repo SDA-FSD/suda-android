@@ -582,6 +582,22 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
+  String get achievementSceneStealer => 'Estrela da Cena';
+
+  @override
+  String achievementSceneStealerHint(int count) {
+    return 'Complete $count Roleplays.';
+  }
+
+  @override
+  String get achievementOnARoll => 'Imparável';
+
+  @override
+  String achievementOnARollHint(int count) {
+    return 'Pratique por $count dias seguidos.';
+  }
+
+  @override
   String get otherUserFriends => 'Amigos';
 
   @override

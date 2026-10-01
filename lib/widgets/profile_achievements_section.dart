@@ -129,7 +129,7 @@ int _activityBadgeLevel(ProfileAchievementItem item, {required bool showClaim}) 
 
 int _activityMaxLevel(String code) {
   return switch (code) {
-    'TA' => 4,
+    'TA' || 'SC' || 'ON' => 4,
     _ => 2,
   };
 }
@@ -146,6 +146,8 @@ String _activityAsset(String code, int level) {
   final prefix = switch (code) {
     'HI' => 'HI',
     'TA' => 'TA',
+    'SC' => 'SC',
+    'ON' => 'ON',
     _ => 'PG',
   };
   return 'assets/images/achievement/$prefix-$level.png';
@@ -170,6 +172,18 @@ _AchievementCopy _activityCopy(
         title: l10n.achievementTalkative,
         hint: l10n.achievementTalkativeHint(goal),
         asset: 'assets/images/achievement/TA-$badge.png',
+      );
+    case 'SC':
+      return _AchievementCopy(
+        title: l10n.achievementSceneStealer,
+        hint: l10n.achievementSceneStealerHint(goal),
+        asset: 'assets/images/achievement/SC-$badge.png',
+      );
+    case 'ON':
+      return _AchievementCopy(
+        title: l10n.achievementOnARoll,
+        hint: l10n.achievementOnARollHint(goal),
+        asset: 'assets/images/achievement/ON-$badge.png',
       );
     default:
       return _AchievementCopy(

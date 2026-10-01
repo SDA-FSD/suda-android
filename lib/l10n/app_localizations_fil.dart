@@ -588,6 +588,22 @@ class AppLocalizationsFil extends AppLocalizations {
   }
 
   @override
+  String get achievementSceneStealer => 'Scene Stealer';
+
+  @override
+  String achievementSceneStealerHint(int count) {
+    return 'Kumpletuhin ang $count Roleplay.';
+  }
+
+  @override
+  String get achievementOnARoll => 'Tuloy-tuloy';
+
+  @override
+  String achievementOnARollHint(int count) {
+    return 'Magpraktis nang $count araw nang sunud-sunod.';
+  }
+
+  @override
   String get otherUserFriends => 'Mga Kaibigan';
 
   @override

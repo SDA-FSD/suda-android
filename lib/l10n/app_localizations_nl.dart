@@ -580,6 +580,22 @@ class AppLocalizationsNl extends AppLocalizations {
   }
 
   @override
+  String get achievementSceneStealer => 'Scènedief';
+
+  @override
+  String achievementSceneStealerHint(int count) {
+    return 'Voltooi $count Roleplays.';
+  }
+
+  @override
+  String get achievementOnARoll => 'Op stoom';
+
+  @override
+  String achievementOnARollHint(int count) {
+    return 'Oefen $count dagen achter elkaar.';
+  }
+
+  @override
   String get otherUserFriends => 'Vrienden';
 
   @override
