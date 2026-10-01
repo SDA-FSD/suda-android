@@ -89,8 +89,8 @@ class _SeriesEpisodeTabContentState extends State<SeriesEpisodeTabContent>
   static const _playSlideEnd = (180 + 220) / 520;
 
   final GlobalKey _listKey = GlobalKey();
-  final GlobalKey _unlockBlockKey = GlobalKey();
-  final GlobalKey _advanceFromKey = GlobalKey();
+  /// 행마다 고정. 해금 연출에서 키를 옮기면 썸네일 위젯이 다시 생겨 shimmer가 번쩍인다.
+  final Map<int, GlobalKey> _rowKeys = {};
   late final AnimationController _advanceController;
 
   int _lastScrollToken = -1;
@@ -259,8 +259,8 @@ class _SeriesEpisodeTabContentState extends State<SeriesEpisodeTabContent>
 
   bool _tryCaptureAnchors() {
     final listBox = _listKey.currentContext?.findRenderObject();
-    final fromBox = _advanceFromKey.currentContext?.findRenderObject();
-    final toBox = _unlockBlockKey.currentContext?.findRenderObject();
+    final fromBox = _rowKey(_advanceFrom!).currentContext?.findRenderObject();
+    final toBox = _rowKey(_advanceTo!).currentContext?.findRenderObject();
     if (listBox is! RenderBox ||
         !listBox.hasSize ||
         fromBox is! RenderBox ||
@@ -283,7 +283,7 @@ class _SeriesEpisodeTabContentState extends State<SeriesEpisodeTabContent>
         : seriesOverviewFirstUnlockIndex(overview);
     if (targetIndex == null || targetIndex <= 0) return;
 
-    final targetContext = _unlockBlockKey.currentContext;
+    final targetContext = _rowKey(targetIndex).currentContext;
     if (targetContext == null) return;
     final renderObject = targetContext.findRenderObject();
     if (renderObject is! RenderBox || !renderObject.hasSize) return;
@@ -649,22 +649,7 @@ class _SeriesEpisodeTabContentState extends State<SeriesEpisodeTabContent>
     );
   }
 
-  Widget _wrapUnlockBlockHighlight(Widget child) {
-    return Stack(
-      clipBehavior: Clip.none,
-      fit: StackFit.passthrough,
-      children: [
-        const Positioned(
-          left: -_unlockBlockHorizontalBleed,
-          right: -_unlockBlockHorizontalBleed,
-          top: -_unlockBlockVerticalBleed,
-          bottom: -_unlockBlockVerticalBleed,
-          child: ColoredBox(color: _unlockBlockBackground),
-        ),
-        child,
-      ],
-    );
-  }
+  GlobalKey _rowKey(int index) => _rowKeys.putIfAbsent(index, GlobalKey.new);
 
   Widget _buildEpisodeBlock(
     BuildContext context,
@@ -755,14 +740,24 @@ class _SeriesEpisodeTabContentState extends State<SeriesEpisodeTabContent>
       ),
     );
 
-    Widget result = block;
-    if (highlight) {
-      result = _wrapUnlockBlockHighlight(block);
-    }
-    if (blockKey != null) {
-      result = KeyedSubtree(key: blockKey, child: result);
-    }
-    return result;
+    return KeyedSubtree(
+      key: blockKey,
+      child: Stack(
+        clipBehavior: Clip.none,
+        fit: StackFit.passthrough,
+        children: [
+          if (highlight)
+            const Positioned(
+              left: -_unlockBlockHorizontalBleed,
+              right: -_unlockBlockHorizontalBleed,
+              top: -_unlockBlockVerticalBleed,
+              bottom: -_unlockBlockVerticalBleed,
+              child: ColoredBox(color: _unlockBlockBackground),
+            ),
+          KeyedSubtree(key: const ValueKey('episode-body'), child: block),
+        ],
+      ),
+    );
   }
 
   @override
@@ -788,7 +783,7 @@ class _SeriesEpisodeTabContentState extends State<SeriesEpisodeTabContent>
             episodes[i],
             i + 1,
             _buttonKind(i, firstUnlockIndex),
-            blockKey: _blockKeyFor(i, firstUnlockIndex),
+            blockKey: _rowKey(i),
             highlight: _showsStaticHighlight(i, firstUnlockIndex),
             playButton: _playButtonFor(context, l10n, i, episodes[i]),
           ),
@@ -825,12 +820,6 @@ class _SeriesEpisodeTabContentState extends State<SeriesEpisodeTabContent>
   Widget _ignoreEpisodeButtons(Widget child) {
     if (!_episodeButtonsLocked) return child;
     return IgnorePointer(child: child);
-  }
-
-  Key? _blockKeyFor(int index, int? firstUnlockIndex) {
-    if (_isAdvancing && index == _advanceFrom) return _advanceFromKey;
-    if (index == firstUnlockIndex) return _unlockBlockKey;
-    return null;
   }
 
   bool _showsStaticHighlight(int index, int? firstUnlockIndex) {
