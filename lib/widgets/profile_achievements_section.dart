@@ -121,26 +121,61 @@ class _AchievementCopy {
   });
 }
 
-_AchievementCopy _activityCopy(AppLocalizations l10n, ProfileAchievementItem item) {
+int _activityBadgeLevel(ProfileAchievementItem item, {required bool showClaim}) {
+  if (showClaim && item.claimable && item.claimLevel > 0) return item.claimLevel;
+  if (item.level <= 0) return 1;
+  return item.level;
+}
+
+int _activityMaxLevel(String code) {
+  return switch (code) {
+    'TA' => 4,
+    _ => 2,
+  };
+}
+
+int _activityPopupBadgeLevel(ProfileAchievementItem item, {required bool showClaim}) {
+  if (item.level <= 0) return 1;
+  final shown = _activityBadgeLevel(item, showClaim: showClaim);
+  final max = _activityMaxLevel(item.code);
+  if (shown >= max) return max;
+  return shown + 1;
+}
+
+String _activityAsset(String code, int level) {
+  final prefix = switch (code) {
+    'HI' => 'HI',
+    'TA' => 'TA',
+    _ => 'PG',
+  };
+  return 'assets/images/achievement/$prefix-$level.png';
+}
+
+_AchievementCopy _activityCopy(
+  AppLocalizations l10n,
+  ProfileAchievementItem item, {
+  required bool showClaim,
+}) {
   final goal = item.goal;
+  final badge = _activityBadgeLevel(item, showClaim: showClaim);
   switch (item.code) {
     case 'HI':
       return _AchievementCopy(
         title: l10n.achievementHintSeeker,
         hint: l10n.achievementHintSeekerHint(goal),
-        asset: 'assets/images/achievement/HI-${item.level <= 0 ? 1 : item.level}.png',
+        asset: 'assets/images/achievement/HI-$badge.png',
       );
     case 'TA':
       return _AchievementCopy(
         title: l10n.achievementTalkative,
         hint: l10n.achievementTalkativeHint(goal),
-        asset: 'assets/images/achievement/TA-${item.level <= 0 ? 1 : item.level}.png',
+        asset: 'assets/images/achievement/TA-$badge.png',
       );
     default:
       return _AchievementCopy(
         title: l10n.achievementPocketGuide,
         hint: l10n.achievementPocketGuideHint(goal),
-        asset: 'assets/images/achievement/PG-${item.level <= 0 ? 1 : item.level}.png',
+        asset: 'assets/images/achievement/PG-$badge.png',
       );
   }
 }
@@ -196,7 +231,7 @@ class _AchievementCell extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context).textTheme;
     final copy = item.isActivity
-        ? _activityCopy(l10n, item)
+        ? _activityCopy(l10n, item, showClaim: showClaim)
         : _copyFor(l10n, item.place);
     final titleStyle = theme.bodySmall?.copyWith(color: Colors.white);
     final claiming = showClaim && item.claimable;
@@ -232,18 +267,15 @@ class _AchievementCell extends StatelessWidget {
         ),
         SizedBox(height: titleGap),
         if (claiming)
-          SizedBox(
-            width: double.infinity,
+          Center(
             child: TextButton(
               style: TextButton.styleFrom(
                 backgroundColor: const Color(0xFF0CABA8),
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                minimumSize: const Size(0, 32),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                minimumSize: Size.zero,
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
+                shape: const StadiumBorder(),
               ),
               onPressed: onClaim == null ? null : () => onClaim!(item),
               child: Text(
@@ -300,8 +332,13 @@ class _AchievementCell extends StatelessWidget {
             width: popupImageSize,
             height: popupImageSize,
             child: _MedalImage(
-              asset: copy.asset,
-              grayscale: !item.unlocked,
+              asset: item.isActivity
+                  ? _activityAsset(
+                      item.code,
+                      _activityPopupBadgeLevel(item, showClaim: showClaim),
+                    )
+                  : copy.asset,
+              grayscale: item.isActivity ? false : !item.unlocked,
               filter: grayscale,
             ),
           ),
