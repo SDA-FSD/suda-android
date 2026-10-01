@@ -545,6 +545,33 @@ class AppLocalizationsTh extends AppLocalizations {
   }
 
   @override
+  String get achievementClaim => 'รับ';
+
+  @override
+  String get achievementPocketGuide => 'คู่มือพกพา';
+
+  @override
+  String achievementPocketGuideHint(int count) {
+    return 'ใช้ตัวแปล $count ครั้งระหว่าง Roleplay';
+  }
+
+  @override
+  String get achievementHintSeeker => 'นักล่าคำใบ้';
+
+  @override
+  String achievementHintSeekerHint(int count) {
+    return 'ใช้คำใบ้ $count ครั้งระหว่าง Roleplay';
+  }
+
+  @override
+  String get achievementTalkative => 'พูดเก่ง';
+
+  @override
+  String achievementTalkativeHint(int count) {
+    return 'พูดทั้งหมด $count คำ';
+  }
+
+  @override
   String get otherUserFriends => 'เพื่อน';
 
   @override

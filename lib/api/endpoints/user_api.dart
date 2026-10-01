@@ -133,6 +133,56 @@ class UserApi {
     );
   }
 
+  static Future<ActivityAchievementClaimResult?> claimActivityAchievement({
+    required String accessToken,
+    required String code,
+  }) {
+    return SudaHttpClient.executeWithRefresh(
+      () => _claimActivityAchievementInternal(accessToken, code),
+      retryWithNewToken: (newToken) =>
+          _claimActivityAchievementInternal(newToken, code),
+    );
+  }
+
+  static Future<ActivityAchievementClaimResult?> _claimActivityAchievementInternal(
+    String accessToken,
+    String code,
+  ) async {
+    final uri = SudaHttpClient.buildUri('/v1/users/activity-achievements/$code/claim');
+    late final http.Response response;
+    try {
+      response = await SudaHttpClient.client
+          .post(
+            uri,
+            headers: {
+              'Accept': 'application/json',
+              'Authorization': 'Bearer $accessToken',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      rethrow;
+    }
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw Exception(
+        'POST /v1/users/activity-achievements/$code/claim failed: HTTP ${response.statusCode} ${response.body}',
+      );
+    }
+    final raw = response.body.trim();
+    if (raw.isEmpty || raw == 'null') return null;
+    final data = jsonDecode(raw);
+    if (data == null) return null;
+    if (data is! Map<String, dynamic>) {
+      throw Exception(
+        'POST /v1/users/activity-achievements/$code/claim unexpected body: ${response.body}',
+      );
+    }
+    return ActivityAchievementClaimResult.fromJson(data);
+  }
+
   static Future<List<CharacterRewardClaimDto>> claimCharacterRewards({
     required String accessToken,
     required List<int> userCharacterRewardIds,

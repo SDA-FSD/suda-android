@@ -554,6 +554,33 @@ class AppLocalizationsVi extends AppLocalizations {
   }
 
   @override
+  String get achievementClaim => 'Nhận';
+
+  @override
+  String get achievementPocketGuide => 'Cẩm nang bỏ túi';
+
+  @override
+  String achievementPocketGuideHint(int count) {
+    return 'Dùng trình dịch $count lần trong Roleplay.';
+  }
+
+  @override
+  String get achievementHintSeeker => 'Người săn gợi ý';
+
+  @override
+  String achievementHintSeekerHint(int count) {
+    return 'Dùng gợi ý $count lần trong Roleplay.';
+  }
+
+  @override
+  String get achievementTalkative => 'Hay nói';
+
+  @override
+  String achievementTalkativeHint(int count) {
+    return 'Nói tổng cộng $count từ.';
+  }
+
+  @override
   String get otherUserFriends => 'Bạn bè';
 
   @override

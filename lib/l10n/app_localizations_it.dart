@@ -557,6 +557,33 @@ class AppLocalizationsIt extends AppLocalizations {
   }
 
   @override
+  String get achievementClaim => 'Riscatta';
+
+  @override
+  String get achievementPocketGuide => 'Guida tascabile';
+
+  @override
+  String achievementPocketGuideHint(int count) {
+    return 'Usa il traduttore $count volte durante i Roleplay.';
+  }
+
+  @override
+  String get achievementHintSeeker => 'Cercatore di indizi';
+
+  @override
+  String achievementHintSeekerHint(int count) {
+    return 'Usa gli indizi $count volte durante i Roleplay.';
+  }
+
+  @override
+  String get achievementTalkative => 'Loquace';
+
+  @override
+  String achievementTalkativeHint(int count) {
+    return 'Pronuncia un totale di $count parole.';
+  }
+
+  @override
   String get otherUserFriends => 'Amici';
 
   @override

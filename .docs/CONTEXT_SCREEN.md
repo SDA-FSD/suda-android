@@ -1093,7 +1093,7 @@
   - REJECTED(쿨다운): 알약은 Add Friend. 탭하면 스토킹 팝업(POST 없음). `409 FRIEND_REQUEST_COOLDOWN`도 동일 Body+OK
   - `409 FRIEND_LIMIT_EXCEEDED`: `limitUserId==대상`이면 상대 한도, 아니면 내 한도
 - Neighbors: `neighborCharacters`(내 프로필과 같은 캐릭터당 1장). 타이틀 항상. 획득 있으면 같은 가로 스크롤(탭 없음, 등급 링 두께 3). 0개면 `otherUserNeighborsEmpty`(en No characters collected yet. / pt Nenhum personagem coletado ainda. / ko 아직 획득한 캐릭터가 없습니다.)
-- Achievements: 타이틀 항상. 획득만·탭 없음. 0개면 `otherUserAchievementsEmpty`(en No achievements earned yet. / pt Nenhuma conquista obtida ainda. / ko 아직 획득한 업적이 없습니다.). 1~2개여도 3열 그리드 칸 크기 유지(빈 칸 spacer)
+- Achievements: 타이틀 항상. 랭킹은 횟수 1 이상, 활동 업적은 1레벨 이상만. Claim·탭 없음. 0개면 `otherUserAchievementsEmpty`(en No achievements earned yet. / pt Nenhuma conquista obtida ainda. / ko 아직 획득한 업적이 없습니다.). 1~2개여도 3열 그리드 칸 크기 유지(빈 칸 spacer)
 
 ---
 

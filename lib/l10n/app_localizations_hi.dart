@@ -552,6 +552,33 @@ class AppLocalizationsHi extends AppLocalizations {
   }
 
   @override
+  String get achievementClaim => 'प्राप्त करें';
+
+  @override
+  String get achievementPocketGuide => 'पॉकेट गाइड';
+
+  @override
+  String achievementPocketGuideHint(int count) {
+    return 'रोलप्ले के दौरान अनुवादक का $count बार उपयोग करें।';
+  }
+
+  @override
+  String get achievementHintSeeker => 'संकेत खोजी';
+
+  @override
+  String achievementHintSeekerHint(int count) {
+    return 'रोलप्ले के दौरान संकेतों का $count बार उपयोग करें।';
+  }
+
+  @override
+  String get achievementTalkative => 'बातूनी';
+
+  @override
+  String achievementTalkativeHint(int count) {
+    return 'कुल $count शब्द बोलें।';
+  }
+
+  @override
   String get otherUserFriends => 'मित्र';
 
   @override

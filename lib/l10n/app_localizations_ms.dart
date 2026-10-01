@@ -555,6 +555,33 @@ class AppLocalizationsMs extends AppLocalizations {
   }
 
   @override
+  String get achievementClaim => 'Tuntut';
+
+  @override
+  String get achievementPocketGuide => 'Panduan Poket';
+
+  @override
+  String achievementPocketGuideHint(int count) {
+    return 'Gunakan penterjemah $count kali semasa Roleplay.';
+  }
+
+  @override
+  String get achievementHintSeeker => 'Pencari Petunjuk';
+
+  @override
+  String achievementHintSeekerHint(int count) {
+    return 'Gunakan petunjuk $count kali semasa Roleplay.';
+  }
+
+  @override
+  String get achievementTalkative => 'Suka bercakap';
+
+  @override
+  String achievementTalkativeHint(int count) {
+    return 'Sebut sebanyak $count perkataan.';
+  }
+
+  @override
   String get otherUserFriends => 'Rakan';
 
   @override

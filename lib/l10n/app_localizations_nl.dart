@@ -553,6 +553,33 @@ class AppLocalizationsNl extends AppLocalizations {
   }
 
   @override
+  String get achievementClaim => 'Claimen';
+
+  @override
+  String get achievementPocketGuide => 'Zakgids';
+
+  @override
+  String achievementPocketGuideHint(int count) {
+    return 'Gebruik de vertaler $count keer tijdens Roleplays.';
+  }
+
+  @override
+  String get achievementHintSeeker => 'Hintzoeker';
+
+  @override
+  String achievementHintSeekerHint(int count) {
+    return 'Gebruik hints $count keer tijdens Roleplays.';
+  }
+
+  @override
+  String get achievementTalkative => 'Praatgraag';
+
+  @override
+  String achievementTalkativeHint(int count) {
+    return 'Spreek in totaal $count woorden.';
+  }
+
+  @override
   String get otherUserFriends => 'Vrienden';
 
   @override

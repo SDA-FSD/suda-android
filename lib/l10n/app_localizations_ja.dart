@@ -523,6 +523,33 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
+  String get achievementClaim => '受け取る';
+
+  @override
+  String get achievementPocketGuide => 'ポケットガイド';
+
+  @override
+  String achievementPocketGuideHint(int count) {
+    return 'ロールプレイで翻訳を$count回使ってください。';
+  }
+
+  @override
+  String get achievementHintSeeker => 'ヒント探求者';
+
+  @override
+  String achievementHintSeekerHint(int count) {
+    return 'ロールプレイでヒントを$count回使ってください。';
+  }
+
+  @override
+  String get achievementTalkative => 'おしゃべり';
+
+  @override
+  String achievementTalkativeHint(int count) {
+    return '合計$count語話してください。';
+  }
+
+  @override
   String get otherUserFriends => 'フレンド';
 
   @override

@@ -25,6 +25,7 @@ import '../widgets/gnb_bar.dart';
 import '../widgets/suda_label_tabs.dart';
 import '../widgets/user_profile_avatar.dart';
 import '../widgets/level_up_progress_track.dart';
+import '../effects/like_progress_effect.dart';
 import '../widgets/profile_achievements_section.dart';
 import '../widgets/suda_neighbors_row.dart';
 import 'character.dart';
@@ -493,6 +494,52 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  List<ProfileAchievementItem> _profileAchievementItems(UserProgressDto? progress) {
+    final mixed = progress?.profileAchievements ?? const <ProfileAchievementItem>[];
+    if (mixed.isNotEmpty) return mixed;
+    final ranks = progress?.achievements ?? const <RankedPlaceAchievementDto>[];
+    if (ranks.isEmpty) {
+      return const [
+        ProfileAchievementItem(place: 1),
+        ProfileAchievementItem(place: 2),
+        ProfileAchievementItem(place: 3),
+      ];
+    }
+    return [for (final rank in ranks) ProfileAchievementItem.rank(rank)];
+  }
+
+  Future<void> _onActivityAchievementClaim(ProfileAchievementItem item) async {
+    if (!item.claimable || item.code.isEmpty) return;
+    try {
+      final token = await TokenStorage.loadAccessToken();
+      if (token == null || !mounted) return;
+      final claimed = await SudaApiClient.claimActivityAchievement(
+        accessToken: token,
+        code: item.code,
+      );
+      if (!mounted) return;
+      if (claimed == null) {
+        await _loadProgress();
+        return;
+      }
+      await LikeProgressEffect.play(
+        context,
+        params: LikeProgressEffectParams(
+          asIsLikePoint: claimed.likeBefore,
+          toBeLikePoint: claimed.likeAfter,
+          asIsLevel: claimed.levelBefore,
+          toBeLevel: claimed.levelAfter,
+          asIsProgress: claimed.progressBefore,
+          toBeProgress: claimed.progressAfter,
+        ),
+      );
+      if (!mounted) return;
+      await Future.wait([_loadMyProfile(), _loadProgress()]);
+    } catch (e) {
+      debugPrint('activity achievement claim failed: $e');
+    }
+  }
+
   Future<void> _loadProgress() async {
     final requestId = ++_progressRequestId;
     if (_progress == null && mounted) {
@@ -936,7 +983,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         const SizedBox(height: 10),
         ProfileAchievementsSection(
-          achievements: progress?.achievements ?? const [],
+          items: _profileAchievementItems(progress),
+          showClaim: true,
+          onClaim: _onActivityAchievementClaim,
         ),
       ],
     );

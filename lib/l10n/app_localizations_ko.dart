@@ -524,6 +524,33 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
+  String get achievementClaim => '받기';
+
+  @override
+  String get achievementPocketGuide => '포켓 가이드';
+
+  @override
+  String achievementPocketGuideHint(int count) {
+    return '롤플레이에서 번역기를 $count회 사용하세요.';
+  }
+
+  @override
+  String get achievementHintSeeker => '힌트 탐색가';
+
+  @override
+  String achievementHintSeekerHint(int count) {
+    return '롤플레이에서 힌트를 $count회 사용하세요.';
+  }
+
+  @override
+  String get achievementTalkative => '수다쟁이';
+
+  @override
+  String achievementTalkativeHint(int count) {
+    return '총 $count개의 단어를 말하세요.';
+  }
+
+  @override
   String get otherUserFriends => '친구';
 
   @override

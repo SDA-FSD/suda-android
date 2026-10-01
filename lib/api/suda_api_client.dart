@@ -458,6 +458,13 @@ class SudaApiClient {
     return UserApi.getProgress(accessToken: accessToken);
   }
 
+  static Future<ActivityAchievementClaimResult?> claimActivityAchievement({
+    required String accessToken,
+    required String code,
+  }) {
+    return UserApi.claimActivityAchievement(accessToken: accessToken, code: code);
+  }
+
   static Future<OtherUserProfileDto> getOtherUserProfile({
     required String accessToken,
     required int userId,

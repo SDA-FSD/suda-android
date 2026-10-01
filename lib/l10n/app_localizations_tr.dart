@@ -552,6 +552,33 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
+  String get achievementClaim => 'Al';
+
+  @override
+  String get achievementPocketGuide => 'Cep Rehberi';
+
+  @override
+  String achievementPocketGuideHint(int count) {
+    return 'Roleplay sırasında çevirmeni $count kez kullan.';
+  }
+
+  @override
+  String get achievementHintSeeker => 'İpucu Avcısı';
+
+  @override
+  String achievementHintSeekerHint(int count) {
+    return 'Roleplay sırasında ipuçlarını $count kez kullan.';
+  }
+
+  @override
+  String get achievementTalkative => 'Konuşkan';
+
+  @override
+  String achievementTalkativeHint(int count) {
+    return 'Toplam $count kelime söyle.';
+  }
+
+  @override
   String get otherUserFriends => 'Arkadaşlar';
 
   @override

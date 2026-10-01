@@ -549,6 +549,33 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get achievementClaim => 'استلم';
+
+  @override
+  String get achievementPocketGuide => 'دليل الجيب';
+
+  @override
+  String achievementPocketGuideHint(int count) {
+    return 'استخدم المترجم $count مرات أثناء لعب الأدوار.';
+  }
+
+  @override
+  String get achievementHintSeeker => 'باحث التلميحات';
+
+  @override
+  String achievementHintSeekerHint(int count) {
+    return 'استخدم التلميحات $count مرات أثناء لعب الأدوار.';
+  }
+
+  @override
+  String get achievementTalkative => 'ثرثار';
+
+  @override
+  String achievementTalkativeHint(int count) {
+    return 'تحدّث بما مجموعه $count كلمة.';
+  }
+
+  @override
   String get otherUserFriends => 'الأصدقاء';
 
   @override

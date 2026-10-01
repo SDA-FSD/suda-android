@@ -561,6 +561,33 @@ class AppLocalizationsFil extends AppLocalizations {
   }
 
   @override
+  String get achievementClaim => 'Kunin';
+
+  @override
+  String get achievementPocketGuide => 'Gabay sa Bulsa';
+
+  @override
+  String achievementPocketGuideHint(int count) {
+    return 'Gamitin ang tagasalin nang $count beses sa Roleplay.';
+  }
+
+  @override
+  String get achievementHintSeeker => 'Tagahanap ng Hint';
+
+  @override
+  String achievementHintSeekerHint(int count) {
+    return 'Gamitin ang mga hint nang $count beses sa Roleplay.';
+  }
+
+  @override
+  String get achievementTalkative => 'Madaldal';
+
+  @override
+  String achievementTalkativeHint(int count) {
+    return 'Magsalita ng kabuuang $count salita.';
+  }
+
+  @override
   String get otherUserFriends => 'Mga Kaibigan';
 
   @override

@@ -1127,6 +1127,48 @@ abstract class AppLocalizations {
   /// **'x {count}'**
   String profileAchievementCount(int count);
 
+  /// No description provided for @achievementClaim.
+  ///
+  /// In en, this message translates to:
+  /// **'Claim'**
+  String get achievementClaim;
+
+  /// No description provided for @achievementPocketGuide.
+  ///
+  /// In en, this message translates to:
+  /// **'Pocket Guide'**
+  String get achievementPocketGuide;
+
+  /// No description provided for @achievementPocketGuideHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the translator {count} times during Roleplays.'**
+  String achievementPocketGuideHint(int count);
+
+  /// No description provided for @achievementHintSeeker.
+  ///
+  /// In en, this message translates to:
+  /// **'Hint Seeker'**
+  String get achievementHintSeeker;
+
+  /// No description provided for @achievementHintSeekerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Use hints {count} times during Roleplays.'**
+  String achievementHintSeekerHint(int count);
+
+  /// No description provided for @achievementTalkative.
+  ///
+  /// In en, this message translates to:
+  /// **'Talkative'**
+  String get achievementTalkative;
+
+  /// No description provided for @achievementTalkativeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Speak a total of {count} words.'**
+  String achievementTalkativeHint(int count);
+
   /// No description provided for @otherUserFriends.
   ///
   /// In en, this message translates to:

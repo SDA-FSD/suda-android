@@ -552,6 +552,33 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
+  String get achievementClaim => 'Забрать';
+
+  @override
+  String get achievementPocketGuide => 'Карманный гид';
+
+  @override
+  String achievementPocketGuideHint(int count) {
+    return 'Используйте переводчик $count раз во время ролевых игр.';
+  }
+
+  @override
+  String get achievementHintSeeker => 'Искатель подсказок';
+
+  @override
+  String achievementHintSeekerHint(int count) {
+    return 'Используйте подсказки $count раз во время ролевых игр.';
+  }
+
+  @override
+  String get achievementTalkative => 'Болтун';
+
+  @override
+  String achievementTalkativeHint(int count) {
+    return 'Произнесите в общей сложности $count слов.';
+  }
+
+  @override
   String get otherUserFriends => 'Друзья';
 
   @override

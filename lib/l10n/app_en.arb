@@ -217,6 +217,34 @@
   "profileAchievementWeeklyRunnerUpHint": "Finish 2nd in the Weekly Ranking.",
   "profileAchievementWeeklyThirdHint": "Finish 3rd in the Weekly Ranking.",
   "profileAchievementCount": "x {count}",
+  "achievementClaim": "Claim",
+  "achievementPocketGuide": "Pocket Guide",
+  "achievementPocketGuideHint": "Use the translator {count} times during Roleplays.",
+  "achievementHintSeeker": "Hint Seeker",
+  "achievementHintSeekerHint": "Use hints {count} times during Roleplays.",
+  "achievementTalkative": "Talkative",
+  "achievementTalkativeHint": "Speak a total of {count} words.",
+  "@achievementPocketGuideHint": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@achievementHintSeekerHint": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@achievementTalkativeHint": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "@profileAchievementCount": {
     "placeholders": {
       "count": {

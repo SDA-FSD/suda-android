@@ -556,6 +556,33 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get achievementClaim => 'Reclamar';
+
+  @override
+  String get achievementPocketGuide => 'Guía de bolsillo';
+
+  @override
+  String achievementPocketGuideHint(int count) {
+    return 'Usa el traductor $count veces durante los Roleplays.';
+  }
+
+  @override
+  String get achievementHintSeeker => 'Buscador de pistas';
+
+  @override
+  String achievementHintSeekerHint(int count) {
+    return 'Usa pistas $count veces durante los Roleplays.';
+  }
+
+  @override
+  String get achievementTalkative => 'Hablador';
+
+  @override
+  String achievementTalkativeHint(int count) {
+    return 'Di un total de $count palabras.';
+  }
+
+  @override
   String get otherUserFriends => 'Amigos';
 
   @override
@@ -1661,6 +1688,33 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
   @override
   String profileAchievementCount(int count) {
     return 'x $count';
+  }
+
+  @override
+  String get achievementClaim => 'Reclamar';
+
+  @override
+  String get achievementPocketGuide => 'Guía de bolsillo';
+
+  @override
+  String achievementPocketGuideHint(int count) {
+    return 'Usa el traductor $count veces durante los Roleplays.';
+  }
+
+  @override
+  String get achievementHintSeeker => 'Buscador de pistas';
+
+  @override
+  String achievementHintSeekerHint(int count) {
+    return 'Usa pistas $count veces durante los Roleplays.';
+  }
+
+  @override
+  String get achievementTalkative => 'Hablador';
+
+  @override
+  String achievementTalkativeHint(int count) {
+    return 'Di un total de $count palabras.';
   }
 
   @override

@@ -502,9 +502,7 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
 
   Widget _buildProgress(BuildContext context, AppLocalizations l10n) {
     final progress = _profile;
-    final unlocked =
-        progress?.achievements.where((e) => e.unlocked).toList() ??
-        const <RankedPlaceAchievementDto>[];
+    final unlocked = _otherAchievements(progress);
     final titleStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
       color: Colors.white,
       fontWeight: FontWeight.w700,
@@ -591,13 +589,24 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
           )
         else
           ProfileAchievementsSection(
-            achievements: unlocked,
+            items: unlocked,
             tapEnabled: false,
             unlockedOnly: true,
           ),
       ],
     );
   }
+}
+
+List<ProfileAchievementItem> _otherAchievements(OtherUserProfileDto? progress) {
+  final mixed = progress?.profileAchievements ?? const <ProfileAchievementItem>[];
+  final source = mixed.isNotEmpty
+      ? mixed
+      : [
+          for (final rank in progress?.achievements ?? const <RankedPlaceAchievementDto>[])
+            ProfileAchievementItem.rank(rank),
+        ];
+  return source.where((item) => item.unlocked).toList();
 }
 
 String _formatSpokenCount(int n) {

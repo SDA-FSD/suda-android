@@ -6,15 +6,19 @@ import '../models/user_models.dart';
 import 'default_popup.dart';
 
 class ProfileAchievementsSection extends StatelessWidget {
-  final List<RankedPlaceAchievementDto> achievements;
+  final List<ProfileAchievementItem> items;
   final bool tapEnabled;
   final bool unlockedOnly;
+  final bool showClaim;
+  final Future<void> Function(ProfileAchievementItem item)? onClaim;
 
   const ProfileAchievementsSection({
     super.key,
-    required this.achievements,
+    required this.items,
     this.tapEnabled = true,
     this.unlockedOnly = false,
+    this.showClaim = false,
+    this.onClaim,
   });
 
   static const _hPad = 40.0;
@@ -49,39 +53,54 @@ class ProfileAchievementsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final source = achievements.isEmpty
+    final source = items.isEmpty
         ? const [
-            RankedPlaceAchievementDto(place: 1, progressCount: 0),
-            RankedPlaceAchievementDto(place: 2, progressCount: 0),
-            RankedPlaceAchievementDto(place: 3, progressCount: 0),
+            ProfileAchievementItem(place: 1),
+            ProfileAchievementItem(place: 2),
+            ProfileAchievementItem(place: 3),
           ]
-        : achievements;
-    final items = unlockedOnly
+        : items;
+    final visible = unlockedOnly
         ? source.where((item) => item.unlocked).toList()
         : source;
-    if (items.isEmpty) return const SizedBox.shrink();
-    final cells = <RankedPlaceAchievementDto?>[
-      for (var i = 0; i < 3; i++) i < items.length ? items[i] : null,
-    ];
+    if (visible.isEmpty) return const SizedBox.shrink();
+    final rows = <List<ProfileAchievementItem?>>[];
+    for (var i = 0; i < visible.length; i += 3) {
+      final end = i + 3 > visible.length ? visible.length : i + 3;
+      final row = <ProfileAchievementItem?>[...visible.sublist(i, end)];
+      while (row.length < 3) {
+        row.add(null);
+      }
+      rows.add(row);
+    }
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: _hPad),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Column(
         children: [
-          for (var i = 0; i < cells.length; i++) ...[
-            if (i > 0) const SizedBox(width: _colGap),
-            Expanded(
-              child: cells[i] == null
-                  ? const SizedBox.shrink()
-                  : _AchievementCell(
-                      item: cells[i]!,
-                      grayscale: _grayscale,
-                      titleGap: _titleGap,
-                      progressGap: _progressGap,
-                      progressColor: _progressColor,
-                      popupImageSize: _popupImageSize,
-                      tapEnabled: tapEnabled,
-                    ),
+          for (var r = 0; r < rows.length; r++) ...[
+            if (r > 0) const SizedBox(height: 16),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (var i = 0; i < rows[r].length; i++) ...[
+                  if (i > 0) const SizedBox(width: _colGap),
+                  Expanded(
+                    child: rows[r][i] == null
+                        ? const SizedBox.shrink()
+                        : _AchievementCell(
+                            item: rows[r][i]!,
+                            grayscale: _grayscale,
+                            titleGap: _titleGap,
+                            progressGap: _progressGap,
+                            progressColor: _progressColor,
+                            popupImageSize: _popupImageSize,
+                            tapEnabled: tapEnabled,
+                            showClaim: showClaim,
+                            onClaim: onClaim,
+                          ),
+                  ),
+                ],
+              ],
             ),
           ],
         ],
@@ -100,6 +119,30 @@ class _AchievementCopy {
     required this.hint,
     required this.asset,
   });
+}
+
+_AchievementCopy _activityCopy(AppLocalizations l10n, ProfileAchievementItem item) {
+  final goal = item.goal;
+  switch (item.code) {
+    case 'HI':
+      return _AchievementCopy(
+        title: l10n.achievementHintSeeker,
+        hint: l10n.achievementHintSeekerHint(goal),
+        asset: 'assets/images/achievement/HI-${item.level <= 0 ? 1 : item.level}.png',
+      );
+    case 'TA':
+      return _AchievementCopy(
+        title: l10n.achievementTalkative,
+        hint: l10n.achievementTalkativeHint(goal),
+        asset: 'assets/images/achievement/TA-${item.level <= 0 ? 1 : item.level}.png',
+      );
+    default:
+      return _AchievementCopy(
+        title: l10n.achievementPocketGuide,
+        hint: l10n.achievementPocketGuideHint(goal),
+        asset: 'assets/images/achievement/PG-${item.level <= 0 ? 1 : item.level}.png',
+      );
+  }
 }
 
 _AchievementCopy _copyFor(AppLocalizations l10n, int place) {
@@ -126,13 +169,15 @@ _AchievementCopy _copyFor(AppLocalizations l10n, int place) {
 }
 
 class _AchievementCell extends StatelessWidget {
-  final RankedPlaceAchievementDto item;
+  final ProfileAchievementItem item;
   final ColorFilter grayscale;
   final double titleGap;
   final double progressGap;
   final Color progressColor;
   final double popupImageSize;
   final bool tapEnabled;
+  final bool showClaim;
+  final Future<void> Function(ProfileAchievementItem item)? onClaim;
 
   const _AchievementCell({
     required this.item,
@@ -142,34 +187,89 @@ class _AchievementCell extends StatelessWidget {
     required this.progressColor,
     required this.popupImageSize,
     required this.tapEnabled,
+    required this.showClaim,
+    required this.onClaim,
   });
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context).textTheme;
-    final copy = _copyFor(l10n, item.place);
+    final copy = item.isActivity
+        ? _activityCopy(l10n, item)
+        : _copyFor(l10n, item.place);
     final titleStyle = theme.bodySmall?.copyWith(color: Colors.white);
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: tapEnabled ? () => _showPopup(context, l10n, theme, copy) : null,
-      child: Column(
-        children: [
-          AspectRatio(
+    final claiming = showClaim && item.claimable;
+    return Column(
+      children: [
+        GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: tapEnabled ? () => _showPopup(context, l10n, theme, copy) : null,
+          child: AspectRatio(
             aspectRatio: 1,
-            child: _MedalImage(
-              asset: copy.asset,
-              grayscale: !item.unlocked,
-              filter: grayscale,
+            child: Stack(
+              children: [
+                _MedalImage(
+                  asset: copy.asset,
+                  grayscale: !item.unlocked,
+                  filter: grayscale,
+                ),
+                if (claiming)
+                  const Positioned(
+                    top: 2,
+                    right: 2,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: Color(0xFFFF5252),
+                        shape: BoxShape.circle,
+                      ),
+                      child: SizedBox(width: 9, height: 9),
+                    ),
+                  ),
+              ],
             ),
           ),
-          SizedBox(height: titleGap),
+        ),
+        SizedBox(height: titleGap),
+        if (claiming)
+          SizedBox(
+            width: double.infinity,
+            child: TextButton(
+              style: TextButton.styleFrom(
+                backgroundColor: const Color(0xFF0CABA8),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                minimumSize: const Size(0, 32),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              onPressed: onClaim == null ? null : () => onClaim!(item),
+              child: Text(
+                l10n.achievementClaim,
+                style: theme.bodySmall?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                  fontVariations: const [FontVariation('wght', 700)],
+                ),
+              ),
+            ),
+          )
+        else ...[
           SizedBox(
             height: 18,
             width: double.infinity,
             child: _MarqueeTitle(text: copy.title, style: titleStyle),
           ),
-          if (item.progressCount > 0) ...[
+          if (item.isActivity) ...[
+            SizedBox(height: progressGap),
+            Text(
+              '${item.progress}/${item.goal}',
+              textAlign: TextAlign.center,
+              style: theme.bodySmall?.copyWith(color: progressColor),
+            ),
+          ] else if (item.progressCount > 0) ...[
             SizedBox(height: progressGap),
             Text(
               l10n.profileAchievementCount(item.progressCount),
@@ -178,7 +278,7 @@ class _AchievementCell extends StatelessWidget {
             ),
           ],
         ],
-      ),
+      ],
     );
   }
 
@@ -206,12 +306,13 @@ class _AchievementCell extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
-          Text(
-            l10n.profileAchievementCount(item.progressCount),
-            textAlign: TextAlign.center,
-            style: theme.bodySmall?.copyWith(color: progressColor),
-          ),
-          const SizedBox(height: 20),
+          if (!item.isActivity)
+            Text(
+              l10n.profileAchievementCount(item.progressCount),
+              textAlign: TextAlign.center,
+              style: theme.bodySmall?.copyWith(color: progressColor),
+            ),
+          if (!item.isActivity) const SizedBox(height: 20),
           Text(
             copy.hint,
             textAlign: TextAlign.center,

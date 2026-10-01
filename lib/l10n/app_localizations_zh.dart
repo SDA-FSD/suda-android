@@ -520,6 +520,33 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get achievementClaim => '领取';
+
+  @override
+  String get achievementPocketGuide => '口袋指南';
+
+  @override
+  String achievementPocketGuideHint(int count) {
+    return '在角色扮演中使用翻译器 $count 次。';
+  }
+
+  @override
+  String get achievementHintSeeker => '提示探索者';
+
+  @override
+  String achievementHintSeekerHint(int count) {
+    return '在角色扮演中使用提示 $count 次。';
+  }
+
+  @override
+  String get achievementTalkative => '话匣子';
+
+  @override
+  String achievementTalkativeHint(int count) {
+    return '总共说出 $count 个单词。';
+  }
+
+  @override
   String get otherUserFriends => '好友';
 
   @override
@@ -1553,6 +1580,33 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   }
 
   @override
+  String get achievementClaim => '领取';
+
+  @override
+  String get achievementPocketGuide => '口袋指南';
+
+  @override
+  String achievementPocketGuideHint(int count) {
+    return '在角色扮演中使用翻译器 $count 次。';
+  }
+
+  @override
+  String get achievementHintSeeker => '提示探索者';
+
+  @override
+  String achievementHintSeekerHint(int count) {
+    return '在角色扮演中使用提示 $count 次。';
+  }
+
+  @override
+  String get achievementTalkative => '话匣子';
+
+  @override
+  String achievementTalkativeHint(int count) {
+    return '总共说出 $count 个单词。';
+  }
+
+  @override
   String get otherUserFriends => '好友';
 
   @override
@@ -2583,6 +2637,33 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   @override
   String profileAchievementCount(int count) {
     return 'x $count';
+  }
+
+  @override
+  String get achievementClaim => '領取';
+
+  @override
+  String get achievementPocketGuide => '口袋指南';
+
+  @override
+  String achievementPocketGuideHint(int count) {
+    return '在角色扮演中使用翻譯器 $count 次。';
+  }
+
+  @override
+  String get achievementHintSeeker => '提示探索者';
+
+  @override
+  String achievementHintSeekerHint(int count) {
+    return '在角色扮演中使用提示 $count 次。';
+  }
+
+  @override
+  String get achievementTalkative => '話匣子';
+
+  @override
+  String achievementTalkativeHint(int count) {
+    return '總共說出 $count 個單字。';
   }
 
   @override
