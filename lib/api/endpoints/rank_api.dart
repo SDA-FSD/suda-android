@@ -136,6 +136,39 @@ class RankApi {
     return data.map((e) => (e as num).toInt()).toList();
   }
 
+  /// GET /v1/rank/character-rewards/pending — 200 body 또는 JSON null.
+  static Future<RankedPendingRewardDto?> getRankingRewardPending({
+    required String accessToken,
+  }) {
+    return SudaHttpClient.executeWithRefresh(
+      () => _getRankingRewardPendingInternal(accessToken),
+      retryWithNewToken: _getRankingRewardPendingInternal,
+    );
+  }
+
+  static Future<RankedPendingRewardDto?> _getRankingRewardPendingInternal(
+    String accessToken,
+  ) async {
+    final response = await _get(
+      '/v1/rank/character-rewards/pending',
+      accessToken,
+    );
+    final raw = response.body.trim();
+    if (raw.isEmpty || raw == 'null') {
+      return null;
+    }
+    final data = jsonDecode(raw);
+    if (data == null) {
+      return null;
+    }
+    if (data is! Map<String, dynamic>) {
+      throw Exception(
+        'GET /v1/rank/character-rewards/pending unexpected body: ${response.body}',
+      );
+    }
+    return RankedPendingRewardDto.fromJson(data);
+  }
+
   /// POST /v1/rank/character-rewards/claim — body `List<Long>`, 200 수령분.
   static Future<List<CharacterRewardClaimDto>> claimRankingCharacterRewards({
     required String accessToken,

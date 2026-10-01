@@ -1087,7 +1087,17 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
 
   Future<void> _maybeShowRankingRewardClaim(RankScreenDto dto) async {
     if (widget.forceRankingRewardClaimPreview) return;
-    if (dto.period?.phase != 'ANNOUNCE') return;
+    final phase = dto.period?.phase;
+    if (phase == 'ANNOUNCE') {
+      await _showAnnounceRankingRewardClaim(dto);
+      return;
+    }
+    if (phase == 'COLLECT') {
+      await _showCollectRankingRewardClaim(dto);
+    }
+  }
+
+  Future<void> _showAnnounceRankingRewardClaim(RankScreenDto dto) async {
     final periodId = dto.period?.periodId;
     if (periodId == null) return;
     final me = dto.myEntry;
@@ -1118,6 +1128,46 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
       unawaited(_rankingRewardClaimAppearController.forward());
     } catch (err) {
       debugPrint('ranking reward claimable failed: $err');
+    }
+  }
+
+  /// 다음 시즌 수집 중. 등수·Like는 직전 시즌 freeze, 아바타는 내 프로필.
+  Future<void> _showCollectRankingRewardClaim(RankScreenDto dto) async {
+    final gen = ++_rankingRewardClaimLoadGen;
+    try {
+      final token = await TokenStorage.loadAccessToken();
+      if (token == null || token.isEmpty) return;
+      final pending = await SudaApiClient.getRankingRewardPending(
+        accessToken: token,
+      );
+      if (!mounted || gen != _rankingRewardClaimLoadGen) return;
+      if (pending == null || pending.rewardIds.isEmpty) return;
+      final place = pending.place;
+      if (place < 1 || place > 3) return;
+      final user = widget.user;
+      final me = dto.myEntry;
+      _rankingRewardClaimableIds = pending.rewardIds;
+      debugPrint(
+        'ranking reward pending periodId=${pending.periodId} place=$place '
+        'ids=$_rankingRewardClaimableIds',
+      );
+      setState(() {
+        _rankingRewardClaimVisible = true;
+        _rankingRewardClaimPlace = place;
+        _rankingRewardClaimEntry = RankEntryDto(
+          rank: place,
+          userId: user?.id ?? me?.userId,
+          name: user?.name ?? me?.name,
+          imgPath: user?.imgPath ?? me?.imgPath,
+          weeklyLike: pending.weeklyLike,
+          subscribedYn: me?.subscribedYn ?? 'N',
+          level: me?.level ?? 0,
+          isMe: true,
+        );
+      });
+      unawaited(_rankingRewardClaimAppearController.forward());
+    } catch (err) {
+      debugPrint('ranking reward pending failed: $err');
     }
   }
 

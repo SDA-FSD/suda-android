@@ -230,3 +230,34 @@ class RankScreenDto {
     );
   }
 }
+
+/// GET /v1/rank/character-rewards/pending — 200 JSON null이면 수령 패널 없음.
+class RankedPendingRewardDto {
+  final int periodId;
+  final int place;
+  final int weeklyLike;
+  final List<int> rewardIds;
+
+  const RankedPendingRewardDto({
+    required this.periodId,
+    required this.place,
+    required this.weeklyLike,
+    required this.rewardIds,
+  });
+
+  factory RankedPendingRewardDto.fromJson(Map<String, dynamic> json) {
+    final rawIds = json['rewardIds'];
+    final ids = <int>[];
+    if (rawIds is List) {
+      for (final e in rawIds) {
+        if (e is num) ids.add(e.toInt());
+      }
+    }
+    return RankedPendingRewardDto(
+      periodId: (json['periodId'] as num?)?.toInt() ?? 0,
+      place: (json['place'] as num?)?.toInt() ?? 0,
+      weeklyLike: (json['weeklyLike'] as num?)?.toInt() ?? 0,
+      rewardIds: ids,
+    );
+  }
+}

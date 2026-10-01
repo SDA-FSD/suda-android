@@ -73,6 +73,12 @@ class SudaApiClient {
     );
   }
 
+  static Future<RankedPendingRewardDto?> getRankingRewardPending({
+    required String accessToken,
+  }) {
+    return RankApi.getRankingRewardPending(accessToken: accessToken);
+  }
+
   static Future<List<CharacterRewardClaimDto>> claimRankingCharacterRewards({
     required String accessToken,
     required List<int> userCharacterRewardIds,
