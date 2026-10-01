@@ -182,6 +182,7 @@ mixin PlayingConversationMixin<T extends StatefulWidget> on State<T> {
       cdnYn: aiSound?.cdnYn,
       cdnPath: aiSound?.cdnPath,
       soundBytes: aiSound?.file,
+      serverMsgId: SeriesStateService.instance.session?.startMsgId,
     );
   }
 
@@ -190,10 +191,12 @@ mixin PlayingConversationMixin<T extends StatefulWidget> on State<T> {
     String? cdnYn,
     String? cdnPath,
     Uint8List? soundBytes,
+    int? serverMsgId,
   }) async {
     playingHintPrepareForAiMessageHandler?.call();
     playingHintResetIconForAiStartHandler?.call();
     final entry = PlayingConversationEntry.ai(text: text);
+    entry.conversationIndex = serverMsgId;
     final audioSource = await _prepareAiVoice(
       cdnYn: cdnYn,
       cdnPath: cdnPath,
@@ -209,15 +212,17 @@ mixin PlayingConversationMixin<T extends StatefulWidget> on State<T> {
     }
   }
 
-  Future<void> showPlayingUserMessage(String text) async {
+  Future<void> showPlayingUserMessage(String text, {int? serverMsgId}) async {
     if (text.trim().isEmpty) return;
     final entry = PlayingConversationEntry.user(text: text.trim());
+    entry.conversationIndex = serverMsgId;
     await _addEntry(entry);
   }
 
-  Future<void> showPlayingNarration(String text) async {
+  Future<void> showPlayingNarration(String text, {int? serverMsgId}) async {
     if (text.trim().isEmpty) return;
     final entry = PlayingConversationEntry.narration(text: text.trim());
+    entry.conversationIndex = serverMsgId;
     await _addEntry(entry);
   }
 
@@ -555,8 +560,12 @@ mixin PlayingConversationMixin<T extends StatefulWidget> on State<T> {
     bool revealImmediately = false,
   }) async {
     if (entry.consumesConversationIndex) {
-      entry.conversationIndex = _nextConversationIndex;
-      _nextConversationIndex += 1;
+      if (entry.conversationIndex == null) {
+        entry.conversationIndex = _nextConversationIndex;
+        _nextConversationIndex += 1;
+      } else if (entry.conversationIndex! >= _nextConversationIndex) {
+        _nextConversationIndex = entry.conversationIndex! + 1;
+      }
     }
     setState(() {
       _conversationEntries.add(entry);

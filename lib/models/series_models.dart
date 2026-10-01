@@ -260,6 +260,9 @@ class RpS2UserMessageResponseDto {
   final String? aiText;
   final int? missionCompletedIndex;
   final String? serviceMessage;
+  final int? userMsgId;
+  final int? narrationMsgId;
+  final int? aiMsgId;
 
   const RpS2UserMessageResponseDto({
     this.userText,
@@ -268,6 +271,9 @@ class RpS2UserMessageResponseDto {
     this.aiText,
     this.missionCompletedIndex,
     this.serviceMessage,
+    this.userMsgId,
+    this.narrationMsgId,
+    this.aiMsgId,
   });
 
   factory RpS2UserMessageResponseDto.fromJson(Map<String, dynamic> json) {
@@ -278,6 +284,9 @@ class RpS2UserMessageResponseDto {
       aiText: json['aiText'] as String?,
       missionCompletedIndex: _optionalInt(json['missionCompletedIndex']),
       serviceMessage: json['serviceMessage'] as String?,
+      userMsgId: _optionalInt(json['userMsgId']),
+      narrationMsgId: _optionalInt(json['narrationMsgId']),
+      aiMsgId: _optionalInt(json['aiMsgId']),
     );
   }
 }
@@ -286,8 +295,9 @@ class RpS2UserMessageResponseDto {
 class RpS2SessionDto {
   final String? sessionId;
   final RpS2SoundResDto? aiSound;
+  final int? startMsgId;
 
-  const RpS2SessionDto({this.sessionId, this.aiSound});
+  const RpS2SessionDto({this.sessionId, this.aiSound, this.startMsgId});
 
   factory RpS2SessionDto.fromJson(Map<String, dynamic> json) {
     final raw = json['sessionId'];
@@ -295,6 +305,7 @@ class RpS2SessionDto {
     return RpS2SessionDto(
       sessionId: sessionId,
       aiSound: _parseRpS2SoundRes(json['aiSound']),
+      startMsgId: _optionalInt(json['startMsgId']),
     );
   }
 }

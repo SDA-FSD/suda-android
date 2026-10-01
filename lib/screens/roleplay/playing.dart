@@ -182,7 +182,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
         _turnCount > 0 && nextCompletedSpeechCount >= _turnCount;
 
     if (userText.isNotEmpty) {
-      await showPlayingUserMessage(userText);
+      await showPlayingUserMessage(userText, serverMsgId: response.userMsgId);
     }
     if (!mounted) return;
     setState(() => _completedSpeechCount = nextCompletedSpeechCount);
@@ -203,7 +203,10 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
       aiAudioFuture = _fetchAiMessageAudio();
     }
 
-    await _showNarrationPhase(narrationText);
+    await _showNarrationPhase(
+      narrationText,
+      serverMsgId: response.narrationMsgId,
+    );
     if (!mounted) return;
 
     if (aiText.isEmpty) {
@@ -229,6 +232,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
       cdnYn: aiSound?.cdnYn,
       cdnPath: aiSound?.cdnPath,
       soundBytes: aiSound?.file,
+      serverMsgId: response.aiMsgId,
     );
   }
 
@@ -241,11 +245,14 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     }
   }
 
-  Future<void> _showNarrationPhase(String narrationText) async {
+  Future<void> _showNarrationPhase(
+    String narrationText, {
+    int? serverMsgId,
+  }) async {
     if (narrationText.isEmpty) return;
     await Future<void>.delayed(const Duration(milliseconds: 500));
     if (!mounted) return;
-    await showPlayingNarration(narrationText);
+    await showPlayingNarration(narrationText, serverMsgId: serverMsgId);
     await Future<void>.delayed(const Duration(milliseconds: 1000));
   }
 

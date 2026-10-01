@@ -78,7 +78,7 @@ Home (시리즈 썸네일)
 |------|------|------------|-----------|
 | **Opening** | 세션 생성 | `POST /rps2/sessions` → `RpS2SessionDto` | ✅ `opening.dart`. briefing `stop()`은 `_stopBriefingAudio`에서 2s timeout(AOS·iOS Start·AOS dispose 동일). hang 시 Playing 진입. iOS dispose는 `IosAudioTeardown` 큐. |
 | **① AI 시작** | 진입 직후 첫 AI 말풍선·TTS·번역 아이콘 | 텍스트: `cefrMap[ENGLISH_LEVEL].startLine` · 음성: `session.aiSound` · 아바타: `aiCharacter.rpImgPath` · 번역: `GET /rps2/sessions/{id}/translation?rpMsgId=` | ✅ `playing_conversation_mixin.dart` **`startAiOpeningFlow`만**. iOS: Opening AVPlayer teardown를 `IosAudioTeardown` 큐(job timeout 2s)로 직렬화, CDN을 파일로 받아 `setFilePath`, duration=0을 로드 실패로 보지 않음. Playing iOS 오디오 세션은 TTS부터 `playAndRecord`+`defaultToSpeaker`(Bluetooth 미사용 전제, 탭 시 category 전환 없음). **AOS Playing `AudioPlayer.stop()`은 Opening과 같은 2s timeout** (`_stopPlayingAudioPlayer`: TTS prepare·힌트/finish `stopPlayingConversationAudio`). HTTP·나레이션·`setAudioSource`는 timeout 대상 아님. |
-| **② 힌트 자동** | AI 발화 후 조건부 | `_autoHintEnabled` + `GET /rps2/sessions/{id}/hint/{rpMsgId}` (`rpMsgId` = 마지막 AI `conversationIndex`) | ✅ `playing_hint_mixin.dart` — 오토힌트 ON 자동 노출 후 사용자 턴·OFF 아이콘 탭+사용자 턴·AI 음성 종료 트리거·3s blink. 힌트 텍스트 202 not-ready 시 최대 15회 재시도 |
+| **② 힌트 자동** | AI 발화 후 조건부 | `_autoHintEnabled` + `GET /rps2/sessions/{id}/hint/{rpMsgId}` (`rpMsgId` = 마지막 AI의 서버 id, 없으면 `conversationIndex`) | ✅ `playing_hint_mixin.dart` — 오토힌트 ON 자동 노출 후 사용자 턴·OFF 아이콘 탭+사용자 턴·AI 음성 종료 트리거·3s blink. 힌트 텍스트 202 not-ready 시 최대 15회 재시도 |
 | **③ 사용자 발화** | 마이크/타이핑 전송 | `POST /rps2/sessions/{id}/user-message/audio`, `POST /rps2/sessions/{id}/user-message/text` | ✅ `playing_input_mixin.dart`. iOS: 탭 시 세션 재설정 없이 `recorder.start`(플러그인 `manageAudioSession=false`). 말풍선은 start 전에 노출. AOS 녹음 경로는 세션 전환 없음(기존과 동일). **`recorder.stop`/`cancel`은 Playing 오디오와 같은 2s timeout** (`_stopRecording`. 직렬 큐 유지. POST/말한 길이와 무관). |
 | **④ 나레이션+후속 AI+턴바** | 사용자 1회 발화 후 서버 처리 | `RpS2UserMessageResponseDto(userText,userGrade,narration,aiText,missionCompletedIndex,serviceMessage?)` + `GET /rps2/sessions/{id}/ai-message/audio` | ✅ 사용자 말풍선·턴바 등급 효과·미션 완료 효과·나레이션·후속 AI 말풍선/음성 |
 | **⑤ 반복·종료** | 턴 소진·finish | `requiredSpeechCount` | ✅ 마지막 턴 나레이션·후속 AI·분석중 blink 후 `PUT /rps2/sessions/{id}/finish` 분기. 상세 §3-2 |
@@ -253,7 +253,7 @@ Home (시리즈 썸네일)
 
 **사용자 발화 후 응답 타이밍**
 
-- `conversationIndex`는 **1부터 시작**하며 AI/User/Narration entry를 포함한 전체 대화 순번이다. **recording preview 말풍선은 index를 소비하지 않는다** (`consumesConversationIndex`). 힌트 조회의 `rpMsgId`는 마지막 AI entry의 `conversationIndex`를 그대로 사용한다.
+- `conversationIndex`는 번역·힌트의 `rpMsgId`다. 서버가 `startMsgId`·`userMsgId`·`narrationMsgId`·`aiMsgId`를 주면 그 값을 쓴다. 없으면 로컬 순번(1부터, recording은 미소비). 힌트는 마지막 AI entry의 `conversationIndex`.
 - 사용자 말풍선 노출 직후 후속 AI 음성(`GET /rps2/sessions/{id}/ai-message/audio`)을 미리 준비한다.
 - 사용자 말풍선 후 **500ms 대기** → 나레이션 노출(`playing_conversation_mixin`, `TextPainter` 시각 줄마다 fade-in. painter는 표시 `Text`와 같은 `textScaler`. 공백 분절 없음 → ja/zh/th도 폭에 맞게 접힘. 가운데 정렬 유지) → 나레이션 단계는 **최소 1초** 보장 → **500ms 대기**.
 - 위 시점과 AI 음성 준비 완료 중 늦은 시점에 AI 말풍선을 노출하고, 준비된 음성이 있으면 말풍선 노출과 동시에 재생한다.
@@ -336,8 +336,8 @@ Home (시리즈 썸네일)
 | GET | `/rps2/series/{seriesId}/overview` | `RpS2SeriesOverviewDto` | SeriesOverview | ✅ |
 | GET | `/rps2/series/{seriesId}/best-score` | `Map<int,int>` | SeriesOverview (CEFR 변경) | ✅ |
 | POST | `/rps2/sessions` | req: `{seriesId, episodeId}` / res: `RpS2SessionDto` | Opening Start | ✅ |
-| GET | `/rps2/sessions/{id}/translation?rpMsgId=` | **plain String** (JSON 아님) · `rpMsgId` = AI entry `conversationIndex` | Playing AI 말풍선 번역 | ✅ `SeriesApi._parseStringResponse` |
-| GET | `/rps2/sessions/{id}/hint/{rpMsgId}` | `RpS2HintDto` (`hint`, `translatedHint`) · `rpMsgId` = 마지막 AI `conversationIndex` · 202 not-ready는 최대 15회 재시도 | Playing 힌트 | ✅ |
+| GET | `/rps2/sessions/{id}/translation?rpMsgId=` | **plain String** (JSON 아님) · `rpMsgId` = AI entry의 서버 `aiMsgId`/`startMsgId`(없으면 로컬 `conversationIndex`) | Playing AI 말풍선 번역 | ✅ `SeriesApi._parseStringResponse` |
+| GET | `/rps2/sessions/{id}/hint/{rpMsgId}` | `RpS2HintDto` (`hint`, `translatedHint`) · `rpMsgId` = 마지막 AI의 서버 id(없으면 로컬 `conversationIndex`) · 202 not-ready는 최대 15회 재시도 | Playing 힌트 | ✅ |
 | PUT | `/rps2/sessions/{id}/hint/{rpMsgId}` | void (200) | 영문 힌트 노출 시 — en 사용자·번역 없음 즉시 노출, 그 외 **답변보기** 탭 시. 실패 무시(플레이 영향 없음) | ✅ |
 | GET | `/rps2/sessions/{id}/hint/sound` | `TtsResultDto` (`cdnYn`, `cdnPath`, `sound`) | 힌트 전체 재생 | ✅ |
 | GET | `/rps2/sessions/{id}/hint/sound/{wordIndex}` | 동일 | 힌트 단어 재생 | ✅ |
