@@ -25,7 +25,7 @@ import 'services/main_user_sync.dart';
 import 'services/font_pack_service.dart';
 import 'services/perf_monitoring_service.dart';
 import 'services/series_state_service.dart';
-import 'routes/roleplay_router.dart';
+import 'routes/series_router.dart';
 import 'screens/login.dart';
 import 'screens/first_cefr_level.dart';
 import 'screens/first_profile_image.dart';
@@ -816,19 +816,19 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     }
 
     if (segments.length >= 2) {
-      if (segments[0] == 'roleplay' &&
+      if (segments[0] == 'series' &&
           segments.length >= 3 &&
           segments[1] == 'overview') {
-        final id = int.tryParse(segments[2]);
-        if (id != null) {
+        final seriesId = int.tryParse(segments[2]);
+        if (seriesId != null) {
           setState(() => _currentMainScreen = 'home');
           unawaited(_syncNotiboxListFirstPage(force: true));
           unawaited(_refreshGnbBadges());
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (!mounted) return;
-            RoleplayRouter.pushOverview(
+            SeriesRouter.pushOverview(
               _navigatorKey.currentState!.context,
-              id,
+              seriesId,
               user: _user,
             );
           });

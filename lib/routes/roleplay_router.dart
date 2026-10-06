@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
-import '../models/user_models.dart';
-import '../services/rest_status_service.dart';
 import '../utils/full_screen_route.dart';
 import '../utils/sub_screen_route.dart';
-import '../widgets/rest_overlay.dart';
-import '../screens/roleplay/overview.dart';
 import '../screens/series/overview.dart';
 import '../screens/roleplay/opening.dart';
 import '../screens/roleplay/playing.dart';
@@ -40,30 +36,6 @@ class RoleplayRouter {
         page: const RoleplayResultReportScreen(),
         settings: const RouteSettings(
           name: RoleplayResultReportScreen.routeName,
-        ),
-      ),
-    );
-  }
-
-  static void pushOverview(BuildContext context, int roleplayId, {UserDto? user}) {
-    if (RestStatusService.instance.shouldShowRestOverlay()) {
-      Navigator.push(
-        context,
-        PageRouteBuilder(
-          opaque: false,
-          barrierColor: Colors.transparent,
-          pageBuilder: (_, __, ___) => const RestOverlay(),
-        ),
-      );
-      return;
-    }
-    Navigator.push(
-      context,
-      SubScreenRoute(
-        page: RoleplayOverviewScreen(roleplayId: roleplayId, user: user),
-        settings: RouteSettings(
-          name: RoleplayOverviewScreen.routeName,
-          arguments: roleplayId,
         ),
       ),
     );

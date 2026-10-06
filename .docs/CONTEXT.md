@@ -20,7 +20,7 @@ Flutter 교육 앱. AI와 영어로 대화. API는 suda-api (`SudaApiClient`).
 
 **Roleplay는 S2만 현행.** 홈은 시리즈 단위 → `SeriesOverviewScreen` → 에피소드 Play → Tutorial(미완료 시) → Opening → Playing → Ending/Result/Try Again. 복귀는 `RoleplayRouter.popToOverview` → `/series/overview`. 플레이 컨텍스트: `SeriesStateService`.
 
-S1은 단일 RP 단위였고 플레이 경로는 제거됨. `RoleplayOverviewScreen`·`RoleplayApi.getRoleplayOverview`는 딥링크 잔존. `playing_backup` 없음.
+S1은 단일 RP 단위였고 플레이 경로와 `/roleplay/overview/{id}`는 제거됨. `playing_backup` 없음.
 
 ## 2. 빌드·실행
 

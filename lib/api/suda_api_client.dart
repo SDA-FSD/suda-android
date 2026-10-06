@@ -369,16 +369,6 @@ class SudaApiClient {
     );
   }
 
-  static Future<RoleplayOverviewDto> getRoleplayOverview({
-    required String accessToken,
-    required int roleplayId,
-  }) {
-    return RoleplayApi.getRoleplayOverview(
-      accessToken: accessToken,
-      roleplayId: roleplayId,
-    );
-  }
-
   static Future<void> updateRoleplaySpeedRate({
     required String accessToken,
     required String speedRate,

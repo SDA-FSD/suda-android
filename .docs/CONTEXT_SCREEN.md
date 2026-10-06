@@ -248,7 +248,7 @@
   - `onNavigateToAlarm` 콜백 호출 → `_MyAppState._navigateToAlarm()` 실행 → 상태 업데이트로 전환
 - **ProfileScreen**: GNB의 Profile 버튼 클릭 시
   - `onNavigateToProfile` 콜백 호출 → `_MyAppState._navigateToProfile()` 실행 → 상태 업데이트로 전환
-- **SeriesOverviewScreen** (Sub): Home 시리즈 썸네일 탭 시 `SeriesRouter.pushOverview`. `lib/screens/series/overview.dart`.
+- **SeriesOverviewScreen** (Sub): Home 시리즈 썸네일 탭 시 `SeriesRouter.pushOverview`. appPath `/series/overview/{seriesId}`. `lib/screens/series/overview.dart`.
   - 진입 시 `GET /rps2/series/{seriesId}/overview` (`SudaApiClient.getSeriesOverview`) → `RpS2SeriesOverviewDto` 파싱.
   - **레이아웃**(rp overview와 동일 골격): `Scaffold`+`Stack` — 상단 배경 `thumbnailImgPath`(원본 CDN, 너비×**60%** 높이. 메모리 `_300`이 있으면 먼저 노출 후 원본 즉시 교체)·히어로 그라데이션·스크롤 본문(`information.png` 24×24(타이틀 **상단** 좌측·탭 → `SeriesInformationScreen`) → 타이틀 `headlineSmall` → gap 4 → `synopsisComplexityLevel` 태그 → 진행률 바(l10n `seriesOverviewCompletionPercent`) → gap 8 → `synopsis`)·**플로팅 헤더**(좌 뒤로가기: 히트 40·암점 원 28 RadialGradient 검정 중앙 α0.22→투명 / 우 언어레벨 pill: liquid glass 24h — `ClipRRect` pill, `BackdropFilter` blur 12, white α0.14~0.22 gradient(좌상 밝음/우하 어두움), border white α0.36, shadow blur 10 offset (0,2), `ENGLISH_LEVEL` l10n 라벨, 탭 → `CefrLevelScreen`) 스크롤 시 타이틀 상단 도달하면 fade-out. Episode 탭 좌측 카드·Similar Topic 3열은 `CdnThumbImage`(`_300`).
   - **에피소드 목록** (`SeriesEpisodeTabContent`): 진행대기 = `bestScoreMap`에 없는 첫 에피소드(민트 채움 Play, 배경 `#1E1E1E`). 그 앞은 테두리 Play, 뒤는 Locked.
@@ -640,14 +640,6 @@
 ### 스크린 내부 구현 특이사항
 - 배경색: RGB(51, 51, 51) - SettingScreen 대비 10% 밝기 증가
 - 우측 상단 X 버튼 필수
-
----
-
-## 11. RoleplayOverviewScreen (딥링크 잔존)
-
-- **파일**: `lib/screens/roleplay/overview.dart` · appPath `/roleplay/overview/{roleplayId}`
-- S1 단일 RP Overview. 홈 진입 없음. Play→Opening 연결 없음. 현행 플로우는 `SeriesOverviewScreen`.
-- 역할 선택·유사 RP·잠금 토스트: l10n `roleplayChooseYourRole` / `roleplaySimilarRoleplays` / `roleplayBeingPrepared` / `roleplayUnlockPreviousRole`
 
 ---
 
@@ -1167,7 +1159,7 @@
 | `/app/notification/{id}` | NotificationBoxScreen (Main, Alarm 탭) | 푸시: 해당 알림 id 카드 펼침·목록 상단 정렬 |
 | `/profile` | ProfileScreen (Main, Profile 탭) | GNB Profile |
 | `/notice/{noticeId}` | AnnouncementDetailScreen (Sub) | 예: `/notice/123` |
-| `/roleplay/overview/{roleplayId}` | RoleplayOverviewScreen (Sub, 딥링크 잔존) | 홈 플로우 아님 |
+| `/series/overview/{seriesId}` | SeriesOverviewScreen (Sub) | 예: `/series/overview/5`. Home 탭 후 `SeriesRouter.pushOverview` |
 | `/profile/history/{rpUserHistoryId}` | HistoryScreen (Sub) | 예: `/profile/history/456`, S2 user-history id |
 | `/profile/setting` | SettingScreen (Sub) | Profile에서 진입 |
 | `/profile/{userId}` | OtherUserProfileScreen (Sub) | 숫자 id. 본인이면 GNB Profile |

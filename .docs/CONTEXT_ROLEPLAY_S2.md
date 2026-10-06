@@ -2,7 +2,7 @@
 
 > 롤플레이 플로우·state·`/rps2` API의 사실 기준. UI 픽셀은 `CONTEXT_SCREEN.md`.
 >
-> **S1**은 단일 RP 단위였다. 플레이 경로·`playing_backup`은 제거됨. `RoleplayOverviewScreen`은 딥링크 잔존.
+> **S1**은 단일 RP 단위였다. 플레이 경로·`playing_backup`·`/roleplay/overview/{id}`는 제거됨.
 
 ---
 
@@ -48,7 +48,7 @@ Home (시리즈 썸네일)
 - **다른 에피소드 Play** → `setSelectedEpisodeId` 시 `session` 초기화.
 - `clear()` → 전 필드 null.
 
-`RoleplayStateService`는 딥링크 Overview·일부 user 동기화 잔존. 플레이는 **`SeriesStateService`만**.
+`RoleplayStateService`는 Tutorial·Result의 user 스냅샷만. 플레이는 **`SeriesStateService`만**.
 
 ---
 
@@ -148,6 +148,7 @@ Home (시리즈 썸네일)
 ### 4-1. SeriesOverviewScreen ✅ (S2 본流)
 
 - **파일**: `lib/screens/series/overview.dart`
+- **appPath**: `/series/overview/{seriesId}` → `SeriesRouter.pushOverview`
 - **API**: `GET /rps2/series/{seriesId}/overview`(`category` 포함), `GET /rps2/series/{seriesId}/best-score`
 - **복귀 시 bestScore 갱신**: `RoleplayRouter.popToOverview` 직전 `markBestScoreRefreshPending` → Overview `RouteAware.didPopNext`에서 `GET .../best-score` 재조회(현재 CEFR 기준). CEFR 변경 후와 동일 API.
 - **로드 시**: `SeriesStateService.setSeriesOverview`, **`FIRST_OVERVIEW`** 통계 (`POST /v1/users/first-overview`, metaInfo `FIRST_OVERVIEW=Y` 가드)
@@ -323,9 +324,6 @@ Home (시리즈 썸네일)
     - **재생**: 메가폰은 발화 왼쪽(항상). `audioInputYn == 'Y'`만 `GET /rps2/user-histories/{rpUserHistoryId}/messages/{rpMsgId}/audio`(`TtsResultDto`, `rpMsgId` = `speechFeedback` 키 = `messages[].id`). `N`은 토스트 `speechFeedbackNoRecording`. fetch 중 16×16 `CircularProgressIndicator`(strokeWidth 2, 발화색). 재생 중 `megaphone_fill.png` 같은 색 + 발화 w700. Key Expression·Feedback TTS 등 다른 재생 중이면 중단 후 우선 적용.
     - **iOS TTS**: Result Key Expression·Speech Feedback·View Chat·**Profile Saved**는 `SudaTtsAudioPlayer` (`suda_tts_audio_player.dart`). Playing과 같이 byte[]·CDN을 임시 파일로 `setFilePath` + `audio_session` speech. `Uri.dataFromBytes` 미사용(첫 생성 byte[] 무음 방지). AOS는 HTTP/`data:` URI.
   - Footer: Got it! / Report(S1과 동일 UX) — S2는 `POST /rps2/user-histories/{rpUserHistoryId}/report`. **Profile History 진입**(`showReportLink: false`, `exitViaPop`)은 Report 없음·페이월 없이 pop. 정상 종료 Result의 Got it·시스템 뒤로가기는 `feedbackLockedYn=='Y'`일 때 Paywall `rp_result_got_it`(Result 위, 전환 후 Result 제거, 닫히면 Overview). `'N'`은 `popToOverview`.
-### 4-6. RoleplayOverviewScreen (딥링크 잔존)
-
-- `lib/screens/roleplay/overview.dart` — S1 단일 RP Overview. Play→Opening 연결 없음. appPath `/roleplay/overview/{id}` 용.
 
 ---
 
@@ -365,7 +363,7 @@ Home (시리즈 썸네일)
 
 **API 파일**: `lib/api/endpoints/series_api.dart` → `SudaApiClient.createRpS2Session`
 
-`RoleplayApi` 잔존: `getRoleplayOverview`(딥링크)·`updateSpeedRate`(Playing 속도). 세션 생성은 `/rps2/sessions`만.
+`RoleplayApi` 잔존: `updateSpeedRate`(Playing 속도). 세션 생성은 `/rps2/sessions`만.
 
 ---
 
@@ -397,7 +395,7 @@ lib/effects/mission_complete_effect.dart   # 미션 완료 shine (EffectOverlayS
 lib/widgets/effects/mission_complete_overlay.dart  # 미션 완료 전체화면 오버레이
 lib/widgets/roleplay_configuration_panel.dart  # S2 Playing 설정패널 (오토힌트·속도)
 lib/routes/roleplay_router.dart            # replaceWithPlaying, popToOverview
-lib/services/roleplay_state_service.dart   # 딥링크 Overview 잔존
+lib/services/roleplay_state_service.dart   # Tutorial·Result user 스냅샷
 lib/utils/english_level_util.dart        # cefrMap 키 (ENGLISH_LEVEL)
 ```
 
