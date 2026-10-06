@@ -260,7 +260,7 @@ Home (시리즈 썸네일)
 
 **푸터 3층 상세** (`lib/screens/roleplay/playing_input_mixin.dart` — `buildPlayingFooter`)
 
-1. **서비스메시지 영역**: height **24**, `bodyMedium` 중앙. **세션당 첫 사용자 발화 턴**에만 `holdMicrophoneToSpeak` fade-in/out. **마지막 턴** `POST user-message` 응답 **직후** 서버 `serviceMessage`(없으면 `roleplayAnalyzing`) blink(이후 나레이션·후속 AI 계속 노출).
+1. **서비스메시지 영역**: height **24**, `bodyMedium` 중앙. `holdMicrophoneToSpeak` fade-in/out: 세션 첫 사용자 턴에 즉시, 녹음 500ms 미만이거나 녹음 시작 전 손을 뗄 때(에너지 부족으로 막힌 탭은 제외), 녹음 모드에서 마이크 버튼을 누르지 않은 채 8초가 지날 때마다(같은 턴에서 반복, 손을 떼면 8초를 다시 셈). **마지막 턴** `POST user-message` 응답 **직후** 서버 `serviceMessage`(없으면 `roleplayAnalyzing`) blink(이후 나레이션·후속 AI 계속 노출).
 2. **입력 영역**:
    - **녹음**: gap **10** + height **140** (`roleplayMicFooterStackHeight` = mic 100px + 에너지/아이콘 행 40px). 마이크 **이미지 하단**이 에너지·아이콘 행 **상단**에 정렬. 하단 행 중앙 `PlayingEnergyIndicator`(일반: energy+숫자, 무제한: unlimited 아이콘만). 좌 mic/keyboard·우 hint 아이콘과 동일 세로 높이.
    - **타이핑**: gap 10 + 입력 height **44** (`#353535` stadium) + Send 44×44 + gap 10

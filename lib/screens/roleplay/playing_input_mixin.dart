@@ -36,6 +36,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
         PlayingConversationMixin<T>,
         PlayingHintMixin<T> {
   static const int _minRecordingDurationMs = 500;
+  static const Duration _holdToSpeakIdle = Duration(seconds: 8);
 
   final AudioRecorder _recorder = AudioRecorder();
   DateTime? _recordingStartedAt;
@@ -50,6 +51,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
   bool _isHintEnabled = false;
   bool _hintUsedThisTurn = false;
   Timer? _hintIdleTimer;
+  Timer? _holdToSpeakIdleTimer;
   Timer? _serviceMessageTimer;
   final ScrollController _bodyScrollController = ScrollController();
   bool _isServiceMessageVisible = false;
@@ -65,7 +67,8 @@ mixin PlayingInputMixin<T extends StatefulWidget>
   late final AnimationController _hintBlinkController;
   late final AnimationController _analyzingBlinkController;
   bool _isAnalyzingBlinking = false;
-  bool _holdToSpeakMessageShown = false;
+  bool _holdToSpeakOpeningPending = true;
+  bool _suppressHoldToSpeakOnRelease = false;
   bool _hasLoggedStartScriptPlaybackEnded = false;
   bool _hasLoggedFirstUtteranceSubmitted = false;
   double _missionPanelHeight = RoleplayMissionPanel.collapsedHeight;
@@ -103,6 +106,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
 
   void disposePlayingInput() {
     _hintIdleTimer?.cancel();
+    _cancelHoldToSpeakIdle();
     _serviceMessageTimer?.cancel();
     _bodyScrollController.dispose();
     unawaited(_disposeRecorderSafely());
@@ -177,7 +181,11 @@ mixin PlayingInputMixin<T extends StatefulWidget>
       });
     }
     if (_inputMode == _PlayingInputMode.recording) {
-      _showHoldToSpeakMessage();
+      if (_holdToSpeakOpeningPending) {
+        _holdToSpeakOpeningPending = false;
+        _showHoldToSpeakMessage();
+      }
+      _armHoldToSpeakIdle();
       _hintIdleTimer?.cancel();
       _hintIdleTimer = Timer(const Duration(seconds: 3), () {
         if (!mounted) return;
@@ -192,6 +200,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
   }
 
   void deactivateUserTurn() {
+    _cancelHoldToSpeakIdle();
     _setUserTurn(false);
     _setHintEnabled(false);
     _cancelHintIdleAndBlink();
@@ -424,6 +433,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
 
   void lockPlayingInputForSessionEnd() {
     _hintIdleTimer?.cancel();
+    _cancelHoldToSpeakIdle();
     _cancelHintIdleAndBlink();
     dismissPlayingHint();
     _isInputLocked = true;
@@ -522,6 +532,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
                         _inputMode == _PlayingInputMode.typing;
                     if (!toRecording) {
                       _cancelHintIdleAndBlink();
+                      _cancelHoldToSpeakIdle();
                     }
                     setState(() {
                       _inputMode = toRecording
@@ -529,7 +540,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
                           : _PlayingInputMode.typing;
                     });
                     if (toRecording && _isUserTurn) {
-                      _showHoldToSpeakMessage();
+                      _armHoldToSpeakIdle();
                     }
                   },
             child: SizedBox(
@@ -739,6 +750,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
 
   void _setUserTurn(bool isUserTurn) {
     if (!mounted) return;
+    if (!isUserTurn) _cancelHoldToSpeakIdle();
     setState(() {
       _isUserTurn = isUserTurn;
       if (!isUserTurn) {
@@ -785,9 +797,34 @@ mixin PlayingInputMixin<T extends StatefulWidget>
     }
   }
 
+  void _cancelHoldToSpeakIdle() {
+    _holdToSpeakIdleTimer?.cancel();
+    _holdToSpeakIdleTimer = null;
+  }
+
+  void _armHoldToSpeakIdle() {
+    _cancelHoldToSpeakIdle();
+    if (!_isUserTurn ||
+        _isInputLocked ||
+        _inputMode != _PlayingInputMode.recording) {
+      return;
+    }
+    _holdToSpeakIdleTimer = Timer(_holdToSpeakIdle, () {
+      if (!mounted ||
+          !_isUserTurn ||
+          _isInputLocked ||
+          _inputMode != _PlayingInputMode.recording ||
+          _isRecording ||
+          _isRecordingStarting ||
+          _micState != _PlayingMicButtonState.defaultState) {
+        return;
+      }
+      _showHoldToSpeakMessage();
+      _armHoldToSpeakIdle();
+    });
+  }
+
   void _showHoldToSpeakMessage() {
-    if (_holdToSpeakMessageShown) return;
-    _holdToSpeakMessageShown = true;
     final l10n = AppLocalizations.of(context)!;
     _showServiceMessage(l10n.holdMicrophoneToSpeak);
   }
@@ -811,12 +848,15 @@ mixin PlayingInputMixin<T extends StatefulWidget>
   }
 
   void _onMicPressStart() {
+    _cancelHoldToSpeakIdle();
     if (_isUserTurn &&
         checkCanSpendPlayingEnergy != null &&
         !checkCanSpendPlayingEnergy!()) {
+      _suppressHoldToSpeakOnRelease = true;
       unawaited(_showPlayingEnergyBlockedPopup());
       return;
     }
+    _suppressHoldToSpeakOnRelease = false;
     unawaited(_beginRecording());
   }
 
@@ -832,6 +872,10 @@ mixin PlayingInputMixin<T extends StatefulWidget>
   }
 
   void _onMicPressEnd(bool cancel) {
+    if (_consumeEnergyHoldToSpeakSuppress()) {
+      _armHoldToSpeakIdle();
+      return;
+    }
     if (cancel) {
       unawaited(_cancelRecording());
     } else {
@@ -840,7 +884,17 @@ mixin PlayingInputMixin<T extends StatefulWidget>
   }
 
   void _onMicPressCancel() {
+    if (_consumeEnergyHoldToSpeakSuppress()) {
+      _armHoldToSpeakIdle();
+      return;
+    }
     unawaited(_cancelRecording());
+  }
+
+  bool _consumeEnergyHoldToSpeakSuppress() {
+    if (!_suppressHoldToSpeakOnRelease) return false;
+    _suppressHoldToSpeakOnRelease = false;
+    return true;
   }
 
   void _handleSend() {
@@ -944,6 +998,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
       removePlayingRecordingEntry();
       if (!mounted) return;
       _setMicState(_PlayingMicButtonState.defaultState);
+      _armHoldToSpeakIdle();
       return;
     }
     _isRecordingStarting = false;
@@ -976,6 +1031,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
     if (!mounted) return;
     setState(() => _isRecording = false);
     _setMicState(_PlayingMicButtonState.defaultState);
+    _armHoldToSpeakIdle();
   }
 
   Future<void> _finishRecording() async {
@@ -990,6 +1046,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
     if (!_isRecording) {
       _setMicState(_PlayingMicButtonState.defaultState);
       _showHoldToSpeakMessage();
+      _armHoldToSpeakIdle();
       return;
     }
     final startedAt = _recordingStartedAt;
@@ -1007,10 +1064,12 @@ mixin PlayingInputMixin<T extends StatefulWidget>
       _deleteRecordingFile(path);
       _setMicState(_PlayingMicButtonState.defaultState);
       _showHoldToSpeakMessage();
+      _armHoldToSpeakIdle();
       return;
     }
     if (path == null) {
       _setMicState(_PlayingMicButtonState.defaultState);
+      _armHoldToSpeakIdle();
       return;
     }
     final bytes = await File(path).readAsBytes();
@@ -1145,5 +1204,6 @@ mixin PlayingInputMixin<T extends StatefulWidget>
     _setTypingEnabled(true);
     _setUserTurn(true);
     if (!_hintUsedThisTurn) _setHintEnabled(true);
+    _armHoldToSpeakIdle();
   }
 }
