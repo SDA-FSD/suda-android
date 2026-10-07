@@ -185,6 +185,8 @@ class RankScreenDto {
   final bool hasMore;
   final int? nextPageNum;
   final List<RankEntryDto> listEntries;
+  final int pageSize;
+  final int totalPages;
 
   const RankScreenDto({
     this.period,
@@ -197,6 +199,8 @@ class RankScreenDto {
     this.hasMore = false,
     this.nextPageNum,
     this.listEntries = const [],
+    this.pageSize = 50,
+    this.totalPages = 0,
   });
 
   factory RankScreenDto.fromPeriodAndPage({
@@ -227,6 +231,8 @@ class RankScreenDto {
       hasMore: page.hasMore,
       nextPageNum: page.nextPageNum,
       listEntries: sorted.where((e) => e.rank >= 4).toList(),
+      pageSize: page.pageSize <= 0 ? 50 : page.pageSize,
+      totalPages: page.totalPages,
     );
   }
 }

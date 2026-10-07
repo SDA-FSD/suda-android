@@ -127,6 +127,18 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
   int? _nextPageNum;
   bool _hasMorePages = false;
   bool _loadingMore = false;
+  bool _loadingPrevious = false;
+  bool _jumpingToMe = false;
+
+  /// 이어 붙인 페이지 범위. 0이 첫 페이지(1~pageSize위).
+  int _loadedMinPage = 0;
+  int _loadedMaxPage = 0;
+  int _pageSize = 50;
+  int _totalPages = 0;
+
+  /// CustomScrollView center. 이 인덱스 앞은 위로 prepend, 뒤는 아래로 append.
+  int _anchorIndex = 0;
+  final GlobalKey _listCenterKey = GlobalKey();
 
   /// 자기 행 vs 리스트 뷰포트. 미로드(키 없음)는 below.
   _MeRowSlot _meRowSlot = _MeRowSlot.below;
@@ -285,6 +297,12 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
       _snapshotMinute = dto.snapshotMinute;
       _nextPageNum = dto.nextPageNum;
       _hasMorePages = dto.hasMore;
+      _loadedMinPage = 0;
+      _loadedMaxPage = 0;
+      _pageSize = dto.pageSize <= 0 ? 50 : dto.pageSize;
+      _totalPages = dto.totalPages;
+      _anchorIndex = 0;
+      _jumpingToMe = false;
       _meRowSlot = _MeRowSlot.below;
       _stickyFadeEnabled = false;
       _applied = null;
@@ -415,6 +433,10 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
     _myEntryResolved = true;
     _listRows = _screen!.listEntries;
     _hasMorePages = false;
+    _loadedMinPage = 0;
+    _loadedMaxPage = 0;
+    _anchorIndex = 0;
+    _jumpingToMe = false;
     _loading = false;
     _loadFailed = false;
     if (preview.fromRank > 10) {
@@ -562,6 +584,7 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
     }
 
     for (final entry in _screen?.topEntries ?? const <RankEntryDto>[]) {
+      if (_loadedMinPage > 0 && entry.rank > 3) continue;
       add(entry);
     }
     for (final entry in _listRows) {
@@ -816,6 +839,7 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
   void _onScroll() {
     _updateMeRowSlot();
     _requestLoadMoreIfNeeded();
+    _requestLoadPreviousIfNeeded();
   }
 
   void _openOtherUserProfile(RankEntryDto? entry) {
@@ -826,7 +850,7 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
   }
 
   void _requestLoadMoreIfNeeded() {
-    if (_queuedBump != null || _bumpAnimating) return;
+    if (_jumpingToMe || _queuedBump != null || _bumpAnimating) return;
     if (!_hasMorePages || _nextPageNum == null || _loadingMore) return;
     if (!_scrollController.hasClients) {
       unawaited(_loadMore());
@@ -889,35 +913,25 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
   }
 
   Future<void> _loadMore() async {
-    if (_queuedBump != null || _bumpAnimating) return;
+    if (_jumpingToMe || _queuedBump != null || _bumpAnimating) return;
     if (_loadingMore || !_hasMorePages || _nextPageNum == null) return;
-    final token = await TokenStorage.loadAccessToken();
-    if (token == null || token.isEmpty) return;
     final requestingPage = _nextPageNum!;
     setState(() => _loadingMore = true);
     try {
-      final page = await SudaApiClient.getRankEntries(
-        accessToken: token,
-        pageNum: requestingPage,
-        snapshotMinute: _snapshotMinute,
-      );
-      if (!mounted) return;
+      final page = await _fetchRankPage(requestingPage);
+      if (!mounted || page == null) {
+        if (mounted) setState(() => _loadingMore = false);
+        return;
+      }
       debugPrint(
         'rank loadMore page=$requestingPage entries=${page.entries.length} '
         'hasMore=${page.hasMore} next=${page.nextPageNum} total=${page.total}',
       );
-      final merged = [..._listRows];
-      final seen = merged.map((e) => e.userId).toSet();
-      for (final entry in page.entries) {
-        if (entry.rank < 4) continue;
-        if (seen.add(entry.userId)) {
-          merged.add(entry);
-        }
-      }
+      final merged = _mergeRankRows(_listRows, page.entries);
+      _noteRankPageMeta(page);
       final bool inferredHasMore;
       final int? inferredNext;
       if (page.entries.isEmpty) {
-        // 빈 page면 서버 플래그만 신뢰 (무한 재요청 방지)
         inferredHasMore = page.hasMore;
         inferredNext = page.nextPageNum;
       } else {
@@ -931,6 +945,7 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
       }
       setState(() {
         _listRows = merged;
+        if (requestingPage > _loadedMaxPage) _loadedMaxPage = requestingPage;
         _nextPageNum = inferredNext;
         _hasMorePages = inferredHasMore && inferredNext != null;
         _loadingMore = false;
@@ -945,6 +960,215 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
       if (!mounted) return;
       setState(() => _loadingMore = false);
     }
+  }
+
+  void _requestLoadPreviousIfNeeded() {
+    if (_jumpingToMe || _queuedBump != null || _bumpAnimating) return;
+    if (_loadingPrevious || _loadedMinPage <= 0) return;
+    if (!_scrollController.hasClients) return;
+    final pos = _scrollController.position;
+    if (pos.pixels <= pos.minScrollExtent + 480) {
+      unawaited(_loadPrevious());
+    }
+  }
+
+  Future<void> _loadPrevious() async {
+    if (_jumpingToMe || _loadingPrevious || _loadedMinPage <= 0) return;
+    final requestingPage = _loadedMinPage - 1;
+    setState(() => _loadingPrevious = true);
+    try {
+      final page = await _fetchRankPage(requestingPage);
+      if (!mounted || page == null) {
+        if (mounted) setState(() => _loadingPrevious = false);
+        return;
+      }
+      final before = _scrollRows().length;
+      final merged = _mergeRankRows(page.entries, _listRows);
+      final added = _countScrollRows(merged) - before;
+      setState(() {
+        _listRows = merged;
+        _loadedMinPage = requestingPage;
+        _anchorIndex += added < 0 ? 0 : added;
+        _loadingPrevious = false;
+      });
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _updateMeRowSlot();
+      });
+    } catch (e, st) {
+      debugPrint('rank loadPrevious FAILED page=$requestingPage: $e\n$st');
+      if (!mounted) return;
+      setState(() => _loadingPrevious = false);
+    }
+  }
+
+  int _pageForRank(int rank) {
+    final size = _pageSize <= 0 ? 50 : _pageSize;
+    if (rank <= 1) return 0;
+    return (rank - 1) ~/ size;
+  }
+
+  List<RankEntryDto> _scrollRows() =>
+      _buildDisplayRows().where((e) => e.rank >= 4).toList();
+
+  int _countScrollRows(List<RankEntryDto> rows) {
+    final saved = _listRows;
+    _listRows = rows;
+    final count = _scrollRows().length;
+    _listRows = saved;
+    return count;
+  }
+
+  List<RankEntryDto> _mergeRankRows(
+    List<RankEntryDto> first,
+    List<RankEntryDto> second,
+  ) {
+    final merged = <RankEntryDto>[];
+    final seen = <int>{};
+    for (final entry in [...first, ...second]) {
+      if (entry.rank < 4) continue;
+      final id = entry.userId;
+      if (id != null && !seen.add(id)) continue;
+      merged.add(entry);
+    }
+    merged.sort((a, b) => a.rank.compareTo(b.rank));
+    return merged;
+  }
+
+  void _noteRankPageMeta(RankEntryPageDto page) {
+    if (page.pageSize > 0) _pageSize = page.pageSize;
+    if (page.totalPages > 0) _totalPages = page.totalPages;
+  }
+
+  Future<RankEntryPageDto?> _fetchRankPage(int pageNum) async {
+    final token = await TokenStorage.loadAccessToken();
+    if (token == null || token.isEmpty) return null;
+    final page = await SudaApiClient.getRankEntries(
+      accessToken: token,
+      pageNum: pageNum,
+      snapshotMinute: _snapshotMinute,
+    );
+    _noteRankPageMeta(page);
+    return page;
+  }
+
+  void _onStickyTap() {
+    if (_isAnnouncePhase || _jumpingToMe || _bumpAnimating) return;
+    unawaited(_revealMyRank());
+  }
+
+  Future<void> _revealMyRank() async {
+    final me = _myEntryKept;
+    if (me == null || me.rank <= 10 || _jumpingToMe) return;
+    final targetPage = _pageForRank(me.rank);
+    final alreadyLoaded = _scrollRows().any((e) => e.isMe);
+    final adjacent = targetPage <= _loadedMaxPage + 1;
+    setState(() => _jumpingToMe = true);
+    var sweepFromTop = false;
+    try {
+      if (!alreadyLoaded && adjacent) {
+        final last = _totalPages > 0 && targetPage >= _totalPages
+            ? _totalPages - 1
+            : targetPage;
+        final extra = _totalPages <= 0 || last + 1 < _totalPages;
+        final from = _loadedMaxPage + 1;
+        final to = extra ? last + 1 : last;
+        if (from <= to) {
+          final pages = await Future.wait([
+            for (var p = from; p <= to; p++) _fetchRankPage(p),
+          ]);
+          if (!mounted) return;
+          if (pages.any((p) => p == null)) {
+            setState(() => _jumpingToMe = false);
+            return;
+          }
+          var merged = _listRows;
+          for (final page in pages) {
+            merged = _mergeRankRows(merged, page!.entries);
+          }
+          setState(() {
+            _listRows = merged;
+            _loadedMaxPage = to;
+            final tail = pages.last!;
+            _hasMorePages = tail.hasMore;
+            _nextPageNum = tail.nextPageNum;
+          });
+        }
+      } else if (!alreadyLoaded) {
+        final lastIndex = _totalPages > 0 ? _totalPages - 1 : targetPage + 1;
+        final clampedTarget = targetPage < 0
+            ? 0
+            : (targetPage > lastIndex ? lastIndex : targetPage);
+        final pagesToFetch = <int>[
+          if (clampedTarget - 1 >= 0) clampedTarget - 1,
+          clampedTarget,
+          if (clampedTarget + 1 <= lastIndex) clampedTarget + 1,
+        ];
+        final pages = await Future.wait([
+          for (final p in pagesToFetch) _fetchRankPage(p),
+        ]);
+        if (!mounted) return;
+        if (pages.any((p) => p == null)) {
+          setState(() => _jumpingToMe = false);
+          return;
+        }
+        var merged = const <RankEntryDto>[];
+        for (final page in pages) {
+          merged = _mergeRankRows(merged, page!.entries);
+        }
+        final minPage = pagesToFetch.first;
+        final maxPage = pagesToFetch.last;
+        final tail = pages.last!;
+        setState(() {
+          _listRows = merged;
+          _loadedMinPage = minPage;
+          _loadedMaxPage = maxPage;
+          _anchorIndex = 0;
+          _hasMorePages = tail.hasMore;
+          _nextPageNum = tail.nextPageNum;
+        });
+        sweepFromTop = minPage > 0;
+      }
+    } catch (e, st) {
+      debugPrint('rank revealMyRank FAILED: $e\n$st');
+      if (mounted) setState(() => _jumpingToMe = false);
+      return;
+    }
+    _scrollMyRowIntoCenter(sweepFromTop: sweepFromTop);
+  }
+
+  void _scrollMyRowIntoCenter({required bool sweepFromTop}) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_scrollController.hasClients) {
+        if (mounted) setState(() => _jumpingToMe = false);
+        return;
+      }
+      if (sweepFromTop) _scrollController.jumpTo(0);
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        if (!mounted) return;
+        final ctx = _meRowKey.currentContext;
+        if (ctx == null || !_scrollController.hasClients) {
+          setState(() => _jumpingToMe = false);
+          return;
+        }
+        final viewport = _scrollController.position.viewportDimension;
+        final align = viewport <= 0
+            ? 0.5
+            : ((viewport - GnbBar.contentHeight) / 2 / viewport).clamp(
+                0.05,
+                0.95,
+              );
+        await Scrollable.ensureVisible(
+          ctx,
+          alignment: align,
+          duration: Duration(milliseconds: sweepFromTop ? 750 : 450),
+          curve: Curves.easeOut,
+        );
+        if (!mounted) return;
+        setState(() => _jumpingToMe = false);
+        _updateMeRowSlot();
+      });
+    });
   }
 
   @override
@@ -1018,7 +1242,10 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
                   child: Opacity(opacity: v, child: child),
                 );
               },
-              child: _RankMyEntrySticky(
+              child: GestureDetector(
+                onTap: _onStickyTap,
+                behavior: HitTestBehavior.opaque,
+                child: _RankMyEntrySticky(
                 entry: _myEntryKept!,
                 displayRank: _bumpAnimating && !_bumpListMotion
                     ? _lerpInt(_bumpFromRank, _bumpToRank, _bumpT)
@@ -1030,6 +1257,7 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
                 pulseT: _bumpT,
                 defaultProfile: _defaultProfile,
                 premiumBadge: _premiumBadge,
+              ),
               ),
             )
           : null,
@@ -1392,65 +1620,72 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
                     Expanded(
                       child: Builder(
                         builder: (context) {
-                          final displayRows = _buildDisplayRows()
-                              .where((e) => e.rank >= 4)
-                              .toList();
-                          final itemCount =
-                              displayRows.length + (_loadingMore ? 1 : 0);
-                          return ListView.builder(
+                          final displayRows = _scrollRows();
+                          final anchor = _anchorIndex.clamp(
+                            0,
+                            displayRows.length,
+                          );
+                          final forwardCount = displayRows.length - anchor;
+                          return CustomScrollView(
                             controller: _scrollController,
-                            padding: const EdgeInsets.only(
-                              bottom: GnbBar.contentHeight,
-                            ),
+                            center: _listCenterKey,
+                            cacheExtent: _jumpingToMe ? 1000000 : 250,
                             clipBehavior: Clip.hardEdge,
                             physics: const AlwaysScrollableScrollPhysics(),
-                            itemCount: itemCount,
-                            itemBuilder: (context, index) {
-                              if (index >= displayRows.length) {
-                                return const Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 16),
-                                  child: Center(
-                                    child: SizedBox(
-                                      width: 24,
-                                      height: 24,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              }
-                              final entry = displayRows[index];
-                              if (_hasMorePages &&
-                                  index >= displayRows.length - 5) {
-                                unawaited(_loadMore());
-                              }
-                              final shift = _rowShift(entry) * _bumpT;
-                              return Transform.translate(
-                                offset: Offset(0, shift),
-                                child: _RankListRow(
-                                  key: entry.isMe
-                                      ? _meRowKey
-                                      : ValueKey(entry.userId ?? entry.rank),
-                                  rank: _shownRank(entry),
-                                  likeOverride: entry.isMe
-                                      ? _shownLike(entry)
-                                      : null,
-                                  pulseValues:
-                                      entry.isMe &&
-                                      _bumpAnimating &&
-                                      _bumpListMotion,
-                                  pulseT: _bumpT,
-                                  entry: entry,
-                                  defaultProfile: _defaultProfile,
-                                  premiumBadge: _premiumBadge,
-                                  contentHorizontal: side,
-                                  onOpenProfile: () =>
-                                      _openOtherUserProfile(entry),
+                            slivers: [
+                              SliverList(
+                                delegate: SliverChildBuilderDelegate(
+                                  (context, i) {
+                                    final index = anchor - 1 - i;
+                                    return _buildRankScrollTile(
+                                      displayRows[index],
+                                      side,
+                                    );
+                                  },
+                                  childCount: anchor,
                                 ),
-                              );
-                            },
+                              ),
+                              SliverPadding(
+                                key: _listCenterKey,
+                                padding: const EdgeInsets.only(
+                                  bottom: GnbBar.contentHeight,
+                                ),
+                                sliver: SliverList(
+                                  delegate: SliverChildBuilderDelegate(
+                                    (context, i) {
+                                      final index = anchor + i;
+                                      if (index >= displayRows.length) {
+                                        return const Padding(
+                                          padding: EdgeInsets.symmetric(
+                                            vertical: 16,
+                                          ),
+                                          child: Center(
+                                            child: SizedBox(
+                                              width: 24,
+                                              height: 24,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                      if (_hasMorePages &&
+                                          index >= displayRows.length - 5) {
+                                        unawaited(_loadMore());
+                                      }
+                                      return _buildRankScrollTile(
+                                        displayRows[index],
+                                        side,
+                                      );
+                                    },
+                                    childCount:
+                                        forwardCount + (_loadingMore ? 1 : 0),
+                                  ),
+                                ),
+                              ),
+                            ],
                           );
                         },
                       ),
@@ -1461,6 +1696,25 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
             ),
           ),
       ],
+    );
+  }
+
+  Widget _buildRankScrollTile(RankEntryDto entry, double side) {
+    final shift = _rowShift(entry) * _bumpT;
+    return Transform.translate(
+      offset: Offset(0, shift),
+      child: _RankListRow(
+        key: entry.isMe ? _meRowKey : ValueKey(entry.userId ?? entry.rank),
+        rank: _shownRank(entry),
+        likeOverride: entry.isMe ? _shownLike(entry) : null,
+        pulseValues: entry.isMe && _bumpAnimating && _bumpListMotion,
+        pulseT: _bumpT,
+        entry: entry,
+        defaultProfile: _defaultProfile,
+        premiumBadge: _premiumBadge,
+        contentHorizontal: side,
+        onOpenProfile: () => _openOtherUserProfile(entry),
+      ),
     );
   }
 
