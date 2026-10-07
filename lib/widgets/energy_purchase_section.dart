@@ -620,6 +620,83 @@ class _PurchaseProductButton extends StatelessWidget {
     return const Color(0xFFFFB700);
   }
 
+  bool get _hasPrice => price != null && price!.isNotEmpty;
+
+  /// 알림 카드는 제목이 가격 아래에 있어 전체 폭. 무제한·용량만 가격과 세로로 겹친다.
+  bool get _reservePriceOnTitle => !_isEnablePush && _hasPrice;
+
+  Widget _priceCluster(TextTheme theme, List<Color> priceBg, Color priceColor) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (showPtStrike)
+          Padding(
+            padding: const EdgeInsetsDirectional.only(end: 4),
+            child: Text(
+              'R\$5,99',
+              style: theme.labelSmall?.copyWith(
+                color: const Color(0xFF8C8C8C),
+                decoration: TextDecoration.lineThrough,
+                decorationColor: const Color(0xFF8C8C8C),
+              ),
+            ),
+          ),
+        Container(
+          height: 25,
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(colors: priceBg),
+            borderRadius: const BorderRadius.only(
+              topRight: Radius.circular(_radius),
+              bottomLeft: Radius.circular(_radius),
+            ),
+          ),
+          child: Text(
+            price!,
+            style: theme.bodySmall?.copyWith(
+              color: priceColor,
+              fontWeight: FontWeight.w600,
+              fontVariations: const [FontVariation('wght', 600)],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTitleLine(TextTheme theme, List<Color> priceBg, Color priceColor) {
+    final titleLine = _PurchaseTitleLine(
+      text: title,
+      style: theme.bodyMedium?.copyWith(
+        color: Colors.white,
+        fontWeight: FontWeight.w600,
+        fontVariations: const [FontVariation('wght', 600)],
+      ),
+    );
+    if (!_reservePriceOnTitle) return titleLine;
+    return Row(
+      children: [
+        Expanded(child: titleLine),
+        SizedBox(
+          height: 20,
+          child: Align(
+            alignment: AlignmentDirectional.centerStart,
+            widthFactor: 1,
+            child: IgnorePointer(
+              child: ExcludeSemantics(
+                child: Opacity(
+                  opacity: 0,
+                  child: _priceCluster(theme, priceBg, priceColor),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context).textTheme;
@@ -686,16 +763,7 @@ class _PurchaseProductButton extends StatelessWidget {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      _PurchaseTitleLine(
-                                        text: title,
-                                        style: theme.bodyMedium?.copyWith(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.w600,
-                                          fontVariations: const [
-                                            FontVariation('wght', 600),
-                                          ],
-                                        ),
-                                      ),
+                                      _buildTitleLine(theme, priceBg, priceColor),
                                       const SizedBox(height: 2),
                                       Text(
                                         subtitle,
@@ -751,49 +819,11 @@ class _PurchaseProductButton extends StatelessWidget {
                     ),
                   ),
                 ),
-              if (price != null && price!.isNotEmpty)
+              if (_hasPrice)
                 PositionedDirectional(
                   top: 0,
                   end: 0,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (showPtStrike)
-                        Padding(
-                          padding: const EdgeInsets.only(right: 4),
-                          child: Text(
-                            'R\$5,99',
-                            style: theme.labelSmall?.copyWith(
-                              color: const Color(0xFF8C8C8C),
-                              decoration: TextDecoration.lineThrough,
-                              decorationColor: const Color(0xFF8C8C8C),
-                            ),
-                          ),
-                        ),
-                      Container(
-                        height: 25,
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(colors: priceBg),
-                          borderRadius: const BorderRadius.only(
-                            topRight: Radius.circular(_radius),
-                            bottomLeft: Radius.circular(_radius),
-                          ),
-                        ),
-                        child: Text(
-                          price!,
-                          style: theme.bodySmall?.copyWith(
-                            color: priceColor,
-                            fontWeight: FontWeight.w600,
-                            fontVariations: const [
-                              FontVariation('wght', 600),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                  child: _priceCluster(theme, priceBg, priceColor),
                 ),
             ],
           ),
@@ -817,11 +847,14 @@ class _PurchaseTitleLine extends StatelessWidget {
     required TextStyle? style,
     required double maxWidth,
     required TextDirection textDirection,
+    required TextScaler textScaler,
   }) {
+    if (!maxWidth.isFinite || maxWidth <= 0) return text.isNotEmpty;
     final painter = TextPainter(
       text: TextSpan(text: text, style: style),
       maxLines: 1,
       textDirection: textDirection,
+      textScaler: textScaler,
     )..layout(maxWidth: maxWidth);
     return painter.didExceedMaxLines;
   }
@@ -835,6 +868,7 @@ class _PurchaseTitleLine extends StatelessWidget {
           style: style,
           maxWidth: constraints.maxWidth,
           textDirection: Directionality.of(context),
+          textScaler: MediaQuery.textScalerOf(context),
         );
         return SizedBox(
           height: 20,

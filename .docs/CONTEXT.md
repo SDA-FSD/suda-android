@@ -170,7 +170,7 @@ xcrun altool --upload-app --type ios -f build/ios/ipa/suda.ipa --apiKey "$(cat ~
 
 ## 7-2. IAP (현행)
 
-에너지 팝업 INAPP 3종 + Enable Notifications(비IAP) + Paywall Premium 월/연. `IapPurchaseService`. Lab Query/Buy 콘솔 없음.
+에너지 팝업 INAPP 3종 + Enable Notifications(비IAP) + Paywall Premium 월/연. `IapPurchaseService`. Lab Query/Buy 콘솔 없음. 상품 카드 제목(`energy_purchase_section.dart`): 무제한·용량은 우상단 가격(pt 무제한은 취소선 `R$5,99` 포함) 실측 폭만큼 제목 줄 `end`만 비움. 넘치면 그 폭에서 마키하고, 판정은 표시와 같은 `textScaler`. 설명·알림 카드 제목은 전체 폭.
 
 | 구분 | AOS productId | iOS productId | basePlanId (stat) | 진입 |
 |------|---------------|---------------|-------------------|------|
