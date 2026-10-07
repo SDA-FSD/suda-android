@@ -55,6 +55,9 @@ class AppLocalizationsMs extends AppLocalizations {
   String get settingsCefrLevel => 'Tahap Bahasa Inggeris';
 
   @override
+  String get settingsAppLanguage => 'Bahasa aplikasi';
+
+  @override
   String get pushNotifications => 'Pemberitahuan Push';
 
   @override
@@ -360,6 +363,16 @@ class AppLocalizationsMs extends AppLocalizations {
 
   @override
   String get firstCefrLevelTitle => 'Apakah tahap bahasa Inggeris anda?';
+
+  @override
+  String get firstAppLanguageTitle => 'Pilih bahasa aplikasi';
+
+  @override
+  String get firstAppLanguageContinue => 'Teruskan';
+
+  @override
+  String get requestFailed =>
+      'Tidak dapat menyelesaikan permintaan. Sila cuba lagi.';
 
   @override
   String get firstCefrLevelDescriptionPreA1 =>

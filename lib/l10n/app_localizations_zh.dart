@@ -54,6 +54,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsCefrLevel => '英语水平';
 
   @override
+  String get settingsAppLanguage => '应用语言';
+
+  @override
   String get pushNotifications => '推送通知';
 
   @override
@@ -340,6 +343,15 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get firstCefrLevelTitle => '你的英语水平如何？';
+
+  @override
+  String get firstAppLanguageTitle => '请选择应用语言';
+
+  @override
+  String get firstAppLanguageContinue => '继续';
+
+  @override
+  String get requestFailed => '未能完成请求。请重试。';
 
   @override
   String get firstCefrLevelDescriptionPreA1 => '我会读英文';
@@ -1130,6 +1142,9 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get settingsCefrLevel => '英语水平';
 
   @override
+  String get settingsAppLanguage => '应用语言';
+
+  @override
   String get pushNotifications => '推送通知';
 
   @override
@@ -1416,6 +1431,15 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get firstCefrLevelTitle => '你的英语水平如何？';
+
+  @override
+  String get firstAppLanguageTitle => '请选择应用语言';
+
+  @override
+  String get firstAppLanguageContinue => '继续';
+
+  @override
+  String get requestFailed => '未能完成请求。请重试。';
 
   @override
   String get firstCefrLevelDescriptionPreA1 => '我会读英文';
@@ -2206,6 +2230,9 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get settingsCefrLevel => '英語程度';
 
   @override
+  String get settingsAppLanguage => '應用程式語言';
+
+  @override
   String get pushNotifications => '推播通知';
 
   @override
@@ -2492,6 +2519,15 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get firstCefrLevelTitle => '你的英語程度如何？';
+
+  @override
+  String get firstAppLanguageTitle => '請選擇應用程式語言';
+
+  @override
+  String get firstAppLanguageContinue => '繼續';
+
+  @override
+  String get requestFailed => '未能完成請求。請再試一次。';
 
   @override
   String get firstCefrLevelDescriptionPreA1 => '我會讀英文';

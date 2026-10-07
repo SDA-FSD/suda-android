@@ -6,12 +6,18 @@ import '../services/suda_api_client.dart';
 import '../services/token_storage.dart';
 import '../utils/default_toast.dart';
 import '../widgets/default_profile_avatar.dart';
+import '../widgets/onboarding_step_bar.dart';
 
 /// 최초 CEFR 선택 직후 1회 노출되는 기본 프로필 이미지 선택 Full Screen.
 class FirstProfileImageScreen extends StatefulWidget {
   final void Function(UserDto? updatedUser) onComplete;
+  final bool preview;
 
-  const FirstProfileImageScreen({super.key, required this.onComplete});
+  const FirstProfileImageScreen({
+    super.key,
+    required this.onComplete,
+    this.preview = false,
+  });
 
   @override
   State<FirstProfileImageScreen> createState() =>
@@ -72,6 +78,10 @@ class _FirstProfileImageScreenState extends State<FirstProfileImageScreen> {
 
   Future<void> _onConfirm() async {
     if (_isSubmitting) return;
+    if (widget.preview) {
+      widget.onComplete(null);
+      return;
+    }
 
     setState(() => _isSubmitting = true);
     UserDto? updated;
@@ -188,12 +198,15 @@ class _FirstProfileImageScreenState extends State<FirstProfileImageScreen> {
       canPop: false,
       child: Scaffold(
         backgroundColor: _backgroundColor,
-        body: Column(
+        body: withOnboardingStepBar(
+          step: 3,
+          body: Column(
           children: [
             Expanded(child: _buildTopSection(l10n, theme)),
             Expanded(child: _buildCarousel()),
             Expanded(child: _buildBottomSection(l10n, theme)),
           ],
+          ),
         ),
       ),
     );

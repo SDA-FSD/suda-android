@@ -55,6 +55,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get settingsCefrLevel => 'İngilizce Seviyesi';
 
   @override
+  String get settingsAppLanguage => 'Uygulama dili';
+
+  @override
   String get pushNotifications => 'Anlık Bildirimler';
 
   @override
@@ -360,6 +363,15 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get firstCefrLevelTitle => 'İngilizce seviyen nedir?';
+
+  @override
+  String get firstAppLanguageTitle => 'Uygulama dilini seçin';
+
+  @override
+  String get firstAppLanguageContinue => 'Devam';
+
+  @override
+  String get requestFailed => 'İstek tamamlanamadı. Lütfen tekrar deneyin.';
 
   @override
   String get firstCefrLevelDescriptionPreA1 => 'İngilizce okuyabiliyorum';

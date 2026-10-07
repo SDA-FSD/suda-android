@@ -8,7 +8,6 @@ class PushApi {
   static Future<void> registerPushToken({
     required String accessToken,
     required String pushToken,
-    required String languageTag,
   }) async {
     final uri = SudaHttpClient.buildUri('/v1/users/push-token');
 
@@ -24,7 +23,6 @@ class PushApi {
             body: jsonEncode({
               'deviceType': deviceType,
               'pushToken': pushToken,
-              'languageTag': languageTag,
             }),
           )
           .timeout(const Duration(seconds: 10));

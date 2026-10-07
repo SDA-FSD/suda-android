@@ -54,6 +54,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settingsCefrLevel => '英語レベル';
 
   @override
+  String get settingsAppLanguage => 'アプリの言語';
+
+  @override
   String get pushNotifications => 'プッシュ通知';
 
   @override
@@ -342,6 +345,15 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get firstCefrLevelTitle => 'あなたの英語レベルは？';
+
+  @override
+  String get firstAppLanguageTitle => 'アプリの言語を選んでください';
+
+  @override
+  String get firstAppLanguageContinue => '続ける';
+
+  @override
+  String get requestFailed => 'リクエストを完了できませんでした。もう一度お試しください。';
 
   @override
   String get firstCefrLevelDescriptionPreA1 => '英語の文字が読めます';

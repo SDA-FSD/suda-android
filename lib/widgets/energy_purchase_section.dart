@@ -12,6 +12,7 @@ import '../services/energy_refresh_bus.dart';
 import '../services/iap_purchase_service.dart';
 import '../theme/app_theme.dart';
 import '../utils/default_toast.dart';
+import '../utils/language_util.dart';
 import '../utils/sub_screen_route.dart';
 
 enum _EnergyPurchaseKind { enablePush, unlimited, capacity6, capacity7 }
@@ -467,7 +468,7 @@ class _EnergyPurchaseSectionState extends State<EnergyPurchaseSection> {
     }
 
     final l10n = AppLocalizations.of(context)!;
-    final isPt = Localizations.localeOf(context).languageCode == 'pt';
+    final isPt = LanguageUtil.getCurrentLanguageCode() == 'pt';
     final children = <Widget>[];
 
     for (var i = 0; i < kinds.length; i++) {

@@ -55,6 +55,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsCefrLevel => 'Уровень английского';
 
   @override
+  String get settingsAppLanguage => 'Язык приложения';
+
+  @override
   String get pushNotifications => 'Push-уведомления';
 
   @override
@@ -358,6 +361,16 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get firstCefrLevelTitle => 'Какой у вас уровень английского?';
+
+  @override
+  String get firstAppLanguageTitle => 'Выберите язык приложения';
+
+  @override
+  String get firstAppLanguageContinue => 'Продолжить';
+
+  @override
+  String get requestFailed =>
+      'Не удалось выполнить запрос. Попробуйте ещё раз.';
 
   @override
   String get firstCefrLevelDescriptionPreA1 => 'Я умею читать по-английски';

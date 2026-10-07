@@ -32,6 +32,7 @@
 /v1/users/grant-welcome-gift
 /v1/users/agreement
 /v1/users/language-level
+/v1/users/language-tag
 /v1/users/energy/detail
 /v1/users/energy/simple
 /v1/users/push-token

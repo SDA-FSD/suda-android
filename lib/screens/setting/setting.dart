@@ -9,12 +9,14 @@ import '../../services/token_storage.dart';
 import '../../services/auth_service.dart';
 import '../../services/iap_purchase_service.dart';
 import '../../services/suda_api_client.dart';
+import '../../utils/app_language.dart';
 import '../../utils/default_toast.dart';
 import '../../utils/sub_screen_route.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../services/app_version_service.dart';
 import 'account.dart';
 import 'cefr_level.dart';
+import '../first_app_language.dart';
 import 'push_agreement.dart';
 import 'feedback.dart';
 import 'announcements.dart';
@@ -107,6 +109,21 @@ class SettingScreen extends StatelessWidget {
             context,
             l10n.settingsCefrLevel,
             () => _navigateToSubScreen(context, CefrLevelScreen(user: user)),
+          ),
+          _buildMenuItem(
+            context,
+            l10n.settingsAppLanguage,
+            () => _navigateToSubScreen(
+              context,
+              FirstAppLanguageScreen(
+                showStepBar: false,
+                initialTag: AppLanguage.tagOf(getCurrentUser?.call() ?? user),
+                onSaved: (user) {
+                  if (user == null) return;
+                  onUserUpdated?.call(user);
+                },
+              ),
+            ),
           ),
           _buildMenuItem(
             context,

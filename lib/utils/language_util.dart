@@ -1,24 +1,34 @@
 import 'package:flutter/material.dart';
 
-/// 언어 코드 관련 유틸리티
+/// 언어 코드 관련 유틸리티.
+///
+/// [bind]에 사용자 `LANGUAGE_TAG`가 있으면 그 값을 쓴다. 없으면 기기 로케일.
 class LanguageUtil {
-  /// 현재 디바이스의 언어 코드 가져오기
-  /// 
-  /// ISO 639-1 두 글자 언어 코드를 반환합니다 (예: 'ko', 'en', 'pt')
-  /// Flutter의 platformDispatcher.locale을 사용하여 디바이스 언어 설정을 가져옵니다.
-  /// 
-  /// 반환값: 언어 코드 (예: 'ko', 'en', 'pt')
-  static String getCurrentLanguageCode() {
-    final locale = WidgetsBinding.instance.platformDispatcher.locale;
-    return locale.languageCode;
+  static String? _boundTag;
+
+  /// 저장된 앱 언어. null이면 이후 조회는 기기 로케일.
+  static void bind(String? languageTag) {
+    final tag = languageTag?.trim();
+    _boundTag = (tag == null || tag.isEmpty) ? null : tag;
   }
 
-  /// 현재 디바이스의 BCP 47 language tag 가져오기
-  ///
-  /// 예: 'ko-KR', 'zh-Hans-CN'. region/script가 없으면 languageCode만 (예: 'ko').
+  static String? get boundTag => _boundTag;
+
+  /// ISO 639-1 언어 코드. 저장 태그가 있으면 그 primary (`ko-KR` → `ko`).
+  static String getCurrentLanguageCode() {
+    final bound = _boundTag;
+    if (bound != null) {
+      final dash = bound.indexOf('-');
+      return dash <= 0 ? bound : bound.substring(0, dash);
+    }
+    return WidgetsBinding.instance.platformDispatcher.locale.languageCode;
+  }
+
+  /// BCP 47 language tag. 저장 태그가 있으면 그 원문.
   static String getCurrentLanguageTag() {
-    final locale = WidgetsBinding.instance.platformDispatcher.locale;
-    return locale.toLanguageTag();
+    final bound = _boundTag;
+    if (bound != null) return bound;
+    return WidgetsBinding.instance.platformDispatcher.locale.toLanguageTag();
   }
 
   /// 서버 다국어 키 조회 순서. 대소문자 구분 (`ko-KR`).

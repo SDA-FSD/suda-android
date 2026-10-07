@@ -56,6 +56,9 @@ class AppLocalizationsNl extends AppLocalizations {
   String get settingsCefrLevel => 'Engelsniveau';
 
   @override
+  String get settingsAppLanguage => 'App-taal';
+
+  @override
   String get pushNotifications => 'Pushmeldingen';
 
   @override
@@ -358,6 +361,16 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get firstCefrLevelTitle => 'Wat is je Engelsniveau?';
+
+  @override
+  String get firstAppLanguageTitle => 'Kies de taal van de app';
+
+  @override
+  String get firstAppLanguageContinue => 'Doorgaan';
+
+  @override
+  String get requestFailed =>
+      'Het verzoek kon niet worden voltooid. Probeer het opnieuw.';
 
   @override
   String get firstCefrLevelDescriptionPreA1 => 'Ik kan Engels lezen';

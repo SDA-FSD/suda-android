@@ -640,12 +640,10 @@ class SudaApiClient {
   static Future<void> registerPushToken({
     required String accessToken,
     required String pushToken,
-    required String languageTag,
   }) {
     return PushApi.registerPushToken(
       accessToken: accessToken,
       pushToken: pushToken,
-      languageTag: languageTag,
     );
   }
 
@@ -676,6 +674,16 @@ class SudaApiClient {
     return UserApi.updateLanguageLevel(
       accessToken: accessToken,
       languageLevel: languageLevel,
+    );
+  }
+
+  static Future<void> updateLanguageTag({
+    required String accessToken,
+    required String languageTag,
+  }) {
+    return UserApi.updateLanguageTag(
+      accessToken: accessToken,
+      languageTag: languageTag,
     );
   }
 

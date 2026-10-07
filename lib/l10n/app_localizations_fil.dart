@@ -57,6 +57,9 @@ class AppLocalizationsFil extends AppLocalizations {
   String get settingsCefrLevel => 'Antas ng English';
 
   @override
+  String get settingsAppLanguage => 'Wika ng app';
+
+  @override
   String get pushNotifications => 'Mga Push Notification';
 
   @override
@@ -362,6 +365,16 @@ class AppLocalizationsFil extends AppLocalizations {
 
   @override
   String get firstCefrLevelTitle => 'Ano ang antas mo sa English?';
+
+  @override
+  String get firstAppLanguageTitle => 'Piliin ang wika ng app';
+
+  @override
+  String get firstAppLanguageContinue => 'Magpatuloy';
+
+  @override
+  String get requestFailed =>
+      'Hindi makumpleto ang kahilingan. Pakisubukan ulit.';
 
   @override
   String get firstCefrLevelDescriptionPreA1 =>

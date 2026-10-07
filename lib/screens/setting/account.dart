@@ -12,6 +12,7 @@ import '../../services/iap_purchase_service.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/subscription_status_cache.dart';
 import '../../services/token_storage.dart';
+import '../../utils/app_language.dart';
 import '../../utils/default_toast.dart';
 import '../../utils/sub_screen_route.dart';
 import '../../widgets/app_scaffold.dart';
@@ -484,7 +485,7 @@ class _AccountScreenState extends State<AccountScreen> with SingleTickerProvider
                                               l10n.accountPremiumRenewsOn(
                                                 _formatRenewDate(
                                                   _subscriptionExpiredAt!,
-                                                  Localizations.localeOf(
+                                                  AppLanguage.displayLocale(
                                                     context,
                                                   ),
                                                 ),

@@ -56,6 +56,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get settingsCefrLevel => 'अंग्रेज़ी का स्तर';
 
   @override
+  String get settingsAppLanguage => 'ऐप की भाषा';
+
+  @override
   String get pushNotifications => 'पुश नोटिफ़िकेशन';
 
   @override
@@ -358,6 +361,16 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get firstCefrLevelTitle => 'आपका अंग्रेज़ी स्तर क्या है?';
+
+  @override
+  String get firstAppLanguageTitle => 'ऐप की भाषा चुनें';
+
+  @override
+  String get firstAppLanguageContinue => 'जारी रखें';
+
+  @override
+  String get requestFailed =>
+      'अनुरोध पूरा नहीं हो सका। कृपया फिर से कोशिश करें।';
 
   @override
   String get firstCefrLevelDescriptionPreA1 => 'मुझे अंग्रेज़ी पढ़नी आती है';

@@ -7,6 +7,7 @@ import '../../l10n/app_localizations.dart';
 import '../../services/iap_purchase_service.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
+import '../../utils/app_language.dart';
 import '../../utils/default_toast.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../widgets/default_popup.dart';
@@ -384,7 +385,7 @@ class _ChangePlanScreenState extends State<ChangePlanScreen> {
     final current = _currentPlan!;
     final available = _availablePlan!;
     final expiredAt = _energy?.subscriptionExpiredAt;
-    final locale = Localizations.localeOf(context);
+    final locale = AppLanguage.displayLocale(context);
 
     return Column(
       children: [

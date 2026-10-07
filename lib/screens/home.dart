@@ -13,7 +13,6 @@ import '../services/iap_purchase_service.dart';
 import '../services/perf_monitoring_service.dart';
 import '../config/app_config.dart';
 import '../routes/series_router.dart';
-import '../utils/language_util.dart';
 import '../utils/suda_json_util.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/cdn_thumb_image.dart';
@@ -250,7 +249,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       String? pushToken;
 
       // iOS: 알림 권한 → APNs 토큰 준비 후 FCM getToken.
-      // 토큰이 없어도 languageTag는 보낸다(pushToken은 빈 문자열).
+      // 토큰이 없어도 등록은 시도한다(pushToken은 빈 문자열). 언어는 보내지 않는다.
       if (Platform.isIOS) {
         var settings = await messaging.getNotificationSettings();
         if (settings.authorizationStatus == AuthorizationStatus.notDetermined) {
@@ -267,12 +266,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         if (pushToken == null || pushToken.isEmpty) return;
       }
 
-      final languageTag = LanguageUtil.getCurrentLanguageTag();
-
       await SudaApiClient.registerPushToken(
         accessToken: _accessToken!,
         pushToken: pushToken ?? '',
-        languageTag: languageTag,
       );
 
       // 토큰 갱신 시 재등록 (리스너는 세션당 1회만 연결)
@@ -284,7 +280,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         await SudaApiClient.registerPushToken(
           accessToken: access,
           pushToken: token,
-          languageTag: LanguageUtil.getCurrentLanguageTag(),
         );
       });
     } catch (_) {

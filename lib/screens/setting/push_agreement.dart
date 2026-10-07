@@ -13,7 +13,6 @@ import '../../services/token_storage.dart';
 import '../../services/suda_api_client.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../utils/default_toast.dart';
-import '../../utils/language_util.dart';
 
 class PushAgreementScreen extends StatefulWidget {
   final UserDto? user;
@@ -442,7 +441,6 @@ class _PushAgreementScreenState extends State<PushAgreementScreen> {
       await SudaApiClient.registerPushToken(
         accessToken: access,
         pushToken: pushToken,
-        languageTag: LanguageUtil.getCurrentLanguageTag(),
       );
     } catch (_) {}
   }

@@ -54,6 +54,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settingsCefrLevel => '언어 레벨';
 
   @override
+  String get settingsAppLanguage => '앱 언어';
+
+  @override
   String get pushNotifications => '푸시알림';
 
   @override
@@ -342,6 +345,15 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get firstCefrLevelTitle => '현재 영어 레벨을 선택해 주세요.';
+
+  @override
+  String get firstAppLanguageTitle => '앱 언어를 선택해 주세요';
+
+  @override
+  String get firstAppLanguageContinue => '계속하기';
+
+  @override
+  String get requestFailed => '요청을 완료하지 못했어요. 다시 시도해 주세요.';
 
   @override
   String get firstCefrLevelDescriptionPreA1 => '영어를 읽을 수 있어요';

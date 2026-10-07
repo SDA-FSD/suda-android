@@ -27,6 +27,7 @@ import 'services/perf_monitoring_service.dart';
 import 'services/series_state_service.dart';
 import 'routes/series_router.dart';
 import 'screens/login.dart';
+import 'screens/first_app_language.dart';
 import 'screens/first_cefr_level.dart';
 import 'screens/first_profile_image.dart';
 import 'screens/home.dart';
@@ -40,6 +41,7 @@ import 'screens/setting/announcement_detail.dart';
 import 'utils/sub_screen_route.dart';
 import 'config/app_config.dart';
 import 'utils/iap_busy_overlay.dart';
+import 'utils/app_language.dart';
 import 'utils/cdn_thumbnail.dart';
 import 'utils/user_img_path.dart';
 import 'theme/app_theme.dart';
@@ -144,8 +146,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       0; // Profile 탭 활성 상태에서 서브 스크린 pop 복귀 시 증가 → ProfileScreen 프로필 재조회
   bool _hasCheckedVersion = false; // 버전 체크 실행 여부
   bool _needsAgreement = false; // 서비스 이용 동의 필요 여부
-  bool _needsFirstCefrLevel = false; // 동의 직후 1회 CEFR 레벨 선택
+  bool _needsFirstAppLanguage = false; // 동의 후 LANGUAGE_TAG 없을 때
+  bool _needsFirstCefrLevel = false; // 언어 선택 후 1회 CEFR 레벨 선택
   bool _needsFirstProfileImage = false; // CEFR 직후 1회 프로필 이미지 선택
+  String? _appliedLanguageTag;
+  bool _languageApplyReady = false;
 
   /// 마지막 홈 `getHomeContents`의 `notiboxUnreadYn` (`onHomeContentsLoaded`만 갱신)
   String _homeNotiboxUnreadYn = 'N';
@@ -506,18 +511,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         return;
       }
 
-      // 4) 서비스 이용 동의 여부 확인 (SUDA_AGREEMENT == 'Y')
-      bool needsAgreement = true;
-      if (user.metaInfo != null) {
-        for (var meta in user.metaInfo!) {
-          if (meta.key == 'SUDA_AGREEMENT' && meta.value == 'Y') {
-            needsAgreement = false;
-            break;
-          }
-        }
-      }
-
-      // 5) Google 계정 정보는 UI 표시용 부가 정보 (실패해도 JWT 기반 로그인 상태는 유지)
+      // 4) Google 계정 정보는 UI 표시용 부가 정보 (실패해도 JWT 기반 로그인 상태는 유지)
       final account = await AuthService.signInSilently();
 
       // 프로필 이미지 프리캐시
@@ -534,7 +528,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         _accessToken = storedAccessToken;
         _googleUser = account ?? AuthService.currentUser;
         _user = user;
-        _needsAgreement = needsAgreement;
+        _assignEntryFlags(user);
         _isLoading = false;
       });
       await _removeNativeSplashAfterFlutterFrame();
@@ -600,17 +594,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         return;
       }
 
-      // 5) 서비스 이용 동의 여부 확인
-      bool needsAgreement = true;
-      if (user.metaInfo != null) {
-        for (var meta in user.metaInfo!) {
-          if (meta.key == 'SUDA_AGREEMENT' && meta.value == 'Y') {
-            needsAgreement = false;
-            break;
-          }
-        }
-      }
-
       // 프로필 이미지 프리캐시
       _precacheUserAvatar(user);
 
@@ -625,7 +608,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       setState(() {
         _accessToken = token;
         _user = user;
-        _needsAgreement = needsAgreement;
+        _assignEntryFlags(user);
       });
     } catch (_) {
       await TokenStorage.clearTokens();
@@ -646,6 +629,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     setState(() {
       _googleUser = null;
       _accessToken = null;
+      _user = null;
+      _needsAgreement = false;
+      _needsFirstAppLanguage = false;
+      _needsFirstCefrLevel = false;
+      _needsFirstProfileImage = false;
       _currentMainScreen = 'home'; // 로그아웃 후 다시 로그인 시 Home 화면으로
       _homeNotiboxUnreadYn = 'N';
       _notiboxHasUnreadFromAlarmList = false;
@@ -689,11 +677,51 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     unawaited(_refreshGnbBadges());
   }
 
+  void _ensureAppLanguage() {
+    final tag = AppLanguage.tagOf(_user);
+    if (_languageApplyReady && _appliedLanguageTag == tag) return;
+    _languageApplyReady = true;
+    _appliedLanguageTag = tag;
+    AppLanguage.apply(_user);
+    unawaited(FontPackService.instance.loadForCurrentLocale());
+  }
+
+  bool _agreed(UserDto user) {
+    final meta = user.metaInfo;
+    if (meta == null) return false;
+    for (final item in meta) {
+      if (item.key == 'SUDA_AGREEMENT' && item.value == 'Y') return true;
+    }
+    return false;
+  }
+
+  /// 로그인·콜드 스타트 진입. 언어 태그가 없으면 언어 화면만 연다.
+  void _assignEntryFlags(UserDto user) {
+    _needsAgreement = !_agreed(user);
+    _needsFirstAppLanguage =
+        !_needsAgreement && AppLanguage.tagOf(user) == null;
+    _needsFirstCefrLevel = false;
+    _needsFirstProfileImage = false;
+  }
+
   /// 동의 완료 시 호출
   void _onAgreementComplete() {
     setState(() {
       _needsAgreement = false;
-      _needsFirstCefrLevel = true;
+      if (AppLanguage.tagOf(_user) == null) {
+        _needsFirstAppLanguage = true;
+      } else if (!AppLanguage.hasEnglishLevel(_user)) {
+        _needsFirstCefrLevel = true;
+      }
+    });
+  }
+
+  void _onFirstAppLanguageSaved(UserDto? user) {
+    if (user == null) return;
+    setState(() {
+      _user = user;
+      _needsFirstAppLanguage = false;
+      _needsFirstCefrLevel = !AppLanguage.hasEnglishLevel(user);
     });
   }
 
@@ -730,6 +758,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       _accessToken = null;
       _user = null;
       _needsAgreement = false;
+      _needsFirstAppLanguage = false;
       _needsFirstCefrLevel = false;
       _needsFirstProfileImage = false;
       _currentMainScreen = 'home';
@@ -920,6 +949,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    _ensureAppLanguage();
+    final languageTag = AppLanguage.tagOf(_user);
     return MaterialApp(
       navigatorKey: _navigatorKey,
       navigatorObservers: [
@@ -928,6 +959,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       ],
       title: 'SUDA',
       debugShowCheckedModeBanner: false,
+      locale: AppLanguage.materialLocale(languageTag),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       // MaterialApp 빌드 후 첫 프레임이 그려진 후 버전 체크 실행
@@ -960,6 +992,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               onAgreementDismissWithoutConsent:
                   _onAgreementDismissWithoutConsent,
             )
+          : _needsFirstAppLanguage
+          ? FirstAppLanguageScreen(onSaved: _onFirstAppLanguageSaved)
           : _needsFirstCefrLevel
           ? FirstCefrLevelScreen(onComplete: _onFirstCefrLevelComplete)
           : _needsFirstProfileImage

@@ -57,6 +57,9 @@ class AppLocalizationsVi extends AppLocalizations {
   String get settingsCefrLevel => 'Trình độ tiếng Anh';
 
   @override
+  String get settingsAppLanguage => 'Ngôn ngữ ứng dụng';
+
+  @override
   String get pushNotifications => 'Thông báo đẩy';
 
   @override
@@ -361,6 +364,15 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get firstCefrLevelTitle => 'Trình độ tiếng Anh của bạn là gì?';
+
+  @override
+  String get firstAppLanguageTitle => 'Chọn ngôn ngữ ứng dụng';
+
+  @override
+  String get firstAppLanguageContinue => 'Tiếp tục';
+
+  @override
+  String get requestFailed => 'Không thể hoàn tất yêu cầu. Vui lòng thử lại.';
 
   @override
   String get firstCefrLevelDescriptionPreA1 => 'Tôi có thể đọc tiếng Anh';

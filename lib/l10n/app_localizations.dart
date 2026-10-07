@@ -227,6 +227,12 @@ abstract class AppLocalizations {
   /// **'Language Level'**
   String get settingsCefrLevel;
 
+  /// No description provided for @settingsAppLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'App Language'**
+  String get settingsAppLanguage;
+
   /// No description provided for @pushNotifications.
   ///
   /// In en, this message translates to:
@@ -778,6 +784,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'What is your English level?'**
   String get firstCefrLevelTitle;
+
+  /// No description provided for @firstAppLanguageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your app language'**
+  String get firstAppLanguageTitle;
+
+  /// No description provided for @firstAppLanguageContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get firstAppLanguageContinue;
+
+  /// No description provided for @requestFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t complete the request. Please try again.'**
+  String get requestFailed;
 
   /// No description provided for @firstCefrLevelDescriptionPreA1.
   ///

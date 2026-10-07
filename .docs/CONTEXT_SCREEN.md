@@ -141,9 +141,13 @@
 - **스크린 타입**: **Full Screen**
 - **appPath**: 해당 없음 (인증 플로우)
 - **진입 연출**: `#121212` 배경 위 중앙 스틸에서 시작한다. **1000ms 대기** 후 스틸 500ms fade-out, 로고 파트 1000ms 중앙 이동, 포스터·하단 영역은 fade-in 없이 각각 등장 연출한다. 포스터 1~3행은 행별로 화면 밖→노출 위치 1000ms(`easeOutCubic`) 슬라인 후 마키(1행 좌에서 등장·우로·60s, 2행 우에서 등장·좌로·70s, 3행 좌에서 등장·우로·66s). 하단 노출 영역은 화면 아래 밖에서 1000ms 상승(`easeOutCubic`).
-- **서비스 이용 동의(레이어)**: 로그인 후 사용자 metaInfo의 `SUDA_AGREEMENT != 'Y'`인 경우, LoginScreen 위에 **bottom-up 레이어**(배경 blur+dim)로 동의 UI를 노출한다. 레이어 바깥 탭 시 닫힌다. 동의 완료 시 `POST /v1/users/agreement` + AppsFlyer `af_complete_registration` 이벤트를 호출한 뒤 **FirstCefrLevelScreen**(§1.2)으로 전환한다.
+- **서비스 이용 동의(레이어)**: 로그인 후 사용자 metaInfo의 `SUDA_AGREEMENT != 'Y'`인 경우, LoginScreen 위에 **bottom-up 레이어**(배경 blur+dim)로 동의 UI를 노출한다. 레이어 바깥 탭 시 닫힌다. 동의 완료 시 `POST /v1/users/agreement` + AppsFlyer `af_complete_registration` 이벤트를 호출한 뒤 **FirstAppLanguageScreen**(§1.1a, `LANGUAGE_TAG` 없을 때)으로 전환한다.
 
 ---
+
+## 1.1a FirstAppLanguageScreen
+
+`lib/screens/first_app_language.dart`. Full Screen. `PopScope` `canPop: false`(Setting에서 열면 뒤로가기 가능, 진행 막대 없음, 버튼은 `actionConfirm`). 배경 `#121212`. 약관 직후 또는 재실행 시 `LANGUAGE_TAG`가 없으면 노출. 상단 헤더 자리에 진행 막대 1/3 (`OnboardingStepBar`). 기기 언어와 같은 선택지를 맨 위·선택 상태로 둔다. 맞는 항목이 없으면 Continue 비활성. 버튼 문구 `firstAppLanguageContinue`(en Continue, pt Continuar, ko 계속하기). 목록 하단 1/3는 검정 그라데이션(위쪽 절반에서 0→100%, 아래 절반은 검정)이고 그 영역 중앙에 버튼. 선택 버튼 너비는 목록의 80%. 비선택은 테두리 `#635F5F` 1. 저장 성공 시 `ENGLISH_LEVEL`이 없으면 CEFR, 있으면 Home. 실패는 `requestFailed` 토스트 후 유지. Setting > App Language(`settingsAppLanguage`)도 같은 화면을 연다. 태그 규칙·서버 키는 `CONTEXT_LOCALE.md`.
 
 ## 1.2 FirstCefrLevelScreen
 
@@ -158,7 +162,7 @@
 - Setting `CefrLevelScreen`과 동일 API(`PUT /v1/users/language-level`) 사용
 
 ### 이전 스크린 정보 (진입점)
-- **LoginScreen 동의 레이어**: `_onAgreementComplete` → `main.dart` `_needsFirstCefrLevel = true`
+- **LoginScreen 동의 레이어**: 언어 저장 후 `_onFirstAppLanguageSaved` → `ENGLISH_LEVEL` 없으면 `_needsFirstCefrLevel = true`
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
 - **FirstProfileImageScreen**(§1.3): Confirm 탭 시 API 호출 후 `_onFirstCefrLevelComplete`(실패해도 다음)
@@ -167,7 +171,7 @@
 - **배경**: `#121212`. **PopScope** `canPop: false`(시스템·스와이프 백 차단)
 - **레이아웃**: 상·중·하 3등분(`Expanded`×3). 상단·하단은 각각 2등분 가상선 기준 배치
 - **중앙**: `PageView` 캐러셀(Pre-A1~B1, 기본 포커스 **A1**, 무한루프 없음). 포커스 원 40% width·`#0CABA8`, 대기 원 90%·반원 peek. 좌우 `#121212` 60%→0% 그라데이션. 스냅 후 `Vibration` 80ms
-- **Confirm**: 흰 배경·Stadium·검정 텍스트. l10n `firstCefrLevel*` + 공통 `actionConfirm`
+- **Confirm**: 흰 배경·Stadium·검정 텍스트. 문구는 `firstAppLanguageContinue`(Continue). 상단 진행 막대 2/3 (`OnboardingStepBar`)
 - **Lab(dev)**: Setting > Lab > **Open First CEFR Level**
 
 ## 1.3 FirstProfileImageScreen
@@ -192,7 +196,7 @@
 - **배경**: `#121212`. **PopScope** `canPop: false`
 - **레이아웃**: FirstCefr와 동일 상·중·하 3등분. **캐러셀 위 선택별 설명 문구 없음**
 - **중앙**: `PageView` + `DefaultProfileAvatar`(마스크 `maskScale` 기본 **0.35**). 포커스 지름은 캐러셀 `LayoutBuilder` 영역 내 최대 정사각(잘림 방지). 측면은 `Transform.scale(0.4)`만 적용해 마스크 비율 고정. 기본 포커스 **1번**. 스냅 `Vibration` 80ms. 좌우 그라데이션 peek 동일
-- **힌트**: `firstCefrLevelSettingsHint`. 버튼: `actionConfirm`
+- **힌트**: `firstCefrLevelSettingsHint`. 버튼: `actionConfirm`. 상단 진행 막대 3/3
 - **Lab(dev)**: Setting > Lab > **Open First Profile Image**
 
 ---
@@ -284,7 +288,7 @@
     - banners: `MainHomeBannerDto(imgPath, overlayText, appPath?)`
   - **시리즈 페이징 조회**: `GET /v2/home/series?category={enumValue}&pageNum=…` (`SudaApiClient.getSeriesByCategory()`)
   - **푸시 토큰 등록**: `_registerPushToken()` (`POST /v1/users/push-token`)
-    - AOS: FCM 토큰 필수. iOS: APNs 최대 3초. 토큰 없어도 `pushToken=""` + `languageTag` 전송
+    - AOS: FCM 토큰 필수. iOS: APNs 최대 3초. 토큰 없어도 `pushToken=""`만 전송. 언어 태그는 보내지 않음
 - **초기화 작업**: `initState()`에서 `_performInitialization()` 호출 (한 번만 실행)
   - `_isInitialized` 플래그로 중복 실행 방지
 - **Props**:
@@ -1100,7 +1104,7 @@
   └─ 토큰 유효 → [HomeScreen] (동의 미완료 시 LoginScreen 동의 레이어)
 
 [LoginScreen]
-  ├─ 로그인 성공 → [HomeScreen] (이미 동의) / [FirstCefrLevelScreen] → [FirstProfileImageScreen] (동의 직후)
+  ├─ 로그인 성공 → [HomeScreen] (이미 동의·언어 태그 있음) / [FirstAppLanguageScreen] → [FirstCefrLevelScreen] → [FirstProfileImageScreen] (동의 직후)
   └─ 로그인 취소/실패 → [LoginScreen] (유지)
 
 [NotificationBoxScreen] ←→ [HomeScreen] ←→ [ProfileScreen] (GNB Alarm/Home/Profile)
@@ -1124,7 +1128,7 @@
    - JWT 토큰 확인 및 서버 검증 (네이티브 스플래시 유지 중)
    - 처리 완료 후 `FlutterNativeSplash.remove()` 호출
    - 토큰 없음/유효하지 않음 → LoginScreen 표시
-   - 토큰 유효 → HomeScreen 표시 (동의 미완료 시 LoginScreen 동의 레이어 → 동의 직후 FirstCefrLevelScreen → FirstProfileImageScreen → Home)
+   - 토큰 유효 → HomeScreen 표시 (동의 미완료 시 LoginScreen 동의 레이어 → `LANGUAGE_TAG` 없으면 FirstAppLanguageScreen → ENGLISH_LEVEL 없으면 FirstCefrLevelScreen → FirstProfileImageScreen → Home)
 
 3. **로그아웃 시**
    - `_onSignOut()`에서 곧바로 LoginScreen 표시
