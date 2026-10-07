@@ -6,6 +6,7 @@ class CharacterDetailDto {
   final String rarity;
   final String? ageRange;
   final String? nationality;
+  final String? flagIconImgPath;
   final String? occupation;
   final List<String> interests;
   final List<String> personalities;
@@ -20,6 +21,7 @@ class CharacterDetailDto {
     required this.rarity,
     this.ageRange,
     this.nationality,
+    this.flagIconImgPath,
     this.occupation,
     this.interests = const [],
     this.personalities = const [],
@@ -44,6 +46,7 @@ class CharacterDetailDto {
       rarity: json['rarity'] as String? ?? '',
       ageRange: _blankToNull(json['ageRange']),
       nationality: _blankToNull(json['nationality']),
+      flagIconImgPath: _blankToNull(json['flagIconImgPath']),
       occupation: _blankToNull(json['occupation']),
       interests: strings(json['interests']),
       personalities: strings(json['personalities']),

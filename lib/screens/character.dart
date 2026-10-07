@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -264,6 +265,10 @@ class _CharacterScreenState extends State<CharacterScreen> {
             fit: BoxFit.cover,
             errorWidget: (_, _, _) => const ColoredBox(color: Color(0xFF2A2A2A)),
           );
+    const flagSize = 40.0;
+    final radius = size / 2;
+    final flagCenter = radius + radius * math.cos(math.pi / 4);
+    final flagPath = detail.flagIconImgPath;
     return SizedBox(
       width: size,
       height: size,
@@ -280,6 +285,22 @@ class _CharacterScreenState extends State<CharacterScreen> {
             borderWidth: 5,
             child: image,
           ),
+          if (flagPath != null)
+            Positioned(
+              left: flagCenter - flagSize / 2,
+              top: flagCenter - flagSize / 2,
+              width: flagSize,
+              height: flagSize,
+              child: ClipOval(
+                child: CachedNetworkImage(
+                  imageUrl: CdnThumbUrl.original(flagPath),
+                  width: flagSize,
+                  height: flagSize,
+                  fit: BoxFit.cover,
+                  errorWidget: (_, _, _) => const SizedBox.shrink(),
+                ),
+              ),
+            ),
         ],
       ),
     );
