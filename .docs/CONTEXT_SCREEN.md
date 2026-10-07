@@ -147,7 +147,7 @@
 
 ## 1.1a FirstAppLanguageScreen
 
-`lib/screens/first_app_language.dart`. Full Screen. `PopScope` `canPop: false`(Setting에서 열면 뒤로가기 가능, 진행 막대 없음, 버튼은 `actionConfirm`). 배경 `#121212`. 약관 직후 또는 재실행 시 `LANGUAGE_TAG`가 없으면 노출. 상단 헤더 자리에 진행 막대 1/3 (`OnboardingStepBar`). 기기 언어와 같은 선택지를 맨 위·선택 상태로 둔다. 맞는 항목이 없으면 Continue 비활성. 버튼 문구 `firstAppLanguageContinue`(en Continue, pt Continuar, ko 계속하기). 목록 하단 1/3는 검정 그라데이션(위쪽 절반에서 0→100%, 아래 절반은 검정)이고 그 영역 중앙에 버튼. 선택 버튼 너비는 목록의 80%. 비선택은 테두리 `#635F5F` 1. 저장 성공 시 `ENGLISH_LEVEL`이 없으면 CEFR, 있으면 Home. 실패는 `requestFailed` 토스트 후 유지. Setting > App Language(`settingsAppLanguage`)도 같은 화면을 연다. 태그 규칙·서버 키는 `CONTEXT_LOCALE.md`.
+`lib/screens/first_app_language.dart`. Full Screen. `PopScope` `canPop: false`(Setting에서 열면 뒤로가기 가능, 진행 막대 없음, 버튼은 `actionConfirm`). 배경 `#121212`. 약관 직후 또는 재실행 시 `LANGUAGE_TAG`가 없으면 노출. 상단 헤더 자리에 진행 막대 1/3 (`OnboardingStepBar`, 이전 칸은 채워진 채 이번 칸만 애니메이션). 기기 언어와 같은 선택지를 맨 위·선택 상태로 둔다. 맞는 항목이 없으면 Continue 비활성. 버튼 문구 `firstAppLanguageContinue`(en Continue, pt Continuar, ko 계속하기). 목록 하단 1/3는 검정 그라데이션(위쪽 절반에서 0→100%, 아래 절반은 검정)이고 그 영역 중앙에 버튼. 선택 버튼 너비는 목록의 80%. 비선택은 테두리 `#635F5F` 1. 저장 성공 시 `ENGLISH_LEVEL`이 없으면 CEFR, 있으면 Home. 실패는 `requestFailed` 토스트 후 유지. Setting > App Language(`settingsAppLanguage`)도 같은 화면을 연다. 태그 규칙·서버 키는 `CONTEXT_LOCALE.md`.
 
 ## 1.2 FirstCefrLevelScreen
 

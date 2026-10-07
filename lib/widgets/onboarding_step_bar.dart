@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// 온보딩 3단계 진행 막대. 노출 직후 왼쪽부터 활성 칸만 한 번 칠한다.
+/// 온보딩 3단계 진행 막대. 이전 칸은 채워진 채, 이번 칸만 왼쪽부터 한 번 칠한다.
 class OnboardingStepBar extends StatefulWidget {
   /// 1=언어, 2=CEFR, 3=프로필 이미지.
   final int step;
@@ -45,9 +45,10 @@ class _OnboardingStepBarState extends State<OnboardingStepBar>
           builder: (context, constraints) {
             final width = constraints.maxWidth;
             final barWidth = (width - _gap * 2) / 3;
-            final activeEnd =
-                widget.step * barWidth + (widget.step - 1) * _gap;
-            final reveal = (activeEnd * _controller.value).clamp(0.0, width);
+            final doneEnd = (widget.step - 1) * (barWidth + _gap);
+            final activeEnd = doneEnd + barWidth;
+            final reveal = (doneEnd + (activeEnd - doneEnd) * _controller.value)
+                .clamp(0.0, width);
             return SizedBox(
               height: _barHeight,
               child: Stack(
