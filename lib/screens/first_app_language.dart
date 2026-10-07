@@ -97,26 +97,6 @@ class _FirstAppLanguageScreenState extends State<FirstAppLanguageScreen> {
   }
 
   Widget _buildTitle(AppLocalizations l10n, TextTheme theme) {
-    return Column(
-      children: [
-        const Expanded(flex: 5, child: SizedBox.shrink()),
-        Expanded(
-          flex: 5,
-          child: Align(
-            alignment: Alignment.bottomCenter,
-            child: FractionallySizedBox(
-              widthFactor: 0.8,
-              child: Text(
-                l10n.firstAppLanguageTitle,
-                style: theme.headlineLarge?.copyWith(color: Colors.white),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-              ),
-            ),
-          ),
-        ),
-        const Expanded(flex: 2, child: SizedBox.shrink()),
-      ],
-    );
+    return onboardingTitle(l10n.firstAppLanguageTitle, theme);
   }
 }

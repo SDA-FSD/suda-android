@@ -147,7 +147,7 @@
 
 ## 1.1a FirstAppLanguageScreen
 
-`lib/screens/first_app_language.dart`. Full Screen. `PopScope` `canPop: false`. 배경 `#121212`. 약관 직후 또는 재실행 시 `LANGUAGE_TAG`가 없으면 노출. 상단 헤더 자리에 진행 막대 1/3 (`OnboardingStepBar`, 이전 칸은 채워진 채 이번 칸만 애니메이션). 기기 언어와 같은 선택지를 맨 위·선택 상태로 둔다. 맞는 항목이 없으면 Continue 비활성. 버튼 문구 `firstAppLanguageContinue`(en Continue, pt Continuar, ko 계속하기). 목록 하단 1/3는 검정 그라데이션(위쪽 절반에서 0→100%, 아래 절반은 검정)이고 그 영역 중앙에 버튼. 선택 버튼 너비는 목록의 80%. 비선택은 테두리 `#635F5F` 1. 저장 성공 시 `GET /v1/users`로 `_user`를 바꾸고, `ENGLISH_LEVEL`이 없으면 CEFR, 있으면 Home. 실패는 `requestFailed` 토스트 후 유지. 태그 규칙·서버 키는 `CONTEXT_LOCALE.md`. Setting의 앱 언어는 별도 하위 화면 `lib/screens/setting/app_language.dart` (`AppLanguageScreen`). 헤더 `settingsAppLanguage`, 진행 막대 없음, 버튼 `actionConfirm`. 선택 목록은 `AppLanguageOptionList`, 저장 규칙은 `AppLanguageOptions`.
+`lib/screens/first_app_language.dart`. Full Screen. `PopScope` `canPop: false`. 배경 `#121212`. 약관 직후 또는 재실행 시 `LANGUAGE_TAG`가 없으면 노출. 상단 헤더 자리에 진행 막대 1/3 (`OnboardingStepBar`, 이전 칸은 채워진 채 이번 칸만 애니메이션). 흰 타이틀은 CEFR·프로필과 같이 상단 1/3 안에서 글 하단이 그 높이의 72% (`onboardingTitle`). 기기 언어와 같은 선택지를 맨 위·선택 상태로 둔다. 맞는 항목이 없으면 Continue 비활성. 버튼 문구 `firstAppLanguageContinue`(en Continue, pt Continuar, ko 계속하기). 목록 하단 1/3는 검정 그라데이션(위쪽 절반에서 0→100%, 아래 절반은 검정)이고 그 영역 중앙에 버튼. 선택 버튼 너비는 목록의 80%. 비선택은 테두리 `#635F5F` 1. 저장 성공 시 `GET /v1/users`로 `_user`를 바꾸고, `ENGLISH_LEVEL`이 없으면 CEFR, 있으면 Home. 실패는 `requestFailed` 토스트 후 유지. 태그 규칙·서버 키는 `CONTEXT_LOCALE.md`. Setting의 앱 언어는 별도 하위 화면 `lib/screens/setting/app_language.dart` (`AppLanguageScreen`). 헤더 `settingsAppLanguage`, 진행 막대 없음, 버튼 `actionConfirm`. 선택 목록은 `AppLanguageOptionList`, 저장 규칙은 `AppLanguageOptions`.
 
 ## 1.2 FirstCefrLevelScreen
 
@@ -169,7 +169,7 @@
 
 ### 스크린 내부 구현 특이사항
 - **배경**: `#121212`. **PopScope** `canPop: false`(시스템·스와이프 백 차단)
-- **레이아웃**: 상·중·하 3등분(`Expanded`×3). 상단·하단은 각각 2등분 가상선 기준 배치
+- **레이아웃**: 상·중·하 3등분(`Expanded`×3). 흰 타이틀은 언어 화면과 같이 상단 1/3 안에서 글 하단이 그 높이의 72% (`onboardingTitle`). 하단은 2등분 가상선 기준 배치
 - **중앙**: `PageView` 캐러셀(Pre-A1~B1, 기본 포커스 **A1**, 무한루프 없음). 포커스 원 40% width·`#0CABA8`, 대기 원 90%·반원 peek. 좌우 `#121212` 60%→0% 그라데이션. 스냅 후 `Vibration` 80ms
 - **Confirm**: 흰 배경·Stadium·검정 텍스트. 문구는 `firstAppLanguageContinue`(Continue). 상단 진행 막대 2/3 (`OnboardingStepBar`)
 - **Lab(dev)**: Setting > Lab > **Open First CEFR Level**
@@ -194,7 +194,7 @@
 
 ### 스크린 내부 구현 특이사항
 - **배경**: `#121212`. **PopScope** `canPop: false`
-- **레이아웃**: FirstCefr와 동일 상·중·하 3등분. **캐러셀 위 선택별 설명 문구 없음**
+- **레이아웃**: FirstCefr와 동일 상·중·하 3등분. 흰 타이틀도 같은 `onboardingTitle`. **캐러셀 위 선택별 설명 문구 없음**
 - **중앙**: `PageView` + `DefaultProfileAvatar`(마스크 `maskScale` 기본 **0.35**). 포커스 지름은 캐러셀 `LayoutBuilder` 영역 내 최대 정사각(잘림 방지). 측면은 `Transform.scale(0.4)`만 적용해 마스크 비율 고정. 기본 포커스 **1번**. 스냅 `Vibration` 80ms. 좌우 그라데이션 peek 동일
 - **힌트**: `firstCefrLevelSettingsHint`. 버튼: `actionConfirm`. 상단 진행 막대 3/3
 - **Lab(dev)**: Setting > Lab > **Open First Profile Image**

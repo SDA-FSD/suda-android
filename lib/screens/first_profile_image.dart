@@ -213,26 +213,7 @@ class _FirstProfileImageScreenState extends State<FirstProfileImageScreen> {
   }
 
   Widget _buildTopSection(AppLocalizations l10n, TextTheme theme) {
-    return Column(
-      children: [
-        const Expanded(child: SizedBox.shrink()),
-        Expanded(
-          child: Align(
-            alignment: Alignment.bottomCenter,
-            child: FractionallySizedBox(
-              widthFactor: 0.8,
-              child: Text(
-                l10n.firstProfileImageTitle,
-                style: theme.headlineLarge?.copyWith(color: Colors.white),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-              ),
-            ),
-          ),
-        ),
-        const Expanded(child: SizedBox.shrink()),
-      ],
-    );
+    return onboardingTitle(l10n.firstProfileImageTitle, theme);
   }
 
   Widget _buildBottomSection(AppLocalizations l10n, TextTheme theme) {

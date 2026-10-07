@@ -117,6 +117,32 @@ class _LeftRevealClipper extends CustomClipper<Rect> {
       oldClipper.reveal != reveal;
 }
 
+/// 온보딩 흰 타이틀. 상단 밴드 안에서 글 하단이 밴드 높이의 72%.
+Widget onboardingTitle(String text, TextTheme theme) {
+  return LayoutBuilder(
+    builder: (context, constraints) {
+      return Stack(
+        children: [
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: constraints.maxHeight * 0.28,
+            child: FractionallySizedBox(
+              widthFactor: 0.8,
+              child: Text(
+                text,
+                style: theme.headlineLarge?.copyWith(color: Colors.white),
+                textAlign: TextAlign.center,
+                maxLines: 2,
+              ),
+            ),
+          ),
+        ],
+      );
+    },
+  );
+}
+
 /// 헤더 자리(SafeArea 안, 상단 16·좌우 24)에 진행 막대를 올린다.
 Widget withOnboardingStepBar({required int step, required Widget body}) {
   return Stack(
