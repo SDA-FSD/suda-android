@@ -39,7 +39,6 @@ import 'screens/setting/setting.dart';
 import 'screens/setting/announcement_detail.dart';
 import 'utils/sub_screen_route.dart';
 import 'config/app_config.dart';
-import 'utils/language_util.dart';
 import 'utils/iap_busy_overlay.dart';
 import 'utils/cdn_thumbnail.dart';
 import 'utils/user_img_path.dart';
@@ -462,10 +461,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     final storedAccessToken = await TokenStorage.loadAccessToken();
     print('[BOOT] loadAccessToken done: hasToken=${storedAccessToken != null}');
 
-    // 언어 코드 저장 (앱 실행 시 항상 최신 언어 코드로 업데이트)
-    final languageCode = LanguageUtil.getCurrentLanguageCode();
-    await TokenStorage.saveLanguageCode(languageCode);
-
     if (storedAccessToken == null) {
       TokenRefreshService.instance.stop();
       print('[BOOT] precache login assets...');
@@ -578,10 +573,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       });
       return;
     }
-
-    // 언어 코드 저장 (로그인 시에도 최신 언어 코드로 업데이트)
-    final languageCode = LanguageUtil.getCurrentLanguageCode();
-    await TokenStorage.saveLanguageCode(languageCode);
 
     try {
       // 3) JWT를 사용하여 사용자 정보 조회

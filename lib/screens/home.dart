@@ -250,7 +250,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       String? pushToken;
 
       // iOS: 알림 권한 → APNs 토큰 준비 후 FCM getToken.
-      // 토큰이 없어도 languageCode는 보낸다(pushToken은 빈 문자열).
+      // 토큰이 없어도 languageTag는 보낸다(pushToken은 빈 문자열).
       if (Platform.isIOS) {
         var settings = await messaging.getNotificationSettings();
         if (settings.authorizationStatus == AuthorizationStatus.notDetermined) {
@@ -267,13 +267,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         if (pushToken == null || pushToken.isEmpty) return;
       }
 
-      final languageCode = LanguageUtil.getCurrentLanguageCode();
       final languageTag = LanguageUtil.getCurrentLanguageTag();
 
       await SudaApiClient.registerPushToken(
         accessToken: _accessToken!,
         pushToken: pushToken ?? '',
-        languageCode: languageCode,
         languageTag: languageTag,
       );
 
@@ -286,7 +284,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         await SudaApiClient.registerPushToken(
           accessToken: access,
           pushToken: token,
-          languageCode: LanguageUtil.getCurrentLanguageCode(),
           languageTag: LanguageUtil.getCurrentLanguageTag(),
         );
       });

@@ -105,7 +105,6 @@ xcrun altool --upload-app --type ios -f build/ios/ipa/suda.ipa --apiKey "$(cat ~
   - AOS Services ID: `AppConfig.appleServicesId`. redirect → 서버가 `signinwithapple` intent
   - Login UI: **iOS는 Apple 위**, **AOS는 Google 위**
 - JWT·deviceId: `TokenStorage` (secure storage). deviceId는 최초 1회 생성
-- 언어: `LanguageUtil`의 플랫폼 `languageCode` → `TokenStorage` SharedPreferences. 로그아웃 시 토큰과 함께 삭제
 - 정적 UI l10n: `lib/l10n/app_en.arb`가 canonical이고 `flutter gen-l10n` 생성물도 같은 디렉터리에 커밋한다. 지원 locale은 `en`, `ko`, `pt`(ID는 generic `pt`, 문구는 브라질 포르투갈어), `es_419`, `ja`, `zh_Hans`, `zh_Hant`, `fr`, `de`, `it`, `vi`, `th`, `id`, `ms`, `fil`, `hi`, `ar`, `tr`, `ru`, `pl`, `nl`.
   - Flutter fallback 요건으로 `app_es.arb`는 `es_419`, `app_zh.arb`는 `zh_Hans`와 locale ID 외 동일하게 유지한다. `l10n.yaml`은 기본 fallback `en`과 중남미 스페인어 선택을 위해 `es_419`를 우선한다.
   - AOS 13+ 앱 언어 목록: `android/app/src/main/res/xml/locales_config.xml` + Manifest `android:localeConfig`. 위 21개만 등록(하이픈 태그 `es-419`/`zh-Hans`/`zh-Hant`). 폴백 전용 `es`/`zh`는 목록에 넣지 않음.
@@ -204,9 +203,9 @@ xcrun altool --upload-app --type ios -f build/ios/ipa/suda.ipa --apiKey "$(cat ~
 네이티브 스플래시 `#121212` + 중앙 스틸(`splash_still_260513.png`, 논리 165×36). **AOS** `launch_background.xml` gravity center. **iOS** `LaunchScreen` `LaunchImage` contentMode center(밀도 @1x/@2x/@3x = AOS mdpi/xhdpi/xxhdpi). `FlutterNativeSplash.preserve` → JWT 후 remove. Login은 동일 스틸에서 페이드/로고 이동/포스터 마키(상세 `CONTEXT_SCREEN.md` Login). CustomSplash·LoadingScreen 없음. 로그아웃 → 곧장 Login.
 
 ## 10. 푸시
-`firebase_messaging`. Home `initState`에서 `POST /v1/users/push-token` (`deviceType` ANDROID|IOS, `languageCode`, `languageTag` BCP 47 예: `ko-KR`, 실패 무시). `LanguageUtil.getCurrentLanguageTag()` = `platformDispatcher.locale.toLanguageTag()` (region 없으면 languageCode만).
+`firebase_messaging`. Home `initState`에서 `POST /v1/users/push-token` (`deviceType` ANDROID|IOS, `languageTag` BCP 47 예: `ko-KR`, 실패 무시). `LanguageUtil.getCurrentLanguageTag()` = `platformDispatcher.locale.toLanguageTag()` (region 없으면 languageCode만). 서버 사용자 언어는 meta `LANGUAGE_TAG`만 사용.
 - AOS: FCM 토큰 없으면 호출 안 함.
-- iOS: APNs 대기 **최대 3초**. 알림 거부·APNs/FCM 실패여도 `pushToken=""` + `languageCode`/`languageTag`는 보냄. 이후 토큰이 생기면 같은 API로 재등록.
+- iOS: APNs 대기 **최대 3초**. 알림 거부·APNs/FCM 실패여도 `pushToken=""` + `languageTag`는 보냄. 이후 토큰이 생기면 같은 API로 재등록.
 
 클릭 `appPath`: 비로그인·동의 전은 `PendingAppPathService`. 경로 표·규칙은 `CONTEXT_SCREEN.md` appPath.
 

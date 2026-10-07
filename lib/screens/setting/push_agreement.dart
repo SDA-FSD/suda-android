@@ -442,7 +442,6 @@ class _PushAgreementScreenState extends State<PushAgreementScreen> {
       await SudaApiClient.registerPushToken(
         accessToken: access,
         pushToken: pushToken,
-        languageCode: LanguageUtil.getCurrentLanguageCode(),
         languageTag: LanguageUtil.getCurrentLanguageTag(),
       );
     } catch (_) {}

@@ -8,7 +8,6 @@ class TokenStorage {
   static const _keyRefreshToken = 'suda_refresh_token';
   static const _keyAccessTokenSavedAt = 'suda_access_token_saved_at';
   static const _keyDeviceId = 'suda_device_id';
-  static const _keyLanguageCode = 'suda_language_code';
   static const _keyLatestVersion = 'suda_latest_version';
   static const _secureStorage = FlutterSecureStorage();
   static const _uuid = Uuid();
@@ -86,24 +85,6 @@ class TokenStorage {
     return _secureStorage.read(key: _keyRefreshToken);
   }
 
-  /// 언어 코드 저장
-  /// 
-  /// 앱 실행 시 또는 언어 변경 시 호출하여 사용자 언어 코드를 보존 데이터 영역에 저장
-  static Future<void> saveLanguageCode(String languageCode) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_keyLanguageCode, languageCode);
-  }
-
-  /// 저장된 언어 코드 가져오기
-  /// 
-  /// 서버 API 호출 시 필요한 경우 사용
-  /// 반환값: ISO 639-1 두 글자 언어 코드 (예: 'ko', 'en', 'pt')
-  /// 저장된 값이 없으면 null 반환
-  static Future<String?> loadLanguageCode() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_keyLanguageCode);
-  }
-
   /// 최신 버전 정보 저장
   /// 
   /// 버전 체크 API 호출 시 최신 버전 정보를 영구 저장 영역에 저장
@@ -121,13 +102,11 @@ class TokenStorage {
     return prefs.getString(_keyLatestVersion);
   }
 
-  /// 모든 토큰 및 언어 코드 삭제 (로그아웃 시 사용)
+  /// 모든 토큰 삭제 (로그아웃 시 사용)
   static Future<void> clearTokens() async {
-    final prefs = await SharedPreferences.getInstance();
     await _secureStorage.delete(key: _keyAccessToken);
     await _secureStorage.delete(key: _keyRefreshToken);
     await _secureStorage.delete(key: _keyAccessTokenSavedAt);
-    await prefs.remove(_keyLanguageCode);
   }
 }
 
