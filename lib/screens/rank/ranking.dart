@@ -2224,6 +2224,26 @@ class _RankListRow extends StatelessWidget {
   static const _listAvatarOuter = 40.0;
   static const _listBorderW = 2.0;
 
+  /// 표시 `Text`와 같은 배율·상속 자간으로 넘침을 본다.
+  static bool _nameOverflows(
+    BuildContext context,
+    String text,
+    TextStyle style,
+    double maxWidth,
+  ) {
+    if (!maxWidth.isFinite || maxWidth <= 0) return text.isNotEmpty;
+    final painter = TextPainter(
+      text: TextSpan(
+        text: text,
+        style: DefaultTextStyle.of(context).style.merge(style),
+      ),
+      maxLines: 1,
+      textDirection: Directionality.of(context),
+      textScaler: MediaQuery.textScalerOf(context),
+    )..layout(maxWidth: maxWidth);
+    return painter.didExceedMaxLines;
+  }
+
   @override
   Widget build(BuildContext context) {
     final isEmpty = entry == null;
@@ -2292,74 +2312,68 @@ class _RankListRow extends StatelessWidget {
             child: GestureDetector(
               onTap: onOpenProfile,
               behavior: HitTestBehavior.opaque,
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  const badgeGap = 4.0;
-                  const badgeSize = 14.0;
-                  final badgeReserve = isPremium ? badgeGap + badgeSize : 0.0;
-                  final nameMax = (constraints.maxWidth - badgeReserve).clamp(
-                    0.0,
-                    double.infinity,
-                  );
-                  final textDir = Directionality.of(context);
-                  final textPainter = TextPainter(
-                    text: TextSpan(text: displayName, style: nameStyle),
-                    maxLines: 1,
-                    textDirection: textDir,
-                  )..layout();
-                  final textW = textPainter.width;
-                  final needsMarquee = textW > nameMax;
-                  final nameW = needsMarquee ? nameMax : textW;
-
-                  return Row(
-                    children: [
-                      SizedBox(
-                        width: nameW,
-                        height: 16,
-                        child: needsMarquee
-                            ? Marquee(
-                                text: displayName,
-                                style: nameStyle,
-                                scrollAxis: Axis.horizontal,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                blankSpace: 24,
-                                velocity: 30,
-                                pauseAfterRound: const Duration(seconds: 2),
-                                startPadding: 0,
-                                accelerationDuration: const Duration(
-                                  seconds: 1,
-                                ),
-                                accelerationCurve: Curves.linear,
-                                decelerationDuration: const Duration(
-                                  milliseconds: 500,
-                                ),
-                                decelerationCurve: Curves.easeOut,
-                              )
-                            : Align(
-                                alignment: AlignmentDirectional.centerStart,
-                                child: Text(
-                                  displayName,
-                                  maxLines: 1,
-                                  softWrap: false,
-                                  overflow: TextOverflow.clip,
-                                  style: nameStyle,
-                                ),
+              child: Row(
+                children: [
+                  Flexible(
+                    fit: FlexFit.loose,
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final overflows = _nameOverflows(
+                          context,
+                          displayName,
+                          nameStyle,
+                          constraints.maxWidth,
+                        );
+                        if (overflows) {
+                          return SizedBox(
+                            width: constraints.maxWidth,
+                            height: 16,
+                            child: Marquee(
+                              text: displayName,
+                              style: nameStyle,
+                              scrollAxis: Axis.horizontal,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              blankSpace: 24,
+                              velocity: 30,
+                              pauseAfterRound: const Duration(seconds: 2),
+                              startPadding: 0,
+                              accelerationDuration: const Duration(seconds: 1),
+                              accelerationCurve: Curves.linear,
+                              decelerationDuration: const Duration(
+                                milliseconds: 500,
                               ),
-                      ),
-                      if (isPremium) ...[
-                        const SizedBox(width: badgeGap),
-                        Transform.translate(
-                          offset: const Offset(0, 1),
-                          child: Image.asset(
-                            premiumBadge,
-                            width: badgeSize,
-                            height: badgeSize,
+                              decelerationCurve: Curves.easeOut,
+                            ),
+                          );
+                        }
+                        return SizedBox(
+                          height: 16,
+                          child: Align(
+                            alignment: AlignmentDirectional.centerStart,
+                            widthFactor: 1,
+                            child: Text(
+                              displayName,
+                              maxLines: 1,
+                              softWrap: false,
+                              style: nameStyle,
+                            ),
                           ),
-                        ),
-                      ],
-                    ],
-                  );
-                },
+                        );
+                      },
+                    ),
+                  ),
+                  if (isPremium) ...[
+                    const SizedBox(width: 4),
+                    Transform.translate(
+                      offset: const Offset(0, 1),
+                      child: Image.asset(
+                        premiumBadge,
+                        width: 14,
+                        height: 14,
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
           ),

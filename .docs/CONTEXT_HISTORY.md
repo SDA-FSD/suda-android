@@ -4,6 +4,8 @@
 
 ---
 
+- **랭킹 리스트 이름(2026-10-07):** 4위+ 이름은 슬롯에 들어가면 자기 너비, 넘치면 그 폭에서 마키. 폭 판단은 배율·상속 letterSpacing. 구독 뱃지는 이름 뒤.
+
 - **에너지 팝업 상품 제목(2026-10-07):** 무제한·용량 제목은 가격(pt 무제한 취소선 포함) 실측 폭만큼 `end`만 비우고, 넘치면 그 폭에서 마키. 설명·알림 카드는 전체 폭. 마키 판정에 `textScaler`.
 
 - **Friends Share Link(2026-09-29):** 두 탭 하단 흰 알약. OS Share Sheet에 `friendsShareBody`와 `AppConfig.sharePageUrl`(dev `https://dev-sudatalk.kr/public/share`, 그 외 운영). 점프 페이지는 suda-web `/public/share`.
