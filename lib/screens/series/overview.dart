@@ -256,7 +256,7 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
 
     final levelAfter = EnglishLevelUtil.readLevelFromUser(widget.user);
     if (levelBefore != levelAfter) {
-      await _refreshBestScoreMap();
+      await _loadOverview();
     } else if (mounted) {
       setState(() {});
     }

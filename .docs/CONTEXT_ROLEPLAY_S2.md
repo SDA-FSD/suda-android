@@ -150,7 +150,7 @@ Home (시리즈 썸네일)
 - **파일**: `lib/screens/series/overview.dart`
 - **appPath**: `/series/overview/{seriesId}` → `SeriesRouter.pushOverview`
 - **API**: `GET /rps2/series/{seriesId}/overview`(`category` 포함), `GET /rps2/series/{seriesId}/best-score`
-- **복귀 시 bestScore 갱신**: `RoleplayRouter.popToOverview` 직전 `markBestScoreRefreshPending` → Overview `RouteAware.didPopNext`에서 `GET .../best-score` 재조회(현재 CEFR 기준). CEFR 변경 후와 동일 API.
+- **복귀 시 bestScore 갱신**: `RoleplayRouter.popToOverview` 직전 `markBestScoreRefreshPending` → Overview `RouteAware.didPopNext`에서 `GET .../best-score` 재조회(현재 CEFR 기준). CEFR 변경은 overview를 다시 로드한다.
 - **로드 시**: `SeriesStateService.setSeriesOverview`, **`FIRST_OVERVIEW`** 통계 (`POST /v1/users/first-overview`, metaInfo `FIRST_OVERVIEW=Y` 가드)
 - **에피소드 Play**: `setSelectedEpisodeId(episode.id)` → `RoleplayRouter.pushTutorial`
 - **Similar Topic 탭**: `SeriesSimilarTopicTabContent` — `GET /v2/home/series?category=` 초기 0–2페이지 로드·스크롤 추가 페이징, 현재 series 제외, 3열 썸네일(`CdnThumbSlot.similarGrid`) 탭 시 Overview push
@@ -332,7 +332,7 @@ Home (시리즈 썸네일)
 | Method | Path | DTO | 사용처 | 상태 |
 |--------|------|-----|--------|------|
 | GET | `/rps2/series/{seriesId}/overview` | `RpS2SeriesOverviewDto` | SeriesOverview | ✅ |
-| GET | `/rps2/series/{seriesId}/best-score` | `Map<int,int>` | SeriesOverview (CEFR 변경) | ✅ |
+| GET | `/rps2/series/{seriesId}/best-score` | `Map<int,int>` | SeriesOverview 플레이 복귀 | ✅ |
 | POST | `/rps2/sessions` | req: `{seriesId, episodeId}` / res: `RpS2SessionDto` | Opening Start | ✅ |
 | GET | `/rps2/sessions/{id}/translation?rpMsgId=` | **plain String** (JSON 아님) · `rpMsgId` = AI entry의 서버 `aiMsgId`/`startMsgId`(없으면 로컬 `conversationIndex`) | Playing AI 말풍선 번역 | ✅ `SeriesApi._parseStringResponse` |
 | GET | `/rps2/sessions/{id}/hint/{rpMsgId}` | `RpS2HintDto` (`hint`, `translatedHint`) · `rpMsgId` = 마지막 AI의 서버 id(없으면 로컬 `conversationIndex`) · 202 not-ready는 최대 15회 재시도 | Playing 힌트 | ✅ |
