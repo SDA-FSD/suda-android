@@ -5,6 +5,7 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../services/iap_purchase_service.dart';
@@ -23,18 +24,36 @@ import 'paywall_completed.dart';
 /// 결제 성공 → [PaywallCompletedScreen] → pop(true).
 /// Play/`pendingYn` 승인대기 → 토스트 후 화면 유지. `successYn=N` → 실패 토스트·유지.
 class PaywallScreen extends StatefulWidget {
-  const PaywallScreen({super.key, required this.screen});
+  const PaywallScreen({super.key, required this.screen, this.visualType = 1});
 
   /// Paywall mount 통계용 screen (`PaywallImpressionScreen`).
   final String screen;
 
+  /// 1·2·3. [push]가 로컬에서 1→2→3→1로 넘긴 값.
+  final int visualType;
+
   static const String routeName = '/paywall';
+  static const _visualTypeKey = 'paywall_visual_type';
+
+  /// 다음에 보여줄 type. 없으면 1. 읽고 나서 1→2→3→1.
+  static Future<int> _takeVisualType() async {
+    final prefs = await SharedPreferences.getInstance();
+    final stored = prefs.getInt(_visualTypeKey) ?? 1;
+    final type = stored >= 1 && stored <= 3 ? stored : 1;
+    await prefs.setInt(_visualTypeKey, type == 3 ? 1 : type + 1);
+    return type;
+  }
 
   /// `true` = 구독 성공(에너지 팝업에서 Go Premium 숨김·detail 재조회).
-  static Future<T?> push<T>(BuildContext context, {required String screen}) {
+  static Future<T?> push<T>(
+    BuildContext context, {
+    required String screen,
+  }) async {
+    final visualType = await _takeVisualType();
+    if (!context.mounted) return null;
     return Navigator.of(context).push<T>(
       FullScreenRoute<T>(
-        page: PaywallScreen(screen: screen),
+        page: PaywallScreen(screen: screen, visualType: visualType),
         transition: FullScreenTransition.bottomUp,
         settings: const RouteSettings(name: routeName),
       ),
@@ -47,11 +66,107 @@ class PaywallScreen extends StatefulWidget {
 
 enum _PaywallPlan { annual, monthly }
 
+/// type 2·3 glow. 원 크기는 type 1 청록 glow와 같음.
+class _PaywallGlow {
+  const _PaywallGlow({
+    required this.leftRatio,
+    required this.topRatio,
+    required this.color,
+  });
+
+  final double leftRatio;
+  final double topRatio;
+  final Color color;
+
+  static const widthRatio = 478 / 440;
+  static const heightWidthRatio = 521 / 440;
+  static const blurSigma = 50.0;
+  static const opacity = 0.39;
+}
+
+class _PaywallVisual {
+  const _PaywallVisual({
+    required this.bgTop,
+    required this.bgBottom,
+    required this.characterAsset,
+    required this.characterAspect,
+    this.characterRightOverflow = 0.05,
+    this.glows = const [],
+  });
+
+  final Color bgTop;
+  final Color bgBottom;
+  final String characterAsset;
+  final double characterAspect;
+
+  /// 화면 너비 대비 오른쪽 삐져나감. type3은 0.
+  final double characterRightOverflow;
+  final List<_PaywallGlow> glows;
+
+  static const type1 = _PaywallVisual(
+    bgTop: Color(0xFF8A38F5),
+    bgBottom: Color(0xFF80D7CF),
+    characterAsset: 'assets/images/icons/paywall_character.png',
+    characterAspect: 1096 / 804,
+  );
+
+  static const type2 = _PaywallVisual(
+    bgTop: Color(0xFF80D7CF),
+    bgBottom: Color(0xFF8A38F5),
+    characterAsset: 'assets/images/icons/paywall_character2.png',
+    characterAspect: 1181 / 756,
+    glows: [
+      _PaywallGlow(
+        leftRatio: -239 / 440,
+        topRatio: 620 / 956,
+        color: Color(0xFF04E7E2),
+      ),
+      _PaywallGlow(
+        leftRatio: 180 / 440,
+        topRatio: 280 / 956,
+        color: Color(0xFFF8F2FF),
+      ),
+    ],
+  );
+
+  static const type3 = _PaywallVisual(
+    bgTop: Color(0xFFAD38F5),
+    bgBottom: Color(0xFFFFD6F1),
+    characterAsset: 'assets/images/icons/paywall_character3.png',
+    characterAspect: 1194 / 840,
+    characterRightOverflow: 0,
+    glows: [
+      _PaywallGlow(
+        leftRatio: -40 / 440,
+        topRatio: 280 / 956,
+        color: Color(0xFF04E7E2),
+      ),
+      _PaywallGlow(
+        leftRatio: -239 / 440,
+        topRatio: 250 / 956,
+        color: Color(0xFFF8F2FF),
+      ),
+    ],
+  );
+
+  static _PaywallVisual of(int type) {
+    switch (type) {
+      case 2:
+        return type2;
+      case 3:
+        return type3;
+      default:
+        return type1;
+    }
+  }
+}
+
 class _PaywallScreenState extends State<PaywallScreen> {
   static const _font = 'ChironHeiHK';
-  static const _bgTop = Color(0xFF8A38F5);
-  static const _bgBottom = Color(0xFF80D7CF);
   static const _heroToPremiumGapWidthRatio = 0.08;
+  static const _heroWidthRatio = 0.65;
+  static const _characterWidthRatio = 0.45;
+
   /// 배경 보라 glow (PaywallCompleted와 동일: 부모 size 대비 반응형 + blur 고정).
   static const _purpleGlowWidthRatio = 1.086;
   static const _purpleGlowHeightRatio = 0.707;
@@ -60,6 +175,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
   static const _purpleGlowColor = Color(0xFFAB6AFF);
   static const _purpleGlowOpacity = 0.57;
   static const _purpleGlowBlurSigma = 88.7;
+
   /// 배경 청록 glow (Figma 440×956 기준).
   static const _glowLeftRatio = 100 / 440;
   static const _glowTopRatio = 600 / 956;
@@ -67,24 +183,19 @@ class _PaywallScreenState extends State<PaywallScreen> {
   static const _glowHeightWidthRatio = 521 / 440;
   static const _glowColor = Color(0xFF04E7E2);
   static const _glowBlurSigma = 50.0;
-  /// 캐릭터 너비(화면 대비). 0.56에서 소폭 축소.
-  static const _heroCharacterWidthRatio = 0.50;
-  /// 값이 커질수록 왼쪽으로 이동(음수면 화면 우측으로 더 삐져나감).
-  static const _heroCharacterRightRatio = -0.03;
-  /// 에셋 804×1096.
-  static const _heroCharacterAspect = 1096 / 804;
-  /// top↑ = 캐릭터↓. 신발 끝이 PREMIUM 카드 안쪽까지 겹치도록 내림.
-  static const _heroCharacterTopDropRatio = 0.21;
-  /// 캐릭터 높이 중 카드 위로 남길(겹칠) 발 영역 비율.
-  static const _heroCharacterFootOverlapRatio = 0.08;
+
   static const _premiumCard = Color(0xFF48069D);
   static const _premiumCardTopInset = 10.0;
+
   /// Figma 콘텐츠 392 대비 카드 299.
   static const _premiumCardWidthRatio = 0.763;
+
   /// 뱃지 크기 = 카드 폭 * 0.11.
   static const _premiumBadgeSizeRatio = 0.11;
+
   /// 뱃지 왼쪽 오버행(카드 폭 기준): 2.3%
   static const _premiumBadgeLeftOverhangRatio = 0.023;
+
   /// 뱃지 위쪽 오버행(카드 폭 기준): 1.34%
   static const _premiumBadgeTopOverhangWidthRatio = 0.0134;
   static const _premiumBadgeOutlineWidth = 1.5;
@@ -110,6 +221,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
     blurRadius: 20,
     spreadRadius: 0,
   );
+
   /// 플랜 카드 전용 soft drop (glow 위에서도 또렷하게).
   static const _planCardShadow = BoxShadow(
     color: Color(0x66000000), // #000000 40%
@@ -118,10 +230,9 @@ class _PaywallScreenState extends State<PaywallScreen> {
     spreadRadius: 0,
   );
 
+  _PaywallVisual get _visual => _PaywallVisual.of(widget.visualType);
+
   _PaywallPlan _selected = _PaywallPlan.annual;
-  final GlobalKey _heroStackKey = GlobalKey();
-  final GlobalKey _premiumCardKey = GlobalKey();
-  double? _premiumCardTopInStack;
   late final TapGestureRecognizer _termsRecognizer;
   late final TapGestureRecognizer _privacyRecognizer;
   late final TapGestureRecognizer _restoreRecognizer;
@@ -145,9 +256,10 @@ class _PaywallScreenState extends State<PaywallScreen> {
     super.initState();
     _termsRecognizer = TapGestureRecognizer()..onTap = _openTerms;
     _privacyRecognizer = TapGestureRecognizer()..onTap = _openPrivacy;
-    _restoreRecognizer = TapGestureRecognizer()..onTap = () {
-      unawaited(_onRestoreTap());
-    };
+    _restoreRecognizer = TapGestureRecognizer()
+      ..onTap = () {
+        unawaited(_onRestoreTap());
+      };
     IapPurchaseService.instance.uiListenable.addListener(_onIapUi);
     IapPurchaseService.instance.userNotice.addListener(_onIapNotice);
     unawaited(_loadPrices());
@@ -191,8 +303,8 @@ class _PaywallScreenState extends State<PaywallScreen> {
   }
 
   Future<void> _loadPrices() async {
-    final prices =
-        await IapPurchaseService.instance.loadPremiumSubscriptionPrices();
+    final prices = await IapPurchaseService.instance
+        .loadPremiumSubscriptionPrices();
     if (!mounted) return;
     setState(() => _prices = prices);
   }
@@ -237,7 +349,9 @@ class _PaywallScreenState extends State<PaywallScreen> {
 
   String _annualPriceSub(AppLocalizations l10n) {
     final v = _prices?.yearlyPerMonthFormatted;
-    final amount = (v != null && v.isNotEmpty) ? v : l10n.paywallFallbackAnnualPerMonth;
+    final amount = (v != null && v.isNotEmpty)
+        ? v
+        : l10n.paywallFallbackAnnualPerMonth;
     return l10n.paywallPricePerMonth(amount);
   }
 
@@ -250,7 +364,9 @@ class _PaywallScreenState extends State<PaywallScreen> {
 
   String _monthlyPriceMain(AppLocalizations l10n) {
     final v = _prices?.monthlyFormatted;
-    final amount = (v != null && v.isNotEmpty) ? v : l10n.paywallFallbackMonthly;
+    final amount = (v != null && v.isNotEmpty)
+        ? v
+        : l10n.paywallFallbackMonthly;
     return l10n.paywallPricePerMonth(amount);
   }
 
@@ -400,8 +516,8 @@ class _PaywallScreenState extends State<PaywallScreen> {
     final wght = weight == FontWeight.w700
         ? 700.0
         : weight == FontWeight.w600
-            ? 600.0
-            : 400.0;
+        ? 600.0
+        : 400.0;
     return TextStyle(
       fontFamily: _font,
       fontSize: size,
@@ -438,7 +554,8 @@ class _PaywallScreenState extends State<PaywallScreen> {
         maxLines: maxLines,
       )..layout(maxWidth: maxWidth);
       final linesOk = !painter.didExceedMaxLines;
-      final tokensOk = !requireTokensFit ||
+      final tokensOk =
+          !requireTokensFit ||
           !_anyTokenExceedsWidth(text, style, maxWidth, textDirection);
       if (linesOk && tokensOk) return fontSize;
 
@@ -501,19 +618,6 @@ class _PaywallScreenState extends State<PaywallScreen> {
     return !painter.didExceedMaxLines;
   }
 
-  double _lineTextWidth({
-    required String text,
-    required TextStyle style,
-    required TextDirection textDirection,
-  }) {
-    final painter = TextPainter(
-      text: TextSpan(text: text, style: style),
-      textDirection: textDirection,
-      maxLines: 1,
-    )..layout();
-    return painter.width;
-  }
-
   /// arb `\n`은 2줄 필요할 때만 적용. 1줄에 들어가면 공백으로 이어 붙여 표시.
   ({String displayText, double fontSize}) _resolveSoftBreakHeroTitle({
     required String textWithBreaks,
@@ -542,33 +646,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
             textDirection: textDirection,
             maxLines: 1,
           ) &&
-          !_anyTokenExceedsWidth(
-            singleLine,
-            style,
-            maxWidth,
-            textDirection,
-          )) {
-        // `\n`이 있는데 1줄이 더 넓으면(예: Improve Faster) 캐릭터 손과 겹침 → 줄바꿈 유지.
-        if (textWithBreaks.contains('\n')) {
-          var maxBrokenWidth = 0.0;
-          for (final line in textWithBreaks.split('\n')) {
-            if (line.trim().isEmpty) continue;
-            final w = _lineTextWidth(
-              text: line,
-              style: style,
-              textDirection: textDirection,
-            );
-            if (w > maxBrokenWidth) maxBrokenWidth = w;
-          }
-          final singleWidth = _lineTextWidth(
-            text: singleLine,
-            style: style,
-            textDirection: textDirection,
-          );
-          if (singleWidth > maxBrokenWidth) {
-            break;
-          }
-        }
+          !_anyTokenExceedsWidth(singleLine, style, maxWidth, textDirection)) {
         return (displayText: singleLine, fontSize: fontSize);
       }
       fontSize -= 0.5;
@@ -649,16 +727,16 @@ class _PaywallScreenState extends State<PaywallScreen> {
         }
 
         final textStyle = styleBase.copyWith(fontSize: fittedSize);
-        final displayMaxLines =
-            displayText.contains('\n') ? maxLines : 1;
+        final displayMaxLines = displayText.contains('\n') ? maxLines : 1;
         final painter = TextPainter(
           text: TextSpan(text: displayText, style: textStyle),
           textAlign: align,
           textDirection: textDirection,
           maxLines: displayMaxLines,
         )..layout(maxWidth: maxWidth);
+        final shaderWidth = align == TextAlign.center ? maxWidth : painter.width;
         final shader = gradient.createShader(
-          Rect.fromLTWH(0, 0, painter.width, painter.height),
+          Rect.fromLTWH(0, 0, shaderWidth, painter.height),
         );
         return Text(
           displayText,
@@ -674,26 +752,37 @@ class _PaywallScreenState extends State<PaywallScreen> {
     );
   }
 
-  void _measurePremiumCardTop() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      final stackContext = _heroStackKey.currentContext;
-      final cardContext = _premiumCardKey.currentContext;
-      if (stackContext == null || cardContext == null) return;
-
-      final stackBox = stackContext.findRenderObject() as RenderBox?;
-      final cardBox = cardContext.findRenderObject() as RenderBox?;
-      if (stackBox == null || cardBox == null) return;
-
-      final cardTop = cardBox.localToGlobal(
-        Offset.zero,
-        ancestor: stackBox,
-      ).dy;
-      final current = _premiumCardTopInStack;
-      if (current == null || (current - cardTop).abs() > 0.5) {
-        setState(() => _premiumCardTopInStack = cardTop);
-      }
-    });
+  Widget _variantGlow(Size size, _PaywallGlow glow) {
+    const blur = _PaywallGlow.blurSigma;
+    return Positioned(
+      left: size.width * glow.leftRatio - blur * 2,
+      top: size.height * glow.topRatio - blur * 2,
+      child: IgnorePointer(
+        child: RepaintBoundary(
+          child: ImageFiltered(
+            imageFilter: ImageFilter.blur(
+              sigmaX: blur,
+              sigmaY: blur,
+              tileMode: TileMode.decal,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(blur * 2),
+              child: Opacity(
+                opacity: _PaywallGlow.opacity,
+                child: Container(
+                  width: size.width * _PaywallGlow.widthRatio,
+                  height: size.width * _PaywallGlow.heightWidthRatio,
+                  decoration: BoxDecoration(
+                    color: glow.color,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -701,8 +790,8 @@ class _PaywallScreenState extends State<PaywallScreen> {
     final size = MediaQuery.sizeOf(context);
     final topPad = MediaQuery.paddingOf(context).top;
     final bottomPad = MediaQuery.paddingOf(context).bottom;
-    final characterWidth = size.width * _heroCharacterWidthRatio;
-    final characterHeight = characterWidth * _heroCharacterAspect;
+    final characterWidth = size.width * _characterWidthRatio;
+    final characterHeight = characterWidth * _visual.characterAspect;
     // X는 상태바 아래 안전영역에 고정한다.
     const closeTop = 8.0;
     const closeButtonSize = 44.0;
@@ -711,253 +800,295 @@ class _PaywallScreenState extends State<PaywallScreen> {
     const closeToTextMinGap = 8.0;
     const headerBandTop = 0.0;
     final baseHeroTopGap = (12 + (size.height * 0.01)) * 0.8;
-    final minHeroTopGap = (topPad + closeTop + closeButtonSize + closeToTextMinGap) -
+    final minHeroTopGap =
+        (topPad + closeTop + closeButtonSize + closeToTextMinGap) -
         (headerBandTop + closeButtonSize + contentPaddingTop + heroInnerTop);
     final heroTopGap = baseHeroTopGap < minHeroTopGap
         ? minHeroTopGap
         : baseHeroTopGap;
-    final overlapHeight = characterHeight * _heroCharacterFootOverlapRatio;
-    // 카드 실측 top에 종속: 캐릭터 발이 카드 상단에 살짝 겹치도록.
-    final characterTop = _premiumCardTopInStack != null
-        ? _premiumCardTopInStack! - (characterHeight - overlapHeight)
-        // 초기 1프레임 fallback (측정 전): 기존 대비 과도한 점프 방지용.
-        : (closeButtonSize + contentPaddingTop + heroTopGap) +
-            (characterHeight * _heroCharacterTopDropRatio);
-
-    _measurePremiumCardTop();
 
     return Scaffold(
-      backgroundColor: _bgTop,
+      backgroundColor: _visual.bgTop,
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [_bgTop, _bgBottom],
+            colors: [_visual.bgTop, _visual.bgBottom],
           ),
         ),
         child: Stack(
           clipBehavior: Clip.none,
           children: [
-            // 그라디언트 위 · 콘텐츠 아래 보라 glow (캐릭터/그림자 clip 방지를 위해 이 레이어만 ClipRect)
-            Positioned.fill(
-              child: IgnorePointer(
-                child: ClipRect(
-                  child: Stack(
-                    clipBehavior: Clip.hardEdge,
-                    children: [
-                      Positioned(
-                        left: size.width * _purpleGlowLeftRatio -
-                            _purpleGlowBlurSigma * 2,
-                        top: size.height * _purpleGlowTopRatio -
-                            _purpleGlowBlurSigma * 2,
-                        child: ImageFiltered(
-                          imageFilter: ImageFilter.blur(
-                            sigmaX: _purpleGlowBlurSigma,
-                            sigmaY: _purpleGlowBlurSigma,
-                            tileMode: TileMode.decal,
-                          ),
-                          child: Padding(
-                            padding:
-                                const EdgeInsets.all(_purpleGlowBlurSigma * 2),
-                            child: Opacity(
-                              opacity: _purpleGlowOpacity,
-                              child: Container(
-                                width: size.width * _purpleGlowWidthRatio,
-                                height: size.height * _purpleGlowHeightRatio,
-                                decoration: const BoxDecoration(
-                                  color: _purpleGlowColor,
-                                  shape: BoxShape.circle,
+            if (_visual.glows.isEmpty) ...[
+              // 그라디언트 위 · 콘텐츠 아래 보라 glow (캐릭터/그림자 clip 방지를 위해 이 레이어만 ClipRect)
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: ClipRect(
+                    child: Stack(
+                      clipBehavior: Clip.hardEdge,
+                      children: [
+                        Positioned(
+                          left:
+                              size.width * _purpleGlowLeftRatio -
+                              _purpleGlowBlurSigma * 2,
+                          top:
+                              size.height * _purpleGlowTopRatio -
+                              _purpleGlowBlurSigma * 2,
+                          child: ImageFiltered(
+                            imageFilter: ImageFilter.blur(
+                              sigmaX: _purpleGlowBlurSigma,
+                              sigmaY: _purpleGlowBlurSigma,
+                              tileMode: TileMode.decal,
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(
+                                _purpleGlowBlurSigma * 2,
+                              ),
+                              child: Opacity(
+                                opacity: _purpleGlowOpacity,
+                                child: Container(
+                                  width: size.width * _purpleGlowWidthRatio,
+                                  height: size.height * _purpleGlowHeightRatio,
+                                  decoration: const BoxDecoration(
+                                    color: _purpleGlowColor,
+                                    shape: BoxShape.circle,
+                                  ),
                                 ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-            // "Escolha seu plano" 근처 좌측 청록 glow
-            Positioned(
-              left: size.width * _glowLeftRatio - _glowBlurSigma * 2,
-              top: size.height * _glowTopRatio - _glowBlurSigma * 2,
-              child: IgnorePointer(
-                // ImageFiltered를 별 레이어로 분리해야 형제 위젯 boxShadow가 합성에서 살아남음.
-                child: RepaintBoundary(
-                  child: ImageFiltered(
-                    imageFilter: ImageFilter.blur(
-                      sigmaX: _glowBlurSigma,
-                      sigmaY: _glowBlurSigma,
-                      tileMode: TileMode.decal,
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(_glowBlurSigma * 2),
-                      child: Container(
-                        width: size.width * _glowWidthRatio,
-                        height: size.width * _glowHeightWidthRatio,
-                        decoration: const BoxDecoration(
-                          color: _glowColor,
-                          shape: BoxShape.circle,
+              // "Escolha seu plano" 근처 좌측 청록 glow
+              Positioned(
+                left: size.width * _glowLeftRatio - _glowBlurSigma * 2,
+                top: size.height * _glowTopRatio - _glowBlurSigma * 2,
+                child: IgnorePointer(
+                  // ImageFiltered를 별 레이어로 분리해야 형제 위젯 boxShadow가 합성에서 살아남음.
+                  child: RepaintBoundary(
+                    child: ImageFiltered(
+                      imageFilter: ImageFilter.blur(
+                        sigmaX: _glowBlurSigma,
+                        sigmaY: _glowBlurSigma,
+                        tileMode: TileMode.decal,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(_glowBlurSigma * 2),
+                        child: Container(
+                          width: size.width * _glowWidthRatio,
+                          height: size.width * _glowHeightWidthRatio,
+                          decoration: const BoxDecoration(
+                            color: _glowColor,
+                            shape: BoxShape.circle,
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
+            ] else
+              for (final glow in _visual.glows) _variantGlow(size, glow),
             SingleChildScrollView(
               clipBehavior: Clip.none,
               padding: EdgeInsets.only(bottom: bottomPad + 24),
-              child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              SizedBox(height: headerBandTop),
-              // X·히어로·PREMIUM·캐릭터를 한 Stack에 두고, 캐릭터를 마지막에
-              // 그려 발이 카드 위에 보이도록 함 (이전엔 Column 순서로 카드가 덮음).
-              Stack(
-                key: _heroStackKey,
+              child: Stack(
                 clipBehavior: Clip.none,
                 children: [
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      const SizedBox(height: 44),
+                      SizedBox(height: headerBandTop),
+                      Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              const SizedBox(height: 44),
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(
+                                  24,
+                                  8,
+                                  24,
+                                  0,
+                                ),
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    SizedBox(height: heroTopGap),
+                                    _buildHeroPremiumSection(size),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          PositionedDirectional(
+                            start: 8,
+                            top: topPad + closeTop,
+                            child: IconButton(
+                              onPressed: () => Navigator.of(context).maybePop(),
+                              icon: const Icon(
+                                Icons.close,
+                                color: Colors.white,
+                                size: 28,
+                              ),
+                              padding: const EdgeInsets.all(8),
+                              constraints: const BoxConstraints(
+                                minWidth: 44,
+                                minHeight: 44,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: size.height * 0.028),
+                      _buildPlanDivider(),
+                      const SizedBox(height: 14),
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
+                        padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            SizedBox(height: heroTopGap),
-                            _buildHeroPremiumSection(size, characterWidth),
+                            _buildAnnualPlan(),
+                            const SizedBox(height: 12),
+                            _buildMonthlyPlan(),
+                            SizedBox(height: size.height * 0.028),
+                            _buildCta(),
+                            const SizedBox(height: 12),
+                            Text(
+                              AppLocalizations.of(
+                                context,
+                              )!.paywallAutoRenewNotice,
+                              textAlign: TextAlign.center,
+                              style: _style(
+                                size: 12,
+                                color: _legal,
+                                height: 1.35,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            Text.rich(
+                              TextSpan(
+                                style: _style(size: 10, color: _legal),
+                                children: [
+                                  TextSpan(
+                                    text: AppLocalizations.of(
+                                      context,
+                                    )!.settingsTerms,
+                                    style: _style(size: 10, color: _legal)
+                                        .copyWith(
+                                          decoration: TextDecoration.underline,
+                                          decorationColor: _legal,
+                                        ),
+                                    recognizer: _termsRecognizer,
+                                  ),
+                                  const TextSpan(text: '  •  '),
+                                  TextSpan(
+                                    text: AppLocalizations.of(
+                                      context,
+                                    )!.settingsPrivacy,
+                                    style: _style(size: 10, color: _legal)
+                                        .copyWith(
+                                          decoration: TextDecoration.underline,
+                                          decorationColor: _legal,
+                                        ),
+                                    recognizer: _privacyRecognizer,
+                                  ),
+                                  if (!kIsWeb && Platform.isIOS) ...[
+                                    const TextSpan(text: '  •  '),
+                                    TextSpan(
+                                      text: AppLocalizations.of(
+                                        context,
+                                      )!.settingsRestorePurchases,
+                                      style: _style(size: 10, color: _legal)
+                                          .copyWith(
+                                            decoration:
+                                                TextDecoration.underline,
+                                            decorationColor: _legal,
+                                          ),
+                                      recognizer: _restoreRecognizer,
+                                    ),
+                                  ],
+                                ],
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
                           ],
                         ),
                       ),
                     ],
                   ),
-                  PositionedDirectional(
-                    start: 8,
-                    top: topPad + closeTop,
-                    child: IconButton(
-                      onPressed: () => Navigator.of(context).maybePop(),
-                      icon: const Icon(
-                        Icons.close,
-                        color: Colors.white,
-                        size: 28,
-                      ),
-                      padding: const EdgeInsets.all(8),
-                      constraints: const BoxConstraints(
-                        minWidth: 44,
-                        minHeight: 44,
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    right: size.width * _heroCharacterRightRatio,
-                    top: characterTop,
-                    child: IgnorePointer(
-                      child: Image.asset(
-                        'assets/images/icons/paywall_character.png',
-                        width: characterWidth,
-                        height: characterHeight,
-                        fit: BoxFit.contain,
-                      ),
-                    ),
+                  _characterLayer(
+                    size,
+                    characterWidth,
+                    characterHeight,
+                    topPad,
                   ),
                 ],
               ),
-              SizedBox(height: size.height * 0.028),
-              _buildPlanDivider(),
-              const SizedBox(height: 14),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _buildAnnualPlan(),
-                    const SizedBox(height: 12),
-                    _buildMonthlyPlan(),
-                    SizedBox(height: size.height * 0.028),
-                    _buildCta(),
-                    const SizedBox(height: 12),
-                    Text(
-                      AppLocalizations.of(context)!.paywallAutoRenewNotice,
-                      textAlign: TextAlign.center,
-                      style: _style(size: 12, color: _legal, height: 1.35),
-                    ),
-                    const SizedBox(height: 10),
-                    Text.rich(
-                      TextSpan(
-                        style: _style(size: 10, color: _legal),
-                        children: [
-                          TextSpan(
-                            text: AppLocalizations.of(context)!.settingsTerms,
-                            style: _style(size: 10, color: _legal).copyWith(
-                              decoration: TextDecoration.underline,
-                              decorationColor: _legal,
-                            ),
-                            recognizer: _termsRecognizer,
-                          ),
-                          const TextSpan(text: '  •  '),
-                          TextSpan(
-                            text: AppLocalizations.of(context)!.settingsPrivacy,
-                            style: _style(size: 10, color: _legal).copyWith(
-                              decoration: TextDecoration.underline,
-                              decorationColor: _legal,
-                            ),
-                            recognizer: _privacyRecognizer,
-                          ),
-                          if (!kIsWeb && Platform.isIOS) ...[
-                            const TextSpan(text: '  •  '),
-                            TextSpan(
-                              text: AppLocalizations.of(context)!
-                                  .settingsRestorePurchases,
-                              style: _style(size: 10, color: _legal).copyWith(
-                                decoration: TextDecoration.underline,
-                                decorationColor: _legal,
-                              ),
-                              recognizer: _restoreRecognizer,
-                            ),
-                          ],
-                        ],
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildHeroPremiumSection(Size size, double characterWidth) {
+  Widget _characterLayer(
+    Size size,
+    double characterWidth,
+    double characterHeight,
+    double top,
+  ) {
+    return Positioned(
+      right: -size.width * _visual.characterRightOverflow,
+      top: top,
+      child: IgnorePointer(
+        child: Image.asset(
+          _visual.characterAsset,
+          width: characterWidth,
+          height: characterHeight,
+          fit: BoxFit.contain,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeroPremiumSection(Size size) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _buildHero(characterWidth),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: SizedBox(
+            width: size.width * _heroWidthRatio,
+            child: _buildHero(),
+          ),
+        ),
         SizedBox(height: size.width * _heroToPremiumGapWidthRatio),
         _buildPremiumCard(),
       ],
     );
   }
 
-  Widget _buildHero(double characterWidth) {
+  Widget _buildHero() {
     final l10n = AppLocalizations.of(context)!;
     return Padding(
-      padding: EdgeInsets.only(right: characterWidth * 0.62, top: 12),
+      padding: const EdgeInsets.only(top: 12),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
             l10n.paywallHeroTitle1,
+            textAlign: TextAlign.center,
             style: _style(
               size: 20,
               weight: FontWeight.w600,
@@ -967,6 +1098,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
           const SizedBox(height: 4),
           _gradientText(
             text: l10n.paywallHeroTitle2,
+            align: TextAlign.center,
             style: _style(size: 32, weight: FontWeight.w700),
             // `\n`은 2줄 필요할 때만 적용. 1줄에 들어가면 줄바꿈 없음.
             softLineBreak: true,
@@ -1017,6 +1149,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
 
         return Text(
           text,
+          textAlign: TextAlign.center,
           // 줄 수 제한 없음 → 공간 부족 시 아래로 늘어나며 전부 표시.
           overflow: TextOverflow.visible,
           style: fittedStyle,
@@ -1038,7 +1171,8 @@ class _PaywallScreenState extends State<PaywallScreen> {
         // Figma 실측 오버행 기준: 좌 2.3%, 상 1.34%(둘 다 카드폭 기준).
         final badgeLeft = -(cardWidth * _premiumBadgeLeftOverhangRatio);
         final badgeTop =
-            _premiumCardTopInset - (cardWidth * _premiumBadgeTopOverhangWidthRatio);
+            _premiumCardTopInset -
+            (cardWidth * _premiumBadgeTopOverhangWidthRatio);
 
         return Align(
           alignment: Alignment.center,
@@ -1048,7 +1182,6 @@ class _PaywallScreenState extends State<PaywallScreen> {
               clipBehavior: Clip.none,
               children: [
                 Container(
-                  key: _premiumCardKey,
                   width: cardWidth,
                   margin: const EdgeInsets.only(top: _premiumCardTopInset),
                   padding: const EdgeInsets.fromLTRB(16, 6, 16, 18),
@@ -1149,13 +1282,9 @@ class _PaywallScreenState extends State<PaywallScreen> {
                 maxLines: 1,
               )..layout(maxWidth: maxWidth);
               // 1줄 불가해도 말줄임/fade 없이 줄바꿈해 전부 표시.
-              final fitsOneLine = !oneLinePainter.didExceedMaxLines &&
-                  !_anyTokenExceedsWidth(
-                    label,
-                    style,
-                    maxWidth,
-                    textDirection,
-                  );
+              final fitsOneLine =
+                  !oneLinePainter.didExceedMaxLines &&
+                  !_anyTokenExceedsWidth(label, style, maxWidth, textDirection);
 
               return Text(
                 label,
@@ -1273,8 +1402,10 @@ class _PaywallScreenState extends State<PaywallScreen> {
                   borderRadius: BorderRadius.circular(radius),
                 ),
                 child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 5,
+                  ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -1298,10 +1429,10 @@ class _PaywallScreenState extends State<PaywallScreen> {
                       const SizedBox(width: 4),
                       _gradientText(
                         text: AppLocalizations.of(context)!.paywallBestBadge,
-                        style: _style(size: 14, weight: FontWeight.w700)
-                            .copyWith(
-                          letterSpacing: 14 * -0.01,
-                        ),
+                        style: _style(
+                          size: 14,
+                          weight: FontWeight.w700,
+                        ).copyWith(letterSpacing: 14 * -0.01),
                         shadows: const [_melhorGlyphShadow],
                         gradient: const LinearGradient(
                           begin: Alignment.centerLeft,
@@ -1345,8 +1476,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
     // 선택/미선택 모두 outside stroke → 안쪽 콘텐츠 크기 고정(탭 시 밀림 방지).
     const selectedBorderWidth = 3.0;
     const unselectedBorderWidth = 1.0;
-    final strokeWidth =
-        selected ? selectedBorderWidth : unselectedBorderWidth;
+    final strokeWidth = selected ? selectedBorderWidth : unselectedBorderWidth;
     // 그림자는 Material/Ink 바깥에 둬 clip에 잘리지 않게 함.
     final cardBody = Ink(
       decoration: BoxDecoration(
@@ -1365,12 +1495,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
         borderRadius: radius,
         clipBehavior: Clip.antiAlias,
         child: Padding(
-          padding: EdgeInsets.fromLTRB(
-            14,
-            showMelhorBadge ? 26 : 14,
-            14,
-            14,
-          ),
+          padding: EdgeInsets.fromLTRB(14, showMelhorBadge ? 26 : 14, 14, 14),
           child: IntrinsicHeight(
             child: Row(
               crossAxisAlignment: showMelhorBadge
@@ -1407,9 +1532,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
                               subtitle,
                               style: _style(
                                 size: 14,
-                                color: _planTitle.withValues(
-                                  alpha: 0.85,
-                                ),
+                                color: _planTitle.withValues(alpha: 0.85),
                                 height: 1.3,
                               ),
                             ),
@@ -1480,11 +1603,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
             clipBehavior: Clip.none,
             children: [
               painted,
-              Positioned(
-                left: 10,
-                top: -16,
-                child: _melhorBadge(),
-              ),
+              Positioned(left: 10, top: -16, child: _melhorBadge()),
             ],
           )
         : painted;
@@ -1594,10 +1713,7 @@ class _MelhorBadgeStrokePainter extends CustomPainter {
       size.width - strokeWidth,
       size.height - strokeWidth,
     );
-    final rrect = RRect.fromRectAndRadius(
-      rect,
-      Radius.circular(radius),
-    );
+    final rrect = RRect.fromRectAndRadius(rect, Radius.circular(radius));
     final paint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
@@ -1644,10 +1760,7 @@ class _PlanCardOutsideStrokePainter extends CustomPainter {
       size.width + strokeWidth,
       size.height + strokeWidth,
     );
-    final rrect = RRect.fromRectAndRadius(
-      rect,
-      Radius.circular(radius + half),
-    );
+    final rrect = RRect.fromRectAndRadius(rect, Radius.circular(radius + half));
     final paint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
