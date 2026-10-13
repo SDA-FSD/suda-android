@@ -21,20 +21,9 @@ class AppDialogService {
 
   static bool get _isIos => !kIsWeb && Platform.isIOS;
 
-  static Uri _resolveStoreUri({
-    String? aosMarketLink,
-    String? iosMarketLink,
-    required String packageName,
-  }) {
+  static Uri _resolveStoreUri(String packageName) {
     if (_isIos) {
-      if (iosMarketLink != null) {
-        return Uri.parse(iosMarketLink);
-      }
       return Uri.parse(_iosAppStoreUrl);
-    }
-
-    if (aosMarketLink != null) {
-      return Uri.parse(aosMarketLink);
     }
     return _playStoreDetailsUri(packageName);
   }
@@ -43,11 +32,7 @@ class AppDialogService {
   ///
   /// [navigatorKey]를 사용하여 MaterialApp의 Navigator에 접근
   /// 팝업 표시 실패 시 앱을 종료
-  static Future<void> showForceUpdateDialog(
-    GlobalKey<NavigatorState> navigatorKey, {
-    String? aosMarketLink,
-    String? iosMarketLink,
-  }) async {
+  static Future<void> showForceUpdateDialog(GlobalKey<NavigatorState> navigatorKey) async {
     try {
       return showDialog<void>(
         context: navigatorKey.currentContext!,
@@ -62,11 +47,7 @@ class AppDialogService {
                 onPressed: () async {
                   try {
                     final info = await PackageInfo.fromPlatform();
-                    final storeUri = _resolveStoreUri(
-                      aosMarketLink: aosMarketLink,
-                      iosMarketLink: iosMarketLink,
-                      packageName: info.packageName,
-                    );
+                    final storeUri = _resolveStoreUri(info.packageName);
                     await launchUrl(
                       storeUri,
                       mode: LaunchMode.externalApplication,

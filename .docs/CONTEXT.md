@@ -137,7 +137,7 @@ xcrun altool --upload-app --type ios -f build/ios/ipa/suda.ipa --apiKey "$(cat ~
 - `GET /v1/users/notification` (`readYn`, `sendFinishedAt` 30일). 읽음 `POST …/notification/{id}/read`
 - GNB 빨간 점: 종은 `notiboxUnreadYn`. 랭킹·프로필은 `rankBadgeYn`·`profileBadgeYn`. 랭킹 탭을 열어 `POST /v1/rank/seen`이 `recordedYn=Y`면 랭킹 점만 끈 뒤 `GET /v2/home/badges`로 맞춘다. 보상 수령 후에도 같은 badges 조회. 미수령 랭킹 보상이 있으면 phase와 무관하게 점이 켜진다. 없으면 COLLECT에서 그 period를 한 번도 안 봤거나 마지막으로 본 스냅샷과 등수 숫자가 다를 때. 프로필 점은 배포 이후 지급된 레벨업 미수령(이후 업적도 같은 세트). 배포 전 지급분은 점이 없고, 현재 period를 막는 기준은 없다. Like만 변한 등수는 점이 아니다
 
-기타 엔드포인트 세부는 코드·`CONTEXT_ROLEPLAY_S2.md` API 표. 버전 체크: `VersionCheckService` — 강제 업데이트/`forceUpdateYn==Y` 또는 네트워크 실패 시 팝업 후 종료, 통과 후에만 JWT.
+기타 엔드포인트 세부는 코드·`CONTEXT_ROLEPLAY_S2.md` API 표. 버전 체크: `VersionCheckService` — `GET /v1/latest-version`은 `version`·`forceUpdateYn`만. 강제 업데이트(`forceUpdateYn==Y`이고 최신이 더 높음) 또는 네트워크 실패 시 팝업 후 종료, 통과 후에만 JWT. 스토어 이동은 iOS `https://apps.apple.com/app/id6798914572`, Android는 패키지명 Play Store.
 
 ## 5. 앱 아이콘
 원본 `assets/images/app_icon.png`. `flutter pub run flutter_launcher_icons` (`pubspec.yaml`).
