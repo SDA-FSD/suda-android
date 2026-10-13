@@ -1238,6 +1238,33 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
     );
   }
 
+  void _reportSpeechFeedbackOpen(int rpMsgId) {
+    final historyId = _s2History?.id;
+    if (historyId == null) return;
+    unawaited(_sendSpeechFeedbackTap(
+      historyId: historyId,
+      rpMsgId: rpMsgId,
+      sourceScreen: widget.profileHistory ? 'HISTORY' : 'RESULT',
+    ));
+  }
+
+  Future<void> _sendSpeechFeedbackTap({
+    required int historyId,
+    required int rpMsgId,
+    required String sourceScreen,
+  }) async {
+    try {
+      final token = await TokenStorage.loadAccessToken();
+      if (token == null || token.isEmpty) return;
+      await SudaApiClient.tapRpS2SpeechFeedback(
+        accessToken: token,
+        historyId: historyId,
+        rpMsgId: rpMsgId,
+        sourceScreen: sourceScreen,
+      );
+    } catch (_) {}
+  }
+
   Future<void> _refreshUserHistoryAfterSpeechFeedbackUnlock() async {
     final historyId = _s2History?.id;
     if (historyId == null) return;
@@ -1305,6 +1332,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
                 _improvedSentenceIsPlaying,
             onImprovedTap: () =>
                 unawaited(_onImprovedSentenceTap(message.id!)),
+            onOpenFeedback: _reportSpeechFeedbackOpen,
           ),
       ];
     }
@@ -1353,6 +1381,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
               _improvedSentenceMsgId == messageId &&
               _improvedSentenceIsPlaying,
           onImprovedTap: () => unawaited(_onImprovedSentenceTap(messageId)),
+          onOpenFeedback: _reportSpeechFeedbackOpen,
         ),
       );
     }
@@ -1873,6 +1902,7 @@ class _SpeechFeedbackRow extends StatefulWidget {
     required this.improvedFetching,
     required this.improvedPlaying,
     required this.onImprovedTap,
+    required this.onOpenFeedback,
   });
 
   final int? rpMsgId;
@@ -1894,6 +1924,7 @@ class _SpeechFeedbackRow extends StatefulWidget {
   final bool improvedFetching;
   final bool improvedPlaying;
   final VoidCallback onImprovedTap;
+  final void Function(int rpMsgId) onOpenFeedback;
 
   @override
   State<_SpeechFeedbackRow> createState() => _SpeechFeedbackRowState();
@@ -1954,6 +1985,10 @@ class _SpeechFeedbackRowState extends State<_SpeechFeedbackRow> {
         );
         return;
       }
+    }
+    final openMsgId = widget.rpMsgId;
+    if (openMsgId != null) {
+      widget.onOpenFeedback(openMsgId);
     }
     final allowed = await ensureSpeechFeedbackUnlocked(
       context,

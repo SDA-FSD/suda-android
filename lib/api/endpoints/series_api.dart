@@ -728,6 +728,59 @@ class SeriesApi {
     }
   }
 
+  /// POST /rps2/user-histories/{id}/feedbacks/{rpMsgId}/tap
+  /// Feedback을 여는 탭. 응답은 무시한다.
+  static Future<void> tapSpeechFeedback({
+    required String accessToken,
+    required int historyId,
+    required int rpMsgId,
+    required String sourceScreen,
+  }) async {
+    await SudaHttpClient.executeWithRefresh(
+      () => _tapSpeechFeedbackInternal(
+        accessToken,
+        historyId,
+        rpMsgId,
+        sourceScreen,
+      ),
+      retryWithNewToken: (newToken) => _tapSpeechFeedbackInternal(
+        newToken,
+        historyId,
+        rpMsgId,
+        sourceScreen,
+      ),
+    );
+  }
+
+  static Future<void> _tapSpeechFeedbackInternal(
+    String accessToken,
+    int historyId,
+    int rpMsgId,
+    String sourceScreen,
+  ) async {
+    final uri = SudaHttpClient.buildUri(
+      '/rps2/user-histories/$historyId/feedbacks/$rpMsgId/tap',
+    );
+    late final http.Response response;
+    try {
+      response = await SudaHttpClient.client
+          .post(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+              'Content-Type': 'application/json',
+            },
+            body: jsonEncode({'sourceScreen': sourceScreen}),
+          )
+          .timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      rethrow;
+    }
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+  }
+
   static Future<int> finishSession({
     required String accessToken,
     required String rpSessionId,

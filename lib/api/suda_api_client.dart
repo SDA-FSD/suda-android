@@ -239,6 +239,20 @@ class SudaApiClient {
     );
   }
 
+  static Future<void> tapRpS2SpeechFeedback({
+    required String accessToken,
+    required int historyId,
+    required int rpMsgId,
+    required String sourceScreen,
+  }) {
+    return SeriesApi.tapSpeechFeedback(
+      accessToken: accessToken,
+      historyId: historyId,
+      rpMsgId: rpMsgId,
+      sourceScreen: sourceScreen,
+    );
+  }
+
   static Future<int> finishRpS2Session({
     required String accessToken,
     required String rpSessionId,

@@ -64,6 +64,7 @@
 /rps2/user-histories/*/expressions/*
 /rps2/user-histories/*/messages/*/audio
 /rps2/user-histories/*/feedbacks/*/audio
+/rps2/user-histories/*/feedbacks/*/tap
 /rps2/user-histories/*/user-star-rating
 /rps2/user-histories/*/report
 /rps2/user-histories/*

@@ -26,10 +26,23 @@ class RankLikeOverlay {
     );
   }
 
+  /// 테스트가 세션 Like 누적을 비울 때 쓴다.
+  static void debugReset() {
+    _pending.clear();
+    _presented = null;
+  }
+
   static void markPresented(List<int> historyIds) {
     if (historyIds.isEmpty || historyIds.any((id) => id <= 0)) return;
     final ids = [...historyIds]..sort();
     _presented = ids.join(',');
+  }
+
+  /// 캡처 이후 세션 Like가 있으면 true. 꼬리 페이지를 부르기 전에 쓴다.
+  static bool hasLikeAfterCapture(String? snapshotMinute) {
+    final capture = captureAt(snapshotMinute);
+    if (capture == null) return false;
+    return _pending.any((e) => e.observedAtUtc.isAfter(capture));
   }
 
   /// COLLECT가 아니거나 더할 세션이 없으면 null.
@@ -112,6 +125,77 @@ class RankLikeOverlay {
     return rank;
   }
 
+  /// 스냅샷에 없는 사용자. 세션 Like가 주간 Like다.
+  ///
+  /// [window]는 1위부터이거나 끝에서 연속인 3페이지 이하다.
+  /// 1위부터면 등수를 항상 정한다. 꼬리면 내 점수가 창의 맨 위보다 낮을 때만.
+  /// 목록에 끼워 넣지 않는다. 확신하지 못하면 null.
+  static RankEntryPlacement? resolveEntry({
+    required bool collect,
+    required String? snapshotMinute,
+    required List<RankEntryDto> window,
+    required int windowStartRank,
+    required bool coversRankOne,
+    required int total,
+  }) {
+    if (!collect) return null;
+    final capture = captureAt(snapshotMinute);
+    if (capture == null) return null;
+    _pending.removeWhere((e) => !e.observedAtUtc.isAfter(capture));
+    if (_pending.isEmpty) return null;
+    final nowLike = _pending.fold<int>(0, (sum, e) => sum + e.delta);
+    if (nowLike <= 0) return null;
+    final rank = _confidentEntryRank(
+      window: window,
+      windowStartRank: windowStartRank,
+      coversRankOne: coversRankOne,
+      nowLike: nowLike,
+      total: total,
+    );
+    if (rank == null) return null;
+    final ids = _pending.map((e) => e.historyId).toList()..sort();
+    return RankEntryPlacement(
+      rank: rank,
+      weeklyLike: nowLike,
+      historyIds: ids,
+    );
+  }
+
+  static int? _confidentEntryRank({
+    required List<RankEntryDto> window,
+    required int windowStartRank,
+    required bool coversRankOne,
+    required int nowLike,
+    required int total,
+  }) {
+    if (nowLike <= 0 || windowStartRank < 1) return null;
+    if (coversRankOne && windowStartRank != 1) return null;
+    if (window.isEmpty) {
+      if (coversRankOne && total == 0) return 1;
+      return null;
+    }
+    final sorted = [...window]..sort((a, b) => a.rank.compareTo(b.rank));
+    var expect = windowStartRank;
+    for (final entry in sorted) {
+      if (entry.rank != expect) return null;
+      expect++;
+    }
+    if (sorted.last.rank != total) return null;
+    if (coversRankOne) {
+      var ahead = 0;
+      for (final entry in sorted) {
+        if (entry.weeklyLike >= nowLike) ahead++;
+      }
+      return ahead + 1;
+    }
+    if (nowLike >= sorted.first.weeklyLike) return null;
+    var aheadInWindow = 0;
+    for (final entry in sorted) {
+      if (entry.weeklyLike >= nowLike) aheadInWindow++;
+    }
+    return (windowStartRank - 1) + aheadInWindow + 1;
+  }
+
   static List<RankEntryDto> reorder({
     required List<RankEntryDto> board,
     required RankEntryDto me,
@@ -140,6 +224,19 @@ class RankLikeOverlay {
     if (id != null && entry.userId == id) return true;
     return entry.isMe && me.isMe;
   }
+}
+
+/// 스냅샷 밖에 있던 사용자가 세션 Like로 들어간 등수. 고정 행만 그린다.
+class RankEntryPlacement {
+  const RankEntryPlacement({
+    required this.rank,
+    required this.weeklyLike,
+    required this.historyIds,
+  });
+
+  final int rank;
+  final int weeklyLike;
+  final List<int> historyIds;
 }
 
 class RankPersonalization {

@@ -13,6 +13,7 @@ import '../../models/rank_models.dart';
 import '../../models/user_models.dart';
 import '../../models/character_reward_models.dart';
 import '../../services/rank_like_overlay.dart';
+import '../../services/subscription_status_cache.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
 import '../../widgets/app_scaffold.dart';
@@ -112,7 +113,13 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
   RankScreenDto? _screen;
 
   /// `/entries/me` 결과. null = 미참여(스냅샷 기준). 보정 애니 중에는 as-is.
+  /// [_sessionEntry]면 스냅샷 밖 합성 등수이고, 보이는 목록에는 없다.
   RankEntryDto? _myEntryKept;
+
+  /// 꼬리 페이지로만 계산한 첫 진입. 고정 행만 보여주고 탭으로 목록을 옮기지 않는다.
+  bool _sessionEntry = false;
+
+  int _loadGen = 0;
 
   /// 스냅샷 원본. 재배치 기준이라 보정으로 덮지 않는다.
   RankEntryDto? _serverMyEntry;
@@ -260,6 +267,7 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
   }
 
   Future<void> _loadScreen() async {
+    final gen = ++_loadGen;
     // 재진입: 기존 sticky/리스트를 숨기지 않고 백그라운드 갱신 (진입 시 1초 공백 방지)
     final keepUi = _screen != null;
     if (!keepUi) {
@@ -282,7 +290,9 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
         return;
       }
       final dto = await SudaApiClient.getRankScreen(accessToken: token);
-      if (!mounted) return;
+      if (!mounted || gen != _loadGen) return;
+      final sessionEntry = await _resolveSessionEntry(dto);
+      if (!mounted || gen != _loadGen) return;
       _bumpStartTimer?.cancel();
       _stopBumpHaptics();
       _queuedBump = null;
@@ -307,6 +317,7 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
       _stickyFadeEnabled = false;
       _applied = null;
       _queuedBump = null;
+      _sessionEntry = false;
       final personalization = _resolvePersonalization();
       if (personalization != null && personalization.animate) {
         _myEntryKept = _serverMyEntry;
@@ -318,12 +329,17 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
           RankLikeOverlay.markPresented(personalization.historyIds);
         }
       }
+      if (_serverMyEntry == null && sessionEntry != null) {
+        _myEntryKept = sessionEntry;
+        _sessionEntry = true;
+      }
       debugPrint(
         'ranking loaded rows=${_listRows.length} hasMore=$_hasMorePages '
         'next=$_nextPageNum total=${dto.total} liveRankSize=${dto.period?.liveRankSize} '
         'snap=$_snapshotMinute my=${_serverMyEntry?.rank} '
         'bump=${personalization?.nowRank}/${personalization?.nowLike} '
-        'animate=${personalization?.animate}',
+        'animate=${personalization?.animate} '
+        'session=${_sessionEntry ? sessionEntry?.rank : null}',
       );
       _applyCountdown(dto.period);
       setState(() {
@@ -356,6 +372,131 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
         _loadFailed = true;
       });
     }
+  }
+
+  /// 스냅샷에 없는 사용자. 마지막 3페이지(전체가 3장 이하면 전부)로만 등수를 정한다.
+  /// 페이지는 계산용이고 보이는 목록에 붙이지 않는다.
+  Future<RankEntryDto?> _resolveSessionEntry(RankScreenDto dto) async {
+    if (widget.forceAnnouncePhase || dto.period?.phase != 'COLLECT') {
+      return null;
+    }
+    if (dto.myEntry != null) return null;
+    final snap = dto.snapshotMinute;
+    if (!RankLikeOverlay.hasLikeAfterCapture(snap)) return null;
+    final profileFuture = _sessionProfile();
+    try {
+      final window = await _sessionWindow(dto);
+      final profile = await profileFuture;
+      if (window == null || _windowContainsMe(window.entries)) return null;
+      final placement = RankLikeOverlay.resolveEntry(
+        collect: true,
+        snapshotMinute: snap,
+        window: window.entries,
+        windowStartRank: window.startRank,
+        coversRankOne: window.coversRankOne,
+        total: dto.total,
+      );
+      if (placement == null) return null;
+      final user = widget.user;
+      return RankEntryDto(
+        rank: placement.rank,
+        userId: user?.id,
+        name: profile?.name ?? user?.name,
+        imgPath: profile?.imgPath ?? user?.imgPath,
+        weeklyLike: placement.weeklyLike,
+        subscribedYn: SubscriptionStatusCache.isSubscribedActive ? 'Y' : 'N',
+        level: profile?.currentLevel ?? 0,
+        isMe: true,
+      );
+    } catch (err) {
+      debugPrint('ranking session entry failed: $err');
+      await profileFuture;
+      return null;
+    }
+  }
+
+  Future<MyProfileDto?> _sessionProfile() async {
+    try {
+      final token = await TokenStorage.loadAccessToken();
+      if (token == null || token.isEmpty) return null;
+      return await SudaApiClient.getMyProfile(accessToken: token);
+    } catch (err) {
+      debugPrint('ranking session profile failed: $err');
+      return null;
+    }
+  }
+
+  Future<({List<RankEntryDto> entries, int startRank, bool coversRankOne})?>
+  _sessionWindow(RankScreenDto dto) async {
+    final pageSize = dto.pageSize <= 0 ? 50 : dto.pageSize;
+    final totalPages = dto.totalPages;
+    final snap = dto.snapshotMinute;
+    if (totalPages <= 1) {
+      return (
+        entries: _pageZeroBoard(dto),
+        startRank: 1,
+        coversRankOne: true,
+      );
+    }
+    final last = totalPages - 1;
+    final first = totalPages <= 3 ? 0 : last - 2;
+    final fetchFrom = first == 0 ? 1 : first;
+    final pages = <RankEntryPageDto>[];
+    if (fetchFrom <= last) {
+      final fetched = await Future.wait([
+        for (var pageNum = fetchFrom; pageNum <= last; pageNum++)
+          _fetchRankPage(
+            pageNum,
+            snapshotMinute: snap,
+            noteMeta: false,
+          ),
+      ]);
+      if (fetched.any((page) => page == null)) return null;
+      for (final page in fetched) {
+        final minute = page!.snapshotMinute;
+        if (minute != null && minute.isNotEmpty && minute != snap) return null;
+        pages.add(page);
+      }
+    }
+    return (
+      entries: [
+        if (first == 0) ..._pageZeroBoard(dto),
+        for (final page in pages) ...page.entries,
+      ],
+      startRank: first * pageSize + 1,
+      coversRankOne: first == 0,
+    );
+  }
+
+  bool _windowContainsMe(List<RankEntryDto> entries) {
+    final id = widget.user?.id;
+    for (final entry in entries) {
+      if (entry.isMe) return true;
+      if (id != null && entry.userId == id) return true;
+    }
+    return false;
+  }
+
+  List<RankEntryDto> _pageZeroBoard(RankScreenDto dto) {
+    final byUser = <int, RankEntryDto>{};
+    final noId = <RankEntryDto>[];
+    void add(RankEntryDto entry) {
+      final id = entry.userId;
+      if (id == null) {
+        noId.add(entry);
+        return;
+      }
+      byUser[id] = entry;
+    }
+
+    for (final entry in dto.topEntries) {
+      add(entry);
+    }
+    for (final entry in dto.listEntries) {
+      add(entry);
+    }
+    return [...byUser.values, ...noId]
+      ..sort((a, b) => a.rank.compareTo(b.rank));
   }
 
   Future<void> _markRankSeen() async {
@@ -895,7 +1036,8 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
 
   void _syncStickyFade({bool instant = false}) {
     final me = _myEntryKept;
-    final eligible = !_isAnnouncePhase && me != null && me.rank > 10;
+    final eligible =
+        !_isAnnouncePhase && me != null && (_sessionEntry || me.rank > 10);
     final wanted = eligible && _meRowSlot == _MeRowSlot.below;
     if (!eligible) {
       _stickyFadeController.value = 0;
@@ -1040,20 +1182,27 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
     if (page.totalPages > 0) _totalPages = page.totalPages;
   }
 
-  Future<RankEntryPageDto?> _fetchRankPage(int pageNum) async {
+  Future<RankEntryPageDto?> _fetchRankPage(
+    int pageNum, {
+    String? snapshotMinute,
+    bool noteMeta = true,
+  }) async {
     final token = await TokenStorage.loadAccessToken();
     if (token == null || token.isEmpty) return null;
     final page = await SudaApiClient.getRankEntries(
       accessToken: token,
       pageNum: pageNum,
-      snapshotMinute: _snapshotMinute,
+      snapshotMinute: snapshotMinute ?? _snapshotMinute,
     );
-    _noteRankPageMeta(page);
+    if (noteMeta) _noteRankPageMeta(page);
     return page;
   }
 
   void _onStickyTap() {
-    if (_isAnnouncePhase || _jumpingToMe || _bumpAnimating) return;
+    // 합성 행은 스냅샷 페이지에 없다. 탭하면 끝 구간으로 목록이 바뀐다.
+    if (_isAnnouncePhase || _jumpingToMe || _bumpAnimating || _sessionEntry) {
+      return;
+    }
     unawaited(_revealMyRank());
   }
 
@@ -1190,7 +1339,9 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
         _myEntryKept == null &&
         !hasMeOnScreen;
     final stickyEligible =
-        isCollectRank && _myEntryKept != null && _myEntryKept!.rank > 10;
+        isCollectRank &&
+        _myEntryKept != null &&
+        (_sessionEntry || _myEntryKept!.rank > 10);
 
     final showRankingRewardClaimLayer =
         _rankingRewardClaimEntry != null &&
