@@ -421,6 +421,9 @@ class AppLocalizationsNl extends AppLocalizations {
       'Houd de microfoon ingedrukt om te praten';
 
   @override
+  String get roleplayNoWordsRecognized => 'Geen woorden herkend. Opnieuw.';
+
+  @override
   String get roleplayTypeMessagePlaceholder => 'Typ je bericht...';
 
   @override

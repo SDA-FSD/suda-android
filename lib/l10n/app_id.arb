@@ -163,6 +163,7 @@
   "speechFeedbackNoRecording": "Tidak ada rekaman.",
   "microphonePermissionDenied": "Tidak dapat memulai tanpa izin mikrofon.",
   "holdMicrophoneToSpeak": "Tekan dan tahan mikrofon untuk berbicara",
+  "roleplayNoWordsRecognized": "Tidak ada kata dikenali. Coba lagi.",
   "roleplayTypeMessagePlaceholder": "Ketik pesan Anda...",
   "yourTurnFirst": "Anda dulu!",
   "sayLineBelowToStart": "Ucapkan kalimat di bawah untuk memulai.",

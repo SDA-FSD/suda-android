@@ -163,6 +163,7 @@
   "speechFeedbackNoRecording": "Walang recording na available.",
   "microphonePermissionDenied": "Hindi makapagsimula nang walang pahintulot sa microphone.",
   "holdMicrophoneToSpeak": "Pindutin nang matagal ang mic para magsalita",
+  "roleplayNoWordsRecognized": "Walang nakilalang salita. Subukan muli.",
   "roleplayTypeMessagePlaceholder": "I-type ang mensahe mo...",
   "yourTurnFirst": "Ikaw muna!",
   "sayLineBelowToStart": "Sabihin ang linya sa ibaba para magsimula.",

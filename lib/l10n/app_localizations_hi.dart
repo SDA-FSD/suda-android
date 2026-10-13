@@ -420,6 +420,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get holdMicrophoneToSpeak => 'बोलने के लिए माइक्रोफ़ोन दबाकर रखें';
 
   @override
+  String get roleplayNoWordsRecognized => 'कोई शब्द नहीं मिला। फिर कोशिश करें।';
+
+  @override
   String get roleplayTypeMessagePlaceholder => 'अपना मैसेज लिखें...';
 
   @override

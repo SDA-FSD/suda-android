@@ -163,6 +163,7 @@
   "speechFeedbackNoRecording": "Nenhuma gravação disponível.",
   "microphonePermissionDenied": "Não é possível iniciar sem permissão do microfone.",
   "holdMicrophoneToSpeak": "Segure o microfone para falar",
+  "roleplayNoWordsRecognized": "Nenhuma palavra reconhecida. Tente novamente.",
   "roleplayTypeMessagePlaceholder": "Digite sua resposta…",
   "yourTurnFirst": "É sua vez primeiro!",
   "sayLineBelowToStart": "Diga a frase abaixo para começar.",

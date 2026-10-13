@@ -163,6 +163,7 @@
   "speechFeedbackNoRecording": "録音がありません。",
   "microphonePermissionDenied": "マイクの使用を許可しないと開始できません。",
   "holdMicrophoneToSpeak": "マイクボタンを長押しして話す",
+  "roleplayNoWordsRecognized": "言葉が認識されませんでした。もう一度どうぞ。",
   "roleplayTypeMessagePlaceholder": "メッセージを入力…",
   "yourTurnFirst": "あなたから始めましょう！",
   "sayLineBelowToStart": "下のフレーズを話して始めましょう。",

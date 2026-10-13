@@ -422,6 +422,9 @@ class AppLocalizationsVi extends AppLocalizations {
   String get holdMicrophoneToSpeak => 'Nhấn giữ micrô để nói';
 
   @override
+  String get roleplayNoWordsRecognized => 'Không nhận ra từ nào. Thử lại.';
+
+  @override
   String get roleplayTypeMessagePlaceholder => 'Nhập câu trả lời...';
 
   @override

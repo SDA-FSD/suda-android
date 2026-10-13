@@ -422,6 +422,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get holdMicrophoneToSpeak => 'Segure o microfone para falar';
 
   @override
+  String get roleplayNoWordsRecognized =>
+      'Nenhuma palavra reconhecida. Tente novamente.';
+
+  @override
   String get roleplayTypeMessagePlaceholder => 'Digite sua resposta…';
 
   @override

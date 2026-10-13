@@ -422,6 +422,9 @@ class AppLocalizationsId extends AppLocalizations {
       'Tekan dan tahan mikrofon untuk berbicara';
 
   @override
+  String get roleplayNoWordsRecognized => 'Tidak ada kata dikenali. Coba lagi.';
+
+  @override
   String get roleplayTypeMessagePlaceholder => 'Ketik pesan Anda...';
 
   @override

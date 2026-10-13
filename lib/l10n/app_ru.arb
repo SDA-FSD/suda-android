@@ -163,6 +163,7 @@
   "speechFeedbackNoRecording": "Нет доступной записи.",
   "microphonePermissionDenied": "Без доступа к микрофону начать нельзя.",
   "holdMicrophoneToSpeak": "Удерживайте кнопку микрофона и говорите",
+  "roleplayNoWordsRecognized": "Слова не распознаны. Ещё раз.",
   "roleplayTypeMessagePlaceholder": "Введите сообщение...",
   "yourTurnFirst": "Начните вы!",
   "sayLineBelowToStart": "Произнесите фразу ниже, чтобы начать.",

@@ -163,6 +163,7 @@
   "speechFeedbackNoRecording": "Keine Aufnahme verfügbar.",
   "microphonePermissionDenied": "Zum Starten ist der Mikrofonzugriff erforderlich.",
   "holdMicrophoneToSpeak": "Mikrofon gedrückt halten und sprechen",
+  "roleplayNoWordsRecognized": "Keine Wörter erkannt. Erneut versuchen.",
   "roleplayTypeMessagePlaceholder": "Nachricht eingeben ...",
   "yourTurnFirst": "Du fängst an!",
   "sayLineBelowToStart": "Sprich den Satz unten, um zu starten.",

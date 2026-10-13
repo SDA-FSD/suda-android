@@ -422,6 +422,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'Mantén presionado el micrófono para hablar';
 
   @override
+  String get roleplayNoWordsRecognized =>
+      'No se reconocieron palabras. Inténtalo de nuevo.';
+
+  @override
   String get roleplayTypeMessagePlaceholder => 'Escribe tu mensaje...';
 
   @override
@@ -1583,6 +1587,10 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
   @override
   String get holdMicrophoneToSpeak =>
       'Mantén presionado el micrófono para hablar';
+
+  @override
+  String get roleplayNoWordsRecognized =>
+      'No se reconocieron palabras. Inténtalo de nuevo.';
 
   @override
   String get roleplayTypeMessagePlaceholder => 'Escribe tu mensaje...';

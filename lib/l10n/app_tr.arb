@@ -163,6 +163,7 @@
   "speechFeedbackNoRecording": "Kayıt yok.",
   "microphonePermissionDenied": "Mikrofon izni olmadan başlanamaz.",
   "holdMicrophoneToSpeak": "Konuşmak için mikrofona basılı tut",
+  "roleplayNoWordsRecognized": "Sözcük algılanamadı. Tekrar deneyin.",
   "roleplayTypeMessagePlaceholder": "Mesajını yaz...",
   "yourTurnFirst": "İlk sıra sende!",
   "sayLineBelowToStart": "Başlamak için aşağıdaki cümleyi söyle.",

@@ -398,6 +398,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get holdMicrophoneToSpeak => '마이크를 길게 누르고 말하세요';
 
   @override
+  String get roleplayNoWordsRecognized => '인식된 말이 없습니다. 다시 말해 주세요.';
+
+  @override
   String get roleplayTypeMessagePlaceholder => '여기에 메시지를 입력하세요.';
 
   @override

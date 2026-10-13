@@ -425,6 +425,9 @@ class AppLocalizationsFr extends AppLocalizations {
       'Maintenez le bouton du micro enfoncé pour parler';
 
   @override
+  String get roleplayNoWordsRecognized => 'Aucun mot reconnu. Réessayez.';
+
+  @override
   String get roleplayTypeMessagePlaceholder => 'Saisissez votre message…';
 
   @override

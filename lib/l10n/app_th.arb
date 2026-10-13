@@ -163,6 +163,7 @@
   "speechFeedbackNoRecording": "ไม่มีไฟล์เสียงที่บันทึกไว้",
   "microphonePermissionDenied": "เริ่มไม่ได้หากไม่อนุญาตให้ใช้ไมโครโฟน",
   "holdMicrophoneToSpeak": "กดไมโครโฟนค้างไว้แล้วพูด",
+  "roleplayNoWordsRecognized": "ไม่พบคำพูด ลองอีกครั้ง",
   "roleplayTypeMessagePlaceholder": "พิมพ์ข้อความ...",
   "yourTurnFirst": "คุณพูดก่อนเลย!",
   "sayLineBelowToStart": "พูดประโยคด้านล่างเพื่อเริ่ม",

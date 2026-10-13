@@ -163,6 +163,7 @@
   "speechFeedbackNoRecording": "녹음된 음성이 없습니다.",
   "microphonePermissionDenied": "마이크 권한이 없어서 시작할 수 없습니다.",
   "holdMicrophoneToSpeak": "마이크를 길게 누르고 말하세요",
+  "roleplayNoWordsRecognized": "인식된 말이 없습니다. 다시 말해 주세요.",
   "roleplayTypeMessagePlaceholder": "여기에 메시지를 입력하세요.",
   "yourTurnFirst": "먼저 시작해주세요!",
   "sayLineBelowToStart": "아래 문장을 말해서 시작하세요.",

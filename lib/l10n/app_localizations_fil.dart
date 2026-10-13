@@ -427,6 +427,10 @@ class AppLocalizationsFil extends AppLocalizations {
       'Pindutin nang matagal ang mic para magsalita';
 
   @override
+  String get roleplayNoWordsRecognized =>
+      'Walang nakilalang salita. Subukan muli.';
+
+  @override
   String get roleplayTypeMessagePlaceholder => 'I-type ang mensahe mo...';
 
   @override

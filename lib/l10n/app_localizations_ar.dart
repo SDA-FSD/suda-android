@@ -417,6 +417,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get holdMicrophoneToSpeak => 'اضغط مطولًا على الميكروفون للتحدث';
 
   @override
+  String get roleplayNoWordsRecognized => 'لم يُتعرَّف على كلام. أعد المحاولة.';
+
+  @override
   String get roleplayTypeMessagePlaceholder => 'اكتب رسالتك...';
 
   @override

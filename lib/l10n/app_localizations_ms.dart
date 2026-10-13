@@ -423,6 +423,10 @@ class AppLocalizationsMs extends AppLocalizations {
   String get holdMicrophoneToSpeak => 'Tekan dan tahan mikrofon untuk bercakap';
 
   @override
+  String get roleplayNoWordsRecognized =>
+      'Tiada perkataan dikenali. Cuba lagi.';
+
+  @override
   String get roleplayTypeMessagePlaceholder => 'Taip mesej anda...';
 
   @override

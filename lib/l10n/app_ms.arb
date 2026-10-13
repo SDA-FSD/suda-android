@@ -163,6 +163,7 @@
   "speechFeedbackNoRecording": "Tiada rakaman tersedia.",
   "microphonePermissionDenied": "Tidak dapat bermula tanpa kebenaran mikrofon.",
   "holdMicrophoneToSpeak": "Tekan dan tahan mikrofon untuk bercakap",
+  "roleplayNoWordsRecognized": "Tiada perkataan dikenali. Cuba lagi.",
   "roleplayTypeMessagePlaceholder": "Taip mesej anda...",
   "yourTurnFirst": "Giliran anda dulu!",
   "sayLineBelowToStart": "Sebut ayat di bawah untuk bermula.",

@@ -413,6 +413,9 @@ class AppLocalizationsTh extends AppLocalizations {
   String get holdMicrophoneToSpeak => 'กดไมโครโฟนค้างไว้แล้วพูด';
 
   @override
+  String get roleplayNoWordsRecognized => 'ไม่พบคำพูด ลองอีกครั้ง';
+
+  @override
   String get roleplayTypeMessagePlaceholder => 'พิมพ์ข้อความ...';
 
   @override

@@ -420,6 +420,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get holdMicrophoneToSpeak => 'Konuşmak için mikrofona basılı tut';
 
   @override
+  String get roleplayNoWordsRecognized =>
+      'Sözcük algılanamadı. Tekrar deneyin.';
+
+  @override
   String get roleplayTypeMessagePlaceholder => 'Mesajını yaz...';
 
   @override

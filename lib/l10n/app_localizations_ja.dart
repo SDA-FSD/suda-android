@@ -398,6 +398,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get holdMicrophoneToSpeak => 'マイクボタンを長押しして話す';
 
   @override
+  String get roleplayNoWordsRecognized => '言葉が認識されませんでした。もう一度どうぞ。';
+
+  @override
   String get roleplayTypeMessagePlaceholder => 'メッセージを入力…';
 
   @override

@@ -420,6 +420,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get holdMicrophoneToSpeak => 'Hold microphone to speak';
 
   @override
+  String get roleplayNoWordsRecognized => 'No words recognized. Try again.';
+
+  @override
   String get roleplayTypeMessagePlaceholder => 'Type your message ...';
 
   @override

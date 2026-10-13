@@ -421,6 +421,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get holdMicrophoneToSpeak => 'Удерживайте кнопку микрофона и говорите';
 
   @override
+  String get roleplayNoWordsRecognized => 'Слова не распознаны. Ещё раз.';
+
+  @override
   String get roleplayTypeMessagePlaceholder => 'Введите сообщение...';
 
   @override

@@ -163,6 +163,7 @@
   "speechFeedbackNoRecording": "Không có bản ghi âm.",
   "microphonePermissionDenied": "Không thể bắt đầu khi chưa có quyền dùng micrô.",
   "holdMicrophoneToSpeak": "Nhấn giữ micrô để nói",
+  "roleplayNoWordsRecognized": "Không nhận ra từ nào. Thử lại.",
   "roleplayTypeMessagePlaceholder": "Nhập câu trả lời...",
   "yourTurnFirst": "Bạn nói trước nhé!",
   "sayLineBelowToStart": "Hãy nói câu bên dưới để bắt đầu.",

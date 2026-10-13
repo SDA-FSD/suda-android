@@ -37,13 +37,22 @@ mixin PlayingInputMixin<T extends StatefulWidget>
         PlayingHintMixin<T> {
   static const int _minRecordingDurationMs = 500;
   static const Duration _holdToSpeakIdle = Duration(seconds: 8);
+  static const Duration _speechLevelInterval = Duration(milliseconds: 100);
+  static const int _speechLevelWarmupMs = 150;
+  static const int _minSpeechLevelSamples = 3;
+  static const double _speechFloorPercentile = 0.2;
+  static const double _minSpeechSpreadDb = 10;
+  static const double _loudSpeechPeakDb = -30;
 
   final AudioRecorder _recorder = AudioRecorder();
+  StreamSubscription<Amplitude>? _speechLevelSub;
+  final List<double> _speechLevelsDb = [];
   DateTime? _recordingStartedAt;
   bool _isRecording = false;
   bool _isRecordingStarting = false;
   _PendingRecordingAction? _pendingRecordingAction;
   Future<void> _recordingTail = Future<void>.value();
+
   /// 마이크 권한 캐시. start 실패 시 null로 비워 재확인.
   bool? _cachedMicPermission;
   bool _iosRecorderDoesNotManageSession = false;
@@ -481,6 +490,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
 
   Future<void> _disposeRecorderSafely() async {
     await teardownPlayingRecording();
+    await _cancelSpeechLevelMonitor(clear: true);
     try {
       _recorder.dispose();
     } catch (e, st) {
@@ -490,10 +500,9 @@ mixin PlayingInputMixin<T extends StatefulWidget>
 
   void startPlayingAnalyzingBlink({String? message}) {
     final l10n = AppLocalizations.of(context)!;
-    final resolvedMessage =
-        (message != null && message.trim().isNotEmpty)
-            ? message.trim()
-            : l10n.roleplayAnalyzing;
+    final resolvedMessage = (message != null && message.trim().isNotEmpty)
+        ? message.trim()
+        : l10n.roleplayAnalyzing;
     _serviceMessageTimer?.cancel();
     if (!_analyzingBlinkController.isAnimating) {
       _analyzingBlinkController.repeat(reverse: true);
@@ -528,8 +537,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
             onTap: _isInputLocked
                 ? null
                 : () {
-                    final toRecording =
-                        _inputMode == _PlayingInputMode.typing;
+                    final toRecording = _inputMode == _PlayingInputMode.typing;
                     if (!toRecording) {
                       _cancelHintIdleAndBlink();
                       _cancelHoldToSpeakIdle();
@@ -557,9 +565,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
               ),
             ),
           ),
-          Expanded(
-            child: Center(child: center ?? const SizedBox.shrink()),
-          ),
+          Expanded(child: Center(child: center ?? const SizedBox.shrink())),
           IgnorePointer(
             ignoring: !_isHintEnabled || _isInputLocked,
             child: AnimatedBuilder(
@@ -615,6 +621,9 @@ mixin PlayingInputMixin<T extends StatefulWidget>
                 builder: (context, _) {
                   final textWidget = Text(
                     _serviceMessageText ?? '',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: _serviceMessageColor ?? Colors.white,
                     ),
@@ -829,6 +838,11 @@ mixin PlayingInputMixin<T extends StatefulWidget>
     _showServiceMessage(l10n.holdMicrophoneToSpeak);
   }
 
+  void _showNoWordsRecognizedMessage() {
+    final l10n = AppLocalizations.of(context)!;
+    _showServiceMessage(l10n.roleplayNoWordsRecognized);
+  }
+
   void _showServiceMessage(String message, {bool persistent = false}) {
     _serviceMessageTimer?.cancel();
     setState(() {
@@ -899,8 +913,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
 
   void _handleSend() {
     if (!_isTypingEnabled || !_isUserTurn || _isInputLocked) return;
-    if (checkCanSpendPlayingEnergy != null &&
-        !checkCanSpendPlayingEnergy!()) {
+    if (checkCanSpendPlayingEnergy != null && !checkCanSpendPlayingEnergy!()) {
       unawaited(_showPlayingEnergyBlockedPopup());
       return;
     }
@@ -988,6 +1001,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
         path: path,
       );
       _recordingStartedAt = DateTime.now();
+      _startSpeechLevelMonitor(_recordingStartedAt!);
       logRpS2PlayingEvent('MIC_RECORDING_STARTED');
     } catch (e) {
       debugPrint('[DEBUG] S2 recording start error: $e');
@@ -1060,6 +1074,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
     setState(() => _isRecording = false);
 
     if (durationMs < _minRecordingDurationMs) {
+      _speechLevelsDb.clear();
       _logMicRecordingCancelled();
       _deleteRecordingFile(path);
       _setMicState(_PlayingMicButtonState.defaultState);
@@ -1068,7 +1083,15 @@ mixin PlayingInputMixin<T extends StatefulWidget>
       return;
     }
     if (path == null) {
+      _speechLevelsDb.clear();
       _setMicState(_PlayingMicButtonState.defaultState);
+      _armHoldToSpeakIdle();
+      return;
+    }
+    if (!_consumeRecordingHasSpeech()) {
+      _deleteRecordingFile(path);
+      _setMicState(_PlayingMicButtonState.defaultState);
+      _showNoWordsRecognizedMessage();
       _armHoldToSpeakIdle();
       return;
     }
@@ -1084,9 +1107,13 @@ mixin PlayingInputMixin<T extends StatefulWidget>
   }
 
   Future<String?> _stopRecording({bool discard = false}) async {
-    if (!_isRecording) return null;
+    if (!_isRecording) {
+      await _cancelSpeechLevelMonitor(clear: true);
+      return null;
+    }
     try {
       if (discard) {
+        await _cancelSpeechLevelMonitor(clear: true);
         await _recorder.cancel().timeout(const Duration(seconds: 2));
         return null;
       }
@@ -1097,7 +1124,53 @@ mixin PlayingInputMixin<T extends StatefulWidget>
     } catch (e, st) {
       debugPrint('[DEBUG] S2 recording stop error: $e\n$st');
       return null;
+    } finally {
+      await _cancelSpeechLevelMonitor(clear: discard);
     }
+  }
+
+  void _startSpeechLevelMonitor(DateTime startedAt) {
+    _speechLevelSub?.cancel();
+    _speechLevelsDb.clear();
+    _speechLevelSub = _recorder.onAmplitudeChanged(_speechLevelInterval).listen(
+      (amp) {
+        if (DateTime.now().difference(startedAt).inMilliseconds <
+            _speechLevelWarmupMs) {
+          return;
+        }
+        final db = amp.current;
+        if (!db.isFinite) return;
+        _speechLevelsDb.add(db);
+      },
+    );
+  }
+
+  Future<void> _cancelSpeechLevelMonitor({required bool clear}) async {
+    final sub = _speechLevelSub;
+    _speechLevelSub = null;
+    await sub?.cancel();
+    if (clear) _speechLevelsDb.clear();
+  }
+
+  /// 같은 녹음의 바닥(하위 20%)과 최댓값을 비교한다.
+  /// 0 dBFS는 미준비 값이라 빼고, 남은 샘플이 부족하면 업로드를 막지 않는다.
+  bool _consumeRecordingHasSpeech() {
+    final hasSpeech = _recordingLevelsIndicateSpeech();
+    _speechLevelsDb.clear();
+    return hasSpeech;
+  }
+
+  bool _recordingLevelsIndicateSpeech() {
+    final levels = [
+      for (final level in _speechLevelsDb)
+        if (level != 0) level,
+    ];
+    if (levels.length < _minSpeechLevelSamples) return true;
+    final sorted = List<double>.of(levels)..sort();
+    final floorIndex = ((sorted.length - 1) * _speechFloorPercentile).floor();
+    final floor = sorted[floorIndex];
+    final peak = sorted.last;
+    return peak - floor >= _minSpeechSpreadDb || peak >= _loudSpeechPeakDb;
   }
 
   void _deleteRecordingFile(String? path) {

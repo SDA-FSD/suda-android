@@ -887,6 +887,12 @@ abstract class AppLocalizations {
   /// **'Hold microphone to speak'**
   String get holdMicrophoneToSpeak;
 
+  /// No description provided for @roleplayNoWordsRecognized.
+  ///
+  /// In en, this message translates to:
+  /// **'No words recognized. Try again.'**
+  String get roleplayNoWordsRecognized;
+
   /// No description provided for @roleplayTypeMessagePlaceholder.
   ///
   /// In en, this message translates to:

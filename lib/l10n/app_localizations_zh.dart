@@ -396,6 +396,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get holdMicrophoneToSpeak => '按住麦克风说话';
 
   @override
+  String get roleplayNoWordsRecognized => '没有识别到话语。请再试一次。';
+
+  @override
   String get roleplayTypeMessagePlaceholder => '输入你的回复…';
 
   @override
@@ -1484,6 +1487,9 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get holdMicrophoneToSpeak => '按住麦克风说话';
 
   @override
+  String get roleplayNoWordsRecognized => '没有识别到话语。请再试一次。';
+
+  @override
   String get roleplayTypeMessagePlaceholder => '输入你的回复…';
 
   @override
@@ -2570,6 +2576,9 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get holdMicrophoneToSpeak => '按住麥克風說話';
+
+  @override
+  String get roleplayNoWordsRecognized => '沒有辨識到話語。請再試一次。';
 
   @override
   String get roleplayTypeMessagePlaceholder => '輸入你的回覆⋯⋯';

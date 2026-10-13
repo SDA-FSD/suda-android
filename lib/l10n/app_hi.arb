@@ -163,6 +163,7 @@
   "speechFeedbackNoRecording": "कोई रिकॉर्डिंग उपलब्ध नहीं।",
   "microphonePermissionDenied": "माइक्रोफ़ोन की अनुमति के बिना शुरू नहीं कर सकते।",
   "holdMicrophoneToSpeak": "बोलने के लिए माइक्रोफ़ोन दबाकर रखें",
+  "roleplayNoWordsRecognized": "कोई शब्द नहीं मिला। फिर कोशिश करें।",
   "roleplayTypeMessagePlaceholder": "अपना मैसेज लिखें...",
   "yourTurnFirst": "पहले आपकी बारी!",
   "sayLineBelowToStart": "शुरू करने के लिए नीचे दी गई लाइन बोलें।",

@@ -163,6 +163,7 @@
   "speechFeedbackNoRecording": "沒有可用的錄音。",
   "microphonePermissionDenied": "未取得麥克風權限，無法開始。",
   "holdMicrophoneToSpeak": "按住麥克風說話",
+  "roleplayNoWordsRecognized": "沒有辨識到話語。請再試一次。",
   "roleplayTypeMessagePlaceholder": "輸入你的回覆⋯⋯",
   "yourTurnFirst": "由你先開始！",
   "sayLineBelowToStart": "說出下方句子以開始。",
