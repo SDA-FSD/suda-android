@@ -378,10 +378,11 @@
 - **파일 경로**: `lib/screens/friends.dart`
 - **클래스명**: `FriendsScreen`
 - **스크린 타입**: **Sub Screen**
-- **appPath**: 해당 없음
+- **appPath**: `/profile/friends/requests` (GNB Profile 전환 후 Push, Friend Requests 탭으로 시작 `initialTabIndex: 1`)
 
 ### 이전 스크린 정보 (진입점)
 - **ProfileScreen**: 내 프로필 Friends 라벨+숫자 칸 탭. 타인 프로필에서는 열리지 않음
+- 푸시 `appPath` `/profile/friends/requests` (Social Updates 친구 요청 수신)
 
 ### 이후 스크린 정보
 - **OtherUserProfileScreen**: 엔트리(아바타·이름) 탭. Accept/Decline 버튼은 이동하지 않음
@@ -1067,17 +1068,17 @@
 - **파일 경로**: `lib/screens/other_user_profile.dart`
 - **클래스명**: `OtherUserProfileScreen` (StatefulWidget)
 - **스크린 타입**: **Sub Screen** (좌상단 백버튼. GNB 없음)
-- **appPath**: `/profile/{userId}` (숫자 id. `/profile/history`·`/profile/setting`과 구분). 본인 id면 GNB Profile만 열고 SubScreen은 열지 않음
+- **appPath**: `/profile/{userId}` (숫자 id. `/profile/history`·`/profile/setting`·`/profile/friends/requests`와 구분). 본인 id면 GNB Profile만 열고 SubScreen은 열지 않음
 
 ### 스크린 용도
 - Ranking COLLECT/ANNOUNCE에서 **다른 사용자**의 읽기전용 프로필. 친구 알약만 쓰기.
 
 ### 이전 스크린 정보 (진입점)
 - **RankingScreen**: 포디움·4위+ 리스트의 **이미지·이름**. 빈 칸·본인(`isMe`/`user.id`)·Like 숫자·Ranking Reward Claim 패널 제외
-- 푸시 `appPath` `/profile/{userId}`
+- 푸시 `appPath` `/profile/{userId}` (Social Updates 친구 요청 수락도 수락자 id)
 
 ### 이후 스크린 정보
-- 백 → 이전 스크린. 설정·Paywall·Saved/History 없음
+  - 백 → 이전 스크린. 설정·Paywall·Saved/History 없음
 
 ### 스크린 내부 구현 특이사항
 - 데이터 `GET /v1/users/{userId}/profile`. 배경은 **대상** `subscribedYn`
@@ -1087,7 +1088,7 @@
   - FRIEND: streak 카드와 동일. 테두리 1px `#80D7CF` 100%→0%→100%(우상→좌하), 안쪽 `#121212` 위 `#0CABA8` 16%. `check_raw.png` + `otherUserFriends`. 탭 → Unfriend 팝업(`primaryLight`)
   - OUTGOING_PENDING: `#80D7CF` / 글자 `#0CABA8` / `otherUserRequested`. 탭 → 요청 취소 팝업
   - NONE·INCOMING_PENDING: `#0CABA8` 흰글자 `otherUserAddFriend`. 탭 → 신청 팝업(랭킹 리스트 프레임+레벨뱃지, 가로=팝업 width 30%). POST 후 INCOMING은 즉시 FRIEND
-  - REJECTED(쿨다운): 알약은 Add Friend. 탭하면 스토킹 팝업(POST 없음). `409 FRIEND_REQUEST_COOLDOWN`도 동일 Body+OK
+  - REJECTED(쿨다운): 알약은 Add Friend. 탭하면 스토킹 팝업(POST 없음). `409 FRIEND_REQUEST_COOLDOWN`도 동일 Body+OK. 서버는 내가 취소한 요청도 48h 재신청을 막는다(상태는 NONE이라 POST 후 409로 같은 팝업)
   - `409 FRIEND_LIMIT_EXCEEDED`: `limitUserId==대상`이면 상대 한도, 아니면 내 한도
 - Neighbors: `neighborCharacters`(내 프로필과 같은 캐릭터당 1장). 타이틀 항상. 획득 있으면 같은 가로 스크롤(탭 없음, 등급 링 두께 3). 0개면 `otherUserNeighborsEmpty`(en No characters collected yet. / pt Nenhum personagem coletado ainda. / ko 아직 획득한 캐릭터가 없습니다.)
 - Achievements: 타이틀 항상. 랭킹은 횟수 1 이상, 활동 업적은 1레벨 이상만. Claim·탭 없음. 0개면 `otherUserAchievementsEmpty`(en No achievements earned yet. / pt Nenhuma conquista obtida ainda. / ko 아직 획득한 업적이 없습니다.). 1~2개여도 3열 그리드 칸 크기 유지(빈 칸 spacer)
@@ -1167,6 +1168,7 @@
 | `/series/overview/{seriesId}` | SeriesOverviewScreen (Sub) | 예: `/series/overview/5`. Home 탭 후 `SeriesRouter.pushOverview` |
 | `/profile/history/{rpUserHistoryId}` | HistoryScreen (Sub) | 예: `/profile/history/456`, S2 user-history id |
 | `/profile/setting` | SettingScreen (Sub) | Profile에서 진입 |
+| `/profile/friends/requests` | FriendsScreen (Sub) | Friend Requests 탭으로 시작. Social Updates 친구 요청 수신 |
 | `/profile/{userId}` | OtherUserProfileScreen (Sub) | 숫자 id. 본인이면 GNB Profile |
 
 - **제외**: Login, Agreement(인증 플로우), RoleplayOpening(role 선택 필수), Playing/Ending/Result/Try Again(세션·플로우 의존).

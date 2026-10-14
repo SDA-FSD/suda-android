@@ -17,7 +17,10 @@ import 'rank/rank_crown_avatar.dart';
 
 /// 내 프로필 Friends 칸에서 여는 친구·받은 요청 Sub Screen.
 class FriendsScreen extends StatefulWidget {
-  const FriendsScreen({super.key});
+  const FriendsScreen({super.key, this.initialTabIndex = 0});
+
+  /// 0 = Friends, 1 = Friend Requests.
+  final int initialTabIndex;
 
   @override
   State<FriendsScreen> createState() => _FriendsScreenState();
@@ -166,6 +169,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
                 Expanded(
                   child: SudaLabelTabs(
                     expandContent: true,
+                    initialIndex: widget.initialTabIndex,
                     tabs: [
                       SudaLabelTab(
                         label: SudaTabLabel.l10n((l10n) => l10n.friendsTitle),

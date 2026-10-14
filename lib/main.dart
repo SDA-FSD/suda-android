@@ -32,6 +32,7 @@ import 'screens/first_cefr_level.dart';
 import 'screens/first_profile_image.dart';
 import 'screens/home.dart';
 import 'screens/profile.dart';
+import 'screens/friends.dart';
 import 'screens/other_user_profile.dart';
 import 'screens/notification_box.dart';
 import 'screens/rank/ranking.dart';
@@ -920,6 +921,24 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                     getCurrentUser: () => _user,
                   ),
                 ),
+              );
+            }
+          });
+          return;
+        }
+        if (segments.length >= 3 &&
+            segments[1] == 'friends' &&
+            segments[2] == 'requests') {
+          setState(() => _currentMainScreen = 'profile');
+          unawaited(_syncNotiboxListFirstPage(force: true));
+          unawaited(_refreshGnbBadges());
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            final c = _navigatorKey.currentState?.context;
+            if (c != null && c.mounted) {
+              Navigator.push(
+                c,
+                SubScreenRoute(page: const FriendsScreen(initialTabIndex: 1)),
               );
             }
           });
