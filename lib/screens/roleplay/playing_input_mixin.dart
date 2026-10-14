@@ -36,6 +36,17 @@ mixin PlayingInputMixin<T extends StatefulWidget>
         PlayingConversationMixin<T>,
         PlayingHintMixin<T> {
   static const int _minRecordingDurationMs = 500;
+  static const String _eventRecordingBelow500Ms = 'MIC_RECORDING_BELOW_500MS';
+  static const String _eventRecordingReleasedInCancelZone =
+      'MIC_RECORDING_RELEASED_IN_CANCEL_ZONE';
+  static const String _eventRecordingScreenLeave =
+      'MIC_RECORDING_SCREEN_LEAVE';
+  static const String _eventRecordingPointerCancel =
+      'MIC_RECORDING_POINTER_CANCEL';
+  static const String _eventMicPermissionDenied = 'MIC_PERMISSION_DENIED';
+  static const String _eventRecordingStartFailed = 'MIC_RECORDING_START_FAILED';
+  static const String _eventRecordingStopFailed = 'MIC_RECORDING_STOP_FAILED';
+  static const String _eventRecordingNoSpeech = 'MIC_RECORDING_NO_SPEECH';
   static const Duration _holdToSpeakIdle = Duration(seconds: 8);
   static const Duration _speechLevelInterval = Duration(milliseconds: 100);
   static const int _speechLevelWarmupMs = 150;
@@ -51,6 +62,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
   bool _isRecording = false;
   bool _isRecordingStarting = false;
   _PendingRecordingAction? _pendingRecordingAction;
+  String? _pendingCancelEvent;
   Future<void> _recordingTail = Future<void>.value();
 
   /// 마이크 권한 캐시. start 실패 시 null로 비워 재확인.
@@ -162,10 +174,6 @@ mixin PlayingInputMixin<T extends StatefulWidget>
     if (_hasLoggedFirstUtteranceSubmitted) return;
     _hasLoggedFirstUtteranceSubmitted = true;
     logRpS2PlayingEvent('FIRST_UTTERANCE_SUBMITTED');
-  }
-
-  void _logMicRecordingCancelled() {
-    logRpS2PlayingEvent('MIC_RECORDING_CANCELLED');
   }
 
   /// S2 턴 흐름에서 사용자 발화 준비 시점에 호출 (S1 `_activateUserTurn` 이식).
@@ -459,6 +467,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
   Future<void> teardownPlayingRecording() async {
     if (_isRecordingStarting && !_isRecording) {
       _pendingRecordingAction = _PendingRecordingAction.cancel;
+      _pendingCancelEvent = _eventRecordingScreenLeave;
     }
     await _enqueueRecording(_teardownRecordingImpl);
     await _recordingTail;
@@ -472,7 +481,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
 
   Future<void> _teardownRecordingImpl() async {
     if (_isRecording) {
-      _logMicRecordingCancelled();
+      logRpS2PlayingEvent(_eventRecordingScreenLeave);
       _recordingStartedAt = null;
       await _stopRecording(discard: true);
       removePlayingRecordingEntry();
@@ -484,6 +493,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
       }
     }
     _pendingRecordingAction = null;
+    _pendingCancelEvent = null;
     _isRecordingStarting = false;
     _recordingStartedAt = null;
   }
@@ -891,7 +901,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
       return;
     }
     if (cancel) {
-      unawaited(_cancelRecording());
+      unawaited(_cancelRecording(_eventRecordingReleasedInCancelZone));
     } else {
       unawaited(_finishRecording());
     }
@@ -902,7 +912,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
       _armHoldToSpeakIdle();
       return;
     }
-    unawaited(_cancelRecording());
+    unawaited(_cancelRecording(_eventRecordingPointerCancel));
   }
 
   bool _consumeEnergyHoldToSpeakSuppress() {
@@ -975,6 +985,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
 
     final hasPermission = await _ensureMicPermission();
     if (!hasPermission) {
+      logRpS2PlayingEvent(_eventMicPermissionDenied);
       if (!mounted) return;
       DefaultToast.show(
         context,
@@ -1009,6 +1020,8 @@ mixin PlayingInputMixin<T extends StatefulWidget>
       _recordingStartedAt = null;
       _cachedMicPermission = null;
       _pendingRecordingAction = null;
+      _pendingCancelEvent = null;
+      logRpS2PlayingEvent(_eventRecordingStartFailed);
       removePlayingRecordingEntry();
       if (!mounted) return;
       _setMicState(_PlayingMicButtonState.defaultState);
@@ -1019,25 +1032,30 @@ mixin PlayingInputMixin<T extends StatefulWidget>
     if (!mounted) return;
     setState(() => _isRecording = true);
     final pendingAction = _pendingRecordingAction;
+    final pendingCancelEvent = _pendingCancelEvent;
     _pendingRecordingAction = null;
+    _pendingCancelEvent = null;
     if (pendingAction == _PendingRecordingAction.cancel) {
-      await _cancelRecordingImpl();
+      await _cancelRecordingImpl(
+        pendingCancelEvent ?? _eventRecordingScreenLeave,
+      );
     } else if (pendingAction == _PendingRecordingAction.finish) {
       await _finishRecordingImpl();
     }
   }
 
-  Future<void> _cancelRecording() async {
-    return _enqueueRecording(_cancelRecordingImpl);
+  Future<void> _cancelRecording(String event) async {
+    return _enqueueRecording(() => _cancelRecordingImpl(event));
   }
 
-  Future<void> _cancelRecordingImpl() async {
+  Future<void> _cancelRecordingImpl(String event) async {
     if (_isRecordingStarting && !_isRecording) {
       _pendingRecordingAction = _PendingRecordingAction.cancel;
+      _pendingCancelEvent = event;
       return;
     }
     if (_isRecording) {
-      _logMicRecordingCancelled();
+      logRpS2PlayingEvent(event);
     }
     _recordingStartedAt = null;
     await _stopRecording(discard: true);
@@ -1075,7 +1093,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
 
     if (durationMs < _minRecordingDurationMs) {
       _speechLevelsDb.clear();
-      _logMicRecordingCancelled();
+      logRpS2PlayingEvent(_eventRecordingBelow500Ms);
       _deleteRecordingFile(path);
       _setMicState(_PlayingMicButtonState.defaultState);
       _showHoldToSpeakMessage();
@@ -1084,11 +1102,13 @@ mixin PlayingInputMixin<T extends StatefulWidget>
     }
     if (path == null) {
       _speechLevelsDb.clear();
+      logRpS2PlayingEvent(_eventRecordingStopFailed);
       _setMicState(_PlayingMicButtonState.defaultState);
       _armHoldToSpeakIdle();
       return;
     }
     if (!_consumeRecordingHasSpeech()) {
+      logRpS2PlayingEvent(_eventRecordingNoSpeech);
       _deleteRecordingFile(path);
       _setMicState(_PlayingMicButtonState.defaultState);
       _showNoWordsRecognizedMessage();
