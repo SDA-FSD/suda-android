@@ -19,6 +19,9 @@ class AppLocalizationsPl extends AppLocalizations {
   String get agreementPrivacyLabel => 'Akceptuję Politykę prywatności.';
 
   @override
+  String get agreementAllLabel => 'Akceptuję wszystkie wymagane warunki';
+
+  @override
   String get agreementTermsTitle => 'Warunki korzystania';
 
   @override
@@ -393,6 +396,9 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get firstProfileImageTitle => 'Wybierz zdjęcie profilowe';
+
+  @override
+  String get firstUsernameTitle => 'Jak mamy się\ndo Ciebie zwracać?';
 
   @override
   String get actionConfirm => 'Potwierdź';

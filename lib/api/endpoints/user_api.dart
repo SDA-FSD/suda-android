@@ -429,6 +429,72 @@ class UserApi {
     );
   }
 
+  /// POST /v1/users/onboarding-profile-image (best-effort; 200 only)
+  static Future<void> postOnboardingProfileImage({
+    required String accessToken,
+  }) async {
+    final uri = SudaHttpClient.buildUri('/v1/users/onboarding-profile-image');
+
+    late final http.Response response;
+    try {
+      response = await SudaHttpClient.client
+          .post(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      rethrow;
+    }
+
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return;
+    }
+
+    throw Exception(
+      'POST /v1/users/onboarding-profile-image failed: HTTP ${response.statusCode} ${response.body}',
+    );
+  }
+
+  /// POST /v1/users/onboarding-username (best-effort; 200 only)
+  static Future<void> postOnboardingUsername({
+    required String accessToken,
+  }) async {
+    final uri = SudaHttpClient.buildUri('/v1/users/onboarding-username');
+
+    late final http.Response response;
+    try {
+      response = await SudaHttpClient.client
+          .post(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      rethrow;
+    }
+
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return;
+    }
+
+    throw Exception(
+      'POST /v1/users/onboarding-username failed: HTTP ${response.statusCode} ${response.body}',
+    );
+  }
+
   /// PUT /v1/users/grant-welcome-gift
   static Future<void> grantWelcomeGift({
     required String accessToken,

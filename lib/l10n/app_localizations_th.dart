@@ -18,6 +18,9 @@ class AppLocalizationsTh extends AppLocalizations {
   String get agreementPrivacyLabel => 'ยอมรับนโยบายความเป็นส่วนตัว';
 
   @override
+  String get agreementAllLabel => 'ยอมรับข้อกำหนดที่จำเป็นทั้งหมด';
+
+  @override
   String get agreementTermsTitle => 'ข้อกำหนดการใช้งาน';
 
   @override
@@ -385,6 +388,9 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get firstProfileImageTitle => 'เลือกรูปโปรไฟล์ของคุณ';
+
+  @override
+  String get firstUsernameTitle => 'ให้เราเรียกคุณ\nว่าอะไรดี?';
 
   @override
   String get actionConfirm => 'ยืนยัน';

@@ -30,6 +30,7 @@ import 'screens/login.dart';
 import 'screens/first_app_language.dart';
 import 'screens/first_cefr_level.dart';
 import 'screens/first_profile_image.dart';
+import 'screens/first_username.dart';
 import 'screens/home.dart';
 import 'screens/profile.dart';
 import 'screens/friends.dart';
@@ -149,7 +150,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   bool _needsAgreement = false; // 서비스 이용 동의 필요 여부
   bool _needsFirstAppLanguage = false; // 동의 후 LANGUAGE_TAG 없을 때
   bool _needsFirstCefrLevel = false; // 언어 선택 후 1회 CEFR 레벨 선택
-  bool _needsFirstProfileImage = false; // CEFR 직후 1회 프로필 이미지 선택
+  bool _needsFirstProfileImage = false; // meta ONBOARDING_PROFILE_IMAGE=N (신규 가입자)
+  bool _needsFirstUsername = false; // meta ONBOARDING_USERNAME=N (신규 가입자)
   String? _appliedLanguageTag;
   bool _languageApplyReady = false;
 
@@ -635,6 +637,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       _needsFirstAppLanguage = false;
       _needsFirstCefrLevel = false;
       _needsFirstProfileImage = false;
+      _needsFirstUsername = false;
       _currentMainScreen = 'home'; // 로그아웃 후 다시 로그인 시 Home 화면으로
       _homeNotiboxUnreadYn = 'N';
       _notiboxHasUnreadFromAlarmList = false;
@@ -696,13 +699,20 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     return false;
   }
 
-  /// 로그인·콜드 스타트 진입. 언어 태그가 없으면 언어 화면만 연다.
+  /// 로그인·콜드 스타트 진입. 언어 태그가 없으면 언어 화면을 연다.
+  /// 신규 가입자(온보딩 meta `N`)는 남은 CEFR·프로필 이미지·이름 단계부터 이어간다.
   void _assignEntryFlags(UserDto user) {
     _needsAgreement = !_agreed(user);
     _needsFirstAppLanguage =
         !_needsAgreement && AppLanguage.tagOf(user) == null;
-    _needsFirstCefrLevel = false;
-    _needsFirstProfileImage = false;
+    _needsFirstProfileImage =
+        user.hasMetaInfoValue(key: 'ONBOARDING_PROFILE_IMAGE', value: 'N');
+    _needsFirstUsername =
+        user.hasMetaInfoValue(key: 'ONBOARDING_USERNAME', value: 'N');
+    _needsFirstCefrLevel = !_needsAgreement &&
+        !_needsFirstAppLanguage &&
+        (_needsFirstProfileImage || _needsFirstUsername) &&
+        !AppLanguage.hasEnglishLevel(user);
   }
 
   /// 동의 완료 시 호출
@@ -726,21 +736,28 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     });
   }
 
-  /// 최초 CEFR 레벨 선택 완료 시 호출 (API 실패여도 프로필 이미지 선택으로)
+  /// 최초 CEFR 레벨 선택 완료 시 호출 (API 실패여도 다음 단계로)
   void _onFirstCefrLevelComplete() {
     setState(() {
       _needsFirstCefrLevel = false;
-      _needsFirstProfileImage = true;
     });
   }
 
-  /// 최초 프로필 이미지 선택 완료 시 호출 (API 실패여도 Home 진입)
+  /// 최초 프로필 이미지 선택 완료 시 호출 (API 실패여도 Username으로)
   void _onFirstProfileImageComplete(UserDto? updatedUser) {
     setState(() {
       _needsFirstProfileImage = false;
-      if (updatedUser != null) {
-        _user = updatedUser;
-      }
+      _user = (updatedUser ?? _user)
+          ?.upsertMetaInfo(key: 'ONBOARDING_PROFILE_IMAGE', value: 'Y');
+    });
+  }
+
+  /// 최초 이름 확인 완료 시 호출 (이름 저장 성공 시에만)
+  void _onFirstUsernameComplete(UserDto? updatedUser) {
+    setState(() {
+      _needsFirstUsername = false;
+      _user = (updatedUser ?? _user)
+          ?.upsertMetaInfo(key: 'ONBOARDING_USERNAME', value: 'Y');
     });
   }
 
@@ -762,6 +779,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       _needsFirstAppLanguage = false;
       _needsFirstCefrLevel = false;
       _needsFirstProfileImage = false;
+      _needsFirstUsername = false;
       _currentMainScreen = 'home';
       _homeNotiboxUnreadYn = 'N';
       _notiboxHasUnreadFromAlarmList = false;
@@ -1017,6 +1035,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           ? FirstCefrLevelScreen(onComplete: _onFirstCefrLevelComplete)
           : _needsFirstProfileImage
           ? FirstProfileImageScreen(onComplete: _onFirstProfileImageComplete)
+          : _needsFirstUsername
+          ? FirstUsernameScreen(
+              user: _user,
+              onComplete: _onFirstUsernameComplete,
+            )
           : Builder(
               builder: (_) {
                 if (PendingAppPathService.instance.hasPendingNavigation) {

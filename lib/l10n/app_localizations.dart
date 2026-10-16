@@ -155,6 +155,12 @@ abstract class AppLocalizations {
   /// **'I agree to the Privacy Policy.'**
   String get agreementPrivacyLabel;
 
+  /// No description provided for @agreementAllLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Agree to all required terms'**
+  String get agreementAllLabel;
+
   /// No description provided for @agreementTermsTitle.
   ///
   /// In en, this message translates to:
@@ -838,6 +844,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Choose your Profile Picture'**
   String get firstProfileImageTitle;
+
+  /// No description provided for @firstUsernameTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What should we\ncall you?'**
+  String get firstUsernameTitle;
 
   /// No description provided for @actionConfirm.
   ///

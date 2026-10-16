@@ -20,6 +20,9 @@ class AppLocalizationsVi extends AppLocalizations {
       'Tôi đồng ý với Chính sách quyền riêng tư.';
 
   @override
+  String get agreementAllLabel => 'Đồng ý với tất cả điều khoản bắt buộc';
+
+  @override
   String get agreementTermsTitle => 'Điều khoản sử dụng';
 
   @override
@@ -394,6 +397,9 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get firstProfileImageTitle => 'Chọn ảnh hồ sơ của bạn';
+
+  @override
+  String get firstUsernameTitle => 'Chúng tôi nên\ngọi bạn là gì?';
 
   @override
   String get actionConfirm => 'Xác nhận';

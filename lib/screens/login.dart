@@ -998,6 +998,18 @@ class _AgreementBottomSheet extends StatelessWidget {
                 onChanged: onPrivacyChanged,
                 onLinkTap: onOpenPrivacy,
               ),
+              const SizedBox(height: 24),
+              const Divider(height: 1, thickness: 1, color: Color(0xFF353535)),
+              const SizedBox(height: 24),
+              _AgreementRow(
+                label: l10n.agreementAllLabel,
+                isChecked: isAllAgreed,
+                centerAlign: true,
+                onChanged: (v) {
+                  onTermsChanged(v);
+                  onPrivacyChanged(v);
+                },
+              ),
               const SizedBox(height: 48),
               ElevatedButton(
                 onPressed: isAllAgreed && !isSubmitting ? onSubmit : null,
@@ -1035,72 +1047,79 @@ class _AgreementBottomSheet extends StatelessWidget {
 
 class _AgreementRow extends StatelessWidget {
   final String label;
-  final String linkLabel;
+  final String? linkLabel;
   final bool isChecked;
+  final bool centerAlign;
   final ValueChanged<bool?> onChanged;
-  final VoidCallback onLinkTap;
+  final VoidCallback? onLinkTap;
 
   const _AgreementRow({
     required this.label,
-    required this.linkLabel,
+    this.linkLabel,
     required this.isChecked,
+    this.centerAlign = false,
     required this.onChanged,
-    required this.onLinkTap,
+    this.onLinkTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context).textTheme;
+    final checkbox = SizedBox(
+      width: 40,
+      height: 40,
+      child: Center(
+        child: isChecked
+            ? SvgPicture.asset(
+                'assets/images/icons/check_mint.svg',
+                width: 24,
+                height: 24,
+                fit: BoxFit.contain,
+              )
+            : Container(
+                width: 23,
+                height: 23,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1E1E1E),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 1),
+                ),
+              ),
+      ),
+    );
+    final labelBlock = Wrap(
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        Text(
+          label,
+          style: theme.bodySmall?.copyWith(color: Colors.white),
+        ),
+        if (linkLabel != null) ...[
+          const SizedBox(width: 8),
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: onLinkTap,
+            child: Text(
+              linkLabel!,
+              style: theme.bodySmall?.copyWith(
+                color: const Color(0xFF0CABA8),
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () => onChanged(!isChecked),
       child: Row(
+        mainAxisAlignment:
+            centerAlign ? MainAxisAlignment.center : MainAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 40,
-            height: 40,
-            child: Center(
-              child: isChecked
-                  ? SvgPicture.asset(
-                      'assets/images/icons/check_mint.svg',
-                      width: 24,
-                      height: 24,
-                      fit: BoxFit.contain,
-                    )
-                  : Container(
-                      width: 23,
-                      height: 23,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF1E1E1E),
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 1),
-                      ),
-                    ),
-            ),
-          ),
-          Expanded(
-            child: Wrap(
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                Text(
-                  label,
-                  style: theme.bodySmall?.copyWith(color: Colors.white),
-                ),
-                const SizedBox(width: 8),
-                GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: onLinkTap,
-                  child: Text(
-                    linkLabel,
-                    style: theme.bodySmall?.copyWith(
-                      color: const Color(0xFF0CABA8),
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          checkbox,
+          if (centerAlign) labelBlock else Expanded(child: labelBlock),
         ],
       ),
     );

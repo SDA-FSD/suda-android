@@ -19,6 +19,9 @@ class AppLocalizationsNl extends AppLocalizations {
   String get agreementPrivacyLabel => 'Ik ga akkoord met het privacybeleid.';
 
   @override
+  String get agreementAllLabel => 'Akkoord met alle verplichte voorwaarden';
+
+  @override
   String get agreementTermsTitle => 'Gebruiksvoorwaarden';
 
   @override
@@ -392,6 +395,9 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get firstProfileImageTitle => 'Kies je profielfoto';
+
+  @override
+  String get firstUsernameTitle => 'Hoe mogen we\nje noemen?';
 
   @override
   String get actionConfirm => 'Bevestigen';

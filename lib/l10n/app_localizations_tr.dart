@@ -19,6 +19,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get agreementPrivacyLabel => 'Gizlilik Politikası\'nı kabul ediyorum.';
 
   @override
+  String get agreementAllLabel => 'Tüm zorunlu şartları kabul ediyorum';
+
+  @override
   String get agreementTermsTitle => 'Kullanım Koşulları';
 
   @override
@@ -393,6 +396,9 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get firstProfileImageTitle => 'Profil resmini seç';
+
+  @override
+  String get firstUsernameTitle => 'Sana nasıl\nhitap edelim?';
 
   @override
   String get actionConfirm => 'Onayla';

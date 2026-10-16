@@ -19,6 +19,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get agreementPrivacyLabel => 'Acepto la Política de privacidad.';
 
   @override
+  String get agreementAllLabel => 'Acepto todos los términos obligatorios';
+
+  @override
   String get agreementTermsTitle => 'Términos de uso';
 
   @override
@@ -393,6 +396,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get firstProfileImageTitle => 'Elige tu foto de perfil';
+
+  @override
+  String get firstUsernameTitle => '¿Cómo quieres que\nte llamemos?';
 
   @override
   String get actionConfirm => 'Confirmar';
@@ -1186,6 +1192,9 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
   String get agreementPrivacyLabel => 'Acepto la Política de privacidad.';
 
   @override
+  String get agreementAllLabel => 'Acepto todos los términos obligatorios';
+
+  @override
   String get agreementTermsTitle => 'Términos de uso';
 
   @override
@@ -1560,6 +1569,9 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
 
   @override
   String get firstProfileImageTitle => 'Elige tu foto de perfil';
+
+  @override
+  String get firstUsernameTitle => '¿Cómo quieres que\nte llamemos?';
 
   @override
   String get actionConfirm => 'Confirmar';

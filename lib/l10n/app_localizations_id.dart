@@ -19,6 +19,9 @@ class AppLocalizationsId extends AppLocalizations {
   String get agreementPrivacyLabel => 'Saya menyetujui Kebijakan Privasi.';
 
   @override
+  String get agreementAllLabel => 'Setuju dengan semua ketentuan wajib';
+
+  @override
   String get agreementTermsTitle => 'Ketentuan Penggunaan';
 
   @override
@@ -393,6 +396,9 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get firstProfileImageTitle => 'Pilih foto profilmu';
+
+  @override
+  String get firstUsernameTitle => 'Kami harus\nmemanggilmu apa?';
 
   @override
   String get actionConfirm => 'Konfirmasi';

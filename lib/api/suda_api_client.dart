@@ -673,6 +673,14 @@ class SudaApiClient {
     return UserApi.postFirstOverview(accessToken: accessToken);
   }
 
+  static Future<void> postOnboardingProfileImage({required String accessToken}) {
+    return UserApi.postOnboardingProfileImage(accessToken: accessToken);
+  }
+
+  static Future<void> postOnboardingUsername({required String accessToken}) {
+    return UserApi.postOnboardingUsername(accessToken: accessToken);
+  }
+
   static Future<void> updateAgreement({required String accessToken}) {
     return UserApi.updateAgreement(accessToken: accessToken);
   }

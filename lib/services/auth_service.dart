@@ -143,12 +143,13 @@ class AuthService {
         throw StateError('Apple identityToken is null');
       }
 
-      final fullName = _formatAppleFullName(credential.givenName, credential.familyName);
+      final givenName = credential.givenName?.trim();
+      final name = (givenName == null || givenName.isEmpty) ? null : givenName;
 
       if (kDebugMode) {
         debugPrint(
           '[Auth] Apple ok hasEmail=${credential.email != null} '
-          'hasFullName=${fullName != null}',
+          'hasName=${name != null}',
         );
       }
 
@@ -157,7 +158,7 @@ class AuthService {
         rawNonce: rawNonce,
         authorizationCode: credential.authorizationCode,
         email: credential.email,
-        fullName: fullName,
+        fullName: name,
       );
     } on SignInWithAppleAuthorizationException catch (error) {
       if (error.code == AuthorizationErrorCode.canceled) {
@@ -200,16 +201,5 @@ class AuthService {
       length,
       (_) => charset[random.nextInt(charset.length)],
     ).join();
-  }
-
-  static String? _formatAppleFullName(String? givenName, String? familyName) {
-    final parts = <String>[
-      if (givenName != null && givenName.trim().isNotEmpty) givenName.trim(),
-      if (familyName != null && familyName.trim().isNotEmpty) familyName.trim(),
-    ];
-    if (parts.isEmpty) {
-      return null;
-    }
-    return parts.join(' ');
   }
 }
