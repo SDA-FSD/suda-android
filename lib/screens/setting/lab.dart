@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 
 import '../../config/app_config.dart';
 import '../../effects/like_progress_effect.dart';
-import '../../effects/ribbon_burst_effect.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/series_models.dart';
 import '../../routes/roleplay_router.dart';
@@ -915,16 +914,6 @@ class _LabScreenState extends State<LabScreen> {
             _buildLabScreenButton(
               label: 'Open Reward Unboxing',
               onPressed: () => unawaited(_openRewardUnboxingPreview()),
-            ),
-            _buildSectionDivider(),
-            Text(
-              'Ribbon Burst Effect',
-              style: theme.headlineSmall?.copyWith(color: Colors.white),
-            ),
-            const SizedBox(height: 12),
-            _buildLabScreenButton(
-              label: 'Play Ribbon Burst',
-              onPressed: () => unawaited(RibbonBurstEffect.play(context)),
             ),
             _buildSectionDivider(),
             Text(
