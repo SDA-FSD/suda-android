@@ -164,7 +164,7 @@ class _PaywallVisual {
 class _PaywallScreenState extends State<PaywallScreen> {
   static const _font = 'ChironHeiHK';
   static const _heroToPremiumGapWidthRatio = 0.08;
-  static const _heroWidthRatio = 0.65;
+  static const _heroWidthRatio = 0.70;
   static const _characterWidthRatio = 0.45;
 
   /// 배경 보라 glow (PaywallCompleted와 동일: 부모 size 대비 반응형 + blur 고정).
@@ -603,19 +603,20 @@ class _PaywallScreenState extends State<PaywallScreen> {
     return false;
   }
 
-  bool _textFitsLines({
+  /// 폭 제한 없이 한 줄 실측. 줄바꿈으로 끝 음절이 사라지는 판정을 피한다.
+  double _singleLineWidth({
     required String text,
     required TextStyle style,
-    required double maxWidth,
     required TextDirection textDirection,
-    required int maxLines,
+    required TextScaler textScaler,
   }) {
     final painter = TextPainter(
       text: TextSpan(text: text, style: style),
+      maxLines: 1,
       textDirection: textDirection,
-      maxLines: maxLines,
-    )..layout(maxWidth: maxWidth);
-    return !painter.didExceedMaxLines;
+      textScaler: textScaler,
+    )..layout();
+    return painter.width;
   }
 
   /// arb `\n`은 2줄 필요할 때만 적용. 1줄에 들어가면 공백으로 이어 붙여 표시.
@@ -624,6 +625,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
     required TextStyle baseStyle,
     required double maxWidth,
     required TextDirection textDirection,
+    required TextScaler textScaler,
     required double baseSize,
     required double minSize,
     required int maxLinesWhenBroken,
@@ -639,13 +641,15 @@ class _PaywallScreenState extends State<PaywallScreen> {
     var fontSize = baseSize;
     while (fontSize >= minSize) {
       final style = styleBase.copyWith(fontSize: fontSize);
-      if (_textFitsLines(
+      final fits =
+          _singleLineWidth(
             text: singleLine,
             style: style,
-            maxWidth: maxWidth,
             textDirection: textDirection,
-            maxLines: 1,
-          ) &&
+            textScaler: textScaler,
+          ) <=
+          maxWidth;
+      if (fits &&
           !_anyTokenExceedsWidth(singleLine, style, maxWidth, textDirection)) {
         return (displayText: singleLine, fontSize: fontSize);
       }
@@ -689,6 +693,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
             ? (minFontSize - 4).clamp(20.0, minFontSize)
             : baseSize;
         final textDirection = Directionality.of(context);
+        final textScaler = MediaQuery.textScalerOf(context);
         final styleBase = style.copyWith(
           height: 1.35,
           leadingDistribution: TextLeadingDistribution.even,
@@ -702,6 +707,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
             baseStyle: style,
             maxWidth: maxWidth,
             textDirection: textDirection,
+            textScaler: textScaler,
             baseSize: baseSize,
             minSize: minSize,
             maxLinesWhenBroken: maxLines,
@@ -727,13 +733,20 @@ class _PaywallScreenState extends State<PaywallScreen> {
         }
 
         final textStyle = styleBase.copyWith(fontSize: fittedSize);
-        final displayMaxLines = displayText.contains('\n') ? maxLines : 1;
+        final oneLine = !displayText.contains('\n');
+        final displayMaxLines = oneLine ? 1 : maxLines;
         final painter = TextPainter(
           text: TextSpan(text: displayText, style: textStyle),
           textAlign: align,
           textDirection: textDirection,
+          textScaler: textScaler,
           maxLines: displayMaxLines,
-        )..layout(maxWidth: maxWidth);
+        );
+        if (oneLine) {
+          painter.layout();
+        } else {
+          painter.layout(maxWidth: maxWidth);
+        }
         final shaderWidth = align == TextAlign.center ? maxWidth : painter.width;
         final shader = gradient.createShader(
           Rect.fromLTWH(0, 0, shaderWidth, painter.height),
@@ -742,6 +755,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
           displayText,
           textAlign: align,
           maxLines: displayMaxLines,
+          softWrap: !oneLine,
           overflow: TextOverflow.visible,
           style: textStyle.copyWith(
             foreground: Paint()..shader = shader,
