@@ -20,6 +20,9 @@ class AppLocalizationsFr extends AppLocalizations {
       'J’accepte la politique de confidentialité.';
 
   @override
+  String get agreementAllLabel => 'Accepter toutes les conditions obligatoires';
+
+  @override
   String get agreementTermsTitle => 'Conditions d’utilisation';
 
   @override
@@ -396,6 +399,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get firstProfileImageTitle => 'Choisissez votre photo de profil';
+
+  @override
+  String get firstUsernameTitle => 'Comment pouvons-nous\nvous appeler ?';
 
   @override
   String get actionConfirm => 'Confirmer';

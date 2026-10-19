@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-/// 온보딩 3단계 진행 막대. 이전 칸은 채워진 채, 이번 칸만 왼쪽부터 한 번 칠한다.
+/// 온보딩 4단계 진행 막대. 이전 칸은 채워진 채, 이번 칸만 왼쪽부터 한 번 칠한다.
 class OnboardingStepBar extends StatefulWidget {
-  /// 1=언어, 2=CEFR, 3=프로필 이미지.
+  /// 1=언어, 2=CEFR, 3=프로필 이미지, 4=이름.
   final int step;
 
   const OnboardingStepBar({super.key, required this.step});
@@ -18,6 +18,7 @@ class _OnboardingStepBarState extends State<OnboardingStepBar>
   static const _gradientEnd = Color(0xFF0CABA8);
   static const _barHeight = 8.0;
   static const _gap = 5.0;
+  static const _stepCount = 4;
 
   late final AnimationController _controller;
 
@@ -44,7 +45,7 @@ class _OnboardingStepBarState extends State<OnboardingStepBar>
         return LayoutBuilder(
           builder: (context, constraints) {
             final width = constraints.maxWidth;
-            final barWidth = (width - _gap * 2) / 3;
+            final barWidth = (width - _gap * (_stepCount - 1)) / _stepCount;
             final doneEnd = (widget.step - 1) * (barWidth + _gap);
             final activeEnd = doneEnd + barWidth;
             final reveal = (doneEnd + (activeEnd - doneEnd) * _controller.value)
@@ -55,7 +56,7 @@ class _OnboardingStepBarState extends State<OnboardingStepBar>
                 children: [
                   Row(
                     children: [
-                      for (var i = 0; i < 3; i++) ...[
+                      for (var i = 0; i < _stepCount; i++) ...[
                         if (i > 0) const SizedBox(width: _gap),
                         Expanded(child: _capsule(_inactive)),
                       ],
@@ -70,7 +71,7 @@ class _OnboardingStepBarState extends State<OnboardingStepBar>
                         ).createShader(rect),
                         child: Row(
                           children: [
-                            for (var i = 0; i < 3; i++) ...[
+                            for (var i = 0; i < _stepCount; i++) ...[
                               if (i > 0) const SizedBox(width: _gap),
                               Expanded(
                                 child: _capsule(

@@ -194,7 +194,11 @@ class _AccountScreenState extends State<AccountScreen> with SingleTickerProvider
       }
     } catch (e) {
       if (mounted) {
-        DefaultToast.show(context, 'Failed to update name: $e', isError: true);
+        DefaultToast.show(
+          context,
+          AppLocalizations.of(context)!.requestFailed,
+          isError: true,
+        );
       }
     }
   }

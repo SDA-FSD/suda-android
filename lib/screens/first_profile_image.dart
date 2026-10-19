@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:vibration/vibration.dart';
 
@@ -8,7 +10,7 @@ import '../utils/default_toast.dart';
 import '../widgets/default_profile_avatar.dart';
 import '../widgets/onboarding_step_bar.dart';
 
-/// 최초 CEFR 선택 직후 1회 노출되는 기본 프로필 이미지 선택 Full Screen.
+/// 신규 가입자 온보딩(meta `ONBOARDING_PROFILE_IMAGE=N`)의 기본 프로필 이미지 선택 Full Screen.
 class FirstProfileImageScreen extends StatefulWidget {
   final void Function(UserDto? updatedUser) onComplete;
   final bool preview;
@@ -88,6 +90,7 @@ class _FirstProfileImageScreenState extends State<FirstProfileImageScreen> {
     try {
       final token = await TokenStorage.loadAccessToken();
       if (token != null) {
+        unawaited(_postOnboardingProfileImageBestEffort(token));
         await SudaApiClient.updateProfileImage(
           accessToken: token,
           type: 'DEFAULT',
@@ -108,6 +111,14 @@ class _FirstProfileImageScreenState extends State<FirstProfileImageScreen> {
         setState(() => _isSubmitting = false);
         widget.onComplete(updated);
       }
+    }
+  }
+
+  Future<void> _postOnboardingProfileImageBestEffort(String accessToken) async {
+    try {
+      await SudaApiClient.postOnboardingProfileImage(accessToken: accessToken);
+    } catch (_) {
+      // best-effort: ignore
     }
   }
 
@@ -261,7 +272,7 @@ class _FirstProfileImageScreenState extends State<FirstProfileImageScreen> {
                               color: Colors.black,
                             ),
                           )
-                        : Text(l10n.actionConfirm),
+                        : Text(l10n.firstAppLanguageContinue),
                   ),
                 ),
               ],

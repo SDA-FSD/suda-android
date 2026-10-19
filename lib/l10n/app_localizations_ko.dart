@@ -18,6 +18,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get agreementPrivacyLabel => '개인정보 처리방침에 동의합니다.';
 
   @override
+  String get agreementAllLabel => '모든 필수 약관에 동의합니다.';
+
+  @override
   String get agreementTermsTitle => '이용약관';
 
   @override
@@ -372,6 +375,9 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get firstProfileImageTitle => '프로필 이미지를 선택하세요';
+
+  @override
+  String get firstUsernameTitle => '어떻게 불러드리면\n될까요?';
 
   @override
   String get actionConfirm => '확인';

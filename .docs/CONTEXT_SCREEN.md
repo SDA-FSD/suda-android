@@ -141,13 +141,13 @@
 - **스크린 타입**: **Full Screen**
 - **appPath**: 해당 없음 (인증 플로우)
 - **진입 연출**: `#121212` 배경 위 중앙 스틸에서 시작한다. **1000ms 대기** 후 스틸 500ms fade-out, 로고 파트 1000ms 중앙 이동, 포스터·하단 영역은 fade-in 없이 각각 등장 연출한다. 포스터 1~3행은 행별로 화면 밖→노출 위치 1000ms(`easeOutCubic`) 슬라인 후 마키(1행 좌에서 등장·우로·60s, 2행 우에서 등장·좌로·70s, 3행 좌에서 등장·우로·66s). 하단 노출 영역은 화면 아래 밖에서 1000ms 상승(`easeOutCubic`).
-- **서비스 이용 동의(레이어)**: 로그인 후 사용자 metaInfo의 `SUDA_AGREEMENT != 'Y'`인 경우, LoginScreen 위에 **bottom-up 레이어**(배경 blur+dim)로 동의 UI를 노출한다. 레이어 바깥 탭 시 닫힌다. 동의 완료 시 `POST /v1/users/agreement` + AppsFlyer `af_complete_registration` 이벤트를 호출한 뒤 **FirstAppLanguageScreen**(§1.1a, `LANGUAGE_TAG` 없을 때)으로 전환한다.
+- **서비스 이용 동의(레이어)**: 로그인 후 사용자 metaInfo의 `SUDA_AGREEMENT != 'Y'`인 경우, LoginScreen 위에 **bottom-up 레이어**(배경 blur+dim)로 동의 UI를 노출한다. 순서: 약관 → 개인정보 → 구분선(`#353535` 1px) → **Agree All**(`agreementAllLabel`, 링크 없음·가운데 정렬). Agree All은 약관·개인정보를 함께 켜고 끄며, 두 항목이 모두 체크되면 자동 체크된다. 레이어 바깥 탭 시 닫힌다. 동의 완료 시 `POST /v1/users/agreement` + AppsFlyer `af_complete_registration` 이벤트를 호출한 뒤 **FirstAppLanguageScreen**(§1.1a, `LANGUAGE_TAG` 없을 때)으로 전환한다.
 
 ---
 
 ## 1.1a FirstAppLanguageScreen
 
-`lib/screens/first_app_language.dart`. Full Screen. `PopScope` `canPop: false`. 배경 `#121212`. 약관 직후 또는 재실행 시 `LANGUAGE_TAG`가 없으면 노출. 상단 헤더 자리에 진행 막대 1/3 (`OnboardingStepBar`, 이전 칸은 채워진 채 이번 칸만 애니메이션). 흰 타이틀은 CEFR·프로필과 같이 상단 1/3 안에서 글 하단이 그 높이의 72% (`onboardingTitle`). 기기 언어와 같은 선택지를 맨 위·선택 상태로 둔다. 맞는 항목이 없으면 Continue 비활성. 버튼 문구 `firstAppLanguageContinue`(en Continue, pt Continuar, ko 계속하기). 목록 하단 1/3는 검정 그라데이션(위쪽 절반에서 0→100%, 아래 절반은 검정)이고 그 영역 중앙에 버튼. 선택 버튼 너비는 목록의 80%. 비선택은 테두리 `#635F5F` 1. 저장 성공 시 `GET /v1/users`로 `_user`를 바꾸고, `ENGLISH_LEVEL`이 없으면 CEFR, 있으면 Home. 실패는 `requestFailed` 토스트 후 유지. 태그 규칙·서버 키는 `CONTEXT_LOCALE.md`. Setting의 앱 언어는 별도 하위 화면 `lib/screens/setting/app_language.dart` (`AppLanguageScreen`). 헤더 `settingsAppLanguage`, 진행 막대 없음, 버튼 `actionConfirm`. 선택 목록은 `AppLanguageOptionList`, 저장 규칙은 `AppLanguageOptions`.
+`lib/screens/first_app_language.dart`. Full Screen. `PopScope` `canPop: false`. 배경 `#121212`. 약관 직후 또는 재실행 시 `LANGUAGE_TAG`가 없으면 노출. 상단 헤더 자리에 진행 막대 1/4 (`OnboardingStepBar`, 이전 칸은 채워진 채 이번 칸만 애니메이션). 흰 타이틀은 CEFR·프로필과 같이 상단 1/3 안에서 글 하단이 그 높이의 72% (`onboardingTitle`). 기기 언어와 같은 선택지를 맨 위·선택 상태로 둔다. 맞는 항목이 없으면 Continue 비활성. 버튼 문구 `firstAppLanguageContinue`(en Continue, pt Continuar, ko 계속하기). 목록 하단 1/3는 검정 그라데이션(위쪽 절반에서 0→100%, 아래 절반은 검정)이고 그 영역 중앙에 버튼. 선택 버튼 너비는 목록의 80%. 비선택은 테두리 `#635F5F` 1. 저장 성공 시 `GET /v1/users`로 `_user`를 바꾸고, `ENGLISH_LEVEL`이 없으면 CEFR, 있으면 Home. 실패는 `requestFailed` 토스트 후 유지. 태그 규칙·서버 키는 `CONTEXT_LOCALE.md`. Setting의 앱 언어는 별도 하위 화면 `lib/screens/setting/app_language.dart` (`AppLanguageScreen`). 헤더 `settingsAppLanguage`, 진행 막대 없음, 버튼 `actionConfirm`. 선택 목록은 `AppLanguageOptionList`, 저장 규칙은 `AppLanguageOptions`.
 
 ## 1.2 FirstCefrLevelScreen
 
@@ -158,20 +158,20 @@
 - **appPath**: 해당 없음 (온보딩 플로우)
 
 ### 스크린 용도
-- 서비스 이용 동의를 **방금 완료한 세션**에서 1회만 노출되는 CEFR 레벨 선택 화면
+- `ENGLISH_LEVEL`이 없을 때 언어 선택 직후 노출되는 CEFR 레벨 선택 화면. 재실행 시에는 신규 가입자(온보딩 meta `N`)만 다시 노출
 - Setting `CefrLevelScreen`과 동일 API(`PUT /v1/users/language-level`) 사용
 
 ### 이전 스크린 정보 (진입점)
 - **LoginScreen 동의 레이어**: 언어 저장 후 `_onFirstAppLanguageSaved` → `ENGLISH_LEVEL` 없으면 `_needsFirstCefrLevel = true`
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
-- **FirstProfileImageScreen**(§1.3): Confirm 탭 시 API 호출 후 `_onFirstCefrLevelComplete`(실패해도 다음)
+- **FirstProfileImageScreen**(§1.3): Confirm 탭 시 API 호출 후 `_onFirstCefrLevelComplete`(실패해도 다음). `ONBOARDING_PROFILE_IMAGE=N`이 아니면(기존 사용자) Home
 
 ### 스크린 내부 구현 특이사항
 - **배경**: `#121212`. **PopScope** `canPop: false`(시스템·스와이프 백 차단)
 - **레이아웃**: 상·중·하 3등분(`Expanded`×3). 흰 타이틀은 언어 화면과 같이 상단 1/3 안에서 글 하단이 그 높이의 72% (`onboardingTitle`). 하단은 2등분 가상선 기준 배치
 - **중앙**: `PageView` 캐러셀(Pre-A1~B1, 기본 포커스 **A1**, 무한루프 없음). 포커스 원 40% width·`#0CABA8`, 대기 원 90%·반원 peek. 좌우 `#121212` 60%→0% 그라데이션. 스냅 후 `Vibration` 80ms
-- **Confirm**: 흰 배경·Stadium·검정 텍스트. 문구는 `firstAppLanguageContinue`(Continue). 상단 진행 막대 2/3 (`OnboardingStepBar`)
+- **Confirm**: 흰 배경·Stadium·검정 텍스트. 문구는 `firstAppLanguageContinue`(Continue). 상단 진행 막대 2/4 (`OnboardingStepBar`)
 - **Lab(dev)**: Setting > Lab > **Open First CEFR Level**
 
 ## 1.3 FirstProfileImageScreen
@@ -183,21 +183,46 @@
 - **appPath**: 해당 없음 (온보딩 플로우)
 
 ### 스크린 용도
-- CEFR 선택 **직후 1회** 기본 프로필 이미지(색상) 선택
+- 신규 가입자(meta `ONBOARDING_PROFILE_IMAGE=N`)만 노출되는 기본 프로필 이미지(색상) 선택. 키가 없는 기존 사용자는 노출 안 함
 - `PUT /v1/users/profile-img` body `{ "type": "DEFAULT", "value": "1"…"4" }` (좌→우 `#FFB700`/`#FFAAE1`/`#B286EB`/`#054544`). 기본·무효 value는 1번 노랑. 이미 저장된 `DEFAULT:03ABA8`은 그대로 표시(피커 엔트리 없음)
 
 ### 이전 스크린 정보 (진입점)
-- **FirstCefrLevelScreen**: `_onFirstCefrLevelComplete` → `main.dart` `_needsFirstProfileImage = true`
+- **FirstCefrLevelScreen**: `_onFirstCefrLevelComplete` 후 `_needsFirstProfileImage`(로그인·재실행 시 `_assignEntryFlags`가 meta `N`으로 설정)
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
-- **HomeScreen(Main)**: Confirm 후 `_onFirstProfileImageComplete`. PUT 성공 시 `GET /v1/users`로 `_user` 갱신. API 실패여도 Home
+- **FirstUsernameScreen**(§1.4): Continue 후 `_onFirstProfileImageComplete`. `POST /v1/users/onboarding-profile-image`(best-effort) + `_user`에 `ONBOARDING_PROFILE_IMAGE=Y` 주입. PUT 성공 시 `GET /v1/users`로 `_user` 갱신. API 실패여도 다음
 
 ### 스크린 내부 구현 특이사항
 - **배경**: `#121212`. **PopScope** `canPop: false`
 - **레이아웃**: FirstCefr와 동일 상·중·하 3등분. 흰 타이틀도 같은 `onboardingTitle`. **캐러셀 위 선택별 설명 문구 없음**
 - **중앙**: `PageView` + `DefaultProfileAvatar`(마스크 `maskScale` 기본 **0.35**). 포커스 지름은 캐러셀 `LayoutBuilder` 영역 내 최대 정사각(잘림 방지). 측면은 `Transform.scale(0.4)`만 적용해 마스크 비율 고정. 기본 포커스 **1번**. 스냅 `Vibration` 80ms. 좌우 그라데이션 peek 동일
-- **힌트**: `firstCefrLevelSettingsHint`. 버튼: `actionConfirm`. 상단 진행 막대 3/3
+- **힌트**: `firstCefrLevelSettingsHint`. 버튼: `firstAppLanguageContinue`(Continue). 상단 진행 막대 3/4
 - **Lab(dev)**: Setting > Lab > **Open First Profile Image**
+
+## 1.4 FirstUsernameScreen
+
+### 스크린 관련 정의 파일
+- **파일 경로**: `lib/screens/first_username.dart`
+- **클래스명**: `FirstUsernameScreen` (StatefulWidget)
+- **스크린 타입**: **Full Screen**
+- **appPath**: 해당 없음 (온보딩 플로우)
+
+### 스크린 용도
+- 신규 가입자(meta `ONBOARDING_USERNAME=N`)만 노출되는 이름 확인·수정. 가입 이름(Google `given_name`, Apple given name)이 미리 채워짐
+- `PUT /v1/users?name=` (Account 이름과 동일 API·규칙: trim, 빈 값 불가, 길이 제한 없음)
+
+### 이전 스크린 정보 (진입점)
+- **FirstProfileImageScreen**(§1.3) 완료 후. 재실행 시 `_assignEntryFlags`가 meta `N`이면 바로 진입
+
+### 이후 스크린 정보 (이동 가능한 다른 스크린)
+- **HomeScreen(Main)**: 이름 저장 성공 시에만 `_onFirstUsernameComplete`. `POST /v1/users/onboarding-username`(best-effort) + `GET /v1/users` + `_user`에 `ONBOARDING_USERNAME=Y` 주입. 저장 실패는 `requestFailed` 토스트 후 입력 유지
+
+### 스크린 내부 구현 특이사항
+- **배경**: `#121212`. **PopScope** `canPop: false`. 바깥 탭 시 키보드 닫힘. `resizeToAvoidBottomInset: false`(타이틀·진행 막대 간격 유지)
+- **레이아웃**: 상단 타이틀 밴드는 화면 높이 1/3 고정(`firstUsernameTitle`, locale별 `\n`). 진행 막대 4/4. `resizeToAvoidBottomInset: false`. 키보드 시 타이틀 Y는 그대로 두고, 아바타·이름 칸·힌트·Confirm을 `viewInsets` bottom padding으로 키보드 위에 올림(TextField 트리 유지). 아바타는 48·좌측으로 300ms `easeOutCubic` 축소·이동
+- **중앙**: `UserProfileAvatar`(무료 링) + 이름 필드(`#353535` 알약·`edit.svg`)
+- **하단**: 힌트 `firstCefrLevelSettingsHint`, 버튼 `actionConfirm`(키보드 위에도 동일). trim 후 빈 값이면 비활성
+- **Lab(dev)**: Setting > Lab 온보딩 미리보기(언어 → CEFR → 프로필 → 이름)
 
 ---
 
@@ -1106,7 +1131,7 @@
   └─ 토큰 유효 → [HomeScreen] (동의 미완료 시 LoginScreen 동의 레이어)
 
 [LoginScreen]
-  ├─ 로그인 성공 → [HomeScreen] (이미 동의·언어 태그 있음) / [FirstAppLanguageScreen] → [FirstCefrLevelScreen] → [FirstProfileImageScreen] (동의 직후)
+  ├─ 로그인 성공 → [HomeScreen] (이미 동의·언어 태그 있음) / [FirstAppLanguageScreen] → [FirstCefrLevelScreen] → [FirstProfileImageScreen] → [FirstUsernameScreen] (신규 가입자)
   └─ 로그인 취소/실패 → [LoginScreen] (유지)
 
 [NotificationBoxScreen] ←→ [HomeScreen] ←→ [ProfileScreen] (GNB Alarm/Home/Profile)
@@ -1130,7 +1155,7 @@
    - JWT 토큰 확인 및 서버 검증 (네이티브 스플래시 유지 중)
    - 처리 완료 후 `FlutterNativeSplash.remove()` 호출
    - 토큰 없음/유효하지 않음 → LoginScreen 표시
-   - 토큰 유효 → HomeScreen 표시 (동의 미완료 시 LoginScreen 동의 레이어 → `LANGUAGE_TAG` 없으면 FirstAppLanguageScreen → ENGLISH_LEVEL 없으면 FirstCefrLevelScreen → FirstProfileImageScreen → Home)
+   - 토큰 유효 → HomeScreen 표시 (동의 미완료 시 LoginScreen 동의 레이어 → `LANGUAGE_TAG` 없으면 FirstAppLanguageScreen → ENGLISH_LEVEL 없으면 FirstCefrLevelScreen → 신규 가입자는 FirstProfileImageScreen → FirstUsernameScreen → Home)
 
 3. **로그아웃 시**
    - `_onSignOut()`에서 곧바로 LoginScreen 표시

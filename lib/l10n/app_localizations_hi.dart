@@ -19,6 +19,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get agreementPrivacyLabel => 'मैं गोपनीयता नीति से सहमत हूँ।';
 
   @override
+  String get agreementAllLabel => 'सभी आवश्यक शर्तों से सहमत हूँ';
+
+  @override
   String get agreementTermsTitle => 'उपयोग की शर्तें';
 
   @override
@@ -392,6 +395,9 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get firstProfileImageTitle => 'अपनी प्रोफ़ाइल तस्वीर चुनें';
+
+  @override
+  String get firstUsernameTitle => 'हम आपको क्या\nकहकर बुलाएँ?';
 
   @override
   String get actionConfirm => 'कन्फ़र्म करें';

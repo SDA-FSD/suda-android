@@ -18,6 +18,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get agreementPrivacyLabel => '我同意《隐私政策》。';
 
   @override
+  String get agreementAllLabel => '同意全部必要条款';
+
+  @override
   String get agreementTermsTitle => '用户协议';
 
   @override
@@ -370,6 +373,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get firstProfileImageTitle => '请选择你的头像';
+
+  @override
+  String get firstUsernameTitle => '我们该怎么\n称呼你？';
 
   @override
   String get actionConfirm => '确认';
@@ -1109,6 +1115,9 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get agreementPrivacyLabel => '我同意《隐私政策》。';
 
   @override
+  String get agreementAllLabel => '同意全部必要条款';
+
+  @override
   String get agreementTermsTitle => '用户协议';
 
   @override
@@ -1461,6 +1470,9 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get firstProfileImageTitle => '请选择你的头像';
+
+  @override
+  String get firstUsernameTitle => '我们该怎么\n称呼你？';
 
   @override
   String get actionConfirm => '确认';
@@ -2200,6 +2212,9 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get agreementPrivacyLabel => '我同意隱私政策。';
 
   @override
+  String get agreementAllLabel => '同意全部必要條款';
+
+  @override
   String get agreementTermsTitle => '使用條款';
 
   @override
@@ -2552,6 +2567,9 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get firstProfileImageTitle => '請選擇你的頭像';
+
+  @override
+  String get firstUsernameTitle => '我們該怎麼\n稱呼你？';
 
   @override
   String get actionConfirm => '確認';

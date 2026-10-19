@@ -27,6 +27,7 @@ import '../roleplay/try_again.dart';
 import '../first_app_language.dart';
 import '../first_cefr_level.dart';
 import '../first_profile_image.dart';
+import '../first_username.dart';
 import '../paywall/paywall.dart';
 import '../paywall/paywall_completed.dart';
 import '../rank/ranking.dart';
@@ -983,7 +984,7 @@ class _LabScreenState extends State<LabScreen> {
   }
 }
 
-/// Lab 전용. API 없이 언어 → CEFR → 프로필 이미지 순서를 연다.
+/// Lab 전용. API 없이 언어 → CEFR → 프로필 이미지 → 이름 순서를 연다.
 class _OnboardingFlowPreview extends StatefulWidget {
   const _OnboardingFlowPreview();
 
@@ -1007,8 +1008,13 @@ class _OnboardingFlowPreviewState extends State<_OnboardingFlowPreview> {
           preview: true,
           onComplete: () => setState(() => _step = 2),
         );
-      default:
+      case 2:
         return FirstProfileImageScreen(
+          preview: true,
+          onComplete: (_) => setState(() => _step = 3),
+        );
+      default:
+        return FirstUsernameScreen(
           preview: true,
           onComplete: (_) => Navigator.of(context).pop(),
         );

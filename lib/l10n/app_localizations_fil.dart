@@ -21,6 +21,10 @@ class AppLocalizationsFil extends AppLocalizations {
       'Sumasang-ayon ako sa Patakaran sa Privacy.';
 
   @override
+  String get agreementAllLabel =>
+      'Sumasang-ayon sa lahat ng kinakailangang tuntunin';
+
+  @override
   String get agreementTermsTitle => 'Mga Tuntunin ng Paggamit';
 
   @override
@@ -398,6 +402,9 @@ class AppLocalizationsFil extends AppLocalizations {
 
   @override
   String get firstProfileImageTitle => 'Piliin ang iyong profile picture';
+
+  @override
+  String get firstUsernameTitle => 'Ano ang itatawag\nnamin sa iyo?';
 
   @override
   String get actionConfirm => 'Kumpirmahin';
