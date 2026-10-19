@@ -10,7 +10,7 @@ import '../utils/default_toast.dart';
 import '../widgets/default_profile_avatar.dart';
 import '../widgets/onboarding_step_bar.dart';
 
-/// 신규 가입자 온보딩(meta `ONBOARDING_PROFILE_IMAGE=N`)의 기본 프로필 이미지 선택 Full Screen.
+/// 온보딩(meta `ONBOARDING_PROFILE_IMAGE` != Y)의 기본 프로필 이미지 선택 Full Screen.
 class FirstProfileImageScreen extends StatefulWidget {
   final void Function(UserDto? updatedUser) onComplete;
   final bool preview;

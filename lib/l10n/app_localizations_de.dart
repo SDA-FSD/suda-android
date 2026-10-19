@@ -403,6 +403,14 @@ class AppLocalizationsDe extends AppLocalizations {
   String get firstUsernameTitle => 'Wie dürfen wir\ndich nennen?';
 
   @override
+  String tutorialIntroTitle(String name) {
+    return '$name,\nbereit zum Aufwärmen?';
+  }
+
+  @override
+  String get tutorialIntroStart => 'Tutorial starten';
+
+  @override
   String get actionConfirm => 'Bestätigen';
 
   @override

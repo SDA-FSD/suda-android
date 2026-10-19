@@ -157,6 +157,14 @@
   "firstCefrLevelSettingsHint": "Bisa diubah kapan saja",
   "firstProfileImageTitle": "Pilih foto profilmu",
   "firstUsernameTitle": "Kami harus\nmemanggilmu apa?",
+  "tutorialIntroTitle": "{name},\nsiap pemanasan?",
+  "@tutorialIntroTitle": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "tutorialIntroStart": "Mulai tutorial",
+
   "actionConfirm": "Konfirmasi",
   "feedbackPlaceholder": "Bagikan pendapat, saran, atau masalah yang Anda temui...",
   "feedbackSend": "Kirim",

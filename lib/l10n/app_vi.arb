@@ -157,6 +157,14 @@
   "firstCefrLevelSettingsHint": "Bạn có thể thay đổi bất cứ lúc nào",
   "firstProfileImageTitle": "Chọn ảnh hồ sơ của bạn",
   "firstUsernameTitle": "Chúng tôi nên\ngọi bạn là gì?",
+  "tutorialIntroTitle": "{name},\nsẵn sàng khởi động chưa?",
+  "@tutorialIntroTitle": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "tutorialIntroStart": "Bắt đầu hướng dẫn",
+
   "actionConfirm": "Xác nhận",
   "feedbackPlaceholder": "Hãy chia sẻ cảm nhận, đề xuất hoặc vấn đề bạn gặp phải...",
   "feedbackSend": "Gửi",

@@ -157,6 +157,14 @@
   "firstCefrLevelSettingsHint": "之後可隨時更改",
   "firstProfileImageTitle": "請選擇你的頭像",
   "firstUsernameTitle": "我們該怎麼\n稱呼你？",
+  "tutorialIntroTitle": "{name}，\n準備暖暖身嗎？",
+  "@tutorialIntroTitle": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "tutorialIntroStart": "開始教學",
+
   "actionConfirm": "確認",
   "feedbackPlaceholder": "歡迎分享你的想法、建議或遇到的任何問題⋯⋯",
   "feedbackSend": "送出",

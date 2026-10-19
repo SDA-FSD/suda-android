@@ -401,6 +401,14 @@ class AppLocalizationsId extends AppLocalizations {
   String get firstUsernameTitle => 'Kami harus\nmemanggilmu apa?';
 
   @override
+  String tutorialIntroTitle(String name) {
+    return '$name,\nsiap pemanasan?';
+  }
+
+  @override
+  String get tutorialIntroStart => 'Mulai tutorial';
+
+  @override
   String get actionConfirm => 'Konfirmasi';
 
   @override

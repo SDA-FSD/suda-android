@@ -157,6 +157,14 @@
   "firstCefrLevelSettingsHint": "Maaari mo itong baguhin anumang oras",
   "firstProfileImageTitle": "Piliin ang iyong profile picture",
   "firstUsernameTitle": "Ano ang itatawag\nnamin sa iyo?",
+  "tutorialIntroTitle": "{name},\nhanda nang mag-warm up?",
+  "@tutorialIntroTitle": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "tutorialIntroStart": "Simulan ang tutorial",
+
   "actionConfirm": "Kumpirmahin",
   "feedbackPlaceholder": "Ibahagi ang opinyon, mungkahi, o anumang problemang naranasan mo...",
   "feedbackSend": "Ipadala",

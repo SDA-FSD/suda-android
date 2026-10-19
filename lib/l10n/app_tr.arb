@@ -157,6 +157,14 @@
   "firstCefrLevelSettingsHint": "İstediğin zaman değiştirebilirsin",
   "firstProfileImageTitle": "Profil resmini seç",
   "firstUsernameTitle": "Sana nasıl\nhitap edelim?",
+  "tutorialIntroTitle": "{name},\nısınmaya hazır mısın?",
+  "@tutorialIntroTitle": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "tutorialIntroStart": "Eğitime başla",
+
   "actionConfirm": "Onayla",
   "feedbackPlaceholder": "Fikirlerini, önerilerini veya karşılaştığın sorunları paylaş...",
   "feedbackSend": "Gönder",

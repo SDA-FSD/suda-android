@@ -407,6 +407,14 @@ class AppLocalizationsFil extends AppLocalizations {
   String get firstUsernameTitle => 'Ano ang itatawag\nnamin sa iyo?';
 
   @override
+  String tutorialIntroTitle(String name) {
+    return '$name,\nhanda nang mag-warm up?';
+  }
+
+  @override
+  String get tutorialIntroStart => 'Simulan ang tutorial';
+
+  @override
   String get actionConfirm => 'Kumpirmahin';
 
   @override

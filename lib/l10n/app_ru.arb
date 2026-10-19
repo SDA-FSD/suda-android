@@ -157,6 +157,14 @@
   "firstCefrLevelSettingsHint": "Уровень можно изменить в любое время",
   "firstProfileImageTitle": "Выберите фото профиля",
   "firstUsernameTitle": "Как к вам\nобращаться?",
+  "tutorialIntroTitle": "{name},\nготовы размяться?",
+  "@tutorialIntroTitle": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "tutorialIntroStart": "Начать обучение",
+
   "actionConfirm": "Подтвердить",
   "feedbackPlaceholder": "Расскажите, что вы думаете, предложите улучшение или сообщите о проблеме...",
   "feedbackSend": "Отправить",

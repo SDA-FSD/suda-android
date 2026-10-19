@@ -401,6 +401,14 @@ class AppLocalizationsRu extends AppLocalizations {
   String get firstUsernameTitle => 'Как к вам\nобращаться?';
 
   @override
+  String tutorialIntroTitle(String name) {
+    return '$name,\nготовы размяться?';
+  }
+
+  @override
+  String get tutorialIntroStart => 'Начать обучение';
+
+  @override
   String get actionConfirm => 'Подтвердить';
 
   @override

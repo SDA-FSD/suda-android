@@ -495,6 +495,39 @@ class UserApi {
     );
   }
 
+  /// POST /v1/users/onboarding-tutorial (best-effort; 200 only)
+  static Future<void> postOnboardingTutorial({
+    required String accessToken,
+  }) async {
+    final uri = SudaHttpClient.buildUri('/v1/users/onboarding-tutorial');
+
+    late final http.Response response;
+    try {
+      response = await SudaHttpClient.client
+          .post(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      rethrow;
+    }
+
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return;
+    }
+
+    throw Exception(
+      'POST /v1/users/onboarding-tutorial failed: HTTP ${response.statusCode} ${response.body}',
+    );
+  }
+
   /// PUT /v1/users/grant-welcome-gift
   static Future<void> grantWelcomeGift({
     required String accessToken,

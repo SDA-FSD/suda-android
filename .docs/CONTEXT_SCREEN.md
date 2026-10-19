@@ -158,14 +158,14 @@
 - **appPath**: 해당 없음 (온보딩 플로우)
 
 ### 스크린 용도
-- `ENGLISH_LEVEL`이 없을 때 언어 선택 직후 노출되는 CEFR 레벨 선택 화면. 재실행 시에는 신규 가입자(온보딩 meta `N`)만 다시 노출
+- `ENGLISH_LEVEL`이 없을 때 언어 선택 직후 노출되는 CEFR 레벨 선택 화면. 재실행 시에는 온보딩 미완료(`ONBOARDING_*` != Y)일 때만 다시 노출
 - Setting `CefrLevelScreen`과 동일 API(`PUT /v1/users/language-level`) 사용
 
 ### 이전 스크린 정보 (진입점)
 - **LoginScreen 동의 레이어**: 언어 저장 후 `_onFirstAppLanguageSaved` → `ENGLISH_LEVEL` 없으면 `_needsFirstCefrLevel = true`
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
-- **FirstProfileImageScreen**(§1.3): Confirm 탭 시 API 호출 후 `_onFirstCefrLevelComplete`(실패해도 다음). `ONBOARDING_PROFILE_IMAGE=N`이 아니면(기존 사용자) Home
+- **FirstProfileImageScreen**(§1.3): Confirm 탭 시 API 호출 후 `_onFirstCefrLevelComplete`(실패해도 다음). `ONBOARDING_PROFILE_IMAGE=Y`면(기존·완료) 다음 단계/Home
 
 ### 스크린 내부 구현 특이사항
 - **배경**: `#121212`. **PopScope** `canPop: false`(시스템·스와이프 백 차단)
@@ -183,11 +183,11 @@
 - **appPath**: 해당 없음 (온보딩 플로우)
 
 ### 스크린 용도
-- 신규 가입자(meta `ONBOARDING_PROFILE_IMAGE=N`)만 노출되는 기본 프로필 이미지(색상) 선택. 키가 없는 기존 사용자는 노출 안 함
+- meta `ONBOARDING_PROFILE_IMAGE` != Y일 때 노출되는 기본 프로필 이미지(색상) 선택. 기존 유저는 마이그레이션으로 `Y`
 - `PUT /v1/users/profile-img` body `{ "type": "DEFAULT", "value": "1"…"4" }` (좌→우 `#FFB700`/`#FFAAE1`/`#B286EB`/`#054544`). 기본·무효 value는 1번 노랑. 이미 저장된 `DEFAULT:03ABA8`은 그대로 표시(피커 엔트리 없음)
 
 ### 이전 스크린 정보 (진입점)
-- **FirstCefrLevelScreen**: `_onFirstCefrLevelComplete` 후 `_needsFirstProfileImage`(로그인·재실행 시 `_assignEntryFlags`가 meta `N`으로 설정)
+- **FirstCefrLevelScreen**: `_onFirstCefrLevelComplete` 후 `_needsFirstProfileImage`(로그인·재실행 시 `_assignEntryFlags`가 meta != Y이면 설정)
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
 - **FirstUsernameScreen**(§1.4): Continue 후 `_onFirstProfileImageComplete`. `POST /v1/users/onboarding-profile-image`(best-effort) + `_user`에 `ONBOARDING_PROFILE_IMAGE=Y` 주입. PUT 성공 시 `GET /v1/users`로 `_user` 갱신. API 실패여도 다음
@@ -208,21 +208,42 @@
 - **appPath**: 해당 없음 (온보딩 플로우)
 
 ### 스크린 용도
-- 신규 가입자(meta `ONBOARDING_USERNAME=N`)만 노출되는 이름 확인·수정. 가입 이름(Google `given_name`, Apple given name)이 미리 채워짐
+- meta `ONBOARDING_USERNAME` != Y일 때 노출되는 이름 확인·수정. 가입 이름(Google `given_name`, Apple given name)이 미리 채워짐
 - `PUT /v1/users?name=` (Account 이름과 동일 API·규칙: trim, 빈 값 불가, 길이 제한 없음)
 
 ### 이전 스크린 정보 (진입점)
-- **FirstProfileImageScreen**(§1.3) 완료 후. 재실행 시 `_assignEntryFlags`가 meta `N`이면 바로 진입
+- **FirstProfileImageScreen**(§1.3) 완료 후. 재실행 시 `_assignEntryFlags`가 meta != Y이면 바로 진입
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
-- **HomeScreen(Main)**: 이름 저장 성공 시에만 `_onFirstUsernameComplete`. `POST /v1/users/onboarding-username`(best-effort) + `GET /v1/users` + `_user`에 `ONBOARDING_USERNAME=Y` 주입. 저장 실패는 `requestFailed` 토스트 후 입력 유지
+- **TutorialIntroScreen**: 이름 저장 성공 시에만 `_onFirstUsernameComplete` → Intro. `POST /v1/users/onboarding-username`(best-effort) + `GET /v1/users` + `_user`에 `ONBOARDING_USERNAME=Y` 주입. 저장 실패는 `requestFailed` 토스트 후 입력 유지
 
 ### 스크린 내부 구현 특이사항
 - **배경**: `#121212`. **PopScope** `canPop: false`. 바깥 탭 시 키보드 닫힘. `resizeToAvoidBottomInset: false`(타이틀·진행 막대 간격 유지)
 - **레이아웃**: 상단 타이틀 밴드는 화면 높이 1/3 고정(`firstUsernameTitle`, locale별 `\n`). 진행 막대 4/4. `resizeToAvoidBottomInset: false`. 키보드 시 타이틀 Y는 그대로 두고, 아바타·이름 칸·힌트·Confirm을 `viewInsets` bottom padding으로 키보드 위에 올림(TextField 트리 유지). 아바타는 48·좌측으로 300ms `easeOutCubic` 축소·이동
 - **중앙**: `UserProfileAvatar`(무료 링) + 이름 필드(`#353535` 알약·`edit.svg`)
 - **하단**: 힌트 `firstCefrLevelSettingsHint`, 버튼 `actionConfirm`(키보드 위에도 동일). trim 후 빈 값이면 비활성
-- **Lab(dev)**: Setting > Lab 온보딩 미리보기(언어 → CEFR → 프로필 → 이름)
+- **Confirm→Intro**: 저장 성공 후 `TutorialIntroStage` 1.7s 전환을 Username 스택에서 재생한 뒤 `onComplete`(§1.5)
+- **Lab(dev)**: Setting > Lab 온보딩 미리보기(언어 → CEFR → 프로필 → 이름 → Intro → Roleplay stub)
+
+## 1.5 TutorialIntroScreen
+
+### 스크린 관련 정의 파일
+- **파일 경로**: `lib/screens/tutorial/tutorial_intro.dart`
+- **클래스명**: `TutorialIntroScreen` (StatefulWidget)
+- **스크린 타입**: **Full Screen**
+
+### 스크린 용도
+- Username 직후. `ONBOARDING_TUTORIAL` != Y일 때. Start Tutorial → 마이크 권한(Opening과 동일) → Tutorial Roleplay(현재 stub). Close 시 `POST /v1/users/onboarding-tutorial`(best-effort)
+
+### 이전 스크린 정보 (진입점)
+- **FirstUsernameScreen** 완료 / `_assignEntryFlags` 재진입
+
+### 이후 스크린 정보
+- **TutorialRoleplayStubScreen** (`tutorial_roleplay_stub.dart`) — 본편 전까지 자리. Close → Home(세션). Lab **Open Tutorial Intro** / 온보딩 플로우 preview
+
+### 스크린 내부 구현 특이사항
+- **배경**: `TutorialRoleplayBackdrop` — 프로토타입 `#bg`와 동일 `tutorial_roleplay_bg.jpg`(이미 블러된 롤플레이). 추가 blur/딤 없음·밝은 ColorFilter로 비침 확보. Confirm 전환 시 bg opacity 0→1 (900ms ease-out, delay 80ms)
+- **애니**: 프로토타입 `.go`는 `TutorialIntroStage` 공용. **Username Confirm 성공 시** Username 위에서 전환(rest fade + bg/아바타/문구/CTA) 후 Intro는 `playEntrance: false`. 콜드스타트·Lab 단독 Open은 Intro 입장 애니. l10n `tutorialIntroTitle(name)` · `tutorialIntroStart`(play_white · mint `#0CABA8`)
 
 ---
 

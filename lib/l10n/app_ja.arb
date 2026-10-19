@@ -157,6 +157,14 @@
   "firstCefrLevelSettingsHint": "いつでも変更できます",
   "firstProfileImageTitle": "プロフィール画像を選んでください",
   "firstUsernameTitle": "何とお呼びすれば\nいいですか？",
+  "tutorialIntroTitle": "{name}さん、\nウォームアップしましょうか？",
+  "@tutorialIntroTitle": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "tutorialIntroStart": "チュートリアルを始める",
+
   "actionConfirm": "決定",
   "feedbackPlaceholder": "ご意見、ご要望、お困りの点などをお聞かせください…",
   "feedbackSend": "送信",

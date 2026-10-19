@@ -380,6 +380,14 @@ class AppLocalizationsJa extends AppLocalizations {
   String get firstUsernameTitle => '何とお呼びすれば\nいいですか？';
 
   @override
+  String tutorialIntroTitle(String name) {
+    return '$nameさん、\nウォームアップしましょうか？';
+  }
+
+  @override
+  String get tutorialIntroStart => 'チュートリアルを始める';
+
+  @override
   String get actionConfirm => '決定';
 
   @override

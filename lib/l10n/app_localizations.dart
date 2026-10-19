@@ -851,6 +851,18 @@ abstract class AppLocalizations {
   /// **'What should we\ncall you?'**
   String get firstUsernameTitle;
 
+  /// No description provided for @tutorialIntroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{name},\nready to warm up?'**
+  String tutorialIntroTitle(String name);
+
+  /// No description provided for @tutorialIntroStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Tutorial'**
+  String get tutorialIntroStart;
+
   /// No description provided for @actionConfirm.
   ///
   /// In en, this message translates to:

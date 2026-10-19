@@ -401,6 +401,14 @@ class AppLocalizationsPl extends AppLocalizations {
   String get firstUsernameTitle => 'Jak mamy się\ndo Ciebie zwracać?';
 
   @override
+  String tutorialIntroTitle(String name) {
+    return '$name,\ngotowy na rozgrzewkę?';
+  }
+
+  @override
+  String get tutorialIntroStart => 'Rozpocznij tutorial';
+
+  @override
   String get actionConfirm => 'Potwierdź';
 
   @override

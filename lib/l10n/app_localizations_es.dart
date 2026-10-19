@@ -401,6 +401,14 @@ class AppLocalizationsEs extends AppLocalizations {
   String get firstUsernameTitle => '¿Cómo quieres que\nte llamemos?';
 
   @override
+  String tutorialIntroTitle(String name) {
+    return '$name,\n¿listo para calentar?';
+  }
+
+  @override
+  String get tutorialIntroStart => 'Empezar tutorial';
+
+  @override
   String get actionConfirm => 'Confirmar';
 
   @override
@@ -1572,6 +1580,14 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
 
   @override
   String get firstUsernameTitle => '¿Cómo quieres que\nte llamemos?';
+
+  @override
+  String tutorialIntroTitle(String name) {
+    return '$name,\n¿listo para calentar?';
+  }
+
+  @override
+  String get tutorialIntroStart => 'Empezar tutorial';
 
   @override
   String get actionConfirm => 'Confirmar';

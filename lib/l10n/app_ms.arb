@@ -157,6 +157,14 @@
   "firstCefrLevelSettingsHint": "Boleh ditukar pada bila-bila masa",
   "firstProfileImageTitle": "Pilih gambar profil anda",
   "firstUsernameTitle": "Kami patut panggil\nanda apa?",
+  "tutorialIntroTitle": "{name},\nsedia untuk memanaskan badan?",
+  "@tutorialIntroTitle": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "tutorialIntroStart": "Mulakan tutorial",
+
   "actionConfirm": "Sahkan",
   "feedbackPlaceholder": "Kongsi pendapat, cadangan atau sebarang masalah yang anda hadapi...",
   "feedbackSend": "Hantar",

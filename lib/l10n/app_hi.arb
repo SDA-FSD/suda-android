@@ -157,6 +157,14 @@
   "firstCefrLevelSettingsHint": "इसे कभी भी बदल सकते हैं",
   "firstProfileImageTitle": "अपनी प्रोफ़ाइल तस्वीर चुनें",
   "firstUsernameTitle": "हम आपको क्या\nकहकर बुलाएँ?",
+  "tutorialIntroTitle": "{name},\nवार्म अप के लिए तैयार?",
+  "@tutorialIntroTitle": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "tutorialIntroStart": "ट्यूटोरियल शुरू करें",
+
   "actionConfirm": "कन्फ़र्म करें",
   "feedbackPlaceholder": "अपने विचार, सुझाव या सामने आई कोई समस्या बताएँ...",
   "feedbackSend": "भेजें",

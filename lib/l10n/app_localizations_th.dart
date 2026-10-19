@@ -393,6 +393,14 @@ class AppLocalizationsTh extends AppLocalizations {
   String get firstUsernameTitle => 'ให้เราเรียกคุณ\nว่าอะไรดี?';
 
   @override
+  String tutorialIntroTitle(String name) {
+    return '$name\nพร้อมวอร์มอัปหรือยัง?';
+  }
+
+  @override
+  String get tutorialIntroStart => 'เริ่มบทเรียน';
+
+  @override
   String get actionConfirm => 'ยืนยัน';
 
   @override

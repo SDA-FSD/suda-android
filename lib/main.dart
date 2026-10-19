@@ -31,6 +31,8 @@ import 'screens/first_app_language.dart';
 import 'screens/first_cefr_level.dart';
 import 'screens/first_profile_image.dart';
 import 'screens/first_username.dart';
+import 'screens/tutorial/tutorial_intro.dart';
+import 'screens/tutorial/tutorial_roleplay_stub.dart';
 import 'screens/home.dart';
 import 'screens/profile.dart';
 import 'screens/friends.dart';
@@ -150,8 +152,13 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   bool _needsAgreement = false; // 서비스 이용 동의 필요 여부
   bool _needsFirstAppLanguage = false; // 동의 후 LANGUAGE_TAG 없을 때
   bool _needsFirstCefrLevel = false; // 언어 선택 후 1회 CEFR 레벨 선택
-  bool _needsFirstProfileImage = false; // meta ONBOARDING_PROFILE_IMAGE=N (신규 가입자)
-  bool _needsFirstUsername = false; // meta ONBOARDING_USERNAME=N (신규 가입자)
+  bool _needsFirstProfileImage = false; // ONBOARDING_PROFILE_IMAGE != Y
+  bool _needsFirstUsername = false; // ONBOARDING_USERNAME != Y
+  /// ONBOARDING_TUTORIAL != Y 이면 Intro.
+  bool _needsTutorialIntro = false;
+  bool _needsTutorialRoleplay = false;
+  /// Username Confirm 전환을 이미 재생했으면 Intro 입장 애니 스킵.
+  bool _tutorialIntroPlayEntrance = true;
   String? _appliedLanguageTag;
   bool _languageApplyReady = false;
 
@@ -638,6 +645,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       _needsFirstCefrLevel = false;
       _needsFirstProfileImage = false;
       _needsFirstUsername = false;
+      _needsTutorialIntro = false;
+      _needsTutorialRoleplay = false;
       _currentMainScreen = 'home'; // 로그아웃 후 다시 로그인 시 Home 화면으로
       _homeNotiboxUnreadYn = 'N';
       _notiboxHasUnreadFromAlarmList = false;
@@ -700,19 +709,28 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   }
 
   /// 로그인·콜드 스타트 진입. 언어 태그가 없으면 언어 화면을 연다.
-  /// 신규 가입자(온보딩 meta `N`)는 남은 CEFR·프로필 이미지·이름 단계부터 이어간다.
+  /// 온보딩 meta는 `Y`만 완료(키 없음/`N`은 미완료). 기존 유저는 마이그레이션으로 `Y`.
   void _assignEntryFlags(UserDto user) {
     _needsAgreement = !_agreed(user);
     _needsFirstAppLanguage =
         !_needsAgreement && AppLanguage.tagOf(user) == null;
     _needsFirstProfileImage =
-        user.hasMetaInfoValue(key: 'ONBOARDING_PROFILE_IMAGE', value: 'N');
+        !user.hasMetaInfoValue(key: 'ONBOARDING_PROFILE_IMAGE', value: 'Y');
     _needsFirstUsername =
-        user.hasMetaInfoValue(key: 'ONBOARDING_USERNAME', value: 'N');
+        !user.hasMetaInfoValue(key: 'ONBOARDING_USERNAME', value: 'Y');
     _needsFirstCefrLevel = !_needsAgreement &&
         !_needsFirstAppLanguage &&
         (_needsFirstProfileImage || _needsFirstUsername) &&
         !AppLanguage.hasEnglishLevel(user);
+    _needsTutorialIntro = !_needsAgreement &&
+        !_needsFirstAppLanguage &&
+        !_needsFirstCefrLevel &&
+        !_needsFirstProfileImage &&
+        !_needsFirstUsername &&
+        !user.hasMetaInfoValue(key: 'ONBOARDING_TUTORIAL', value: 'Y');
+    // 콜드스타트 재진입은 Intro 입장 애니 재생.
+    _tutorialIntroPlayEntrance = _needsTutorialIntro;
+    _needsTutorialRoleplay = false;
   }
 
   /// 동의 완료 시 호출
@@ -758,7 +776,40 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       _needsFirstUsername = false;
       _user = (updatedUser ?? _user)
           ?.upsertMetaInfo(key: 'ONBOARDING_USERNAME', value: 'Y');
+      final needsIntro = !(_user?.hasMetaInfoValue(
+            key: 'ONBOARDING_TUTORIAL',
+            value: 'Y',
+          ) ??
+          false);
+      _needsTutorialIntro = needsIntro;
+      // Username 화면에서 Confirm→Intro 전환 애니를 이미 재생함.
+      _tutorialIntroPlayEntrance = false;
     });
+  }
+
+  void _onTutorialIntroStart() {
+    setState(() {
+      _needsTutorialIntro = false;
+      _needsTutorialRoleplay = true;
+    });
+  }
+
+  void _onTutorialRoleplayClose() {
+    unawaited(_postOnboardingTutorialBestEffort());
+    setState(() {
+      _needsTutorialRoleplay = false;
+      _user = _user?.upsertMetaInfo(key: 'ONBOARDING_TUTORIAL', value: 'Y');
+    });
+  }
+
+  Future<void> _postOnboardingTutorialBestEffort() async {
+    try {
+      final token = _accessToken ?? await TokenStorage.loadAccessToken();
+      if (token == null) return;
+      await SudaApiClient.postOnboardingTutorial(accessToken: token);
+    } catch (_) {
+      // best-effort: ignore
+    }
   }
 
   /// 동의 레이어를 동의 없이 닫을 때: 로컬 토큰 삭제 + Google 세션 정리 + 앱 상태 초기화
@@ -780,6 +831,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       _needsFirstCefrLevel = false;
       _needsFirstProfileImage = false;
       _needsFirstUsername = false;
+      _needsTutorialIntro = false;
+      _needsTutorialRoleplay = false;
       _currentMainScreen = 'home';
       _homeNotiboxUnreadYn = 'N';
       _notiboxHasUnreadFromAlarmList = false;
@@ -1039,6 +1092,16 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           ? FirstUsernameScreen(
               user: _user,
               onComplete: _onFirstUsernameComplete,
+            )
+          : _needsTutorialIntro
+          ? TutorialIntroScreen(
+              user: _user,
+              onStartTutorial: _onTutorialIntroStart,
+              playEntrance: _tutorialIntroPlayEntrance,
+            )
+          : _needsTutorialRoleplay
+          ? TutorialRoleplayStubScreen(
+              onClose: _onTutorialRoleplayClose,
             )
           : Builder(
               builder: (_) {

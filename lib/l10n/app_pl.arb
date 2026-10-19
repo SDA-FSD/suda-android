@@ -157,6 +157,14 @@
   "firstCefrLevelSettingsHint": "Możesz go zmienić w każdej chwili",
   "firstProfileImageTitle": "Wybierz zdjęcie profilowe",
   "firstUsernameTitle": "Jak mamy się\ndo Ciebie zwracać?",
+  "tutorialIntroTitle": "{name},\ngotowy na rozgrzewkę?",
+  "@tutorialIntroTitle": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "tutorialIntroStart": "Rozpocznij tutorial",
+
   "actionConfirm": "Potwierdź",
   "feedbackPlaceholder": "Podziel się swoją opinią, sugestiami lub napotkanymi problemami...",
   "feedbackSend": "Wyślij",
