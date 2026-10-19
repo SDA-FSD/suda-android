@@ -403,6 +403,14 @@ class AppLocalizationsMs extends AppLocalizations {
   String get firstUsernameTitle => 'Kami patut panggil\nanda apa?';
 
   @override
+  String tutorialIntroTitle(String name) {
+    return '$name,\nsedia untuk memanaskan badan?';
+  }
+
+  @override
+  String get tutorialIntroStart => 'Mulakan tutorial';
+
+  @override
   String get actionConfirm => 'Sahkan';
 
   @override

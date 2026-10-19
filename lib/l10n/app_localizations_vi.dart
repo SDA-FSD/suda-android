@@ -402,6 +402,14 @@ class AppLocalizationsVi extends AppLocalizations {
   String get firstUsernameTitle => 'Chúng tôi nên\ngọi bạn là gì?';
 
   @override
+  String tutorialIntroTitle(String name) {
+    return '$name,\nsẵn sàng khởi động chưa?';
+  }
+
+  @override
+  String get tutorialIntroStart => 'Bắt đầu hướng dẫn';
+
+  @override
   String get actionConfirm => 'Xác nhận';
 
   @override

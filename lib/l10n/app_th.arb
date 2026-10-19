@@ -157,6 +157,14 @@
   "firstCefrLevelSettingsHint": "เปลี่ยนได้ทุกเมื่อ",
   "firstProfileImageTitle": "เลือกรูปโปรไฟล์ของคุณ",
   "firstUsernameTitle": "ให้เราเรียกคุณ\nว่าอะไรดี?",
+  "tutorialIntroTitle": "{name}\nพร้อมวอร์มอัปหรือยัง?",
+  "@tutorialIntroTitle": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "tutorialIntroStart": "เริ่มบทเรียน",
+
   "actionConfirm": "ยืนยัน",
   "feedbackPlaceholder": "แชร์ความคิดเห็น ข้อเสนอแนะ หรือปัญหาที่พบ...",
   "feedbackSend": "ส่ง",

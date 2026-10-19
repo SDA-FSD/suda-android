@@ -402,6 +402,14 @@ class AppLocalizationsPt extends AppLocalizations {
   String get firstUsernameTitle => 'Como podemos\nte chamar?';
 
   @override
+  String tutorialIntroTitle(String name) {
+    return '$name,\nvamos aquecer?';
+  }
+
+  @override
+  String get tutorialIntroStart => 'Iniciar tutorial';
+
+  @override
   String get actionConfirm => 'Confirmar';
 
   @override

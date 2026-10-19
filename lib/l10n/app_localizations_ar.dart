@@ -397,6 +397,14 @@ class AppLocalizationsAr extends AppLocalizations {
   String get firstUsernameTitle => 'بماذا نناديك؟';
 
   @override
+  String tutorialIntroTitle(String name) {
+    return '$name،\nمستعد للإحماء؟';
+  }
+
+  @override
+  String get tutorialIntroStart => 'ابدأ البرنامج التعليمي';
+
+  @override
   String get actionConfirm => 'تأكيد';
 
   @override

@@ -157,6 +157,14 @@
   "firstCefrLevelSettingsHint": "يمكنك تغييره في أي وقت",
   "firstProfileImageTitle": "اختر صورة ملفك الشخصي",
   "firstUsernameTitle": "بماذا نناديك؟",
+  "tutorialIntroTitle": "{name}،\nمستعد للإحماء؟",
+  "@tutorialIntroTitle": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "tutorialIntroStart": "ابدأ البرنامج التعليمي",
+
   "actionConfirm": "تأكيد",
   "feedbackPlaceholder": "شاركنا أفكارك أو اقتراحاتك أو أي مشكلات واجهتها...",
   "feedbackSend": "إرسال",

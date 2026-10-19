@@ -378,6 +378,14 @@ class AppLocalizationsZh extends AppLocalizations {
   String get firstUsernameTitle => '我们该怎么\n称呼你？';
 
   @override
+  String tutorialIntroTitle(String name) {
+    return '$name，\n准备热热身吗？';
+  }
+
+  @override
+  String get tutorialIntroStart => '开始教程';
+
+  @override
   String get actionConfirm => '确认';
 
   @override
@@ -1475,6 +1483,14 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get firstUsernameTitle => '我们该怎么\n称呼你？';
 
   @override
+  String tutorialIntroTitle(String name) {
+    return '$name，\n准备热热身吗？';
+  }
+
+  @override
+  String get tutorialIntroStart => '开始教程';
+
+  @override
   String get actionConfirm => '确认';
 
   @override
@@ -2570,6 +2586,14 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get firstUsernameTitle => '我們該怎麼\n稱呼你？';
+
+  @override
+  String tutorialIntroTitle(String name) {
+    return '$name，\n準備暖暖身嗎？';
+  }
+
+  @override
+  String get tutorialIntroStart => '開始教學';
 
   @override
   String get actionConfirm => '確認';

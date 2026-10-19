@@ -401,6 +401,14 @@ class AppLocalizationsTr extends AppLocalizations {
   String get firstUsernameTitle => 'Sana nasıl\nhitap edelim?';
 
   @override
+  String tutorialIntroTitle(String name) {
+    return '$name,\nısınmaya hazır mısın?';
+  }
+
+  @override
+  String get tutorialIntroStart => 'Eğitime başla';
+
+  @override
   String get actionConfirm => 'Onayla';
 
   @override

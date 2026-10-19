@@ -157,6 +157,14 @@
   "firstCefrLevelSettingsHint": "언제든지 변경할 수 있습니다",
   "firstProfileImageTitle": "프로필 이미지를 선택하세요",
   "firstUsernameTitle": "어떻게 불러드리면\n될까요?",
+  "tutorialIntroTitle": "{name}님,\n가볍게 입부터 풀어볼까요?",
+  "@tutorialIntroTitle": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "tutorialIntroStart": "튜토리얼 시작",
+
   "actionConfirm": "확인",
   "feedbackPlaceholder": "생각, 제안사항 또는 겪으신 문제점을 공유해 주세요...",
   "feedbackSend": "전송",

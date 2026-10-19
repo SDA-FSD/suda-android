@@ -157,6 +157,14 @@
   "firstCefrLevelSettingsHint": "Je kunt dit altijd wijzigen",
   "firstProfileImageTitle": "Kies je profielfoto",
   "firstUsernameTitle": "Hoe mogen we\nje noemen?",
+  "tutorialIntroTitle": "{name},\nklaar om op te warmen?",
+  "@tutorialIntroTitle": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "tutorialIntroStart": "Tutorial starten",
+
   "actionConfirm": "Bevestigen",
   "feedbackPlaceholder": "Deel je mening, suggesties of problemen...",
   "feedbackSend": "Versturen",

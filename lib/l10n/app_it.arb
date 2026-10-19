@@ -157,6 +157,14 @@
   "firstCefrLevelSettingsHint": "Puoi cambiarlo quando vuoi",
   "firstProfileImageTitle": "Scegli la tua foto del profilo",
   "firstUsernameTitle": "Come possiamo\nchiamarti?",
+  "tutorialIntroTitle": "{name},\npronto a riscaldarti?",
+  "@tutorialIntroTitle": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "tutorialIntroStart": "Inizia il tutorial",
+
   "actionConfirm": "Conferma",
   "feedbackPlaceholder": "Condividi pensieri, suggerimenti o problemi riscontrati...",
   "feedbackSend": "Invia",

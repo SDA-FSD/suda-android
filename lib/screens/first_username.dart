@@ -9,8 +9,9 @@ import '../services/token_storage.dart';
 import '../utils/default_toast.dart';
 import '../widgets/onboarding_step_bar.dart';
 import '../widgets/user_profile_avatar.dart';
+import 'tutorial/tutorial_intro_stage.dart';
 
-/// 신규 가입자 온보딩(meta `ONBOARDING_USERNAME=N`)의 이름 확인·수정 Full Screen.
+/// 온보딩(meta `ONBOARDING_USERNAME` != Y)의 이름 확인·수정 Full Screen.
 class FirstUsernameScreen extends StatefulWidget {
   final UserDto? user;
   final void Function(UserDto? updatedUser) onComplete;
@@ -27,7 +28,8 @@ class FirstUsernameScreen extends StatefulWidget {
   State<FirstUsernameScreen> createState() => _FirstUsernameScreenState();
 }
 
-class _FirstUsernameScreenState extends State<FirstUsernameScreen> {
+class _FirstUsernameScreenState extends State<FirstUsernameScreen>
+    with SingleTickerProviderStateMixin {
   static const _backgroundColor = Color(0xFF121212);
   static const _hintColor = Color(0xFF8C8C8C);
   static const _fieldColor = Color(0xFF353535);
@@ -38,29 +40,65 @@ class _FirstUsernameScreenState extends State<FirstUsernameScreen> {
 
   late final TextEditingController _nameController;
   final FocusNode _nameFocusNode = FocusNode();
+  late final AnimationController _toIntro;
   bool _isSubmitting = false;
+  bool _transitioning = false;
+  UserDto? _completedUser;
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.user?.name ?? '');
+    _toIntro = AnimationController(
+      vsync: this,
+      duration: TutorialIntroStage.duration,
+    );
+    _toIntro.addStatusListener((status) {
+      if (status == AnimationStatus.completed && mounted) {
+        widget.onComplete(_completedUser);
+      }
+    });
   }
 
   @override
   void dispose() {
+    _toIntro.dispose();
     _nameController.dispose();
     _nameFocusNode.dispose();
     super.dispose();
   }
 
   bool get _canSubmit =>
-      !_isSubmitting && _nameController.text.trim().isNotEmpty;
+      !_isSubmitting &&
+      !_transitioning &&
+      _nameController.text.trim().isNotEmpty;
+
+  String get _displayName {
+    final fromField = _nameController.text.trim();
+    final raw = (_completedUser?.name ??
+            (fromField.isNotEmpty ? fromField : widget.user?.name?.trim())) ??
+        '';
+    if (raw.isEmpty) return 'Friend';
+    return raw;
+  }
+
+  String? get _imgPath => _completedUser?.imgPath ?? widget.user?.imgPath;
+
+  Future<void> _playTransitionToIntro(UserDto? updated) async {
+    _completedUser = updated ??
+        widget.user?.copyWith(name: _nameController.text.trim());
+    setState(() => _transitioning = true);
+    await _toIntro.forward(from: 0);
+  }
 
   Future<void> _onConfirm() async {
     if (!_canSubmit) return;
     _nameFocusNode.unfocus();
     if (widget.preview) {
-      widget.onComplete(null);
+      await _playTransitionToIntro(
+        widget.user?.copyWith(name: _nameController.text.trim()) ??
+            UserDto(id: 0, name: _nameController.text.trim()),
+      );
       return;
     }
 
@@ -89,7 +127,7 @@ class _FirstUsernameScreenState extends State<FirstUsernameScreen> {
       if (mounted) {
         setState(() => _isSubmitting = false);
         if (saved) {
-          widget.onComplete(updated);
+          await _playTransitionToIntro(updated);
         }
       }
     }
@@ -109,49 +147,83 @@ class _FirstUsernameScreenState extends State<FirstUsernameScreen> {
     final theme = Theme.of(context).textTheme;
     final screenHeight = MediaQuery.sizeOf(context).height;
     final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
-    final isKeyboardVisible = keyboardInset > 0;
+    final isKeyboardVisible = keyboardInset > 0 && !_transitioning;
     // 키보드와 무관하게 상단 1/3 고정 → 타이틀이 진행 막대에 붙지 않음.
     final titleBandHeight = screenHeight / 3;
 
     return PopScope(
       canPop: false,
       child: GestureDetector(
-        onTap: () => _nameFocusNode.unfocus(),
+        onTap: () {
+          if (!_transitioning) _nameFocusNode.unfocus();
+        },
         child: Scaffold(
           backgroundColor: _backgroundColor,
           resizeToAvoidBottomInset: false,
-          body: withOnboardingStepBar(
-            step: 4,
-            // TextField 트리 위치 고정. 키보드 시 bottom padding만 올려 이름 칸을 키보드 위에 둔다.
-            body: Column(
-              children: [
-                SizedBox(
-                  height: titleBandHeight,
-                  child: _buildTopSection(l10n, theme),
-                ),
-                Expanded(
-                  child: AnimatedPadding(
-                    duration: _animationDuration,
-                    curve: Curves.easeOutCubic,
-                    padding: EdgeInsets.only(
-                      bottom: isKeyboardVisible ? keyboardInset + 16 : 0,
-                    ),
-                    child: Column(
-                      children: [
-                        Expanded(
-                          child: _buildNameSection(theme, isKeyboardVisible),
+          body: AnimatedBuilder(
+            animation: _toIntro,
+            builder: (context, _) {
+              final t = _toIntro.value;
+              final restOpacity = _transitioning
+                  ? TutorialIntroStage.restOpacity(t)
+                  : 1.0;
+              return Stack(
+                fit: StackFit.expand,
+                children: [
+                  Opacity(
+                    opacity: restOpacity,
+                    child: IgnorePointer(
+                      ignoring: _transitioning,
+                      child: withOnboardingStepBar(
+                        step: 4,
+                        body: Column(
+                          children: [
+                            SizedBox(
+                              height: titleBandHeight,
+                              child: _buildTopSection(l10n, theme),
+                            ),
+                            Expanded(
+                              child: AnimatedPadding(
+                                duration: _animationDuration,
+                                curve: Curves.easeOutCubic,
+                                padding: EdgeInsets.only(
+                                  bottom: isKeyboardVisible
+                                      ? keyboardInset + 16
+                                      : 0,
+                                ),
+                                child: Column(
+                                  children: [
+                                    Expanded(
+                                      child: _buildNameSection(
+                                        theme,
+                                        isKeyboardVisible,
+                                        hideAvatar: _transitioning,
+                                      ),
+                                    ),
+                                    if (isKeyboardVisible)
+                                      _buildActions(l10n, theme)
+                                    else
+                                      Expanded(
+                                        child: _buildBottomSection(l10n, theme),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                        // 키보드 시에도 힌트·Confirm이 이름 칸 아래·키보드 위에 보이게 한다.
-                        if (isKeyboardVisible)
-                          _buildActions(l10n, theme)
-                        else
-                          Expanded(child: _buildBottomSection(l10n, theme)),
-                      ],
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
+                  if (_transitioning)
+                    TutorialIntroStage(
+                      progress: t,
+                      displayName: _displayName,
+                      imgPath: _imgPath,
+                    ),
+                ],
+              );
+            },
           ),
         ),
       ),
@@ -163,7 +235,12 @@ class _FirstUsernameScreenState extends State<FirstUsernameScreen> {
   }
 
   /// 아바타 + 이름 필드(하단 정렬). 키보드 시 아바타만 48·좌측.
-  Widget _buildNameSection(TextTheme theme, bool isKeyboardVisible) {
+  /// 전환 중에는 스테이지 아바타만 쓰므로 여기 아바타는 숨긴다.
+  Widget _buildNameSection(
+    TextTheme theme,
+    bool isKeyboardVisible, {
+    bool hideAvatar = false,
+  }) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final maxAvatarSize =
@@ -190,16 +267,20 @@ class _FirstUsernameScreenState extends State<FirstUsernameScreen> {
                   curve: Curves.easeOutCubic,
                   width: avatarSize,
                   height: avatarSize,
-                  child: LayoutBuilder(
-                    builder: (context, box) {
-                      if (box.maxWidth < 2) return const SizedBox.shrink();
-                      return UserProfileAvatar(
-                        imgPath: widget.user?.imgPath,
-                        isPremium: false,
-                        size: box.maxWidth,
-                      );
-                    },
-                  ),
+                  child: hideAvatar
+                      ? const SizedBox.shrink()
+                      : LayoutBuilder(
+                          builder: (context, box) {
+                            if (box.maxWidth < 2) {
+                              return const SizedBox.shrink();
+                            }
+                            return UserProfileAvatar(
+                              imgPath: widget.user?.imgPath,
+                              isPremium: false,
+                              size: box.maxWidth,
+                            );
+                          },
+                        ),
                 ),
               ),
               const SizedBox(height: _avatarGap),

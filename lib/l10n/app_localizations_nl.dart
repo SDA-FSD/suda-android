@@ -400,6 +400,14 @@ class AppLocalizationsNl extends AppLocalizations {
   String get firstUsernameTitle => 'Hoe mogen we\nje noemen?';
 
   @override
+  String tutorialIntroTitle(String name) {
+    return '$name,\nklaar om op te warmen?';
+  }
+
+  @override
+  String get tutorialIntroStart => 'Tutorial starten';
+
+  @override
   String get actionConfirm => 'Bevestigen';
 
   @override

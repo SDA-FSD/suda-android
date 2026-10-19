@@ -380,6 +380,14 @@ class AppLocalizationsKo extends AppLocalizations {
   String get firstUsernameTitle => '어떻게 불러드리면\n될까요?';
 
   @override
+  String tutorialIntroTitle(String name) {
+    return '$name님,\n가볍게 입부터 풀어볼까요?';
+  }
+
+  @override
+  String get tutorialIntroStart => '튜토리얼 시작';
+
+  @override
   String get actionConfirm => '확인';
 
   @override
