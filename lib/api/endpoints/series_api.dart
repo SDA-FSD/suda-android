@@ -20,7 +20,21 @@ class RpS2InsufficientEnergyException implements Exception {
   const RpS2InsufficientEnergyException();
 }
 
+class RpS2AudioTooShortException implements Exception {
+  const RpS2AudioTooShortException();
+}
+
 class SeriesApi {
+  static bool _isAudioTooShortBody(String body) {
+    if (body.isEmpty) return false;
+    try {
+      final decoded = jsonDecode(body);
+      return decoded is Map && decoded['code'] == 'AUDIO_TOO_SHORT';
+    } catch (_) {
+      return false;
+    }
+  }
+
   static void _throwIfRpS2SessionNotFound(
     http.Response response,
     String operation,
@@ -549,6 +563,10 @@ class SeriesApi {
 
     if (response.statusCode == 401) {
       throw UnauthorizedException('Access token expired');
+    }
+    if (response.statusCode == 400 &&
+        _isAudioTooShortBody(response.body)) {
+      throw const RpS2AudioTooShortException();
     }
     _throwIfRpS2InsufficientEnergy(
       response,

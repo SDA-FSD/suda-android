@@ -47,6 +47,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
   static const String _eventRecordingStartFailed = 'MIC_RECORDING_START_FAILED';
   static const String _eventRecordingStopFailed = 'MIC_RECORDING_STOP_FAILED';
   static const String _eventRecordingNoSpeech = 'MIC_RECORDING_NO_SPEECH';
+  static const String _eventAudioTooShort = 'MIC_AUDIO_TOO_SHORT';
   static const Duration _holdToSpeakIdle = Duration(seconds: 8);
   static const Duration _speechLevelInterval = Duration(milliseconds: 100);
   static const int _speechLevelWarmupMs = 150;
@@ -1208,6 +1209,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
       _restoreUserTurnAfterSendFailure();
       return;
     }
+    final loggedFirstUtteranceThisCall = !_hasLoggedFirstUtteranceSubmitted;
     _logFirstUtteranceSubmittedIfNeeded();
     await PerfMonitoringService.instance.trace('roleplay_turn_total', () async {
       late final RpS2UserMessageResponseDto response;
@@ -1228,6 +1230,15 @@ mixin PlayingInputMixin<T extends StatefulWidget>
       } on RpS2SessionNotFoundException catch (_) {
         if (!mounted) return;
         playingSessionNotFoundHandler?.call();
+        return;
+      } on RpS2AudioTooShortException {
+        if (loggedFirstUtteranceThisCall) {
+          _hasLoggedFirstUtteranceSubmitted = false;
+        }
+        logRpS2PlayingEvent(_eventAudioTooShort);
+        if (!mounted) return;
+        _restoreUserTurnAfterSendFailure();
+        _showHoldToSpeakMessage();
         return;
       } catch (e, st) {
         debugPrint('[DEBUG] S2 user audio request error: $e\n$st');
