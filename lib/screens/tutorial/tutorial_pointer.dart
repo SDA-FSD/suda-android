@@ -1,25 +1,21 @@
 import 'package:flutter/material.dart';
 
 /// 탭 가이드: `tutorial_pointer.png` 스케일 펄스 + 손끝 원 리플.
-///
-/// 손가락·채움원·테두리원 모두 `#8C8C8C`, 살짝 투명(90%)은 위젯 [Opacity]로 일괄.
+/// 손가락·채움원·테두리원 모두 `#8C8C8C` 불투명.
 /// 원 중심 = 손가락 손끝 앵커.
 class TutorialPointer extends StatefulWidget {
   static const assetPath = 'assets/images/tutorial/tutorial_pointer.png';
   static const color = Color(0xFF8C8C8C);
 
-  /// 손가락·원 공통 살짝 투명.
-  static const opacity = 0.9;
-
   /// 원 앵커 (위젯 size 대비). Center 기준 손끝 ≈ (0.28, 0.22).
   static const tipX = 0.36;
   static const tipY = 0.30;
-  static const fingerNudgeUp = 0.05;
-  static const fingerNudgeLeft = 0.02;
+  static const fingerNudgeUp = 0.10;
+  static const fingerNudgeLeft = 0.07;
   static const _baseTipX = 0.28;
   static const _baseTipY = 0.22;
 
-  /// PNG 알파를 눌러 불투명 `#8C8C8C` 실루엣으로 칠한 뒤, 부모 Opacity로 통일.
+  /// PNG 알파를 눌러 불투명 `#8C8C8C` 실루엣으로 칠함.
   static const _opaqueTint = ColorFilter.matrix(<double>[
     0, 0, 0, 0, 0x8C,
     0, 0, 0, 0, 0x8C,
@@ -30,10 +26,16 @@ class TutorialPointer extends StatefulWidget {
   final double size;
   final Duration startDelay;
 
+  /// 손끝 채움·테두리 원. 탭은 같이 펄스. 홀드는 채움 원에서 테두리가 퍼져 사라진다.
+  final bool showCircles;
+  final bool holdGesture;
+
   const TutorialPointer({
     super.key,
     this.size = 120,
     this.startDelay = Duration.zero,
+    this.showCircles = true,
+    this.holdGesture = false,
   });
 
   @override
@@ -50,7 +52,9 @@ class _TutorialPointerState extends State<TutorialPointer>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1100),
+      duration: widget.holdGesture
+          ? const Duration(milliseconds: 1600)
+          : const Duration(milliseconds: 1100),
     );
     Future<void>.delayed(widget.startDelay, () {
       if (!mounted) return;
@@ -69,23 +73,25 @@ class _TutorialPointerState extends State<TutorialPointer>
   Widget build(BuildContext context) {
     if (!_visible) return SizedBox(width: widget.size, height: widget.size);
 
-    final scale = TweenSequence<double>([
-      TweenSequenceItem(
-        tween: Tween(begin: 0.92, end: 1.08)
-            .chain(CurveTween(curve: Curves.easeOut)),
-        weight: 35,
-      ),
-      TweenSequenceItem(
-        tween: Tween(begin: 1.08, end: 1.0)
-            .chain(CurveTween(curve: Curves.easeInOut)),
-        weight: 30,
-      ),
-      TweenSequenceItem(
-        tween: Tween(begin: 1.0, end: 0.92)
-            .chain(CurveTween(curve: Curves.easeIn)),
-        weight: 35,
-      ),
-    ]).animate(_controller);
+    final Animation<double> scale = widget.holdGesture
+        ? const AlwaysStoppedAnimation(1)
+        : TweenSequence<double>([
+            TweenSequenceItem(
+              tween: Tween(begin: 0.92, end: 1.08)
+                  .chain(CurveTween(curve: Curves.easeOut)),
+              weight: 35,
+            ),
+            TweenSequenceItem(
+              tween: Tween(begin: 1.08, end: 1.0)
+                  .chain(CurveTween(curve: Curves.easeInOut)),
+              weight: 30,
+            ),
+            TweenSequenceItem(
+              tween: Tween(begin: 1.0, end: 0.92)
+                  .chain(CurveTween(curve: Curves.easeIn)),
+              weight: 35,
+            ),
+          ]).animate(_controller);
 
     final tipShift = Offset(
       widget.size *
@@ -98,12 +104,11 @@ class _TutorialPointerState extends State<TutorialPointer>
               TutorialPointer.fingerNudgeUp),
     );
 
-    return Opacity(
-      opacity: TutorialPointer.opacity,
-      child: AnimatedBuilder(
+    return AnimatedBuilder(
         animation: _controller,
         builder: (context, _) {
           final t = _controller.value;
+          final press = widget.holdGesture ? _holdPress(t) : 0.0;
           return SizedBox(
             width: widget.size,
             height: widget.size,
@@ -112,9 +117,12 @@ class _TutorialPointerState extends State<TutorialPointer>
               children: [
                 Center(
                   child: Transform.translate(
-                    offset: tipShift,
+                    offset: tipShift +
+                        Offset(0, widget.holdGesture ? widget.size * 0.06 * press : 0),
                     child: Transform.scale(
-                      scale: scale.value,
+                      scale: widget.holdGesture
+                          ? 1 - 0.12 * press
+                          : scale.value,
                       alignment: const Alignment(-0.35, -0.55),
                       child: ColorFiltered(
                         colorFilter: TutorialPointer._opaqueTint,
@@ -129,22 +137,24 @@ class _TutorialPointerState extends State<TutorialPointer>
                     ),
                   ),
                 ),
-                Positioned.fill(
-                  child: CustomPaint(
-                    painter: _TapRipplePainter(progress: t),
+                if (widget.showCircles)
+                  Positioned.fill(
+                    child: CustomPaint(
+                      painter: widget.holdGesture
+                          ? _HoldCirclePainter(progress: t)
+                          : _TapRipplePainter(progress: t),
+                    ),
                   ),
-                ),
               ],
             ),
           );
         },
-      ),
     );
   }
 }
 
 /// 안쪽 채움 원 1개 + 바깥 테두리 원 1개. 중심 = [TutorialPointer.tipX/Y].
-/// 베이스 투명도는 부모 [Opacity], 테두리는 커지며 추가 fade.
+/// 테두리는 커지며 사라질 때만 fade.
 class _TapRipplePainter extends CustomPainter {
   final double progress;
 
@@ -189,5 +199,58 @@ class _TapRipplePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _TapRipplePainter oldDelegate) =>
+      oldDelegate.progress != progress;
+}
+
+/// 0 뜸 → 1 꾹 누른 채 유지 → 0 뗌.
+double _holdPress(double t) {
+  if (t < 0.22) return Curves.easeIn.transform(t / 0.22);
+  if (t < 0.78) return 1;
+  return 1 - Curves.easeOut.transform((t - 0.78) / 0.22);
+}
+
+/// 홀드: 누르는 동안 채움 원은 손끝에 머물고, 테두리 원은 그 원에서 퍼져 사라진다.
+class _HoldCirclePainter extends CustomPainter {
+  final double progress;
+
+  const _HoldCirclePainter({required this.progress});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final press = _holdPress(progress);
+    if (press < 0.12) return;
+    final center = Offset(
+      size.width * TutorialPointer.tipX,
+      size.height * (TutorialPointer.tipY + 0.06 * press),
+    );
+    final base = size.shortestSide * 0.09;
+    final fillIn = ((press - 0.12) / 0.2).clamp(0.0, 1.0);
+    final fillRadius = base * 0.92;
+    canvas.drawCircle(
+      center,
+      fillRadius,
+      Paint()..color = TutorialPointer.color.withValues(alpha: fillIn),
+    );
+
+    const ringStart = 0.24;
+    const ringEnd = 0.68;
+    if (progress < ringStart || progress > ringEnd) return;
+    final local =
+        ((progress - ringStart) / (ringEnd - ringStart)).clamp(0.0, 1.0);
+    final grow = Curves.easeOut.transform(local);
+    final fade = (1.0 - local) * (1.0 - local * 0.15);
+    if (fade < 0.02) return;
+    canvas.drawCircle(
+      center,
+      fillRadius + base * 2.6 * grow,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.2 * (1.0 - local * 0.4)
+        ..color = TutorialPointer.color.withValues(alpha: fade),
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _HoldCirclePainter oldDelegate) =>
       oldDelegate.progress != progress;
 }

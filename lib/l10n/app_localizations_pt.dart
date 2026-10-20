@@ -448,6 +448,31 @@ class AppLocalizationsPt extends AppLocalizations {
   String get tutorialRoleplayGuideMissionTapContinue => 'Toque para continuar';
 
   @override
+  String get tutorialRoleplayNarration1 =>
+      'Hoje você vai se mudar para um novo bairro. Você entra em um táxi e é recebido por Betty, uma motorista simpática. 🚕';
+
+  @override
+  String get tutorialRoleplayBettyLine1 => 'Hi there! Hop in!';
+
+  @override
+  String get tutorialRoleplayBettyLine1Translation => 'Oi! Pode entrar!';
+
+  @override
+  String get tutorialRoleplayHoldHello =>
+      'Aperte e segure\no microfone.\nDiga ‘Hello’ e solte.';
+
+  @override
+  String get tutorialRoleplayMicHolding => '‘Hello’';
+
+  @override
+  String get tutorialRoleplayMicTooShort =>
+      'Segure o microfone\npor mais tempo e\ndiga ‘Hello’';
+
+  @override
+  String get tutorialRoleplayMicNoSpeech =>
+      'Não conseguimos ouvir.\nTente dizer \'Hello\' de novo.';
+
+  @override
   String get actionConfirm => 'Confirmar';
 
   @override

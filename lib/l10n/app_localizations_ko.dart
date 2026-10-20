@@ -424,6 +424,30 @@ class AppLocalizationsKo extends AppLocalizations {
   String get tutorialRoleplayGuideMissionTapContinue => '탭해서 계속하기';
 
   @override
+  String get tutorialRoleplayNarration1 =>
+      '오늘은 새로운 동네로 이사 가는 날이에요. 택시에 올라타자 친절한 기사 베티가 반갑게 인사합니다. 🚕';
+
+  @override
+  String get tutorialRoleplayBettyLine1 => 'Hi there! Hop in!';
+
+  @override
+  String get tutorialRoleplayBettyLine1Translation => '안녕하세요! 어서 타세요!';
+
+  @override
+  String get tutorialRoleplayHoldHello =>
+      '마이크 버튼을 꾹 누른 채\n‘Hello’라고 말하고\n손을 떼세요.';
+
+  @override
+  String get tutorialRoleplayMicHolding => '‘Hello’';
+
+  @override
+  String get tutorialRoleplayMicTooShort => '다시 길게 누르고\n‘Hello’라고 말해보세요';
+
+  @override
+  String get tutorialRoleplayMicNoSpeech =>
+      '목소리가 들리지 않았어요.\n다시 \'Hello\'라고 말해보세요.';
+
+  @override
   String get actionConfirm => '확인';
 
   @override
