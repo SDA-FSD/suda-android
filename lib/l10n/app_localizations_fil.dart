@@ -1086,40 +1086,38 @@ class AppLocalizationsFil extends AppLocalizations {
   String get roleplayTurnGradeD => 'oh…';
 
   @override
-  String get tutorialPage1Title =>
-      'Tingnan ang **Mission** mo\nat simulan ang usapan.';
+  String get tutorialSlide1Title =>
+      'Gamitin ang **Tagasalin** kapag hindi mo naiintindihan';
 
   @override
-  String get tutorialPage1Tip =>
-      '*Tip: Mas natural ang pagsasalita mo,\nmas malaki ang reward!';
+  String get tutorialSlide2Title =>
+      'Kung mahirap ang pagbigkas, **makinig** muna, tapos **ulitin**';
 
   @override
-  String get tutorialPage2Title =>
-      'Gamitin ang **Translator**\nkapag hindi mo naintindihan.';
+  String get tutorialSlide3Title =>
+      'Tingnan ang **AI Feedback** pagkatapos ng bawat usapan';
 
   @override
-  String get tutorialPage3Title => 'Gamitin ang **Hint**\nkapag natigil ka.';
+  String get tutorialSlideReady => 'Handa na ako! >';
 
   @override
-  String get tutorialPage3Subtitle =>
-      'Pwede mong i-on o i-off\nang auto hints anytime.';
+  String get tutorialSlideContinue => 'Magpatuloy >';
 
   @override
-  String get tutorialPage4Title =>
-      'Kung mahirap ang pagbigkas,\nmakinig muna, tapos ulitin.';
+  String get tutorialSlide1Translation => 'Ano ang gusto mo?';
 
   @override
-  String get tutorialPage4Tip =>
-      '*Tip: Subukang sumagot nang hindi tinitingnan\nang translation para sa mas mataas na score.';
+  String get tutorialSlide2HintLine => 'Isang latte lang.';
 
   @override
-  String get tutorialPage5Title => 'Hindi makapagsalita\nnang malakas?';
+  String get tutorialSlide3SaidLabel => 'Ang sinabi mo';
 
   @override
-  String get tutorialPage5Subtitle => 'Lumipat sa **Text Mode**.';
+  String get tutorialSlide3BetterLabel => 'Mas magandang pahayag';
 
   @override
-  String get tutorialPage6Title => 'Walang humahatol sa\'yo.\nKaya mo \'yan!';
+  String get tutorialSlide3Feedback =>
+      'Naiintindihan ang \"I want coffee\"! Pero kapag umorder, mas magalang at natural pakinggan ang \"I\'d like\".';
 
   @override
   String rankCountdownDays(int count) {

@@ -159,7 +159,7 @@ Home (시리즈 썸네일)
 
 - **파일**: `lib/screens/roleplay/tutorial.dart`
 - **user** 조회·갱신: `SeriesStateService` (Tutorial 완료 시 `RoleplayStateService.setUser`도 맞춤)
-- **이미지**: `assets/images/tutorial/tutorial{1~6}.png` + l10n 오버레이. Lab은 `preview`로 API 없이 재현
+- **화면**: 3장 클라이언트 드로잉(배경 `0CABA8` / `FFB700` / `FF00A6`). 상세는 `CONTEXT_SCREEN.md` §11.2. Lab은 `preview`로 API 없이 재현
 - 완료/스킵 → `replaceWithOpeningFromTutorial`
 
 ### 4-3. RoleplayOpeningScreen ✅ (S2 UI·세션)

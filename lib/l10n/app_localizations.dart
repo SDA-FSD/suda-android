@@ -2069,65 +2069,65 @@ abstract class AppLocalizations {
   /// **'oh…'**
   String get roleplayTurnGradeD;
 
-  /// No description provided for @tutorialPage1Title.
+  /// No description provided for @tutorialSlide1Title.
   ///
   /// In en, this message translates to:
-  /// **'Check your **Mission**\nand start the conversation.'**
-  String get tutorialPage1Title;
+  /// **'Use the **Translator** when you don\'t understand'**
+  String get tutorialSlide1Title;
 
-  /// No description provided for @tutorialPage1Tip.
+  /// No description provided for @tutorialSlide2Title.
   ///
   /// In en, this message translates to:
-  /// **'*Tip: The more naturally you speak,\nthe bigger your reward!'**
-  String get tutorialPage1Tip;
+  /// **'If pronunciation is hard, **listen** first, then **repeat**'**
+  String get tutorialSlide2Title;
 
-  /// No description provided for @tutorialPage2Title.
+  /// No description provided for @tutorialSlide3Title.
   ///
   /// In en, this message translates to:
-  /// **'Use the **Translator**\nwhen you don\'t understand.'**
-  String get tutorialPage2Title;
+  /// **'Check your **AI Feedback** after each conversation'**
+  String get tutorialSlide3Title;
 
-  /// No description provided for @tutorialPage3Title.
+  /// No description provided for @tutorialSlideReady.
   ///
   /// In en, this message translates to:
-  /// **'Use a **Hint**\nwhen you get stuck.'**
-  String get tutorialPage3Title;
+  /// **'I\'m Ready! >'**
+  String get tutorialSlideReady;
 
-  /// No description provided for @tutorialPage3Subtitle.
+  /// No description provided for @tutorialSlideContinue.
   ///
   /// In en, this message translates to:
-  /// **'You can turn auto hints\non or off anytime.'**
-  String get tutorialPage3Subtitle;
+  /// **'Continue >'**
+  String get tutorialSlideContinue;
 
-  /// No description provided for @tutorialPage4Title.
+  /// No description provided for @tutorialSlide1Translation.
   ///
   /// In en, this message translates to:
-  /// **'If pronunciation is hard,\nlisten first, then repeat.'**
-  String get tutorialPage4Title;
+  /// **'What would you like?'**
+  String get tutorialSlide1Translation;
 
-  /// No description provided for @tutorialPage4Tip.
+  /// No description provided for @tutorialSlide2HintLine.
   ///
   /// In en, this message translates to:
-  /// **'*Tip: Try answering without looking at the translation\nto earn a higher score.'**
-  String get tutorialPage4Tip;
+  /// **'Just a latte, please.'**
+  String get tutorialSlide2HintLine;
 
-  /// No description provided for @tutorialPage5Title.
+  /// No description provided for @tutorialSlide3SaidLabel.
   ///
   /// In en, this message translates to:
-  /// **'Can\'t speak out loud?'**
-  String get tutorialPage5Title;
+  /// **'What You Said'**
+  String get tutorialSlide3SaidLabel;
 
-  /// No description provided for @tutorialPage5Subtitle.
+  /// No description provided for @tutorialSlide3BetterLabel.
   ///
   /// In en, this message translates to:
-  /// **'Switch to **Text Mode**.'**
-  String get tutorialPage5Subtitle;
+  /// **'Better Expression'**
+  String get tutorialSlide3BetterLabel;
 
-  /// No description provided for @tutorialPage6Title.
+  /// No description provided for @tutorialSlide3Feedback.
   ///
   /// In en, this message translates to:
-  /// **'No one\'s judging.\nYou\'ve got this!'**
-  String get tutorialPage6Title;
+  /// **'\"I want coffee\" gets your point across! But when ordering, \"I\'d like\" sounds more polite and natural.'**
+  String get tutorialSlide3Feedback;
 
   /// No description provided for @rankCountdownDays.
   ///

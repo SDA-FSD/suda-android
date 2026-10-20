@@ -396,6 +396,40 @@ class UserApi {
     );
   }
 
+  /// POST /v1/users/tutorial-1-to-2 · tutorial-2-to-3 (best-effort; 200 only)
+  static Future<void> tutorialStep({
+    required String accessToken,
+    required String path,
+  }) async {
+    final uri = SudaHttpClient.buildUri(path);
+
+    late final http.Response response;
+    try {
+      response = await SudaHttpClient.client
+          .post(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      rethrow;
+    }
+
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return;
+    }
+
+    throw Exception(
+      'POST $path failed: HTTP ${response.statusCode} ${response.body}',
+    );
+  }
+
   /// POST /v1/users/first-overview (best-effort; 200 only)
   static Future<void> postFirstOverview({
     required String accessToken,

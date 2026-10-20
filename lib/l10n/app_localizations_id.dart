@@ -1075,40 +1075,38 @@ class AppLocalizationsId extends AppLocalizations {
   String get roleplayTurnGradeD => 'oh…';
 
   @override
-  String get tutorialPage1Title => 'Cek **Misi** kamu\ndan mulai percakapan.';
+  String get tutorialSlide1Title =>
+      'Gunakan **Penerjemah** saat kamu tidak mengerti';
 
   @override
-  String get tutorialPage1Tip =>
-      '*Tip: Semakin alami kamu berbicara,\nsemakin besar hadiahnya!';
+  String get tutorialSlide2Title =>
+      'Jika pengucapan sulit, **dengarkan** dulu, lalu **ulangi**';
 
   @override
-  String get tutorialPage2Title =>
-      'Gunakan **Penerjemah**\nsaat kamu tidak mengerti.';
+  String get tutorialSlide3Title =>
+      'Periksa **umpan balik AI** setelah setiap percakapan';
 
   @override
-  String get tutorialPage3Title => 'Gunakan **Petunjuk**\nsaat kamu macet.';
+  String get tutorialSlideReady => 'Saya siap! >';
 
   @override
-  String get tutorialPage3Subtitle =>
-      'Kamu bisa mengaktifkan atau menonaktifkan\npetunjuk otomatis kapan saja.';
+  String get tutorialSlideContinue => 'Lanjutkan >';
 
   @override
-  String get tutorialPage4Title =>
-      'Kalau pengucapan sulit,\ndengar dulu, lalu ulangi.';
+  String get tutorialSlide1Translation => 'Apa yang kamu inginkan?';
 
   @override
-  String get tutorialPage4Tip =>
-      '*Tip: Coba jawab tanpa melihat terjemahan\nuntuk skor yang lebih tinggi.';
+  String get tutorialSlide2HintLine => 'Satu latte saja.';
 
   @override
-  String get tutorialPage5Title => 'Tidak bisa berbicara keras?';
+  String get tutorialSlide3SaidLabel => 'Yang kamu katakan';
 
   @override
-  String get tutorialPage5Subtitle => 'Beralih ke **Mode Teks**.';
+  String get tutorialSlide3BetterLabel => 'Ungkapan yang lebih baik';
 
   @override
-  String get tutorialPage6Title =>
-      'Tidak ada yang menghakimi.\nKamu pasti bisa!';
+  String get tutorialSlide3Feedback =>
+      '\"I want coffee\" sudah tersampaikan! Tapi saat memesan, \"I\'d like\" terdengar lebih sopan dan alami.';
 
   @override
   String rankCountdownDays(int count) {

@@ -1076,40 +1076,37 @@ class AppLocalizationsEs extends AppLocalizations {
   String get roleplayTurnGradeD => 'oh…';
 
   @override
-  String get tutorialPage1Title =>
-      'Revisa tu **Misión**\ny empieza la conversación.';
+  String get tutorialSlide1Title => 'Usa el **Traductor** cuando no entiendas';
 
   @override
-  String get tutorialPage1Tip =>
-      '*Consejo: ¡Cuanto más natural hables,\nmayor será tu recompensa!';
+  String get tutorialSlide2Title =>
+      'Si la pronunciación es difícil, **escucha** primero y luego **repite**';
 
   @override
-  String get tutorialPage2Title =>
-      '¡Usa el **Traductor**\ncuando no entiendas!';
+  String get tutorialSlide3Title =>
+      'Revisa tu **feedback de IA** después de cada conversación';
 
   @override
-  String get tutorialPage3Title => 'Usa una **Pista**\ncuando te trabes.';
+  String get tutorialSlideReady => '¡Estoy listo! >';
 
   @override
-  String get tutorialPage3Subtitle =>
-      'Puedes activar o desactivar\nlas pistas automáticas cuando quieras.';
+  String get tutorialSlideContinue => 'Continuar >';
 
   @override
-  String get tutorialPage4Title =>
-      'Si la pronunciación es difícil,\nescucha primero y luego repite.';
+  String get tutorialSlide1Translation => '¿Qué te gustaría?';
 
   @override
-  String get tutorialPage4Tip =>
-      '*Consejo: Intenta responder sin mirar la traducción\npara obtener una puntuación más alta.';
+  String get tutorialSlide2HintLine => 'Solo un latte, por favor.';
 
   @override
-  String get tutorialPage5Title => '¿No puedes hablar\nen voz alta?';
+  String get tutorialSlide3SaidLabel => 'Lo que dijiste';
 
   @override
-  String get tutorialPage5Subtitle => 'Cambia al **Modo texto**.';
+  String get tutorialSlide3BetterLabel => 'Expresión mejorada';
 
   @override
-  String get tutorialPage6Title => 'Nadie te está juzgando.\n¡Tú puedes!';
+  String get tutorialSlide3Feedback =>
+      '\"I want coffee\" transmite la idea. Pero al pedir, \"I\'d like\" suena más cortés y natural.';
 
   @override
   String rankCountdownDays(int count) {
@@ -2319,40 +2316,37 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
   String get roleplayTurnGradeD => 'oh…';
 
   @override
-  String get tutorialPage1Title =>
-      'Revisa tu **Misión**\ny empieza la conversación.';
+  String get tutorialSlide1Title => 'Usa el **Traductor** cuando no entiendas';
 
   @override
-  String get tutorialPage1Tip =>
-      '*Consejo: ¡Cuanto más natural hables,\nmayor será tu recompensa!';
+  String get tutorialSlide2Title =>
+      'Si la pronunciación es difícil, **escucha** primero y luego **repite**';
 
   @override
-  String get tutorialPage2Title =>
-      '¡Usa el **Traductor**\ncuando no entiendas!';
+  String get tutorialSlide3Title =>
+      'Revisa tu **feedback de IA** después de cada conversación';
 
   @override
-  String get tutorialPage3Title => 'Usa una **Pista**\ncuando te trabes.';
+  String get tutorialSlideReady => '¡Estoy listo! >';
 
   @override
-  String get tutorialPage3Subtitle =>
-      'Puedes activar o desactivar\nlas pistas automáticas cuando quieras.';
+  String get tutorialSlideContinue => 'Continuar >';
 
   @override
-  String get tutorialPage4Title =>
-      'Si la pronunciación es difícil,\nescucha primero y luego repite.';
+  String get tutorialSlide1Translation => '¿Qué te gustaría?';
 
   @override
-  String get tutorialPage4Tip =>
-      '*Consejo: Intenta responder sin mirar la traducción\npara obtener una puntuación más alta.';
+  String get tutorialSlide2HintLine => 'Solo un latte, por favor.';
 
   @override
-  String get tutorialPage5Title => '¿No puedes hablar\nen voz alta?';
+  String get tutorialSlide3SaidLabel => 'Lo que dijiste';
 
   @override
-  String get tutorialPage5Subtitle => 'Cambia al **Modo texto**.';
+  String get tutorialSlide3BetterLabel => 'Expresión mejorada';
 
   @override
-  String get tutorialPage6Title => 'Nadie te está juzgando.\n¡Tú puedes!';
+  String get tutorialSlide3Feedback =>
+      '\"I want coffee\" transmite la idea. Pero al pedir, \"I\'d like\" suena más cortés y natural.';
 
   @override
   String rankCountdownDays(int count) {

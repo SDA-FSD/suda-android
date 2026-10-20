@@ -731,6 +731,20 @@ class SudaApiClient {
     return UserApi.tutorialShown(accessToken: accessToken);
   }
 
+  static Future<void> tutorial1To2({required String accessToken}) {
+    return UserApi.tutorialStep(
+      accessToken: accessToken,
+      path: '/v1/users/tutorial-1-to-2',
+    );
+  }
+
+  static Future<void> tutorial2To3({required String accessToken}) {
+    return UserApi.tutorialStep(
+      accessToken: accessToken,
+      path: '/v1/users/tutorial-2-to-3',
+    );
+  }
+
   static Future<void> postFirstOverview({required String accessToken}) {
     return UserApi.postFirstOverview(accessToken: accessToken);
   }

@@ -27,6 +27,8 @@
 /v1/users/character-rewards/claim
 /v1/users/profile-img
 /v1/users/tutorial
+/v1/users/tutorial-1-to-2
+/v1/users/tutorial-2-to-3
 /v1/users/tutorial-shown
 /v1/users/first-overview
 /v1/users/grant-welcome-gift

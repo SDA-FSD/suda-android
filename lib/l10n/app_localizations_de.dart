@@ -1078,41 +1078,38 @@ class AppLocalizationsDe extends AppLocalizations {
   String get roleplayTurnGradeD => 'oh…';
 
   @override
-  String get tutorialPage1Title =>
-      'Schau dir deine **Mission** an\nund starte das Gespräch.';
+  String get tutorialSlide1Title =>
+      'Nutze den **Übersetzer**, wenn du etwas nicht verstehst';
 
   @override
-  String get tutorialPage1Tip =>
-      '*Tipp: Je natürlicher du sprichst,\ndesto größer ist deine Belohnung!';
+  String get tutorialSlide2Title =>
+      'Wenn die Aussprache schwer ist, **höre** zuerst zu und **wiederhole** dann';
 
   @override
-  String get tutorialPage2Title =>
-      'Nutze den **Übersetzer**,\nwenn du etwas nicht verstehst.';
+  String get tutorialSlide3Title =>
+      'Prüfe dein **KI-Feedback** nach jedem Gespräch';
 
   @override
-  String get tutorialPage3Title =>
-      'Nutze einen **Tipp**,\nwenn du nicht weiterkommst.';
+  String get tutorialSlideReady => 'Ich bin bereit! >';
 
   @override
-  String get tutorialPage3Subtitle =>
-      'Automatische Hinweise kannst du\njederzeit ein- oder ausschalten.';
+  String get tutorialSlideContinue => 'Weiter >';
 
   @override
-  String get tutorialPage4Title =>
-      'Wenn die Aussprache schwerfällt,\nzuerst zuhören, dann nachsprechen.';
+  String get tutorialSlide1Translation => 'Was möchten Sie?';
 
   @override
-  String get tutorialPage4Tip =>
-      '*Tipp: Antworte ohne die Übersetzung zu sehen,\num eine höhere Punktzahl zu erzielen.';
+  String get tutorialSlide2HintLine => 'Nur einen Latte, bitte.';
 
   @override
-  String get tutorialPage5Title => 'Du kannst nicht laut sprechen?';
+  String get tutorialSlide3SaidLabel => 'Was du gesagt hast';
 
   @override
-  String get tutorialPage5Subtitle => 'Wechsle in den **Textmodus**.';
+  String get tutorialSlide3BetterLabel => 'Besserer Ausdruck';
 
   @override
-  String get tutorialPage6Title => 'Niemand bewertet dich.\nDu schaffst das!';
+  String get tutorialSlide3Feedback =>
+      '„I want coffee“ kommt an! Beim Bestellen klingt „I\'d like“ aber höflicher und natürlicher.';
 
   @override
   String rankCountdownDays(int count) {

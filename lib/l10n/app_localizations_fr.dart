@@ -1083,42 +1083,38 @@ class AppLocalizationsFr extends AppLocalizations {
   String get roleplayTurnGradeD => 'oh…';
 
   @override
-  String get tutorialPage1Title =>
-      'Consultez votre **Mission**\net lancez la conversation.';
+  String get tutorialSlide1Title =>
+      'Utilisez le **Traducteur** quand vous ne comprenez pas';
 
   @override
-  String get tutorialPage1Tip =>
-      '*Astuce : Plus vous parlez naturellement,\nplus la récompense est grande !';
+  String get tutorialSlide2Title =>
+      'Si la prononciation est difficile, **écoutez** d\'abord, puis **répétez**';
 
   @override
-  String get tutorialPage2Title =>
-      'Utilisez le **Traducteur**\nquand vous ne comprenez pas.';
+  String get tutorialSlide3Title =>
+      'Consultez votre **feedback IA** après chaque conversation';
 
   @override
-  String get tutorialPage3Title =>
-      'Utilisez un **Indice**\nquand vous bloquez.';
+  String get tutorialSlideReady => 'Je suis prêt ! >';
 
   @override
-  String get tutorialPage3Subtitle =>
-      'Vous pouvez activer ou désactiver\nles indices auto à tout moment.';
+  String get tutorialSlideContinue => 'Continuer >';
 
   @override
-  String get tutorialPage4Title =>
-      'Si la prononciation est difficile,\nécoutez d\'abord, puis répétez.';
+  String get tutorialSlide1Translation => 'Qu\'est-ce que vous voudriez ?';
 
   @override
-  String get tutorialPage4Tip =>
-      '*Astuce : Essayez de répondre sans regarder\nla traduction pour obtenir un meilleur score.';
+  String get tutorialSlide2HintLine => 'Juste un latte, s\'il vous plaît.';
 
   @override
-  String get tutorialPage5Title => 'Vous ne pouvez pas\nparler à voix haute ?';
+  String get tutorialSlide3SaidLabel => 'Ce que vous avez dit';
 
   @override
-  String get tutorialPage5Subtitle => 'Passez en **mode texte**.';
+  String get tutorialSlide3BetterLabel => 'Meilleure expression';
 
   @override
-  String get tutorialPage6Title =>
-      'Personne ne vous juge.\nVous allez y arriver !';
+  String get tutorialSlide3Feedback =>
+      '« I want coffee » fait passer le message ! Mais pour commander, « I\'d like » sonne plus poli et naturel.';
 
   @override
   String rankCountdownDays(int count) {
