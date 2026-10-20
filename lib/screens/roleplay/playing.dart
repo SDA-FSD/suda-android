@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../routes/roleplay_router.dart';
+import '../../services/roleplay_state_service.dart';
 import '../../services/series_state_service.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
@@ -45,6 +46,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
         PlayingFinishMixin,
         PlayingEnergyMixin {
   static const List<int> _speedRateSteps = [70, 100, 120, 150];
+  static const String _autoHintMetaKey = 'RP_AUTO_HINT';
   static const double _playingHeaderTopSpacing = 60;
 
   bool _showExitLayer = false;
@@ -113,13 +115,12 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
   }
 
   bool _resolveDefaultAutoHint() {
-    final level = EnglishLevelUtil.readLevelFromUser(
-      SeriesStateService.instance.user,
-    );
-    return switch (level) {
-      'Pre-A1' || 'A1' || 'A2' => true,
-      _ => false,
-    };
+    final meta = SeriesStateService.instance.user?.metaInfo;
+    if (meta == null) return false;
+    for (final item in meta) {
+      if (item.key == _autoHintMetaKey) return item.value == 'Y';
+    }
+    return false;
   }
 
   double _scaffoldBodyLeadHeight() {
@@ -451,6 +452,43 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
 
   void _onAutoHintChanged(bool value) {
     setState(() => _autoHintEnabled = value);
+    _persistAutoHint(value);
+    if (value && isUserTurn) {
+      unawaited(_showAutoHintForCurrentUserTurn());
+    }
+  }
+
+  Future<void> _showAutoHintForCurrentUserTurn() async {
+    await showPlayingHint();
+    if (!mounted || !isUserTurn) return;
+    disableHintButtonAfterAutoShow();
+  }
+
+  void _persistAutoHint(bool enabled) {
+    final value = enabled ? 'Y' : 'N';
+    final current = SeriesStateService.instance.user;
+    if (current != null) {
+      final updated = current.upsertMetaInfo(
+        key: _autoHintMetaKey,
+        value: value,
+      );
+      SeriesStateService.instance.setUser(updated);
+      RoleplayStateService.instance.setUser(updated);
+    }
+    unawaited(_putAutoHint(value));
+  }
+
+  Future<void> _putAutoHint(String value) async {
+    final accessToken = await TokenStorage.loadAccessToken();
+    if (accessToken == null) return;
+    try {
+      await SudaApiClient.updateRoleplayAutoHint(
+        accessToken: accessToken,
+        value: value,
+      );
+    } catch (_) {
+      // 속도 변경과 동일: 에러 무시
+    }
   }
 
   void _onSpeedIndexChanged(int nextIndex) {

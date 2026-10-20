@@ -41,6 +41,7 @@
 /v1/users/push-agreement
 /v1/users/push-agreement/categories
 /v1/users/speed-rate
+/v1/users/auto-hint
 /v1/users/feedback
 /v1/users/expressions
 /v1/users/notification

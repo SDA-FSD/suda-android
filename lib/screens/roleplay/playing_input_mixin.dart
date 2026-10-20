@@ -784,6 +784,13 @@ mixin PlayingInputMixin<T extends StatefulWidget>
     setState(() => _isHintEnabled = isEnabled);
   }
 
+  /// 이미 사용자 턴인 상태에서 자동 힌트를 켠 뒤, 버튼만 끈다.
+  void disableHintButtonAfterAutoShow() {
+    _hintUsedThisTurn = true;
+    _setHintEnabled(false);
+    _cancelHintIdleAndBlink();
+  }
+
   void _setTypingEnabled(bool isEnabled) {
     if (!mounted) return;
     setState(() => _isTypingEnabled = isEnabled);

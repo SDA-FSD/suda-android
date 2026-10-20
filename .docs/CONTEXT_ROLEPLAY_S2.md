@@ -221,7 +221,7 @@ Home (시리즈 썸네일)
   - **노출**: 케밥 탭 토글 · `top = safeArea + 56` · `right = 24` · 미션패널 포함 최상단
   - **닫기**: 케밥 재탭 · 패널 외부 탭 (`Listener` dismiss)
   - **프레임**: Series Overview 언어레벨 버튼과 동일 글래스(BackdropFilter σ12 + gradient border, radius 16)
-  - **오토힌트**: l10n `roleplayAutoHint` · push agreement 동일 토글 · Pre-A1/A1/A2 기본 on, B1 이상 off · `_autoHintEnabled` (Playing 생명주기)
+  - **오토힌트**: l10n `roleplayAutoHint` · push agreement 동일 토글 · meta `RP_AUTO_HINT`=`Y`만 on, 키 없음·그 외는 off(CEFR 무관) · 토글 시 로컬 user meta + `PUT /v1/users/auto-hint?value=Y|N`(실패 무시) · 같은 RP 이후 턴과 다음 RP에 유지 · 사용자 턴 중 ON이면 그 턴 힌트 1회 자동 노출 후 힌트 버튼 disabled · `_autoHintEnabled`
   - **속도**: l10n `roleplayVoiceSpeed` · 가로 레일 200×4 · thumb 9 흰 원 · 좌측~thumb `#80D7CF` · 0.7/1.0/1.2/1.5 · 탭 시 1단 이동 + `PUT` speed-rate
   - **구분선**: `SizedBox` 200×1 직접 그림, `#FFFFFF` 40% (`panelLineColor`), 상·하 여백 **16**
   - **슬라이더**: 레일 기본색 `panelLineColor` · 터치 영역 = 레일+라벨 전체 · 탭 1단 이동 · 드래그 후 가장 가까운 4단계 스냅

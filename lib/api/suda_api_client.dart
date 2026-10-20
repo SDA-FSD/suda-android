@@ -393,6 +393,16 @@ class SudaApiClient {
     );
   }
 
+  static Future<void> updateRoleplayAutoHint({
+    required String accessToken,
+    required String value,
+  }) {
+    return RoleplayApi.updateAutoHint(
+      accessToken: accessToken,
+      value: value,
+    );
+  }
+
   static Future<VersionDto> getLatestVersion({
     required String clientVersion,
   }) {

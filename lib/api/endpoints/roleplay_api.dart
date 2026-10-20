@@ -44,4 +44,43 @@ class RoleplayApi {
       'PUT /v1/users/speed-rate failed: HTTP ${response.statusCode} ${response.body}',
     );
   }
+
+  static Future<void> updateAutoHint({
+    required String accessToken,
+    required String value,
+  }) async {
+    return await SudaHttpClient.executeWithRefresh(
+      () => _updateAutoHintInternal(accessToken, value),
+      retryWithNewToken: (newToken) => _updateAutoHintInternal(newToken, value),
+    );
+  }
+
+  static Future<void> _updateAutoHintInternal(
+    String accessToken,
+    String value,
+  ) async {
+    final uri = SudaHttpClient.buildUri('/v1/users/auto-hint', {
+      'value': value,
+    });
+    late final http.Response response;
+    try {
+      response = await SudaHttpClient.client
+          .put(uri, headers: {'Authorization': 'Bearer $accessToken'})
+          .timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      rethrow;
+    }
+
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return;
+    }
+
+    throw Exception(
+      'PUT /v1/users/auto-hint failed: HTTP ${response.statusCode} ${response.body}',
+    );
+  }
 }
