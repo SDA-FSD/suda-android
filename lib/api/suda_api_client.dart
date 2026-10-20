@@ -20,6 +20,7 @@ import 'endpoints/push_api.dart';
 import 'endpoints/rank_api.dart';
 import 'endpoints/roleplay_api.dart';
 import 'endpoints/series_api.dart';
+import 'endpoints/tutorial_api.dart';
 import 'endpoints/user_api.dart';
 import 'endpoints/version_api.dart';
 import '../services/energy_refresh_bus.dart';
@@ -118,6 +119,67 @@ class SudaApiClient {
     return SeriesApi.getSeriesBestScore(
       accessToken: accessToken,
       seriesId: seriesId,
+    );
+  }
+
+  static Future<RpS2SessionDto> createTutorialSession({
+    required String accessToken,
+  }) {
+    return TutorialApi.createSession(accessToken: accessToken);
+  }
+
+  static Future<RpS2UserMessageResponseDto> sendTutorialUserAudio({
+    required String accessToken,
+    required String sessionId,
+    required Uint8List audioData,
+  }) {
+    return TutorialApi.sendUserAudio(
+      accessToken: accessToken,
+      sessionId: sessionId,
+      audioData: audioData,
+    );
+  }
+
+  static Future<RpS2SoundResDto> getTutorialAiAudio({
+    required String accessToken,
+    required String sessionId,
+  }) {
+    return TutorialApi.aiAudio(accessToken: accessToken, sessionId: sessionId);
+  }
+
+  static Future<String> getTutorialTranslation({
+    required String accessToken,
+    required String sessionId,
+    required int rpMsgId,
+  }) {
+    return TutorialApi.translation(
+      accessToken: accessToken,
+      sessionId: sessionId,
+      rpMsgId: rpMsgId,
+    );
+  }
+
+  static Future<RpS2HintDto> getTutorialHint({
+    required String accessToken,
+    required String sessionId,
+    required int rpMsgId,
+  }) {
+    return TutorialApi.hint(
+      accessToken: accessToken,
+      sessionId: sessionId,
+      rpMsgId: rpMsgId,
+    );
+  }
+
+  static Future<TtsResultDto> getTutorialHintSound({
+    required String accessToken,
+    required String sessionId,
+    int? wordIndex,
+  }) {
+    return TutorialApi.hintSound(
+      accessToken: accessToken,
+      sessionId: sessionId,
+      wordIndex: wordIndex,
     );
   }
 

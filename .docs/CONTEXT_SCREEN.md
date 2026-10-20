@@ -239,10 +239,10 @@
 - **FirstUsernameScreen** 완료 / `_assignEntryFlags` 재진입
 
 ### 이후 스크린 정보
-- **TutorialRoleplayScreen** (`tutorial_roleplay.dart`) — 1단계 미션 확인. `tutorial_rp_bg` 선명 노출 후 blur되며 제목·Skip·턴바·Missions·가이드 말풍선(`#0CABA8` radius 20)·탭 포인터. Skip → `DefaultPopup` → Home(`ONBOARDING_TUTORIAL`). 시스템 back은 완료 처리 안 함. 미션/가이드 탭 다음 단계는 추후. Lab **Open Tutorial Intro** / 온보딩 preview
+- **TutorialRoleplayScreen** (`tutorial_roleplay.dart`) — 1단계 미션 확인(제목·Skip·턴바 3칸 비움·Missions·가이드 말풍선·탭 포인터) → 탭 시 2단계: 접힌 미션+마이크만 → ~0.6s 나레이션 → ~0.7s Betty → ~0.6s Hello 말풍선과 함께 `POST /tutorial/sessions`의 Amy `aiSound` 재생 → 재생 종료(실패·무음 포함) 후 안내와 함께 마이크 활성·홀드 전까지 `ic_mic_ripple` 펄스(한 바퀴 1.4s) → ~0.3s 손가락이 버튼에 내려앉고, 채움 원에서 테두리 원이 퍼져 사라지는 홀드(탭 펄스 아님). 힌트는 비활성. 500ms 미만·무음은 올리지 않는다. 그 외 `POST /tutorial/sessions/{id}/user-message/audio` 후 사용자·나레이션·AI 말풍선, 번역, Amy 음성, 재생 끝나면 마이크. 미션 성공 시 다음 미션. 3개면 마이크 잠금. 힌트는 첫 미션 성공 후. 영어 문장 메가폰과 단어 탭은 `hint/sound`로 재생. UI 목: `RoleplayMissionPanel` 접힘·나레이션·Betty(`tutorial_betty.png`) AI 말풍선은 왼쪽(en 로케일 번역 없음). 1단계 가이드 말풍선 문구는 말풍선 가로 중앙·마이크 위 Hello 안내(`#0CABA8`, `'Hello'`/`‘Hello’`는 `#054544`). 문구는 en/pt/ko 스펙(나레이션·번역·안내·홀드 중·짧은 탭·무인식). 나레이션은 자동 줄바꿈. 마이크 안내만 구 단위 줄바꿈. 마이크 입력 연동 전엔 안내 기본 문구만·힌트(타이핑·번역 버튼 없음). 턴바는 사용자 발화마다 `#0CABA8`로 최대 3칸. Skip → `DefaultPopup` → Home(`ONBOARDING_TUTORIAL`). Lab **Open Tutorial Intro** / 온보딩 preview
 
 ### 스크린 내부 구현 특이사항
-- **배경**: `TutorialRoleplayBackdrop` — `tutorial_rp_bg.png`. Intro는 Playing과 동일 blur(sigma 10)·딤. Roleplay 1단계는 선명 페이드인 3s → hold → blur·딤으로 전환 후 미션 UI. 탭 포인터는 `TutorialPointer`(`tutorial_pointer.dart` / `tutorial_pointer.png`) 스케일 펄스 + 안쪽 채움점·바깥 빈 링 리플
+- **배경**: `TutorialRoleplayBackdrop` — `tutorial_rp_bg.png`. Intro는 Playing과 동일 blur(sigma 10)·딤. Roleplay: 선명 페이드인 3s → hold → blur·딤 → 1단계 미션 UI → 탭 후 2단계 Playing형. 탭 포인터 `TutorialPointer`(`tutorial_pointer.png`) 스케일 펄스 + 채움/테두리 원 리플(손가락·원 `Opacity` 0.9)
 - **Intro 레이아웃**(`TutorialIntroStage`): 최종 아바타 top **24%** · 아바타 높이 **11.7%** · 문구 top = 아바타 하단+**1%** · CTA top **74.5%**(모두 화면 높이 비율)
 - **애니**: 프로토타입 `.go`는 `TutorialIntroStage` 공용. **Username Confirm 성공 시** Username 위에서 전환(rest fade + bg/아바타/문구/CTA) 후 Intro는 `playEntrance: false`. 콜드스타트·Lab 단독 Open은 Intro 입장 애니. l10n `tutorialIntroTitle(name)` · `tutorialIntroStart`(play_white · mint `#0CABA8`)
 

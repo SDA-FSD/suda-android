@@ -446,6 +446,31 @@ class AppLocalizationsEs extends AppLocalizations {
   String get tutorialRoleplayGuideMissionTapContinue => 'Tap to continue';
 
   @override
+  String get tutorialRoleplayNarration1 =>
+      'You\'re moving to a new neighborhood today. You hop into a taxi, where a friendly driver named Betty greets you. 🚕';
+
+  @override
+  String get tutorialRoleplayBettyLine1 => 'Hi there! Hop in!';
+
+  @override
+  String get tutorialRoleplayBettyLine1Translation => '';
+
+  @override
+  String get tutorialRoleplayHoldHello =>
+      'Press and hold\nthe mic button.\nSay ‘Hello’ and release.';
+
+  @override
+  String get tutorialRoleplayMicHolding => '‘Hello’';
+
+  @override
+  String get tutorialRoleplayMicTooShort =>
+      'Hold the mic longer\nand say ‘Hello’';
+
+  @override
+  String get tutorialRoleplayMicNoSpeech =>
+      'Didn\'t catch that.\nTry saying \'Hello\' again.';
+
+  @override
   String get actionConfirm => 'Confirmar';
 
   @override
@@ -1662,6 +1687,31 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
 
   @override
   String get tutorialRoleplayGuideMissionTapContinue => 'Tap to continue';
+
+  @override
+  String get tutorialRoleplayNarration1 =>
+      'You\'re moving to a new neighborhood today. You hop into a taxi, where a friendly driver named Betty greets you. 🚕';
+
+  @override
+  String get tutorialRoleplayBettyLine1 => 'Hi there! Hop in!';
+
+  @override
+  String get tutorialRoleplayBettyLine1Translation => '';
+
+  @override
+  String get tutorialRoleplayHoldHello =>
+      'Press and hold\nthe mic button.\nSay ‘Hello’ and release.';
+
+  @override
+  String get tutorialRoleplayMicHolding => '‘Hello’';
+
+  @override
+  String get tutorialRoleplayMicTooShort =>
+      'Hold the mic longer\nand say ‘Hello’';
+
+  @override
+  String get tutorialRoleplayMicNoSpeech =>
+      'Didn\'t catch that.\nTry saying \'Hello\' again.';
 
   @override
   String get actionConfirm => 'Confirmar';

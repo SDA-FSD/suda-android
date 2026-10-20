@@ -935,6 +935,48 @@ abstract class AppLocalizations {
   /// **'Tap to continue'**
   String get tutorialRoleplayGuideMissionTapContinue;
 
+  /// No description provided for @tutorialRoleplayNarration1.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re moving to a new neighborhood today. You hop into a taxi, where a friendly driver named Betty greets you. 🚕'**
+  String get tutorialRoleplayNarration1;
+
+  /// No description provided for @tutorialRoleplayBettyLine1.
+  ///
+  /// In en, this message translates to:
+  /// **'Hi there! Hop in!'**
+  String get tutorialRoleplayBettyLine1;
+
+  /// No description provided for @tutorialRoleplayBettyLine1Translation.
+  ///
+  /// In en, this message translates to:
+  /// **''**
+  String get tutorialRoleplayBettyLine1Translation;
+
+  /// No description provided for @tutorialRoleplayHoldHello.
+  ///
+  /// In en, this message translates to:
+  /// **'Press and hold\nthe mic button.\nSay ‘Hello’ and release.'**
+  String get tutorialRoleplayHoldHello;
+
+  /// No description provided for @tutorialRoleplayMicHolding.
+  ///
+  /// In en, this message translates to:
+  /// **'‘Hello’'**
+  String get tutorialRoleplayMicHolding;
+
+  /// No description provided for @tutorialRoleplayMicTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold the mic longer\nand say ‘Hello’'**
+  String get tutorialRoleplayMicTooShort;
+
+  /// No description provided for @tutorialRoleplayMicNoSpeech.
+  ///
+  /// In en, this message translates to:
+  /// **'Didn\'t catch that.\nTry saying \'Hello\' again.'**
+  String get tutorialRoleplayMicNoSpeech;
+
   /// No description provided for @actionConfirm.
   ///
   /// In en, this message translates to:

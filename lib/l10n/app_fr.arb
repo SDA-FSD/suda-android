@@ -176,6 +176,13 @@
   "tutorialRoleplayMission3": "Say why you're going there",
   "tutorialRoleplayGuideMissionMain": "Check your missions first!",
   "tutorialRoleplayGuideMissionTapContinue": "Tap to continue",
+  "tutorialRoleplayNarration1": "You're moving to a new neighborhood today. You hop into a taxi, where a friendly driver named Betty greets you. 🚕",
+  "tutorialRoleplayBettyLine1": "Hi there! Hop in!",
+  "tutorialRoleplayBettyLine1Translation": "",
+  "tutorialRoleplayHoldHello": "Press and hold\nthe mic button.\nSay ‘Hello’ and release.",
+  "tutorialRoleplayMicHolding": "‘Hello’",
+  "tutorialRoleplayMicTooShort": "Hold the mic longer\nand say ‘Hello’",
+  "tutorialRoleplayMicNoSpeech": "Didn't catch that.\nTry saying 'Hello' again.",
 
   "actionConfirm": "Confirmer",
   "feedbackPlaceholder": "Partagez vos remarques, suggestions ou problèmes rencontrés…",
