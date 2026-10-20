@@ -164,6 +164,18 @@
     }
   },
   "tutorialIntroStart": "튜토리얼 시작",
+  "tutorialRoleplayTitle": "첫 대화",
+  "tutorialRoleplaySkip": "건너뛰기",
+  "tutorialRoleplaySkipTitle": "튜토리얼을 건너뛰시겠어요?",
+  "tutorialRoleplaySkipBody": "건너뛰면 튜토리얼 완료 보상을\n받을 수 없어요.",
+  "tutorialRoleplaySkipConfirm": "튜토리얼 건너뛰기",
+  "tutorialRoleplaySkipKeepGoing": "계속하기",
+  "tutorialRoleplayMissions": "미션",
+  "tutorialRoleplayMission1": "택시 기사에게 인사하기",
+  "tutorialRoleplayMission2": "목적지 말하기",
+  "tutorialRoleplayMission3": "그곳에 가는 이유 말하기",
+  "tutorialRoleplayGuideMissionMain": "먼저 미션을 확인하세요!",
+  "tutorialRoleplayGuideMissionTapContinue": "탭해서 계속하기",
 
   "actionConfirm": "확인",
   "feedbackPlaceholder": "생각, 제안사항 또는 겪으신 문제점을 공유해 주세요...",

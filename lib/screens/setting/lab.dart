@@ -29,7 +29,7 @@ import '../first_cefr_level.dart';
 import '../first_profile_image.dart';
 import '../first_username.dart';
 import '../tutorial/tutorial_intro.dart';
-import '../tutorial/tutorial_roleplay_stub.dart';
+import '../tutorial/tutorial_roleplay.dart';
 import '../paywall/paywall.dart';
 import '../paywall/paywall_completed.dart';
 import '../rank/ranking.dart';
@@ -1050,15 +1050,15 @@ class _OnboardingFlowPreviewState extends State<_OnboardingFlowPreview> {
           onStartTutorial: () => setState(() => _step = 5),
         );
       default:
-        return TutorialRoleplayStubScreen(
+        return TutorialRoleplayScreen(
           preview: true,
-          onClose: () => Navigator.of(context).pop(),
+          onSkip: () => Navigator.of(context).pop(),
         );
     }
   }
 }
 
-/// Lab: Tutorial Intro → (mic) → Roleplay stub.
+/// Lab: Tutorial Intro → (mic) → Tutorial Roleplay.
 class _TutorialIntroPreview extends StatefulWidget {
   const _TutorialIntroPreview();
 
@@ -1072,9 +1072,9 @@ class _TutorialIntroPreviewState extends State<_TutorialIntroPreview> {
   @override
   Widget build(BuildContext context) {
     if (_roleplay) {
-      return TutorialRoleplayStubScreen(
+      return TutorialRoleplayScreen(
         preview: true,
-        onClose: () => Navigator.of(context).pop(),
+        onSkip: () => Navigator.of(context).pop(),
       );
     }
     return TutorialIntroScreen(

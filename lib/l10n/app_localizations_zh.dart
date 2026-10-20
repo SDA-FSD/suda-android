@@ -386,6 +386,43 @@ class AppLocalizationsZh extends AppLocalizations {
   String get tutorialIntroStart => '开始教程';
 
   @override
+  String get tutorialRoleplayTitle => 'Your First Conversation';
+
+  @override
+  String get tutorialRoleplaySkip => 'Skip';
+
+  @override
+  String get tutorialRoleplaySkipTitle => 'Skip the tutorial?';
+
+  @override
+  String get tutorialRoleplaySkipBody =>
+      'If you skip, you won\'t receive\nthe tutorial reward.';
+
+  @override
+  String get tutorialRoleplaySkipConfirm => 'Skip Tutorial';
+
+  @override
+  String get tutorialRoleplaySkipKeepGoing => 'Keep Going';
+
+  @override
+  String get tutorialRoleplayMissions => 'Missions';
+
+  @override
+  String get tutorialRoleplayMission1 => 'Greet the taxi driver';
+
+  @override
+  String get tutorialRoleplayMission2 => 'Tell the driver where you\'re going';
+
+  @override
+  String get tutorialRoleplayMission3 => 'Say why you\'re going there';
+
+  @override
+  String get tutorialRoleplayGuideMissionMain => 'Check your missions first!';
+
+  @override
+  String get tutorialRoleplayGuideMissionTapContinue => 'Tap to continue';
+
+  @override
   String get actionConfirm => '确认';
 
   @override
@@ -1492,6 +1529,43 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get tutorialIntroStart => '开始教程';
 
   @override
+  String get tutorialRoleplayTitle => 'Your First Conversation';
+
+  @override
+  String get tutorialRoleplaySkip => 'Skip';
+
+  @override
+  String get tutorialRoleplaySkipTitle => 'Skip the tutorial?';
+
+  @override
+  String get tutorialRoleplaySkipBody =>
+      'If you skip, you won\'t receive\nthe tutorial reward.';
+
+  @override
+  String get tutorialRoleplaySkipConfirm => 'Skip Tutorial';
+
+  @override
+  String get tutorialRoleplaySkipKeepGoing => 'Keep Going';
+
+  @override
+  String get tutorialRoleplayMissions => 'Missions';
+
+  @override
+  String get tutorialRoleplayMission1 => 'Greet the taxi driver';
+
+  @override
+  String get tutorialRoleplayMission2 => 'Tell the driver where you\'re going';
+
+  @override
+  String get tutorialRoleplayMission3 => 'Say why you\'re going there';
+
+  @override
+  String get tutorialRoleplayGuideMissionMain => 'Check your missions first!';
+
+  @override
+  String get tutorialRoleplayGuideMissionTapContinue => 'Tap to continue';
+
+  @override
   String get actionConfirm => '确认';
 
   @override
@@ -2596,6 +2670,43 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get tutorialIntroStart => '開始教學';
+
+  @override
+  String get tutorialRoleplayTitle => 'Your First Conversation';
+
+  @override
+  String get tutorialRoleplaySkip => 'Skip';
+
+  @override
+  String get tutorialRoleplaySkipTitle => 'Skip the tutorial?';
+
+  @override
+  String get tutorialRoleplaySkipBody =>
+      'If you skip, you won\'t receive\nthe tutorial reward.';
+
+  @override
+  String get tutorialRoleplaySkipConfirm => 'Skip Tutorial';
+
+  @override
+  String get tutorialRoleplaySkipKeepGoing => 'Keep Going';
+
+  @override
+  String get tutorialRoleplayMissions => 'Missions';
+
+  @override
+  String get tutorialRoleplayMission1 => 'Greet the taxi driver';
+
+  @override
+  String get tutorialRoleplayMission2 => 'Tell the driver where you\'re going';
+
+  @override
+  String get tutorialRoleplayMission3 => 'Say why you\'re going there';
+
+  @override
+  String get tutorialRoleplayGuideMissionMain => 'Check your missions first!';
+
+  @override
+  String get tutorialRoleplayGuideMissionTapContinue => 'Tap to continue';
 
   @override
   String get actionConfirm => '確認';

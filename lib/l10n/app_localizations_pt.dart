@@ -410,6 +410,44 @@ class AppLocalizationsPt extends AppLocalizations {
   String get tutorialIntroStart => 'Iniciar tutorial';
 
   @override
+  String get tutorialRoleplayTitle => 'Sua primeira conversa';
+
+  @override
+  String get tutorialRoleplaySkip => 'Pular';
+
+  @override
+  String get tutorialRoleplaySkipTitle => 'Pular o tutorial?';
+
+  @override
+  String get tutorialRoleplaySkipBody =>
+      'Se pular, você não receberá\na recompensa do tutorial.';
+
+  @override
+  String get tutorialRoleplaySkipConfirm => 'Pular tutorial';
+
+  @override
+  String get tutorialRoleplaySkipKeepGoing => 'Continuar';
+
+  @override
+  String get tutorialRoleplayMissions => 'Missões';
+
+  @override
+  String get tutorialRoleplayMission1 => 'Cumprimente o taxista';
+
+  @override
+  String get tutorialRoleplayMission2 => 'Diga para onde você vai';
+
+  @override
+  String get tutorialRoleplayMission3 => 'Diga por que você vai até lá';
+
+  @override
+  String get tutorialRoleplayGuideMissionMain =>
+      'Confira suas missões primeiro!';
+
+  @override
+  String get tutorialRoleplayGuideMissionTapContinue => 'Toque para continuar';
+
+  @override
   String get actionConfirm => 'Confirmar';
 
   @override

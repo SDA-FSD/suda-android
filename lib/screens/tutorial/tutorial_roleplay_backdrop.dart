@@ -1,38 +1,64 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/material.dart';
 
-/// Tutorial Intro / Roleplay 공용 배경.
-///
-/// 프로토타입 `#bg` = `tutorial_roleplay_bg.jpg`(이미 블러된 롤플레이 장면).
-/// HTML은 추가 blur·딤 없이 이미지만 opacity로 올린다.
+import '../../widgets/roleplay_overview_backdrop.dart'
+    show
+        kRoleplayOverviewBackdropBlurSigma,
+        kRoleplayOverviewBackdropDim,
+        kRoleplayOverviewBackdropImageScale;
+
+/// Tutorial Roleplay 배경 (`tutorial_rp_bg.png`).
+/// [blurAmount] 0=선명, 1=기존 Playing과 동일 blur·딤.
 class TutorialRoleplayBackdrop extends StatelessWidget {
-  const TutorialRoleplayBackdrop({super.key});
+  static const assetPath = 'assets/images/tutorial/tutorial_rp_bg.png';
 
-  static const assetPath = 'assets/images/tutorial/tutorial_roleplay_bg.jpg';
+  /// 0~1. Playing 배경 blur/딤 강도에 맞춤.
+  final double blurAmount;
 
-  /// 원본 mean≈47로 디바이스에서 거의 검게 보이므로 살짝 밝혀 시안처럼 비치게 한다.
-  static const _lift = ColorFilter.matrix(<double>[
-    1.35, 0, 0, 0, 18,
-    0, 1.35, 0, 0, 18,
-    0, 0, 1.35, 0, 18,
-    0, 0, 0, 1, 0,
-  ]);
+  const TutorialRoleplayBackdrop({super.key, this.blurAmount = 0});
 
   @override
   Widget build(BuildContext context) {
+    final t = blurAmount.clamp(0.0, 1.0);
+    final sigma = kRoleplayOverviewBackdropBlurSigma * t;
+    final dimOpacity = kRoleplayOverviewBackdropDim.a * t;
+
+    Widget image = const DecoratedBox(
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage(assetPath),
+          fit: BoxFit.cover,
+          alignment: Alignment.center,
+          filterQuality: FilterQuality.medium,
+        ),
+      ),
+      child: SizedBox.expand(),
+    );
+
+    if (t > 0.001) {
+      image = Transform.scale(
+        scale: 1 + (kRoleplayOverviewBackdropImageScale - 1) * t,
+        alignment: Alignment.center,
+        child: ImageFiltered(
+          imageFilter: ImageFilter.blur(sigmaX: sigma, sigmaY: sigma),
+          child: image,
+        ),
+      );
+    }
+
     return ColoredBox(
       color: const Color(0xFF121212),
-      child: ColorFiltered(
-        colorFilter: _lift,
-        child: DecoratedBox(
-          decoration: const BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage(assetPath),
-              fit: BoxFit.cover,
-              alignment: Alignment.center,
-              filterQuality: FilterQuality.medium,
-            ),
-          ),
-          child: const SizedBox.expand(),
+      child: ClipRect(
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            image,
+            if (dimOpacity > 0.001)
+              ColoredBox(
+                color: Color.fromRGBO(0, 0, 0, dimOpacity),
+              ),
+          ],
         ),
       ),
     );
