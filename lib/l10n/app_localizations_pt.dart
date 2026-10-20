@@ -1014,39 +1014,37 @@ class AppLocalizationsPt extends AppLocalizations {
   String get roleplayTurnGradeD => 'oxi?';
 
   @override
-  String get tutorialPage1Title =>
-      'Confira sua **Missão**\ne comece a conversa.';
+  String get tutorialSlide1Title => 'Use o **Tradutor** quando não entender';
 
   @override
-  String get tutorialPage1Tip =>
-      '* Dica: quanto mais natural você falar,\nmaior será a recompensa!';
+  String get tutorialSlide2Title =>
+      'Se a pronúncia estiver difícil, **escuta** primeiro e depois **repete**';
 
   @override
-  String get tutorialPage2Title => 'Use o **Tradutor**\nquando não entender!';
+  String get tutorialSlide3Title =>
+      'Confira seu **feedback de IA** após cada conversa';
 
   @override
-  String get tutorialPage3Title => 'Use as **Dicas**\nquando travar.';
+  String get tutorialSlideReady => 'Estou pronto! >';
 
   @override
-  String get tutorialPage3Subtitle =>
-      'Você pode ativar ou desativar\ndicas automáticas quando quiser.';
+  String get tutorialSlideContinue => 'Continuar >';
 
   @override
-  String get tutorialPage4Title =>
-      'Se a pronúncia estiver difícil,\nescuta primeiro e depois repete.';
+  String get tutorialSlide1Translation => 'O que você gostaria?';
 
   @override
-  String get tutorialPage4Tip =>
-      '* Dica: tente responder sem ver a tradução\npara aumentar sua pontuação.';
+  String get tutorialSlide2HintLine => 'Só um latte, por favor.';
 
   @override
-  String get tutorialPage5Title => 'Não consegue falar\nem voz alta?';
+  String get tutorialSlide3SaidLabel => 'O que você disse';
 
   @override
-  String get tutorialPage5Subtitle => 'Mude para o **Modo Texto**.';
+  String get tutorialSlide3BetterLabel => 'Expressão melhorada';
 
   @override
-  String get tutorialPage6Title => 'Ninguém está te julgando.\nVai com tudo!';
+  String get tutorialSlide3Feedback =>
+      '\"I want coffee\" transmite bem a ideia! Mas, na hora de pedir, usar \"I\'d like\" soa mais educado e natural.';
 
   @override
   String rankCountdownDays(int count) {

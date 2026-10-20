@@ -1010,38 +1010,37 @@ class AppLocalizationsHi extends AppLocalizations {
   String get roleplayTurnGradeD => 'ओह…';
 
   @override
-  String get tutorialPage1Title => 'अपना **मिशन** देखें\nऔर बातचीत शुरू करें।';
+  String get tutorialSlide1Title => 'जब समझ न आए तो **अनुवादक** का उपयोग करें';
 
   @override
-  String get tutorialPage1Tip =>
-      '*टिप: जितना स्वाभाविक बोलेंगे,\nइनाम उतना बड़ा होगा!';
+  String get tutorialSlide2Title =>
+      'अगर उच्चारण कठिन हो, तो पहले **सुनें**, फिर **दोहराएँ**';
 
   @override
-  String get tutorialPage2Title => 'समझ न आए तो\n**अनुवादक** का उपयोग करें।';
+  String get tutorialSlide3Title =>
+      'हर बातचीत के बाद अपना **AI फ़ीडबैक** देखें';
 
   @override
-  String get tutorialPage3Title => 'अटक जाएँ तो\n**हिंट** देखें।';
+  String get tutorialSlideReady => 'मैं तैयार हूँ! >';
 
   @override
-  String get tutorialPage3Subtitle =>
-      'ऑटो हिंट कभी भी\nचालू या बंद कर सकते हैं।';
+  String get tutorialSlideContinue => 'जारी रखें >';
 
   @override
-  String get tutorialPage4Title =>
-      'उच्चारण मुश्किल हो तो\nपहले सुनें, फिर दोहराएँ।';
+  String get tutorialSlide1Translation => 'आप क्या चाहेंगे?';
 
   @override
-  String get tutorialPage4Tip =>
-      '*टिप: अनुवाद देखे बिना जवाब देने पर\nज़्यादा स्कोर मिल सकता है।';
+  String get tutorialSlide2HintLine => 'बस एक लाटे दीजिए।';
 
   @override
-  String get tutorialPage5Title => 'ज़ोर से नहीं बोल सकते?';
+  String get tutorialSlide3SaidLabel => 'आपने जो कहा';
 
   @override
-  String get tutorialPage5Subtitle => '**टेक्स्ट मोड** पर स्विच करें।';
+  String get tutorialSlide3BetterLabel => 'बेहतर अभिव्यक्ति';
 
   @override
-  String get tutorialPage6Title => 'कोई जज नहीं कर रहा।\nआप कर सकते हैं!';
+  String get tutorialSlide3Feedback =>
+      '\"I want coffee\" से बात समझ आ जाती है! लेकिन ऑर्डर करते समय \"I\'d like\" ज़्यादा विनम्र और स्वाभाविक लगता है।';
 
   @override
   String rankCountdownDays(int count) {

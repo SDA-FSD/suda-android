@@ -1002,37 +1002,37 @@ class AppLocalizationsAr extends AppLocalizations {
   String get roleplayTurnGradeD => 'أوه…';
 
   @override
-  String get tutorialPage1Title => 'راجع **المهمة**\nوابدأ المحادثة.';
+  String get tutorialSlide1Title => 'استخدم **المترجم** عندما لا تفهم';
 
   @override
-  String get tutorialPage1Tip =>
-      '*نصيحة: كلما تحدّثت بعفوية أكبر،\nزاد مكافأتك!';
+  String get tutorialSlide2Title =>
+      'إذا كان النطق صعبًا، **استمع** أولًا ثم **كرّر**';
 
   @override
-  String get tutorialPage2Title => 'استخدم **المترجم**\nعندما لا تفهم.';
+  String get tutorialSlide3Title =>
+      'راجع **ملاحظات الذكاء الاصطناعي** بعد كل محادثة';
 
   @override
-  String get tutorialPage3Title => 'استخدم **التلميح**\nعندما تتوقف.';
+  String get tutorialSlideReady => 'أنا جاهز! >';
 
   @override
-  String get tutorialPage3Subtitle =>
-      'يمكنك تشغيل التلميحات التلقائية\nأو إيقافها في أي وقت.';
+  String get tutorialSlideContinue => 'متابعة >';
 
   @override
-  String get tutorialPage4Title => 'إذا كان النطق صعبًا،\nاستمع أولًا ثم كرّر.';
+  String get tutorialSlide1Translation => 'ماذا تريد؟';
 
   @override
-  String get tutorialPage4Tip =>
-      '*نصيحة: حاول الإجابة دون النظر إلى الترجمة\nلتحصل على درجة أعلى.';
+  String get tutorialSlide2HintLine => 'لاتيه واحد فقط من فضلك.';
 
   @override
-  String get tutorialPage5Title => 'لا تستطيع التحدث\nبصوت عالٍ؟';
+  String get tutorialSlide3SaidLabel => 'ما قلته';
 
   @override
-  String get tutorialPage5Subtitle => 'انتقل إلى **وضع النص**.';
+  String get tutorialSlide3BetterLabel => 'تعبير أفضل';
 
   @override
-  String get tutorialPage6Title => 'لا أحد يحكم عليك.\nأنت قادر!';
+  String get tutorialSlide3Feedback =>
+      '\"I want coffee\" توصل المعنى! لكن عند الطلب، \"I\'d like\" تبدو أكثر تهذيبًا وطبيعية.';
 
   @override
   String rankCountdownDays(int count) {

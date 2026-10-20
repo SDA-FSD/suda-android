@@ -1007,40 +1007,38 @@ class AppLocalizationsEn extends AppLocalizations {
   String get roleplayTurnGradeD => 'oh…';
 
   @override
-  String get tutorialPage1Title =>
-      'Check your **Mission**\nand start the conversation.';
+  String get tutorialSlide1Title =>
+      'Use the **Translator** when you don\'t understand';
 
   @override
-  String get tutorialPage1Tip =>
-      '*Tip: The more naturally you speak,\nthe bigger your reward!';
+  String get tutorialSlide2Title =>
+      'If pronunciation is hard, **listen** first, then **repeat**';
 
   @override
-  String get tutorialPage2Title =>
-      'Use the **Translator**\nwhen you don\'t understand.';
+  String get tutorialSlide3Title =>
+      'Check your **AI Feedback** after each conversation';
 
   @override
-  String get tutorialPage3Title => 'Use a **Hint**\nwhen you get stuck.';
+  String get tutorialSlideReady => 'I\'m Ready! >';
 
   @override
-  String get tutorialPage3Subtitle =>
-      'You can turn auto hints\non or off anytime.';
+  String get tutorialSlideContinue => 'Continue >';
 
   @override
-  String get tutorialPage4Title =>
-      'If pronunciation is hard,\nlisten first, then repeat.';
+  String get tutorialSlide1Translation => 'What would you like?';
 
   @override
-  String get tutorialPage4Tip =>
-      '*Tip: Try answering without looking at the translation\nto earn a higher score.';
+  String get tutorialSlide2HintLine => 'Just a latte, please.';
 
   @override
-  String get tutorialPage5Title => 'Can\'t speak out loud?';
+  String get tutorialSlide3SaidLabel => 'What You Said';
 
   @override
-  String get tutorialPage5Subtitle => 'Switch to **Text Mode**.';
+  String get tutorialSlide3BetterLabel => 'Better Expression';
 
   @override
-  String get tutorialPage6Title => 'No one\'s judging.\nYou\'ve got this!';
+  String get tutorialSlide3Feedback =>
+      '\"I want coffee\" gets your point across! But when ordering, \"I\'d like\" sounds more polite and natural.';
 
   @override
   String rankCountdownDays(int count) {

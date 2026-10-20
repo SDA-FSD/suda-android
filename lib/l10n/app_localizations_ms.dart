@@ -1016,41 +1016,38 @@ class AppLocalizationsMs extends AppLocalizations {
   String get roleplayTurnGradeD => 'oh…';
 
   @override
-  String get tutorialPage1Title =>
-      'Semak **Misi** anda\ndan mulakan perbualan.';
+  String get tutorialSlide1Title =>
+      'Gunakan **Penterjemah** apabila anda tidak faham';
 
   @override
-  String get tutorialPage1Tip =>
-      '*Tip: Semakin semula jadi anda bercakap,\nsemakin besar ganjaran anda!';
+  String get tutorialSlide2Title =>
+      'Jika sebutan sukar, **dengar** dahulu, kemudian **ulang**';
 
   @override
-  String get tutorialPage2Title =>
-      'Gunakan **Penterjemah**\napabila anda tidak faham.';
+  String get tutorialSlide3Title =>
+      'Semak **maklum balas AI** selepas setiap perbualan';
 
   @override
-  String get tutorialPage3Title =>
-      'Gunakan **Petunjuk**\napabila anda tersekat.';
+  String get tutorialSlideReady => 'Saya bersedia! >';
 
   @override
-  String get tutorialPage3Subtitle =>
-      'Anda boleh menghidupkan atau mematikan\npetunjuk automatik pada bila-bila masa.';
+  String get tutorialSlideContinue => 'Teruskan >';
 
   @override
-  String get tutorialPage4Title =>
-      'Jika sebutan sukar,\ndengar dahulu, kemudian ulang.';
+  String get tutorialSlide1Translation => 'Apa yang anda mahukan?';
 
   @override
-  String get tutorialPage4Tip =>
-      '*Tip: Cuba jawab tanpa melihat terjemahan\nuntuk mendapat markah lebih tinggi.';
+  String get tutorialSlide2HintLine => 'Satu latte sahaja.';
 
   @override
-  String get tutorialPage5Title => 'Tidak boleh bercakap kuat?';
+  String get tutorialSlide3SaidLabel => 'Apa yang anda katakan';
 
   @override
-  String get tutorialPage5Subtitle => 'Tukar kepada **Mod Teks**.';
+  String get tutorialSlide3BetterLabel => 'Ungkapan yang lebih baik';
 
   @override
-  String get tutorialPage6Title => 'Tiada siapa yang menghakimi.\nAnda mampu!';
+  String get tutorialSlide3Feedback =>
+      '\"I want coffee\" sudah menyampaikan maksud! Tetapi semasa memesan, \"I\'d like\" kedengaran lebih sopan dan semula jadi.';
 
   @override
   String rankCountdownDays(int count) {

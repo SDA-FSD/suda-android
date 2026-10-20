@@ -965,34 +965,35 @@ class AppLocalizationsJa extends AppLocalizations {
   String get roleplayTurnGradeD => 'おっ…';
 
   @override
-  String get tutorialPage1Title => '**ミッション**を確認して\n会話を始めましょう。';
+  String get tutorialSlide1Title => '相手の言葉がわからなければ**翻訳**を使いましょう';
 
   @override
-  String get tutorialPage1Tip => '*Tip: 自然に話すほど、\n報酬が大きくなります！';
+  String get tutorialSlide2Title => '発音が難しければ、まず**聞いて**、それから**繰り返して**みましょう';
 
   @override
-  String get tutorialPage2Title => 'わからないときは\n**翻訳**を使いましょう。';
+  String get tutorialSlide3Title => '会話が終わったら**AIフィードバック**を確認しましょう';
 
   @override
-  String get tutorialPage3Title => '行き詰まったら\n**ヒント**を見て話してみましょう。';
+  String get tutorialSlideReady => '準備できました! >';
 
   @override
-  String get tutorialPage3Subtitle => '自動ヒントはいつでも\nオン/オフできます。';
+  String get tutorialSlideContinue => '続ける >';
 
   @override
-  String get tutorialPage4Title => '発音が難しいときは、\nまず聞いてから繰り返しましょう。';
+  String get tutorialSlide1Translation => '何にしますか？';
 
   @override
-  String get tutorialPage4Tip => '*Tip: 翻訳を見ずに答えると、\nより高いスコアを獲得できます。';
+  String get tutorialSlide2HintLine => 'ラテを一つだけください。';
 
   @override
-  String get tutorialPage5Title => '声に出して\n話せないときは？';
+  String get tutorialSlide3SaidLabel => 'あなたの発言';
 
   @override
-  String get tutorialPage5Subtitle => '**テキストモード**に\n切り替えてください。';
+  String get tutorialSlide3BetterLabel => 'より良い表現';
 
   @override
-  String get tutorialPage6Title => '誰もジャッジしません。\n自信を持って！';
+  String get tutorialSlide3Feedback =>
+      '「I want coffee」でも意味は伝わります！注文するときは「I\'d like」のほうが丁寧で自然に聞こえます。';
 
   @override
   String rankCountdownDays(int count) {

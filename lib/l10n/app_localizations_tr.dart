@@ -1009,39 +1009,37 @@ class AppLocalizationsTr extends AppLocalizations {
   String get roleplayTurnGradeD => 'oh…';
 
   @override
-  String get tutorialPage1Title =>
-      '**Görev**ini kontrol et\nve sohbeti başlat.';
+  String get tutorialSlide1Title => 'Anlamadığında **Çevirmen**i kullan';
 
   @override
-  String get tutorialPage1Tip =>
-      '*İpucu: Ne kadar doğal konuşursan\nödülün o kadar büyük olur!';
+  String get tutorialSlide2Title =>
+      'Telaffuz zorsa önce **dinle**, sonra **tekrarla**';
 
   @override
-  String get tutorialPage2Title => 'Anlamadığında\n**Çevirmen**i kullan.';
+  String get tutorialSlide3Title =>
+      'Her konuşmadan sonra **AI geri bildirimini** kontrol et';
 
   @override
-  String get tutorialPage3Title => 'Takıldığında\n**İpucu** kullan.';
+  String get tutorialSlideReady => 'Hazırım! >';
 
   @override
-  String get tutorialPage3Subtitle =>
-      'Otomatik ipuçlarını istediğin zaman\naçıp kapatabilirsin.';
+  String get tutorialSlideContinue => 'Devam >';
 
   @override
-  String get tutorialPage4Title =>
-      'Telaffuz zorsa\nönce dinle, sonra tekrarla.';
+  String get tutorialSlide1Translation => 'Ne istersiniz?';
 
   @override
-  String get tutorialPage4Tip =>
-      '*İpucu: Çeviriye bakmadan cevaplamayı dene,\ndaha yüksek puan alırsın.';
+  String get tutorialSlide2HintLine => 'Sadece bir latte, lütfen.';
 
   @override
-  String get tutorialPage5Title => 'Sesli konuşamıyor musun?';
+  String get tutorialSlide3SaidLabel => 'Söylediğin';
 
   @override
-  String get tutorialPage5Subtitle => '**Metin Modu**na geç.';
+  String get tutorialSlide3BetterLabel => 'Daha iyi ifade';
 
   @override
-  String get tutorialPage6Title => 'Kimse seni yargılamıyor.\nBaşaracaksın!';
+  String get tutorialSlide3Feedback =>
+      '\"I want coffee\" anlatıyor! Ama sipariş verirken \"I\'d like\" daha nazik ve doğal duyulur.';
 
   @override
   String rankCountdownDays(int count) {

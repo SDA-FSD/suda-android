@@ -1008,40 +1008,38 @@ class AppLocalizationsRu extends AppLocalizations {
   String get roleplayTurnGradeD => 'ох…';
 
   @override
-  String get tutorialPage1Title => 'Проверь **миссию**\nи начни разговор.';
+  String get tutorialSlide1Title =>
+      'Используй **переводчик**, когда не понимаешь';
 
   @override
-  String get tutorialPage1Tip =>
-      '*Совет: Чем естественнее говоришь,\nтем больше награда!';
+  String get tutorialSlide2Title =>
+      'Если произношение трудное, сначала **послушай**, потом **повтори**';
 
   @override
-  String get tutorialPage2Title =>
-      'Используй **переводчик**,\nесли не понимаешь.';
+  String get tutorialSlide3Title =>
+      'Проверь **обратную связь ИИ** после каждого разговора';
 
   @override
-  String get tutorialPage3Title => 'Используй **подсказку**,\nесли застрял.';
+  String get tutorialSlideReady => 'Я готов! >';
 
   @override
-  String get tutorialPage3Subtitle =>
-      'Автоподсказки можно включать\nи выключать в любой момент.';
+  String get tutorialSlideContinue => 'Продолжить >';
 
   @override
-  String get tutorialPage4Title =>
-      'Если произношение трудное,\nсначала послушай, потом повтори.';
+  String get tutorialSlide1Translation => 'Что бы вы хотели?';
 
   @override
-  String get tutorialPage4Tip =>
-      '*Совет: Попробуй ответить, не глядя на перевод,\nчтобы получить больше баллов.';
+  String get tutorialSlide2HintLine => 'Только латте, пожалуйста.';
 
   @override
-  String get tutorialPage5Title => 'Не можешь говорить вслух?';
+  String get tutorialSlide3SaidLabel => 'Что ты сказал';
 
   @override
-  String get tutorialPage5Subtitle => 'Переключись в **текстовый режим**.';
+  String get tutorialSlide3BetterLabel => 'Более удачная фраза';
 
   @override
-  String get tutorialPage6Title =>
-      'Никто тебя не оценивает.\nУ тебя получится!';
+  String get tutorialSlide3Feedback =>
+      '«I want coffee» понятно! Но при заказе «I\'d like» звучит вежливее и естественнее.';
 
   @override
   String rankCountdownDays(int count) {

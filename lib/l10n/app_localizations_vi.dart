@@ -1010,39 +1010,37 @@ class AppLocalizationsVi extends AppLocalizations {
   String get roleplayTurnGradeD => 'ồ…';
 
   @override
-  String get tutorialPage1Title =>
-      'Xem **Nhiệm vụ** của bạn\nvà bắt đầu trò chuyện.';
+  String get tutorialSlide1Title => 'Dùng **Trình dịch** khi bạn không hiểu';
 
   @override
-  String get tutorialPage1Tip =>
-      '*Mẹo: Bạn nói càng tự nhiên,\nphần thưởng càng lớn!';
+  String get tutorialSlide2Title =>
+      'Nếu phát âm khó, hãy **nghe** trước rồi **nhắc lại**';
 
   @override
-  String get tutorialPage2Title => 'Dùng **Trình dịch**\nkhi bạn không hiểu.';
+  String get tutorialSlide3Title =>
+      'Kiểm tra **phản hồi AI** sau mỗi cuộc hội thoại';
 
   @override
-  String get tutorialPage3Title => 'Dùng **Gợi ý**\nkhi bạn bị kẹt.';
+  String get tutorialSlideReady => 'Tôi sẵn sàng! >';
 
   @override
-  String get tutorialPage3Subtitle =>
-      'Bạn có thể bật hoặc tắt\ngợi ý tự động bất cứ lúc nào.';
+  String get tutorialSlideContinue => 'Tiếp tục >';
 
   @override
-  String get tutorialPage4Title =>
-      'Nếu phát âm khó,\nhãy nghe trước rồi nhắc lại.';
+  String get tutorialSlide1Translation => 'Bạn muốn gì?';
 
   @override
-  String get tutorialPage4Tip =>
-      '*Mẹo: Hãy trả lời mà không nhìn bản dịch\nđể được điểm cao hơn.';
+  String get tutorialSlide2HintLine => 'Cho tôi một ly latte.';
 
   @override
-  String get tutorialPage5Title => 'Không thể nói to?';
+  String get tutorialSlide3SaidLabel => 'Điều bạn đã nói';
 
   @override
-  String get tutorialPage5Subtitle => 'Chuyển sang **Chế độ văn bản**.';
+  String get tutorialSlide3BetterLabel => 'Cách diễn đạt tốt hơn';
 
   @override
-  String get tutorialPage6Title => 'Không ai đang đánh giá bạn.\nBạn làm được!';
+  String get tutorialSlide3Feedback =>
+      '\"I want coffee\" vẫn truyền đạt được ý! Nhưng khi gọi món, \"I\'d like\" nghe lịch sự và tự nhiên hơn.';
 
   @override
   String rankCountdownDays(int count) {

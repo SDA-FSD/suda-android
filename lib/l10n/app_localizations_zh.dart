@@ -957,34 +957,35 @@ class AppLocalizationsZh extends AppLocalizations {
   String get roleplayTurnGradeD => '哦…';
 
   @override
-  String get tutorialPage1Title => '查看你的**任务**，\n开始对话吧。';
+  String get tutorialSlide1Title => '听不懂时请使用**翻译器**';
 
   @override
-  String get tutorialPage1Tip => '*提示：说得越自然，\n奖励越大！';
+  String get tutorialSlide2Title => '如果发音很难，先**听**再**跟读**';
 
   @override
-  String get tutorialPage2Title => '听不懂时\n请使用**翻译**。';
+  String get tutorialSlide3Title => '每次对话结束后查看**AI反馈**';
 
   @override
-  String get tutorialPage3Title => '卡住时\n请使用**提示**。';
+  String get tutorialSlideReady => '我准备好了! >';
 
   @override
-  String get tutorialPage3Subtitle => '你可以随时\n开启或关闭自动提示。';
+  String get tutorialSlideContinue => '继续 >';
 
   @override
-  String get tutorialPage4Title => '发音有困难的话，\n先听再跟读。';
+  String get tutorialSlide1Translation => '您想要什么？';
 
   @override
-  String get tutorialPage4Tip => '*提示：不看翻译来回答，\n可以获得更高分数。';
+  String get tutorialSlide2HintLine => '请来一杯拿铁。';
 
   @override
-  String get tutorialPage5Title => '不方便大声说？';
+  String get tutorialSlide3SaidLabel => '你说的话';
 
   @override
-  String get tutorialPage5Subtitle => '切换到**文字模式**。';
+  String get tutorialSlide3BetterLabel => '更好的表达';
 
   @override
-  String get tutorialPage6Title => '没有人在评判你。\n你可以的！';
+  String get tutorialSlide3Feedback =>
+      '“I want coffee”也能表达意思！点单时用“I\'d like”会更礼貌、更自然。';
 
   @override
   String rankCountdownDays(int count) {
@@ -2062,34 +2063,35 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get roleplayTurnGradeD => '哦…';
 
   @override
-  String get tutorialPage1Title => '查看你的**任务**，\n开始对话吧。';
+  String get tutorialSlide1Title => '听不懂时请使用**翻译器**';
 
   @override
-  String get tutorialPage1Tip => '*提示：说得越自然，\n奖励越大！';
+  String get tutorialSlide2Title => '如果发音很难，先**听**再**跟读**';
 
   @override
-  String get tutorialPage2Title => '听不懂时\n请使用**翻译**。';
+  String get tutorialSlide3Title => '每次对话结束后查看**AI反馈**';
 
   @override
-  String get tutorialPage3Title => '卡住时\n请使用**提示**。';
+  String get tutorialSlideReady => '我准备好了! >';
 
   @override
-  String get tutorialPage3Subtitle => '你可以随时\n开启或关闭自动提示。';
+  String get tutorialSlideContinue => '继续 >';
 
   @override
-  String get tutorialPage4Title => '发音有困难的话，\n先听再跟读。';
+  String get tutorialSlide1Translation => '您想要什么？';
 
   @override
-  String get tutorialPage4Tip => '*提示：不看翻译来回答，\n可以获得更高分数。';
+  String get tutorialSlide2HintLine => '请来一杯拿铁。';
 
   @override
-  String get tutorialPage5Title => '不方便大声说？';
+  String get tutorialSlide3SaidLabel => '你说的话';
 
   @override
-  String get tutorialPage5Subtitle => '切换到**文字模式**。';
+  String get tutorialSlide3BetterLabel => '更好的表达';
 
   @override
-  String get tutorialPage6Title => '没有人在评判你。\n你可以的！';
+  String get tutorialSlide3Feedback =>
+      '“I want coffee”也能表达意思！点单时用“I\'d like”会更礼貌、更自然。';
 
   @override
   String rankCountdownDays(int count) {
@@ -3167,34 +3169,35 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get roleplayTurnGradeD => '哦…';
 
   @override
-  String get tutorialPage1Title => '查看你的**任務**，\n開始對話吧。';
+  String get tutorialSlide1Title => '聽不懂時請使用**翻譯器**';
 
   @override
-  String get tutorialPage1Tip => '*提示：說得越自然，\n獎勵越大！';
+  String get tutorialSlide2Title => '如果發音很難，先**聽**再**跟讀**';
 
   @override
-  String get tutorialPage2Title => '聽不懂時\n請使用**翻譯**。';
+  String get tutorialSlide3Title => '每次對話結束後查看**AI回饋**';
 
   @override
-  String get tutorialPage3Title => '卡住時\n請使用**提示**。';
+  String get tutorialSlideReady => '我準備好了! >';
 
   @override
-  String get tutorialPage3Subtitle => '你可以隨時\n開啟或關閉自動提示。';
+  String get tutorialSlideContinue => '繼續 >';
 
   @override
-  String get tutorialPage4Title => '發音有困難的話，\n先聽再跟讀。';
+  String get tutorialSlide1Translation => '您想要什麼？';
 
   @override
-  String get tutorialPage4Tip => '*提示：不看翻譯來回答，\n可以獲得更高分數。';
+  String get tutorialSlide2HintLine => '請來一杯拿鐵。';
 
   @override
-  String get tutorialPage5Title => '不方便大聲說？';
+  String get tutorialSlide3SaidLabel => '你說的話';
 
   @override
-  String get tutorialPage5Subtitle => '切換到**文字模式**。';
+  String get tutorialSlide3BetterLabel => '更好的表達';
 
   @override
-  String get tutorialPage6Title => '沒有人在評判你。\n你沒問題的！';
+  String get tutorialSlide3Feedback =>
+      '「I want coffee」也能表達意思！點餐時用「I\'d like」會更有禮、更自然。';
 
   @override
   String rankCountdownDays(int count) {

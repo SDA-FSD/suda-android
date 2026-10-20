@@ -1010,39 +1010,37 @@ class AppLocalizationsNl extends AppLocalizations {
   String get roleplayTurnGradeD => 'oh…';
 
   @override
-  String get tutorialPage1Title => 'Check je **Missie**\nen start het gesprek.';
+  String get tutorialSlide1Title =>
+      'Gebruik de **Vertaler** als je het niet begrijpt';
 
   @override
-  String get tutorialPage1Tip =>
-      '*Tip: Hoe natuurlijker je spreekt,\nhoe groter je beloning!';
+  String get tutorialSlide2Title =>
+      'Als de uitspraak lastig is, **luister** eerst en **herhaal** daarna';
 
   @override
-  String get tutorialPage2Title =>
-      'Gebruik de **Vertaler**\nals je het niet begrijpt.';
+  String get tutorialSlide3Title => 'Bekijk je **AI-feedback** na elk gesprek';
 
   @override
-  String get tutorialPage3Title => 'Gebruik een **Hint**\nals je vastloopt.';
+  String get tutorialSlideReady => 'Ik ben er klaar voor! >';
 
   @override
-  String get tutorialPage3Subtitle =>
-      'Je kunt automatische hints\naltijd aan of uit zetten.';
+  String get tutorialSlideContinue => 'Doorgaan >';
 
   @override
-  String get tutorialPage4Title =>
-      'Als de uitspraak lastig is,\nluister eerst en herhaal daarna.';
+  String get tutorialSlide1Translation => 'Wat wil je?';
 
   @override
-  String get tutorialPage4Tip =>
-      '*Tip: Probeer te antwoorden zonder naar de vertaling\nte kijken voor een hogere score.';
+  String get tutorialSlide2HintLine => 'Alleen een latte, alsjeblieft.';
 
   @override
-  String get tutorialPage5Title => 'Kun je niet hardop praten?';
+  String get tutorialSlide3SaidLabel => 'Wat je zei';
 
   @override
-  String get tutorialPage5Subtitle => 'Schakel over naar de **Tekstmodus**.';
+  String get tutorialSlide3BetterLabel => 'Betere formulering';
 
   @override
-  String get tutorialPage6Title => 'Niemand beoordeelt je.\nJij kunt dit!';
+  String get tutorialSlide3Feedback =>
+      '\"I want coffee\" komt over! Maar bij het bestellen klinkt \"I\'d like\" beleefder en natuurlijker.';
 
   @override
   String rankCountdownDays(int count) {

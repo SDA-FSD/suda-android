@@ -1013,39 +1013,37 @@ class AppLocalizationsPl extends AppLocalizations {
   String get roleplayTurnGradeD => 'oh…';
 
   @override
-  String get tutorialPage1Title => 'Sprawdź **misję**\ni rozpocznij rozmowę.';
+  String get tutorialSlide1Title =>
+      'Użyj **tłumacza**, gdy czegoś nie rozumiesz';
 
   @override
-  String get tutorialPage1Tip =>
-      '*Wskazówka: Im bardziej naturalnie mówisz,\ntym większa nagroda!';
+  String get tutorialSlide2Title =>
+      'Jeśli wymowa jest trudna, najpierw **posłuchaj**, potem **powtórz**';
 
   @override
-  String get tutorialPage2Title =>
-      'Użyj **tłumacza**,\ngdy czegoś nie rozumiesz.';
+  String get tutorialSlide3Title => 'Sprawdź **opinię AI** po każdej rozmowie';
 
   @override
-  String get tutorialPage3Title => 'Użyj **podpowiedzi**,\ngdy utkniesz.';
+  String get tutorialSlideReady => 'Jestem gotowy! >';
 
   @override
-  String get tutorialPage3Subtitle =>
-      'Automatyczne podpowiedzi możesz włączać\ni wyłączać w dowolnym momencie.';
+  String get tutorialSlideContinue => 'Kontynuuj >';
 
   @override
-  String get tutorialPage4Title =>
-      'Jeśli wymowa sprawia trudność,\nnajpierw posłuchaj, potem powtórz.';
+  String get tutorialSlide1Translation => 'Na co masz ochotę?';
 
   @override
-  String get tutorialPage4Tip =>
-      '*Wskazówka: Odpowiadaj bez patrzenia na tłumaczenie,\naby zdobyć wyższy wynik.';
+  String get tutorialSlide2HintLine => 'Poproszę tylko latte.';
 
   @override
-  String get tutorialPage5Title => 'Nie możesz mówić na głos?';
+  String get tutorialSlide3SaidLabel => 'To, co powiedziałeś';
 
   @override
-  String get tutorialPage5Subtitle => 'Przełącz na **tryb tekstowy**.';
+  String get tutorialSlide3BetterLabel => 'Lepsze wyrażenie';
 
   @override
-  String get tutorialPage6Title => 'Nikt Cię nie ocenia.\nDasz radę!';
+  String get tutorialSlide3Feedback =>
+      '„I want coffee” jest zrozumiałe! Przy zamawianiu „I\'d like” brzmi jednak grzeczniej i naturalniej.';
 
   @override
   String rankCountdownDays(int count) {
