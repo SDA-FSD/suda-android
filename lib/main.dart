@@ -32,7 +32,7 @@ import 'screens/first_cefr_level.dart';
 import 'screens/first_profile_image.dart';
 import 'screens/first_username.dart';
 import 'screens/tutorial/tutorial_intro.dart';
-import 'screens/tutorial/tutorial_roleplay_stub.dart';
+import 'screens/tutorial/tutorial_roleplay.dart';
 import 'screens/home.dart';
 import 'screens/profile.dart';
 import 'screens/friends.dart';
@@ -1100,8 +1100,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               playEntrance: _tutorialIntroPlayEntrance,
             )
           : _needsTutorialRoleplay
-          ? TutorialRoleplayStubScreen(
-              onClose: _onTutorialRoleplayClose,
+          ? TutorialRoleplayScreen(
+              onSkip: _onTutorialRoleplayClose,
             )
           : Builder(
               builder: (_) {

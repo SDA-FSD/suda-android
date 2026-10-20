@@ -388,6 +388,42 @@ class AppLocalizationsKo extends AppLocalizations {
   String get tutorialIntroStart => '튜토리얼 시작';
 
   @override
+  String get tutorialRoleplayTitle => '첫 대화';
+
+  @override
+  String get tutorialRoleplaySkip => '건너뛰기';
+
+  @override
+  String get tutorialRoleplaySkipTitle => '튜토리얼을 건너뛰시겠어요?';
+
+  @override
+  String get tutorialRoleplaySkipBody => '건너뛰면 튜토리얼 완료 보상을\n받을 수 없어요.';
+
+  @override
+  String get tutorialRoleplaySkipConfirm => '튜토리얼 건너뛰기';
+
+  @override
+  String get tutorialRoleplaySkipKeepGoing => '계속하기';
+
+  @override
+  String get tutorialRoleplayMissions => '미션';
+
+  @override
+  String get tutorialRoleplayMission1 => '택시 기사에게 인사하기';
+
+  @override
+  String get tutorialRoleplayMission2 => '목적지 말하기';
+
+  @override
+  String get tutorialRoleplayMission3 => '그곳에 가는 이유 말하기';
+
+  @override
+  String get tutorialRoleplayGuideMissionMain => '먼저 미션을 확인하세요!';
+
+  @override
+  String get tutorialRoleplayGuideMissionTapContinue => '탭해서 계속하기';
+
+  @override
   String get actionConfirm => '확인';
 
   @override

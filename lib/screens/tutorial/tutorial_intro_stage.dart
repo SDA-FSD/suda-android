@@ -56,17 +56,23 @@ class TutorialIntroStage extends StatelessWidget {
     final theme = Theme.of(context).textTheme;
     final size = MediaQuery.sizeOf(context);
     final u = size.width / designW;
-    final yh = size.height / designH;
     final t = progress.clamp(0.0, 1.0);
 
-    // 가로 중앙 고정(시안·Username과 맞춤). Y·scale만 프로토타입 `.go` 수치.
+    // 가로 중앙. 아바타 top/크기·문구·CTA 모두 화면 높이 비율 → 기기마다 동일.
+    // 최종: 아바타 top 24% · 아바타 높이 11.7% · 문구 gap 1% · CTA 74.5%.
     final avatarCurve = easeIos.transform(local(t, 0, 950));
-    const endTy = -200.5;
     const endScale = 0.7746;
     final avScale = 1.0 + (endScale - 1.0) * avatarCurve;
-    final avSize = 288 * u * avScale;
+    const avHeightEndFrac = 0.117;
+    // 애니 중 scale은 end 기준 상대값 (최종 avScale=endScale일 때 11.7%)
+    final avSize = size.height * avHeightEndFrac * (avScale / endScale);
     final avLeft = (size.width - avSize) / 2;
-    final avTop = (508 + endTy * avatarCurve) * yh;
+    const avTopStartFrac = 508 / designH;
+    const avTopEndFrac = 0.24;
+    final avTopFrac =
+        avTopStartFrac + (avTopEndFrac - avTopStartFrac) * avatarCurve;
+    final avTop = size.height * avTopFrac;
+    final textTop = avTop + avSize + size.height * 0.01;
 
     final line1 = _fadeSlide(t, delayMs: 520, durMs: 800);
     final line2 = _fadeSlide(t, delayMs: 640, durMs: 800);
@@ -83,7 +89,7 @@ class TutorialIntroStage extends StatelessWidget {
       children: [
         Opacity(
           opacity: bgOpacity(t),
-          child: const TutorialRoleplayBackdrop(),
+          child: const TutorialRoleplayBackdrop(blurAmount: 1),
         ),
         Positioned(
           left: avLeft,
@@ -99,7 +105,7 @@ class TutorialIntroStage extends StatelessWidget {
         Positioned(
           left: 24,
           right: 24,
-          top: 625 * yh,
+          top: textTop,
           child: Column(
             children: [
               Opacity(
@@ -131,7 +137,7 @@ class TutorialIntroStage extends StatelessWidget {
         Positioned(
           left: 0,
           right: 0,
-          top: 1354 * yh,
+          top: size.height * (1354 / designH),
           child: Opacity(
             opacity: cta.opacity,
             child: Transform.translate(

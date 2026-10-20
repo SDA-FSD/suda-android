@@ -164,6 +164,18 @@
     }
   },
   "tutorialIntroStart": "Iniciar tutorial",
+  "tutorialRoleplayTitle": "Sua primeira conversa",
+  "tutorialRoleplaySkip": "Pular",
+  "tutorialRoleplaySkipTitle": "Pular o tutorial?",
+  "tutorialRoleplaySkipBody": "Se pular, você não receberá\na recompensa do tutorial.",
+  "tutorialRoleplaySkipConfirm": "Pular tutorial",
+  "tutorialRoleplaySkipKeepGoing": "Continuar",
+  "tutorialRoleplayMissions": "Missões",
+  "tutorialRoleplayMission1": "Cumprimente o taxista",
+  "tutorialRoleplayMission2": "Diga para onde você vai",
+  "tutorialRoleplayMission3": "Diga por que você vai até lá",
+  "tutorialRoleplayGuideMissionMain": "Confira suas missões primeiro!",
+  "tutorialRoleplayGuideMissionTapContinue": "Toque para continuar",
 
   "actionConfirm": "Confirmar",
   "feedbackPlaceholder": "Compartilhe seus pensamentos, sugestões ou problemas que você encontrou...",

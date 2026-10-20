@@ -223,7 +223,7 @@
 - **중앙**: `UserProfileAvatar`(무료 링) + 이름 필드(`#353535` 알약·`edit.svg`)
 - **하단**: 힌트 `firstCefrLevelSettingsHint`, 버튼 `actionConfirm`(키보드 위에도 동일). trim 후 빈 값이면 비활성
 - **Confirm→Intro**: 저장 성공 후 `TutorialIntroStage` 1.7s 전환을 Username 스택에서 재생한 뒤 `onComplete`(§1.5)
-- **Lab(dev)**: Setting > Lab 온보딩 미리보기(언어 → CEFR → 프로필 → 이름 → Intro → Roleplay stub)
+- **Lab(dev)**: Setting > Lab 온보딩 미리보기(언어 → CEFR → 프로필 → 이름 → Intro → Tutorial Roleplay 1단계)
 
 ## 1.5 TutorialIntroScreen
 
@@ -233,16 +233,17 @@
 - **스크린 타입**: **Full Screen**
 
 ### 스크린 용도
-- Username 직후. `ONBOARDING_TUTORIAL` != Y일 때. Start Tutorial → 마이크 권한(Opening과 동일) → Tutorial Roleplay(현재 stub). Close 시 `POST /v1/users/onboarding-tutorial`(best-effort)
+- Username 직후. `ONBOARDING_TUTORIAL` != Y일 때. Start Tutorial → 마이크 권한(Opening과 동일) → Tutorial Roleplay. Skip 확정 시 `POST /v1/users/onboarding-tutorial`(best-effort)
 
 ### 이전 스크린 정보 (진입점)
 - **FirstUsernameScreen** 완료 / `_assignEntryFlags` 재진입
 
 ### 이후 스크린 정보
-- **TutorialRoleplayStubScreen** (`tutorial_roleplay_stub.dart`) — 본편 전까지 자리. Close → Home(세션). Lab **Open Tutorial Intro** / 온보딩 플로우 preview
+- **TutorialRoleplayScreen** (`tutorial_roleplay.dart`) — 1단계 미션 확인. `tutorial_rp_bg` 선명 노출 후 blur되며 제목·Skip·턴바·Missions·가이드 말풍선(`#0CABA8` radius 20)·탭 포인터. Skip → `DefaultPopup` → Home(`ONBOARDING_TUTORIAL`). 시스템 back은 완료 처리 안 함. 미션/가이드 탭 다음 단계는 추후. Lab **Open Tutorial Intro** / 온보딩 preview
 
 ### 스크린 내부 구현 특이사항
-- **배경**: `TutorialRoleplayBackdrop` — 프로토타입 `#bg`와 동일 `tutorial_roleplay_bg.jpg`(이미 블러된 롤플레이). 추가 blur/딤 없음·밝은 ColorFilter로 비침 확보. Confirm 전환 시 bg opacity 0→1 (900ms ease-out, delay 80ms)
+- **배경**: `TutorialRoleplayBackdrop` — `tutorial_rp_bg.png`. Intro는 Playing과 동일 blur(sigma 10)·딤. Roleplay 1단계는 선명 페이드인 3s → hold → blur·딤으로 전환 후 미션 UI. 탭 포인터는 `TutorialPointer`(`tutorial_pointer.dart` / `tutorial_pointer.png`) 스케일 펄스 + 안쪽 채움점·바깥 빈 링 리플
+- **Intro 레이아웃**(`TutorialIntroStage`): 최종 아바타 top **24%** · 아바타 높이 **11.7%** · 문구 top = 아바타 하단+**1%** · CTA top **74.5%**(모두 화면 높이 비율)
 - **애니**: 프로토타입 `.go`는 `TutorialIntroStage` 공용. **Username Confirm 성공 시** Username 위에서 전환(rest fade + bg/아바타/문구/CTA) 후 Intro는 `playEntrance: false`. 콜드스타트·Lab 단독 Open은 Intro 입장 애니. l10n `tutorialIntroTitle(name)` · `tutorialIntroStart`(play_white · mint `#0CABA8`)
 
 ---

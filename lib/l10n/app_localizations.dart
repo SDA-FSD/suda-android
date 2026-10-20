@@ -863,6 +863,78 @@ abstract class AppLocalizations {
   /// **'Start Tutorial'**
   String get tutorialIntroStart;
 
+  /// No description provided for @tutorialRoleplayTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your First Conversation'**
+  String get tutorialRoleplayTitle;
+
+  /// No description provided for @tutorialRoleplaySkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get tutorialRoleplaySkip;
+
+  /// No description provided for @tutorialRoleplaySkipTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip the tutorial?'**
+  String get tutorialRoleplaySkipTitle;
+
+  /// No description provided for @tutorialRoleplaySkipBody.
+  ///
+  /// In en, this message translates to:
+  /// **'If you skip, you won\'t receive\nthe tutorial reward.'**
+  String get tutorialRoleplaySkipBody;
+
+  /// No description provided for @tutorialRoleplaySkipConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip Tutorial'**
+  String get tutorialRoleplaySkipConfirm;
+
+  /// No description provided for @tutorialRoleplaySkipKeepGoing.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep Going'**
+  String get tutorialRoleplaySkipKeepGoing;
+
+  /// No description provided for @tutorialRoleplayMissions.
+  ///
+  /// In en, this message translates to:
+  /// **'Missions'**
+  String get tutorialRoleplayMissions;
+
+  /// No description provided for @tutorialRoleplayMission1.
+  ///
+  /// In en, this message translates to:
+  /// **'Greet the taxi driver'**
+  String get tutorialRoleplayMission1;
+
+  /// No description provided for @tutorialRoleplayMission2.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell the driver where you\'re going'**
+  String get tutorialRoleplayMission2;
+
+  /// No description provided for @tutorialRoleplayMission3.
+  ///
+  /// In en, this message translates to:
+  /// **'Say why you\'re going there'**
+  String get tutorialRoleplayMission3;
+
+  /// No description provided for @tutorialRoleplayGuideMissionMain.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your missions first!'**
+  String get tutorialRoleplayGuideMissionMain;
+
+  /// No description provided for @tutorialRoleplayGuideMissionTapContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to continue'**
+  String get tutorialRoleplayGuideMissionTapContinue;
+
   /// No description provided for @actionConfirm.
   ///
   /// In en, this message translates to:

@@ -164,6 +164,18 @@
     }
   },
   "tutorialIntroStart": "Simulan ang tutorial",
+  "tutorialRoleplayTitle": "Your First Conversation",
+  "tutorialRoleplaySkip": "Skip",
+  "tutorialRoleplaySkipTitle": "Skip the tutorial?",
+  "tutorialRoleplaySkipBody": "If you skip, you won't receive\nthe tutorial reward.",
+  "tutorialRoleplaySkipConfirm": "Skip Tutorial",
+  "tutorialRoleplaySkipKeepGoing": "Keep Going",
+  "tutorialRoleplayMissions": "Missions",
+  "tutorialRoleplayMission1": "Greet the taxi driver",
+  "tutorialRoleplayMission2": "Tell the driver where you're going",
+  "tutorialRoleplayMission3": "Say why you're going there",
+  "tutorialRoleplayGuideMissionMain": "Check your missions first!",
+  "tutorialRoleplayGuideMissionTapContinue": "Tap to continue",
 
   "actionConfirm": "Kumpirmahin",
   "feedbackPlaceholder": "Ibahagi ang opinyon, mungkahi, o anumang problemang naranasan mo...",
