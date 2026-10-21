@@ -183,6 +183,7 @@
   "tutorialRoleplayMicHolding": "‘Hello’",
   "tutorialRoleplayMicTooShort": "Hold the mic longer\nand say ‘Hello’",
   "tutorialRoleplayMicNoSpeech": "Didn't catch that.\nTry saying 'Hello' again.",
+  "tutorialRoleplayHintGuide": "क्या कहें,\nसमझ नहीं आ रहा?\nहिंट पर टैप करें!",
 
   "actionConfirm": "कन्फ़र्म करें",
   "feedbackPlaceholder": "अपने विचार, सुझाव या सामने आई कोई समस्या बताएँ...",

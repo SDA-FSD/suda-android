@@ -463,6 +463,9 @@ class AppLocalizationsTh extends AppLocalizations {
       'Didn\'t catch that.\nTry saying \'Hello\' again.';
 
   @override
+  String get tutorialRoleplayHintGuide => 'นึกไม่ออกเหรอ?\nแตะคำใบ้สิ!';
+
+  @override
   String get actionConfirm => 'ยืนยัน';
 
   @override

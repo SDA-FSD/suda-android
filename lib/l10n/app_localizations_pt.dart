@@ -473,6 +473,10 @@ class AppLocalizationsPt extends AppLocalizations {
       'Não conseguimos ouvir.\nTente dizer \'Hello\' de novo.';
 
   @override
+  String get tutorialRoleplayHintGuide =>
+      'Não sabe o que dizer?\nToque na dica!';
+
+  @override
   String get actionConfirm => 'Confirmar';
 
   @override

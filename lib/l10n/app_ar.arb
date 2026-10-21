@@ -183,6 +183,7 @@
   "tutorialRoleplayMicHolding": "‘Hello’",
   "tutorialRoleplayMicTooShort": "Hold the mic longer\nand say ‘Hello’",
   "tutorialRoleplayMicNoSpeech": "Didn't catch that.\nTry saying 'Hello' again.",
+  "tutorialRoleplayHintGuide": "مش عارف تقول إيه؟\nاضغط على التلميح!",
 
   "actionConfirm": "تأكيد",
   "feedbackPlaceholder": "شاركنا أفكارك أو اقتراحاتك أو أي مشكلات واجهتها...",

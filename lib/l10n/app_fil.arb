@@ -183,6 +183,7 @@
   "tutorialRoleplayMicHolding": "‘Hello’",
   "tutorialRoleplayMicTooShort": "Hold the mic longer\nand say ‘Hello’",
   "tutorialRoleplayMicNoSpeech": "Didn't catch that.\nTry saying 'Hello' again.",
+  "tutorialRoleplayHintGuide": "Hindi alam ang sasabihin?\nI-tap ang hint!",
 
   "actionConfirm": "Kumpirmahin",
   "feedbackPlaceholder": "Ibahagi ang opinyon, mungkahi, o anumang problemang naranasan mo...",

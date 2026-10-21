@@ -171,8 +171,7 @@ class TutorialApi {
       throw UnauthorizedException('Access token expired');
     }
     if (response.statusCode >= 200 && response.statusCode < 300) {
-      final decoded = jsonDecode(response.body);
-      return decoded is String ? decoded : '';
+      return _parseStringResponse(response.body);
     }
     throw Exception(
       'GET /tutorial/sessions/$sessionId/translation failed: HTTP ${response.statusCode}',
@@ -253,6 +252,15 @@ class TutorialApi {
     throw Exception(
       'GET $path failed: HTTP ${response.statusCode}',
     );
+  }
+
+  /// 본편 번역과 같이 plain text 또는 JSON 문자열.
+  static String _parseStringResponse(String body) {
+    try {
+      final decoded = jsonDecode(body);
+      if (decoded is String) return decoded;
+    } catch (_) {}
+    return body;
   }
 
   static String? _code(String body) {

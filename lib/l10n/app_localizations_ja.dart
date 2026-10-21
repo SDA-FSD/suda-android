@@ -450,6 +450,9 @@ class AppLocalizationsJa extends AppLocalizations {
       'Didn\'t catch that.\nTry saying \'Hello\' again.';
 
   @override
+  String get tutorialRoleplayHintGuide => '言葉が浮かばないときは\nヒントをタップ！';
+
+  @override
   String get actionConfirm => '決定';
 
   @override

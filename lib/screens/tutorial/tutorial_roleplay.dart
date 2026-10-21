@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' show ImageFilter;
 
+import 'package:audio_session/audio_session.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:record/record.dart';
@@ -15,6 +17,7 @@ import '../../screens/roleplay/playing_conversation_mixin.dart'
     show PlayingConversationLayout;
 import '../../screens/roleplay/suda_tts_audio_player.dart';
 import '../../services/token_storage.dart';
+import '../../effects/mission_complete_effect.dart';
 import '../../widgets/default_popup.dart';
 import '../../widgets/roleplay_mic_button_area.dart';
 import '../../widgets/roleplay_mission_panel.dart';
@@ -67,22 +70,37 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
   /// 서버가 받은 사용자 발화 수. 턴바는 최대 3칸, 색은 `#0CABA8`.
   int _answeredTurnCount = 0;
   int _completedMissions = 0;
+  final Set<int> _completedMissionIndexes = {};
+  final GlobalKey _missionIconAnchorKey = GlobalKey();
+  bool _showMissionCompletedFlash = false;
+  int _flashMissionIndex = 0;
+  Timer? _missionCompleteTimer;
   String? _sessionId;
   int _lastAiMsgId = 1;
   bool _sending = false;
   bool _recording = false;
   bool _recordStarting = false;
+  bool _showRecordingBubble = false;
+  bool _micHeld = false;
   bool _stopRequested = false;
   bool _stopCancel = false;
   bool _showHelloGuide = true;
   String? _hintEnglish;
   String? _hintNative;
+  final GlobalKey _hintCardKey = GlobalKey();
+  /// 영어 답변을 펼쳤는지. 영어 사용자는 처음부터 펼친다.
+  bool _hintAnswerOpen = false;
+  /// 두 번째 AI 음성이 끝난 뒤에만 힌트 안내를 띄운다.
+  bool _hintCoachReady = false;
+  /// 힌트를 한 번 열기 전에는 버튼 안내를 보여 준다.
+  bool _hintCoachDismissed = false;
   /// -1이면 문장 전체, 0 이상이면 그 단어.
   int? _hintPlayingIndex;
   DateTime? _recordStartedAt;
   final List<double> _speechLevelsDb = [];
   StreamSubscription<Amplitude>? _speechLevelSub;
   final AudioRecorder _recorder = AudioRecorder();
+  bool _micPermissionGranted = false;
   final ScrollController _talkScroll = ScrollController();
   final List<_TutorialLine> _lines = [];
 
@@ -155,6 +173,7 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
     _bgFade.dispose();
     _blurUi.dispose();
     _micLoadingRotation.dispose();
+    _missionCompleteTimer?.cancel();
     super.dispose();
   }
 
@@ -259,17 +278,35 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
     } catch (e) {
       debugPrint('[DEBUG] tutorial opening voice play: $e');
     }
+    await _armMicSession();
   }
 
   void _revealMicGuide() {
     setState(() {
       _showMicGuide = true;
-      _micEnabled = true;
+      _micEnabled = false;
       _micPulsing = true;
       _micGuide = _TutorialMicGuide.afterVoice;
     });
-    Future<void>.delayed(const Duration(milliseconds: 300), () {
+    unawaited(_prepareMicThenEnable());
+  }
+
+  /// 권한과 녹음 세션을 버튼을 열기 전에 맞춘다.
+  /// iOS는 본편처럼 `playAndRecord`를 유지해야 첫 홀드 초반이 잘리지 않는다.
+  Future<void> _prepareMicThenEnable() async {
+    try {
+      _micPermissionGranted = await _recorder.hasPermission();
       if (!mounted || _stage != _TutorialRpStage.playing) return;
+      if (_micPermissionGranted) await _armMicSession();
+    } catch (e) {
+      debugPrint('[DEBUG] tutorial mic prepare: $e');
+    }
+    if (!mounted || _stage != _TutorialRpStage.playing) return;
+    setState(() => _micEnabled = true);
+    Future<void>.delayed(const Duration(milliseconds: 300), () {
+      if (!mounted || _stage != _TutorialRpStage.playing || !_micEnabled) {
+        return;
+      }
       setState(() => _showMicPointer = true);
     });
   }
@@ -277,23 +314,50 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
   void _onMicHoldStart() {
     if (_sending || !_micEnabled) return;
     setState(() {
+      _showRecordingBubble = true;
+      _micHeld = true;
       _micPulsing = false;
       _showMicPointer = false;
       _micGuide = _TutorialMicGuide.holding;
     });
+    _scrollTalkToEnd();
     unawaited(_startRecording());
   }
 
   void _onMicHoldEnd({required bool cancel}) {
+    if (mounted && _micHeld) {
+      setState(() => _micHeld = false);
+    }
     unawaited(_finishRecording(cancel: cancel));
+  }
+
+  Future<void> _armMicSession() async {
+    if (!Platform.isIOS) return;
+    try {
+      final session = await AudioSession.instance;
+      await session.configure(
+        AudioSessionConfiguration.speech().copyWith(
+          avAudioSessionCategory: AVAudioSessionCategory.playAndRecord,
+          avAudioSessionCategoryOptions:
+              AVAudioSessionCategoryOptions.defaultToSpeaker |
+                  AVAudioSessionCategoryOptions.allowBluetooth,
+        ),
+      );
+      await session.setActive(true);
+      await _recorder.ios?.manageAudioSession(false);
+    } catch (e) {
+      debugPrint('[DEBUG] tutorial mic session: $e');
+    }
   }
 
   Future<void> _startRecording() async {
     if (_recording || _recordStarting || _sending) return;
     _recordStarting = true;
     _stopRequested = false;
-    final granted = await _recorder.hasPermission();
-    if (!granted || !mounted) {
+    if (!_micPermissionGranted) {
+      _micPermissionGranted = await _recorder.hasPermission();
+    }
+    if (!_micPermissionGranted || !mounted) {
       _recordStarting = false;
       _restoreMicGuide(_TutorialMicGuide.afterVoice);
       return;
@@ -302,14 +366,16 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
     final path =
         '${Directory.systemTemp.path}/tutorial_record_${DateTime.now().millisecondsSinceEpoch}.$ext';
     _recordStarting = true;
+    final config = RecordConfig(
+      encoder: Platform.isIOS ? AudioEncoder.wav : AudioEncoder.aacLc,
+    );
     try {
-      await _aiVoice.stop();
-      await _recorder.start(
-        RecordConfig(
-          encoder: Platform.isIOS ? AudioEncoder.wav : AudioEncoder.aacLc,
-        ),
-        path: path,
-      );
+      if (_aiVoice.isPlaying) {
+        try {
+          await _aiVoice.stop().timeout(const Duration(milliseconds: 150));
+        } catch (_) {}
+      }
+      await _recorder.start(config, path: path);
       _recordStartedAt = DateTime.now();
       _listenSpeechLevel(_recordStartedAt!);
     } catch (e) {
@@ -355,7 +421,10 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
       debugPrint('[DEBUG] tutorial record stop: $e');
     }
     if (!mounted) return;
-    setState(() => _recording = false);
+    setState(() {
+      _recording = false;
+      _showRecordingBubble = false;
+    });
     if (cancel) {
       _restoreMicGuide(_TutorialMicGuide.afterVoice);
       return;
@@ -388,7 +457,7 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
   bool _speechDetected() {
     final levels = List<double>.of(_speechLevelsDb);
     _speechLevelsDb.clear();
-    if (levels.length < 3) return true;
+    if (levels.length < 3) return false;
     final sorted = List<double>.of(levels)..sort();
     final floor = sorted[((sorted.length - 1) * 0.2).floor()];
     final peak = sorted.last;
@@ -403,14 +472,16 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
     } catch (_) {}
   }
 
-  void _restoreMicGuide(_TutorialMicGuide guide) {
-    if (!mounted || _completedMissions >= _turnCount) return;
+  void _restoreMicGuide(_TutorialMicGuide guide, {bool revealHint = false}) {
+    if (!mounted || _answeredTurnCount >= _turnCount) return;
     setState(() {
       _micEnabled = true;
       _sending = false;
+      _showRecordingBubble = false;
       _micPulsing = _showHelloGuide;
       _showMicPointer = _showHelloGuide;
       _micGuide = guide;
+      if (revealHint) _hintCoachReady = true;
     });
   }
 
@@ -427,6 +498,7 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
       _showMicPointer = false;
     });
     if (!_micLoadingRotation.isAnimating) _micLoadingRotation.repeat();
+    var armHint = false;
     try {
       final token = await TokenStorage.loadAccessToken();
       if (token == null || token.isEmpty) {
@@ -440,84 +512,155 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
       );
       if (!mounted) return;
       final showTranslation = Localizations.localeOf(context).languageCode != 'en';
+      final aiText = response.aiText ?? '';
+      final aiMsgId = response.aiMsgId;
+      final soundFuture = SudaApiClient.getTutorialAiAudio(
+        accessToken: token,
+        sessionId: sessionId,
+      );
+      var missionJustCompleted = false;
       setState(() {
         _lines.add(_TutorialLine.user(response.userText ?? ''));
         if ((response.narration ?? '').isNotEmpty) {
           _lines.add(_TutorialLine.narration(response.narration!));
         }
-        _lines.add(_TutorialLine.ai(response.aiText ?? ''));
+        if (!showTranslation) _lines.add(_TutorialLine.ai(aiText));
         _answeredTurnCount = (_answeredTurnCount + 1).clamp(0, _turnCount);
         final done = response.missionCompletedIndex;
         if (done != null && done >= 0 && done == _completedMissions) {
+          _completedMissionIndexes.add(done);
+          _flashMissionIndex = done;
+          _showMissionCompletedFlash = true;
           _completedMissions = done + 1;
+          missionJustCompleted = true;
         }
         _showHelloGuide = false;
         _hintEnglish = null;
         _hintNative = null;
+        _hintAnswerOpen = false;
         _hintPlayingIndex = null;
-        if (response.aiMsgId != null) _lastAiMsgId = response.aiMsgId!;
+        if (aiMsgId != null) _lastAiMsgId = aiMsgId;
       });
+      armHint = _answeredTurnCount == 1 && !_hintCoachDismissed;
       _scrollTalkToEnd();
-      if (showTranslation && response.aiMsgId != null) {
-        unawaited(_loadTranslation(sessionId, response.aiMsgId!));
+      if (missionJustCompleted) _playMissionSuccess();
+      if (showTranslation) {
+        final translation = aiMsgId == null
+            ? null
+            : await _fetchTranslation(sessionId, aiMsgId);
+        if (!mounted) return;
+        setState(() {
+          final line = _TutorialLine.ai(aiText);
+          line.translation = translation;
+          _lines.add(line);
+        });
+        _scrollTalkToEnd();
       }
-      final sound = await SudaApiClient.getTutorialAiAudio(
-        accessToken: token,
-        sessionId: sessionId,
-      );
+      try {
+        final sound = await soundFuture;
+        if (mounted) await _playOpeningVoice(sound);
+      } catch (e) {
+        debugPrint('[DEBUG] tutorial ai audio: $e');
+      }
       if (!mounted) return;
-      await _playOpeningVoice(sound);
+      await _armMicSession();
       if (!mounted) return;
-      if (_completedMissions >= _turnCount) {
+      if (_answeredTurnCount >= _turnCount) {
         setState(() {
           _sending = false;
           _micEnabled = false;
           _micPulsing = false;
+          _showRecordingBubble = false;
         });
         return;
       }
-      _restoreMicGuide(_TutorialMicGuide.afterVoice);
+      _restoreMicGuide(
+        _TutorialMicGuide.afterVoice,
+        revealHint: armHint,
+      );
     } on TutorialAudioTooShortException {
       _restoreMicGuide(_TutorialMicGuide.tooShort);
     } on TutorialNoSpeechException {
       _restoreMicGuide(_TutorialMicGuide.noSpeech);
     } catch (e) {
       debugPrint('[DEBUG] tutorial user audio: $e');
-      _restoreMicGuide(_TutorialMicGuide.afterVoice);
+      _restoreMicGuide(
+        _TutorialMicGuide.afterVoice,
+        revealHint: armHint,
+      );
     } finally {
       if (_micLoadingRotation.isAnimating) _micLoadingRotation.stop();
     }
   }
 
-  Future<void> _loadTranslation(String sessionId, int rpMsgId) async {
+  void _playMissionSuccess() {
+    MissionCompleteEffect.play(context, anchorKey: _missionIconAnchorKey);
+    _missionCompleteTimer?.cancel();
+    _missionCompleteTimer = Timer(
+      RoleplayMissionPanel.completedBackgroundDuration,
+      () {
+        if (!mounted) return;
+        setState(() => _showMissionCompletedFlash = false);
+      },
+    );
+  }
+
+  Future<String?> _fetchTranslation(String sessionId, int rpMsgId) async {
     try {
       final token = await TokenStorage.loadAccessToken();
-      if (token == null) return;
+      if (token == null) return null;
       final text = await SudaApiClient.getTutorialTranslation(
         accessToken: token,
         sessionId: sessionId,
         rpMsgId: rpMsgId,
       );
-      if (!mounted || text.isEmpty) return;
-      setState(() {
-        for (var i = _lines.length - 1; i >= 0; i--) {
-          if (_lines[i].kind == _TutorialLineKind.ai) {
-            _lines[i].translation = text;
-            break;
-          }
-        }
-      });
+      if (text.isEmpty) return null;
+      return text;
     } catch (e) {
       debugPrint('[DEBUG] tutorial translation: $e');
+      return null;
     }
   }
 
+  /// 목적지·이유 고정 힌트. 인사 Hello는 첫 마이크 안내라 힌트에 넣지 않는다.
+  (String, String?) _localHint() {
+    final index = _completedMissions <= 1 ? 0 : 1;
+    const english = [
+      'SUDA City, please.',
+      "I'm moving there today.",
+    ];
+    final code = Localizations.localeOf(context).languageCode;
+    const ko = ['수다 빌리지로 가주세요.', '오늘 그곳으로 이사 가요.'];
+    const pt = ['Para SUDA City, por favor.', 'Estou me mudando para lá hoje.'];
+    final native = switch (code) {
+      'ko' => ko[index],
+      'pt' => pt[index],
+      _ => null,
+    };
+    return (english[index], native);
+  }
+
+  void _applyHint(String english, String? native) {
+    final shownNative = (native ?? '').trim();
+    setState(() {
+      _hintEnglish = english.trim().isEmpty ? null : english.trim();
+      _hintNative = shownNative.isEmpty ? null : shownNative;
+      _hintAnswerOpen = shownNative.isEmpty;
+      _hintCoachDismissed = _hintEnglish != null;
+      _hintPlayingIndex = null;
+    });
+    _scrollHintIntoView();
+  }
+
   Future<void> _onHintTap() async {
+    if (_answeredTurnCount < 1 || _hintEnglish != null) return;
+    final local = _localHint();
+    _applyHint(local.$1, local.$2);
     final sessionId = _sessionId;
-    if (sessionId == null || _sending || _completedMissions == 0) return;
+    if (sessionId == null) return;
     try {
       final token = await TokenStorage.loadAccessToken();
-      if (token == null) return;
+      if (token == null || !mounted) return;
       final hint = await SudaApiClient.getTutorialHint(
         accessToken: token,
         sessionId: sessionId,
@@ -525,12 +668,8 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
       );
       if (!mounted) return;
       final english = (hint.hint ?? '').trim();
-      final native = (hint.translatedHint ?? '').trim();
-      setState(() {
-        _hintEnglish = english.isEmpty ? null : english;
-        _hintNative = native.isEmpty ? null : native;
-        _hintPlayingIndex = null;
-      });
+      if (english.isEmpty) return;
+      _applyHint(english, hint.translatedHint);
     } catch (e) {
       debugPrint('[DEBUG] tutorial hint: $e');
     }
@@ -575,12 +714,46 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
     });
   }
 
+  /// 힌트 상자는 대화 맨 아래에 붙는다. 높이가 잡힌 뒤에 다시 끝까지 내린다.
+  void _scrollHintIntoView() {
+    void perform() {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final anchor = _hintCardKey.currentContext;
+        if (anchor != null) {
+          Scrollable.ensureVisible(
+            anchor,
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeOut,
+            alignment: 1.0,
+            alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
+          );
+        }
+        if (!_talkScroll.hasClients) return;
+        final position = _talkScroll.position;
+        position.animateTo(
+          position.maxScrollExtent,
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeOut,
+        );
+      });
+    }
+
+    perform();
+    WidgetsBinding.instance.addPostFrameCallback((_) => perform());
+    Future<void>.delayed(const Duration(milliseconds: 280), perform);
+    Future<void>.delayed(const Duration(milliseconds: 480), perform);
+  }
+
+  /// 두 번째 AI 음성 후, 힌트를 열기 전에는 Skip과 힌트만 누를 수 있다.
+  bool get _mustTapHint => _hintCoachReady && !_hintCoachDismissed;
+
   bool get _showMicGuideBubble =>
       _showMicGuide &&
-      (_showHelloGuide ||
-          _micGuide == _TutorialMicGuide.holding ||
+      ((_micGuide == _TutorialMicGuide.holding && _micHeld) ||
           _micGuide == _TutorialMicGuide.tooShort ||
-          _micGuide == _TutorialMicGuide.noSpeech);
+          _micGuide == _TutorialMicGuide.noSpeech ||
+          (_showHelloGuide && _micGuide == _TutorialMicGuide.afterVoice));
 
   String _micGuideText(AppLocalizations l10n) {
     return switch (_micGuide) {
@@ -721,15 +894,14 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
                             micGuide: _showMicGuideBubble
                                 ? _micGuideText(l10n)
                                 : null,
-                            hintEnglish: _hintEnglish,
-                            hintNative: _hintNative,
-                            hintPlayingIndex: _hintPlayingIndex,
-                            onHintWord: (index) => unawaited(_playHintSound(wordIndex: index)),
-                            onHintSentence: () => unawaited(_playHintSound()),
+                            showHintCoach: _mustTapHint,
+                            hintGuide: l10n.tutorialRoleplayHintGuide,
                             showMicPointer: _showMicPointer && _showHelloGuide,
-                            micEnabled: _micEnabled,
+                            guideNearMic: !_showHelloGuide,
+                            guideReserveText: l10n.tutorialRoleplayHoldHello,
+                            micEnabled: _micEnabled && !_mustTapHint,
                             micLoading: _sending,
-                            hintEnabled: _micEnabled && _completedMissions > 0,
+                            hintEnabled: _hintCoachReady,
                             showMicPulse: _micPulsing,
                             onMicHoldStart: _onMicHoldStart,
                             onMicHoldEnd: _onMicHoldEnd,
@@ -842,9 +1014,26 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
                             translation: showTranslation ? line.translation : null,
                           ),
                       ],
-                      if (_recording) ...[
+                      if (_hintEnglish != null) ...[
                         const SizedBox(height: 14),
-                        const _TutorialUserBubble(text: '…'),
+                        KeyedSubtree(
+                          key: _hintCardKey,
+                          child: _RoleplayHintCard(
+                          label: l10n.roleplayHintLabel,
+                          showAnswerLabel: l10n.roleplayHintShowAnswer,
+                          english: _hintEnglish!,
+                          native: _hintNative,
+                          answerOpen: _hintAnswerOpen,
+                          playingIndex: _hintPlayingIndex,
+                          onReveal: () => setState(() => _hintAnswerOpen = true),
+                          onWord: (index) => unawaited(_playHintSound(wordIndex: index)),
+                          onSentence: () => unawaited(_playHintSound()),
+                        ),
+                        ),
+                      ],
+                      if (_showRecordingBubble) ...[
+                        const SizedBox(height: 14),
+                        const _TutorialRecordingBubble(),
                       ],
                       const SizedBox(height: 24),
                     ],
@@ -854,10 +1043,18 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
                   top: PlayingConversationLayout.missionPanelTop,
                   left: 0,
                   right: 0,
-                  child: RoleplayMissionPanel(
+                  child: IgnorePointer(
+                    ignoring: _mustTapHint,
+                    child: RoleplayMissionPanel(
                     missions: missions,
-                    activeMissionIndex: _completedMissions.clamp(0, _turnCount - 1),
+                    activeMissionIndex: _showMissionCompletedFlash
+                        ? _flashMissionIndex
+                        : _completedMissions.clamp(0, _turnCount - 1),
                     completedCount: _completedMissions,
+                    completedMissionIndexes: _completedMissionIndexes,
+                    showCompletedBackgroundFlash: _showMissionCompletedFlash,
+                    missionIconAnchorKey: _missionIconAnchorKey,
+                  ),
                   ),
                 ),
               ],
@@ -881,19 +1078,155 @@ class _TutorialLine {
   _TutorialLine.ai(this.text) : kind = _TutorialLineKind.ai;
 }
 
-class _TutorialHintWords extends StatelessWidget {
-  static const _playColor = Color(0xFF0CABA8);
+/// 본편 `playing_hint_mixin` 힌트 상자와 같은 막대·번역·버튼·점선 단어.
+class _RoleplayHintCard extends StatelessWidget {
+  static const _bg = Color(0xFF194847);
+  static const _accent = Color(0xFF80D7CF);
+  static const _bar = Color(0xFF054544);
+  static const _play = Color(0xFF0CABA8);
+  static const _button = Color(0xFF076766);
+  static const _buttonText = Color(0xFF1B3B3B);
 
+  final String label;
+  final String showAnswerLabel;
   final String english;
   final String? native;
+  final bool answerOpen;
+  final int? playingIndex;
+  final VoidCallback onReveal;
+  final void Function(int index)? onWord;
+  final VoidCallback? onSentence;
+
+  const _RoleplayHintCard({
+    required this.label,
+    required this.showAnswerLabel,
+    required this.english,
+    required this.native,
+    required this.answerOpen,
+    required this.playingIndex,
+    required this.onReveal,
+    this.onWord,
+    this.onSentence,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final hasNative = native != null && native!.isNotEmpty;
+    final showEnglish = answerOpen || !hasNative;
+    final labelStyle =
+        theme.elevatedButtonTheme.style?.textStyle
+            ?.resolve(const <WidgetState>{})
+            ?.copyWith(color: _accent) ??
+        theme.textTheme.bodyMedium?.copyWith(color: _accent);
+    final buttonStyle =
+        theme.elevatedButtonTheme.style?.textStyle
+            ?.resolve(const <WidgetState>{})
+            ?.copyWith(color: _buttonText) ??
+        theme.textTheme.bodyMedium?.copyWith(color: _buttonText);
+
+    return Container(
+      width: double.infinity,
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: _bg.withValues(alpha: 0.7),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Container(
+            height: 27,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: _bar,
+              borderRadius: BorderRadius.circular(13.5),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.4),
+                  blurRadius: 6,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ColorFiltered(
+                  colorFilter: const ColorFilter.mode(_accent, BlendMode.srcIn),
+                  child: Image.asset(
+                    'assets/images/icons/lightball.png',
+                    height: 14,
+                    fit: BoxFit.contain,
+                    filterQuality: FilterQuality.medium,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Text(label, style: labelStyle, textAlign: TextAlign.center),
+              ],
+            ),
+          ),
+          if (hasNative)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+              child: Text(
+                native!,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyMedium?.copyWith(color: _accent),
+              ),
+            ),
+          if (!showEnglish)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
+              child: Center(
+                child: FractionallySizedBox(
+                  widthFactor: 0.9,
+                  child: Material(
+                    color: _button,
+                    borderRadius: BorderRadius.circular(22),
+                    child: InkWell(
+                      onTap: onReveal,
+                      borderRadius: BorderRadius.circular(22),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 12,
+                          horizontal: 16,
+                        ),
+                        child: Text(
+                          showAnswerLabel,
+                          style: buttonStyle,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            )
+          else
+            _HintAnswerWords(
+              english: english,
+              playingIndex: playingIndex,
+              onWord: onWord,
+              onSentence: onSentence,
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HintAnswerWords extends StatelessWidget {
+  final String english;
   final int? playingIndex;
   final void Function(int index)? onWord;
   final VoidCallback? onSentence;
 
-  const _TutorialHintWords({
+  const _HintAnswerWords({
     required this.english,
-    this.native,
-    this.playingIndex,
+    required this.playingIndex,
     this.onWord,
     this.onSentence,
   });
@@ -905,58 +1238,492 @@ class _TutorialHintWords extends StatelessWidget {
         .split(RegExp(r'\s+'))
         .where((word) => word.isNotEmpty)
         .toList();
-    final style = Theme.of(context).textTheme.bodyMedium;
-    return Column(
-      children: [
-        if (native != null && native!.isNotEmpty) ...[
-          Text(
-            native!,
-            textAlign: TextAlign.center,
-            style: style?.copyWith(color: Colors.white),
-          ),
-          const SizedBox(height: 8),
-        ],
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            GestureDetector(
-              onTap: onSentence,
-              child: Image.asset(
-                playingIndex == -1
-                    ? 'assets/images/icons/megaphone_fill.png'
-                    : 'assets/images/icons/megaphone.png',
-                width: 24,
-                height: 24,
+    final headline =
+        Theme.of(context).textTheme.headlineSmall ??
+        Theme.of(context).textTheme.bodyLarge;
+    final playing = playingIndex != null;
+    return Padding(
+      padding: const EdgeInsets.all(12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: 40,
+            child: Center(
+              child: GestureDetector(
+                onTap: onSentence,
+                behavior: HitTestBehavior.opaque,
+                child: Image.asset(
+                  playing
+                      ? 'assets/images/icons/megaphone_fill.png'
+                      : 'assets/images/icons/megaphone.png',
+                  width: 24,
+                  height: 24,
+                ),
               ),
             ),
-            const SizedBox(width: 8),
-            Expanded(
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(left: 8),
               child: Wrap(
-                spacing: 6,
+                alignment: WrapAlignment.start,
+                crossAxisAlignment: WrapCrossAlignment.center,
                 runSpacing: 4,
                 children: [
-                  for (var i = 0; i < words.length; i++)
-                    GestureDetector(
+                  for (var i = 0; i < words.length; i++) ...[
+                    if (i > 0) Text(' ', style: headline),
+                    _HintWord(
+                      word: words[i],
+                      headline: headline,
+                      highlighted:
+                          playingIndex == -1 || playingIndex == i,
                       onTap: onWord == null ? null : () => onWord!(i),
-                      child: Text(
-                        words[i],
-                        style: style?.copyWith(
-                          color: playingIndex == -1 || playingIndex == i
-                              ? _playColor
-                              : Colors.white,
-                          fontStyle: FontStyle.italic,
-                          decoration: TextDecoration.underline,
-                          decorationStyle: TextDecorationStyle.dotted,
-                          decorationColor: _playColor,
-                        ),
-                      ),
                     ),
+                  ],
                 ],
               ),
             ),
-          ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HintWord extends StatelessWidget {
+  final String word;
+  final TextStyle? headline;
+  final bool highlighted;
+  final VoidCallback? onTap;
+
+  const _HintWord({
+    required this.word,
+    required this.headline,
+    required this.highlighted,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final style = headline?.copyWith(
+      color: highlighted ? _RoleplayHintCard._play : Colors.white,
+      height: 1.35,
+      fontStyle: FontStyle.italic,
+    );
+    final painter = TextPainter(
+      text: TextSpan(text: word, style: style),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    final width = painter.width;
+    painter.dispose();
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(word, style: style),
+          const SizedBox(height: 2),
+          SizedBox(
+            width: width,
+            height: 3,
+            child: CustomPaint(
+              painter: _HintDottedUnderlinePainter(
+                color: _RoleplayHintCard._play,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HintDottedUnderlinePainter extends CustomPainter {
+  static const double _strokeWidth = 1.5;
+  static const double _dashLength = 3;
+  static const double _dashGap = 3;
+
+  final Color color;
+
+  _HintDottedUnderlinePainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = _strokeWidth
+      ..strokeCap = StrokeCap.round
+      ..style = PaintingStyle.stroke;
+    final y = size.height / 2;
+    var x = 0.0;
+    while (x < size.width) {
+      final segmentEnd = math.min(x + _dashLength, size.width);
+      if (segmentEnd > x) {
+        canvas.drawLine(Offset(x, y), Offset(segmentEnd, y), paint);
+      }
+      x += _dashLength + _dashGap;
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _HintDottedUnderlinePainter oldDelegate) =>
+      oldDelegate.color != color;
+}
+
+/// 힌트 아이콘 둘레의 흰 테두리 원 두 개.
+/// 영상: 작게 나타났다가 커지면서 옅어지고, 다시 안쪽에서 이어진다.
+class _HintAimRings extends StatefulWidget {
+  static const canvas = 96.0;
+
+  const _HintAimRings();
+
+  @override
+  State<_HintAimRings> createState() => _HintAimRingsState();
+}
+
+class _HintAimRingsState extends State<_HintAimRings>
+    with SingleTickerProviderStateMixin {
+  static const _minInner = 16.0;
+  static const _maxInner = 32.0;
+  static const _gap = 8.0;
+  static const _innerStroke = 2.5;
+  static const _outerStroke = 2.0;
+
+  late final AnimationController _pulse;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulse = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _pulse.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _pulse,
+      builder: (context, _) {
+        final t = _pulse.value;
+        final travel = Curves.easeOut.transform(t);
+        final fadeIn = (t / 0.18).clamp(0.0, 1.0);
+        final opacity = fadeIn * (1 - travel);
+        return CustomPaint(
+          size: const Size(_HintAimRings.canvas, _HintAimRings.canvas),
+          painter: _HintRingPainter(
+            innerRadius: _minInner + (_maxInner - _minInner) * travel,
+            opacity: opacity,
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _HintRingPainter extends CustomPainter {
+  final double innerRadius;
+  final double opacity;
+
+  _HintRingPainter({required this.innerRadius, required this.opacity});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (opacity <= 0.01) return;
+    final center = Offset(size.width / 2, size.height / 2);
+    final color = Colors.white.withValues(alpha: opacity.clamp(0.0, 1.0));
+    final inner = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = _HintAimRingsState._innerStroke;
+    final outer = Paint()
+      ..color = color.withValues(alpha: (opacity * 0.85).clamp(0.0, 1.0))
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = _HintAimRingsState._outerStroke;
+    canvas.drawCircle(center, innerRadius, inner);
+    canvas.drawCircle(center, innerRadius + _HintAimRingsState._gap, outer);
+  }
+
+  @override
+  bool shouldRepaint(covariant _HintRingPainter oldDelegate) =>
+      oldDelegate.innerRadius != innerRadius || oldDelegate.opacity != opacity;
+}
+
+/// 힌트 버튼 위에 강조 원과 안내를 화면 맨 위에 붙인다.
+class _HintCoachLayer extends StatefulWidget {
+  final bool show;
+  final String guide;
+  final Widget child;
+
+  const _HintCoachLayer({
+    required this.show,
+    required this.guide,
+    required this.child,
+  });
+
+  @override
+  State<_HintCoachLayer> createState() => _HintCoachLayerState();
+}
+
+class _HintCoachLayerState extends State<_HintCoachLayer>
+    with SingleTickerProviderStateMixin {
+  static const _appearDuration = Duration(milliseconds: 560);
+
+  final LayerLink _link = LayerLink();
+  OverlayEntry? _entry;
+  late final AnimationController _appear;
+
+  @override
+  void initState() {
+    super.initState();
+    _appear = AnimationController(vsync: this, duration: _appearDuration)
+      ..addListener(() => _entry?.markNeedsBuild());
+    _schedule();
+  }
+
+  @override
+  void didUpdateWidget(covariant _HintCoachLayer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.show != widget.show || oldWidget.guide != widget.guide) {
+      _schedule();
+    }
+  }
+
+  void _schedule() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _sync();
+    });
+  }
+
+  void _sync() {
+    if (!mounted) return;
+    if (!widget.show) {
+      _appear.stop();
+      _appear.value = 0;
+      _remove();
+      return;
+    }
+    final overlay = Overlay.maybeOf(context, rootOverlay: true);
+    if (overlay == null) return;
+    final fresh = _entry == null;
+    _entry ??= OverlayEntry(builder: _build);
+    if (_entry!.mounted) {
+      _entry!.markNeedsBuild();
+    } else {
+      overlay.insert(_entry!);
+    }
+    if (fresh) _appear.forward(from: 0);
+  }
+
+  Widget _build(BuildContext context) {
+    final t = Curves.easeOutCubic.transform(_appear.value);
+    return IgnorePointer(
+      child: Stack(
+        children: [
+          CompositedTransformFollower(
+            link: _link,
+            showWhenUnlinked: false,
+            targetAnchor: Alignment.center,
+            followerAnchor: Alignment.center,
+            child: Opacity(opacity: t, child: const _HintAimRings()),
+          ),
+          if (widget.guide.isNotEmpty)
+            CompositedTransformFollower(
+              link: _link,
+              showWhenUnlinked: false,
+              targetAnchor: Alignment.topCenter,
+              followerAnchor: Alignment.bottomRight,
+              offset: Offset(
+                _HintCoachBubble.tailEndInset + _HintCoachBubble.tailWidth / 2,
+                -4 + (1 - t) * 18,
+              ),
+              child: Opacity(
+                opacity: t,
+                child: DefaultTextStyle.merge(
+                  style: const TextStyle(decoration: TextDecoration.none),
+                  child: _HintCoachBubble(text: widget.guide),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  void _remove() {
+    if (_entry?.mounted ?? false) _entry!.remove();
+    _entry = null;
+  }
+
+  @override
+  void dispose() {
+    _remove();
+    _appear.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return CompositedTransformTarget(link: _link, child: widget.child);
+  }
+}
+
+/// 힌트 버튼 위에 붙는 안내. 꼬리는 버튼 가운데를 가리킨다.
+class _HintCoachBubble extends StatelessWidget {
+  static const tailWidth = 18.0;
+  static const tailEndInset = 27.0;
+
+  final String text;
+
+  const _HintCoachBubble({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    final heading = Theme.of(context).textTheme.headlineSmall;
+    final style = TextStyle(
+      fontFamily: heading?.fontFamily,
+      fontFamilyFallback: heading?.fontFamilyFallback,
+      fontSize: heading?.fontSize ?? 20,
+      fontWeight: heading?.fontWeight ?? FontWeight.w700,
+      fontVariations: heading?.fontVariations,
+      letterSpacing: heading?.letterSpacing,
+      color: Colors.white,
+      decoration: TextDecoration.none,
+    );
+    final maxWidth = (MediaQuery.sizeOf(context).width - 72).clamp(200.0, 340.0);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: maxWidth),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
+            decoration: const BoxDecoration(
+              color: Color(0xFF0CABA8),
+              borderRadius: BorderRadius.all(Radius.circular(20)),
+            ),
+            child: Text(text, textAlign: TextAlign.center, style: style),
+          ),
+        ),
+        Transform.translate(
+          offset: const Offset(0, -2),
+          child: const Padding(
+            padding: EdgeInsetsDirectional.only(end: _HintCoachBubble.tailEndInset),
+            child: CustomPaint(
+              size: Size(_HintCoachBubble.tailWidth, 12),
+              painter: _HintCoachTailPainter(),
+            ),
+          ),
         ),
       ],
+    );
+  }
+}
+
+class _HintCoachTailPainter extends CustomPainter {
+  const _HintCoachTailPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final path = Path()
+      ..moveTo(0, 0)
+      ..lineTo(size.width, 0)
+      ..lineTo(size.width / 2, size.height)
+      ..close();
+    canvas.drawPath(path, Paint()..color = const Color(0xFF0CABA8));
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+/// 본편 녹음 말풍선과 같은 흰 점 3개 파도.
+class _TutorialRecordingBubble extends StatelessWidget {
+  const _TutorialRecordingBubble();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Align(
+      alignment: Alignment.centerRight,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: Color(0x4DFFFFFF),
+          borderRadius: BorderRadius.all(Radius.circular(12)),
+        ),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          child: _TutorialWaveDots(),
+        ),
+      ),
+    );
+  }
+}
+
+class _TutorialWaveDots extends StatefulWidget {
+  const _TutorialWaveDots();
+
+  @override
+  State<_TutorialWaveDots> createState() => _TutorialWaveDotsState();
+}
+
+class _TutorialWaveDotsState extends State<_TutorialWaveDots>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  double _opacityFor(int index, double t) {
+    final phase = (t * 2 * math.pi) + (index * 0.8);
+    return 0.3 + (0.7 * (1 + math.sin(phase)) / 2);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, _) {
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: List.generate(3, (index) {
+            return Padding(
+              padding: EdgeInsets.only(right: index == 2 ? 0 : 4),
+              child: Opacity(
+                opacity: _opacityFor(index, _controller.value),
+                child: const DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                  child: SizedBox(width: 6, height: 6),
+                ),
+              ),
+            );
+          }),
+        );
+      },
     );
   }
 }
@@ -1260,6 +2027,30 @@ class _GuideBubble extends StatelessWidget {
 }
 
 /// 마이크 위 Hello 안내. 꼬리는 아래로(마이크 쪽).
+/// 보이는 문구가 짧아져도 슬롯 높이는 [reserveText]만큼 유지한다.
+class _PinnedGuideSlot extends StatelessWidget {
+  final String? reserveText;
+  final Widget child;
+
+  const _PinnedGuideSlot({required this.reserveText, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    final reserve = reserveText;
+    if (reserve == null || reserve.isEmpty) return child;
+    return Stack(
+      alignment: Alignment.bottomCenter,
+      children: [
+        Opacity(
+          opacity: 0,
+          child: _MicGuideBubble(text: reserve),
+        ),
+        child,
+      ],
+    );
+  }
+}
+
 class _MicGuideBubble extends StatelessWidget {
   static const _fill = Color(0xFF0CABA8);
 
@@ -1275,7 +2066,7 @@ class _MicGuideBubble extends StatelessWidget {
       children: [
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+          padding: const EdgeInsets.fromLTRB(28, 22, 28, 22),
           decoration: BoxDecoration(
             color: _fill,
             borderRadius: BorderRadius.circular(20),
@@ -1414,12 +2205,15 @@ class _TutorialMicRippleState extends State<_TutorialMicRipple>
 class _PlayingLikeDisabledFooter extends StatelessWidget {
   final AnimationController loadingRotationController;
   final String? micGuide;
-  final String? hintEnglish;
-  final String? hintNative;
-  final int? hintPlayingIndex;
-  final void Function(int index)? onHintWord;
-  final VoidCallback? onHintSentence;
+  final bool showHintCoach;
+  final String hintGuide;
   final bool showMicPointer;
+
+  /// 첫 발화 후 펄스가 없으므로 가이드를 마이크 쪽으로 내린다.
+  final bool guideNearMic;
+
+  /// 누르는 순간 문구가 줄어도 마이크가 움직이지 않게 잡아 두는 높이.
+  final String? guideReserveText;
   final bool micEnabled;
   final bool micLoading;
   final bool hintEnabled;
@@ -1431,12 +2225,11 @@ class _PlayingLikeDisabledFooter extends StatelessWidget {
   const _PlayingLikeDisabledFooter({
     required this.loadingRotationController,
     this.micGuide,
-    this.hintEnglish,
-    this.hintNative,
-    this.hintPlayingIndex,
-    this.onHintWord,
-    this.onHintSentence,
+    this.showHintCoach = false,
+    this.hintGuide = '',
     this.showMicPointer = false,
+    this.guideNearMic = false,
+    this.guideReserveText,
     this.micEnabled = false,
     this.micLoading = false,
     this.hintEnabled = false,
@@ -1455,19 +2248,12 @@ class _PlayingLikeDisabledFooter extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (hintEnglish != null) ...[
-              _TutorialHintWords(
-                english: hintEnglish!,
-                native: hintNative,
-                playingIndex: hintPlayingIndex,
-                onWord: onHintWord,
-                onSentence: onHintSentence,
-              ),
-              const SizedBox(height: 12),
-            ],
             if (micGuide != null) ...[
-              _EnterFade(child: _MicGuideBubble(text: micGuide!)),
-              const SizedBox(height: 48),
+              _PinnedGuideSlot(
+                reserveText: guideNearMic ? null : guideReserveText,
+                child: _EnterFade(child: _MicGuideBubble(text: micGuide!)),
+              ),
+              SizedBox(height: guideNearMic ? 12 : 48),
             ] else ...[
               const SizedBox(height: 24),
               const SizedBox(height: 10),
@@ -1477,7 +2263,32 @@ class _PlayingLikeDisabledFooter extends StatelessWidget {
               child: Stack(
                 clipBehavior: Clip.none,
                 children: [
+                  if (showMicPulse)
+                    const Positioned(
+                      key: ValueKey('tutorialMicRipple'),
+                      left: 0,
+                      right: 0,
+                      bottom: roleplayMicBottomInsetFromStackBottom +
+                          roleplayMicDefaultSize / 2 -
+                          _TutorialMicRipple.displaySize / 2,
+                      child: IgnorePointer(
+                        child: Center(child: _TutorialMicRipple()),
+                      ),
+                    ),
+                  Positioned.fill(
+                    key: const ValueKey('tutorialMicButton'),
+                    child: RoleplayMicButtonArea(
+                      isInteractive: micEnabled && !micLoading,
+                      isLoading: micLoading,
+                      isDisabled: !micEnabled || micLoading,
+                      loadingRotationController: loadingRotationController,
+                      onPressStart: onMicHoldStart,
+                      onPressEnd: (cancel) => onMicHoldEnd(cancel: cancel),
+                      onPressCancel: () => onMicHoldEnd(cancel: true),
+                    ),
+                  ),
                   Positioned(
+                    key: const ValueKey('tutorialMicIcons'),
                     left: 0,
                     right: 0,
                     bottom: 0,
@@ -1489,18 +2300,24 @@ class _PlayingLikeDisabledFooter extends StatelessWidget {
                         children: [
                           const SizedBox(width: 40, height: 40),
                           const Expanded(child: SizedBox.shrink()),
-                          Opacity(
-                            opacity: hintEnabled ? 1 : 0.4,
-                            child: GestureDetector(
-                              onTap: hintEnabled ? onHintTap : null,
-                              child: SizedBox(
-                                width: 40,
-                                height: 40,
-                                child: Center(
-                                  child: Image.asset(
-                                    'assets/images/icons/lightball.png',
-                                    height: 24,
-                                    width: 24,
+                          _HintCoachLayer(
+                            show: showHintCoach,
+                            guide: hintGuide,
+                            child: AnimatedOpacity(
+                              duration: const Duration(milliseconds: 560),
+                              curve: Curves.easeOutCubic,
+                              opacity: hintEnabled ? 1 : 0.4,
+                              child: GestureDetector(
+                                onTap: hintEnabled ? onHintTap : null,
+                                child: SizedBox(
+                                  width: 40,
+                                  height: 40,
+                                  child: Center(
+                                    child: Image.asset(
+                                      'assets/images/icons/lightball.png',
+                                      height: 24,
+                                      width: 24,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -1510,30 +2327,9 @@ class _PlayingLikeDisabledFooter extends StatelessWidget {
                       ),
                     ),
                   ),
-                  if (showMicPulse)
-                    const Positioned(
-                      left: 0,
-                      right: 0,
-                      bottom: roleplayMicBottomInsetFromStackBottom +
-                          roleplayMicDefaultSize / 2 -
-                          _TutorialMicRipple.displaySize / 2,
-                      child: IgnorePointer(
-                        child: Center(child: _TutorialMicRipple()),
-                      ),
-                    ),
-                  Positioned.fill(
-                    child: RoleplayMicButtonArea(
-                      isInteractive: micEnabled && !micLoading,
-                      isLoading: micLoading,
-                      isDisabled: !micEnabled || micLoading,
-                      loadingRotationController: loadingRotationController,
-                      onPressStart: onMicHoldStart,
-                      onPressEnd: (cancel) => onMicHoldEnd(cancel: cancel),
-                      onPressCancel: () => onMicHoldEnd(cancel: true),
-                    ),
-                  ),
                   if (showMicPointer)
                     const Positioned(
+                      key: ValueKey('tutorialMicPointer'),
                       right: 74,
                       bottom: -6,
                       child: IgnorePointer(

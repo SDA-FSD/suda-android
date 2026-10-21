@@ -467,6 +467,10 @@ class AppLocalizationsAr extends AppLocalizations {
       'Didn\'t catch that.\nTry saying \'Hello\' again.';
 
   @override
+  String get tutorialRoleplayHintGuide =>
+      'مش عارف تقول إيه؟\nاضغط على التلميح!';
+
+  @override
   String get actionConfirm => 'تأكيد';
 
   @override

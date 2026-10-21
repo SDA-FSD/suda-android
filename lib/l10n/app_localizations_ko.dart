@@ -448,6 +448,9 @@ class AppLocalizationsKo extends AppLocalizations {
       '목소리가 들리지 않았어요.\n다시 \'Hello\'라고 말해보세요.';
 
   @override
+  String get tutorialRoleplayHintGuide => '말이 떠오르지 않을 때는\n힌트를 사용하세요!';
+
+  @override
   String get actionConfirm => '확인';
 
   @override

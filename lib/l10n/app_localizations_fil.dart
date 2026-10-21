@@ -477,6 +477,10 @@ class AppLocalizationsFil extends AppLocalizations {
       'Didn\'t catch that.\nTry saying \'Hello\' again.';
 
   @override
+  String get tutorialRoleplayHintGuide =>
+      'Hindi alam ang sasabihin?\nI-tap ang hint!';
+
+  @override
   String get actionConfirm => 'Kumpirmahin';
 
   @override

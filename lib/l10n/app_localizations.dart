@@ -977,6 +977,12 @@ abstract class AppLocalizations {
   /// **'Didn\'t catch that.\nTry saying \'Hello\' again.'**
   String get tutorialRoleplayMicNoSpeech;
 
+  /// No description provided for @tutorialRoleplayHintGuide.
+  ///
+  /// In en, this message translates to:
+  /// **'Not sure what to say?\nTap the hint!'**
+  String get tutorialRoleplayHintGuide;
+
   /// No description provided for @actionConfirm.
   ///
   /// In en, this message translates to:

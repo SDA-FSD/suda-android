@@ -183,6 +183,7 @@
   "tutorialRoleplayMicHolding": "‘Hello’",
   "tutorialRoleplayMicTooShort": "Hold the mic longer\nand say ‘Hello’",
   "tutorialRoleplayMicNoSpeech": "Didn't catch that.\nTry saying 'Hello' again.",
+  "tutorialRoleplayHintGuide": "Bingung mau bilang apa?\nKetuk petunjuknya!",
 
   "actionConfirm": "Konfirmasi",
   "feedbackPlaceholder": "Bagikan pendapat, saran, atau masalah yang Anda temui...",
