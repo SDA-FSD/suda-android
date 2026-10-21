@@ -526,6 +526,9 @@ class AppLocalizationsId extends AppLocalizations {
   String get roleplayAutoHint => 'Petunjuk otomatis';
 
   @override
+  String get roleplayAutoHintGuide => 'Aktifkan petunjuk otomatis';
+
+  @override
   String get roleplayHintLabel => 'Petunjuk';
 
   @override

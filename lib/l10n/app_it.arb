@@ -201,6 +201,7 @@
   "roleplayExitKeepPlaying": "Continua",
   "roleplayExitExit": "Esci",
   "roleplayAutoHint": "Suggerimento automatico",
+  "roleplayAutoHintGuide": "Attiva il suggerimento automatico",
   "roleplayHintLabel": "Suggerimento",
   "roleplayHintShowAnswer": "Tocca per vedere la risposta suggerita in inglese",
   "roleplayVoiceSpeed": "Velocità della voce",

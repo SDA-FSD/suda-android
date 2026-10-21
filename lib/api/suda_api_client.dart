@@ -465,6 +465,12 @@ class SudaApiClient {
     );
   }
 
+  static Future<void> markRoleplayAutoHintGuideSeen({
+    required String accessToken,
+  }) {
+    return RoleplayApi.markAutoHintGuideSeen(accessToken: accessToken);
+  }
+
   static Future<VersionDto> getLatestVersion({
     required String clientVersion,
   }) {

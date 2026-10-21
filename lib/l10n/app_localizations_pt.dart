@@ -528,6 +528,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get roleplayAutoHint => 'Auto Dica';
 
   @override
+  String get roleplayAutoHintGuide => 'Ative as dicas automáticas';
+
+  @override
   String get roleplayHintLabel => 'Dica';
 
   @override

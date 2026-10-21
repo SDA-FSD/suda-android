@@ -501,6 +501,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get roleplayAutoHint => 'ヒントを自動表示';
 
   @override
+  String get roleplayAutoHintGuide => '自動ヒントをオン';
+
+  @override
   String get roleplayHintLabel => 'ヒント';
 
   @override

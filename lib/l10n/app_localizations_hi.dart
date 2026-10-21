@@ -524,6 +524,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get roleplayAutoHint => 'ऑटो हिंट';
 
   @override
+  String get roleplayAutoHintGuide => 'ऑटो हिंट चालू करें';
+
+  @override
   String get roleplayHintLabel => 'हिंट';
 
   @override

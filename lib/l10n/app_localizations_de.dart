@@ -528,6 +528,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get roleplayAutoHint => 'Auto-Tipp';
 
   @override
+  String get roleplayAutoHintGuide => 'Auto-Tipp einschalten';
+
+  @override
   String get roleplayHintLabel => 'Tipp';
 
   @override

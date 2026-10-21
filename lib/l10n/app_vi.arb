@@ -201,6 +201,7 @@
   "roleplayExitKeepPlaying": "Chơi tiếp",
   "roleplayExitExit": "Thoát",
   "roleplayAutoHint": "Gợi ý tự động",
+  "roleplayAutoHintGuide": "Bật gợi ý tự động",
   "roleplayHintLabel": "Gợi ý",
   "roleplayHintShowAnswer": "Nhấn để xem gợi ý trả lời bằng tiếng Anh",
   "roleplayVoiceSpeed": "Tốc độ giọng đọc",

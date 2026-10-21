@@ -201,6 +201,7 @@
   "roleplayExitKeepPlaying": "続ける",
   "roleplayExitExit": "終了",
   "roleplayAutoHint": "ヒントを自動表示",
+  "roleplayAutoHintGuide": "自動ヒントをオン",
   "roleplayHintLabel": "ヒント",
   "roleplayHintShowAnswer": "タップして英語の回答例を見る",
   "roleplayVoiceSpeed": "音声速度",

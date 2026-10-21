@@ -201,6 +201,7 @@
   "roleplayExitKeepPlaying": "متابعة اللعب",
   "roleplayExitExit": "خروج",
   "roleplayAutoHint": "تلميح تلقائي",
+  "roleplayAutoHintGuide": "فعّل التلميح التلقائي",
   "roleplayHintLabel": "تلميح",
   "roleplayHintShowAnswer": "اضغط لعرض الإجابة المقترحة بالإنجليزية",
   "roleplayVoiceSpeed": "سرعة الصوت",

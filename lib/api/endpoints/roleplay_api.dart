@@ -83,4 +83,39 @@ class RoleplayApi {
       'PUT /v1/users/auto-hint failed: HTTP ${response.statusCode} ${response.body}',
     );
   }
+
+  static Future<void> markAutoHintGuideSeen({
+    required String accessToken,
+  }) async {
+    return await SudaHttpClient.executeWithRefresh(
+      () => _markAutoHintGuideSeenInternal(accessToken),
+      retryWithNewToken: _markAutoHintGuideSeenInternal,
+    );
+  }
+
+  static Future<void> _markAutoHintGuideSeenInternal(
+    String accessToken,
+  ) async {
+    final uri = SudaHttpClient.buildUri('/v1/users/auto-hint-guide');
+    late final http.Response response;
+    try {
+      response = await SudaHttpClient.client
+          .put(uri, headers: {'Authorization': 'Bearer $accessToken'})
+          .timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      rethrow;
+    }
+
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return;
+    }
+
+    throw Exception(
+      'PUT /v1/users/auto-hint-guide failed: HTTP ${response.statusCode} ${response.body}',
+    );
+  }
 }

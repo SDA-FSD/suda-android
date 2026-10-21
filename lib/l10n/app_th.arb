@@ -201,6 +201,7 @@
   "roleplayExitKeepPlaying": "เล่นต่อ",
   "roleplayExitExit": "ออก",
   "roleplayAutoHint": "คำใบ้อัตโนมัติ",
+  "roleplayAutoHintGuide": "เปิดคำใบ้อัตโนมัติ",
   "roleplayHintLabel": "คำใบ้",
   "roleplayHintShowAnswer": "แตะเพื่อดูคำตอบภาษาอังกฤษที่แนะนำ",
   "roleplayVoiceSpeed": "ความเร็วในการพูด",

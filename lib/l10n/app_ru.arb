@@ -201,6 +201,7 @@
   "roleplayExitKeepPlaying": "Продолжить",
   "roleplayExitExit": "Выйти",
   "roleplayAutoHint": "Автоподсказки",
+  "roleplayAutoHintGuide": "Включите автоподсказки",
   "roleplayHintLabel": "Подсказка",
   "roleplayHintShowAnswer": "Показать вариант ответа на английском",
   "roleplayVoiceSpeed": "Скорость речи",

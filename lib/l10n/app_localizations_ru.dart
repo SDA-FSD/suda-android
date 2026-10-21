@@ -525,6 +525,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get roleplayAutoHint => 'Автоподсказки';
 
   @override
+  String get roleplayAutoHintGuide => 'Включите автоподсказки';
+
+  @override
   String get roleplayHintLabel => 'Подсказка';
 
   @override

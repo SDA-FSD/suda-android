@@ -201,6 +201,7 @@
   "roleplayExitKeepPlaying": "Seguir jugando",
   "roleplayExitExit": "Salir",
   "roleplayAutoHint": "Pista automática",
+  "roleplayAutoHintGuide": "Activa las pistas automáticas",
   "roleplayHintLabel": "Pista",
   "roleplayHintShowAnswer": "Toca para ver una respuesta sugerida en inglés",
   "roleplayVoiceSpeed": "Velocidad de voz",

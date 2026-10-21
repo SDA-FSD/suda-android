@@ -201,6 +201,7 @@
   "roleplayExitKeepPlaying": "Continuar Jogando",
   "roleplayExitExit": "Sair",
   "roleplayAutoHint": "Auto Dica",
+  "roleplayAutoHintGuide": "Ative as dicas automáticas",
   "roleplayHintLabel": "Dica",
   "roleplayHintShowAnswer": "Ver resposta",
   "roleplayVoiceSpeed": "Velocidade da Voz",

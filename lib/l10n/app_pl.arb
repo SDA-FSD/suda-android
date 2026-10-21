@@ -201,6 +201,7 @@
   "roleplayExitKeepPlaying": "Graj dalej",
   "roleplayExitExit": "Wyjdź",
   "roleplayAutoHint": "Automatyczna podpowiedź",
+  "roleplayAutoHintGuide": "Włącz automatyczną podpowiedź",
   "roleplayHintLabel": "Podpowiedź",
   "roleplayHintShowAnswer": "Pokaż sugerowaną odpowiedź po angielsku",
   "roleplayVoiceSpeed": "Szybkość mowy",

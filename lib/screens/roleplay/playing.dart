@@ -13,6 +13,7 @@ import '../../services/perf_monitoring_service.dart';
 import '../../utils/english_level_util.dart';
 import '../../utils/suda_json_util.dart';
 import '../../effects/mission_complete_effect.dart';
+import '../../widgets/guide_bubble.dart';
 import '../../widgets/roleplay_configuration_panel.dart';
 import '../../widgets/roleplay_overview_backdrop.dart';
 import '../../widgets/roleplay_scaffold.dart';
@@ -47,10 +48,15 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
         PlayingEnergyMixin {
   static const List<int> _speedRateSteps = [70, 100, 120, 150];
   static const String _autoHintMetaKey = 'RP_AUTO_HINT';
+  static const String _autoHintGuideMetaKey = 'RP_AUTO_HINT_GUIDE';
   static const double _playingHeaderTopSpacing = 60;
 
   bool _showExitLayer = false;
   bool _showConfigurationPanel = false;
+  bool _showAutoHintGuide = false;
+  bool _autoHintGuideSeen = false;
+  bool _autoHintGuidePending = false;
+  int _manualHintOpens = 0;
   late bool _autoHintEnabled;
   late int _speedIndex;
   late final int _turnCount;
@@ -86,6 +92,9 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
       if (mounted) setState(() => _showExitLayer = true);
     };
     _autoHintEnabled = _resolveDefaultAutoHint();
+    _autoHintGuideSeen = _readAutoHintGuideSeen();
+    onManualHintShown = _onManualHintShown;
+    onUserTurnActivated = _maybeShowAutoHintGuide;
     _speedIndex = _resolveInitialSpeedIndex();
     _turnCount = _resolveRequiredSpeechCount();
     _missions = _resolveMissions();
@@ -442,6 +451,17 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
   }
 
   void _onHamburgerTap() {
+    if (_showAutoHintGuide) {
+      setState(() {
+        _showAutoHintGuide = false;
+        _showConfigurationPanel = true;
+      });
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || _autoHintEnabled) return;
+        _onAutoHintChanged(true);
+      });
+      return;
+    }
     setState(() => _showConfigurationPanel = !_showConfigurationPanel);
   }
 
@@ -476,6 +496,66 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
       RoleplayStateService.instance.setUser(updated);
     }
     unawaited(_putAutoHint(value));
+  }
+
+  bool _readAutoHintGuideSeen() {
+    final meta = SeriesStateService.instance.user?.metaInfo;
+    if (meta == null) return false;
+    for (final item in meta) {
+      if (item.key == _autoHintGuideMetaKey) return item.value == 'Y';
+    }
+    return false;
+  }
+
+  void _onManualHintShown() {
+    if (_autoHintEnabled ||
+        _autoHintGuideSeen ||
+        _autoHintGuidePending ||
+        _showAutoHintGuide) {
+      return;
+    }
+    _manualHintOpens++;
+    if (_manualHintOpens >= 2) _autoHintGuidePending = true;
+  }
+
+  void _maybeShowAutoHintGuide() {
+    if (!_autoHintGuidePending || _autoHintEnabled || _autoHintGuideSeen) {
+      return;
+    }
+    _autoHintGuidePending = false;
+    _autoHintGuideSeen = true;
+    setState(() => _showAutoHintGuide = true);
+    _persistAutoHintGuideSeen();
+  }
+
+  void _dismissAutoHintGuide() {
+    if (!_showAutoHintGuide) return;
+    setState(() => _showAutoHintGuide = false);
+  }
+
+  void _persistAutoHintGuideSeen() {
+    final current = SeriesStateService.instance.user;
+    if (current != null) {
+      final updated = current.upsertMetaInfo(
+        key: _autoHintGuideMetaKey,
+        value: 'Y',
+      );
+      SeriesStateService.instance.setUser(updated);
+      RoleplayStateService.instance.setUser(updated);
+    }
+    unawaited(_putAutoHintGuide());
+  }
+
+  Future<void> _putAutoHintGuide() async {
+    final accessToken = await TokenStorage.loadAccessToken();
+    if (accessToken == null) return;
+    try {
+      await SudaApiClient.markRoleplayAutoHintGuideSeen(
+        accessToken: accessToken,
+      );
+    } catch (_) {
+      // 속도 변경과 동일: 에러 무시
+    }
   }
 
   Future<void> _putAutoHint(String value) async {
@@ -679,6 +759,17 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
                 onAutoHintChanged: _onAutoHintChanged,
                 speedIndex: _speedIndex,
                 onSpeedIndexChanged: _onSpeedIndexChanged,
+              ),
+            ),
+          if (_showAutoHintGuide)
+            Positioned(
+              top: topInset + 16 + 40 - GuideBubble.tailLength,
+              right: 16,
+              child: GuideBubble(
+                text: AppLocalizations.of(context)!.roleplayAutoHintGuide,
+                wobble: true,
+                tailOffsetFromEnd: 20,
+                onTap: _dismissAutoHintGuide,
               ),
             ),
           if (widget.showCloseButton)

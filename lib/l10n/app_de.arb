@@ -201,6 +201,7 @@
   "roleplayExitKeepPlaying": "Weiterspielen",
   "roleplayExitExit": "Beenden",
   "roleplayAutoHint": "Auto-Tipp",
+  "roleplayAutoHintGuide": "Auto-Tipp einschalten",
   "roleplayHintLabel": "Tipp",
   "roleplayHintShowAnswer": "Englischen Antwortvorschlag ansehen",
   "roleplayVoiceSpeed": "Sprechtempo",

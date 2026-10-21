@@ -201,6 +201,7 @@
   "roleplayExitKeepPlaying": "Continuer à jouer",
   "roleplayExitExit": "Quitter",
   "roleplayAutoHint": "Indice automatique",
+  "roleplayAutoHintGuide": "Activez l'indice automatique",
   "roleplayHintLabel": "Indice",
   "roleplayHintShowAnswer": "Touchez pour voir une réponse suggérée en anglais",
   "roleplayVoiceSpeed": "Vitesse de lecture",

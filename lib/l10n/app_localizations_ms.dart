@@ -528,6 +528,9 @@ class AppLocalizationsMs extends AppLocalizations {
   String get roleplayAutoHint => 'Petunjuk Automatik';
 
   @override
+  String get roleplayAutoHintGuide => 'Hidupkan petunjuk automatik';
+
+  @override
   String get roleplayHintLabel => 'Petunjuk';
 
   @override

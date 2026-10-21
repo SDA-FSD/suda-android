@@ -499,6 +499,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get roleplayAutoHint => '自动提示';
 
   @override
+  String get roleplayAutoHintGuide => '开启自动提示';
+
+  @override
   String get roleplayHintLabel => '提示';
 
   @override
@@ -1667,6 +1670,9 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get roleplayAutoHint => '自动提示';
 
   @override
+  String get roleplayAutoHintGuide => '开启自动提示';
+
+  @override
   String get roleplayHintLabel => '提示';
 
   @override
@@ -2833,6 +2839,9 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get roleplayAutoHint => '自動提示';
+
+  @override
+  String get roleplayAutoHintGuide => '開啟自動提示';
 
   @override
   String get roleplayHintLabel => '提示';

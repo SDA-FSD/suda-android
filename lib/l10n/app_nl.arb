@@ -201,6 +201,7 @@
   "roleplayExitKeepPlaying": "Doorgaan",
   "roleplayExitExit": "Stoppen",
   "roleplayAutoHint": "Automatische hint",
+  "roleplayAutoHintGuide": "Zet automatische hint aan",
   "roleplayHintLabel": "Hint",
   "roleplayHintShowAnswer": "Engels voorbeeldantwoord bekijken",
   "roleplayVoiceSpeed": "Spreeksnelheid",

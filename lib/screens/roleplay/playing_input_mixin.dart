@@ -69,6 +69,9 @@ mixin PlayingInputMixin<T extends StatefulWidget>
   /// 마이크 권한 캐시. start 실패 시 null로 비워 재확인.
   bool? _cachedMicPermission;
   bool _iosRecorderDoesNotManageSession = false;
+  VoidCallback? onManualHintShown;
+  VoidCallback? onUserTurnActivated;
+
   bool _isUserTurn = false;
   bool _isHintEnabled = false;
   bool _hintUsedThisTurn = false;
@@ -215,6 +218,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
         }
       });
     }
+    onUserTurnActivated?.call();
   }
 
   void deactivateUserTurn() {
@@ -957,6 +961,12 @@ mixin PlayingInputMixin<T extends StatefulWidget>
       await showPlayingHint();
     } finally {
       _isFetchingHintForTap = false;
+    }
+    final shown = activeHintEntry;
+    if (shown != null &&
+        !shown.isLoading &&
+        (shown.hintText?.isNotEmpty ?? false)) {
+      onManualHintShown?.call();
     }
   }
 

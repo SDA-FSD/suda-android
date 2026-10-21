@@ -527,6 +527,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get roleplayAutoHint => 'Pista automática';
 
   @override
+  String get roleplayAutoHintGuide => 'Activa las pistas automáticas';
+
+  @override
   String get roleplayHintLabel => 'Pista';
 
   @override
@@ -1765,6 +1768,9 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
 
   @override
   String get roleplayAutoHint => 'Pista automática';
+
+  @override
+  String get roleplayAutoHintGuide => 'Activa las pistas automáticas';
 
   @override
   String get roleplayHintLabel => 'Pista';

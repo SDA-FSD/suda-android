@@ -525,6 +525,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get roleplayAutoHint => 'Otomatik İpucu';
 
   @override
+  String get roleplayAutoHintGuide => 'Otomatik İpucunu aç';
+
+  @override
   String get roleplayHintLabel => 'İpucu';
 
   @override

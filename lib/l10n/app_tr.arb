@@ -201,6 +201,7 @@
   "roleplayExitKeepPlaying": "Oynamaya Devam Et",
   "roleplayExitExit": "Çık",
   "roleplayAutoHint": "Otomatik İpucu",
+  "roleplayAutoHintGuide": "Otomatik İpucunu aç",
   "roleplayHintLabel": "İpucu",
   "roleplayHintShowAnswer": "Önerilen İngilizce yanıtı görmek için dokun",
   "roleplayVoiceSpeed": "Ses Hızı",

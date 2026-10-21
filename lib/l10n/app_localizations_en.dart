@@ -524,6 +524,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get roleplayAutoHint => 'Auto Hint';
 
   @override
+  String get roleplayAutoHintGuide => 'Turn on Auto Hint';
+
+  @override
   String get roleplayHintLabel => 'Hint';
 
   @override

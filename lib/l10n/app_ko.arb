@@ -201,6 +201,7 @@
   "roleplayExitKeepPlaying": "계속 플레이",
   "roleplayExitExit": "나가기",
   "roleplayAutoHint": "자동 힌트",
+  "roleplayAutoHintGuide": "자동 힌트 켜기",
   "roleplayHintLabel": "답변힌트",
   "roleplayHintShowAnswer": "영어 답변 보기",
   "roleplayVoiceSpeed": "음성 속도",

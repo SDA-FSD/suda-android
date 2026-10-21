@@ -499,6 +499,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get roleplayAutoHint => '자동 힌트';
 
   @override
+  String get roleplayAutoHintGuide => '자동 힌트 켜기';
+
+  @override
   String get roleplayHintLabel => '답변힌트';
 
   @override

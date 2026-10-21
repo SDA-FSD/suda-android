@@ -1079,6 +1079,12 @@ abstract class AppLocalizations {
   /// **'Auto Hint'**
   String get roleplayAutoHint;
 
+  /// No description provided for @roleplayAutoHintGuide.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on Auto Hint'**
+  String get roleplayAutoHintGuide;
+
   /// No description provided for @roleplayHintLabel.
   ///
   /// In en, this message translates to:

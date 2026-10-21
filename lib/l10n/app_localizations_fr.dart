@@ -530,6 +530,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get roleplayAutoHint => 'Indice automatique';
 
   @override
+  String get roleplayAutoHintGuide => 'Activez l\'indice automatique';
+
+  @override
   String get roleplayHintLabel => 'Indice';
 
   @override

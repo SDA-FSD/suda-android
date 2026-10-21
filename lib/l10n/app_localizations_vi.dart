@@ -526,6 +526,9 @@ class AppLocalizationsVi extends AppLocalizations {
   String get roleplayAutoHint => 'Gợi ý tự động';
 
   @override
+  String get roleplayAutoHintGuide => 'Bật gợi ý tự động';
+
+  @override
   String get roleplayHintLabel => 'Gợi ý';
 
   @override

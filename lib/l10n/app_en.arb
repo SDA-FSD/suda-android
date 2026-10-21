@@ -208,6 +208,7 @@
   "roleplayExitKeepPlaying": "Keep Playing",
   "roleplayExitExit": "Exit",
   "roleplayAutoHint": "Auto Hint",
+  "roleplayAutoHintGuide": "Turn on Auto Hint",
   "roleplayHintLabel": "Hint",
   "roleplayHintShowAnswer": "Tap to see the English answer",
   "roleplayVoiceSpeed": "Voice Speed",

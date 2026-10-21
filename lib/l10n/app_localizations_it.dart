@@ -529,6 +529,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get roleplayAutoHint => 'Suggerimento automatico';
 
   @override
+  String get roleplayAutoHintGuide => 'Attiva il suggerimento automatico';
+
+  @override
   String get roleplayHintLabel => 'Suggerimento';
 
   @override

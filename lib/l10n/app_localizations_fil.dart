@@ -534,6 +534,9 @@ class AppLocalizationsFil extends AppLocalizations {
   String get roleplayAutoHint => 'Auto Hint';
 
   @override
+  String get roleplayAutoHintGuide => 'I-on ang Auto Hint';
+
+  @override
   String get roleplayHintLabel => 'Hint';
 
   @override

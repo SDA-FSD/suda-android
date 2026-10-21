@@ -201,6 +201,7 @@
   "roleplayExitKeepPlaying": "繼續進行",
   "roleplayExitExit": "離開",
   "roleplayAutoHint": "自動提示",
+  "roleplayAutoHintGuide": "開啟自動提示",
   "roleplayHintLabel": "提示",
   "roleplayHintShowAnswer": "點一下查看建議的英文回覆",
   "roleplayVoiceSpeed": "語音速度",

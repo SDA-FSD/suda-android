@@ -521,6 +521,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get roleplayAutoHint => 'تلميح تلقائي';
 
   @override
+  String get roleplayAutoHintGuide => 'فعّل التلميح التلقائي';
+
+  @override
   String get roleplayHintLabel => 'تلميح';
 
   @override
