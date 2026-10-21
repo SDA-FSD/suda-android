@@ -8,6 +8,8 @@ import 'tutorial_intro_stage.dart';
 
 /// 온보딩 Username 다음. 프로필·문구·Start Tutorial → 마이크 권한 → Tutorial Roleplay.
 class TutorialIntroScreen extends StatefulWidget {
+  /// 이번 배포는 false라 Username 다음이 홈이다. 다음 배포에서 true.
+  static const onboardingEnabled = false;
   final UserDto? user;
   final VoidCallback onStartTutorial;
   final bool preview;

@@ -722,7 +722,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         !_needsFirstAppLanguage &&
         (_needsFirstProfileImage || _needsFirstUsername) &&
         !AppLanguage.hasEnglishLevel(user);
-    _needsTutorialIntro = !_needsAgreement &&
+    _needsTutorialIntro = TutorialIntroScreen.onboardingEnabled &&
+        !_needsAgreement &&
         !_needsFirstAppLanguage &&
         !_needsFirstCefrLevel &&
         !_needsFirstProfileImage &&
@@ -781,7 +782,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             value: 'Y',
           ) ??
           false);
-      _needsTutorialIntro = needsIntro;
+      _needsTutorialIntro = TutorialIntroScreen.onboardingEnabled && needsIntro;
       // Username 화면에서 Confirm→Intro 전환 애니를 이미 재생함.
       _tutorialIntroPlayEntrance = false;
     });
