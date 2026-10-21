@@ -477,6 +477,13 @@ class AppLocalizationsPt extends AppLocalizations {
       'Não sabe o que dizer?\nToque na dica!';
 
   @override
+  String get tutorialRoleplayHintTapEnglish =>
+      'Toque para ver a resposta em inglês';
+
+  @override
+  String get tutorialRoleplayHintSayIt => 'Sua vez de falar!';
+
+  @override
   String get actionConfirm => 'Confirmar';
 
   @override

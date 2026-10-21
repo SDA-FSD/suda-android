@@ -388,69 +388,73 @@ class AppLocalizationsJa extends AppLocalizations {
   String get tutorialIntroStart => 'チュートリアルを始める';
 
   @override
-  String get tutorialRoleplayTitle => 'Your First Conversation';
+  String get tutorialRoleplayTitle => '初めての会話';
 
   @override
-  String get tutorialRoleplaySkip => 'Skip';
+  String get tutorialRoleplaySkip => 'スキップ';
 
   @override
-  String get tutorialRoleplaySkipTitle => 'Skip the tutorial?';
+  String get tutorialRoleplaySkipTitle => 'チュートリアルをスキップしますか？';
 
   @override
-  String get tutorialRoleplaySkipBody =>
-      'If you skip, you won\'t receive\nthe tutorial reward.';
+  String get tutorialRoleplaySkipBody => 'スキップすると\nチュートリアルの報酬を受け取れません。';
 
   @override
-  String get tutorialRoleplaySkipConfirm => 'Skip Tutorial';
+  String get tutorialRoleplaySkipConfirm => 'チュートリアルをスキップ';
 
   @override
-  String get tutorialRoleplaySkipKeepGoing => 'Keep Going';
+  String get tutorialRoleplaySkipKeepGoing => '続ける';
 
   @override
-  String get tutorialRoleplayMissions => 'Missions';
+  String get tutorialRoleplayMissions => 'ミッション';
 
   @override
-  String get tutorialRoleplayMission1 => 'Greet the taxi driver';
+  String get tutorialRoleplayMission1 => 'タクシーの運転手にあいさつする';
 
   @override
-  String get tutorialRoleplayMission2 => 'Tell the driver where you\'re going';
+  String get tutorialRoleplayMission2 => '行き先を伝える';
 
   @override
-  String get tutorialRoleplayMission3 => 'Say why you\'re going there';
+  String get tutorialRoleplayMission3 => 'そこへ行く理由を伝える';
 
   @override
-  String get tutorialRoleplayGuideMissionMain => 'Check your missions first!';
+  String get tutorialRoleplayGuideMissionMain => 'まずミッションを確認してください！';
 
   @override
-  String get tutorialRoleplayGuideMissionTapContinue => 'Tap to continue';
+  String get tutorialRoleplayGuideMissionTapContinue => 'タップして続ける';
 
   @override
   String get tutorialRoleplayNarration1 =>
-      'You\'re moving to a new neighborhood today. You hop into a taxi, where a friendly driver named Betty greets you. 🚕';
+      '今日は新しい街へ引っ越す日です。タクシーに乗ると、親切な運転手のベティが明るくあいさつしてくれます。 🚕';
 
   @override
   String get tutorialRoleplayBettyLine1 => 'Hi there! Hop in!';
 
   @override
-  String get tutorialRoleplayBettyLine1Translation => '';
+  String get tutorialRoleplayBettyLine1Translation => 'こんにちは！どうぞ乗ってください！';
 
   @override
   String get tutorialRoleplayHoldHello =>
-      'Press and hold\nthe mic button.\nSay ‘Hello’ and release.';
+      'マイクボタンを長押ししたまま\n‘Hello’と言ってから\n指を離してください。';
 
   @override
   String get tutorialRoleplayMicHolding => '‘Hello’';
 
   @override
-  String get tutorialRoleplayMicTooShort =>
-      'Hold the mic longer\nand say ‘Hello’';
+  String get tutorialRoleplayMicTooShort => 'もう少し長く押して\n‘Hello’と言ってください';
 
   @override
   String get tutorialRoleplayMicNoSpeech =>
-      'Didn\'t catch that.\nTry saying \'Hello\' again.';
+      '声が聞き取れませんでした。\nもう一度‘Hello’と言ってください。';
 
   @override
-  String get tutorialRoleplayHintGuide => '言葉が浮かばないときは\nヒントをタップ！';
+  String get tutorialRoleplayHintGuide => '言葉が浮かばないときは\nヒントをタップしてください！';
+
+  @override
+  String get tutorialRoleplayHintTapEnglish => 'タップすると英語の答えが見られます';
+
+  @override
+  String get tutorialRoleplayHintSayIt => 'さあ、言ってみましょう！';
 
   @override
   String get actionConfirm => '決定';
@@ -474,7 +478,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get microphonePermissionDenied => 'マイクの使用を許可しないと開始できません。';
 
   @override
-  String get holdMicrophoneToSpeak => 'マイクボタンを長押しして話す';
+  String get holdMicrophoneToSpeak => 'マイクボタンを長押しして話してください';
 
   @override
   String get roleplayNoWordsRecognized => '言葉が認識されませんでした。もう一度どうぞ。';
@@ -489,7 +493,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get sayLineBelowToStart => '下のフレーズを話して始めましょう。';
 
   @override
-  String get roleplayExitWait => 'ちょっと待って！';
+  String get roleplayExitWait => 'ちょっと待ってください！';
 
   @override
   String get roleplayExitMessage => '今終了すると、報酬を獲得できません。本当に終了しますか？';
@@ -510,7 +514,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get roleplayHintLabel => 'ヒント';
 
   @override
-  String get roleplayHintShowAnswer => 'タップして英語の回答例を見る';
+  String get roleplayHintShowAnswer => 'タップして英語の回答例を見てください';
 
   @override
   String get roleplayVoiceSpeed => '音声速度';

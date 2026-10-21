@@ -474,6 +474,12 @@ class AppLocalizationsEn extends AppLocalizations {
       'Not sure what to say?\nTap the hint!';
 
   @override
+  String get tutorialRoleplayHintTapEnglish => 'Tap to see the English answer';
+
+  @override
+  String get tutorialRoleplayHintSayIt => 'Now, say it!';
+
+  @override
   String get actionConfirm => 'Confirm';
 
   @override

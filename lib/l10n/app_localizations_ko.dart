@@ -451,6 +451,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get tutorialRoleplayHintGuide => '말이 떠오르지 않을 때는\n힌트를 사용하세요!';
 
   @override
+  String get tutorialRoleplayHintTapEnglish => '탭하면 영어 답변을 볼 수 있어요';
+
+  @override
+  String get tutorialRoleplayHintSayIt => '이제 말해보세요!';
+
+  @override
   String get actionConfirm => '확인';
 
   @override

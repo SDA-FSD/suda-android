@@ -983,6 +983,18 @@ abstract class AppLocalizations {
   /// **'Not sure what to say?\nTap the hint!'**
   String get tutorialRoleplayHintGuide;
 
+  /// No description provided for @tutorialRoleplayHintTapEnglish.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to see the English answer'**
+  String get tutorialRoleplayHintTapEnglish;
+
+  /// No description provided for @tutorialRoleplayHintSayIt.
+  ///
+  /// In en, this message translates to:
+  /// **'Now, say it!'**
+  String get tutorialRoleplayHintSayIt;
+
   /// No description provided for @actionConfirm.
   ///
   /// In en, this message translates to:

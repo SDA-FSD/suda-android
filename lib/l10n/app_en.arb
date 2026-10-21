@@ -191,6 +191,8 @@
   "tutorialRoleplayMicTooShort": "Hold the mic longer\nand say ‘Hello’",
   "tutorialRoleplayMicNoSpeech": "Didn't catch that.\nTry saying 'Hello' again.",
   "tutorialRoleplayHintGuide": "Not sure what to say?\nTap the hint!",
+  "tutorialRoleplayHintTapEnglish": "Tap to see the English answer",
+  "tutorialRoleplayHintSayIt": "Now, say it!",
 
   "actionConfirm": "Confirm",
   "feedbackPlaceholder": "Please share your thoughts, suggestions, or any issues you've encountered...",

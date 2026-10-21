@@ -318,7 +318,11 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
       _micHeld = true;
       _micPulsing = false;
       _showMicPointer = false;
-      _micGuide = _TutorialMicGuide.holding;
+      if (_answeredTurnCount == 0) {
+        _micGuide = _TutorialMicGuide.holding;
+      } else {
+        _showHelloGuide = false;
+      }
     });
     _scrollTalkToEnd();
     unawaited(_startRecording());
@@ -343,7 +347,7 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
                   AVAudioSessionCategoryOptions.allowBluetooth,
         ),
       );
-      await session.setActive(true);
+      await session.setActive(true).timeout(const Duration(seconds: 3));
       await _recorder.ios?.manageAudioSession(false);
     } catch (e) {
       debugPrint('[DEBUG] tutorial mic session: $e');
@@ -478,8 +482,8 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
       _micEnabled = true;
       _sending = false;
       _showRecordingBubble = false;
-      _micPulsing = _showHelloGuide;
-      _showMicPointer = _showHelloGuide;
+      _micPulsing = _helloGuideActive;
+      _showMicPointer = _helloGuideActive;
       _micGuide = guide;
       if (revealHint) _hintCoachReady = true;
     });
@@ -519,12 +523,14 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
         sessionId: sessionId,
       );
       var missionJustCompleted = false;
+      final aiLine = _TutorialLine.ai(aiText);
       setState(() {
+        _sending = false;
         _lines.add(_TutorialLine.user(response.userText ?? ''));
         if ((response.narration ?? '').isNotEmpty) {
           _lines.add(_TutorialLine.narration(response.narration!));
         }
-        if (!showTranslation) _lines.add(_TutorialLine.ai(aiText));
+        _lines.add(aiLine);
         _answeredTurnCount = (_answeredTurnCount + 1).clamp(0, _turnCount);
         final done = response.missionCompletedIndex;
         if (done != null && done >= 0 && done == _completedMissions) {
@@ -544,17 +550,13 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
       armHint = _answeredTurnCount == 1 && !_hintCoachDismissed;
       _scrollTalkToEnd();
       if (missionJustCompleted) _playMissionSuccess();
-      if (showTranslation) {
-        final translation = aiMsgId == null
-            ? null
-            : await _fetchTranslation(sessionId, aiMsgId);
-        if (!mounted) return;
-        setState(() {
-          final line = _TutorialLine.ai(aiText);
-          line.translation = translation;
-          _lines.add(line);
-        });
-        _scrollTalkToEnd();
+      if (showTranslation && aiMsgId != null) {
+        unawaited(() async {
+          final translation = await _fetchTranslation(sessionId, aiMsgId);
+          if (!mounted || translation == null) return;
+          setState(() => aiLine.translation = translation);
+          _scrollTalkToEnd();
+        }());
       }
       try {
         final sound = await soundFuture;
@@ -748,12 +750,47 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
   /// 두 번째 AI 음성 후, 힌트를 열기 전에는 Skip과 힌트만 누를 수 있다.
   bool get _mustTapHint => _hintCoachReady && !_hintCoachDismissed;
 
+  /// 두 번째 발화용 힌트 안내. 세 번째 발화는 본편 힌트 상자만 연다.
+  bool get _secondUtteranceHintCoach => _answeredTurnCount == 1;
+
+  /// 모국어 힌트만 열린 상태. 영어 답을 열기 전에는 마이크를 잠근다.
+  bool get _awaitingEnglishReveal =>
+      _secondUtteranceHintCoach &&
+      _hintEnglish != null &&
+      _hintNative != null &&
+      !_hintAnswerOpen;
+
+  /// 영어 답이 화면에 있는 동안. 영어 사용자는 힌트가 열리자마자 해당한다.
+  bool get _englishHintVisible =>
+      _hintEnglish != null && (_hintAnswerOpen || _hintNative == null);
+
+  bool get _showSayItGuide =>
+      _secondUtteranceHintCoach &&
+      _englishHintVisible &&
+      !_micHeld &&
+      !_sending;
+
+  /// Hello 안내는 첫 발화가 받아지기 전에만 보여 준다.
+  bool get _helloGuideActive => _showHelloGuide && _answeredTurnCount == 0;
+
+  /// 누르는 순간의 ‘Hello’도 첫 발화 전에만. 이후 홀드는 이 안내를 쓰지 않는다.
   bool get _showMicGuideBubble =>
+      _helloGuideActive &&
       _showMicGuide &&
-      ((_micGuide == _TutorialMicGuide.holding && _micHeld) ||
+      (_micGuide == _TutorialMicGuide.afterVoice ||
           _micGuide == _TutorialMicGuide.tooShort ||
           _micGuide == _TutorialMicGuide.noSpeech ||
-          (_showHelloGuide && _micGuide == _TutorialMicGuide.afterVoice));
+          (_micGuide == _TutorialMicGuide.holding && _micHeld));
+
+  String? _footerMicGuide(AppLocalizations l10n) {
+    if (_answeredTurnCount > 0) {
+      return _showSayItGuide ? l10n.tutorialRoleplayHintSayIt : null;
+    }
+    if (!_showMicGuideBubble) {
+      return _showSayItGuide ? l10n.tutorialRoleplayHintSayIt : null;
+    }
+    return _micGuideText(l10n);
+  }
 
   String _micGuideText(AppLocalizations l10n) {
     return switch (_micGuide) {
@@ -891,18 +928,25 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
                           ),
                           _PlayingLikeDisabledFooter(
                             loadingRotationController: _micLoadingRotation,
-                            micGuide: _showMicGuideBubble
-                                ? _micGuideText(l10n)
-                                : null,
+                            micGuide: _footerMicGuide(l10n),
+                            compactMicGuide:
+                                _showSayItGuide && !_showMicGuideBubble,
                             showHintCoach: _mustTapHint,
                             hintGuide: l10n.tutorialRoleplayHintGuide,
                             showMicPointer: _showMicPointer && _showHelloGuide,
-                            guideNearMic: !_showHelloGuide,
+                            guideNearMic: !_showHelloGuide || _showSayItGuide,
                             guideReserveText: l10n.tutorialRoleplayHoldHello,
-                            micEnabled: _micEnabled && !_mustTapHint,
+                            micEnabled: _micEnabled &&
+                                !_mustTapHint &&
+                                !_awaitingEnglishReveal,
                             micLoading: _sending,
                             hintEnabled: _hintCoachReady,
-                            showMicPulse: _micPulsing,
+                            hintSparkle: _answeredTurnCount == 2 &&
+                                _micEnabled &&
+                                !_sending &&
+                                !_micHeld &&
+                                _hintEnglish == null,
+                            showMicPulse: _micPulsing || _showSayItGuide,
                             onMicHoldStart: _onMicHoldStart,
                             onMicHoldEnd: _onMicHoldEnd,
                             onHintTap: _onHintTap,
@@ -1018,17 +1062,34 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
                         const SizedBox(height: 14),
                         KeyedSubtree(
                           key: _hintCardKey,
-                          child: _RoleplayHintCard(
-                          label: l10n.roleplayHintLabel,
-                          showAnswerLabel: l10n.roleplayHintShowAnswer,
-                          english: _hintEnglish!,
-                          native: _hintNative,
-                          answerOpen: _hintAnswerOpen,
-                          playingIndex: _hintPlayingIndex,
-                          onReveal: () => setState(() => _hintAnswerOpen = true),
-                          onWord: (index) => unawaited(_playHintSound(wordIndex: index)),
-                          onSentence: () => unawaited(_playHintSound()),
-                        ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              _RoleplayHintCard(
+                                label: l10n.roleplayHintLabel,
+                                showAnswerLabel: l10n.roleplayHintShowAnswer,
+                                english: _hintEnglish!,
+                                native: _hintNative,
+                                answerOpen: _hintAnswerOpen,
+                                pulseAnswerButton: _secondUtteranceHintCoach,
+                                playingIndex: _hintPlayingIndex,
+                                onReveal: () {
+                                  setState(() => _hintAnswerOpen = true);
+                                  _scrollHintIntoView();
+                                },
+                                onWord: (index) => unawaited(
+                                  _playHintSound(wordIndex: index),
+                                ),
+                                onSentence: () => unawaited(_playHintSound()),
+                              ),
+                              if (_awaitingEnglishReveal) ...[
+                                const SizedBox(height: 8),
+                                _BobbingGuideBubble(
+                                  text: l10n.tutorialRoleplayHintTapEnglish,
+                                ),
+                              ],
+                            ],
+                          ),
                         ),
                       ],
                       if (_showRecordingBubble) ...[
@@ -1092,6 +1153,9 @@ class _RoleplayHintCard extends StatelessWidget {
   final String english;
   final String? native;
   final bool answerOpen;
+
+  /// 두 번째 발화만. 세 번째 발화는 본편처럼 버튼 반짝임이 없다.
+  final bool pulseAnswerButton;
   final int? playingIndex;
   final VoidCallback onReveal;
   final void Function(int index)? onWord;
@@ -1103,11 +1167,33 @@ class _RoleplayHintCard extends StatelessWidget {
     required this.english,
     required this.native,
     required this.answerOpen,
+    this.pulseAnswerButton = false,
     required this.playingIndex,
     required this.onReveal,
     this.onWord,
     this.onSentence,
   });
+
+  Widget _answerButton(TextStyle? buttonStyle) {
+    final button = Material(
+      color: _button,
+      borderRadius: BorderRadius.circular(22),
+      child: InkWell(
+        onTap: onReveal,
+        borderRadius: BorderRadius.circular(22),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          child: Text(
+            showAnswerLabel,
+            style: buttonStyle,
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ),
+    );
+    if (!pulseAnswerButton) return button;
+    return _SparklingHintButton(child: button);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1179,29 +1265,13 @@ class _RoleplayHintCard extends StatelessWidget {
             ),
           if (!showEnglish)
             Padding(
-              padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
+              padding: pulseAnswerButton
+                  ? const EdgeInsets.fromLTRB(12, 8, 12, 22)
+                  : const EdgeInsets.fromLTRB(0, 10, 0, 10),
               child: Center(
                 child: FractionallySizedBox(
                   widthFactor: 0.9,
-                  child: Material(
-                    color: _button,
-                    borderRadius: BorderRadius.circular(22),
-                    child: InkWell(
-                      onTap: onReveal,
-                      borderRadius: BorderRadius.circular(22),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 12,
-                          horizontal: 16,
-                        ),
-                        child: Text(
-                          showAnswerLabel,
-                          style: buttonStyle,
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ),
-                  ),
+                  child: _answerButton(buttonStyle),
                 ),
               ),
             )
@@ -1445,7 +1515,7 @@ class _HintRingPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = _HintAimRingsState._innerStroke;
     final outer = Paint()
-      ..color = color.withValues(alpha: (opacity * 0.85).clamp(0.0, 1.0))
+      ..color = color.withValues(alpha: (opacity * 0.4).clamp(0.0, 1.0))
       ..style = PaintingStyle.stroke
       ..strokeWidth = _HintAimRingsState._outerStroke;
     canvas.drawCircle(center, innerRadius, inner);
@@ -1971,8 +2041,9 @@ class _GuideBubble extends StatelessWidget {
         ),
         Container(
           width: double.infinity,
-          constraints: const BoxConstraints(minHeight: 104),
-          padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
+          height: 104,
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          alignment: Alignment.center,
           decoration: BoxDecoration(
             color: _fill,
             borderRadius: BorderRadius.circular(20),
@@ -2046,6 +2117,143 @@ class _PinnedGuideSlot extends StatelessWidget {
           child: _MicGuideBubble(text: reserve),
         ),
         child,
+      ],
+    );
+  }
+}
+
+/// 영어 답변 버튼 테두리. `#087876` 30%를 기준으로 밝기가 출렁인다.
+class _SparklingHintButton extends StatefulWidget {
+  final Widget child;
+
+  const _SparklingHintButton({required this.child});
+
+  @override
+  State<_SparklingHintButton> createState() => _SparklingHintButtonState();
+}
+
+class _SparklingHintButtonState extends State<_SparklingHintButton>
+    with SingleTickerProviderStateMixin {
+  static const _ring = Color(0xFF087876);
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        final t = Curves.easeInOut.transform(_controller.value);
+        return DecoratedBox(
+          decoration: BoxDecoration(
+            color: _ring.withValues(alpha: 0.08 + 0.22 * t),
+            borderRadius: BorderRadius.circular(40),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+            child: child,
+          ),
+        );
+      },
+      child: widget.child,
+    );
+  }
+}
+
+/// 힌트 버튼 아래 안내. 꼬리는 위를 향하고 위아래로 뜬다.
+class _BobbingGuideBubble extends StatefulWidget {
+  final String text;
+
+  const _BobbingGuideBubble({required this.text});
+
+  @override
+  State<_BobbingGuideBubble> createState() => _BobbingGuideBubbleState();
+}
+
+class _BobbingGuideBubbleState extends State<_BobbingGuideBubble>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1300),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        final t = Curves.easeInOut.transform(_controller.value);
+        return Transform.translate(
+          offset: Offset(0, -7 * t),
+          child: child,
+        );
+      },
+      child: Center(child: _GuideChip(text: widget.text, tailUp: true)),
+    );
+  }
+}
+
+/// 짧은 안내 칩. 마이크 안내는 꼬리가 아래, 힌트 버튼 안내는 꼬리가 위.
+class _GuideChip extends StatelessWidget {
+  static const _fill = Color(0xFF0CABA8);
+
+  final String text;
+  final bool tailUp;
+
+  const _GuideChip({required this.text, this.tailUp = false});
+
+  @override
+  Widget build(BuildContext context) {
+    final style = Theme.of(context).textTheme.bodyLarge?.copyWith(
+          color: Colors.white,
+          fontWeight: FontWeight.w700,
+        );
+    final body = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+      decoration: BoxDecoration(
+        color: _fill,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Text(text, textAlign: TextAlign.center, style: style),
+    );
+    final tail = CustomPaint(
+      size: const Size(16, 8),
+      painter: tailUp
+          ? const _BubbleTailPainter(color: _fill)
+          : const _BubbleTailDownPainter(color: _fill),
+    );
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (tailUp) tail,
+        body,
+        if (!tailUp) tail,
       ],
     );
   }
@@ -2145,17 +2353,10 @@ class _BubbleTailPainter extends CustomPainter {
       oldDelegate.color != color;
 }
 
-/// `ic_mic_ripple_01`~`04` 루프. 흰 버튼 지름은 Playing 마이크(100)에 맞춤.
+/// 마이크 둘레 파동. 링 크기는 고정이고, 안쪽·바깥 흰 링의 투명도만 1초 박자로 움직인다.
 class _TutorialMicRipple extends StatefulWidget {
-  static const frames = [
-    'assets/images/tutorial/ic_mic_ripple_01.png',
-    'assets/images/tutorial/ic_mic_ripple_02.png',
-    'assets/images/tutorial/ic_mic_ripple_03.png',
-    'assets/images/tutorial/ic_mic_ripple_04.png',
-  ];
-
-  /// 에셋 462, 흰 원 지름 300 → 화면 마이크 100.
-  static const displaySize = 462 * roleplayMicDefaultSize / 300;
+  /// 흰 원 100 기준으로 바깥 링 끝까지의 칸.
+  static const displaySize = 154.0;
 
   const _TutorialMicRipple();
 
@@ -2172,7 +2373,7 @@ class _TutorialMicRippleState extends State<_TutorialMicRipple>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1400),
+      duration: const Duration(milliseconds: 1000),
     )..repeat();
   }
 
@@ -2187,16 +2388,170 @@ class _TutorialMicRippleState extends State<_TutorialMicRipple>
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, _) {
-        final index =
-            (_controller.value * _TutorialMicRipple.frames.length).floor() %
-            _TutorialMicRipple.frames.length;
-        return Image.asset(
-          _TutorialMicRipple.frames[index],
-          width: _TutorialMicRipple.displaySize,
-          height: _TutorialMicRipple.displaySize,
-          fit: BoxFit.contain,
+        return CustomPaint(
+          size: const Size.square(_TutorialMicRipple.displaySize),
+          painter: _MicPulseRingsPainter(_controller.value),
         );
       },
+    );
+  }
+}
+
+/// 10/19 영상. 링 크기는 고정. 안쪽 흰 링은 30%↔51%를 한 번에 두 번, 바깥 흰 링은 0↔30%.
+class _MicPulseRingsPainter extends CustomPainter {
+  static const _innerFloor = 77 / 255;
+  static const _innerPeak = 131 / 255;
+  static const _outerPeak = 77 / 255;
+
+  final double t;
+
+  const _MicPulseRingsPainter(this.t);
+
+  double _between(List<(double, double)> keys) {
+    if (t <= keys.first.$1) return keys.first.$2;
+    for (var i = 1; i < keys.length; i++) {
+      final a = keys[i - 1];
+      final b = keys[i];
+      if (t <= b.$1) {
+        final u = Curves.easeInOut.transform((t - a.$1) / (b.$1 - a.$1));
+        return a.$2 + (b.$2 - a.$2) * u;
+      }
+    }
+    return keys.last.$2;
+  }
+
+  void _band(Canvas canvas, Offset center, double inner, double outer, double alpha) {
+    if (alpha <= 0.01) return;
+    canvas.drawCircle(
+      center,
+      (inner + outer) / 2,
+      Paint()
+        ..color = Colors.white.withValues(alpha: alpha)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = outer - inner
+        ..isAntiAlias = true,
+    );
+  }
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final innerT = _between(const [
+      (0, 0),
+      (0.2, 1),
+      (0.5, 0),
+      (0.7, 1),
+      (1, 0),
+    ]);
+    final outerT = _between(const [
+      (0, 0),
+      (0.2, 1),
+      (0.7, 1),
+      (1, 0),
+    ]);
+    _band(
+      canvas,
+      center,
+      50,
+      65,
+      _innerFloor + (_innerPeak - _innerFloor) * innerT,
+    );
+    _band(canvas, center, 65, 77, _outerPeak * outerT);
+  }
+
+  @override
+  bool shouldRepaint(covariant _MicPulseRingsPainter oldDelegate) =>
+      oldDelegate.t != t;
+}
+
+/// 힌트 전구. 앞장은 기존 24 논리 픽셀. 세 번째 발화 차례에만 뒤를 반짝인다.
+class _HintBulb extends StatefulWidget {
+  final bool sparkle;
+
+  const _HintBulb({required this.sparkle});
+
+  @override
+  State<_HintBulb> createState() => _HintBulbState();
+}
+
+class _HintBulbState extends State<_HintBulb>
+    with SingleTickerProviderStateMixin {
+  static const _asset = 'assets/images/icons/lightball.png';
+
+  /// 기존 힌트 아이콘. 높이 24는 유지하고, 가로는 전구 비율 15.71.
+  static const _iconW = 15.71;
+  static const _iconH = 24.0;
+  static const _midW = 22.26;
+  static const _midH = 34.0;
+  static const _outerW = 28.8;
+  static const _outerH = 44.0;
+
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1400),
+    );
+    if (widget.sparkle) _controller.repeat();
+  }
+
+  @override
+  void didUpdateWidget(covariant _HintBulb oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.sparkle && !_controller.isAnimating) {
+      _controller.repeat();
+    } else if (!widget.sparkle && _controller.isAnimating) {
+      _controller.stop();
+      _controller.value = 0;
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  /// 뒤 아이콘은 최대 30%까지 밝아졌다가 다시 투명해진다.
+  double _glow(double t, double phase) {
+    final wave = math.sin(((t + phase) % 1) * math.pi);
+    return 0.30 * wave;
+  }
+
+  Widget _glowLayer(double width, double height, double opacity) {
+    return Opacity(
+      opacity: opacity.clamp(0, 1),
+      child: Image.asset(_asset, width: width, height: height),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final front = Image.asset(_asset, width: _iconW, height: _iconH);
+    return SizedBox(
+      width: 40,
+      height: 40,
+      child: widget.sparkle
+          ? AnimatedBuilder(
+              animation: _controller,
+              builder: (context, child) {
+                final t = _controller.value;
+                return Stack(
+                  clipBehavior: Clip.none,
+                  alignment: Alignment.center,
+                  children: [
+                    _glowLayer(_outerW, _outerH, _glow(t, 0)),
+                    _glowLayer(_midW, _midH, _glow(t, 0.28)),
+                    child!,
+                  ],
+                );
+              },
+              child: front,
+            )
+          : Center(child: front),
     );
   }
 }
@@ -2205,6 +2560,7 @@ class _TutorialMicRippleState extends State<_TutorialMicRipple>
 class _PlayingLikeDisabledFooter extends StatelessWidget {
   final AnimationController loadingRotationController;
   final String? micGuide;
+  final bool compactMicGuide;
   final bool showHintCoach;
   final String hintGuide;
   final bool showMicPointer;
@@ -2217,6 +2573,7 @@ class _PlayingLikeDisabledFooter extends StatelessWidget {
   final bool micEnabled;
   final bool micLoading;
   final bool hintEnabled;
+  final bool hintSparkle;
   final bool showMicPulse;
   final VoidCallback onMicHoldStart;
   final VoidCallback onHintTap;
@@ -2225,6 +2582,7 @@ class _PlayingLikeDisabledFooter extends StatelessWidget {
   const _PlayingLikeDisabledFooter({
     required this.loadingRotationController,
     this.micGuide,
+    this.compactMicGuide = false,
     this.showHintCoach = false,
     this.hintGuide = '',
     this.showMicPointer = false,
@@ -2233,11 +2591,22 @@ class _PlayingLikeDisabledFooter extends StatelessWidget {
     this.micEnabled = false,
     this.micLoading = false,
     this.hintEnabled = false,
+    this.hintSparkle = false,
     this.showMicPulse = false,
     required this.onMicHoldStart,
     required this.onMicHoldEnd,
     required this.onHintTap,
   });
+
+  /// 말하기 안내가 마이크 파동 위로 올라가게 하는 간격.
+  double get _gapAboveMic {
+    if (compactMicGuide && showMicPulse) {
+      const rippleOverflow =
+          (_TutorialMicRipple.displaySize - roleplayMicDefaultSize) / 2;
+      return rippleOverflow + 16;
+    }
+    return guideNearMic ? 12 : 48;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -2251,9 +2620,11 @@ class _PlayingLikeDisabledFooter extends StatelessWidget {
             if (micGuide != null) ...[
               _PinnedGuideSlot(
                 reserveText: guideNearMic ? null : guideReserveText,
-                child: _EnterFade(child: _MicGuideBubble(text: micGuide!)),
+                child: compactMicGuide
+                    ? _GuideChip(text: micGuide!)
+                    : _EnterFade(child: _MicGuideBubble(text: micGuide!)),
               ),
-              SizedBox(height: guideNearMic ? 12 : 48),
+              SizedBox(height: _gapAboveMic),
             ] else ...[
               const SizedBox(height: 24),
               const SizedBox(height: 10),
@@ -2309,17 +2680,7 @@ class _PlayingLikeDisabledFooter extends StatelessWidget {
                               opacity: hintEnabled ? 1 : 0.4,
                               child: GestureDetector(
                                 onTap: hintEnabled ? onHintTap : null,
-                                child: SizedBox(
-                                  width: 40,
-                                  height: 40,
-                                  child: Center(
-                                    child: Image.asset(
-                                      'assets/images/icons/lightball.png',
-                                      height: 24,
-                                      width: 24,
-                                    ),
-                                  ),
-                                ),
+                                child: _HintBulb(sparkle: hintSparkle),
                               ),
                             ),
                           ),
