@@ -471,6 +471,10 @@ class AppLocalizationsRu extends AppLocalizations {
       'Didn\'t catch that.\nTry saying \'Hello\' again.';
 
   @override
+  String get tutorialRoleplayHintGuide =>
+      'Не знаешь,\nчто сказать?\nНажми на подсказку!';
+
+  @override
   String get actionConfirm => 'Подтвердить';
 
   @override

@@ -183,6 +183,7 @@
   "tutorialRoleplayMicHolding": "‘Hello’",
   "tutorialRoleplayMicTooShort": "Hold the mic longer\nand say ‘Hello’",
   "tutorialRoleplayMicNoSpeech": "Didn't catch that.\nTry saying 'Hello' again.",
+  "tutorialRoleplayHintGuide": "不知道要說什麼？\n點一下提示！",
 
   "actionConfirm": "確認",
   "feedbackPlaceholder": "歡迎分享你的想法、建議或遇到的任何問題⋯⋯",

@@ -183,6 +183,7 @@
   "tutorialRoleplayMicHolding": "‘Hello’",
   "tutorialRoleplayMicTooShort": "Hold the mic longer\nand say ‘Hello’",
   "tutorialRoleplayMicNoSpeech": "Didn't catch that.\nTry saying 'Hello' again.",
+  "tutorialRoleplayHintGuide": "Weet je niet\nwat je moet zeggen?\nTik op de hint!",
 
   "actionConfirm": "Bevestigen",
   "feedbackPlaceholder": "Deel je mening, suggesties of problemen...",

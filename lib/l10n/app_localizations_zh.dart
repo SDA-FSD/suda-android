@@ -448,6 +448,9 @@ class AppLocalizationsZh extends AppLocalizations {
       'Didn\'t catch that.\nTry saying \'Hello\' again.';
 
   @override
+  String get tutorialRoleplayHintGuide => '不知道说什么？\n点一下提示！';
+
+  @override
   String get actionConfirm => '确认';
 
   @override
@@ -1619,6 +1622,9 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
       'Didn\'t catch that.\nTry saying \'Hello\' again.';
 
   @override
+  String get tutorialRoleplayHintGuide => '不知道说什么？\n点一下提示！';
+
+  @override
   String get actionConfirm => '确认';
 
   @override
@@ -2788,6 +2794,9 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   @override
   String get tutorialRoleplayMicNoSpeech =>
       'Didn\'t catch that.\nTry saying \'Hello\' again.';
+
+  @override
+  String get tutorialRoleplayHintGuide => '不知道要說什麼？\n點一下提示！';
 
   @override
   String get actionConfirm => '確認';

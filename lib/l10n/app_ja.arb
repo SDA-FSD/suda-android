@@ -183,6 +183,7 @@
   "tutorialRoleplayMicHolding": "‘Hello’",
   "tutorialRoleplayMicTooShort": "Hold the mic longer\nand say ‘Hello’",
   "tutorialRoleplayMicNoSpeech": "Didn't catch that.\nTry saying 'Hello' again.",
+  "tutorialRoleplayHintGuide": "言葉が浮かばないときは\nヒントをタップ！",
 
   "actionConfirm": "決定",
   "feedbackPlaceholder": "ご意見、ご要望、お困りの点などをお聞かせください…",

@@ -471,6 +471,10 @@ class AppLocalizationsId extends AppLocalizations {
       'Didn\'t catch that.\nTry saying \'Hello\' again.';
 
   @override
+  String get tutorialRoleplayHintGuide =>
+      'Bingung mau bilang apa?\nKetuk petunjuknya!';
+
+  @override
   String get actionConfirm => 'Konfirmasi';
 
   @override

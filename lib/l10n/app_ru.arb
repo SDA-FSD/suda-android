@@ -183,6 +183,7 @@
   "tutorialRoleplayMicHolding": "‘Hello’",
   "tutorialRoleplayMicTooShort": "Hold the mic longer\nand say ‘Hello’",
   "tutorialRoleplayMicNoSpeech": "Didn't catch that.\nTry saying 'Hello' again.",
+  "tutorialRoleplayHintGuide": "Не знаешь,\nчто сказать?\nНажми на подсказку!",
 
   "actionConfirm": "Подтвердить",
   "feedbackPlaceholder": "Расскажите, что вы думаете, предложите улучшение или сообщите о проблеме...",

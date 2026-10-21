@@ -18,6 +18,8 @@ class SudaTtsAudioPlayer {
 
   Stream<PlayerState> get playerStateStream => _player.playerStateStream;
 
+  bool get isPlaying => _player.playing;
+
   Future<void> stop() async {
     try {
       await _player.stop();

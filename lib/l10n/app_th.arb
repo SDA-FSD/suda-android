@@ -183,6 +183,7 @@
   "tutorialRoleplayMicHolding": "‘Hello’",
   "tutorialRoleplayMicTooShort": "Hold the mic longer\nand say ‘Hello’",
   "tutorialRoleplayMicNoSpeech": "Didn't catch that.\nTry saying 'Hello' again.",
+  "tutorialRoleplayHintGuide": "นึกไม่ออกเหรอ?\nแตะคำใบ้สิ!",
 
   "actionConfirm": "ยืนยัน",
   "feedbackPlaceholder": "แชร์ความคิดเห็น ข้อเสนอแนะ หรือปัญหาที่พบ...",

@@ -471,6 +471,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'Didn\'t catch that.\nTry saying \'Hello\' again.';
 
   @override
+  String get tutorialRoleplayHintGuide =>
+      '¿No sabes qué decir?\n¡Toca la pista!';
+
+  @override
   String get actionConfirm => 'Confirmar';
 
   @override
@@ -1712,6 +1716,10 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
   @override
   String get tutorialRoleplayMicNoSpeech =>
       'Didn\'t catch that.\nTry saying \'Hello\' again.';
+
+  @override
+  String get tutorialRoleplayHintGuide =>
+      '¿No sabes qué decir?\n¡Toca la pista!';
 
   @override
   String get actionConfirm => 'Confirmar';

@@ -224,12 +224,11 @@ class _HoldCirclePainter extends CustomPainter {
       size.height * (TutorialPointer.tipY + 0.06 * press),
     );
     final base = size.shortestSide * 0.09;
-    final fillIn = ((press - 0.12) / 0.2).clamp(0.0, 1.0);
     final fillRadius = base * 0.92;
     canvas.drawCircle(
       center,
       fillRadius,
-      Paint()..color = TutorialPointer.color.withValues(alpha: fillIn),
+      Paint()..color = TutorialPointer.color,
     );
 
     const ringStart = 0.24;
@@ -238,15 +237,13 @@ class _HoldCirclePainter extends CustomPainter {
     final local =
         ((progress - ringStart) / (ringEnd - ringStart)).clamp(0.0, 1.0);
     final grow = Curves.easeOut.transform(local);
-    final fade = (1.0 - local) * (1.0 - local * 0.15);
-    if (fade < 0.02) return;
     canvas.drawCircle(
       center,
       fillRadius + base * 2.6 * grow,
       Paint()
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 2.2 * (1.0 - local * 0.4)
-        ..color = TutorialPointer.color.withValues(alpha: fade),
+        ..strokeWidth = 2.2
+        ..color = TutorialPointer.color,
     );
   }
 

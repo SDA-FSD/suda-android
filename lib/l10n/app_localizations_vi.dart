@@ -472,6 +472,9 @@ class AppLocalizationsVi extends AppLocalizations {
       'Didn\'t catch that.\nTry saying \'Hello\' again.';
 
   @override
+  String get tutorialRoleplayHintGuide => 'Chưa biết nói gì?\nChạm vào gợi ý!';
+
+  @override
   String get actionConfirm => 'Xác nhận';
 
   @override
