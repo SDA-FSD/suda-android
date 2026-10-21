@@ -421,18 +421,6 @@ class SudaApiClient {
     );
   }
 
-  static Future<TtsResultDto> getRpS2UserHistoryFeedbackAudio({
-    required String accessToken,
-    required int rpUserHistoryId,
-    required int rpMsgId,
-  }) {
-    return SeriesApi.getUserHistoryFeedbackAudio(
-      accessToken: accessToken,
-      rpUserHistoryId: rpUserHistoryId,
-      rpMsgId: rpMsgId,
-    );
-  }
-
   static Future<TtsResultDto> getRpS2UserHistoryImprovedSentenceAudio({
     required String accessToken,
     required int rpUserHistoryId,

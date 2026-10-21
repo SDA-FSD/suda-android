@@ -97,7 +97,6 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
   bool _keyExpressionBookmarkInFlight = false;
   int? _speechFeedbackActiveMsgId;
   bool _speechFeedbackIsPlaying = false;
-  int? _feedbackTtsMsgId;
   int? _improvedSentenceMsgId;
   bool _improvedSentenceIsPlaying = false;
 
@@ -728,7 +727,6 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
       _keyExpressionIsPlaying = false;
       _speechFeedbackActiveMsgId = null;
       _speechFeedbackIsPlaying = false;
-      _feedbackTtsMsgId = null;
       _improvedSentenceMsgId = null;
       _improvedSentenceIsPlaying = false;
     });
@@ -819,7 +817,6 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
       _keyExpressionIsPlaying = false;
       _speechFeedbackActiveMsgId = rpMsgId;
       _speechFeedbackIsPlaying = false;
-      _feedbackTtsMsgId = null;
       _improvedSentenceMsgId = null;
       _improvedSentenceIsPlaying = false;
     });
@@ -921,7 +918,6 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
       _keyExpressionIsPlaying = false;
       _speechFeedbackActiveMsgId = null;
       _speechFeedbackIsPlaying = false;
-      _feedbackTtsMsgId = null;
       _improvedSentenceMsgId = rpMsgId;
       _improvedSentenceIsPlaying = false;
     });
@@ -986,16 +982,6 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
     }
   }
 
-  Future<void> _stopFeedbackTts(int rpMsgId) async {
-    if (_feedbackTtsMsgId != rpMsgId) return;
-    _keyExpressionMegaphoneSeq++;
-    _keyExpressionAudioSub?.cancel();
-    _keyExpressionAudioSub = null;
-    await _ttsPlayer.stop();
-    if (!mounted) return;
-    setState(() => _feedbackTtsMsgId = null);
-  }
-
   Future<bool> _loadAndPlayFeedbackAudio(
     int rpMsgId, {
     required VoidCallback onReadyToPlay,
@@ -1014,7 +1000,6 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
       _keyExpressionIsPlaying = false;
       _speechFeedbackActiveMsgId = null;
       _speechFeedbackIsPlaying = false;
-      _feedbackTtsMsgId = null;
       _improvedSentenceMsgId = null;
       _improvedSentenceIsPlaying = false;
     });
@@ -1029,7 +1014,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
     }
 
     try {
-      final tts = await SudaApiClient.getRpS2UserHistoryFeedbackAudio(
+      final tts = await SudaApiClient.getRpS2UserHistoryImprovedSentenceAudio(
         accessToken: token,
         rpUserHistoryId: historyId,
         rpMsgId: rpMsgId,
@@ -1050,7 +1035,10 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
         return false;
       }
 
-      setState(() => _feedbackTtsMsgId = rpMsgId);
+      setState(() {
+        _improvedSentenceMsgId = rpMsgId;
+        _improvedSentenceIsPlaying = true;
+      });
       _keyExpressionAudioSub =
           _ttsPlayer.playerStateStream.listen((state) {
         if (state.processingState == ProcessingState.completed) {
@@ -1059,7 +1047,10 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
           if (!mounted || seq != _keyExpressionMegaphoneSeq) {
             return;
           }
-          setState(() => _feedbackTtsMsgId = null);
+          setState(() {
+            _improvedSentenceMsgId = null;
+            _improvedSentenceIsPlaying = false;
+          });
         }
       });
       onReadyToPlay();
@@ -1071,6 +1062,10 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
       if (!mounted || seq != _keyExpressionMegaphoneSeq) {
         return false;
       }
+      setState(() {
+        _improvedSentenceMsgId = null;
+        _improvedSentenceIsPlaying = false;
+      });
       return false;
     }
   }
@@ -1313,7 +1308,6 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
             profileHistory: widget.profileHistory,
             onUnlockedAfterPaywall: _refreshUserHistoryAfterSpeechFeedbackUnlock,
             onLoadAndPlayFeedbackAudio: _loadAndPlayFeedbackAudio,
-            onStopFeedbackAudio: _stopFeedbackTts,
             onStopImprovedAudio: _stopImprovedSentence,
             userSpeech: message.content ?? '',
             audioInputEnabled: message.audioInputYn == 'Y',
@@ -1363,7 +1357,6 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
           profileHistory: widget.profileHistory,
           onUnlockedAfterPaywall: _refreshUserHistoryAfterSpeechFeedbackUnlock,
           onLoadAndPlayFeedbackAudio: _loadAndPlayFeedbackAudio,
-          onStopFeedbackAudio: _stopFeedbackTts,
           onStopImprovedAudio: _stopImprovedSentence,
           userSpeech: message.content ?? '',
           audioInputEnabled: message.audioInputYn == 'Y',
@@ -1892,7 +1885,6 @@ class _SpeechFeedbackRow extends StatefulWidget {
     required this.profileHistory,
     required this.onUnlockedAfterPaywall,
     required this.onLoadAndPlayFeedbackAudio,
-    required this.onStopFeedbackAudio,
     required this.onStopImprovedAudio,
     required this.userSpeech,
     required this.audioInputEnabled,
@@ -1914,7 +1906,6 @@ class _SpeechFeedbackRow extends StatefulWidget {
     int rpMsgId, {
     required VoidCallback onReadyToPlay,
   }) onLoadAndPlayFeedbackAudio;
-  final Future<void> Function(int rpMsgId) onStopFeedbackAudio;
   final Future<void> Function(int rpMsgId) onStopImprovedAudio;
   final String userSpeech;
   final bool audioInputEnabled;
@@ -1956,7 +1947,6 @@ class _SpeechFeedbackRowState extends State<_SpeechFeedbackRow> {
     if (_expanded) {
       final rpMsgId = widget.rpMsgId;
       if (rpMsgId != null) {
-        unawaited(widget.onStopFeedbackAudio(rpMsgId));
         unawaited(widget.onStopImprovedAudio(rpMsgId));
       }
       setState(() => _expanded = false);
@@ -2003,6 +1993,12 @@ class _SpeechFeedbackRowState extends State<_SpeechFeedbackRow> {
 
     final rpMsgId = widget.rpMsgId;
     if (rpMsgId == null) {
+      setState(() => _expanded = true);
+      return;
+    }
+
+    final improvedSentence = widget.feedback?.improvedSentence?.trim();
+    if (improvedSentence == null || improvedSentence.isEmpty) {
       setState(() => _expanded = true);
       return;
     }

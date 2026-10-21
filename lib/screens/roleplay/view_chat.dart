@@ -59,7 +59,6 @@ class _ViewChatScreenState extends State<ViewChatScreen> {
   bool _isAutoPlaying = false;
   int? _playingMsgId;
   int? _loadingMsgId;
-  int? _feedbackTtsMsgId;
   int? _improvedMsgId;
   bool _improvedPlaying = false;
 
@@ -106,7 +105,6 @@ class _ViewChatScreenState extends State<ViewChatScreen> {
       _isAutoPlaying = false;
       _playingMsgId = null;
       _loadingMsgId = null;
-      _feedbackTtsMsgId = null;
       _improvedMsgId = null;
       _improvedPlaying = false;
     });
@@ -170,7 +168,6 @@ class _ViewChatScreenState extends State<ViewChatScreen> {
     setState(() {
       _playingMsgId = msgId;
       _loadingMsgId = msgId;
-      _feedbackTtsMsgId = null;
       _improvedMsgId = null;
       _improvedPlaying = false;
     });
@@ -300,7 +297,6 @@ class _ViewChatScreenState extends State<ViewChatScreen> {
       _isAutoPlaying = false;
       _playingMsgId = null;
       _loadingMsgId = null;
-      _feedbackTtsMsgId = null;
       _improvedMsgId = null;
       _improvedPlaying = false;
     });
@@ -325,7 +321,6 @@ class _ViewChatScreenState extends State<ViewChatScreen> {
     setState(() {
       _playingMsgId = null;
       _loadingMsgId = null;
-      _feedbackTtsMsgId = null;
       _improvedMsgId = rpMsgId;
       _improvedPlaying = false;
     });
@@ -387,11 +382,6 @@ class _ViewChatScreenState extends State<ViewChatScreen> {
     }
   }
 
-  Future<void> _stopFeedbackTts(int rpMsgId) async {
-    if (_feedbackTtsMsgId != rpMsgId) return;
-    await _stopPlayback();
-  }
-
   Future<bool> _loadAndPlayFeedbackAudio(
     int rpMsgId, {
     required VoidCallback onReadyToPlay,
@@ -409,7 +399,6 @@ class _ViewChatScreenState extends State<ViewChatScreen> {
     setState(() {
       _playingMsgId = null;
       _loadingMsgId = null;
-      _feedbackTtsMsgId = null;
       _improvedMsgId = null;
       _improvedPlaying = false;
     });
@@ -420,7 +409,7 @@ class _ViewChatScreenState extends State<ViewChatScreen> {
     if (historyId == null || token == null) return false;
 
     try {
-      final tts = await SudaApiClient.getRpS2UserHistoryFeedbackAudio(
+      final tts = await SudaApiClient.getRpS2UserHistoryImprovedSentenceAudio(
         accessToken: token,
         rpUserHistoryId: historyId,
         rpMsgId: rpMsgId,
@@ -435,13 +424,19 @@ class _ViewChatScreenState extends State<ViewChatScreen> {
       if (!mounted || seq != _playSeq) return false;
       if (source == null) return false;
 
-      setState(() => _feedbackTtsMsgId = rpMsgId);
+      setState(() {
+        _improvedMsgId = rpMsgId;
+        _improvedPlaying = true;
+      });
       _audioSub = _ttsPlayer.playerStateStream.listen((state) {
         if (state.processingState == ProcessingState.completed) {
           _audioSub?.cancel();
           _audioSub = null;
           if (!mounted || seq != _playSeq) return;
-          setState(() => _feedbackTtsMsgId = null);
+          setState(() {
+            _improvedMsgId = null;
+            _improvedPlaying = false;
+          });
         }
       });
       onReadyToPlay();
@@ -451,6 +446,10 @@ class _ViewChatScreenState extends State<ViewChatScreen> {
       _audioSub?.cancel();
       _audioSub = null;
       if (!mounted || seq != _playSeq) return false;
+      setState(() {
+        _improvedMsgId = null;
+        _improvedPlaying = false;
+      });
       return false;
     }
   }
@@ -544,7 +543,6 @@ class _ViewChatScreenState extends State<ViewChatScreen> {
           isPlaying: message.id != null && _playingMsgId == message.id,
           onAudioTap: () => unawaited(_onPlayTap(message)),
           onLoadAndPlayFeedbackAudio: _loadAndPlayFeedbackAudio,
-          onStopFeedbackAudio: _stopFeedbackTts,
           improvedFetching:
               message.id != null &&
               _improvedMsgId == message.id &&
@@ -752,7 +750,6 @@ class _ViewChatUserCard extends StatefulWidget {
     required this.isPlaying,
     required this.onAudioTap,
     required this.onLoadAndPlayFeedbackAudio,
-    required this.onStopFeedbackAudio,
     required this.improvedFetching,
     required this.improvedPlaying,
     required this.onImprovedTap,
@@ -772,7 +769,6 @@ class _ViewChatUserCard extends StatefulWidget {
     int rpMsgId, {
     required VoidCallback onReadyToPlay,
   }) onLoadAndPlayFeedbackAudio;
-  final Future<void> Function(int rpMsgId) onStopFeedbackAudio;
   final bool improvedFetching;
   final bool improvedPlaying;
   final VoidCallback onImprovedTap;
@@ -825,7 +821,6 @@ class _ViewChatUserCardState extends State<_ViewChatUserCard> {
     if (_expanded) {
       final rpMsgId = widget.message.id;
       if (rpMsgId != null) {
-        unawaited(widget.onStopFeedbackAudio(rpMsgId));
         unawaited(widget.onStopImprovedAudio(rpMsgId));
       }
       setState(() => _expanded = false);
@@ -846,6 +841,11 @@ class _ViewChatUserCardState extends State<_ViewChatUserCard> {
     if (_feedbackAudioLoading) return;
 
     if (rpMsgId == null) {
+      setState(() => _expanded = true);
+      return;
+    }
+
+    if (!_hasImprovedSentence) {
       setState(() => _expanded = true);
       return;
     }

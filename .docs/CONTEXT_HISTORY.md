@@ -41,7 +41,7 @@
 
 - **에너지 팝업 Enable Notifications(2026-08-11):** detail `showEnablePushFreeChargeYn` + screen home/opening/opening_insufficient. impression `enable_push_free_charge`. 완료 시 팝업 경로만 토스트 + 제거 애니.
 - **docs 경량화(2026-08-11):** FPM URL → `CONTEXT_FPM_CUSTOM_URL.md`. `CONTEXT_APPLE.md` 삭제(시뮬·실패표는 `CONTEXT.md` §2). `CONTEXT_IOS.md`는 남은 이슈만. S1은 한 줄 요약. HISTORY 아카이브 분리.
-- **Speech Feedback 펼침 TTS(2026-08-11):** `GET …/feedbacks/{rpMsgId}/audio`. 펼침 허용 시 로딩 스피너 후 펼침+재생, 실패 시 펼침만.
+- **Speech Feedback 펼침 재생:** `improvedSentence`가 있으면 `GET …/feedbacks/{rpMsgId}/improved-sentence/audio`. 스피너 후 펼침+재생(메가폰 fill). 문장 없음·실패는 펼침만. 사용자 언어 본문 TTS API는 구버전 앱 전용.
 - **Change Plan 월→연 ONLY + WITHOUT_PRORATION(2026-08):** 월간 구독자만. `ReplacementMode.withoutProration`.
 - **Opening 마이크(2026-08):** 자동 재개 없음. Start→status/request→영구거부 시 설정 안내. `PERMISSION_MICROPHONE=1`.
 - **Sign in with Apple(2026-07):** `POST /v1/auth/apple`. iOS local/dev/prd, AOS dev/prd. local·stg AOS 미지원.
