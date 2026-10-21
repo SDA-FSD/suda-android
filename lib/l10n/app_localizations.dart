@@ -941,6 +941,24 @@ abstract class AppLocalizations {
   /// **'You\'re moving to a new neighborhood today. You hop into a taxi, where a friendly driver named Betty greets you. 🚕'**
   String get tutorialRoleplayNarration1;
 
+  /// No description provided for @tutorialRoleplayNarrationArrival.
+  ///
+  /// In en, this message translates to:
+  /// **'The taxi arrives at your destination.'**
+  String get tutorialRoleplayNarrationArrival;
+
+  /// No description provided for @tutorialRoleplayResultSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'First conversation complete!'**
+  String get tutorialRoleplayResultSubtitle;
+
+  /// No description provided for @tutorialRoleplayResultContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep It Going!'**
+  String get tutorialRoleplayResultContinue;
+
   /// No description provided for @tutorialRoleplayBettyLine1.
   ///
   /// In en, this message translates to:
@@ -982,6 +1000,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Not sure what to say?\nTap the hint!'**
   String get tutorialRoleplayHintGuide;
+
+  /// No description provided for @tutorialRoleplayHintTapEnglish.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to see the English answer'**
+  String get tutorialRoleplayHintTapEnglish;
+
+  /// No description provided for @tutorialRoleplayHintSayIt.
+  ///
+  /// In en, this message translates to:
+  /// **'Now, say it!'**
+  String get tutorialRoleplayHintSayIt;
 
   /// No description provided for @actionConfirm.
   ///

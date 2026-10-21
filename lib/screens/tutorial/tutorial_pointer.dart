@@ -209,7 +209,7 @@ double _holdPress(double t) {
   return 1 - Curves.easeOut.transform((t - 0.78) / 0.22);
 }
 
-/// 홀드: 누르는 동안 채움 원은 손끝에 머물고, 테두리 원은 그 원에서 퍼져 사라진다.
+/// 홀드: 손가락이 누르는 만큼 채움 원이 작았다가 커지고, 테두리 원은 그 원에서 퍼져 사라진다.
 class _HoldCirclePainter extends CustomPainter {
   final double progress;
 
@@ -218,13 +218,13 @@ class _HoldCirclePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final press = _holdPress(progress);
-    if (press < 0.12) return;
+    if (press < 0.02) return;
     final center = Offset(
       size.width * TutorialPointer.tipX,
       size.height * (TutorialPointer.tipY + 0.06 * press),
     );
     final base = size.shortestSide * 0.09;
-    final fillRadius = base * 0.92;
+    final fillRadius = base * (0.34 + 0.58 * press);
     canvas.drawCircle(
       center,
       fillRadius,

@@ -177,6 +177,9 @@
   "tutorialRoleplayGuideMissionMain": "Confira suas missões primeiro!",
   "tutorialRoleplayGuideMissionTapContinue": "Toque para continuar",
   "tutorialRoleplayNarration1": "Hoje você vai se mudar para um novo bairro. Você entra em um táxi e é recebido por Betty, uma motorista simpática. 🚕",
+  "tutorialRoleplayNarrationArrival": "O táxi chega ao seu destino.",
+  "tutorialRoleplayResultSubtitle": "Primeira conversa concluída!",
+  "tutorialRoleplayResultContinue": "Vamos continuar!",
   "tutorialRoleplayBettyLine1": "Hi there! Hop in!",
   "tutorialRoleplayBettyLine1Translation": "Oi! Pode entrar!",
   "tutorialRoleplayHoldHello": "Aperte e segure\no microfone.\nDiga ‘Hello’ e solte.",
@@ -184,6 +187,8 @@
   "tutorialRoleplayMicTooShort": "Segure o microfone\npor mais tempo e\ndiga ‘Hello’",
   "tutorialRoleplayMicNoSpeech": "Não conseguimos ouvir.\nTente dizer 'Hello' de novo.",
   "tutorialRoleplayHintGuide": "Não sabe o que dizer?\nToque na dica!",
+  "tutorialRoleplayHintTapEnglish": "Toque para ver a resposta em inglês",
+  "tutorialRoleplayHintSayIt": "Sua vez de falar!",
 
   "actionConfirm": "Confirmar",
   "feedbackPlaceholder": "Compartilhe seus pensamentos, sugestões ou problemas que você encontrou...",

@@ -405,70 +405,85 @@ class AppLocalizationsAr extends AppLocalizations {
   String get tutorialIntroStart => 'ابدأ البرنامج التعليمي';
 
   @override
-  String get tutorialRoleplayTitle => 'Your First Conversation';
+  String get tutorialRoleplayTitle => 'محادثتك الأولى';
 
   @override
-  String get tutorialRoleplaySkip => 'Skip';
+  String get tutorialRoleplaySkip => 'تخطي';
 
   @override
-  String get tutorialRoleplaySkipTitle => 'Skip the tutorial?';
+  String get tutorialRoleplaySkipTitle => 'هل تريد تخطي البرنامج التعليمي؟';
 
   @override
   String get tutorialRoleplaySkipBody =>
-      'If you skip, you won\'t receive\nthe tutorial reward.';
+      'إذا تخطيته، فلن تحصل على\nمكافأة البرنامج التعليمي.';
 
   @override
-  String get tutorialRoleplaySkipConfirm => 'Skip Tutorial';
+  String get tutorialRoleplaySkipConfirm => 'تخطي البرنامج التعليمي';
 
   @override
-  String get tutorialRoleplaySkipKeepGoing => 'Keep Going';
+  String get tutorialRoleplaySkipKeepGoing => 'متابعة';
 
   @override
-  String get tutorialRoleplayMissions => 'Missions';
+  String get tutorialRoleplayMissions => 'المهام';
 
   @override
-  String get tutorialRoleplayMission1 => 'Greet the taxi driver';
+  String get tutorialRoleplayMission1 => 'ألقِ التحية على سائق التاكسي';
 
   @override
-  String get tutorialRoleplayMission2 => 'Tell the driver where you\'re going';
+  String get tutorialRoleplayMission2 => 'أخبر السائق إلى أين تذهب';
 
   @override
-  String get tutorialRoleplayMission3 => 'Say why you\'re going there';
+  String get tutorialRoleplayMission3 => 'قل لماذا تذهب إلى هناك';
 
   @override
-  String get tutorialRoleplayGuideMissionMain => 'Check your missions first!';
+  String get tutorialRoleplayGuideMissionMain => 'راجع مهامك أولًا!';
 
   @override
-  String get tutorialRoleplayGuideMissionTapContinue => 'Tap to continue';
+  String get tutorialRoleplayGuideMissionTapContinue => 'اضغط للمتابعة';
 
   @override
   String get tutorialRoleplayNarration1 =>
-      'You\'re moving to a new neighborhood today. You hop into a taxi, where a friendly driver named Betty greets you. 🚕';
+      'اليوم تنتقل إلى حي جديد. تركب تاكسيًا، فترحب بك بتي، السائقة اللطيفة. 🚕';
+
+  @override
+  String get tutorialRoleplayNarrationArrival => 'تصل سيارة الأجرة إلى وجهتك.';
+
+  @override
+  String get tutorialRoleplayResultSubtitle => 'اكتملت المحادثة الأولى!';
+
+  @override
+  String get tutorialRoleplayResultContinue => 'لنواصل!';
 
   @override
   String get tutorialRoleplayBettyLine1 => 'Hi there! Hop in!';
 
   @override
-  String get tutorialRoleplayBettyLine1Translation => '';
+  String get tutorialRoleplayBettyLine1Translation => 'مرحبًا! تفضل بالركوب!';
 
   @override
   String get tutorialRoleplayHoldHello =>
-      'Press and hold\nthe mic button.\nSay ‘Hello’ and release.';
+      'اضغط زر الميكروفون\nمع الاستمرار.\nقل ‘Hello’ ثم ارفع إصبعك.';
 
   @override
   String get tutorialRoleplayMicHolding => '‘Hello’';
 
   @override
   String get tutorialRoleplayMicTooShort =>
-      'Hold the mic longer\nand say ‘Hello’';
+      'اضغط الميكروفون لمدة أطول\nوقل ‘Hello’';
 
   @override
   String get tutorialRoleplayMicNoSpeech =>
-      'Didn\'t catch that.\nTry saying \'Hello\' again.';
+      'لم نسمعك.\nحاول قول ‘Hello’ مرة أخرى.';
 
   @override
   String get tutorialRoleplayHintGuide =>
       'مش عارف تقول إيه؟\nاضغط على التلميح!';
+
+  @override
+  String get tutorialRoleplayHintTapEnglish => 'اضغط لرؤية الإجابة بالإنجليزية';
+
+  @override
+  String get tutorialRoleplayHintSayIt => 'الآن تحدث!';
 
   @override
   String get actionConfirm => 'تأكيد';
