@@ -428,6 +428,15 @@ class AppLocalizationsJa extends AppLocalizations {
       '今日は新しい街へ引っ越す日です。タクシーに乗ると、親切な運転手のベティが明るくあいさつしてくれます。 🚕';
 
   @override
+  String get tutorialRoleplayNarrationArrival => 'タクシーが目的地に到着しました。';
+
+  @override
+  String get tutorialRoleplayResultSubtitle => '初めての会話が終わりました！';
+
+  @override
+  String get tutorialRoleplayResultContinue => 'このまま話してみましょう！';
+
+  @override
   String get tutorialRoleplayBettyLine1 => 'Hi there! Hop in!';
 
   @override

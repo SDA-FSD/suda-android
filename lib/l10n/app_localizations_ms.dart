@@ -452,6 +452,16 @@ class AppLocalizationsMs extends AppLocalizations {
       'Hari ini anda berpindah ke kawasan baharu. Anda menaiki teksi dan Betty, pemandu yang mesra, menyapa anda. 🚕';
 
   @override
+  String get tutorialRoleplayNarrationArrival =>
+      'Teksi tiba di destinasi anda.';
+
+  @override
+  String get tutorialRoleplayResultSubtitle => 'Perbualan pertama selesai!';
+
+  @override
+  String get tutorialRoleplayResultContinue => 'Jom teruskan!';
+
+  @override
   String get tutorialRoleplayBettyLine1 => 'Hi there! Hop in!';
 
   @override

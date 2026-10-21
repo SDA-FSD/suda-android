@@ -452,6 +452,17 @@ class AppLocalizationsIt extends AppLocalizations {
       'Oggi ti trasferisci in un nuovo quartiere. Sali su un taxi e Betty, un\'autista cordiale, ti saluta. 🚕';
 
   @override
+  String get tutorialRoleplayNarrationArrival =>
+      'Il taxi arriva a destinazione.';
+
+  @override
+  String get tutorialRoleplayResultSubtitle =>
+      'Prima conversazione completata!';
+
+  @override
+  String get tutorialRoleplayResultContinue => 'Continuiamo!';
+
+  @override
   String get tutorialRoleplayBettyLine1 => 'Hi there! Hop in!';
 
   @override

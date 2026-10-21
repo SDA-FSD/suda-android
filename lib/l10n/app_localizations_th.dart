@@ -442,6 +442,15 @@ class AppLocalizationsTh extends AppLocalizations {
       'วันนี้คุณย้ายไปอยู่ย่านใหม่ คุณขึ้นแท็กซี่ แล้วเบ็ตตี้ คนขับที่เป็นมิตร ก็ทักทายคุณ 🚕';
 
   @override
+  String get tutorialRoleplayNarrationArrival => 'แท็กซี่มาถึงจุดหมายแล้ว';
+
+  @override
+  String get tutorialRoleplayResultSubtitle => 'จบการสนทนาแรกแล้ว!';
+
+  @override
+  String get tutorialRoleplayResultContinue => 'พูดต่อกันเลย!';
+
+  @override
   String get tutorialRoleplayBettyLine1 => 'Hi there! Hop in!';
 
   @override

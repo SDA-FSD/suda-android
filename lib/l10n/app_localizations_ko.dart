@@ -428,6 +428,15 @@ class AppLocalizationsKo extends AppLocalizations {
       '오늘은 새로운 동네로 이사 가는 날이에요. 택시에 올라타자 친절한 기사 베티가 반갑게 인사합니다. 🚕';
 
   @override
+  String get tutorialRoleplayNarrationArrival => '택시가 목적지에 도착했습니다.';
+
+  @override
+  String get tutorialRoleplayResultSubtitle => '첫 대화를 성공적으로 마쳤어요!';
+
+  @override
+  String get tutorialRoleplayResultContinue => '더 말하러 가기';
+
+  @override
   String get tutorialRoleplayBettyLine1 => 'Hi there! Hop in!';
 
   @override

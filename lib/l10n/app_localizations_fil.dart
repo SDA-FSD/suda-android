@@ -457,6 +457,16 @@ class AppLocalizationsFil extends AppLocalizations {
       'Ngayon, lilipat ka sa bagong lugar. Sumakay ka ng taxi at binabati ka ni Betty, isang mabait na drayber. 🚕';
 
   @override
+  String get tutorialRoleplayNarrationArrival =>
+      'Dumating na ang taxi sa iyong destinasyon.';
+
+  @override
+  String get tutorialRoleplayResultSubtitle => 'Tapos na ang unang usapan!';
+
+  @override
+  String get tutorialRoleplayResultContinue => 'Ituloy natin!';
+
+  @override
   String get tutorialRoleplayBettyLine1 => 'Hi there! Hop in!';
 
   @override

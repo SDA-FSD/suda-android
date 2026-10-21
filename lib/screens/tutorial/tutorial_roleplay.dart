@@ -23,6 +23,7 @@ import '../../widgets/roleplay_mic_button_area.dart';
 import '../../widgets/roleplay_mission_panel.dart';
 import '../../widgets/roleplay_turn_bar_area.dart';
 import 'tutorial_pointer.dart';
+import 'tutorial_result.dart';
 import 'tutorial_roleplay_backdrop.dart';
 
 enum _TutorialRpStage { missionGuide, playing }
@@ -75,6 +76,7 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
   bool _showMissionCompletedFlash = false;
   int _flashMissionIndex = 0;
   Timer? _missionCompleteTimer;
+  Timer? _roleplayEndTimer;
   String? _sessionId;
   int _lastAiMsgId = 1;
   bool _sending = false;
@@ -85,6 +87,7 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
   bool _stopRequested = false;
   bool _stopCancel = false;
   bool _showHelloGuide = true;
+  bool _showResult = false;
   String? _hintEnglish;
   String? _hintNative;
   final GlobalKey _hintCardKey = GlobalKey();
@@ -174,6 +177,7 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
     _blurUi.dispose();
     _micLoadingRotation.dispose();
     _missionCompleteTimer?.cancel();
+    _roleplayEndTimer?.cancel();
     super.dispose();
   }
 
@@ -523,21 +527,25 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
         sessionId: sessionId,
       );
       var missionJustCompleted = false;
+      final ending = _answeredTurnCount + 1 >= _turnCount;
       final aiLine = _TutorialLine.ai(aiText);
       setState(() {
         _sending = false;
         _lines.add(_TutorialLine.user(response.userText ?? ''));
-        if ((response.narration ?? '').isNotEmpty) {
+        if (!ending && (response.narration ?? '').isNotEmpty) {
           _lines.add(_TutorialLine.narration(response.narration!));
         }
         _lines.add(aiLine);
         _answeredTurnCount = (_answeredTurnCount + 1).clamp(0, _turnCount);
         final done = response.missionCompletedIndex;
-        if (done != null && done >= 0 && done == _completedMissions) {
+        if (done != null &&
+            done >= 0 &&
+            done < _turnCount &&
+            !_completedMissionIndexes.contains(done)) {
           _completedMissionIndexes.add(done);
           _flashMissionIndex = done;
           _showMissionCompletedFlash = true;
-          _completedMissions = done + 1;
+          _completedMissions = _completedMissionIndexes.length;
           missionJustCompleted = true;
         }
         _showHelloGuide = false;
@@ -565,17 +573,11 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
         debugPrint('[DEBUG] tutorial ai audio: $e');
       }
       if (!mounted) return;
-      await _armMicSession();
-      if (!mounted) return;
       if (_answeredTurnCount >= _turnCount) {
-        setState(() {
-          _sending = false;
-          _micEnabled = false;
-          _micPulsing = false;
-          _showRecordingBubble = false;
-        });
+        await _finishAfterLastVoice();
         return;
       }
+      await _armMicSession();
       _restoreMicGuide(
         _TutorialMicGuide.afterVoice,
         revealHint: armHint,
@@ -593,6 +595,34 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
     } finally {
       if (_micLoadingRotation.isAnimating) _micLoadingRotation.stop();
     }
+  }
+
+  /// 마지막 AI 음성 뒤에 도착 나레이션을 붙이고, 2초 뒤 롤플레이를 끝낸다.
+  Future<void> _finishAfterLastVoice() async {
+    if (!mounted) return;
+    final arrival = AppLocalizations.of(context)!.tutorialRoleplayNarrationArrival;
+    setState(() {
+      _sending = false;
+      _micEnabled = false;
+      _micPulsing = false;
+      _showRecordingBubble = false;
+      _lines.add(_TutorialLine.narration(arrival));
+    });
+    _scrollTalkToEnd();
+    if (!widget.preview) unawaited(_completeOnboarding());
+    _roleplayEndTimer?.cancel();
+    _roleplayEndTimer = Timer(const Duration(seconds: 2), () {
+      if (!mounted) return;
+      setState(() => _showResult = true);
+    });
+  }
+
+  Future<void> _completeOnboarding() async {
+    try {
+      final token = await TokenStorage.loadAccessToken();
+      if (token == null || token.isEmpty) return;
+      await SudaApiClient.postOnboardingTutorial(accessToken: token);
+    } catch (_) {}
   }
 
   void _playMissionSuccess() {
@@ -624,9 +654,16 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
     }
   }
 
-  /// 목적지·이유 고정 힌트. 인사 Hello는 첫 마이크 안내라 힌트에 넣지 않는다.
+  int? _firstIncompleteMissionIndex() {
+    for (var i = 0; i < _turnCount; i++) {
+      if (!_completedMissionIndexes.contains(i)) return i;
+    }
+    return null;
+  }
+
+  /// 목적지·이유 고정 힌트. 아직 안 한 쪽을 보여 준다. 인사 Hello는 힌트에 넣지 않는다.
   (String, String?) _localHint() {
-    final index = _completedMissions <= 1 ? 0 : 1;
+    final index = _completedMissionIndexes.contains(1) ? 1 : 0;
     const english = [
       'SUDA City, please.',
       "I'm moving there today.",
@@ -827,6 +864,9 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
 
   @override
   Widget build(BuildContext context) {
+    if (_showResult) {
+      return TutorialResultScreen(onContinue: widget.onSkip);
+    }
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context).textTheme;
     final missionLabels = [
@@ -1110,7 +1150,7 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
                     missions: missions,
                     activeMissionIndex: _showMissionCompletedFlash
                         ? _flashMissionIndex
-                        : _completedMissions.clamp(0, _turnCount - 1),
+                        : (_firstIncompleteMissionIndex() ?? _turnCount - 1),
                     completedCount: _completedMissions,
                     completedMissionIndexes: _completedMissionIndexes,
                     showCompletedBackgroundFlash: _showMissionCompletedFlash,

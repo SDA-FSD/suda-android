@@ -451,6 +451,17 @@ class AppLocalizationsVi extends AppLocalizations {
       'Hôm nay bạn chuyển đến một khu phố mới. Bạn lên taxi và Betty, tài xế thân thiện, chào bạn. 🚕';
 
   @override
+  String get tutorialRoleplayNarrationArrival =>
+      'Taxi đã đến nơi bạn muốn đến.';
+
+  @override
+  String get tutorialRoleplayResultSubtitle =>
+      'Hoàn thành cuộc hội thoại đầu tiên!';
+
+  @override
+  String get tutorialRoleplayResultContinue => 'Tiếp tục nói nào!';
+
+  @override
   String get tutorialRoleplayBettyLine1 => 'Hi there! Hop in!';
 
   @override

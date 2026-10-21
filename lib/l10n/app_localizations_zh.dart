@@ -426,6 +426,15 @@ class AppLocalizationsZh extends AppLocalizations {
       '今天你要搬到一个新街区。你坐上出租车，友善的司机贝蒂向你打招呼。 🚕';
 
   @override
+  String get tutorialRoleplayNarrationArrival => '出租车到达了你的目的地。';
+
+  @override
+  String get tutorialRoleplayResultSubtitle => '第一次对话完成了！';
+
+  @override
+  String get tutorialRoleplayResultContinue => '继续说下去！';
+
+  @override
   String get tutorialRoleplayBettyLine1 => 'Hi there! Hop in!';
 
   @override
@@ -1602,6 +1611,15 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
       '今天你要搬到一个新街区。你坐上出租车，友善的司机贝蒂向你打招呼。 🚕';
 
   @override
+  String get tutorialRoleplayNarrationArrival => '出租车到达了你的目的地。';
+
+  @override
+  String get tutorialRoleplayResultSubtitle => '第一次对话完成了！';
+
+  @override
+  String get tutorialRoleplayResultContinue => '继续说下去！';
+
+  @override
   String get tutorialRoleplayBettyLine1 => 'Hi there! Hop in!';
 
   @override
@@ -2776,6 +2794,15 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   @override
   String get tutorialRoleplayNarration1 =>
       '今天你要搬到一個新街區。你坐上計程車，親切的司機貝蒂向你打招呼。 🚕';
+
+  @override
+  String get tutorialRoleplayNarrationArrival => '計程車抵達你的目的地了。';
+
+  @override
+  String get tutorialRoleplayResultSubtitle => '第一次對話完成了！';
+
+  @override
+  String get tutorialRoleplayResultContinue => '繼續說下去！';
 
   @override
   String get tutorialRoleplayBettyLine1 => 'Hi there! Hop in!';

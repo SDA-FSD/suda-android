@@ -450,6 +450,15 @@ class AppLocalizationsId extends AppLocalizations {
       'Hari ini kamu pindah ke lingkungan baru. Kamu naik taksi, dan Betty, sopir yang ramah, menyapamu. 🚕';
 
   @override
+  String get tutorialRoleplayNarrationArrival => 'Taksi tiba di tujuan Anda.';
+
+  @override
+  String get tutorialRoleplayResultSubtitle => 'Percakapan pertama selesai!';
+
+  @override
+  String get tutorialRoleplayResultContinue => 'Ayo lanjut!';
+
+  @override
   String get tutorialRoleplayBettyLine1 => 'Hi there! Hop in!';
 
   @override

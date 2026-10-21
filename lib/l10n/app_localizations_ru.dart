@@ -452,6 +452,16 @@ class AppLocalizationsRu extends AppLocalizations {
       'Сегодня вы переезжаете в новый район. Вы садитесь в такси, и приветливая водительница Бетти вас приветствует. 🚕';
 
   @override
+  String get tutorialRoleplayNarrationArrival =>
+      'Такси прибывает к месту назначения.';
+
+  @override
+  String get tutorialRoleplayResultSubtitle => 'Первый разговор завершён!';
+
+  @override
+  String get tutorialRoleplayResultContinue => 'Продолжаем!';
+
+  @override
   String get tutorialRoleplayBettyLine1 => 'Hi there! Hop in!';
 
   @override

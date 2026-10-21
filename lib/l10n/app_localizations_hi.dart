@@ -450,6 +450,16 @@ class AppLocalizationsHi extends AppLocalizations {
       'आज आप नई बस्ती में शिफ्ट हो रहे हैं। आप टैक्सी में बैठते हैं, और बेटी नाम की मिलनसार ड्राइवर आपका स्वागत करती है। 🚕';
 
   @override
+  String get tutorialRoleplayNarrationArrival =>
+      'टैक्सी आपकी मंज़िल पर पहुँच गई है।';
+
+  @override
+  String get tutorialRoleplayResultSubtitle => 'पहली बातचीत पूरी हुई!';
+
+  @override
+  String get tutorialRoleplayResultContinue => 'आगे बढ़ते रहें!';
+
+  @override
   String get tutorialRoleplayBettyLine1 => 'Hi there! Hop in!';
 
   @override
