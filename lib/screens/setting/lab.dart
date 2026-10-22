@@ -24,10 +24,8 @@ import '../profile.dart'
 import 'announcements.dart'
     show showAnnouncementsPostNoLongerAvailableDefaultPopupForLab;
 import '../roleplay/try_again.dart';
-import '../first_app_language.dart';
 import '../first_cefr_level.dart';
 import '../first_profile_image.dart';
-import '../first_username.dart';
 import '../tutorial/tutorial_intro.dart';
 import '../tutorial/tutorial_roleplay.dart';
 import '../paywall/paywall.dart';
@@ -274,14 +272,6 @@ class _LabScreenState extends State<LabScreen> {
     );
   }
 
-  Future<void> _openOnboardingFlow() async {
-    if (!mounted) return;
-    await Navigator.push(
-      context,
-      MaterialPageRoute<void>(builder: (_) => const _OnboardingFlowPreview()),
-    );
-  }
-
   Future<void> _openFirstCefrLevelScreen() async {
     if (!mounted) return;
     await Navigator.push(
@@ -315,7 +305,6 @@ class _LabScreenState extends State<LabScreen> {
       ),
     );
   }
-
   Future<void> _openPaywallScreen() async {
     if (!mounted) return;
     await PaywallScreen.push(context, screen: PaywallImpressionScreen.lab);
@@ -494,23 +483,6 @@ class _LabScreenState extends State<LabScreen> {
               width: double.infinity,
               height: 56,
               child: ElevatedButton(
-                onPressed: _openOnboardingFlow,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0CABA8),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  elevation: 0,
-                ),
-                child: const Text('Open Onboarding Flow'),
-              ),
-            ),
-            const SizedBox(height: 8),
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
                 onPressed: _openFirstCefrLevelScreen,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF0CABA8),
@@ -541,21 +513,9 @@ class _LabScreenState extends State<LabScreen> {
               ),
             ),
             const SizedBox(height: 8),
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: _openTutorialIntroScreen,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0CABA8),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  elevation: 0,
-                ),
-                child: const Text('Open Tutorial Intro'),
-              ),
+            _buildLabScreenButton(
+              label: 'Open Tutorial Intro',
+              onPressed: () => unawaited(_openTutorialIntroScreen()),
             ),
             _buildSectionDivider(),
             Text(
@@ -1000,61 +960,6 @@ class _LabScreenState extends State<LabScreen> {
 
   Future<void> _playLikeEffect(LikeProgressEffectParams params) async {
     await LikeProgressEffect.play(context, params: params);
-  }
-}
-
-/// Lab 전용. API 없이 언어 → CEFR → 프로필 이미지 → 이름 순서를 연다.
-class _OnboardingFlowPreview extends StatefulWidget {
-  const _OnboardingFlowPreview();
-
-  @override
-  State<_OnboardingFlowPreview> createState() => _OnboardingFlowPreviewState();
-}
-
-class _OnboardingFlowPreviewState extends State<_OnboardingFlowPreview> {
-  int _step = 0;
-
-  @override
-  Widget build(BuildContext context) {
-    switch (_step) {
-      case 0:
-        return FirstAppLanguageScreen(
-          preview: true,
-          onSaved: (_) => setState(() => _step = 1),
-        );
-      case 1:
-        return FirstCefrLevelScreen(
-          preview: true,
-          onComplete: () => setState(() => _step = 2),
-        );
-      case 2:
-        return FirstProfileImageScreen(
-          preview: true,
-          onComplete: (_) => setState(() => _step = 3),
-        );
-      case 3:
-        return FirstUsernameScreen(
-          preview: true,
-          user: const UserDto(id: 0, name: 'Jeeeeun Priscilla'),
-          onComplete: (_) => setState(() => _step = 4),
-        );
-      case 4:
-        return TutorialIntroScreen(
-          preview: true,
-          playEntrance: false,
-          user: const UserDto(
-            id: 0,
-            name: 'Jeeeeun Priscilla',
-            imgPath: 'DEFAULT:4',
-          ),
-          onStartTutorial: () => setState(() => _step = 5),
-        );
-      default:
-        return TutorialRoleplayScreen(
-          preview: true,
-          onSkip: () => Navigator.of(context).pop(),
-        );
-    }
   }
 }
 
