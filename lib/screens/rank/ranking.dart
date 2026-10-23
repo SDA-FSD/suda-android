@@ -2432,6 +2432,7 @@ class _RankListRow extends StatelessWidget {
               ),
             ),
           ),
+          const SizedBox(width: 10),
           GestureDetector(
             onTap: onOpenProfile,
             behavior: HitTestBehavior.opaque,
