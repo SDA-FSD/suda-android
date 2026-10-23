@@ -19,6 +19,7 @@ import '../../screens/roleplay/suda_tts_audio_player.dart';
 import '../../services/token_storage.dart';
 import '../../effects/mission_complete_effect.dart';
 import '../../widgets/default_popup.dart';
+import '../../widgets/guide_bubble.dart';
 import '../../widgets/roleplay_mic_button_area.dart';
 import '../../widgets/roleplay_mission_panel.dart';
 import '../../widgets/roleplay_turn_bar_area.dart';
@@ -27,6 +28,30 @@ import 'tutorial_result.dart';
 import 'tutorial_roleplay_backdrop.dart';
 
 enum _TutorialRpStage { missionGuide, playing }
+
+/// 색은 그대로, 알파만 80%.
+const _kPointerAlpha80 = ColorFilter.matrix(<double>[
+  1,
+  0,
+  0,
+  0,
+  0,
+  0,
+  1,
+  0,
+  0,
+  0,
+  0,
+  0,
+  1,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0.8,
+  0,
+]);
 
 /// 마이크 가이드 문구. 기본은 AI 발화 후, 나머지는 홀드/짧은 탭/무인식.
 enum _TutorialMicGuide { afterVoice, holding, tooShort, noSpeech }
@@ -55,10 +80,15 @@ class TutorialRoleplayScreen extends StatefulWidget {
 
 class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
     with TickerProviderStateMixin {
-  static const _bgFadeIn = Duration(seconds: 3);
-  /// 영상(2026-10-19 4.01.05): 선명 hold → blur ~0.5s → UI ~0.45s 간격.
-  static const _sharpHold = Duration(milliseconds: 600);
-  static const _blurReveal = Duration(milliseconds: 550);
+  /// 블러 시작까지 선명 이미지 구간: 페이드 1167ms + hold 333ms = 1.5s.
+  /// 블러·미션 UI 간격은 원래 3.6s 기준을 2000/3600 비율로 줄인 값 그대로.
+  static const _bgFadeIn = Duration(milliseconds: 1167);
+  static const _sharpHold = Duration(milliseconds: 333);
+  static const _blurReveal = Duration(milliseconds: 306);
+  static const _missionsTitleGap = Duration(milliseconds: 222);
+  static const _missionBoxGap = Duration(milliseconds: 250);
+  static const _bubbleGap = Duration(milliseconds: 250);
+  static const _pointerGap = Duration(milliseconds: 278);
   static const _turnCount = 3;
 
   late final AnimationController _bgFade;
@@ -91,12 +121,16 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
   String? _hintEnglish;
   String? _hintNative;
   final GlobalKey _hintCardKey = GlobalKey();
+
   /// 영어 답변을 펼쳤는지. 영어 사용자는 처음부터 펼친다.
   bool _hintAnswerOpen = false;
+
   /// 두 번째 AI 음성이 끝난 뒤에만 힌트 안내를 띄운다.
   bool _hintCoachReady = false;
+
   /// 힌트를 한 번 열기 전에는 버튼 안내를 보여 준다.
   bool _hintCoachDismissed = false;
+
   /// -1이면 문장 전체, 0 이상이면 그 단어.
   int? _hintPlayingIndex;
   DateTime? _recordStartedAt;
@@ -111,7 +145,17 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
   bool _showMissionsTitle = false;
   bool _showMissionBox = false;
   bool _showBubble = false;
-  bool _showPointer = false;
+
+  /// 미션 확인 손가락. 탭하면 화면이 페이드아웃되는 중에도 투명도가 변하지 않게,
+  /// 화면 전환과 별개로 바로 끈다(페이드아웃 중인 이전 화면도 이 값을 듣는다).
+  final ValueNotifier<bool> _showPointer = ValueNotifier(false);
+
+  /// 미션 확인 → 플레이 전환: 3개 미션 박스가 위로 접히고 제목·말풍선은 먼저 사라진다.
+  static const _guideFoldDuration = Duration(milliseconds: 420);
+  late final AnimationController _guideExit;
+  late final Animation<double> _guideTextFade;
+  late final Animation<double> _guideFold;
+  bool _guideGone = false;
 
   /// 2단계(2026-10-20 1.36.14): 패널만 → 나레이션 → Betty → Hello 말풍선 → 손가락.
   bool _showNarration = false;
@@ -135,6 +179,15 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
       duration: const Duration(milliseconds: 1000),
     );
     _chromeOpacity = CurvedAnimation(parent: _blurUi, curve: Curves.easeOut);
+    _guideExit = AnimationController(vsync: this, duration: _guideFoldDuration);
+    _guideTextFade = CurvedAnimation(
+      parent: _guideExit,
+      curve: const Interval(0, 0.45, curve: Curves.easeOut),
+    );
+    _guideFold = CurvedAnimation(
+      parent: _guideExit,
+      curve: Curves.easeInOutCubic,
+    );
 
     _bgFade.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
@@ -152,18 +205,18 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
     if (!mounted) return;
     await _blurUi.forward();
     if (!mounted) return;
-    await Future<void>.delayed(const Duration(milliseconds: 400));
+    await Future<void>.delayed(_missionsTitleGap);
     if (!mounted) return;
     setState(() => _showMissionsTitle = true);
-    await Future<void>.delayed(const Duration(milliseconds: 450));
+    await Future<void>.delayed(_missionBoxGap);
     if (!mounted) return;
     setState(() => _showMissionBox = true);
-    await Future<void>.delayed(const Duration(milliseconds: 450));
+    await Future<void>.delayed(_bubbleGap);
     if (!mounted) return;
     setState(() => _showBubble = true);
-    await Future<void>.delayed(const Duration(milliseconds: 500));
+    await Future<void>.delayed(_pointerGap);
     if (!mounted) return;
-    setState(() => _showPointer = true);
+    _showPointer.value = true;
   }
 
   @override
@@ -175,6 +228,8 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
     _aiVoice.dispose();
     _bgFade.dispose();
     _blurUi.dispose();
+    _showPointer.dispose();
+    _guideExit.dispose();
     _micLoadingRotation.dispose();
     _missionCompleteTimer?.cancel();
     _roleplayEndTimer?.cancel();
@@ -210,7 +265,11 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
 
   void _onMissionGuideContinue() {
     if (_stage != _TutorialRpStage.missionGuide) return;
+    _showPointer.value = false;
     setState(() => _stage = _TutorialRpStage.playing);
+    _guideExit.forward().whenComplete(() {
+      if (mounted) setState(() => _guideGone = true);
+    });
     widget.onMissionGuideContinue?.call();
     _startPlayingIntro();
   }
@@ -348,7 +407,7 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
           avAudioSessionCategory: AVAudioSessionCategory.playAndRecord,
           avAudioSessionCategoryOptions:
               AVAudioSessionCategoryOptions.defaultToSpeaker |
-                  AVAudioSessionCategoryOptions.allowBluetooth,
+              AVAudioSessionCategoryOptions.allowBluetooth,
         ),
       );
       await session.setActive(true).timeout(const Duration(seconds: 3));
@@ -455,11 +514,13 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
   void _listenSpeechLevel(DateTime startedAt) {
     _speechLevelSub?.cancel();
     _speechLevelsDb.clear();
-    _speechLevelSub = _recorder.onAmplitudeChanged(const Duration(milliseconds: 100)).listen((amp) {
-      if (DateTime.now().difference(startedAt).inMilliseconds < 150) return;
-      if (!amp.current.isFinite || amp.current == 0) return;
-      _speechLevelsDb.add(amp.current);
-    });
+    _speechLevelSub = _recorder
+        .onAmplitudeChanged(const Duration(milliseconds: 100))
+        .listen((amp) {
+          if (DateTime.now().difference(startedAt).inMilliseconds < 150) return;
+          if (!amp.current.isFinite || amp.current == 0) return;
+          _speechLevelsDb.add(amp.current);
+        });
   }
 
   bool _speechDetected() {
@@ -519,7 +580,8 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
         audioData: Uint8List.fromList(bytes),
       );
       if (!mounted) return;
-      final showTranslation = Localizations.localeOf(context).languageCode != 'en';
+      final showTranslation =
+          Localizations.localeOf(context).languageCode != 'en';
       final aiText = response.aiText ?? '';
       final aiMsgId = response.aiMsgId;
       final soundFuture = SudaApiClient.getTutorialAiAudio(
@@ -578,20 +640,14 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
         return;
       }
       await _armMicSession();
-      _restoreMicGuide(
-        _TutorialMicGuide.afterVoice,
-        revealHint: armHint,
-      );
+      _restoreMicGuide(_TutorialMicGuide.afterVoice, revealHint: armHint);
     } on TutorialAudioTooShortException {
       _restoreMicGuide(_TutorialMicGuide.tooShort);
     } on TutorialNoSpeechException {
       _restoreMicGuide(_TutorialMicGuide.noSpeech);
     } catch (e) {
       debugPrint('[DEBUG] tutorial user audio: $e');
-      _restoreMicGuide(
-        _TutorialMicGuide.afterVoice,
-        revealHint: armHint,
-      );
+      _restoreMicGuide(_TutorialMicGuide.afterVoice, revealHint: armHint);
     } finally {
       if (_micLoadingRotation.isAnimating) _micLoadingRotation.stop();
     }
@@ -600,7 +656,9 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
   /// 마지막 AI 음성 뒤에 도착 나레이션을 붙이고, 2초 뒤 롤플레이를 끝낸다.
   Future<void> _finishAfterLastVoice() async {
     if (!mounted) return;
-    final arrival = AppLocalizations.of(context)!.tutorialRoleplayNarrationArrival;
+    final arrival = AppLocalizations.of(
+      context,
+    )!.tutorialRoleplayNarrationArrival;
     setState(() {
       _sending = false;
       _micEnabled = false;
@@ -664,10 +722,7 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
   /// 목적지·이유 고정 힌트. 아직 안 한 쪽을 보여 준다. 인사 Hello는 힌트에 넣지 않는다.
   (String, String?) _localHint() {
     final index = _completedMissionIndexes.contains(1) ? 1 : 0;
-    const english = [
-      'SUDA City, please.',
-      "I'm moving there today.",
-    ];
+    const english = ['SUDA City, please.', "I'm moving there today."];
     final code = Localizations.localeOf(context).languageCode;
     const ko = ['수다 빌리지로 가주세요.', '오늘 그곳으로 이사 가요.'];
     const pt = ['Para SUDA City, por favor.', 'Estou me mudando para lá hoje.'];
@@ -899,98 +954,125 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
                   FadeTransition(
                     opacity: _chromeOpacity,
                     child: SafeArea(
-                      child: Column(
+                      child: Stack(
+                        fit: StackFit.expand,
                         children: [
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                            child: SizedBox(
-                              height: 44,
-                              child: Stack(
-                                alignment: Alignment.center,
-                                children: [
-                                  Text(
-                                    l10n.tutorialRoleplayTitle,
-                                    textAlign: TextAlign.center,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: theme.headlineSmall?.copyWith(
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  Align(
-                                    alignment: Alignment.centerRight,
-                                    child: TextButton(
-                                      onPressed: _showSkipPopup,
-                                      style: TextButton.styleFrom(
-                                        foregroundColor: Colors.white,
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 8,
-                                          vertical: 8,
-                                        ),
-                                        minimumSize: Size.zero,
-                                        tapTargetSize:
-                                            MaterialTapTargetSize.shrinkWrap,
-                                      ),
-                                      child: Text(
-                                        l10n.tutorialRoleplaySkip,
-                                        style: theme.bodyMedium?.copyWith(
+                          Column(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(
+                                  16,
+                                  8,
+                                  16,
+                                  0,
+                                ),
+                                child: SizedBox(
+                                  height: 44,
+                                  child: Stack(
+                                    alignment: Alignment.center,
+                                    children: [
+                                      Text(
+                                        l10n.tutorialRoleplayTitle,
+                                        textAlign: TextAlign.center,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: theme.headlineSmall?.copyWith(
                                           color: Colors.white,
-                                          fontWeight: FontWeight.w600,
                                         ),
                                       ),
-                                    ),
+                                      Align(
+                                        alignment: Alignment.centerRight,
+                                        child: TextButton(
+                                          onPressed: _showSkipPopup,
+                                          style: TextButton.styleFrom(
+                                            foregroundColor: Colors.white,
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                              vertical: 8,
+                                            ),
+                                            minimumSize: Size.zero,
+                                            tapTargetSize: MaterialTapTargetSize
+                                                .shrinkWrap,
+                                          ),
+                                          child: Text(
+                                            l10n.tutorialRoleplaySkip,
+                                            style: theme.bodyMedium?.copyWith(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ],
+                                ),
+                              ),
+                              _showOnlyWhenPlaying(
+                                RoleplayTurnBarArea(
+                                  turnCount: _turnCount,
+                                  barColors: _turnBarColors(),
+                                ),
+                              ),
+                              Expanded(
+                                child: AnimatedSwitcher(
+                                  duration: const Duration(milliseconds: 350),
+                                  child: _stage == _TutorialRpStage.playing
+                                      ? KeyedSubtree(
+                                          key: const ValueKey('playing'),
+                                          child: _buildPlayingBody(l10n, theme),
+                                        )
+                                      : const SizedBox.shrink(
+                                          key: ValueKey('playing-gap'),
+                                        ),
+                                ),
+                              ),
+                              _showOnlyWhenPlaying(
+                                _PlayingLikeDisabledFooter(
+                                  loadingRotationController:
+                                      _micLoadingRotation,
+                                  micGuide: _footerMicGuide(l10n),
+                                  compactMicGuide:
+                                      _showSayItGuide && !_showMicGuideBubble,
+                                  showHintCoach: _mustTapHint,
+                                  hintGuide: l10n.tutorialRoleplayHintGuide,
+                                  showMicPointer:
+                                      _showMicPointer && _showHelloGuide,
+                                  guideNearMic:
+                                      !_showHelloGuide || _showSayItGuide,
+                                  guideReserveText:
+                                      l10n.tutorialRoleplayHoldHello,
+                                  micEnabled:
+                                      _micEnabled &&
+                                      !_mustTapHint &&
+                                      !_awaitingEnglishReveal,
+                                  micLoading: _sending,
+                                  hintEnabled: _hintCoachReady,
+                                  hintSparkle:
+                                      _answeredTurnCount == 2 &&
+                                      _micEnabled &&
+                                      !_sending &&
+                                      !_micHeld &&
+                                      _hintEnglish == null,
+                                  showMicPulse: _micPulsing || _showSayItGuide,
+                                  onMicHoldStart: _onMicHoldStart,
+                                  onMicHoldEnd: _onMicHoldEnd,
+                                  onHintTap: _onHintTap,
+                                ),
+                              ),
+                            ],
+                          ),
+                          // 미션 확인: 제목·3개 미션·말풍선을 한 묶음으로 화면 정중앙에.
+                          // 헤더(52) 아래부터 깔고, 안쪽 아래 여백 52로 화면 전체 중앙에 맞춘다.
+                          // 탭 후에는 접히는 애니메이션이 끝날 때까지만 유지한다.
+                          if (!_guideGone)
+                            Positioned.fill(
+                              top: _headerHeight,
+                              child: _buildMissionGuideBody(
+                                l10n,
+                                theme,
+                                missionLabels,
                               ),
                             ),
-                          ),
-                          RoleplayTurnBarArea(
-                            turnCount: _turnCount,
-                            barColors: _turnBarColors(),
-                          ),
-                          Expanded(
-                            child: AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 350),
-                              child: _stage == _TutorialRpStage.missionGuide
-                                  ? KeyedSubtree(
-                                      key: const ValueKey('guide'),
-                                      child: _buildMissionGuideBody(
-                                        l10n,
-                                        theme,
-                                        missionLabels,
-                                      ),
-                                    )
-                                  : KeyedSubtree(
-                                      key: const ValueKey('playing'),
-                                      child: _buildPlayingBody(l10n, theme),
-                                    ),
-                            ),
-                          ),
-                          _PlayingLikeDisabledFooter(
-                            loadingRotationController: _micLoadingRotation,
-                            micGuide: _footerMicGuide(l10n),
-                            compactMicGuide:
-                                _showSayItGuide && !_showMicGuideBubble,
-                            showHintCoach: _mustTapHint,
-                            hintGuide: l10n.tutorialRoleplayHintGuide,
-                            showMicPointer: _showMicPointer && _showHelloGuide,
-                            guideNearMic: !_showHelloGuide || _showSayItGuide,
-                            guideReserveText: l10n.tutorialRoleplayHoldHello,
-                            micEnabled: _micEnabled &&
-                                !_mustTapHint &&
-                                !_awaitingEnglishReveal,
-                            micLoading: _sending,
-                            hintEnabled: _hintCoachReady,
-                            hintSparkle: _answeredTurnCount == 2 &&
-                                _micEnabled &&
-                                !_sending &&
-                                !_micHeld &&
-                                _hintEnglish == null,
-                            showMicPulse: _micPulsing || _showSayItGuide,
-                            onMicHoldStart: _onMicHoldStart,
-                            onMicHoldEnd: _onMicHoldEnd,
-                            onHintTap: _onHintTap,
-                          ),
                         ],
                       ),
                     ),
@@ -1003,6 +1085,20 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
     );
   }
 
+  /// 상단 제목·Skip 줄 높이(위 8 + 44).
+  static const _headerHeight = 52.0;
+
+  /// 미션 확인 구간에서는 진행바·마이크·힌트를 숨기고, 플레이로 넘어가면 같이 나타난다.
+  Widget _showOnlyWhenPlaying(Widget child) {
+    final playing = _stage == _TutorialRpStage.playing;
+    return AnimatedOpacity(
+      opacity: playing ? 1 : 0,
+      duration: const Duration(milliseconds: 350),
+      curve: Curves.easeOut,
+      child: IgnorePointer(ignoring: !playing, child: child),
+    );
+  }
+
   Widget _buildMissionGuideBody(
     AppLocalizations l10n,
     TextTheme theme,
@@ -1012,33 +1108,98 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
       behavior: HitTestBehavior.opaque,
       onTap: _onMissionGuideContinue,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 26),
+        padding: const EdgeInsets.fromLTRB(26, 0, 26, _headerHeight),
         child: Column(
           children: [
-            const Spacer(flex: 2),
-            _StaggerFade(
-              visible: _showMissionsTitle,
-              child: Text(
-                l10n.tutorialRoleplayMissions,
-                textAlign: TextAlign.center,
-                style: theme.headlineLarge?.copyWith(color: Colors.white),
+            const Spacer(),
+            FadeTransition(
+              opacity: ReverseAnimation(_guideTextFade),
+              child: _StaggerFade(
+                visible: _showMissionsTitle,
+                child: Text(
+                  l10n.tutorialRoleplayMissions,
+                  textAlign: TextAlign.center,
+                  style: theme.headlineLarge?.copyWith(color: Colors.white),
+                ),
               ),
             ),
             const SizedBox(height: 20),
-            _StaggerFade(
-              visible: _showMissionBox,
-              child: _MissionListBox(missions: missions),
-            ),
-            const SizedBox(height: 18),
-            _StaggerFade(
-              visible: _showBubble,
-              child: _GuideBubble(
-                mainText: l10n.tutorialRoleplayGuideMissionMain,
-                subText: l10n.tutorialRoleplayGuideMissionTapContinue,
-                showPointer: _showPointer,
+            // 탭하면 위쪽(윗변 기준)으로 샥 접히며 사라진다. 레이아웃은 그대로 두고 그리기만 변형.
+            AnimatedBuilder(
+              animation: _guideFold,
+              builder: (context, child) {
+                final f = _guideFold.value;
+                return Opacity(
+                  opacity: (1 - f * f).clamp(0.0, 1.0),
+                  child: Transform(
+                    alignment: Alignment.topCenter,
+                    transform: Matrix4.translationValues(0, -36 * f, 0)
+                      ..scaleByDouble(1.0, (1 - f).clamp(0.001, 1.0), 1.0, 1.0),
+                    child: child,
+                  ),
+                );
+              },
+              child: _StaggerFade(
+                visible: _showMissionBox,
+                child: _MissionListBox(missions: missions),
               ),
             ),
-            const Spacer(flex: 3),
+            const SizedBox(height: 18),
+            // 손가락은 말풍선 페이드인 밖에 둔다(그 안에 있으면 페이드인 중 투명도가 변함).
+            FadeTransition(
+              opacity: ReverseAnimation(_guideTextFade),
+              child: Center(
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    _StaggerFade(
+                      visible: _showBubble,
+                      child: _tutorialGuide(
+                        l10n.tutorialRoleplayGuideMissionMain,
+                        tail: GuideBubbleTail.top,
+                        spans: [
+                          TextSpan(text: l10n.tutorialRoleplayGuideMissionMain),
+                          const TextSpan(text: '\n'),
+                          TextSpan(
+                            text: l10n.tutorialRoleplayGuideMissionTapContinue,
+                            style: theme.bodyMedium?.copyWith(
+                              color: const Color(0xFF054544),
+                            ),
+                          ),
+                          const WidgetSpan(
+                            alignment: PlaceholderAlignment.middle,
+                            child: Icon(
+                              Icons.chevron_right,
+                              color: Color(0xFF054544),
+                              size: 20,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Positioned(
+                      right: -6,
+                      bottom: -60,
+                      child: ValueListenableBuilder<bool>(
+                        valueListenable: _showPointer,
+                        builder: (context, on, _) {
+                          if (!on) return const SizedBox.shrink();
+                          // Opacity 대신 알파 필터. 손가락 이미지가 알파 4배 필터를 쓰므로
+                          // Opacity는 동그라미가 없을 때 그 필터 앞에 합쳐져 100%가 된다.
+                          return const IgnorePointer(
+                            child: ColorFiltered(
+                              colorFilter: _kPointerAlpha80,
+                              child: TutorialPointer(size: 120),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const Spacer(),
           ],
         ),
       ),
@@ -1095,7 +1256,9 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
                         else
                           _TutorialAiBubble(
                             english: line.text,
-                            translation: showTranslation ? line.translation : null,
+                            translation: showTranslation
+                                ? line.translation
+                                : null,
                           ),
                       ],
                       if (_hintEnglish != null) ...[
@@ -1117,15 +1280,15 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
                                   setState(() => _hintAnswerOpen = true);
                                   _scrollHintIntoView();
                                 },
-                                onWord: (index) => unawaited(
-                                  _playHintSound(wordIndex: index),
-                                ),
+                                onWord: (index) =>
+                                    unawaited(_playHintSound(wordIndex: index)),
                                 onSentence: () => unawaited(_playHintSound()),
                               ),
                               if (_awaitingEnglishReveal) ...[
                                 const SizedBox(height: 8),
-                                _BobbingGuideBubble(
-                                  text: l10n.tutorialRoleplayHintTapEnglish,
+                                _tutorialGuide(
+                                  l10n.tutorialRoleplayHintTapEnglish,
+                                  tail: GuideBubbleTail.top,
                                 ),
                               ],
                             ],
@@ -1147,15 +1310,15 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
                   child: IgnorePointer(
                     ignoring: _mustTapHint,
                     child: RoleplayMissionPanel(
-                    missions: missions,
-                    activeMissionIndex: _showMissionCompletedFlash
-                        ? _flashMissionIndex
-                        : (_firstIncompleteMissionIndex() ?? _turnCount - 1),
-                    completedCount: _completedMissions,
-                    completedMissionIndexes: _completedMissionIndexes,
-                    showCompletedBackgroundFlash: _showMissionCompletedFlash,
-                    missionIconAnchorKey: _missionIconAnchorKey,
-                  ),
+                      missions: missions,
+                      activeMissionIndex: _showMissionCompletedFlash
+                          ? _flashMissionIndex
+                          : (_firstIncompleteMissionIndex() ?? _turnCount - 1),
+                      completedCount: _completedMissions,
+                      completedMissionIndexes: _completedMissionIndexes,
+                      showCompletedBackgroundFlash: _showMissionCompletedFlash,
+                      missionIconAnchorKey: _missionIconAnchorKey,
+                    ),
                   ),
                 ),
               ],
@@ -1386,8 +1549,7 @@ class _HintAnswerWords extends StatelessWidget {
                     _HintWord(
                       word: words[i],
                       headline: headline,
-                      highlighted:
-                          playingIndex == -1 || playingIndex == i,
+                      highlighted: playingIndex == -1 || playingIndex == i,
                       onTap: onWord == null ? null : () => onWord!(i),
                     ),
                   ],
@@ -1543,7 +1705,18 @@ class _HintRingPainter extends CustomPainter {
   final double innerRadius;
   final double opacity;
 
-  _HintRingPainter({required this.innerRadius, required this.opacity});
+  /// 안쪽(버튼에 가까운) 원 선 굵기. 기본은 힌트 버튼 값.
+  final double innerStroke;
+
+  /// 안쪽 원과 바깥 원 사이 간격. 기본은 힌트 버튼 값.
+  final double gap;
+
+  _HintRingPainter({
+    required this.innerRadius,
+    required this.opacity,
+    this.innerStroke = _HintAimRingsState._innerStroke,
+    this.gap = _HintAimRingsState._gap,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -1553,18 +1726,21 @@ class _HintRingPainter extends CustomPainter {
     final inner = Paint()
       ..color = color
       ..style = PaintingStyle.stroke
-      ..strokeWidth = _HintAimRingsState._innerStroke;
+      ..strokeWidth = innerStroke;
     final outer = Paint()
       ..color = color.withValues(alpha: (opacity * 0.4).clamp(0.0, 1.0))
       ..style = PaintingStyle.stroke
       ..strokeWidth = _HintAimRingsState._outerStroke;
     canvas.drawCircle(center, innerRadius, inner);
-    canvas.drawCircle(center, innerRadius + _HintAimRingsState._gap, outer);
+    canvas.drawCircle(center, innerRadius + gap, outer);
   }
 
   @override
   bool shouldRepaint(covariant _HintRingPainter oldDelegate) =>
-      oldDelegate.innerRadius != innerRadius || oldDelegate.opacity != opacity;
+      oldDelegate.innerRadius != innerRadius ||
+      oldDelegate.opacity != opacity ||
+      oldDelegate.innerStroke != innerStroke ||
+      oldDelegate.gap != gap;
 }
 
 /// 힌트 버튼 위에 강조 원과 안내를 화면 맨 위에 붙인다.
@@ -1652,15 +1828,12 @@ class _HintCoachLayerState extends State<_HintCoachLayer>
               showWhenUnlinked: false,
               targetAnchor: Alignment.topCenter,
               followerAnchor: Alignment.bottomRight,
-              offset: Offset(
-                _HintCoachBubble.tailEndInset + _HintCoachBubble.tailWidth / 2,
-                -4 + (1 - t) * 18,
-              ),
+              offset: Offset(20, -4 + (1 - t) * 18),
               child: Opacity(
                 opacity: t,
                 child: DefaultTextStyle.merge(
                   style: const TextStyle(decoration: TextDecoration.none),
-                  child: _HintCoachBubble(text: widget.guide),
+                  child: _tutorialGuide(widget.guide, tailCentered: false),
                 ),
               ),
             ),
@@ -1685,76 +1858,6 @@ class _HintCoachLayerState extends State<_HintCoachLayer>
   Widget build(BuildContext context) {
     return CompositedTransformTarget(link: _link, child: widget.child);
   }
-}
-
-/// 힌트 버튼 위에 붙는 안내. 꼬리는 버튼 가운데를 가리킨다.
-class _HintCoachBubble extends StatelessWidget {
-  static const tailWidth = 18.0;
-  static const tailEndInset = 27.0;
-
-  final String text;
-
-  const _HintCoachBubble({required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    final heading = Theme.of(context).textTheme.headlineSmall;
-    final style = TextStyle(
-      fontFamily: heading?.fontFamily,
-      fontFamilyFallback: heading?.fontFamilyFallback,
-      fontSize: heading?.fontSize ?? 20,
-      fontWeight: heading?.fontWeight ?? FontWeight.w700,
-      fontVariations: heading?.fontVariations,
-      letterSpacing: heading?.letterSpacing,
-      color: Colors.white,
-      decoration: TextDecoration.none,
-    );
-    final maxWidth = (MediaQuery.sizeOf(context).width - 72).clamp(200.0, 340.0);
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: maxWidth),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
-            decoration: const BoxDecoration(
-              color: Color(0xFF0CABA8),
-              borderRadius: BorderRadius.all(Radius.circular(20)),
-            ),
-            child: Text(text, textAlign: TextAlign.center, style: style),
-          ),
-        ),
-        Transform.translate(
-          offset: const Offset(0, -2),
-          child: const Padding(
-            padding: EdgeInsetsDirectional.only(end: _HintCoachBubble.tailEndInset),
-            child: CustomPaint(
-              size: Size(_HintCoachBubble.tailWidth, 12),
-              painter: _HintCoachTailPainter(),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _HintCoachTailPainter extends CustomPainter {
-  const _HintCoachTailPainter();
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final path = Path()
-      ..moveTo(0, 0)
-      ..lineTo(size.width, 0)
-      ..lineTo(size.width / 2, size.height)
-      ..close();
-    canvas.drawPath(path, Paint()..color = const Color(0xFF0CABA8));
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 /// 본편 녹음 말풍선과 같은 흰 점 3개 파도.
@@ -1857,9 +1960,9 @@ class _TutorialUserBubble extends StatelessWidget {
         ),
         child: Text(
           text,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.white,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(color: Colors.white),
         ),
       ),
     );
@@ -1874,10 +1977,10 @@ class _TutorialNarration extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final style = Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: Colors.white,
-          fontStyle: FontStyle.italic,
-          height: 1.27,
-        );
+      color: Colors.white,
+      fontStyle: FontStyle.italic,
+      height: 1.27,
+    );
     return Center(
       child: Text(text, textAlign: TextAlign.center, style: style),
     );
@@ -1895,8 +1998,9 @@ class _TutorialAiBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context).textTheme;
     final textStyle = theme.bodyMedium?.copyWith(color: Colors.white);
-    final translationStyle =
-        theme.labelSmall?.copyWith(color: const Color(0xFF777373));
+    final translationStyle = theme.labelSmall?.copyWith(
+      color: const Color(0xFF777373),
+    );
 
     return Align(
       alignment: Alignment.centerLeft,
@@ -1996,9 +2100,93 @@ class _StaggerFade extends StatelessWidget {
   }
 }
 
+/// 온보딩 롤플레이 안내. 공통 [GuideBubble]이고, 기본으로 위아래를 흔든다.
+Widget _tutorialGuide(
+  String text, {
+  GuideBubbleTail tail = GuideBubbleTail.bottom,
+  List<InlineSpan>? spans,
+  double tailOffsetFromEnd = 20,
+  bool tailCentered = true,
+  bool wobble = true,
+}) {
+  return _TutorialGuide(
+    text: text,
+    tail: tail,
+    spans: spans,
+    tailOffsetFromEnd: tailOffsetFromEnd,
+    tailCentered: tailCentered,
+    wobble: wobble,
+  );
+}
+
+/// 공통 [GuideBubble]은 그대로 두고, 온보딩에서만 글자 둘레 여백을 더한다.
+/// 공통 여백 가로 14·세로 10에 가로 14·세로 12를 더해 가로 28·세로 22가 된다.
+class _TutorialGuide extends StatelessWidget {
+  static const _extraPadding = EdgeInsets.symmetric(
+    horizontal: 14,
+    vertical: 12,
+  );
+
+  /// 큰 글씨라 공통 기본(260)이면 문장이 어색하게 꺾여서 온보딩만 넓힌다.
+  /// 실제 폭은 부모(화면 좌우 여백)가 다시 제한한다.
+  static const _maxWidth = 360.0;
+
+  final String text;
+  final GuideBubbleTail tail;
+  final List<InlineSpan>? spans;
+  final double tailOffsetFromEnd;
+  final bool tailCentered;
+  final bool wobble;
+
+  const _TutorialGuide({
+    required this.text,
+    required this.tail,
+    required this.spans,
+    required this.tailOffsetFromEnd,
+    required this.tailCentered,
+    required this.wobble,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final style = Theme.of(context).textTheme.headlineSmall?.copyWith(
+      color: Colors.white,
+      decoration: TextDecoration.none,
+    );
+    return GuideBubble(
+      text: text,
+      tail: tail,
+      wobble: wobble,
+      textStyle: style,
+      textAlign: TextAlign.center,
+      cornerRadius: 20,
+      maxWidth: _maxWidth,
+      tailCentered: tailCentered,
+      tailOffsetFromEnd: tailOffsetFromEnd,
+      spans: [
+        WidgetSpan(
+          alignment: PlaceholderAlignment.middle,
+          child: Padding(
+            padding: _extraPadding,
+            child: Text.rich(
+              TextSpan(
+                text: spans == null ? text : null,
+                style: style,
+                children: spans,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 /// 시안: radius 26 · 흰 6.8% 채우기 + Playing 미션 패널과 동일 BackdropFilter blur 12.
 class _MissionListBox extends StatelessWidget {
   static const _radius = 26.0;
+
   /// 시안 채우기 `#FFFFFF` 6.8%.
   static final _fill = Colors.white.withValues(alpha: 0.068);
 
@@ -2055,88 +2243,6 @@ class _MissionListBox extends StatelessWidget {
   }
 }
 
-class _GuideBubble extends StatelessWidget {
-  static const _fill = Color(0xFF0CABA8);
-  static const _sub = Color(0xFF054544);
-
-  final String mainText;
-  final String subText;
-  final bool showPointer;
-
-  const _GuideBubble({
-    required this.mainText,
-    required this.subText,
-    required this.showPointer,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context).textTheme;
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        CustomPaint(
-          size: const Size(18, 10),
-          painter: const _BubbleTailPainter(color: _fill),
-        ),
-        Container(
-          width: double.infinity,
-          height: 104,
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: _fill,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                mainText,
-                textAlign: TextAlign.center,
-                style: theme.headlineSmall?.copyWith(color: Colors.white),
-              ),
-              const SizedBox(height: 8),
-              Center(
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  alignment: Alignment.center,
-                  children: [
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          subText,
-                          textAlign: TextAlign.center,
-                          style: theme.bodyMedium?.copyWith(color: _sub),
-                        ),
-                        const Icon(
-                          Icons.chevron_right,
-                          color: _sub,
-                          size: 20,
-                        ),
-                      ],
-                    ),
-                    if (showPointer)
-                      const Positioned(
-                        right: -80,
-                        top: -22,
-                        child: IgnorePointer(
-                          child: TutorialPointer(size: 120),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 /// 마이크 위 Hello 안내. 꼬리는 아래로(마이크 쪽).
 /// 보이는 문구가 짧아져도 슬롯 높이는 [reserveText]만큼 유지한다.
 class _PinnedGuideSlot extends StatelessWidget {
@@ -2154,7 +2260,11 @@ class _PinnedGuideSlot extends StatelessWidget {
       children: [
         Opacity(
           opacity: 0,
-          child: _MicGuideBubble(text: reserve),
+          child: _tutorialGuide(
+            reserve,
+            wobble: false,
+            spans: _helloSpans(reserve),
+          ),
         ),
         child,
       ],
@@ -2214,128 +2324,6 @@ class _SparklingHintButtonState extends State<_SparklingHintButton>
   }
 }
 
-/// 힌트 버튼 아래 안내. 꼬리는 위를 향하고 위아래로 뜬다.
-class _BobbingGuideBubble extends StatefulWidget {
-  final String text;
-
-  const _BobbingGuideBubble({required this.text});
-
-  @override
-  State<_BobbingGuideBubble> createState() => _BobbingGuideBubbleState();
-}
-
-class _BobbingGuideBubbleState extends State<_BobbingGuideBubble>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1300),
-    )..repeat(reverse: true);
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) {
-        final t = Curves.easeInOut.transform(_controller.value);
-        return Transform.translate(
-          offset: Offset(0, -7 * t),
-          child: child,
-        );
-      },
-      child: Center(child: _GuideChip(text: widget.text, tailUp: true)),
-    );
-  }
-}
-
-/// 짧은 안내 칩. 마이크 안내는 꼬리가 아래, 힌트 버튼 안내는 꼬리가 위.
-class _GuideChip extends StatelessWidget {
-  static const _fill = Color(0xFF0CABA8);
-
-  final String text;
-  final bool tailUp;
-
-  const _GuideChip({required this.text, this.tailUp = false});
-
-  @override
-  Widget build(BuildContext context) {
-    final style = Theme.of(context).textTheme.bodyLarge?.copyWith(
-          color: Colors.white,
-          fontWeight: FontWeight.w700,
-        );
-    final body = Container(
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-      decoration: BoxDecoration(
-        color: _fill,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Text(text, textAlign: TextAlign.center, style: style),
-    );
-    final tail = CustomPaint(
-      size: const Size(16, 8),
-      painter: tailUp
-          ? const _BubbleTailPainter(color: _fill)
-          : const _BubbleTailDownPainter(color: _fill),
-    );
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (tailUp) tail,
-        body,
-        if (!tailUp) tail,
-      ],
-    );
-  }
-}
-
-class _MicGuideBubble extends StatelessWidget {
-  static const _fill = Color(0xFF0CABA8);
-
-  final String text;
-
-  const _MicGuideBubble({required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context).textTheme;
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.fromLTRB(28, 22, 28, 22),
-          decoration: BoxDecoration(
-            color: _fill,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Text.rich(
-            TextSpan(
-              style: theme.headlineSmall?.copyWith(color: Colors.white),
-              children: _helloSpans(text),
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ),
-        CustomPaint(
-          size: const Size(18, 10),
-          painter: const _BubbleTailDownPainter(color: _fill),
-        ),
-      ],
-    );
-  }
-}
-
 const _helloColor = Color(0xFF054544);
 final _helloPattern = RegExp("'Hello'|‘Hello’");
 
@@ -2352,51 +2340,13 @@ List<InlineSpan> _helloSpans(String text) {
   ];
 }
 
-class _BubbleTailDownPainter extends CustomPainter {
-  final Color color;
-
-  const _BubbleTailDownPainter({required this.color});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final path = Path()
-      ..moveTo(0, 0)
-      ..lineTo(size.width, 0)
-      ..lineTo(size.width / 2, size.height)
-      ..close();
-    canvas.drawPath(path, Paint()..color = color);
-  }
-
-  @override
-  bool shouldRepaint(covariant _BubbleTailDownPainter oldDelegate) =>
-      oldDelegate.color != color;
-}
-
-class _BubbleTailPainter extends CustomPainter {
-  final Color color;
-
-  const _BubbleTailPainter({required this.color});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = color;
-    final path = Path()
-      ..moveTo(0, size.height)
-      ..lineTo(size.width / 2, 0)
-      ..lineTo(size.width, size.height)
-      ..close();
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant _BubbleTailPainter oldDelegate) =>
-      oldDelegate.color != color;
-}
-
-/// 마이크 둘레 파동. 링 크기는 고정이고, 안쪽·바깥 흰 링의 투명도만 1초 박자로 움직인다.
+/// 마이크 둘레 파동. 힌트 버튼 강조 원(`_HintAimRings`)과 같은 동작:
+/// 1.2초마다 안쪽 테두리 원이 마이크 바로 바깥에서 16px 퍼지며 나타났다 사라지고,
+/// 8px 바깥의 흐린(40%) 테두리 원이 함께 따라간다. 흰 마이크 원은 고정.
 class _TutorialMicRipple extends StatefulWidget {
   /// 흰 원 100 기준으로 바깥 링 끝까지의 칸.
-  static const displaySize = 154.0;
+  /// 가장 크게 퍼진 바깥 원(68+11+선 반 두께)이 잘리지 않는 크기.
+  static const displaySize = 160.0;
 
   const _TutorialMicRipple();
 
@@ -2406,102 +2356,53 @@ class _TutorialMicRipple extends StatefulWidget {
 
 class _TutorialMicRippleState extends State<_TutorialMicRipple>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
+  /// 흰 원(지름 100) 바로 바깥에서 시작해 전구와 같은 16px을 퍼진다.
+  static const _minInner = 52.0;
+  static const _maxInner = 68.0;
+
+  /// 마이크에 가까운 안쪽 원은 힌트 버튼(2.5)보다 두껍게.
+  static const _innerStroke = 4.0;
+
+  /// 안쪽 원과 바깥 원 사이 간격(힌트 버튼 8보다 살짝 넓게).
+  static const _gap = 11.0;
+
+  late final AnimationController _pulse;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
+    _pulse = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1000),
+      duration: const Duration(milliseconds: 1200),
     )..repeat();
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _pulse.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
-      animation: _controller,
+      animation: _pulse,
       builder: (context, _) {
+        final t = _pulse.value;
+        final travel = Curves.easeOut.transform(t);
+        final fadeIn = (t / 0.18).clamp(0.0, 1.0);
         return CustomPaint(
           size: const Size.square(_TutorialMicRipple.displaySize),
-          painter: _MicPulseRingsPainter(_controller.value),
+          painter: _HintRingPainter(
+            innerRadius: _minInner + (_maxInner - _minInner) * travel,
+            opacity: fadeIn * (1 - travel),
+            innerStroke: _innerStroke,
+            gap: _gap,
+          ),
         );
       },
     );
   }
-}
-
-/// 10/19 영상. 링 크기는 고정. 안쪽 흰 링은 30%↔51%를 한 번에 두 번, 바깥 흰 링은 0↔30%.
-class _MicPulseRingsPainter extends CustomPainter {
-  static const _innerFloor = 77 / 255;
-  static const _innerPeak = 131 / 255;
-  static const _outerPeak = 77 / 255;
-
-  final double t;
-
-  const _MicPulseRingsPainter(this.t);
-
-  double _between(List<(double, double)> keys) {
-    if (t <= keys.first.$1) return keys.first.$2;
-    for (var i = 1; i < keys.length; i++) {
-      final a = keys[i - 1];
-      final b = keys[i];
-      if (t <= b.$1) {
-        final u = Curves.easeInOut.transform((t - a.$1) / (b.$1 - a.$1));
-        return a.$2 + (b.$2 - a.$2) * u;
-      }
-    }
-    return keys.last.$2;
-  }
-
-  void _band(Canvas canvas, Offset center, double inner, double outer, double alpha) {
-    if (alpha <= 0.01) return;
-    canvas.drawCircle(
-      center,
-      (inner + outer) / 2,
-      Paint()
-        ..color = Colors.white.withValues(alpha: alpha)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = outer - inner
-        ..isAntiAlias = true,
-    );
-  }
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final innerT = _between(const [
-      (0, 0),
-      (0.2, 1),
-      (0.5, 0),
-      (0.7, 1),
-      (1, 0),
-    ]);
-    final outerT = _between(const [
-      (0, 0),
-      (0.2, 1),
-      (0.7, 1),
-      (1, 0),
-    ]);
-    _band(
-      canvas,
-      center,
-      50,
-      65,
-      _innerFloor + (_innerPeak - _innerFloor) * innerT,
-    );
-    _band(canvas, center, 65, 77, _outerPeak * outerT);
-  }
-
-  @override
-  bool shouldRepaint(covariant _MicPulseRingsPainter oldDelegate) =>
-      oldDelegate.t != t;
 }
 
 /// 힌트 전구. 앞장은 기존 24 논리 픽셀. 세 번째 발화 차례에만 뒤를 반짝인다.
@@ -2661,8 +2562,13 @@ class _PlayingLikeDisabledFooter extends StatelessWidget {
               _PinnedGuideSlot(
                 reserveText: guideNearMic ? null : guideReserveText,
                 child: compactMicGuide
-                    ? _GuideChip(text: micGuide!)
-                    : _EnterFade(child: _MicGuideBubble(text: micGuide!)),
+                    ? _tutorialGuide(micGuide!)
+                    : _EnterFade(
+                        child: _tutorialGuide(
+                          micGuide!,
+                          spans: _helloSpans(micGuide!),
+                        ),
+                      ),
               ),
               SizedBox(height: _gapAboveMic),
             ] else ...[
@@ -2679,7 +2585,8 @@ class _PlayingLikeDisabledFooter extends StatelessWidget {
                       key: ValueKey('tutorialMicRipple'),
                       left: 0,
                       right: 0,
-                      bottom: roleplayMicBottomInsetFromStackBottom +
+                      bottom:
+                          roleplayMicBottomInsetFromStackBottom +
                           roleplayMicDefaultSize / 2 -
                           _TutorialMicRipple.displaySize / 2,
                       child: IgnorePointer(
@@ -2734,10 +2641,7 @@ class _PlayingLikeDisabledFooter extends StatelessWidget {
                       right: 74,
                       bottom: -6,
                       child: IgnorePointer(
-                        child: TutorialPointer(
-                          size: 120,
-                          holdGesture: true,
-                        ),
+                        child: TutorialPointer(size: 120, holdGesture: true),
                       ),
                     ),
                 ],

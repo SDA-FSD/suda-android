@@ -11,7 +11,17 @@ class GuideBubble extends StatefulWidget {
 
   final String text;
   final TextStyle? textStyle;
+  final TextAlign textAlign;
+
+  /// 있으면 [text] 대신 이 스팬을 그린다. 기본 스타일은 [textStyle].
+  final List<InlineSpan>? spans;
   final GuideBubbleTail tail;
+
+  /// 말풍선 모서리 반지름. 기본은 [radius].
+  final double cornerRadius;
+
+  /// true면 꼭지를 꼬리 변의 가운데에 둔다([tailOffsetFromEnd] 무시).
+  final bool tailCentered;
 
   /// 꼭지 중심이 꼬리 변의 끝에서 떨어진 거리.
   /// 위·아래 꼭지는 오른쪽 끝 기준, 좌·우 꼭지는 아래 끝 기준.
@@ -19,14 +29,24 @@ class GuideBubble extends StatefulWidget {
   final bool wobble;
   final VoidCallback? onTap;
 
+  /// 말풍선 전체 최대 폭. 기본은 [defaultMaxWidth].
+  final double maxWidth;
+
+  static const double defaultMaxWidth = 260;
+
   const GuideBubble({
     super.key,
     required this.text,
     this.textStyle,
+    this.textAlign = TextAlign.start,
+    this.spans,
     this.tail = GuideBubbleTail.top,
+    this.cornerRadius = radius,
+    this.tailCentered = false,
     this.tailOffsetFromEnd = 20,
     this.wobble = false,
     this.onTap,
+    this.maxWidth = defaultMaxWidth,
   });
 
   @override
@@ -82,15 +102,26 @@ class _GuideBubbleState extends State<GuideBubble>
       GuideBubbleTail.right => EdgeInsets.fromLTRB(14, 10, 14 + tail, 10),
     };
     Widget bubble = ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 260),
+      constraints: BoxConstraints(maxWidth: widget.maxWidth),
       child: CustomPaint(
         painter: _GuideBubblePainter(
           tail: widget.tail,
           tailOffsetFromEnd: widget.tailOffsetFromEnd,
+          cornerRadius: widget.cornerRadius,
+          tailCentered: widget.tailCentered,
         ),
         child: Padding(
           padding: padding,
-          child: Text(widget.text, style: style),
+          child: widget.spans == null
+              ? Text(
+                  widget.text,
+                  style: style,
+                  textAlign: widget.textAlign,
+                )
+              : Text.rich(
+                  TextSpan(style: style, children: widget.spans),
+                  textAlign: widget.textAlign,
+                ),
         ),
       ),
     );
@@ -115,15 +146,19 @@ class _GuideBubbleState extends State<GuideBubble>
 class _GuideBubblePainter extends CustomPainter {
   final GuideBubbleTail tail;
   final double tailOffsetFromEnd;
+  final double cornerRadius;
+  final bool tailCentered;
 
   const _GuideBubblePainter({
     required this.tail,
     required this.tailOffsetFromEnd,
+    required this.cornerRadius,
+    required this.tailCentered,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
-    const radius = GuideBubble.radius;
+    final radius = cornerRadius;
     const tailLen = GuideBubble.tailLength;
     const tailW = GuideBubble.tailWidth;
     final body = switch (tail) {
@@ -153,7 +188,7 @@ class _GuideBubblePainter extends CustomPainter {
       ),
     };
     final path = Path()
-      ..addRRect(RRect.fromRectAndRadius(body, const Radius.circular(radius)));
+      ..addRRect(RRect.fromRectAndRadius(body, Radius.circular(radius)));
     final center = _tailCenter(size, body);
     final half = tailW / 2;
     switch (tail) {
@@ -187,8 +222,9 @@ class _GuideBubblePainter extends CustomPainter {
       GuideBubbleTail.top || GuideBubbleTail.bottom => size.width,
       GuideBubbleTail.left || GuideBubbleTail.right => size.height,
     };
+    if (tailCentered) return along / 2;
     final raw = along - tailOffsetFromEnd;
-    final min = GuideBubble.radius + GuideBubble.tailWidth / 2;
+    final min = cornerRadius + GuideBubble.tailWidth / 2;
     final max = along - min;
     if (max <= min) return along / 2;
     return raw.clamp(min, max);
@@ -197,6 +233,8 @@ class _GuideBubblePainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _GuideBubblePainter oldDelegate) {
     return tail != oldDelegate.tail ||
-        tailOffsetFromEnd != oldDelegate.tailOffsetFromEnd;
+        tailOffsetFromEnd != oldDelegate.tailOffsetFromEnd ||
+        cornerRadius != oldDelegate.cornerRadius ||
+        tailCentered != oldDelegate.tailCentered;
   }
 }

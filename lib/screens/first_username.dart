@@ -9,6 +9,7 @@ import '../services/token_storage.dart';
 import '../utils/default_toast.dart';
 import '../widgets/onboarding_step_bar.dart';
 import '../widgets/user_profile_avatar.dart';
+import 'tutorial/tutorial_intro.dart';
 import 'tutorial/tutorial_intro_stage.dart';
 
 /// 온보딩(meta `ONBOARDING_USERNAME` != Y)의 이름 확인·수정 Full Screen.
@@ -127,7 +128,11 @@ class _FirstUsernameScreenState extends State<FirstUsernameScreen>
       if (mounted) {
         setState(() => _isSubmitting = false);
         if (saved) {
-          await _playTransitionToIntro(updated);
+          if (TutorialIntroScreen.onboardingEnabled) {
+            await _playTransitionToIntro(updated);
+          } else {
+            widget.onComplete(updated);
+          }
         }
       }
     }
