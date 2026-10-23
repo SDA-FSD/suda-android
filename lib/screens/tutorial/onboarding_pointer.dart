@@ -3,12 +3,12 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
-/// 탭 가이드: `tutorial_pointer.png` 스케일 펄스 + 손끝 테두리 원 리플(탭은 채움 원 없음).
+/// 탭 가이드: `onboarding_tutorial_pointer.png` 스케일 펄스 + 손끝 테두리 원 리플(탭은 채움 원 없음).
 /// 홀드(마이크)는 채움 원 + 테두리 원이 손가락 뒤에 깔리고, 손가락 둘레는 원이 지워져 공백이 생긴다.
-/// 손가락·원 모두 `#8C8C8C` 불투명.
+/// 탭의 손가락·원은 `#8C8C8C` 불투명. 홀드는 같은 색을 80%로 그린다.
 /// 원 중심 = 손가락 손끝 앵커.
 class TutorialPointer extends StatefulWidget {
-  static const assetPath = 'assets/images/tutorial/tutorial_pointer.png';
+  static const assetPath = 'assets/images/onboarding/onboarding_tutorial_pointer.png';
   static const color = Color(0xFF8C8C8C);
 
   /// 원 앵커 (위젯 size 대비). Center 기준 손끝 ≈ (0.28, 0.22).

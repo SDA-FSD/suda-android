@@ -395,7 +395,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get tutorialRoleplaySkipTitle => '跳过教程？';
 
   @override
-  String get tutorialRoleplaySkipBody => '跳过后，你将无法获得\n教程奖励。';
+  String get tutorialRoleplaySkipBody => '跳过后，将无法返回教程。';
 
   @override
   String get tutorialRoleplaySkipConfirm => '跳过教程';
@@ -422,11 +422,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get tutorialRoleplayGuideMissionTapContinue => '点击继续';
 
   @override
-  String get tutorialRoleplayNarration1 =>
-      '今天你要搬到一个新街区。你坐上出租车，友善的司机贝蒂向你打招呼。 🚕';
-
-  @override
-  String get tutorialRoleplayNarrationArrival => '出租车到达了你的目的地。';
+  String get tutorialRoleplaySceneCaption => '今天要搬到新的街区了。\n和出租车司机Betty打个招呼吧！';
 
   @override
   String get tutorialRoleplayResultSubtitle => '第一次对话完成了！';
@@ -435,31 +431,41 @@ class AppLocalizationsZh extends AppLocalizations {
   String get tutorialRoleplayResultContinue => '继续说下去！';
 
   @override
-  String get tutorialRoleplayBettyLine1 => 'Hi there! Hop in!';
+  String get tutorialRoleplayGreetingSuccess => '第一次打招呼成功！\n做得好！';
 
   @override
-  String get tutorialRoleplayBettyLine1Translation => '你好！快上车！';
+  String get tutorialRoleplayBettyLine1 =>
+      'Hi there! I\'m Betty. Lovely to meet you!';
 
   @override
-  String get tutorialRoleplayHoldHello => '按住麦克风按钮，\n说 ‘Hello’，\n然后松开。';
+  String get tutorialRoleplayBettyLine1Translation => '你好！我是贝蒂。很高兴认识你！';
+
+  @override
+  String get tutorialRoleplayHoldHello => '按住麦克风按钮，说 ‘Hello’，然后松开。';
 
   @override
   String get tutorialRoleplayMicHolding => '‘Hello’';
 
   @override
-  String get tutorialRoleplayMicTooShort => '再按久一点，\n然后说 ‘Hello’';
+  String get tutorialRoleplayMicTooShort => '再按久一点，然后说 ‘Hello’';
 
   @override
-  String get tutorialRoleplayMicNoSpeech => '没有听清。\n请再说一次 ‘Hello’。';
+  String get tutorialRoleplayMicNoSpeech => '没有听清。请再说一次 ‘Hello’。';
 
   @override
-  String get tutorialRoleplayHintGuide => '不知道说什么？\n点一下提示！';
+  String get tutorialRoleplayHintGuide => '不知道该说什么？\n点灯泡看提示。';
 
   @override
-  String get tutorialRoleplayHintTapEnglish => '点一下查看英文回答';
+  String get tutorialRoleplayHintDestinationNative => '请去 SUDA City。';
 
   @override
-  String get tutorialRoleplayHintSayIt => '现在说吧!';
+  String get tutorialRoleplayHintReasonNative => '我今天要搬去那里。';
+
+  @override
+  String get tutorialRoleplayHintAnswerGuide => '试着用这句话回答。';
+
+  @override
+  String get tutorialRoleplayFreeAnswerGuide => '用自己的话回答吧。\n需要帮助的话，点灯泡。';
 
   @override
   String get actionConfirm => '确认';
@@ -1580,7 +1586,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get tutorialRoleplaySkipTitle => '跳过教程？';
 
   @override
-  String get tutorialRoleplaySkipBody => '跳过后，你将无法获得\n教程奖励。';
+  String get tutorialRoleplaySkipBody => '跳过后，将无法返回教程。';
 
   @override
   String get tutorialRoleplaySkipConfirm => '跳过教程';
@@ -1607,11 +1613,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get tutorialRoleplayGuideMissionTapContinue => '点击继续';
 
   @override
-  String get tutorialRoleplayNarration1 =>
-      '今天你要搬到一个新街区。你坐上出租车，友善的司机贝蒂向你打招呼。 🚕';
-
-  @override
-  String get tutorialRoleplayNarrationArrival => '出租车到达了你的目的地。';
+  String get tutorialRoleplaySceneCaption => '今天要搬到新的街区了。\n和出租车司机Betty打个招呼吧！';
 
   @override
   String get tutorialRoleplayResultSubtitle => '第一次对话完成了！';
@@ -1620,31 +1622,41 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get tutorialRoleplayResultContinue => '继续说下去！';
 
   @override
-  String get tutorialRoleplayBettyLine1 => 'Hi there! Hop in!';
+  String get tutorialRoleplayGreetingSuccess => '第一次打招呼成功！\n做得好！';
 
   @override
-  String get tutorialRoleplayBettyLine1Translation => '你好！快上车！';
+  String get tutorialRoleplayBettyLine1 =>
+      'Hi there! I\'m Betty. Lovely to meet you!';
 
   @override
-  String get tutorialRoleplayHoldHello => '按住麦克风按钮，\n说 ‘Hello’，\n然后松开。';
+  String get tutorialRoleplayBettyLine1Translation => '你好！我是贝蒂。很高兴认识你！';
+
+  @override
+  String get tutorialRoleplayHoldHello => '按住麦克风按钮，说 ‘Hello’，然后松开。';
 
   @override
   String get tutorialRoleplayMicHolding => '‘Hello’';
 
   @override
-  String get tutorialRoleplayMicTooShort => '再按久一点，\n然后说 ‘Hello’';
+  String get tutorialRoleplayMicTooShort => '再按久一点，然后说 ‘Hello’';
 
   @override
-  String get tutorialRoleplayMicNoSpeech => '没有听清。\n请再说一次 ‘Hello’。';
+  String get tutorialRoleplayMicNoSpeech => '没有听清。请再说一次 ‘Hello’。';
 
   @override
-  String get tutorialRoleplayHintGuide => '不知道说什么？\n点一下提示！';
+  String get tutorialRoleplayHintGuide => '不知道该说什么？\n点灯泡看提示。';
 
   @override
-  String get tutorialRoleplayHintTapEnglish => '点一下查看英文回答';
+  String get tutorialRoleplayHintDestinationNative => '请去 SUDA City。';
 
   @override
-  String get tutorialRoleplayHintSayIt => '现在说吧!';
+  String get tutorialRoleplayHintReasonNative => '我今天要搬去那里。';
+
+  @override
+  String get tutorialRoleplayHintAnswerGuide => '试着用这句话回答。';
+
+  @override
+  String get tutorialRoleplayFreeAnswerGuide => '用自己的话回答吧。\n需要帮助的话，点灯泡。';
 
   @override
   String get actionConfirm => '确认';
@@ -2765,7 +2777,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get tutorialRoleplaySkipTitle => '跳過教學？';
 
   @override
-  String get tutorialRoleplaySkipBody => '跳過後，你將無法獲得\n教學獎勵。';
+  String get tutorialRoleplaySkipBody => '跳過後，將無法返回教學。';
 
   @override
   String get tutorialRoleplaySkipConfirm => '跳過教學';
@@ -2792,11 +2804,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get tutorialRoleplayGuideMissionTapContinue => '點一下繼續';
 
   @override
-  String get tutorialRoleplayNarration1 =>
-      '今天你要搬到一個新街區。你坐上計程車，親切的司機貝蒂向你打招呼。 🚕';
-
-  @override
-  String get tutorialRoleplayNarrationArrival => '計程車抵達你的目的地了。';
+  String get tutorialRoleplaySceneCaption => '今天要搬到新的社區了。\n和計程車司機Betty打個招呼吧！';
 
   @override
   String get tutorialRoleplayResultSubtitle => '第一次對話完成了！';
@@ -2805,31 +2813,41 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get tutorialRoleplayResultContinue => '繼續說下去！';
 
   @override
-  String get tutorialRoleplayBettyLine1 => 'Hi there! Hop in!';
+  String get tutorialRoleplayGreetingSuccess => '第一次打招呼成功！\n做得好！';
 
   @override
-  String get tutorialRoleplayBettyLine1Translation => '你好！上車吧！';
+  String get tutorialRoleplayBettyLine1 =>
+      'Hi there! I\'m Betty. Lovely to meet you!';
 
   @override
-  String get tutorialRoleplayHoldHello => '按住麥克風按鈕，\n說 ‘Hello’，\n然後放開。';
+  String get tutorialRoleplayBettyLine1Translation => '你好！我是貝蒂。很高興認識你！';
+
+  @override
+  String get tutorialRoleplayHoldHello => '按住麥克風按鈕，說 ‘Hello’，然後放開。';
 
   @override
   String get tutorialRoleplayMicHolding => '‘Hello’';
 
   @override
-  String get tutorialRoleplayMicTooShort => '再按久一點，\n然後說 ‘Hello’';
+  String get tutorialRoleplayMicTooShort => '再按久一點，然後說 ‘Hello’';
 
   @override
-  String get tutorialRoleplayMicNoSpeech => '沒有聽清楚。\n請再說一次 ‘Hello’。';
+  String get tutorialRoleplayMicNoSpeech => '沒有聽清楚。請再說一次 ‘Hello’。';
 
   @override
-  String get tutorialRoleplayHintGuide => '不知道要說什麼？\n點一下提示！';
+  String get tutorialRoleplayHintGuide => '不知道該說什麼？\n點燈泡看提示。';
 
   @override
-  String get tutorialRoleplayHintTapEnglish => '點一下查看英文回答';
+  String get tutorialRoleplayHintDestinationNative => '請去 SUDA City。';
 
   @override
-  String get tutorialRoleplayHintSayIt => '現在說吧!';
+  String get tutorialRoleplayHintReasonNative => '我今天要搬去那裡。';
+
+  @override
+  String get tutorialRoleplayHintAnswerGuide => '試著用這句話回答。';
+
+  @override
+  String get tutorialRoleplayFreeAnswerGuide => '用自己的話回答吧。\n需要幫忙的話，點燈泡。';
 
   @override
   String get actionConfirm => '確認';

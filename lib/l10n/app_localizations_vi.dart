@@ -420,7 +420,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get tutorialRoleplaySkipBody =>
-      'Nếu bỏ qua, bạn sẽ không nhận\nphần thưởng hướng dẫn.';
+      'Nếu bỏ qua, bạn sẽ không thể quay lại phần hướng dẫn.';
 
   @override
   String get tutorialRoleplaySkipConfirm => 'Bỏ qua hướng dẫn';
@@ -447,12 +447,8 @@ class AppLocalizationsVi extends AppLocalizations {
   String get tutorialRoleplayGuideMissionTapContinue => 'Chạm để tiếp tục';
 
   @override
-  String get tutorialRoleplayNarration1 =>
-      'Hôm nay bạn chuyển đến một khu phố mới. Bạn lên taxi và Betty, tài xế thân thiện, chào bạn. 🚕';
-
-  @override
-  String get tutorialRoleplayNarrationArrival =>
-      'Taxi đã đến nơi bạn muốn đến.';
+  String get tutorialRoleplaySceneCaption =>
+      'Hôm nay bạn chuyển đến một khu phố mới.\nHãy chào Betty, tài xế taxi của bạn!';
 
   @override
   String get tutorialRoleplayResultSubtitle =>
@@ -462,34 +458,47 @@ class AppLocalizationsVi extends AppLocalizations {
   String get tutorialRoleplayResultContinue => 'Tiếp tục nói nào!';
 
   @override
-  String get tutorialRoleplayBettyLine1 => 'Hi there! Hop in!';
+  String get tutorialRoleplayGreetingSuccess =>
+      'Lời chào đầu tiên thành công!\nLàm tốt lắm!';
 
   @override
-  String get tutorialRoleplayBettyLine1Translation => 'Xin chào! Mời lên xe!';
+  String get tutorialRoleplayBettyLine1 =>
+      'Hi there! I\'m Betty. Lovely to meet you!';
+
+  @override
+  String get tutorialRoleplayBettyLine1Translation =>
+      'Xin chào! Tôi là Betty. Rất vui được gặp bạn!';
 
   @override
   String get tutorialRoleplayHoldHello =>
-      'Nhấn và giữ\nnút micro.\nNói ‘Hello’ rồi thả ra.';
+      'Nhấn và giữ nút micro. Nói ‘Hello’ rồi thả ra.';
 
   @override
   String get tutorialRoleplayMicHolding => '‘Hello’';
 
   @override
-  String get tutorialRoleplayMicTooShort => 'Giữ micro lâu hơn\nvà nói ‘Hello’';
+  String get tutorialRoleplayMicTooShort => 'Giữ micro lâu hơn và nói ‘Hello’';
 
   @override
   String get tutorialRoleplayMicNoSpeech =>
-      'Chưa nghe rõ.\nHãy thử nói ‘Hello’ lần nữa.';
+      'Chưa nghe rõ. Hãy thử nói ‘Hello’ lần nữa.';
 
   @override
-  String get tutorialRoleplayHintGuide => 'Chưa biết nói gì?\nChạm vào gợi ý!';
+  String get tutorialRoleplayHintGuide =>
+      'Không biết nói gì?\nChạm vào bóng đèn để xem gợi ý.';
 
   @override
-  String get tutorialRoleplayHintTapEnglish =>
-      'Chạm để xem câu trả lời tiếng Anh';
+  String get tutorialRoleplayHintDestinationNative => 'Đến SUDA City, làm ơn.';
 
   @override
-  String get tutorialRoleplayHintSayIt => 'Đến lượt bạn nói!';
+  String get tutorialRoleplayHintReasonNative => 'Hôm nay tôi chuyển đến đó.';
+
+  @override
+  String get tutorialRoleplayHintAnswerGuide => 'Thử trả lời bằng câu này.';
+
+  @override
+  String get tutorialRoleplayFreeAnswerGuide =>
+      'Hãy trả lời bằng lời của bạn.\nCần giúp đỡ? Chạm vào bóng đèn.';
 
   @override
   String get actionConfirm => 'Xác nhận';

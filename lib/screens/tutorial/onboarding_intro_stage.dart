@@ -3,7 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../widgets/user_profile_avatar.dart';
-import 'tutorial_roleplay_backdrop.dart';
+import 'onboarding_backdrop.dart';
 
 /// Username→Intro 프로토타입 `.go`와 동일한 스테이지 (0=Username쪽, 1=Intro 최종).
 class TutorialIntroStage extends StatelessWidget {
@@ -22,7 +22,6 @@ class TutorialIntroStage extends StatelessWidget {
 
   /// null이면 Start 버튼은 보이는 장식만(탭 없음).
   final VoidCallback? onStartTutorial;
-  final bool startLoading;
 
   const TutorialIntroStage({
     super.key,
@@ -30,7 +29,6 @@ class TutorialIntroStage extends StatelessWidget {
     required this.displayName,
     this.imgPath,
     this.onStartTutorial,
-    this.startLoading = false,
   });
 
   static double local(double t, double startMs, double durMs) {
@@ -148,39 +146,26 @@ class TutorialIntroStage extends StatelessWidget {
                   child: SizedBox(
                     height: 60,
                     child: ElevatedButton(
-                      onPressed: (onStartTutorial == null || startLoading)
-                          ? null
-                          : onStartTutorial,
+                      onPressed: onStartTutorial,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: accent,
                         foregroundColor: Colors.white,
-                        disabledBackgroundColor: accent.withOpacity(0.6),
-                        disabledForegroundColor: Colors.white.withOpacity(0.8),
                         elevation: 0,
                         shape: const StadiumBorder(),
                         padding: const EdgeInsets.symmetric(horizontal: 28),
                       ),
-                      child: startLoading
-                          ? const SizedBox(
-                              width: 22,
-                              height: 22,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
-                            )
-                          : Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                SvgPicture.asset(
-                                  'assets/images/icons/play_white.svg',
-                                  width: 18,
-                                  height: 18,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(l10n.tutorialIntroStart),
-                              ],
-                            ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SvgPicture.asset(
+                            'assets/images/icons/play_white.svg',
+                            width: 18,
+                            height: 18,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(l10n.tutorialIntroStart),
+                        ],
+                      ),
                     ),
                   ),
                 ),

@@ -1580,7 +1580,7 @@ class _TutorialTranslatorSampleState extends State<_TutorialTranslatorSample>
           children: [
             ClipOval(
               child: Image.asset(
-                'assets/images/tutorial/turorial_character.png',
+                'assets/images/onboarding/onboarding_turorial_character.png',
                 width: _avatarSize,
                 height: _avatarSize,
                 fit: BoxFit.cover,

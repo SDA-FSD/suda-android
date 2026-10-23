@@ -425,7 +425,7 @@ class AppLocalizationsFil extends AppLocalizations {
 
   @override
   String get tutorialRoleplaySkipBody =>
-      'Kapag nilaktawan, hindi mo matatanggap\nang reward ng tutorial.';
+      'Kapag nilaktawan, hindi ka na makakabalik sa tutorial.';
 
   @override
   String get tutorialRoleplaySkipConfirm => 'Laktawan ang tutorial';
@@ -453,12 +453,8 @@ class AppLocalizationsFil extends AppLocalizations {
   String get tutorialRoleplayGuideMissionTapContinue => 'I-tap para magpatuloy';
 
   @override
-  String get tutorialRoleplayNarration1 =>
-      'Ngayon, lilipat ka sa bagong lugar. Sumakay ka ng taxi at binabati ka ni Betty, isang mabait na drayber. 🚕';
-
-  @override
-  String get tutorialRoleplayNarrationArrival =>
-      'Dumating na ang taxi sa iyong destinasyon.';
+  String get tutorialRoleplaySceneCaption =>
+      'Ngayon, lilipat ka sa isang bagong lugar.\nKumusta ka muna kay Betty, ang driver ng taxi mo!';
 
   @override
   String get tutorialRoleplayResultSubtitle => 'Tapos na ang unang usapan!';
@@ -467,36 +463,49 @@ class AppLocalizationsFil extends AppLocalizations {
   String get tutorialRoleplayResultContinue => 'Ituloy natin!';
 
   @override
-  String get tutorialRoleplayBettyLine1 => 'Hi there! Hop in!';
+  String get tutorialRoleplayGreetingSuccess =>
+      'Tapos na ang unang pagbati!\nAng galing!';
 
   @override
-  String get tutorialRoleplayBettyLine1Translation => 'Kumusta! Sakay na!';
+  String get tutorialRoleplayBettyLine1 =>
+      'Hi there! I\'m Betty. Lovely to meet you!';
+
+  @override
+  String get tutorialRoleplayBettyLine1Translation =>
+      'Kumusta! Ako si Betty. Ikinagagalak kitang makilala!';
 
   @override
   String get tutorialRoleplayHoldHello =>
-      'Pindutin nang matagal\nang button ng mikropono.\nSabihin ang ‘Hello’ at bitawan.';
+      'Pindutin nang matagal ang button ng mikropono. Sabihin ang ‘Hello’ at bitawan.';
 
   @override
   String get tutorialRoleplayMicHolding => '‘Hello’';
 
   @override
   String get tutorialRoleplayMicTooShort =>
-      'Pindutin nang mas matagal\nat sabihin ang ‘Hello’';
+      'Pindutin nang mas matagal at sabihin ang ‘Hello’';
 
   @override
   String get tutorialRoleplayMicNoSpeech =>
-      'Hindi narinig.\nSubukang sabihin ulit ang ‘Hello’.';
+      'Hindi narinig. Subukang sabihin ulit ang ‘Hello’.';
 
   @override
   String get tutorialRoleplayHintGuide =>
-      'Hindi alam ang sasabihin?\nI-tap ang hint!';
+      'Hindi alam ang sasabihin?\nI-tap ang bumbilya para sa hint.';
 
   @override
-  String get tutorialRoleplayHintTapEnglish =>
-      'I-tap para makita ang sagot sa English';
+  String get tutorialRoleplayHintDestinationNative => 'Sa SUDA City, pakiusap.';
 
   @override
-  String get tutorialRoleplayHintSayIt => 'Ikaw naman!';
+  String get tutorialRoleplayHintReasonNative => 'Lilipat ako roon ngayon.';
+
+  @override
+  String get tutorialRoleplayHintAnswerGuide =>
+      'Subukang sumagot gamit ang pangungusap na ito.';
+
+  @override
+  String get tutorialRoleplayFreeAnswerGuide =>
+      'Sumagot gamit ang sarili mong salita.\nKailangan ng tulong? I-tap ang bumbilya.';
 
   @override
   String get actionConfirm => 'Kumpirmahin';

@@ -418,7 +418,7 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get tutorialRoleplaySkipBody =>
-      'Als je overslaat, krijg je\nde tutorialbeloning niet.';
+      'Als je overslaat, kun je niet terug naar de tutorial.';
 
   @override
   String get tutorialRoleplaySkipConfirm => 'Tutorial overslaan';
@@ -445,12 +445,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get tutorialRoleplayGuideMissionTapContinue => 'Tik om verder te gaan';
 
   @override
-  String get tutorialRoleplayNarration1 =>
-      'Vandaag verhuis je naar een nieuwe buurt. Je stapt in een taxi, waar de vriendelijke chauffeur Betty je begroet. 🚕';
-
-  @override
-  String get tutorialRoleplayNarrationArrival =>
-      'De taxi arriveert op je bestemming.';
+  String get tutorialRoleplaySceneCaption =>
+      'Vandaag verhuis je naar een nieuwe buurt.\nZeg hallo tegen Betty, je taxichauffeur!';
 
   @override
   String get tutorialRoleplayResultSubtitle => 'Eerste gesprek voltooid!';
@@ -459,36 +455,51 @@ class AppLocalizationsNl extends AppLocalizations {
   String get tutorialRoleplayResultContinue => 'Ga zo door!';
 
   @override
-  String get tutorialRoleplayBettyLine1 => 'Hi there! Hop in!';
+  String get tutorialRoleplayGreetingSuccess =>
+      'Eerste begroeting gelukt!\nGoed gedaan!';
 
   @override
-  String get tutorialRoleplayBettyLine1Translation => 'Hallo! Stap in!';
+  String get tutorialRoleplayBettyLine1 =>
+      'Hi there! I\'m Betty. Lovely to meet you!';
+
+  @override
+  String get tutorialRoleplayBettyLine1Translation =>
+      'Hallo! Ik ben Betty. Leuk je te ontmoeten!';
 
   @override
   String get tutorialRoleplayHoldHello =>
-      'Houd de microfoonknop\ningedrukt.\nZeg ‘Hello’ en laat los.';
+      'Houd de microfoonknop ingedrukt. Zeg ‘Hello’ en laat los.';
 
   @override
   String get tutorialRoleplayMicHolding => '‘Hello’';
 
   @override
   String get tutorialRoleplayMicTooShort =>
-      'Houd de microfoon langer\ningedrukt en zeg ‘Hello’';
+      'Houd de microfoon langer ingedrukt en zeg ‘Hello’';
 
   @override
   String get tutorialRoleplayMicNoSpeech =>
-      'We hebben je niet gehoord.\nProbeer nog eens ‘Hello’ te zeggen.';
+      'We hebben je niet gehoord. Probeer nog eens ‘Hello’ te zeggen.';
 
   @override
   String get tutorialRoleplayHintGuide =>
-      'Weet je niet\nwat je moet zeggen?\nTik op de hint!';
+      'Weet je niet wat je moet zeggen?\nTik op de gloeilamp voor een hint.';
 
   @override
-  String get tutorialRoleplayHintTapEnglish =>
-      'Tik om het Engelse antwoord te zien';
+  String get tutorialRoleplayHintDestinationNative =>
+      'Naar SUDA City, alsjeblieft.';
 
   @override
-  String get tutorialRoleplayHintSayIt => 'Nu jij!';
+  String get tutorialRoleplayHintReasonNative =>
+      'Ik verhuis er vandaag naartoe.';
+
+  @override
+  String get tutorialRoleplayHintAnswerGuide =>
+      'Probeer te antwoorden met deze zin.';
+
+  @override
+  String get tutorialRoleplayFreeAnswerGuide =>
+      'Antwoord in je eigen woorden.\nHulp nodig? Tik op de gloeilamp.';
 
   @override
   String get actionConfirm => 'Bevestigen';

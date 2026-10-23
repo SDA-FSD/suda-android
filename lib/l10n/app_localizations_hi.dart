@@ -418,7 +418,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get tutorialRoleplaySkipBody =>
-      'छोड़ने पर आपको\nट्यूटोरियल का इनाम नहीं मिलेगा।';
+      'छोड़ने पर आप ट्यूटोरियल पर वापस नहीं आ पाएँगे।';
 
   @override
   String get tutorialRoleplaySkipConfirm => 'ट्यूटोरियल छोड़ें';
@@ -446,12 +446,8 @@ class AppLocalizationsHi extends AppLocalizations {
       'जारी रखने के लिए टैप करें';
 
   @override
-  String get tutorialRoleplayNarration1 =>
-      'आज आप नई बस्ती में शिफ्ट हो रहे हैं। आप टैक्सी में बैठते हैं, और बेटी नाम की मिलनसार ड्राइवर आपका स्वागत करती है। 🚕';
-
-  @override
-  String get tutorialRoleplayNarrationArrival =>
-      'टैक्सी आपकी मंज़िल पर पहुँच गई है।';
+  String get tutorialRoleplaySceneCaption =>
+      'आज आप नए मोहल्ले में शिफ्ट हो रहे हैं।\nअपनी टैक्सी ड्राइवर Betty को नमस्ते कहिए!';
 
   @override
   String get tutorialRoleplayResultSubtitle => 'पहली बातचीत पूरी हुई!';
@@ -460,36 +456,50 @@ class AppLocalizationsHi extends AppLocalizations {
   String get tutorialRoleplayResultContinue => 'आगे बढ़ते रहें!';
 
   @override
-  String get tutorialRoleplayBettyLine1 => 'Hi there! Hop in!';
+  String get tutorialRoleplayGreetingSuccess =>
+      'पहला अभिवादन पूरा!\nबहुत बढ़िया!';
 
   @override
-  String get tutorialRoleplayBettyLine1Translation => 'नमस्ते! अंदर आइए!';
+  String get tutorialRoleplayBettyLine1 =>
+      'Hi there! I\'m Betty. Lovely to meet you!';
+
+  @override
+  String get tutorialRoleplayBettyLine1Translation =>
+      'नमस्ते! मैं Betty हूँ। आपसे मिलकर खुशी हुई!';
 
   @override
   String get tutorialRoleplayHoldHello =>
-      'माइक बटन को दबाकर रखें।\n‘Hello’ बोलें\nऔर छोड़ दें।';
+      'माइक बटन को दबाकर रखें। ‘Hello’ बोलें और छोड़ दें।';
 
   @override
   String get tutorialRoleplayMicHolding => '‘Hello’';
 
   @override
   String get tutorialRoleplayMicTooShort =>
-      'माइक को थोड़ी देर और दबाएँ\nऔर ‘Hello’ बोलें';
+      'माइक को थोड़ी देर और दबाएँ और ‘Hello’ बोलें';
 
   @override
   String get tutorialRoleplayMicNoSpeech =>
-      'आवाज़ सुनाई नहीं दी।\nफिर से ‘Hello’ कहकर देखें।';
+      'आवाज़ सुनाई नहीं दी। फिर से ‘Hello’ कहकर देखें।';
 
   @override
   String get tutorialRoleplayHintGuide =>
-      'क्या कहें,\nसमझ नहीं आ रहा?\nहिंट पर टैप करें!';
+      'क्या कहें, समझ नहीं आ रहा?\nसंकेत के लिए बल्ब पर टैप करें।';
 
   @override
-  String get tutorialRoleplayHintTapEnglish =>
-      'अंग्रेज़ी जवाब देखने के लिए टैप करें';
+  String get tutorialRoleplayHintDestinationNative => 'SUDA City चलिए, प्लीज़।';
 
   @override
-  String get tutorialRoleplayHintSayIt => 'अब आप बोलें!';
+  String get tutorialRoleplayHintReasonNative =>
+      'मैं आज वहीं शिफ्ट हो रहा हूँ।';
+
+  @override
+  String get tutorialRoleplayHintAnswerGuide =>
+      'इस वाक्य से जवाब देने की कोशिश करें।';
+
+  @override
+  String get tutorialRoleplayFreeAnswerGuide =>
+      'अपने शब्दों में जवाब दें।\nमदद चाहिए? बल्ब पर टैप करें।';
 
   @override
   String get actionConfirm => 'कन्फ़र्म करें';

@@ -20,7 +20,7 @@ import 'endpoints/push_api.dart';
 import 'endpoints/rank_api.dart';
 import 'endpoints/roleplay_api.dart';
 import 'endpoints/series_api.dart';
-import 'endpoints/tutorial_api.dart';
+import 'endpoints/onboarding_tutorial_api.dart';
 import 'endpoints/user_api.dart';
 import 'endpoints/version_api.dart';
 import '../services/energy_refresh_bus.dart';

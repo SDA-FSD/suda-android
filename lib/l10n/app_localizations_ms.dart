@@ -421,7 +421,7 @@ class AppLocalizationsMs extends AppLocalizations {
 
   @override
   String get tutorialRoleplaySkipBody =>
-      'Jika dilangkau, anda tidak akan\nmenerima ganjaran tutorial.';
+      'Jika dilangkau, anda tidak boleh kembali ke tutorial.';
 
   @override
   String get tutorialRoleplaySkipConfirm => 'Langkau tutorial';
@@ -448,12 +448,8 @@ class AppLocalizationsMs extends AppLocalizations {
   String get tutorialRoleplayGuideMissionTapContinue => 'Ketik untuk teruskan';
 
   @override
-  String get tutorialRoleplayNarration1 =>
-      'Hari ini anda berpindah ke kawasan baharu. Anda menaiki teksi dan Betty, pemandu yang mesra, menyapa anda. 🚕';
-
-  @override
-  String get tutorialRoleplayNarrationArrival =>
-      'Teksi tiba di destinasi anda.';
+  String get tutorialRoleplaySceneCaption =>
+      'Hari ini anda berpindah ke kawasan baharu.\nUcapkan salam kepada Betty, pemandu teksi anda!';
 
   @override
   String get tutorialRoleplayResultSubtitle => 'Perbualan pertama selesai!';
@@ -462,36 +458,49 @@ class AppLocalizationsMs extends AppLocalizations {
   String get tutorialRoleplayResultContinue => 'Jom teruskan!';
 
   @override
-  String get tutorialRoleplayBettyLine1 => 'Hi there! Hop in!';
+  String get tutorialRoleplayGreetingSuccess =>
+      'Ucapan pertama berjaya!\nBagus!';
 
   @override
-  String get tutorialRoleplayBettyLine1Translation => 'Helo! Sila naik!';
+  String get tutorialRoleplayBettyLine1 =>
+      'Hi there! I\'m Betty. Lovely to meet you!';
+
+  @override
+  String get tutorialRoleplayBettyLine1Translation =>
+      'Helo! Saya Betty. Gembira bertemu dengan anda!';
 
   @override
   String get tutorialRoleplayHoldHello =>
-      'Tekan dan tahan\nbutang mikrofon.\nSebut ‘Hello’, kemudian lepaskan.';
+      'Tekan dan tahan butang mikrofon. Sebut ‘Hello’, kemudian lepaskan.';
 
   @override
   String get tutorialRoleplayMicHolding => '‘Hello’';
 
   @override
   String get tutorialRoleplayMicTooShort =>
-      'Tahan mikrofon lebih lama\ndan sebut ‘Hello’';
+      'Tahan mikrofon lebih lama dan sebut ‘Hello’';
 
   @override
   String get tutorialRoleplayMicNoSpeech =>
-      'Tidak kedengaran.\nCuba sebut ‘Hello’ sekali lagi.';
+      'Tidak kedengaran. Cuba sebut ‘Hello’ sekali lagi.';
 
   @override
   String get tutorialRoleplayHintGuide =>
-      'Tak pasti nak cakap apa?\nKetik petunjuk!';
+      'Tak pasti nak cakap apa?\nKetik mentol untuk lihat petunjuk.';
 
   @override
-  String get tutorialRoleplayHintTapEnglish =>
-      'Ketik untuk lihat jawapan bahasa Inggeris';
+  String get tutorialRoleplayHintDestinationNative => 'Ke SUDA City, tolong.';
 
   @override
-  String get tutorialRoleplayHintSayIt => 'Sekarang giliran anda!';
+  String get tutorialRoleplayHintReasonNative =>
+      'Saya berpindah ke sana hari ini.';
+
+  @override
+  String get tutorialRoleplayHintAnswerGuide => 'Cuba jawab dengan ayat ini.';
+
+  @override
+  String get tutorialRoleplayFreeAnswerGuide =>
+      'Jawab dengan kata-kata sendiri.\nPerlukan bantuan? Ketik mentol.';
 
   @override
   String get actionConfirm => 'Sahkan';

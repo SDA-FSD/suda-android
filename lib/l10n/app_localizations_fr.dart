@@ -422,7 +422,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get tutorialRoleplaySkipBody =>
-      'Si vous passez, vous ne recevrez pas\nla récompense du tutoriel.';
+      'Si vous passez, vous ne pourrez pas revenir au tutoriel.';
 
   @override
   String get tutorialRoleplaySkipConfirm => 'Passer le tutoriel';
@@ -451,12 +451,8 @@ class AppLocalizationsFr extends AppLocalizations {
       'Appuyez pour continuer';
 
   @override
-  String get tutorialRoleplayNarration1 =>
-      'Aujourd\'hui, vous emménagez dans un nouveau quartier. Vous montez dans un taxi, où Betty, une chauffeuse accueillante, vous salue. 🚕';
-
-  @override
-  String get tutorialRoleplayNarrationArrival =>
-      'Le taxi arrive à destination.';
+  String get tutorialRoleplaySceneCaption =>
+      'Aujourd\'hui, vous emménagez dans un nouveau quartier.\nDites bonjour à Betty, votre chauffeuse de taxi !';
 
   @override
   String get tutorialRoleplayResultSubtitle =>
@@ -466,36 +462,50 @@ class AppLocalizationsFr extends AppLocalizations {
   String get tutorialRoleplayResultContinue => 'On continue !';
 
   @override
-  String get tutorialRoleplayBettyLine1 => 'Hi there! Hop in!';
+  String get tutorialRoleplayGreetingSuccess =>
+      'Premier salut réussi !\nBravo !';
 
   @override
-  String get tutorialRoleplayBettyLine1Translation => 'Bonjour ! Montez !';
+  String get tutorialRoleplayBettyLine1 =>
+      'Hi there! I\'m Betty. Lovely to meet you!';
+
+  @override
+  String get tutorialRoleplayBettyLine1Translation =>
+      'Bonjour ! Je suis Betty. Ravie de vous rencontrer !';
 
   @override
   String get tutorialRoleplayHoldHello =>
-      'Maintenez le bouton\ndu micro enfoncé.\nDites ‘Hello’, puis relâchez.';
+      'Maintenez le bouton du micro enfoncé. Dites ‘Hello’, puis relâchez.';
 
   @override
   String get tutorialRoleplayMicHolding => '‘Hello’';
 
   @override
   String get tutorialRoleplayMicTooShort =>
-      'Maintenez le micro\nplus longtemps et dites ‘Hello’';
+      'Maintenez le micro plus longtemps et dites ‘Hello’';
 
   @override
   String get tutorialRoleplayMicNoSpeech =>
-      'Nous n\'avons pas entendu.\nRéessayez en disant ‘Hello’.';
+      'Nous n\'avons pas entendu. Réessayez en disant ‘Hello’.';
 
   @override
   String get tutorialRoleplayHintGuide =>
-      'Vous ne savez pas\nquoi dire ?\nAppuyez sur l\'indice !';
+      'Vous ne savez pas quoi dire ?\nAppuyez sur l\'ampoule pour voir un indice.';
 
   @override
-  String get tutorialRoleplayHintTapEnglish =>
-      'Appuyez pour voir la réponse en anglais';
+  String get tutorialRoleplayHintDestinationNative =>
+      'À SUDA City, s\'il vous plaît.';
 
   @override
-  String get tutorialRoleplayHintSayIt => 'À vous de parler !';
+  String get tutorialRoleplayHintReasonNative => 'J\'y déménage aujourd\'hui.';
+
+  @override
+  String get tutorialRoleplayHintAnswerGuide =>
+      'Essayez de répondre avec cette phrase.';
+
+  @override
+  String get tutorialRoleplayFreeAnswerGuide =>
+      'Répondez avec vos propres mots.\nBesoin d\'aide ? Appuyez sur l\'ampoule.';
 
   @override
   String get actionConfirm => 'Confirmer';

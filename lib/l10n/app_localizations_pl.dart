@@ -419,7 +419,7 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get tutorialRoleplaySkipBody =>
-      'Jeśli pominiesz, nie otrzymasz\nnagrody za tutorial.';
+      'Jeśli pominiesz, nie będziesz mógł wrócić do tutorialu.';
 
   @override
   String get tutorialRoleplaySkipConfirm => 'Pomiń tutorial';
@@ -448,11 +448,8 @@ class AppLocalizationsPl extends AppLocalizations {
       'Dotknij, aby kontynuować';
 
   @override
-  String get tutorialRoleplayNarration1 =>
-      'Dziś przeprowadzasz się do nowej dzielnicy. Wsiadasz do taksówki, gdzie wita cię miła kierowczyni Betty. 🚕';
-
-  @override
-  String get tutorialRoleplayNarrationArrival => 'Taksówka dojeżdża do celu.';
+  String get tutorialRoleplaySceneCaption =>
+      'Dziś przeprowadzasz się do nowej okolicy.\nPrzywitaj się z Betty, swoją taksówkarką!';
 
   @override
   String get tutorialRoleplayResultSubtitle => 'Pierwsza rozmowa ukończona!';
@@ -461,36 +458,49 @@ class AppLocalizationsPl extends AppLocalizations {
   String get tutorialRoleplayResultContinue => 'Tak trzymaj!';
 
   @override
-  String get tutorialRoleplayBettyLine1 => 'Hi there! Hop in!';
+  String get tutorialRoleplayGreetingSuccess =>
+      'Pierwsze powitanie zaliczone!\nŚwietna robota!';
 
   @override
-  String get tutorialRoleplayBettyLine1Translation => 'Cześć! Wsiadaj!';
+  String get tutorialRoleplayBettyLine1 =>
+      'Hi there! I\'m Betty. Lovely to meet you!';
+
+  @override
+  String get tutorialRoleplayBettyLine1Translation =>
+      'Cześć! Jestem Betty. Miło cię poznać!';
 
   @override
   String get tutorialRoleplayHoldHello =>
-      'Przytrzymaj przycisk\nmikrofonu.\nPowiedz ‘Hello’ i puść.';
+      'Przytrzymaj przycisk mikrofonu. Powiedz ‘Hello’ i puść.';
 
   @override
   String get tutorialRoleplayMicHolding => '‘Hello’';
 
   @override
   String get tutorialRoleplayMicTooShort =>
-      'Przytrzymaj mikrofon dłużej\ni powiedz ‘Hello’';
+      'Przytrzymaj mikrofon dłużej i powiedz ‘Hello’';
 
   @override
   String get tutorialRoleplayMicNoSpeech =>
-      'Nie usłyszeliśmy.\nSpróbuj jeszcze raz powiedzieć ‘Hello’.';
+      'Nie usłyszeliśmy. Spróbuj jeszcze raz powiedzieć ‘Hello’.';
 
   @override
   String get tutorialRoleplayHintGuide =>
-      'Nie wiesz, co powiedzieć?\nStuknij podpowiedź!';
+      'Nie wiesz, co powiedzieć?\nStuknij żarówkę, aby zobaczyć podpowiedź.';
 
   @override
-  String get tutorialRoleplayHintTapEnglish =>
-      'Stuknij, aby zobaczyć angielską odpowiedź';
+  String get tutorialRoleplayHintDestinationNative => 'Do SUDA City, poproszę.';
 
   @override
-  String get tutorialRoleplayHintSayIt => 'Teraz twoja kolej!';
+  String get tutorialRoleplayHintReasonNative => 'Dziś się tam przeprowadzam.';
+
+  @override
+  String get tutorialRoleplayHintAnswerGuide =>
+      'Spróbuj odpowiedzieć tym zdaniem.';
+
+  @override
+  String get tutorialRoleplayFreeAnswerGuide =>
+      'Odpowiedz własnymi słowami.\nPotrzebujesz pomocy? Stuknij żarówkę.';
 
   @override
   String get actionConfirm => 'Potwierdź';

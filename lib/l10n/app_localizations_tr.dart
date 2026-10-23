@@ -418,7 +418,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get tutorialRoleplaySkipTitle => 'Eğitimi geçmek istiyor musun?';
 
   @override
-  String get tutorialRoleplaySkipBody => 'Geçersen eğitim ödülünü\nalamazsın.';
+  String get tutorialRoleplaySkipBody => 'Geçersen eğitime geri dönemezsin.';
 
   @override
   String get tutorialRoleplaySkipConfirm => 'Eğitimi geç';
@@ -446,12 +446,8 @@ class AppLocalizationsTr extends AppLocalizations {
       'Devam etmek için dokun';
 
   @override
-  String get tutorialRoleplayNarration1 =>
-      'Bugün yeni bir mahalleye taşınıyorsun. Bir taksiye biniyorsun ve nazik şoför Betty seni selamlıyor. 🚕';
-
-  @override
-  String get tutorialRoleplayNarrationArrival =>
-      'Taksi varış noktasına ulaşıyor.';
+  String get tutorialRoleplaySceneCaption =>
+      'Bugün yeni bir mahalleye taşınıyorsun.\nTaksi şoförün Betty\'ye merhaba de!';
 
   @override
   String get tutorialRoleplayResultSubtitle => 'İlk sohbet tamam!';
@@ -460,36 +456,47 @@ class AppLocalizationsTr extends AppLocalizations {
   String get tutorialRoleplayResultContinue => 'Devam edelim!';
 
   @override
-  String get tutorialRoleplayBettyLine1 => 'Hi there! Hop in!';
+  String get tutorialRoleplayGreetingSuccess => 'İlk selamlama tamam!\nHarika!';
 
   @override
-  String get tutorialRoleplayBettyLine1Translation => 'Merhaba! Buyur, bin!';
+  String get tutorialRoleplayBettyLine1 =>
+      'Hi there! I\'m Betty. Lovely to meet you!';
+
+  @override
+  String get tutorialRoleplayBettyLine1Translation =>
+      'Merhaba! Ben Betty. Tanıştığımıza memnun oldum!';
 
   @override
   String get tutorialRoleplayHoldHello =>
-      'Mikrofon düğmesini\nbasılı tut.\n‘Hello’ de ve bırak.';
+      'Mikrofon düğmesini basılı tut. ‘Hello’ de ve bırak.';
 
   @override
   String get tutorialRoleplayMicHolding => '‘Hello’';
 
   @override
   String get tutorialRoleplayMicTooShort =>
-      'Mikrofonu daha uzun tut\nve ‘Hello’ de';
+      'Mikrofonu daha uzun tut ve ‘Hello’ de';
 
   @override
   String get tutorialRoleplayMicNoSpeech =>
-      'Duyamadık.\nTekrar ‘Hello’ demeyi dene.';
+      'Duyamadık. Tekrar ‘Hello’ demeyi dene.';
 
   @override
   String get tutorialRoleplayHintGuide =>
-      'Ne diyeceğini\nbilmiyor musun?\nİpucuna dokun!';
+      'Ne diyeceğini bilmiyor musun?\nİpucu için ampule dokun.';
 
   @override
-  String get tutorialRoleplayHintTapEnglish =>
-      'İngilizce yanıtı görmek için dokun';
+  String get tutorialRoleplayHintDestinationNative => 'SUDA City\'ye lütfen.';
 
   @override
-  String get tutorialRoleplayHintSayIt => 'Şimdi sen söyle!';
+  String get tutorialRoleplayHintReasonNative => 'Bugün oraya taşınıyorum.';
+
+  @override
+  String get tutorialRoleplayHintAnswerGuide => 'Bu cümleyle cevaplamayı dene.';
+
+  @override
+  String get tutorialRoleplayFreeAnswerGuide =>
+      'Kendi cümlelerinle cevapla.\nYardıma mı ihtiyacın var? Ampule dokun.';
 
   @override
   String get actionConfirm => 'Onayla';

@@ -26,8 +26,8 @@ import 'announcements.dart'
 import '../roleplay/try_again.dart';
 import '../first_cefr_level.dart';
 import '../first_profile_image.dart';
-import '../tutorial/tutorial_intro.dart';
-import '../tutorial/tutorial_roleplay.dart';
+import '../tutorial/onboarding_intro.dart';
+import '../tutorial/onboarding_roleplay.dart';
 import '../paywall/paywall.dart';
 import '../paywall/paywall_completed.dart';
 import '../rank/ranking.dart';

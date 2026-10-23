@@ -8,10 +8,10 @@ import '../../widgets/roleplay_overview_backdrop.dart'
         kRoleplayOverviewBackdropDim,
         kRoleplayOverviewBackdropImageScale;
 
-/// Tutorial Roleplay 배경 (`tutorial_rp_bg.png`).
+/// Tutorial Roleplay 배경 (`onboarding_tutorial_rp_bg.png`).
 /// [blurAmount] 0=선명, 1=기존 Playing과 동일 blur·딤.
 class TutorialRoleplayBackdrop extends StatelessWidget {
-  static const assetPath = 'assets/images/tutorial/tutorial_rp_bg.png';
+  static const assetPath = 'assets/images/onboarding/onboarding_tutorial_rp_bg.png';
 
   /// 0~1. Playing 배경 blur/딤 강도에 맞춤.
   final double blurAmount;

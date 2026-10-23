@@ -100,7 +100,7 @@ flutter:
     - assets/images/icons/
     - assets/images/achievement/
     - assets/images/buttons/
-    - assets/images/tutorial/
+    - assets/images/onboarding/
     - assets/fonts/packs/
     - assets/sounds/
 

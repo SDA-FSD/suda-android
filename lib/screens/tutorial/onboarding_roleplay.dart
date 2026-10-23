@@ -2,14 +2,13 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
 import 'dart:typed_data';
-import 'dart:ui' show ImageFilter;
 
 import 'package:audio_session/audio_session.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:record/record.dart';
 
-import '../../api/endpoints/tutorial_api.dart';
+import '../../api/endpoints/onboarding_tutorial_api.dart';
 import '../../api/suda_api_client.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/series_models.dart';
@@ -23,55 +22,26 @@ import '../../widgets/guide_bubble.dart';
 import '../../widgets/roleplay_mic_button_area.dart';
 import '../../widgets/roleplay_mission_panel.dart';
 import '../../widgets/roleplay_turn_bar_area.dart';
-import 'tutorial_pointer.dart';
-import 'tutorial_result.dart';
-import 'tutorial_roleplay_backdrop.dart';
-
-enum _TutorialRpStage { missionGuide, playing }
-
-/// 색은 그대로, 알파만 80%.
-const _kPointerAlpha80 = ColorFilter.matrix(<double>[
-  1,
-  0,
-  0,
-  0,
-  0,
-  0,
-  1,
-  0,
-  0,
-  0,
-  0,
-  0,
-  1,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0.8,
-  0,
-]);
+import 'onboarding_pointer.dart';
+import 'onboarding_result.dart';
+import 'onboarding_backdrop.dart';
 
 /// 마이크 가이드 문구. 기본은 AI 발화 후, 나머지는 홀드/짧은 탭/무인식.
 enum _TutorialMicGuide { afterVoice, holding, tooShort, noSpeech }
 
 /// 온보딩 Tutorial Roleplay.
 ///
-/// 1단계: 미션 확인 + Skip → 탭 시 2단계 Playing형 UI(목).
-/// 턴바 3칸은 비어 있고, 사용자 대답 시마다 채워짐(이후 연동).
+/// 대화 화면. 턴바 3칸은 비어 있고, 사용자 대답 시마다 채워짐.
 class TutorialRoleplayScreen extends StatefulWidget {
-  static const bettyAvatarAsset = 'assets/images/tutorial/tutorial_betty.png';
+  static const bettyAvatarAsset = 'assets/images/onboarding/onboarding_tutorial_betty.png';
 
   final VoidCallback onSkip;
   final bool preview;
-  final VoidCallback? onMissionGuideContinue;
 
   const TutorialRoleplayScreen({
     super.key,
     required this.onSkip,
     this.preview = false,
-    this.onMissionGuideContinue,
   });
 
   @override
@@ -80,23 +50,12 @@ class TutorialRoleplayScreen extends StatefulWidget {
 
 class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
     with TickerProviderStateMixin {
-  /// 블러 시작까지 선명 이미지 구간: 페이드 1167ms + hold 333ms = 1.5s.
-  /// 블러·미션 UI 간격은 원래 3.6s 기준을 2000/3600 비율로 줄인 값 그대로.
-  static const _bgFadeIn = Duration(milliseconds: 1167);
-  static const _sharpHold = Duration(milliseconds: 333);
-  static const _blurReveal = Duration(milliseconds: 306);
-  static const _missionsTitleGap = Duration(milliseconds: 222);
-  static const _missionBoxGap = Duration(milliseconds: 250);
-  static const _bubbleGap = Duration(milliseconds: 250);
-  static const _pointerGap = Duration(milliseconds: 278);
   static const _turnCount = 3;
 
   late final AnimationController _bgFade;
   late final AnimationController _blurUi;
   late final AnimationController _micLoadingRotation;
   late final Animation<double> _chromeOpacity;
-
-  _TutorialRpStage _stage = _TutorialRpStage.missionGuide;
 
   /// 서버가 받은 사용자 발화 수. 턴바는 최대 3칸, 색은 `#0CABA8`.
   int _answeredTurnCount = 0;
@@ -105,6 +64,8 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
   final GlobalKey _missionIconAnchorKey = GlobalKey();
   bool _showMissionCompletedFlash = false;
   int _flashMissionIndex = 0;
+  bool _showGreetingSuccess = false;
+  late final AnimationController _greetingSuccess;
   Timer? _missionCompleteTimer;
   Timer? _roleplayEndTimer;
   String? _sessionId;
@@ -122,11 +83,12 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
   String? _hintNative;
   final GlobalKey _hintCardKey = GlobalKey();
 
-  /// 영어 답변을 펼쳤는지. 영어 사용자는 처음부터 펼친다.
-  bool _hintAnswerOpen = false;
-
   /// 두 번째 AI 음성이 끝난 뒤에만 힌트 안내를 띄운다.
   bool _hintCoachReady = false;
+  bool _showFreeAnswerGuide = false;
+  bool _freeAnswerGuideDismissed = false;
+  bool _hintAnswerGuideDismissed = false;
+  bool _hintEnglishRevealed = false;
 
   /// 힌트를 한 번 열기 전에는 버튼 안내를 보여 준다.
   bool _hintCoachDismissed = false;
@@ -141,24 +103,7 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
   final ScrollController _talkScroll = ScrollController();
   final List<_TutorialLine> _lines = [];
 
-  /// 영상 참고: Missions 타이틀 → 미션 박스 → 말풍선 → 포인터 순.
-  bool _showMissionsTitle = false;
-  bool _showMissionBox = false;
-  bool _showBubble = false;
-
-  /// 미션 확인 손가락. 탭하면 화면이 페이드아웃되는 중에도 투명도가 변하지 않게,
-  /// 화면 전환과 별개로 바로 끈다(페이드아웃 중인 이전 화면도 이 값을 듣는다).
-  final ValueNotifier<bool> _showPointer = ValueNotifier(false);
-
-  /// 미션 확인 → 플레이 전환: 3개 미션 박스가 위로 접히고 제목·말풍선은 먼저 사라진다.
-  static const _guideFoldDuration = Duration(milliseconds: 420);
-  late final AnimationController _guideExit;
-  late final Animation<double> _guideTextFade;
-  late final Animation<double> _guideFold;
-  bool _guideGone = false;
-
-  /// 2단계(2026-10-20 1.36.14): 패널만 → 나레이션 → Betty → Hello 말풍선 → 손가락.
-  bool _showNarration = false;
+  /// 화면 전환 직후 Betty 말풍선.
   bool _showBetty = false;
   bool _showMicGuide = false;
   bool _showMicPointer = false;
@@ -172,51 +117,32 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
   @override
   void initState() {
     super.initState();
-    _bgFade = AnimationController(vsync: this, duration: _bgFadeIn);
-    _blurUi = AnimationController(vsync: this, duration: _blurReveal);
+    _bgFade = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1),
+    )..value = 1;
+    _blurUi = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1),
+    )..value = 1;
     _micLoadingRotation = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1000),
     );
-    _chromeOpacity = CurvedAnimation(parent: _blurUi, curve: Curves.easeOut);
-    _guideExit = AnimationController(vsync: this, duration: _guideFoldDuration);
-    _guideTextFade = CurvedAnimation(
-      parent: _guideExit,
-      curve: const Interval(0, 0.45, curve: Curves.easeOut),
+    _greetingSuccess = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
     );
-    _guideFold = CurvedAnimation(
-      parent: _guideExit,
-      curve: Curves.easeInOutCubic,
-    );
-
-    _bgFade.addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        _startBlurUiPhase();
+    _greetingSuccess.addStatusListener((status) {
+      if (status == AnimationStatus.completed && mounted) {
+        setState(() => _showGreetingSuccess = false);
       }
     });
+    _chromeOpacity = CurvedAnimation(parent: _blurUi, curve: Curves.easeOut);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _bgFade.forward();
+      if (mounted) _startPlayingIntro();
     });
-  }
-
-  Future<void> _startBlurUiPhase() async {
-    await Future<void>.delayed(_sharpHold);
-    if (!mounted) return;
-    await _blurUi.forward();
-    if (!mounted) return;
-    await Future<void>.delayed(_missionsTitleGap);
-    if (!mounted) return;
-    setState(() => _showMissionsTitle = true);
-    await Future<void>.delayed(_missionBoxGap);
-    if (!mounted) return;
-    setState(() => _showMissionBox = true);
-    await Future<void>.delayed(_bubbleGap);
-    if (!mounted) return;
-    setState(() => _showBubble = true);
-    await Future<void>.delayed(_pointerGap);
-    if (!mounted) return;
-    _showPointer.value = true;
   }
 
   @override
@@ -228,9 +154,8 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
     _aiVoice.dispose();
     _bgFade.dispose();
     _blurUi.dispose();
-    _showPointer.dispose();
-    _guideExit.dispose();
     _micLoadingRotation.dispose();
+    _greetingSuccess.dispose();
     _missionCompleteTimer?.cancel();
     _roleplayEndTimer?.cancel();
     super.dispose();
@@ -263,25 +188,10 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
     );
   }
 
-  void _onMissionGuideContinue() {
-    if (_stage != _TutorialRpStage.missionGuide) return;
-    _showPointer.value = false;
-    setState(() => _stage = _TutorialRpStage.playing);
-    _guideExit.forward().whenComplete(() {
-      if (mounted) setState(() => _guideGone = true);
-    });
-    widget.onMissionGuideContinue?.call();
-    _startPlayingIntro();
-  }
-
-  /// 탭 후: 접힌 미션+마이크만 → 나레이션 → Betty 말풍선+음성 → 음성 종료 후 안내.
+  /// 접힌 미션+마이크만 → 화면 전환 직후 Betty 말풍선+음성 → 음성 종료 후 안내.
   Future<void> _startPlayingIntro() async {
     final gen = ++_playingIntroGen;
     final soundFuture = _loadOpeningVoice();
-    await Future<void>.delayed(const Duration(milliseconds: 600));
-    if (!_playingIntroAlive(gen)) return;
-    setState(() => _showNarration = true);
-    await Future<void>.delayed(const Duration(milliseconds: 700));
     if (!_playingIntroAlive(gen)) return;
     setState(() => _showBetty = true);
     final sound = await soundFuture;
@@ -292,9 +202,7 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
   }
 
   bool _playingIntroAlive(int gen) {
-    return mounted &&
-        _stage == _TutorialRpStage.playing &&
-        gen == _playingIntroGen;
+    return mounted && gen == _playingIntroGen;
   }
 
   Future<RpS2SoundResDto?> _loadOpeningVoice() async {
@@ -359,15 +267,15 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
   Future<void> _prepareMicThenEnable() async {
     try {
       _micPermissionGranted = await _recorder.hasPermission();
-      if (!mounted || _stage != _TutorialRpStage.playing) return;
+      if (!mounted) return;
       if (_micPermissionGranted) await _armMicSession();
     } catch (e) {
       debugPrint('[DEBUG] tutorial mic prepare: $e');
     }
-    if (!mounted || _stage != _TutorialRpStage.playing) return;
+    if (!mounted) return;
     setState(() => _micEnabled = true);
     Future<void>.delayed(const Duration(milliseconds: 300), () {
-      if (!mounted || _stage != _TutorialRpStage.playing || !_micEnabled) {
+      if (!mounted || !_micEnabled) {
         return;
       }
       setState(() => _showMicPointer = true);
@@ -381,6 +289,8 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
       _micHeld = true;
       _micPulsing = false;
       _showMicPointer = false;
+      _hideFreeAnswerGuide();
+      if (_hintEnglish != null) _hintAnswerGuideDismissed = true;
       if (_answeredTurnCount == 0) {
         _micGuide = _TutorialMicGuide.holding;
       } else {
@@ -547,7 +457,9 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
       _micEnabled = true;
       _sending = false;
       _showRecordingBubble = false;
-      _micPulsing = _helloGuideActive;
+      _showFreeAnswerGuide =
+          _answeredTurnCount == 2 && !_freeAnswerGuideDismissed;
+      _micPulsing = _helloGuideActive || _showFreeAnswerGuide;
       _showMicPointer = _helloGuideActive;
       _micGuide = guide;
       if (revealHint) _hintCoachReady = true;
@@ -562,6 +474,7 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
     }
     setState(() {
       _sending = true;
+      _showFreeAnswerGuide = false;
       _micEnabled = false;
       _micPulsing = false;
       _showMicPointer = false;
@@ -589,17 +502,16 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
         sessionId: sessionId,
       );
       var missionJustCompleted = false;
-      final ending = _answeredTurnCount + 1 >= _turnCount;
-      final aiLine = _TutorialLine.ai(aiText);
+      var showGreetingSuccess = false;
+      final done = response.missionCompletedIndex;
+      final completesGreeting =
+          done == 0 && !_completedMissionIndexes.contains(0);
+      final aiLine = _TutorialLine.ai(aiText, typewriter: completesGreeting);
       setState(() {
         _sending = false;
         _lines.add(_TutorialLine.user(response.userText ?? ''));
-        if (!ending && (response.narration ?? '').isNotEmpty) {
-          _lines.add(_TutorialLine.narration(response.narration!));
-        }
-        _lines.add(aiLine);
+        if (!completesGreeting) _lines.add(aiLine);
         _answeredTurnCount = (_answeredTurnCount + 1).clamp(0, _turnCount);
-        final done = response.missionCompletedIndex;
         if (done != null &&
             done >= 0 &&
             done < _turnCount &&
@@ -609,17 +521,26 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
           _showMissionCompletedFlash = true;
           _completedMissions = _completedMissionIndexes.length;
           missionJustCompleted = true;
+          if (done == 0) {
+            _showGreetingSuccess = true;
+            showGreetingSuccess = true;
+          }
         }
         _showHelloGuide = false;
         _hintEnglish = null;
         _hintNative = null;
-        _hintAnswerOpen = false;
         _hintPlayingIndex = null;
         if (aiMsgId != null) _lastAiMsgId = aiMsgId;
       });
       armHint = _answeredTurnCount == 1 && !_hintCoachDismissed;
       _scrollTalkToEnd();
       if (missionJustCompleted) _playMissionSuccess();
+      if (showGreetingSuccess) {
+        await _greetingSuccess.forward(from: 0);
+        if (!mounted) return;
+        setState(() => _lines.add(aiLine));
+        _scrollTalkToEnd();
+      }
       if (showTranslation && aiMsgId != null) {
         unawaited(() async {
           final translation = await _fetchTranslation(sessionId, aiMsgId);
@@ -653,20 +574,15 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
     }
   }
 
-  /// 마지막 AI 음성 뒤에 도착 나레이션을 붙이고, 2초 뒤 롤플레이를 끝낸다.
+  /// 마지막 AI 음성 뒤 2초면 롤플레이를 끝낸다.
   Future<void> _finishAfterLastVoice() async {
     if (!mounted) return;
-    final arrival = AppLocalizations.of(
-      context,
-    )!.tutorialRoleplayNarrationArrival;
     setState(() {
       _sending = false;
       _micEnabled = false;
       _micPulsing = false;
       _showRecordingBubble = false;
-      _lines.add(_TutorialLine.narration(arrival));
     });
-    _scrollTalkToEnd();
     if (!widget.preview) unawaited(_completeOnboarding());
     _roleplayEndTimer?.cancel();
     _roleplayEndTimer = Timer(const Duration(seconds: 2), () {
@@ -712,43 +628,43 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
     }
   }
 
-  int? _firstIncompleteMissionIndex() {
-    for (var i = 0; i < _turnCount; i++) {
-      if (!_completedMissionIndexes.contains(i)) return i;
-    }
-    return null;
+  /// 힌트는 발화 차례로 고정한다. 두 번째는 목적지, 세 번째는 이유.
+  (String, String?) _localHint(AppLocalizations l10n) {
+    final reason = _answeredTurnCount >= 2;
+    final english = reason ? "I'm moving there today." : 'SUDA City, please.';
+    return (english, _nativeForHint(l10n, english));
   }
 
-  /// 목적지·이유 고정 힌트. 아직 안 한 쪽을 보여 준다. 인사 Hello는 힌트에 넣지 않는다.
-  (String, String?) _localHint() {
-    final index = _completedMissionIndexes.contains(1) ? 1 : 0;
-    const english = ['SUDA City, please.', "I'm moving there today."];
-    final code = Localizations.localeOf(context).languageCode;
-    const ko = ['수다 빌리지로 가주세요.', '오늘 그곳으로 이사 가요.'];
-    const pt = ['Para SUDA City, por favor.', 'Estou me mudando para lá hoje.'];
-    final native = switch (code) {
-      'ko' => ko[index],
-      'pt' => pt[index],
-      _ => null,
-    };
-    return (english[index], native);
+  /// 말해야 하는 영어는 그대로 두고, 모국어만 앱 언어로 보여 준다. 영어 사용자는 모국어가 없다.
+  String? _nativeForHint(AppLocalizations l10n, String english) {
+    final native = english == "I'm moving there today."
+        ? l10n.tutorialRoleplayHintReasonNative
+        : l10n.tutorialRoleplayHintDestinationNative;
+    final shown = native.trim();
+    return shown.isEmpty ? null : shown;
   }
 
   void _applyHint(String english, String? native) {
     final shownNative = (native ?? '').trim();
+    final opening = _hintEnglish == null;
     setState(() {
       _hintEnglish = english.trim().isEmpty ? null : english.trim();
       _hintNative = shownNative.isEmpty ? null : shownNative;
-      _hintAnswerOpen = shownNative.isEmpty;
       _hintCoachDismissed = _hintEnglish != null;
       _hintPlayingIndex = null;
+      if (opening && _hintEnglish != null) {
+        _hintAnswerGuideDismissed = false;
+        _hintEnglishRevealed = shownNative.isEmpty;
+      }
+      _hideFreeAnswerGuide();
     });
     _scrollHintIntoView();
   }
 
   Future<void> _onHintTap() async {
     if (_answeredTurnCount < 1 || _hintEnglish != null) return;
-    final local = _localHint();
+    final l10n = AppLocalizations.of(context)!;
+    final local = _localHint(l10n);
     _applyHint(local.$1, local.$2);
     final sessionId = _sessionId;
     if (sessionId == null) return;
@@ -763,7 +679,13 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
       if (!mounted) return;
       final english = (hint.hint ?? '').trim();
       if (english.isEmpty) return;
-      _applyHint(english, hint.translatedHint);
+      if (english != local.$1) {
+        debugPrint(
+          '[DEBUG] tutorial hint ignored for current turn: $english',
+        );
+        return;
+      }
+      _applyHint(english, _nativeForHint(l10n, english));
     } catch (e) {
       debugPrint('[DEBUG] tutorial hint: $e');
     }
@@ -840,27 +762,19 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
   }
 
   /// 두 번째 AI 음성 후, 힌트를 열기 전에는 Skip과 힌트만 누를 수 있다.
-  bool get _mustTapHint => _hintCoachReady && !_hintCoachDismissed;
+  /// AI 발화 3 이후에는 힌트를 열지 않아도 말할 수 있다.
+  bool get _mustTapHint =>
+      _hintCoachReady && !_hintCoachDismissed && _answeredTurnCount < 2;
 
-  /// 두 번째 발화용 힌트 안내. 세 번째 발화는 본편 힌트 상자만 연다.
-  bool get _secondUtteranceHintCoach => _answeredTurnCount == 1;
+  /// AI 발화 3 음성이 끝난 뒤, 이유 발화를 기다리는 동안.
+  bool get _freeAnswerGuideActive => _showFreeAnswerGuide;
 
-  /// 모국어 힌트만 열린 상태. 영어 답을 열기 전에는 마이크를 잠근다.
-  bool get _awaitingEnglishReveal =>
-      _secondUtteranceHintCoach &&
-      _hintEnglish != null &&
-      _hintNative != null &&
-      !_hintAnswerOpen;
-
-  /// 영어 답이 화면에 있는 동안. 영어 사용자는 힌트가 열리자마자 해당한다.
-  bool get _englishHintVisible =>
-      _hintEnglish != null && (_hintAnswerOpen || _hintNative == null);
-
-  bool get _showSayItGuide =>
-      _secondUtteranceHintCoach &&
-      _englishHintVisible &&
-      !_micHeld &&
-      !_sending;
+  /// 힌트나 마이크를 누르면 이 안내는 다시 나오지 않는다.
+  void _hideFreeAnswerGuide() {
+    if (!_showFreeAnswerGuide) return;
+    _freeAnswerGuideDismissed = true;
+    _showFreeAnswerGuide = false;
+  }
 
   /// Hello 안내는 첫 발화가 받아지기 전에만 보여 준다.
   bool get _helloGuideActive => _showHelloGuide && _answeredTurnCount == 0;
@@ -875,12 +789,8 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
           (_micGuide == _TutorialMicGuide.holding && _micHeld));
 
   String? _footerMicGuide(AppLocalizations l10n) {
-    if (_answeredTurnCount > 0) {
-      return _showSayItGuide ? l10n.tutorialRoleplayHintSayIt : null;
-    }
-    if (!_showMicGuideBubble) {
-      return _showSayItGuide ? l10n.tutorialRoleplayHintSayIt : null;
-    }
+    if (_freeAnswerGuideActive) return l10n.tutorialRoleplayFreeAnswerGuide;
+    if (!_showMicGuideBubble) return null;
     return _micGuideText(l10n);
   }
 
@@ -924,11 +834,6 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
     }
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context).textTheme;
-    final missionLabels = [
-      l10n.tutorialRoleplayMission1,
-      l10n.tutorialRoleplayMission2,
-      l10n.tutorialRoleplayMission3,
-    ];
 
     return PopScope(
       canPop: widget.preview,
@@ -1007,76 +912,42 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
                                   ),
                                 ),
                               ),
-                              _showOnlyWhenPlaying(
-                                RoleplayTurnBarArea(
-                                  turnCount: _turnCount,
-                                  barColors: _turnBarColors(),
-                                ),
+                              RoleplayTurnBarArea(
+                                turnCount: _turnCount,
+                                barColors: _turnBarColors(),
                               ),
-                              Expanded(
-                                child: AnimatedSwitcher(
-                                  duration: const Duration(milliseconds: 350),
-                                  child: _stage == _TutorialRpStage.playing
-                                      ? KeyedSubtree(
-                                          key: const ValueKey('playing'),
-                                          child: _buildPlayingBody(l10n, theme),
-                                        )
-                                      : const SizedBox.shrink(
-                                          key: ValueKey('playing-gap'),
-                                        ),
-                                ),
-                              ),
-                              _showOnlyWhenPlaying(
+                              Expanded(child: _buildPlayingBody(l10n, theme)),
                                 _PlayingLikeDisabledFooter(
                                   loadingRotationController:
                                       _micLoadingRotation,
                                   micGuide: _footerMicGuide(l10n),
-                                  compactMicGuide:
-                                      _showSayItGuide && !_showMicGuideBubble,
                                   showHintCoach: _mustTapHint,
                                   hintGuide: l10n.tutorialRoleplayHintGuide,
                                   showMicPointer:
                                       _showMicPointer && _showHelloGuide,
-                                  guideNearMic:
-                                      !_showHelloGuide || _showSayItGuide,
-                                  guideReserveText:
-                                      l10n.tutorialRoleplayHoldHello,
-                                  micEnabled:
-                                      _micEnabled &&
-                                      !_mustTapHint &&
-                                      !_awaitingEnglishReveal,
+                                  guideReserveText: _freeAnswerGuideActive
+                                      ? l10n.tutorialRoleplayFreeAnswerGuide
+                                      : l10n.tutorialRoleplayHoldHello,
+                                  gapAboveMic: _freeAnswerGuideActive
+                                      ? 40
+                                      : 48,
+                                  micEnabled: _micEnabled && !_mustTapHint,
                                   micLoading: _sending,
                                   hintEnabled: _hintCoachReady,
-                                  hintSparkle:
-                                      _answeredTurnCount == 2 &&
-                                      _micEnabled &&
-                                      !_sending &&
-                                      !_micHeld &&
-                                      _hintEnglish == null,
-                                  showMicPulse: _micPulsing || _showSayItGuide,
+                                  hintSparkle: false,
+                                  showMicPulse: _micPulsing,
                                   onMicHoldStart: _onMicHoldStart,
                                   onMicHoldEnd: _onMicHoldEnd,
                                   onHintTap: _onHintTap,
                                 ),
-                              ),
                             ],
                           ),
-                          // 미션 확인: 제목·3개 미션·말풍선을 한 묶음으로 화면 정중앙에.
-                          // 헤더(52) 아래부터 깔고, 안쪽 아래 여백 52로 화면 전체 중앙에 맞춘다.
-                          // 탭 후에는 접히는 애니메이션이 끝날 때까지만 유지한다.
-                          if (!_guideGone)
-                            Positioned.fill(
-                              top: _headerHeight,
-                              child: _buildMissionGuideBody(
-                                l10n,
-                                theme,
-                                missionLabels,
-                              ),
-                            ),
                         ],
                       ),
                     ),
                   ),
+                if (_showGreetingSuccess)
+                  IgnorePointer(child: _greetingSuccessOverlay(l10n, theme)),
               ],
             );
           },
@@ -1085,124 +956,36 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
     );
   }
 
-  /// 상단 제목·Skip 줄 높이(위 8 + 44).
-  static const _headerHeight = 52.0;
-
-  /// 미션 확인 구간에서는 진행바·마이크·힌트를 숨기고, 플레이로 넘어가면 같이 나타난다.
-  Widget _showOnlyWhenPlaying(Widget child) {
-    final playing = _stage == _TutorialRpStage.playing;
-    return AnimatedOpacity(
-      opacity: playing ? 1 : 0,
-      duration: const Duration(milliseconds: 350),
-      curve: Curves.easeOut,
-      child: IgnorePointer(ignoring: !playing, child: child),
-    );
-  }
-
-  Widget _buildMissionGuideBody(
-    AppLocalizations l10n,
-    TextTheme theme,
-    List<String> missions,
-  ) {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: _onMissionGuideContinue,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(26, 0, 26, _headerHeight),
-        child: Column(
-          children: [
-            const Spacer(),
-            FadeTransition(
-              opacity: ReverseAnimation(_guideTextFade),
-              child: _StaggerFade(
-                visible: _showMissionsTitle,
+  /// 첫 인사 미션 성공. 가운데에서 작게 시작해 커지고, 2초면 사라진다.
+  Widget _greetingSuccessOverlay(AppLocalizations l10n, TextTheme theme) {
+    return AnimatedBuilder(
+      animation: _greetingSuccess,
+      builder: (context, _) {
+        final t = _greetingSuccess.value;
+        final pop = Curves.easeOutBack.transform((t / 0.18).clamp(0.0, 1.0));
+        final scale = 0.2 + 0.8 * pop;
+        final opacity = t < 0.9 ? 1.0 : ((1 - t) / 0.1).clamp(0.0, 1.0);
+        return Opacity(
+          opacity: opacity,
+          child: Center(
+            child: Transform.scale(
+              scale: scale,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 32),
                 child: Text(
-                  l10n.tutorialRoleplayMissions,
+                  l10n.tutorialRoleplayGreetingSuccess,
                   textAlign: TextAlign.center,
-                  style: theme.headlineLarge?.copyWith(color: Colors.white),
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            // 탭하면 위쪽(윗변 기준)으로 샥 접히며 사라진다. 레이아웃은 그대로 두고 그리기만 변형.
-            AnimatedBuilder(
-              animation: _guideFold,
-              builder: (context, child) {
-                final f = _guideFold.value;
-                return Opacity(
-                  opacity: (1 - f * f).clamp(0.0, 1.0),
-                  child: Transform(
-                    alignment: Alignment.topCenter,
-                    transform: Matrix4.translationValues(0, -36 * f, 0)
-                      ..scaleByDouble(1.0, (1 - f).clamp(0.001, 1.0), 1.0, 1.0),
-                    child: child,
+                  softWrap: true,
+                  style: theme.headlineLarge?.copyWith(
+                    color: Colors.white,
+                    height: 1.35,
                   ),
-                );
-              },
-              child: _StaggerFade(
-                visible: _showMissionBox,
-                child: _MissionListBox(missions: missions),
-              ),
-            ),
-            const SizedBox(height: 18),
-            // 손가락은 말풍선 페이드인 밖에 둔다(그 안에 있으면 페이드인 중 투명도가 변함).
-            FadeTransition(
-              opacity: ReverseAnimation(_guideTextFade),
-              child: Center(
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    _StaggerFade(
-                      visible: _showBubble,
-                      child: _tutorialGuide(
-                        l10n.tutorialRoleplayGuideMissionMain,
-                        tail: GuideBubbleTail.top,
-                        spans: [
-                          TextSpan(text: l10n.tutorialRoleplayGuideMissionMain),
-                          const TextSpan(text: '\n'),
-                          TextSpan(
-                            text: l10n.tutorialRoleplayGuideMissionTapContinue,
-                            style: theme.bodyMedium?.copyWith(
-                              color: const Color(0xFF054544),
-                            ),
-                          ),
-                          const WidgetSpan(
-                            alignment: PlaceholderAlignment.middle,
-                            child: Icon(
-                              Icons.chevron_right,
-                              color: Color(0xFF054544),
-                              size: 20,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Positioned(
-                      right: -6,
-                      bottom: -60,
-                      child: ValueListenableBuilder<bool>(
-                        valueListenable: _showPointer,
-                        builder: (context, on, _) {
-                          if (!on) return const SizedBox.shrink();
-                          // Opacity 대신 알파 필터. 손가락 이미지가 알파 4배 필터를 쓰므로
-                          // Opacity는 동그라미가 없을 때 그 필터 앞에 합쳐져 100%가 된다.
-                          return const IgnorePointer(
-                            child: ColorFiltered(
-                              colorFilter: _kPointerAlpha80,
-                              child: TutorialPointer(size: 120),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
                 ),
               ),
             ),
-            const Spacer(),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -1232,13 +1015,6 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
                         height: PlayingConversationLayout.firstBubbleTopOffset,
                       ),
                       _StaggerFade(
-                        visible: _showNarration,
-                        child: _TutorialNarration(
-                          text: l10n.tutorialRoleplayNarration1,
-                        ),
-                      ),
-                      const SizedBox(height: 14),
-                      _StaggerFade(
                         visible: _showBetty,
                         child: _TutorialAiBubble(
                           english: l10n.tutorialRoleplayBettyLine1,
@@ -1251,14 +1027,13 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
                         const SizedBox(height: 14),
                         if (line.kind == _TutorialLineKind.user)
                           _TutorialUserBubble(text: line.text)
-                        else if (line.kind == _TutorialLineKind.narration)
-                          _TutorialNarration(text: line.text)
                         else
                           _TutorialAiBubble(
                             english: line.text,
                             translation: showTranslation
                                 ? line.translation
                                 : null,
+                            typewriter: line.typewriter,
                           ),
                       ],
                       if (_hintEnglish != null) ...[
@@ -1268,27 +1043,44 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              _RoleplayHintCard(
-                                label: l10n.roleplayHintLabel,
-                                showAnswerLabel: l10n.roleplayHintShowAnswer,
-                                english: _hintEnglish!,
-                                native: _hintNative,
-                                answerOpen: _hintAnswerOpen,
-                                pulseAnswerButton: _secondUtteranceHintCoach,
-                                playingIndex: _hintPlayingIndex,
-                                onReveal: () {
-                                  setState(() => _hintAnswerOpen = true);
-                                  _scrollHintIntoView();
-                                },
-                                onWord: (index) =>
-                                    unawaited(_playHintSound(wordIndex: index)),
-                                onSentence: () => unawaited(_playHintSound()),
-                              ),
-                              if (_awaitingEnglishReveal) ...[
-                                const SizedBox(height: 8),
-                                _tutorialGuide(
-                                  l10n.tutorialRoleplayHintTapEnglish,
-                                  tail: GuideBubbleTail.top,
+                              if (_answeredTurnCount >= 2)
+                                _ClassicHintCard(
+                                  label: l10n.roleplayHintLabel,
+                                  english: _hintEnglish!,
+                                  native: _hintNative,
+                                  englishVisible:
+                                      _hintEnglishRevealed ||
+                                      _hintNative == null,
+                                  revealLabel: l10n.roleplayHintShowAnswer,
+                                  onReveal: () => setState(
+                                    () => _hintEnglishRevealed = true,
+                                  ),
+                                  playingIndex: _hintPlayingIndex,
+                                  onWord: (index) => unawaited(
+                                    _playHintSound(wordIndex: index),
+                                  ),
+                                  onSentence: () => unawaited(_playHintSound()),
+                                )
+                              else
+                                _RoleplayHintCard(
+                                  label: l10n.roleplayHintLabel,
+                                  english: _hintEnglish!,
+                                  native: _hintNative,
+                                  playingIndex: _hintPlayingIndex,
+                                  onWord: (index) => unawaited(
+                                    _playHintSound(wordIndex: index),
+                                  ),
+                                  onSentence: () => unawaited(_playHintSound()),
+                                ),
+                              if (_answeredTurnCount < 2 &&
+                                  !_hintAnswerGuideDismissed) ...[
+                                const SizedBox(height: 10),
+                                Align(
+                                  alignment: Alignment.center,
+                                  child: _tutorialGuide(
+                                    l10n.tutorialRoleplayHintAnswerGuide,
+                                    tail: GuideBubbleTail.top,
+                                  ),
                                 ),
                               ],
                             ],
@@ -1313,7 +1105,7 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
                       missions: missions,
                       activeMissionIndex: _showMissionCompletedFlash
                           ? _flashMissionIndex
-                          : (_firstIncompleteMissionIndex() ?? _turnCount - 1),
+                          : _answeredTurnCount.clamp(0, _turnCount - 1),
                       completedCount: _completedMissions,
                       completedMissionIndexes: _completedMissionIndexes,
                       showCompletedBackgroundFlash: _showMissionCompletedFlash,
@@ -1330,89 +1122,54 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
   }
 }
 
-enum _TutorialLineKind { user, narration, ai }
+enum _TutorialLineKind { user, ai }
 
 class _TutorialLine {
   final _TutorialLineKind kind;
   final String text;
+  final bool typewriter;
   String? translation;
 
-  _TutorialLine.user(this.text) : kind = _TutorialLineKind.user;
-  _TutorialLine.narration(this.text) : kind = _TutorialLineKind.narration;
-  _TutorialLine.ai(this.text) : kind = _TutorialLineKind.ai;
+  _TutorialLine.user(this.text)
+    : kind = _TutorialLineKind.user,
+      typewriter = false;
+  _TutorialLine.ai(this.text, {this.typewriter = false})
+    : kind = _TutorialLineKind.ai;
 }
 
-/// 본편 `playing_hint_mixin` 힌트 상자와 같은 막대·번역·버튼·점선 단어.
+/// 온보딩 힌트 상자. 앞으로 공통 힌트 상자도 이 모양으로 바꿀 예정이다.
+/// 모국어 아래에 영어 문장 알약을 바로 보여 준다.
 class _RoleplayHintCard extends StatelessWidget {
   static const _bg = Color(0xFF194847);
   static const _accent = Color(0xFF80D7CF);
   static const _bar = Color(0xFF054544);
-  static const _play = Color(0xFF0CABA8);
-  static const _button = Color(0xFF076766);
-  static const _buttonText = Color(0xFF1B3B3B);
+  static const _englishPill = Color(0xFF087876);
 
   final String label;
-  final String showAnswerLabel;
   final String english;
   final String? native;
-  final bool answerOpen;
-
-  /// 두 번째 발화만. 세 번째 발화는 본편처럼 버튼 반짝임이 없다.
-  final bool pulseAnswerButton;
   final int? playingIndex;
-  final VoidCallback onReveal;
   final void Function(int index)? onWord;
   final VoidCallback? onSentence;
 
   const _RoleplayHintCard({
     required this.label,
-    required this.showAnswerLabel,
     required this.english,
     required this.native,
-    required this.answerOpen,
-    this.pulseAnswerButton = false,
     required this.playingIndex,
-    required this.onReveal,
     this.onWord,
     this.onSentence,
   });
-
-  Widget _answerButton(TextStyle? buttonStyle) {
-    final button = Material(
-      color: _button,
-      borderRadius: BorderRadius.circular(22),
-      child: InkWell(
-        onTap: onReveal,
-        borderRadius: BorderRadius.circular(22),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-          child: Text(
-            showAnswerLabel,
-            style: buttonStyle,
-            textAlign: TextAlign.center,
-          ),
-        ),
-      ),
-    );
-    if (!pulseAnswerButton) return button;
-    return _SparklingHintButton(child: button);
-  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final hasNative = native != null && native!.isNotEmpty;
-    final showEnglish = answerOpen || !hasNative;
     final labelStyle =
         theme.elevatedButtonTheme.style?.textStyle
             ?.resolve(const <WidgetState>{})
             ?.copyWith(color: _accent) ??
         theme.textTheme.bodyMedium?.copyWith(color: _accent);
-    final buttonStyle =
-        theme.elevatedButtonTheme.style?.textStyle
-            ?.resolve(const <WidgetState>{})
-            ?.copyWith(color: _buttonText) ??
-        theme.textTheme.bodyMedium?.copyWith(color: _buttonText);
 
     return Container(
       width: double.infinity,
@@ -1459,33 +1216,227 @@ class _RoleplayHintCard extends StatelessWidget {
           ),
           if (hasNative)
             Padding(
-              padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
               child: Text(
                 native!,
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodyMedium?.copyWith(color: _accent),
               ),
             ),
-          if (!showEnglish)
-            Padding(
-              padding: pulseAnswerButton
-                  ? const EdgeInsets.fromLTRB(12, 8, 12, 22)
-                  : const EdgeInsets.fromLTRB(0, 10, 0, 10),
-              child: Center(
-                child: FractionallySizedBox(
-                  widthFactor: 0.9,
-                  child: _answerButton(buttonStyle),
+          Padding(
+            padding: EdgeInsets.fromLTRB(12, hasNative ? 8 : 12, 12, 12),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: _englishPill,
+                borderRadius: BorderRadius.circular(28),
+              ),
+              child: _HintAnswerWords(
+                english: english,
+                playingIndex: playingIndex,
+                onWord: onWord,
+                onSentence: onSentence,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// 본편 힌트 상자. 모국어가 있으면 영어는 버튼을 눌러야 보인다.
+class _ClassicHintCard extends StatelessWidget {
+  static const _bg = Color(0xFF194847);
+  static const _accent = Color(0xFF80D7CF);
+  static const _bar = Color(0xFF054544);
+  static const _playback = Color(0xFF0CABA8);
+
+  final String label;
+  final String english;
+  final String? native;
+  final bool englishVisible;
+  final String revealLabel;
+  final VoidCallback onReveal;
+  final int? playingIndex;
+  final void Function(int index)? onWord;
+  final VoidCallback? onSentence;
+
+  const _ClassicHintCard({
+    required this.label,
+    required this.english,
+    required this.native,
+    required this.englishVisible,
+    required this.revealLabel,
+    required this.onReveal,
+    required this.playingIndex,
+    this.onWord,
+    this.onSentence,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final hasNative = native != null && native!.isNotEmpty;
+    final labelStyle =
+        theme.elevatedButtonTheme.style?.textStyle
+            ?.resolve(const <WidgetState>{})
+            ?.copyWith(color: _accent) ??
+        theme.textTheme.bodyMedium?.copyWith(color: _accent);
+    final words = english
+        .trim()
+        .split(RegExp(r'\s+'))
+        .where((word) => word.isNotEmpty)
+        .toList();
+    final headline =
+        theme.textTheme.headlineSmall ?? theme.textTheme.bodyLarge;
+    final playing = playingIndex != null;
+    final buttonStyle =
+        theme.elevatedButtonTheme.style?.textStyle
+            ?.resolve(const <WidgetState>{})
+            ?.copyWith(color: const Color(0xFF1B3B3B)) ??
+        theme.textTheme.bodyMedium?.copyWith(color: const Color(0xFF1B3B3B));
+
+    return Container(
+      width: double.infinity,
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: _bg.withValues(alpha: 0.7),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: AnimatedSize(
+        duration: const Duration(milliseconds: 220),
+        curve: Curves.easeInOut,
+        alignment: Alignment.topCenter,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(
+              height: 27,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: _bar,
+                borderRadius: BorderRadius.circular(13.5),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.4),
+                    blurRadius: 6,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ColorFiltered(
+                    colorFilter: const ColorFilter.mode(
+                      _accent,
+                      BlendMode.srcIn,
+                    ),
+                    child: Image.asset(
+                      'assets/images/icons/lightball.png',
+                      height: 14,
+                      fit: BoxFit.contain,
+                      filterQuality: FilterQuality.medium,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(label, style: labelStyle, textAlign: TextAlign.center),
+                ],
+              ),
+            ),
+            if (hasNative)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+                child: Text(
+                  native!,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodyMedium?.copyWith(color: _accent),
                 ),
               ),
-            )
-          else
-            _HintAnswerWords(
-              english: english,
-              playingIndex: playingIndex,
-              onWord: onWord,
-              onSentence: onSentence,
-            ),
-        ],
+            if (hasNative && !englishVisible)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
+                child: Center(
+                  child: FractionallySizedBox(
+                    widthFactor: 0.9,
+                    child: Material(
+                      color: const Color(0xFF076766),
+                      borderRadius: BorderRadius.circular(22),
+                      child: InkWell(
+                        onTap: onReveal,
+                        borderRadius: BorderRadius.circular(22),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 12,
+                            horizontal: 16,
+                          ),
+                          child: Text(
+                            revealLabel,
+                            style: buttonStyle,
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            if (englishVisible)
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: 40,
+                      child: Center(
+                        child: GestureDetector(
+                          onTap: onSentence,
+                          behavior: HitTestBehavior.opaque,
+                          child: Image.asset(
+                            playing
+                                ? 'assets/images/icons/megaphone_fill.png'
+                                : 'assets/images/icons/megaphone.png',
+                            width: 24,
+                            height: 24,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 8),
+                        child: Wrap(
+                          alignment: WrapAlignment.start,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          runSpacing: 4,
+                          children: [
+                            for (var i = 0; i < words.length; i++) ...[
+                              if (i > 0) Text(' ', style: headline),
+                              _HintWord(
+                                word: words[i],
+                                headline: headline,
+                                highlighted:
+                                    playingIndex == -1 || playingIndex == i,
+                                textColor: (playingIndex == -1 ||
+                                        playingIndex == i)
+                                    ? _playback
+                                    : Colors.white,
+                                underlineColor: _playback,
+                                onTap: onWord == null ? null : () => onWord!(i),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -1526,12 +1477,18 @@ class _HintAnswerWords extends StatelessWidget {
               child: GestureDetector(
                 onTap: onSentence,
                 behavior: HitTestBehavior.opaque,
-                child: Image.asset(
-                  playing
-                      ? 'assets/images/icons/megaphone_fill.png'
-                      : 'assets/images/icons/megaphone.png',
-                  width: 24,
-                  height: 24,
+                child: ColorFiltered(
+                  colorFilter: const ColorFilter.mode(
+                    Colors.white,
+                    BlendMode.srcIn,
+                  ),
+                  child: Image.asset(
+                    playing
+                        ? 'assets/images/icons/megaphone_fill.png'
+                        : 'assets/images/icons/speaker.png',
+                    width: 22,
+                    height: 22,
+                  ),
                 ),
               ),
             ),
@@ -1567,20 +1524,25 @@ class _HintWord extends StatelessWidget {
   final String word;
   final TextStyle? headline;
   final bool highlighted;
+  final Color? textColor;
+  final Color? underlineColor;
   final VoidCallback? onTap;
 
   const _HintWord({
     required this.word,
     required this.headline,
     required this.highlighted,
+    this.textColor,
+    this.underlineColor,
     this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final style = headline?.copyWith(
-      color: highlighted ? _RoleplayHintCard._play : Colors.white,
+      color: textColor ?? Colors.white,
       height: 1.35,
+      fontWeight: FontWeight.w700,
       fontStyle: FontStyle.italic,
     );
     final painter = TextPainter(
@@ -1602,7 +1564,9 @@ class _HintWord extends StatelessWidget {
             height: 3,
             child: CustomPaint(
               painter: _HintDottedUnderlinePainter(
-                color: _RoleplayHintCard._play,
+                color:
+                    underlineColor ??
+                    (highlighted ? Colors.white : Colors.white70),
               ),
             ),
           ),
@@ -1828,12 +1792,18 @@ class _HintCoachLayerState extends State<_HintCoachLayer>
               showWhenUnlinked: false,
               targetAnchor: Alignment.topCenter,
               followerAnchor: Alignment.bottomRight,
-              offset: Offset(20, -4 + (1 - t) * 18),
+              // 꼭지 끝은 버튼 가운데(오른쪽 끝에서 20)에 맞춘 뒤, 말풍선을 조금 위·오른쪽으로 두고 아주 조금 왼쪽으로 당긴다.
+              offset: Offset(26, -16 + (1 - t) * 18),
               child: Opacity(
                 opacity: t,
                 child: DefaultTextStyle.merge(
                   style: const TextStyle(decoration: TextDecoration.none),
-                  child: _tutorialGuide(widget.guide, tailCentered: false),
+                  child: _tutorialGuide(
+                    widget.guide,
+                    tailCentered: false,
+                    tailOffsetFromEnd: 20,
+                    maxWidth: MediaQuery.sizeOf(context).width * 2 / 3,
+                  ),
                 ),
               ),
             ),
@@ -1969,30 +1939,17 @@ class _TutorialUserBubble extends StatelessWidget {
   }
 }
 
-class _TutorialNarration extends StatelessWidget {
-  final String text;
-
-  const _TutorialNarration({required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    final style = Theme.of(context).textTheme.bodySmall?.copyWith(
-      color: Colors.white,
-      fontStyle: FontStyle.italic,
-      height: 1.27,
-    );
-    return Center(
-      child: Text(text, textAlign: TextAlign.center, style: style),
-    );
-  }
-}
-
 /// Playing AI 말풍선과 동일 톤. 번역 버튼 없이 번역 문장 상시 노출(영어 로케일 제외).
 class _TutorialAiBubble extends StatelessWidget {
   final String english;
   final String? translation;
+  final bool typewriter;
 
-  const _TutorialAiBubble({required this.english, this.translation});
+  const _TutorialAiBubble({
+    required this.english,
+    this.translation,
+    this.typewriter = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -2023,25 +1980,122 @@ class _TutorialAiBubble extends StatelessWidget {
                 color: const Color(0xFF353535),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(english, style: textStyle),
-                  if (translation != null && translation!.isNotEmpty) ...[
-                    const SizedBox(height: 10),
-                    Text(
-                      translation!,
-                      style: translationStyle,
-                      textAlign: TextAlign.justify,
+              child: typewriter
+                  ? _TypeOnText(
+                      text: english,
+                      style: textStyle,
+                      translation: translation,
+                      translationStyle: translationStyle,
+                    )
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(english, style: textStyle),
+                        if (translation != null && translation!.isNotEmpty) ...[
+                          const SizedBox(height: 10),
+                          Text(
+                            translation!,
+                            style: translationStyle,
+                            textAlign: TextAlign.justify,
+                          ),
+                        ],
+                      ],
                     ),
-                  ],
-                ],
-              ),
             ),
           ),
         ],
       ),
+    );
+  }
+}
+
+/// AI 답변 글자를 왼쪽부터 한 글자씩 붙인다. 다 친 뒤에 번역을 보여 준다.
+class _TypeOnText extends StatefulWidget {
+  final String text;
+  final TextStyle? style;
+  final String? translation;
+  final TextStyle? translationStyle;
+
+  const _TypeOnText({
+    required this.text,
+    required this.style,
+    required this.translation,
+    required this.translationStyle,
+  });
+
+  @override
+  State<_TypeOnText> createState() => _TypeOnTextState();
+}
+
+class _TypeOnTextState extends State<_TypeOnText> {
+  static const _step = Duration(milliseconds: 32);
+
+  int _shown = 0;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _schedule();
+  }
+
+  @override
+  void didUpdateWidget(covariant _TypeOnText oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.text != widget.text) {
+      _shown = 0;
+      _timer?.cancel();
+      _schedule();
+    }
+  }
+
+  void _schedule() {
+    if (_shown >= widget.text.characters.length) return;
+    _timer = Timer(_step, () {
+      if (!mounted) return;
+      setState(() => _shown++);
+      _schedule();
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final typed = widget.text.characters.take(_shown).toString();
+    final translation = widget.translation;
+    final showTranslation =
+        _shown >= widget.text.characters.length &&
+        translation != null &&
+        translation.isNotEmpty;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Stack(
+          alignment: Alignment.topLeft,
+          children: [
+            Opacity(
+              opacity: 0,
+              child: Text(widget.text, style: widget.style),
+            ),
+            Text(typed, style: widget.style),
+          ],
+        ),
+        if (showTranslation) ...[
+          const SizedBox(height: 10),
+          Text(
+            translation,
+            style: widget.translationStyle,
+            textAlign: TextAlign.justify,
+          ),
+        ],
+      ],
     );
   }
 }
@@ -2108,6 +2162,7 @@ Widget _tutorialGuide(
   double tailOffsetFromEnd = 20,
   bool tailCentered = true,
   bool wobble = true,
+  double maxWidth = _TutorialGuide.defaultMaxWidth,
 }) {
   return _TutorialGuide(
     text: text,
@@ -2116,6 +2171,7 @@ Widget _tutorialGuide(
     tailOffsetFromEnd: tailOffsetFromEnd,
     tailCentered: tailCentered,
     wobble: wobble,
+    maxWidth: maxWidth,
   );
 }
 
@@ -2129,7 +2185,7 @@ class _TutorialGuide extends StatelessWidget {
 
   /// 큰 글씨라 공통 기본(260)이면 문장이 어색하게 꺾여서 온보딩만 넓힌다.
   /// 실제 폭은 부모(화면 좌우 여백)가 다시 제한한다.
-  static const _maxWidth = 360.0;
+  static const defaultMaxWidth = 360.0;
 
   final String text;
   final GuideBubbleTail tail;
@@ -2137,6 +2193,7 @@ class _TutorialGuide extends StatelessWidget {
   final double tailOffsetFromEnd;
   final bool tailCentered;
   final bool wobble;
+  final double maxWidth;
 
   const _TutorialGuide({
     required this.text,
@@ -2145,6 +2202,7 @@ class _TutorialGuide extends StatelessWidget {
     required this.tailOffsetFromEnd,
     required this.tailCentered,
     required this.wobble,
+    this.maxWidth = defaultMaxWidth,
   });
 
   @override
@@ -2157,10 +2215,11 @@ class _TutorialGuide extends StatelessWidget {
       text: text,
       tail: tail,
       wobble: wobble,
+      dropShadow: true,
       textStyle: style,
       textAlign: TextAlign.center,
       cornerRadius: 20,
-      maxWidth: _maxWidth,
+      maxWidth: maxWidth,
       tailCentered: tailCentered,
       tailOffsetFromEnd: tailOffsetFromEnd,
       spans: [
@@ -2179,66 +2238,6 @@ class _TutorialGuide extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-/// 시안: radius 26 · 흰 6.8% 채우기 + Playing 미션 패널과 동일 BackdropFilter blur 12.
-class _MissionListBox extends StatelessWidget {
-  static const _radius = 26.0;
-
-  /// 시안 채우기 `#FFFFFF` 6.8%.
-  static final _fill = Colors.white.withValues(alpha: 0.068);
-
-  final List<String> missions;
-
-  const _MissionListBox({required this.missions});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context).textTheme;
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(_radius),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: _fill,
-            borderRadius: BorderRadius.circular(_radius),
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.36),
-              width: 1,
-            ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-            child: Column(
-              children: [
-                for (var i = 0; i < missions.length; i++) ...[
-                  if (i > 0) const SizedBox(height: 14),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Image.asset(
-                        'assets/images/icons/rps2_mission_off.png',
-                        width: 24,
-                        height: 24,
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          missions[i],
-                          style: theme.bodyLarge?.copyWith(color: Colors.white),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ),
-      ),
     );
   }
 }
@@ -2268,58 +2267,6 @@ class _PinnedGuideSlot extends StatelessWidget {
         ),
         child,
       ],
-    );
-  }
-}
-
-/// 영어 답변 버튼 테두리. `#087876` 30%를 기준으로 밝기가 출렁인다.
-class _SparklingHintButton extends StatefulWidget {
-  final Widget child;
-
-  const _SparklingHintButton({required this.child});
-
-  @override
-  State<_SparklingHintButton> createState() => _SparklingHintButtonState();
-}
-
-class _SparklingHintButtonState extends State<_SparklingHintButton>
-    with SingleTickerProviderStateMixin {
-  static const _ring = Color(0xFF087876);
-  late final AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 900),
-    )..repeat(reverse: true);
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) {
-        final t = Curves.easeInOut.transform(_controller.value);
-        return DecoratedBox(
-          decoration: BoxDecoration(
-            color: _ring.withValues(alpha: 0.08 + 0.22 * t),
-            borderRadius: BorderRadius.circular(40),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-            child: child,
-          ),
-        );
-      },
-      child: widget.child,
     );
   }
 }
@@ -2405,7 +2352,7 @@ class _TutorialMicRippleState extends State<_TutorialMicRipple>
   }
 }
 
-/// 힌트 전구. 앞장은 기존 24 논리 픽셀. 세 번째 발화 차례에만 뒤를 반짝인다.
+/// 힌트 전구. 앞장은 기존 24 논리 픽셀. AI 발화 3 이후에는 반짝이지 않는다.
 class _HintBulb extends StatefulWidget {
   final bool sparkle;
 
@@ -2501,16 +2448,13 @@ class _HintBulbState extends State<_HintBulb>
 class _PlayingLikeDisabledFooter extends StatelessWidget {
   final AnimationController loadingRotationController;
   final String? micGuide;
-  final bool compactMicGuide;
   final bool showHintCoach;
   final String hintGuide;
   final bool showMicPointer;
 
-  /// 첫 발화 후 펄스가 없으므로 가이드를 마이크 쪽으로 내린다.
-  final bool guideNearMic;
-
   /// 누르는 순간 문구가 줄어도 마이크가 움직이지 않게 잡아 두는 높이.
   final String? guideReserveText;
+  final double gapAboveMic;
   final bool micEnabled;
   final bool micLoading;
   final bool hintEnabled;
@@ -2523,12 +2467,11 @@ class _PlayingLikeDisabledFooter extends StatelessWidget {
   const _PlayingLikeDisabledFooter({
     required this.loadingRotationController,
     this.micGuide,
-    this.compactMicGuide = false,
     this.showHintCoach = false,
     this.hintGuide = '',
     this.showMicPointer = false,
-    this.guideNearMic = false,
     this.guideReserveText,
+    this.gapAboveMic = 48,
     this.micEnabled = false,
     this.micLoading = false,
     this.hintEnabled = false,
@@ -2538,16 +2481,6 @@ class _PlayingLikeDisabledFooter extends StatelessWidget {
     required this.onMicHoldEnd,
     required this.onHintTap,
   });
-
-  /// 말하기 안내가 마이크 파동 위로 올라가게 하는 간격.
-  double get _gapAboveMic {
-    if (compactMicGuide && showMicPulse) {
-      const rippleOverflow =
-          (_TutorialMicRipple.displaySize - roleplayMicDefaultSize) / 2;
-      return rippleOverflow + 16;
-    }
-    return guideNearMic ? 12 : 48;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -2560,17 +2493,15 @@ class _PlayingLikeDisabledFooter extends StatelessWidget {
           children: [
             if (micGuide != null) ...[
               _PinnedGuideSlot(
-                reserveText: guideNearMic ? null : guideReserveText,
-                child: compactMicGuide
-                    ? _tutorialGuide(micGuide!)
-                    : _EnterFade(
-                        child: _tutorialGuide(
-                          micGuide!,
-                          spans: _helloSpans(micGuide!),
-                        ),
-                      ),
+                reserveText: guideReserveText,
+                child: _EnterFade(
+                  child: _tutorialGuide(
+                    micGuide!,
+                    spans: _helloSpans(micGuide!),
+                  ),
+                ),
               ),
-              SizedBox(height: _gapAboveMic),
+              SizedBox(height: gapAboveMic),
             ] else ...[
               const SizedBox(height: 24),
               const SizedBox(height: 10),

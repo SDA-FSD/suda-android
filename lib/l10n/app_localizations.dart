@@ -884,7 +884,7 @@ abstract class AppLocalizations {
   /// No description provided for @tutorialRoleplaySkipBody.
   ///
   /// In en, this message translates to:
-  /// **'If you skip, you won\'t receive\nthe tutorial reward.'**
+  /// **'If you skip, you won\'t be able to return to the tutorial.'**
   String get tutorialRoleplaySkipBody;
 
   /// No description provided for @tutorialRoleplaySkipConfirm.
@@ -935,17 +935,11 @@ abstract class AppLocalizations {
   /// **'Tap to continue'**
   String get tutorialRoleplayGuideMissionTapContinue;
 
-  /// No description provided for @tutorialRoleplayNarration1.
+  /// No description provided for @tutorialRoleplaySceneCaption.
   ///
   /// In en, this message translates to:
-  /// **'You\'re moving to a new neighborhood today. You hop into a taxi, where a friendly driver named Betty greets you. 🚕'**
-  String get tutorialRoleplayNarration1;
-
-  /// No description provided for @tutorialRoleplayNarrationArrival.
-  ///
-  /// In en, this message translates to:
-  /// **'The taxi arrives at your destination.'**
-  String get tutorialRoleplayNarrationArrival;
+  /// **'Today, you\'re moving to a new neighborhood.\nSay hello to Betty, your taxi driver!'**
+  String get tutorialRoleplaySceneCaption;
 
   /// No description provided for @tutorialRoleplayResultSubtitle.
   ///
@@ -959,10 +953,16 @@ abstract class AppLocalizations {
   /// **'Keep It Going!'**
   String get tutorialRoleplayResultContinue;
 
+  /// No description provided for @tutorialRoleplayGreetingSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'First greeting complete!\nGreat job!'**
+  String get tutorialRoleplayGreetingSuccess;
+
   /// No description provided for @tutorialRoleplayBettyLine1.
   ///
   /// In en, this message translates to:
-  /// **'Hi there! Hop in!'**
+  /// **'Hi there! I\'m Betty. Lovely to meet you!'**
   String get tutorialRoleplayBettyLine1;
 
   /// No description provided for @tutorialRoleplayBettyLine1Translation.
@@ -974,7 +974,7 @@ abstract class AppLocalizations {
   /// No description provided for @tutorialRoleplayHoldHello.
   ///
   /// In en, this message translates to:
-  /// **'Press and hold\nthe mic button.\nSay ‘Hello’ and release.'**
+  /// **'Press and hold the mic button. Say ‘Hello’ and release.'**
   String get tutorialRoleplayHoldHello;
 
   /// No description provided for @tutorialRoleplayMicHolding.
@@ -986,32 +986,44 @@ abstract class AppLocalizations {
   /// No description provided for @tutorialRoleplayMicTooShort.
   ///
   /// In en, this message translates to:
-  /// **'Hold the mic longer\nand say ‘Hello’'**
+  /// **'Hold the mic longer and say ‘Hello’'**
   String get tutorialRoleplayMicTooShort;
 
   /// No description provided for @tutorialRoleplayMicNoSpeech.
   ///
   /// In en, this message translates to:
-  /// **'Didn\'t catch that.\nTry saying \'Hello\' again.'**
+  /// **'Didn\'t catch that. Try saying \'Hello\' again.'**
   String get tutorialRoleplayMicNoSpeech;
 
   /// No description provided for @tutorialRoleplayHintGuide.
   ///
   /// In en, this message translates to:
-  /// **'Not sure what to say?\nTap the hint!'**
+  /// **'Not sure what to say?\nTap the light bulb for a hint.'**
   String get tutorialRoleplayHintGuide;
 
-  /// No description provided for @tutorialRoleplayHintTapEnglish.
+  /// No description provided for @tutorialRoleplayHintDestinationNative.
   ///
   /// In en, this message translates to:
-  /// **'Tap to see the English answer'**
-  String get tutorialRoleplayHintTapEnglish;
+  /// **''**
+  String get tutorialRoleplayHintDestinationNative;
 
-  /// No description provided for @tutorialRoleplayHintSayIt.
+  /// No description provided for @tutorialRoleplayHintReasonNative.
   ///
   /// In en, this message translates to:
-  /// **'Now, say it!'**
-  String get tutorialRoleplayHintSayIt;
+  /// **''**
+  String get tutorialRoleplayHintReasonNative;
+
+  /// No description provided for @tutorialRoleplayHintAnswerGuide.
+  ///
+  /// In en, this message translates to:
+  /// **'Try answering with this sentence.'**
+  String get tutorialRoleplayHintAnswerGuide;
+
+  /// No description provided for @tutorialRoleplayFreeAnswerGuide.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer in your own words.\nNeed help? Tap the light bulb.'**
+  String get tutorialRoleplayFreeAnswerGuide;
 
   /// No description provided for @actionConfirm.
   ///

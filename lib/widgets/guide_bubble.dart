@@ -32,6 +32,9 @@ class GuideBubble extends StatefulWidget {
   /// 말풍선 전체 최대 폭. 기본은 [defaultMaxWidth].
   final double maxWidth;
 
+  /// true면 채우기 아래에 그림자를 그린다. X 0, Y 4, blur 4, spread 0, #000000 25%.
+  final bool dropShadow;
+
   static const double defaultMaxWidth = 260;
 
   const GuideBubble({
@@ -47,6 +50,7 @@ class GuideBubble extends StatefulWidget {
     this.wobble = false,
     this.onTap,
     this.maxWidth = defaultMaxWidth,
+    this.dropShadow = false,
   });
 
   @override
@@ -109,6 +113,7 @@ class _GuideBubbleState extends State<GuideBubble>
           tailOffsetFromEnd: widget.tailOffsetFromEnd,
           cornerRadius: widget.cornerRadius,
           tailCentered: widget.tailCentered,
+          dropShadow: widget.dropShadow,
         ),
         child: Padding(
           padding: padding,
@@ -148,12 +153,14 @@ class _GuideBubblePainter extends CustomPainter {
   final double tailOffsetFromEnd;
   final double cornerRadius;
   final bool tailCentered;
+  final bool dropShadow;
 
   const _GuideBubblePainter({
     required this.tail,
     required this.tailOffsetFromEnd,
     required this.cornerRadius,
     required this.tailCentered,
+    required this.dropShadow,
   });
 
   @override
@@ -214,6 +221,17 @@ class _GuideBubblePainter extends CustomPainter {
           ..lineTo(body.right, center + half);
     }
     path.close();
+    if (dropShadow) {
+      canvas.drawPath(
+        path.shift(const Offset(0, 4)),
+        Paint()
+          ..color = const Color(0x40000000)
+          ..maskFilter = const MaskFilter.blur(
+            BlurStyle.normal,
+            4 * 0.57735 + 0.5,
+          ),
+      );
+    }
     canvas.drawPath(path, Paint()..color = GuideBubble.fill);
   }
 
@@ -235,6 +253,7 @@ class _GuideBubblePainter extends CustomPainter {
     return tail != oldDelegate.tail ||
         tailOffsetFromEnd != oldDelegate.tailOffsetFromEnd ||
         cornerRadius != oldDelegate.cornerRadius ||
-        tailCentered != oldDelegate.tailCentered;
+        tailCentered != oldDelegate.tailCentered ||
+        dropShadow != oldDelegate.dropShadow;
   }
 }
