@@ -958,47 +958,47 @@ class _RoleplayTutorialScreenState extends State<RoleplayTutorialScreen>
     final screenHeight = MediaQuery.sizeOf(context).height;
     final top = MediaQuery.paddingOf(context).top;
     final bottom = MediaQuery.paddingOf(context).bottom;
-    return ColoredBox(
-      color: _pageColors[index],
-      child: Column(
-        children: [
-          SizedBox(
-            height: screenHeight / 4,
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(24, top + 12, 24, 8),
-              child: Column(
-                children: [
-                  const SizedBox(height: 20),
-                  Expanded(child: Center(child: _buildTitle(context, index))),
-                ],
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => _handleBottomTap(index),
+      child: ColoredBox(
+        color: _pageColors[index],
+        child: Column(
+          children: [
+            SizedBox(
+              height: screenHeight / 4,
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(24, top + 12, 24, 8),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 20),
+                    Expanded(child: Center(child: _buildTitle(context, index))),
+                  ],
+                ),
               ),
             ),
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(44, 4, 44, 8),
-              child: index == 2
-                  ? _buildResultStage()
-                  : _buildPlayingStage(
-                      showTranslatorSample: index < 2,
-                      translatorFrozen: index == 1,
-                      hintVisible: index == 1 && _slide2HintVisible,
-                      animate: index == 0 && _play[0],
-                    ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(44, 4, 44, 8),
+                child: index == 2
+                    ? _buildResultStage()
+                    : _buildPlayingStage(
+                        showTranslatorSample: index < 2,
+                        translatorFrozen: index == 1,
+                        hintVisible: index == 1 && _slide2HintVisible,
+                        animate: index == 0 && _play[0],
+                      ),
+              ),
             ),
-          ),
-          SizedBox(
-            height: _readySlotHeight + bottom,
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () => _handleBottomTap(index),
+            SizedBox(
+              height: _readySlotHeight + bottom,
               child: Padding(
                 padding: EdgeInsets.only(bottom: bottom),
                 child: Center(child: _buildReady(context, index)),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -1036,7 +1036,7 @@ class _RoleplayTutorialScreenState extends State<RoleplayTutorialScreen>
               top: top + 16,
               left: 0,
               right: 0,
-              child: _buildDotIndicator(),
+              child: IgnorePointer(child: _buildDotIndicator()),
             ),
           ],
         ),

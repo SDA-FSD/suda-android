@@ -713,16 +713,16 @@
 - **LabScreen** (dev): Setting > Lab > Tutorial 언어 선택 후 **Open Tutorial** (`preview: true`, 완료 API 없음)
 
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
-- **RoleplayOpeningScreen**: 튜토리얼 완료(마지막 슬라이드 하단 문구 탭) 또는 이미 완료된 경우 즉시 replace
+- **RoleplayOpeningScreen**: 튜토리얼 완료(마지막 슬라이드 아무 곳 탭) 또는 이미 완료된 경우 즉시 replace
   - `Navigator.pushReplacement()`로 Tutorial 스크린을 스택에서 제거하며 전환
-- **Lab 미리보기**: 마지막 페이지 하단 문구 탭 또는 뒤로가기 시 Lab으로 pop (Opening 전환 없음)
+- **Lab 미리보기**: 마지막 페이지 아무 곳 탭 또는 뒤로가기 시 Lab으로 pop (Opening 전환 없음)
 
 ### 스크린 내부 구현 특이사항
 - **진입 시 조건 체크**: `preview`가 아니면 `RoleplayStateService.instance.user` 없으면 `GET /v1/users` 호출. `TUTORIAL == 'Y'`이면 첫 프레임 이후 `replaceWithOpeningFromTutorial()`로 스킵(`addPostFrameCallback` — build 중 `pushReplacement` 금지). Lab `preview`는 스킵·API 없이 즉시 노출
 - **구성**: PNG 없음. 인디케이터+타이틀은 화면 높이 1/4. 타이틀 l10n `tutorialSlide{1~3}Title`, `**강조**`만 슬라이드 강조색(`054544` / `633721` / `61003F`), 나머지는 흰색. 그 아래 둥근 패널(좌우 마진 44, 세 장 공통 바탕 `#121212` 상단 100%→높이 1/4에서 60%→하단 60% 유지. 우하단 그림자(검정 65% blur 28 offset 16·22)는 패널 밖만. 반투명 안으로 비치지 않음). 1·2는 Playing 크롬을 흰색 60%로. 마이크만 원본(흰 원+마이크)을 60% 투명으로. 1만 턴바 아래 40 AI 샘플: 원형 `turorial_character.png` 32(Playing 아바타 40), 말풍선 영어 `Would you like to order?` 고정, 번역은 `tutorialSlide1Translation`. 번역 아이콘 36은 말풍선과 5 간격이고 원 크기는 말풍선 너비에 넣지 않는다. 비활성 회색↔활성 흰색은 말풍선과 같이 220ms. 말풍선 번역은 켜고 끌 때 220ms로 늘고 줄어든다. 흰 원 2개는 Overlay(패널 밖 가능). 안쪽 원 중심 반지름은 (아이콘 18+여백 4+두께 2.5)×1.5, 두께 5, 원 사이 10, 바깥 두께 3. 반지름이 easeInOut으로 0.82↔1. 활성 끝에서 1초 대기 후 축소, 비활성 끝에서는 바로 확대. 2는 그 샘플을 활성 고정(조준 원 없음). 페이지가 2번을 벗어나면 힌트 오버레이를 바로 제거. 그 아래 힌트(화면 좌우 24, 헤더·`tutorialSlide2HintLine`·영문 Just a latte, please.+메가폰). 영문 단어마다 Playing과 같은 점선 밑줄(`#0CABA8`, 대시 3·간격 3·두께 1.5, 글자 아래 2). 밑줄은 단어 크기 애니와 같이 커졌다 작아진다. 힌트 오버레이는 Material 밖이라 헤더 글자가 노란 두 줄 밑줄을 물려받지 않게 `decoration: none`으로 덮는다. 메가폰+영문은 중앙. 힌트 오버레이도 화면 로케일. 메가폰은 원과 같이 1→1.28로 커지며 강조 중 `#0CABA8`, 메가폰 원은 0.78↔1, please 원은 그 1.3배. 색은 글자 단위로 좌→우 `#0CABA8`, 복귀는 영역 전체가 흰색. 크기 강조는 단어 단위. please만 같은 식으로 반복. 네 모서리 아이콘은 20, 꼭지점 마진은 좌우 20·상하 20. 3번 박스 바탕은 `#0CABA8` 위 `#121212` 상단 100%→1/4에서 60%→하단 60%. 3번 강조 원은 `#FF00A6`이며 0.82↔1로 커졌다 작아지며 fade. 딤·블러와 흰 카드 노출은 같이 끝난다. 카드가 닫힌 뒤 1초는 딤 없이 둔 다음 루프. 강조 원·피드백 카드는 Overlay라 흐려지지 않음. 아치 금별 3 아래 영문 `Well Played!`·`you are crushing it!`, Mission/Words/Like, 좌측 `Speech Feedback`, 카드 2장(NEEDS IMPROVEMENT `I want coffee.` / GOOD `Thank you`). 1·2·3 모두 화면 머문 뒤 500ms 후 애니. 3은 첫 Feedback 버튼 원 강조 후 화면 중앙 흰 카드(좌우 24)가 버튼에서 커지며 fade-in, 3초 유지, 버튼으로 줄어들며 fade-out 후 반복. 카드 문구 `tutorialSlide3SaidLabel`·`tutorialSlide3BetterLabel`·`tutorialSlide3Feedback`. 세 장 모두 하단 슬롯(`bodyLarge`·해당 슬라이드 강조색 `054544`/`633721`/`61003F`·느린 깜빡임). 1·2는 `tutorialSlideContinue`, 3은 `tutorialSlideReady`
 - **인디케이터**: 상단 3개 dot (활성: 흰색 / 비활성: 흰색 40% 불투명도). 페이지 전환 시 진동
-- **탭**: 화면 탭으로는 슬라이드가 바뀌지 않는다. 이동은 스와이프, 또는 하단 문구 탭(1·2는 다음 장, 3은 완료). `preview`가 아니면 1→2·2→3 도착 시 `POST /v1/users/tutorial-1-to-2` · `tutorial-2-to-3` (한 세션에서 앞으로 넘긴 최고 장까지만, 실패 무시. 1장에서 3장으로 바로 넘기면 둘 다)
-- **완료 처리**: 마지막 페이지 하단 `tutorialSlideReady` 탭 시 `SudaApiClient.completeTutorial()` 호출 → 첫 프레임 이후 `replaceWithOpeningFromTutorial()`. `preview`면 `Navigator.pop`
+- **탭**: 화면 아무 곳 탭 또는 스와이프. 탭은 1·2는 다음 장, 3은 완료. 하단 문구도 같은 탭. 상단 점은 터치를 페이지에 통과. `preview`가 아니면 1→2·2→3 도착 시 `POST /v1/users/tutorial-1-to-2` · `tutorial-2-to-3` (한 세션에서 앞으로 넘긴 최고 장까지만, 실패 무시. 1장에서 3장으로 바로 넘기면 둘 다)
+- **완료 처리**: 마지막 페이지 아무 곳 탭 시 `SudaApiClient.completeTutorial()` 호출 → 첫 프레임 이후 `replaceWithOpeningFromTutorial()`. `preview`면 `Navigator.pop`
 - **뒤로가기**: `PopScope(canPop: true)` — Overview(또는 Lab)로 복귀 가능
 - **API**: `POST /v1/users/tutorial` (request body 없음, 200 응답 시 성공). `preview`는 미호출
 - Route name: `/roleplay/tutorial`
