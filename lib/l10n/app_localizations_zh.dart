@@ -1245,6 +1245,23 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get rewardUnboxingViewCharacter => '查看角色';
+
+  @override
+  String get cefrLevelUpTitle => '准备好进入下一级了吗？';
+
+  @override
+  String cefrLevelUpBody(String level) {
+    return '你已完成本系列所有$level剧集！来挑战更高难度吧。';
+  }
+
+  @override
+  String get cefrLevelUpCaption => '即使更换难度，之前难度的进度和游玩记录也会保留。';
+
+  @override
+  String get cefrLevelUpTryNext => '挑战下一级';
+
+  @override
+  String get cefrLevelUpLater => '以后再说';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -2488,6 +2505,23 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get rewardUnboxingViewCharacter => '查看角色';
+
+  @override
+  String get cefrLevelUpTitle => '准备好进入下一级了吗？';
+
+  @override
+  String cefrLevelUpBody(String level) {
+    return '你已完成本系列所有$level剧集！来挑战更高难度吧。';
+  }
+
+  @override
+  String get cefrLevelUpCaption => '即使更换难度，之前难度的进度和游玩记录也会保留。';
+
+  @override
+  String get cefrLevelUpTryNext => '挑战下一级';
+
+  @override
+  String get cefrLevelUpLater => '以后再说';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -3731,4 +3765,21 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get rewardUnboxingViewCharacter => '查看角色';
+
+  @override
+  String get cefrLevelUpTitle => '準備好進入下一級了嗎？';
+
+  @override
+  String cefrLevelUpBody(String level) {
+    return '你已完成本系列所有$level劇集！來挑戰更高難度吧。';
+  }
+
+  @override
+  String get cefrLevelUpCaption => '即使更換難度，先前難度的進度與遊玩紀錄都會保留。';
+
+  @override
+  String get cefrLevelUpTryNext => '挑戰下一級';
+
+  @override
+  String get cefrLevelUpLater => '以後再說';
 }

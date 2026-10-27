@@ -487,5 +487,17 @@
   "rewardUnboxingNewCharacter": "Watak baharu!",
   "rewardUnboxingYouGot": "Anda mendapat {characterName}!",
   "rewardUnboxingSetAsProfile": "Tetapkan sebagai profil",
-  "rewardUnboxingViewCharacter": "Lihat watak"
+  "rewardUnboxingViewCharacter": "Lihat watak",
+  "cefrLevelUpTitle": "Bersedia untuk tahap seterusnya?",
+  "cefrLevelUpBody": "Anda telah menyelesaikan semua episod {level} dalam siri ini! Cabar diri anda pada tahap yang lebih tinggi.",
+  "@cefrLevelUpBody": {
+    "placeholders": {
+      "level": {
+        "type": "String"
+      }
+    }
+  },
+  "cefrLevelUpCaption": "Kemajuan dan sejarah permainan pada tahap sebelumnya akan dikekalkan.",
+  "cefrLevelUpTryNext": "Cuba tahap seterusnya",
+  "cefrLevelUpLater": "Mungkin kemudian"
 }

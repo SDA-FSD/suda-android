@@ -487,5 +487,17 @@
   "rewardUnboxingNewCharacter": "새로운 캐릭터!",
   "rewardUnboxingYouGot": "{characterName} 를 획득했어요!",
   "rewardUnboxingSetAsProfile": "프로필로 설정",
-  "rewardUnboxingViewCharacter": "캐릭터 보기"
+  "rewardUnboxingViewCharacter": "캐릭터 보기",
+  "cefrLevelUpTitle": "다음 난이도로 이어가 볼까요?",
+  "cefrLevelUpBody": "이 시리즈의 {level} 에피소드를 모두 완료했어요! 더 높은 난이도에 도전해 보세요.",
+  "@cefrLevelUpBody": {
+    "placeholders": {
+      "level": {
+        "type": "String"
+      }
+    }
+  },
+  "cefrLevelUpCaption": "난이도를 바꿔도 이전 난이도의 진행 상황과 플레이 기록은 그대로 유지돼요.",
+  "cefrLevelUpTryNext": "다음 난이도 도전하기",
+  "cefrLevelUpLater": "나중에"
 }

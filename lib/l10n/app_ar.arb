@@ -487,5 +487,17 @@
   "rewardUnboxingNewCharacter": "شخصية جديدة!",
   "rewardUnboxingYouGot": "لقد حصلت على {characterName}!",
   "rewardUnboxingSetAsProfile": "تعيين كصورة الملف",
-  "rewardUnboxingViewCharacter": "عرض الشخصية"
+  "rewardUnboxingViewCharacter": "عرض الشخصية",
+  "cefrLevelUpTitle": "هل أنت مستعد للمستوى التالي؟",
+  "cefrLevelUpBody": "لقد أكملت كل حلقات مستوى {level} في هذه السلسلة! تحدَّ نفسك في مستوى أعلى.",
+  "@cefrLevelUpBody": {
+    "placeholders": {
+      "level": {
+        "type": "String"
+      }
+    }
+  },
+  "cefrLevelUpCaption": "سيبقى تقدمك وسجل لعبك في المستوى السابق محفوظين.",
+  "cefrLevelUpTryNext": "جرّب المستوى التالي",
+  "cefrLevelUpLater": "ربما لاحقًا"
 }

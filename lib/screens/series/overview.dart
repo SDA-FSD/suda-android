@@ -21,6 +21,7 @@ import '../../widgets/suda_label_tabs.dart';
 import '../../navigation/app_route_observer.dart';
 import '../../routes/roleplay_router.dart';
 import 'series_information.dart';
+import 'cefr_level_up_popup.dart';
 import 'widgets/series_episode_tab_content.dart';
 import 'widgets/series_similar_topic_tab_content.dart';
 
@@ -57,6 +58,7 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
   bool _cefrExpanded = false;
   bool _cefrSaving = false;
   String? _seriesCefrLevel;
+  bool _cefrLevelUpInFlight = false;
   int _cefrSeq = 0;
   Future<void> _cefrQueue = Future<void>.value();
   late final AnimationController _cefrWidthController;
@@ -184,6 +186,7 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
           _isLoading = false;
           _scrollToUnlockToken++;
         });
+        unawaited(_maybeShowCefrLevelUp(overview));
       } catch (_) {
         if (!mounted) return;
         setState(() {
@@ -303,6 +306,7 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
         }
         _scrollToUnlockToken++;
       });
+      unawaited(_maybeShowCefrLevelUp(updated));
     } catch (_) {}
   }
 
@@ -398,6 +402,57 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
       _seriesCefrLevel ??
           SeriesStateService.instance.playableCefrLevel(widget.user),
     );
+  }
+
+  Future<void> _maybeShowCefrLevelUp(RpS2SeriesOverviewDto overview) async {
+    if (_cefrLevelUpInFlight || !mounted) return;
+    final episodes = overview.episodes;
+    if (episodes.isEmpty) return;
+    final cefr = _currentSeriesCefr();
+    final next = EnglishLevelUtil.nextPlayableLevel(cefr);
+    if (next == null) return;
+    if (!overview.bestScoreMap.containsKey(episodes.last.id)) return;
+
+    _cefrLevelUpInFlight = true;
+    try {
+      final accessToken = await TokenStorage.loadAccessToken();
+      if (!mounted || accessToken == null) return;
+      final shown = await SudaApiClient.hasSeriesCefrLevelUpNotice(
+        accessToken: accessToken,
+        seriesId: widget.seriesId,
+        cefrLevel: cefr,
+      );
+      if (!mounted || shown) return;
+      final tryNext = await showCefrLevelUpPopup(
+        context,
+        levelLabel: EnglishLevelUtil.localizedLabel(
+          AppLocalizations.of(context)!,
+          cefr,
+        ),
+      );
+      if (!mounted) return;
+      try {
+        await SudaApiClient.markSeriesCefrLevelUpNotice(
+          accessToken: accessToken,
+          seriesId: widget.seriesId,
+          cefrLevel: cefr,
+        );
+      } catch (_) {}
+      if (!tryNext || !mounted) return;
+      final saved = await SudaApiClient.updateSeriesCefrLevel(
+        accessToken: accessToken,
+        seriesId: widget.seriesId,
+        cefrLevel: next,
+      );
+      if (!mounted) return;
+      final playable = EnglishLevelUtil.toPlayable(saved);
+      SeriesStateService.instance.setSeriesCefrLevel(playable);
+      setState(() => _seriesCefrLevel = playable);
+      await _loadOverview();
+    } catch (_) {
+    } finally {
+      _cefrLevelUpInFlight = false;
+    }
   }
 
   Widget _buildBackButton(BuildContext context) {

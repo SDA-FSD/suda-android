@@ -1310,4 +1310,22 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get rewardUnboxingViewCharacter => 'Xem nhân vật';
+
+  @override
+  String get cefrLevelUpTitle => 'Sẵn sàng cho cấp độ tiếp theo?';
+
+  @override
+  String cefrLevelUpBody(String level) {
+    return 'Bạn đã hoàn thành mọi tập $level trong series này! Hãy thử thách bản thân ở cấp độ cao hơn.';
+  }
+
+  @override
+  String get cefrLevelUpCaption =>
+      'Tiến độ và lịch sử chơi ở cấp độ trước sẽ được giữ nguyên.';
+
+  @override
+  String get cefrLevelUpTryNext => 'Thử cấp độ tiếp theo';
+
+  @override
+  String get cefrLevelUpLater => 'Để sau';
 }

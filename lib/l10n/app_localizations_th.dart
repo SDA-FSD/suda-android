@@ -1296,4 +1296,22 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get rewardUnboxingViewCharacter => 'ดูตัวละคร';
+
+  @override
+  String get cefrLevelUpTitle => 'พร้อมไปต่อระดับถัดไปหรือยัง?';
+
+  @override
+  String cefrLevelUpBody(String level) {
+    return 'คุณเล่นตอนระดับ $level ในซีรีส์นี้ครบแล้ว! ลองท้าทายตัวเองในระดับที่สูงขึ้นดูสิ';
+  }
+
+  @override
+  String get cefrLevelUpCaption =>
+      'ความคืบหน้าและประวัติการเล่นในระดับก่อนหน้าจะยังคงอยู่';
+
+  @override
+  String get cefrLevelUpTryNext => 'ลองระดับถัดไป';
+
+  @override
+  String get cefrLevelUpLater => 'ไว้ทีหลัง';
 }

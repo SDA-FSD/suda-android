@@ -2464,6 +2464,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'View Character'**
   String get rewardUnboxingViewCharacter;
+
+  /// No description provided for @cefrLevelUpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready for the next level?'**
+  String get cefrLevelUpTitle;
+
+  /// No description provided for @cefrLevelUpBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve completed all the {level} episodes in this series! Challenge yourself at a higher level.'**
+  String cefrLevelUpBody(String level);
+
+  /// No description provided for @cefrLevelUpCaption.
+  ///
+  /// In en, this message translates to:
+  /// **'Your progress and play history at the previous level will be kept.'**
+  String get cefrLevelUpCaption;
+
+  /// No description provided for @cefrLevelUpTryNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Try the Next Level'**
+  String get cefrLevelUpTryNext;
+
+  /// No description provided for @cefrLevelUpLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Maybe Later'**
+  String get cefrLevelUpLater;
 }
 
 class _AppLocalizationsDelegate

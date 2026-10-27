@@ -1260,4 +1260,21 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get rewardUnboxingViewCharacter => '캐릭터 보기';
+
+  @override
+  String get cefrLevelUpTitle => '다음 난이도로 이어가 볼까요?';
+
+  @override
+  String cefrLevelUpBody(String level) {
+    return '이 시리즈의 $level 에피소드를 모두 완료했어요! 더 높은 난이도에 도전해 보세요.';
+  }
+
+  @override
+  String get cefrLevelUpCaption => '난이도를 바꿔도 이전 난이도의 진행 상황과 플레이 기록은 그대로 유지돼요.';
+
+  @override
+  String get cefrLevelUpTryNext => '다음 난이도 도전하기';
+
+  @override
+  String get cefrLevelUpLater => '나중에';
 }

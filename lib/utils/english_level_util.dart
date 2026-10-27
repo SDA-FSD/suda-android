@@ -45,6 +45,20 @@ class EnglishLevelUtil {
     return defaultLevel;
   }
 
+  /// 시리즈에서 방금 끝낸 레벨의 다음 단계. `B1`이면 없다.
+  static String? nextPlayableLevel(String? raw) {
+    switch (toPlayable(raw)) {
+      case 'Pre-A1':
+        return 'A1';
+      case 'A1':
+        return 'A2';
+      case 'A2':
+        return 'B1';
+      default:
+        return null;
+    }
+  }
+
   static String readLevelFromUser(UserDto? user) {
     final meta = user?.metaInfo;
     if (meta == null) return defaultLevel;

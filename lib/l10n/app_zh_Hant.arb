@@ -487,5 +487,17 @@
   "rewardUnboxingNewCharacter": "新角色！",
   "rewardUnboxingYouGot": "獲得了{characterName}！",
   "rewardUnboxingSetAsProfile": "設為頭像",
-  "rewardUnboxingViewCharacter": "查看角色"
+  "rewardUnboxingViewCharacter": "查看角色",
+  "cefrLevelUpTitle": "準備好進入下一級了嗎？",
+  "cefrLevelUpBody": "你已完成本系列所有{level}劇集！來挑戰更高難度吧。",
+  "@cefrLevelUpBody": {
+    "placeholders": {
+      "level": {
+        "type": "String"
+      }
+    }
+  },
+  "cefrLevelUpCaption": "即使更換難度，先前難度的進度與遊玩紀錄都會保留。",
+  "cefrLevelUpTryNext": "挑戰下一級",
+  "cefrLevelUpLater": "以後再說"
 }

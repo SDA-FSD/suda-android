@@ -487,5 +487,17 @@
   "rewardUnboxingNewCharacter": "新しいキャラクター！",
   "rewardUnboxingYouGot": "{characterName} をゲット！",
   "rewardUnboxingSetAsProfile": "プロフィールに設定",
-  "rewardUnboxingViewCharacter": "キャラクターを見る"
+  "rewardUnboxingViewCharacter": "キャラクターを見る",
+  "cefrLevelUpTitle": "次のレベルに進みますか？",
+  "cefrLevelUpBody": "このシリーズの{level}エピソードをすべて完了しました！もっと高いレベルに挑戦してみましょう。",
+  "@cefrLevelUpBody": {
+    "placeholders": {
+      "level": {
+        "type": "String"
+      }
+    }
+  },
+  "cefrLevelUpCaption": "レベルを変えても、前のレベルの進行状況とプレイ履歴はそのまま残ります。",
+  "cefrLevelUpTryNext": "次のレベルに挑戦",
+  "cefrLevelUpLater": "あとで"
 }

@@ -1320,4 +1320,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rewardUnboxingViewCharacter => 'View Character';
+
+  @override
+  String get cefrLevelUpTitle => 'Ready for the next level?';
+
+  @override
+  String cefrLevelUpBody(String level) {
+    return 'You\'ve completed all the $level episodes in this series! Challenge yourself at a higher level.';
+  }
+
+  @override
+  String get cefrLevelUpCaption =>
+      'Your progress and play history at the previous level will be kept.';
+
+  @override
+  String get cefrLevelUpTryNext => 'Try the Next Level';
+
+  @override
+  String get cefrLevelUpLater => 'Maybe Later';
 }

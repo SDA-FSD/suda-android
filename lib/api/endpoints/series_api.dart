@@ -247,6 +247,85 @@ class SeriesApi {
     throw Exception('CEFR level missing');
   }
 
+  static Future<bool> hasSeriesCefrLevelUpNotice({
+    required String accessToken,
+    required int seriesId,
+    required String cefrLevel,
+  }) async {
+    return await SudaHttpClient.executeWithRefresh(
+      () => _hasSeriesCefrLevelUpNoticeInternal(accessToken, seriesId, cefrLevel),
+      retryWithNewToken: (newToken) =>
+          _hasSeriesCefrLevelUpNoticeInternal(newToken, seriesId, cefrLevel),
+    );
+  }
+
+  static Future<bool> _hasSeriesCefrLevelUpNoticeInternal(
+    String accessToken,
+    int seriesId,
+    String cefrLevel,
+  ) async {
+    final uri = SudaHttpClient.buildUri(
+      '/rps2/series/$seriesId/cefr-level-up-notice',
+      {'cefrLevel': cefrLevel},
+    );
+    final response = await _sendSeriesCefrNotice(uri, accessToken, 'GET');
+    final dynamic data = jsonDecode(response.body);
+    return data is Map && data['shown'] == true;
+  }
+
+  static Future<void> markSeriesCefrLevelUpNotice({
+    required String accessToken,
+    required int seriesId,
+    required String cefrLevel,
+  }) async {
+    await SudaHttpClient.executeWithRefresh(
+      () => _markSeriesCefrLevelUpNoticeInternal(accessToken, seriesId, cefrLevel),
+      retryWithNewToken: (newToken) =>
+          _markSeriesCefrLevelUpNoticeInternal(newToken, seriesId, cefrLevel),
+    );
+  }
+
+  static Future<void> _markSeriesCefrLevelUpNoticeInternal(
+    String accessToken,
+    int seriesId,
+    String cefrLevel,
+  ) async {
+    final uri = SudaHttpClient.buildUri(
+      '/rps2/series/$seriesId/cefr-level-up-notice',
+      {'cefrLevel': cefrLevel},
+    );
+    await _sendSeriesCefrNotice(uri, accessToken, 'POST');
+  }
+
+  static Future<http.Response> _sendSeriesCefrNotice(
+    Uri uri,
+    String accessToken,
+    String method,
+  ) async {
+    late final http.Response response;
+    try {
+      final headers = {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      };
+      final request = method == 'POST'
+          ? SudaHttpClient.client.post(uri, headers: headers)
+          : SudaHttpClient.client.get(uri, headers: headers);
+      response = await request.timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      rethrow;
+    }
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return response;
+    }
+    throw Exception(
+      '$method ${uri.path} failed: HTTP ${response.statusCode} ${response.body}',
+    );
+  }
+
   static Future<RpS2SessionDto> createSession({
     required String accessToken,
     required int seriesId,

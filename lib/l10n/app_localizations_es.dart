@@ -1329,6 +1329,24 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get rewardUnboxingViewCharacter => 'Ver personaje';
+
+  @override
+  String get cefrLevelUpTitle => '¿Listo para el siguiente nivel?';
+
+  @override
+  String cefrLevelUpBody(String level) {
+    return '¡Completaste todos los episodios de $level de esta serie! Ponte a prueba en un nivel más alto.';
+  }
+
+  @override
+  String get cefrLevelUpCaption =>
+      'Tu progreso y tu historial de juego del nivel anterior se conservarán.';
+
+  @override
+  String get cefrLevelUpTryNext => 'Probar el siguiente nivel';
+
+  @override
+  String get cefrLevelUpLater => 'Quizá más tarde';
 }
 
 /// The translations for Spanish Castilian, as used in Latin America and the Caribbean (`es_419`).
@@ -2656,4 +2674,22 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
 
   @override
   String get rewardUnboxingViewCharacter => 'Ver personaje';
+
+  @override
+  String get cefrLevelUpTitle => '¿Listo para el siguiente nivel?';
+
+  @override
+  String cefrLevelUpBody(String level) {
+    return '¡Completaste todos los episodios de $level de esta serie! Ponte a prueba en un nivel más alto.';
+  }
+
+  @override
+  String get cefrLevelUpCaption =>
+      'Tu progreso y tu historial de juego del nivel anterior se conservarán.';
+
+  @override
+  String get cefrLevelUpTryNext => 'Probar el siguiente nivel';
+
+  @override
+  String get cefrLevelUpLater => 'Quizá más tarde';
 }

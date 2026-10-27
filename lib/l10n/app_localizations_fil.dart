@@ -1340,4 +1340,22 @@ class AppLocalizationsFil extends AppLocalizations {
 
   @override
   String get rewardUnboxingViewCharacter => 'Tingnan ang Character';
+
+  @override
+  String get cefrLevelUpTitle => 'Handa ka na ba sa susunod na level?';
+
+  @override
+  String cefrLevelUpBody(String level) {
+    return 'Natapos mo na ang lahat ng episode na $level sa seryeng ito! Hamunin ang sarili mo sa mas mataas na level.';
+  }
+
+  @override
+  String get cefrLevelUpCaption =>
+      'Mananatili ang progress at play history mo sa nakaraang level.';
+
+  @override
+  String get cefrLevelUpTryNext => 'Subukan ang susunod na level';
+
+  @override
+  String get cefrLevelUpLater => 'Mamaya na';
 }

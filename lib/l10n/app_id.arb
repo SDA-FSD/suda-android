@@ -487,5 +487,17 @@
   "rewardUnboxingNewCharacter": "Karakter baru!",
   "rewardUnboxingYouGot": "Kamu mendapat {characterName}!",
   "rewardUnboxingSetAsProfile": "Jadikan foto profil",
-  "rewardUnboxingViewCharacter": "Lihat karakter"
+  "rewardUnboxingViewCharacter": "Lihat karakter",
+  "cefrLevelUpTitle": "Siap ke level berikutnya?",
+  "cefrLevelUpBody": "Kamu sudah menyelesaikan semua episode {level} di seri ini! Tantang dirimu di level yang lebih tinggi.",
+  "@cefrLevelUpBody": {
+    "placeholders": {
+      "level": {
+        "type": "String"
+      }
+    }
+  },
+  "cefrLevelUpCaption": "Progres dan riwayat bermain di level sebelumnya akan tetap tersimpan.",
+  "cefrLevelUpTryNext": "Coba level berikutnya",
+  "cefrLevelUpLater": "Nanti saja"
 }

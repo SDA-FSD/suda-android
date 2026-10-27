@@ -26,6 +26,8 @@ import 'announcements.dart'
 import '../roleplay/try_again.dart';
 import '../first_cefr_level.dart';
 import '../first_profile_image.dart';
+import '../series/cefr_level_up_popup.dart'
+    show showCefrLevelUpPopupForLab;
 import '../tutorial/onboarding_intro.dart';
 import '../tutorial/onboarding_roleplay.dart';
 import '../paywall/paywall.dart';
@@ -40,6 +42,11 @@ import '../../utils/paywall_impression_screen.dart';
 ///
 /// 라벨 규칙: 괄호로 분기/sessionId를 붙이지 않는다.
 final List<LabDefaultPopupOption> kLabDefaultPopupOptions = [
+  LabDefaultPopupOption(
+    id: 'series_cefr_level_up',
+    label: 'Series: Next CEFR level',
+    show: showCefrLevelUpPopupForLab,
+  ),
   LabDefaultPopupOption(
     id: 'profile_delete_saved_expression',
     label: 'Profile: Delete saved expression',

@@ -144,6 +144,30 @@ class SudaApiClient {
     );
   }
 
+  static Future<bool> hasSeriesCefrLevelUpNotice({
+    required String accessToken,
+    required int seriesId,
+    required String cefrLevel,
+  }) {
+    return SeriesApi.hasSeriesCefrLevelUpNotice(
+      accessToken: accessToken,
+      seriesId: seriesId,
+      cefrLevel: cefrLevel,
+    );
+  }
+
+  static Future<void> markSeriesCefrLevelUpNotice({
+    required String accessToken,
+    required int seriesId,
+    required String cefrLevel,
+  }) {
+    return SeriesApi.markSeriesCefrLevelUpNotice(
+      accessToken: accessToken,
+      seriesId: seriesId,
+      cefrLevel: cefrLevel,
+    );
+  }
+
   static Future<RpS2SessionDto> createTutorialSession({
     required String accessToken,
   }) {

@@ -487,5 +487,17 @@
   "rewardUnboxingNewCharacter": "नया कैरेक्टर!",
   "rewardUnboxingYouGot": "आपको {characterName} मिला!",
   "rewardUnboxingSetAsProfile": "प्रोफ़ाइल बनाएं",
-  "rewardUnboxingViewCharacter": "कैरेक्टर देखें"
+  "rewardUnboxingViewCharacter": "कैरेक्टर देखें",
+  "cefrLevelUpTitle": "क्या आप अगले स्तर के लिए तैयार हैं?",
+  "cefrLevelUpBody": "आपने इस सीरीज़ के सभी {level} एपिसोड पूरे कर लिए हैं! खुद को ऊँचे स्तर पर चुनौती दें।",
+  "@cefrLevelUpBody": {
+    "placeholders": {
+      "level": {
+        "type": "String"
+      }
+    }
+  },
+  "cefrLevelUpCaption": "पिछला स्तर बदलने पर भी आपकी प्रगति और खेल इतिहास सुरक्षित रहेगा।",
+  "cefrLevelUpTryNext": "अगला स्तर आज़माएँ",
+  "cefrLevelUpLater": "बाद में"
 }

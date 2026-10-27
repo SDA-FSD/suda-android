@@ -487,5 +487,17 @@
   "rewardUnboxingNewCharacter": "Новый персонаж!",
   "rewardUnboxingYouGot": "Ты получил(а) {characterName}!",
   "rewardUnboxingSetAsProfile": "Сделать аватаром",
-  "rewardUnboxingViewCharacter": "Смотреть персонажа"
+  "rewardUnboxingViewCharacter": "Смотреть персонажа",
+  "cefrLevelUpTitle": "Готовы к следующему уровню?",
+  "cefrLevelUpBody": "Вы прошли все эпизоды уровня {level} в этой серии! Бросьте себе вызов на более высоком уровне.",
+  "@cefrLevelUpBody": {
+    "placeholders": {
+      "level": {
+        "type": "String"
+      }
+    }
+  },
+  "cefrLevelUpCaption": "Прогресс и история игры на предыдущем уровне сохранятся.",
+  "cefrLevelUpTryNext": "Попробовать следующий уровень",
+  "cefrLevelUpLater": "Позже"
 }

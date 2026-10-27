@@ -487,5 +487,17 @@
   "rewardUnboxingNewCharacter": "Yeni karakter!",
   "rewardUnboxingYouGot": "{characterName} kazandın!",
   "rewardUnboxingSetAsProfile": "Profil yap",
-  "rewardUnboxingViewCharacter": "Karakteri gör"
+  "rewardUnboxingViewCharacter": "Karakteri gör",
+  "cefrLevelUpTitle": "Bir sonraki seviyeye hazır mısın?",
+  "cefrLevelUpBody": "Bu serideki tüm {level} bölümlerini tamamladın! Kendini daha yüksek bir seviyede dene.",
+  "@cefrLevelUpBody": {
+    "placeholders": {
+      "level": {
+        "type": "String"
+      }
+    }
+  },
+  "cefrLevelUpCaption": "Seviye değişse de önceki seviyedeki ilerlemen ve oyun geçmişin korunur.",
+  "cefrLevelUpTryNext": "Sonraki seviyeyi dene",
+  "cefrLevelUpLater": "Daha sonra"
 }

@@ -487,5 +487,17 @@
   "rewardUnboxingNewCharacter": "Bagong character!",
   "rewardUnboxingYouGot": "Nakuha mo si {characterName}!",
   "rewardUnboxingSetAsProfile": "Itakda bilang Profile",
-  "rewardUnboxingViewCharacter": "Tingnan ang Character"
+  "rewardUnboxingViewCharacter": "Tingnan ang Character",
+  "cefrLevelUpTitle": "Handa ka na ba sa susunod na level?",
+  "cefrLevelUpBody": "Natapos mo na ang lahat ng episode na {level} sa seryeng ito! Hamunin ang sarili mo sa mas mataas na level.",
+  "@cefrLevelUpBody": {
+    "placeholders": {
+      "level": {
+        "type": "String"
+      }
+    }
+  },
+  "cefrLevelUpCaption": "Mananatili ang progress at play history mo sa nakaraang level.",
+  "cefrLevelUpTryNext": "Subukan ang susunod na level",
+  "cefrLevelUpLater": "Mamaya na"
 }

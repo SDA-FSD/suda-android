@@ -487,5 +487,17 @@
   "rewardUnboxingNewCharacter": "Nieuw personage!",
   "rewardUnboxingYouGot": "Je hebt {characterName} gekregen!",
   "rewardUnboxingSetAsProfile": "Als profiel instellen",
-  "rewardUnboxingViewCharacter": "Personage bekijken"
+  "rewardUnboxingViewCharacter": "Personage bekijken",
+  "cefrLevelUpTitle": "Klaar voor het volgende niveau?",
+  "cefrLevelUpBody": "Je hebt alle {level}-afleveringen in deze serie voltooid! Daag jezelf uit op een hoger niveau.",
+  "@cefrLevelUpBody": {
+    "placeholders": {
+      "level": {
+        "type": "String"
+      }
+    }
+  },
+  "cefrLevelUpCaption": "Je voortgang en speelgeschiedenis van het vorige niveau blijven bewaard.",
+  "cefrLevelUpTryNext": "Probeer het volgende niveau",
+  "cefrLevelUpLater": "Misschien later"
 }

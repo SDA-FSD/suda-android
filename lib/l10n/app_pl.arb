@@ -487,5 +487,17 @@
   "rewardUnboxingNewCharacter": "Nowa postać!",
   "rewardUnboxingYouGot": "Zdobywasz {characterName}!",
   "rewardUnboxingSetAsProfile": "Ustaw jako profil",
-  "rewardUnboxingViewCharacter": "Zobacz postać"
+  "rewardUnboxingViewCharacter": "Zobacz postać",
+  "cefrLevelUpTitle": "Gotowy na następny poziom?",
+  "cefrLevelUpBody": "Ukończyłeś wszystkie odcinki {level} w tej serii! Rzuć sobie wyzwanie na wyższym poziomie.",
+  "@cefrLevelUpBody": {
+    "placeholders": {
+      "level": {
+        "type": "String"
+      }
+    }
+  },
+  "cefrLevelUpCaption": "Postępy i historia gry z poprzedniego poziomu zostaną zachowane.",
+  "cefrLevelUpTryNext": "Spróbuj następnego poziomu",
+  "cefrLevelUpLater": "Może później"
 }

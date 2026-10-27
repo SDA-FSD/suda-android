@@ -564,5 +564,17 @@
     }
   },
   "rewardUnboxingSetAsProfile": "Set as Profile",
-  "rewardUnboxingViewCharacter": "View Character"
+  "rewardUnboxingViewCharacter": "View Character",
+  "cefrLevelUpTitle": "Ready for the next level?",
+  "cefrLevelUpBody": "You've completed all the {level} episodes in this series! Challenge yourself at a higher level.",
+  "@cefrLevelUpBody": {
+    "placeholders": {
+      "level": {
+        "type": "String"
+      }
+    }
+  },
+  "cefrLevelUpCaption": "Your progress and play history at the previous level will be kept.",
+  "cefrLevelUpTryNext": "Try the Next Level",
+  "cefrLevelUpLater": "Maybe Later"
 }

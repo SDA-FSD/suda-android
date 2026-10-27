@@ -1330,4 +1330,22 @@ class AppLocalizationsMs extends AppLocalizations {
 
   @override
   String get rewardUnboxingViewCharacter => 'Lihat watak';
+
+  @override
+  String get cefrLevelUpTitle => 'Bersedia untuk tahap seterusnya?';
+
+  @override
+  String cefrLevelUpBody(String level) {
+    return 'Anda telah menyelesaikan semua episod $level dalam siri ini! Cabar diri anda pada tahap yang lebih tinggi.';
+  }
+
+  @override
+  String get cefrLevelUpCaption =>
+      'Kemajuan dan sejarah permainan pada tahap sebelumnya akan dikekalkan.';
+
+  @override
+  String get cefrLevelUpTryNext => 'Cuba tahap seterusnya';
+
+  @override
+  String get cefrLevelUpLater => 'Mungkin kemudian';
 }

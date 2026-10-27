@@ -487,5 +487,17 @@
   "rewardUnboxingNewCharacter": "新角色！",
   "rewardUnboxingYouGot": "获得了{characterName}！",
   "rewardUnboxingSetAsProfile": "设为头像",
-  "rewardUnboxingViewCharacter": "查看角色"
+  "rewardUnboxingViewCharacter": "查看角色",
+  "cefrLevelUpTitle": "准备好进入下一级了吗？",
+  "cefrLevelUpBody": "你已完成本系列所有{level}剧集！来挑战更高难度吧。",
+  "@cefrLevelUpBody": {
+    "placeholders": {
+      "level": {
+        "type": "String"
+      }
+    }
+  },
+  "cefrLevelUpCaption": "即使更换难度，之前难度的进度和游玩记录也会保留。",
+  "cefrLevelUpTryNext": "挑战下一级",
+  "cefrLevelUpLater": "以后再说"
 }

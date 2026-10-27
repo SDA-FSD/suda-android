@@ -487,5 +487,17 @@
   "rewardUnboxingNewCharacter": "ตัวละครใหม่!",
   "rewardUnboxingYouGot": "คุณได้ {characterName}!",
   "rewardUnboxingSetAsProfile": "ตั้งเป็นโปรไฟล์",
-  "rewardUnboxingViewCharacter": "ดูตัวละคร"
+  "rewardUnboxingViewCharacter": "ดูตัวละคร",
+  "cefrLevelUpTitle": "พร้อมไปต่อระดับถัดไปหรือยัง?",
+  "cefrLevelUpBody": "คุณเล่นตอนระดับ {level} ในซีรีส์นี้ครบแล้ว! ลองท้าทายตัวเองในระดับที่สูงขึ้นดูสิ",
+  "@cefrLevelUpBody": {
+    "placeholders": {
+      "level": {
+        "type": "String"
+      }
+    }
+  },
+  "cefrLevelUpCaption": "ความคืบหน้าและประวัติการเล่นในระดับก่อนหน้าจะยังคงอยู่",
+  "cefrLevelUpTryNext": "ลองระดับถัดไป",
+  "cefrLevelUpLater": "ไว้ทีหลัง"
 }

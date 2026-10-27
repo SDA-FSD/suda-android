@@ -487,5 +487,17 @@
   "rewardUnboxingNewCharacter": "Nhân vật mới!",
   "rewardUnboxingYouGot": "Bạn đã nhận được {characterName}!",
   "rewardUnboxingSetAsProfile": "Đặt làm ảnh đại diện",
-  "rewardUnboxingViewCharacter": "Xem nhân vật"
+  "rewardUnboxingViewCharacter": "Xem nhân vật",
+  "cefrLevelUpTitle": "Sẵn sàng cho cấp độ tiếp theo?",
+  "cefrLevelUpBody": "Bạn đã hoàn thành mọi tập {level} trong series này! Hãy thử thách bản thân ở cấp độ cao hơn.",
+  "@cefrLevelUpBody": {
+    "placeholders": {
+      "level": {
+        "type": "String"
+      }
+    }
+  },
+  "cefrLevelUpCaption": "Tiến độ và lịch sử chơi ở cấp độ trước sẽ được giữ nguyên.",
+  "cefrLevelUpTryNext": "Thử cấp độ tiếp theo",
+  "cefrLevelUpLater": "Để sau"
 }
