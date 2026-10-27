@@ -730,6 +730,14 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
+  String get achievementStarPerformer => '대화의 스타';
+
+  @override
+  String achievementStarPerformerHint(int count) {
+    return '에피소드 $count개에서 별 3개를 달성하세요.';
+  }
+
+  @override
   String get otherUserFriends => '친구';
 
   @override

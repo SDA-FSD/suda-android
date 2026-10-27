@@ -265,6 +265,8 @@
   "achievementPicturePerfectHint": "캐릭터 이미지를 {count}장 수집하세요.",
   "achievementCharacterCollector": "캐릭터 수집가",
   "achievementCharacterCollectorHint": "{count, plural, one{서로 다른 캐릭터를 {count}명 수집하세요.} other{서로 다른 캐릭터를 {count}명 수집하세요.}}",
+  "achievementStarPerformer": "대화의 스타",
+  "achievementStarPerformerHint": "에피소드 {count}개에서 별 3개를 달성하세요.",
   "otherUserFriends": "친구",
   "otherUserRequested": "요청 보냄",
   "otherUserAddFriend": "친구 추가",

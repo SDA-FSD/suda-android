@@ -265,6 +265,8 @@
   "achievementPicturePerfectHint": "Kumpulkan {count} gambar karakter.",
   "achievementCharacterCollector": "Kolektor Karakter",
   "achievementCharacterCollectorHint": "{count, plural, one{Kumpulkan {count} karakter yang berbeda.} other{Kumpulkan {count} karakter yang berbeda.}}",
+  "achievementStarPerformer": "Bintang Percakapan",
+  "achievementStarPerformerHint": "Raih 3 bintang di {count} episode.",
   "otherUserFriends": "Teman",
   "otherUserRequested": "Permintaan terkirim",
   "otherUserAddFriend": "Tambah teman",

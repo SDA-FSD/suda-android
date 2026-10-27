@@ -265,6 +265,8 @@
   "achievementPicturePerfectHint": "Kumpul {count} imej watak.",
   "achievementCharacterCollector": "Pengumpul Watak",
   "achievementCharacterCollectorHint": "{count, plural, one{Kumpul {count} watak berbeza.} other{Kumpul {count} watak berbeza.}}",
+  "achievementStarPerformer": "Bintang Perbualan",
+  "achievementStarPerformerHint": "Capai 3 bintang dalam {count} episod.",
   "otherUserFriends": "Rakan",
   "otherUserRequested": "Permintaan dihantar",
   "otherUserAddFriend": "Tambah rakan",

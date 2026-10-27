@@ -265,6 +265,8 @@
   "achievementPicturePerfectHint": "Соберите {count} изображений персонажей.",
   "achievementCharacterCollector": "Коллекционер персонажей",
   "achievementCharacterCollectorHint": "{count, plural, one{Соберите {count} другого персонажа.} other{Соберите {count} разных персонажей.}}",
+  "achievementStarPerformer": "Звезда разговора",
+  "achievementStarPerformerHint": "Получите 3 звезды в {count} эпизодах.",
   "otherUserFriends": "Друзья",
   "otherUserRequested": "Запрос отправлен",
   "otherUserAddFriend": "Добавить в друзья",

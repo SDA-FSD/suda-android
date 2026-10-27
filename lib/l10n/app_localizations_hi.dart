@@ -766,6 +766,14 @@ class AppLocalizationsHi extends AppLocalizations {
   }
 
   @override
+  String get achievementStarPerformer => 'बातचीत का सितारा';
+
+  @override
+  String achievementStarPerformerHint(int count) {
+    return '$count एपिसोड में 3 सितारे हासिल करें।';
+  }
+
+  @override
   String get otherUserFriends => 'मित्र';
 
   @override

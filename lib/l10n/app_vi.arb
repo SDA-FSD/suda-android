@@ -265,6 +265,8 @@
   "achievementPicturePerfectHint": "Sưu tầm {count} ảnh nhân vật.",
   "achievementCharacterCollector": "Nhà sưu tầm nhân vật",
   "achievementCharacterCollectorHint": "{count, plural, one{Sưu tầm {count} nhân vật khác nhau.} other{Sưu tầm {count} nhân vật khác nhau.}}",
+  "achievementStarPerformer": "Ngôi sao hội thoại",
+  "achievementStarPerformerHint": "Đạt 3 sao trong {count} tập.",
   "otherUserFriends": "Bạn bè",
   "otherUserRequested": "Đã gửi lời mời",
   "otherUserAddFriend": "Thêm bạn",

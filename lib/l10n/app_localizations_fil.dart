@@ -776,6 +776,14 @@ class AppLocalizationsFil extends AppLocalizations {
   }
 
   @override
+  String get achievementStarPerformer => 'Bituin ng Usapan';
+
+  @override
+  String achievementStarPerformerHint(int count) {
+    return 'Makamit ang 3 bituin sa $count episode.';
+  }
+
+  @override
   String get otherUserFriends => 'Mga Kaibigan';
 
   @override

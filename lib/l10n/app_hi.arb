@@ -265,6 +265,8 @@
   "achievementPicturePerfectHint": "{count} किरदार चित्र इकट्ठा करें।",
   "achievementCharacterCollector": "किरदार संग्रहकर्ता",
   "achievementCharacterCollectorHint": "{count, plural, one{{count} अलग किरदार इकट्ठा करें।} other{{count} अलग किरदार इकट्ठा करें।}}",
+  "achievementStarPerformer": "बातचीत का सितारा",
+  "achievementStarPerformerHint": "{count} एपिसोड में 3 सितारे हासिल करें।",
   "otherUserFriends": "मित्र",
   "otherUserRequested": "अनुरोध भेजा गया",
   "otherUserAddFriend": "मित्र जोड़ें",

@@ -265,6 +265,8 @@
   "achievementPicturePerfectHint": "Zbierz {count} obrazów postaci.",
   "achievementCharacterCollector": "Kolekcjoner postaci",
   "achievementCharacterCollectorHint": "{count, plural, one{Zbierz {count} inną postać.} other{Zbierz {count} różnych postaci.}}",
+  "achievementStarPerformer": "Gwiazda rozmowy",
+  "achievementStarPerformerHint": "Zdobądź 3 gwiazdki w {count} odcinkach.",
   "otherUserFriends": "Przyjaciele",
   "otherUserRequested": "Wysłano zaproszenie",
   "otherUserAddFriend": "Dodaj znajomego",

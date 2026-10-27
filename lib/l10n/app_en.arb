@@ -279,6 +279,8 @@
   "achievementPicturePerfectHint": "Collect {count} character images.",
   "achievementCharacterCollector": "Character Collector",
   "achievementCharacterCollectorHint": "{count, plural, one{Collect {count} different character.} other{Collect {count} different characters.}}",
+  "achievementStarPerformer": "Star Performer",
+  "achievementStarPerformerHint": "Achieve 3 stars in {count} episodes.",
   "@achievementSceneStealerHint": {
     "placeholders": { "count": { "type": "int" } }
   },
@@ -295,6 +297,9 @@
     "placeholders": { "count": { "type": "int" } }
   },
   "@achievementCharacterCollectorHint": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "@achievementStarPerformerHint": {
     "placeholders": { "count": { "type": "int" } }
   },
   "@achievementPocketGuideHint": {

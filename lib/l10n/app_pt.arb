@@ -265,6 +265,8 @@
   "achievementPicturePerfectHint": "Colecione {count} imagens de personagens.",
   "achievementCharacterCollector": "Colecionador de Personagens",
   "achievementCharacterCollectorHint": "{count, plural, one{Colecione {count} personagem diferente.} other{Colecione {count} personagens diferentes.}}",
+  "achievementStarPerformer": "Estrela da Conversa",
+  "achievementStarPerformerHint": "Alcance 3 estrelas em {count} episódios.",
   "otherUserFriends": "Amigos",
   "otherUserRequested": "Solicitação enviada",
   "otherUserAddFriend": "Adicionar amigo",

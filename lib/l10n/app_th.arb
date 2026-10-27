@@ -265,6 +265,8 @@
   "achievementPicturePerfectHint": "สะสมภาพตัวละคร {count} ภาพ",
   "achievementCharacterCollector": "นักสะสมตัวละคร",
   "achievementCharacterCollectorHint": "{count, plural, one{สะสมตัวละครที่แตกต่างกัน {count} ตัว} other{สะสมตัวละครที่แตกต่างกัน {count} ตัว}}",
+  "achievementStarPerformer": "ดาวแห่งการสนทนา",
+  "achievementStarPerformerHint": "ทำได้ 3 ดาวใน {count} ตอน",
   "otherUserFriends": "เพื่อน",
   "otherUserRequested": "ส่งคำขอแล้ว",
   "otherUserAddFriend": "เพิ่มเพื่อน",

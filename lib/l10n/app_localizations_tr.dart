@@ -762,6 +762,14 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
+  String get achievementStarPerformer => 'Sohbetin Yıldızı';
+
+  @override
+  String achievementStarPerformerHint(int count) {
+    return '$count bölümde 3 yıldız kazan.';
+  }
+
+  @override
   String get otherUserFriends => 'Arkadaşlar';
 
   @override

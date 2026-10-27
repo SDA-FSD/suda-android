@@ -754,6 +754,14 @@ class AppLocalizationsTh extends AppLocalizations {
   }
 
   @override
+  String get achievementStarPerformer => 'ดาวแห่งการสนทนา';
+
+  @override
+  String achievementStarPerformerHint(int count) {
+    return 'ทำได้ 3 ดาวใน $count ตอน';
+  }
+
+  @override
   String get otherUserFriends => 'เพื่อน';
 
   @override

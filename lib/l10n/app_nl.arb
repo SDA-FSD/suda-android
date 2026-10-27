@@ -265,6 +265,8 @@
   "achievementPicturePerfectHint": "Verzamel {count} personageafbeeldingen.",
   "achievementCharacterCollector": "Personageverzamelaar",
   "achievementCharacterCollectorHint": "{count, plural, one{Verzamel {count} ander personage.} other{Verzamel {count} verschillende personages.}}",
+  "achievementStarPerformer": "Ster van het gesprek",
+  "achievementStarPerformerHint": "Behaal 3 sterren in {count} afleveringen.",
   "otherUserFriends": "Vrienden",
   "otherUserRequested": "Verzoek verzonden",
   "otherUserAddFriend": "Vriend toevoegen",

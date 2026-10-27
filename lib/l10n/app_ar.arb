@@ -265,6 +265,8 @@
   "achievementPicturePerfectHint": "اجمع {count} صور شخصيات.",
   "achievementCharacterCollector": "جامع الشخصيات",
   "achievementCharacterCollectorHint": "{count, plural, one{اجمع {count} شخصية مختلفة.} other{اجمع {count} شخصيات مختلفة.}}",
+  "achievementStarPerformer": "نجم الحوار",
+  "achievementStarPerformerHint": "احقق 3 نجوم في {count} حلقات.",
   "otherUserFriends": "الأصدقاء",
   "otherUserRequested": "تم إرسال الطلب",
   "otherUserAddFriend": "إضافة صديق",

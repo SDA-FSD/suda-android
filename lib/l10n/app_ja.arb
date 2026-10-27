@@ -265,6 +265,8 @@
   "achievementPicturePerfectHint": "キャラクター画像を{count}枚集めましょう。",
   "achievementCharacterCollector": "キャラクターコレクター",
   "achievementCharacterCollectorHint": "{count, plural, one{異なるキャラクターを{count}人集めましょう。} other{異なるキャラクターを{count}人集めましょう。}}",
+  "achievementStarPerformer": "会話のスター",
+  "achievementStarPerformerHint": "{count}個のエピソードで星3つを達成しましょう。",
   "otherUserFriends": "フレンド",
   "otherUserRequested": "リクエスト済み",
   "otherUserAddFriend": "フレンド追加",

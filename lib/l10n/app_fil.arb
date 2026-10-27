@@ -265,6 +265,8 @@
   "achievementPicturePerfectHint": "Kolektahin ang {count} larawan ng character.",
   "achievementCharacterCollector": "Kolektor ng Character",
   "achievementCharacterCollectorHint": "{count, plural, one{Kolektahin ang {count} natatanging character.} other{Kolektahin ang {count} (na) natatanging character.}}",
+  "achievementStarPerformer": "Bituin ng Usapan",
+  "achievementStarPerformerHint": "Makamit ang 3 bituin sa {count} episode.",
   "otherUserFriends": "Mga Kaibigan",
   "otherUserRequested": "Naipadala ang request",
   "otherUserAddFriend": "Magdagdag ng kaibigan",

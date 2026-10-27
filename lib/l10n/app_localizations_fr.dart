@@ -774,6 +774,14 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get achievementStarPerformer => 'Star de la conversation';
+
+  @override
+  String achievementStarPerformerHint(int count) {
+    return 'Obtenez 3 étoiles dans $count épisodes.';
+  }
+
+  @override
   String get otherUserFriends => 'Amis';
 
   @override

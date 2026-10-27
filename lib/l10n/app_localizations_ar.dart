@@ -758,6 +758,14 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get achievementStarPerformer => 'نجم الحوار';
+
+  @override
+  String achievementStarPerformerHint(int count) {
+    return 'احقق 3 نجوم في $count حلقات.';
+  }
+
+  @override
   String get otherUserFriends => 'الأصدقاء';
 
   @override

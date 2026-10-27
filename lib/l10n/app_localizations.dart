@@ -1463,6 +1463,18 @@ abstract class AppLocalizations {
   /// **'{count, plural, one{Collect {count} different character.} other{Collect {count} different characters.}}'**
   String achievementCharacterCollectorHint(int count);
 
+  /// No description provided for @achievementStarPerformer.
+  ///
+  /// In en, this message translates to:
+  /// **'Star Performer'**
+  String get achievementStarPerformer;
+
+  /// No description provided for @achievementStarPerformerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Achieve 3 stars in {count} episodes.'**
+  String achievementStarPerformerHint(int count);
+
   /// No description provided for @otherUserFriends.
   ///
   /// In en, this message translates to:

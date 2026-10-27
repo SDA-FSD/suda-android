@@ -265,6 +265,8 @@
   "achievementPicturePerfectHint": "Sammle {count} Charakterbilder.",
   "achievementCharacterCollector": "Charaktersammler",
   "achievementCharacterCollectorHint": "{count, plural, one{Sammle {count} verschiedenen Charakter.} other{Sammle {count} verschiedene Charaktere.}}",
+  "achievementStarPerformer": "Gesprächsstar",
+  "achievementStarPerformerHint": "Erreiche 3 Sterne in {count} Episoden.",
   "otherUserFriends": "Freunde",
   "otherUserRequested": "Angefragt",
   "otherUserAddFriend": "Freund hinzufügen",

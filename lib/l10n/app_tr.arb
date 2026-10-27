@@ -265,6 +265,8 @@
   "achievementPicturePerfectHint": "{count} karakter görseli topla.",
   "achievementCharacterCollector": "Karakter Koleksiyoncusu",
   "achievementCharacterCollectorHint": "{count, plural, one{{count} farklı karakter topla.} other{{count} farklı karakter topla.}}",
+  "achievementStarPerformer": "Sohbetin Yıldızı",
+  "achievementStarPerformerHint": "{count} bölümde 3 yıldız kazan.",
   "otherUserFriends": "Arkadaşlar",
   "otherUserRequested": "İstek gönderildi",
   "otherUserAddFriend": "Arkadaş ekle",

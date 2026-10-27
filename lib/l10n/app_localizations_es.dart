@@ -770,6 +770,14 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get achievementStarPerformer => 'Estrella de la conversación';
+
+  @override
+  String achievementStarPerformerHint(int count) {
+    return 'Consigue 3 estrellas en $count episodios.';
+  }
+
+  @override
   String get otherUserFriends => 'Amigos';
 
   @override
@@ -2086,6 +2094,14 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
       one: 'Colecciona $count personaje diferente.',
     );
     return '$_temp0';
+  }
+
+  @override
+  String get achievementStarPerformer => 'Estrella de la conversación';
+
+  @override
+  String achievementStarPerformerHint(int count) {
+    return 'Consigue 3 estrellas en $count episodios.';
   }
 
   @override

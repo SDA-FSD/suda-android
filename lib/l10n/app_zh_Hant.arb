@@ -265,6 +265,8 @@
   "achievementPicturePerfectHint": "收集 {count} 張角色圖片。",
   "achievementCharacterCollector": "角色收藏家",
   "achievementCharacterCollectorHint": "{count, plural, one{收集 {count} 個不同角色。} other{收集 {count} 個不同角色。}}",
+  "achievementStarPerformer": "對話之星",
+  "achievementStarPerformerHint": "在 {count} 個劇集中獲得 3 顆星。",
   "otherUserFriends": "好友",
   "otherUserRequested": "已送出請求",
   "otherUserAddFriend": "新增好友",

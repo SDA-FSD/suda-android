@@ -721,6 +721,14 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get achievementStarPerformer => '对话之星';
+
+  @override
+  String achievementStarPerformerHint(int count) {
+    return '在 $count 个剧集中获得 3 颗星。';
+  }
+
+  @override
   String get otherUserFriends => '好友';
 
   @override
@@ -1956,6 +1964,14 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   }
 
   @override
+  String get achievementStarPerformer => '对话之星';
+
+  @override
+  String achievementStarPerformerHint(int count) {
+    return '在 $count 个剧集中获得 3 颗星。';
+  }
+
+  @override
   String get otherUserFriends => '好友';
 
   @override
@@ -3188,6 +3204,14 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
       one: '收集 $count 個不同角色。',
     );
     return '$_temp0';
+  }
+
+  @override
+  String get achievementStarPerformer => '對話之星';
+
+  @override
+  String achievementStarPerformerHint(int count) {
+    return '在 $count 個劇集中獲得 3 顆星。';
   }
 
   @override

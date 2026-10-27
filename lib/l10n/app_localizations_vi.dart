@@ -764,6 +764,14 @@ class AppLocalizationsVi extends AppLocalizations {
   }
 
   @override
+  String get achievementStarPerformer => 'Ngôi sao hội thoại';
+
+  @override
+  String achievementStarPerformerHint(int count) {
+    return 'Đạt 3 sao trong $count tập.';
+  }
+
+  @override
   String get otherUserFriends => 'Bạn bè';
 
   @override
