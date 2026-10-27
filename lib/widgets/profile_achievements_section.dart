@@ -130,6 +130,7 @@ int _activityBadgeLevel(ProfileAchievementItem item, {required bool showClaim}) 
 int _activityMaxLevel(String code) {
   return switch (code) {
     'TA' || 'SC' || 'ON' || 'SK' => 4,
+    'PP' => 3,
     _ => 2,
   };
 }
@@ -150,6 +151,7 @@ String _activityAsset(String code, int level) {
     'ON' => 'ON',
     'SB' => 'SB',
     'SK' => 'SK',
+    'PP' => 'PP',
     _ => 'PG',
   };
   return 'assets/images/achievement/$prefix-$level.png';
@@ -192,6 +194,12 @@ _AchievementCopy _activityCopy(
         title: l10n.achievementSocialButterfly,
         hint: l10n.achievementSocialButterflyHint(goal),
         asset: 'assets/images/achievement/SB-$badge.png',
+      );
+    case 'PP':
+      return _AchievementCopy(
+        title: l10n.achievementPicturePerfect,
+        hint: l10n.achievementPicturePerfectHint(goal),
+        asset: 'assets/images/achievement/PP-$badge.png',
       );
     case 'SK':
       return _AchievementCopy(

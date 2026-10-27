@@ -261,6 +261,8 @@
   "achievementSocialButterflyHint": "Magdagdag ng {count} iba pang user bilang kaibigan sa SUDA.",
   "achievementSecretKeeper": "Tagapag-ingat ng Lihim",
   "achievementSecretKeeperHint": "{count, plural, one{I-unlock ang {count} sikreto ng character.} other{I-unlock ang {count} (na) sikreto ng character.}}",
+  "achievementPicturePerfect": "Perpektong Album",
+  "achievementPicturePerfectHint": "Kolektahin ang {count} larawan ng character.",
   "otherUserFriends": "Mga Kaibigan",
   "otherUserRequested": "Naipadala ang request",
   "otherUserAddFriend": "Magdagdag ng kaibigan",

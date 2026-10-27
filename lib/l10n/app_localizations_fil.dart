@@ -754,6 +754,14 @@ class AppLocalizationsFil extends AppLocalizations {
   }
 
   @override
+  String get achievementPicturePerfect => 'Perpektong Album';
+
+  @override
+  String achievementPicturePerfectHint(int count) {
+    return 'Kolektahin ang $count larawan ng character.';
+  }
+
+  @override
   String get otherUserFriends => 'Mga Kaibigan';
 
   @override

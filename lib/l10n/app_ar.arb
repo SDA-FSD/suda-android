@@ -261,6 +261,8 @@
   "achievementSocialButterflyHint": "أضف {count} مستخدمين آخرين كأصدقاء على SUDA.",
   "achievementSecretKeeper": "حارس الأسرار",
   "achievementSecretKeeperHint": "{count, plural, one{افتح {count} سر شخصية.} other{افتح {count} من أسرار الشخصيات.}}",
+  "achievementPicturePerfect": "ألبوم مثالي",
+  "achievementPicturePerfectHint": "اجمع {count} صور شخصيات.",
   "otherUserFriends": "الأصدقاء",
   "otherUserRequested": "تم إرسال الطلب",
   "otherUserAddFriend": "إضافة صديق",

@@ -745,6 +745,14 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
+  String get achievementPicturePerfect => 'Идеальный альбом';
+
+  @override
+  String achievementPicturePerfectHint(int count) {
+    return 'Соберите $count изображений персонажей.';
+  }
+
+  @override
   String get otherUserFriends => 'Друзья';
 
   @override

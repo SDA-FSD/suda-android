@@ -1439,6 +1439,18 @@ abstract class AppLocalizations {
   /// **'{count, plural, one{Unlock {count} character secret.} other{Unlock {count} character secrets.}}'**
   String achievementSecretKeeperHint(int count);
 
+  /// No description provided for @achievementPicturePerfect.
+  ///
+  /// In en, this message translates to:
+  /// **'Picture Perfect'**
+  String get achievementPicturePerfect;
+
+  /// No description provided for @achievementPicturePerfectHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Collect {count} character images.'**
+  String achievementPicturePerfectHint(int count);
+
   /// No description provided for @otherUserFriends.
   ///
   /// In en, this message translates to:

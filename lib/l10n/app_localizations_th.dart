@@ -732,6 +732,14 @@ class AppLocalizationsTh extends AppLocalizations {
   }
 
   @override
+  String get achievementPicturePerfect => 'อัลบั้มสมบูรณ์';
+
+  @override
+  String achievementPicturePerfectHint(int count) {
+    return 'สะสมภาพตัวละคร $count ภาพ';
+  }
+
+  @override
   String get otherUserFriends => 'เพื่อน';
 
   @override

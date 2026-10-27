@@ -261,6 +261,8 @@
   "achievementSocialButterflyHint": "SUDA'da {count} başka kullanıcıyı arkadaş olarak ekle.",
   "achievementSecretKeeper": "Sır Tutucu",
   "achievementSecretKeeperHint": "{count, plural, one{{count} karakter sırrının kilidini aç.} other{{count} karakter sırrının kilidini aç.}}",
+  "achievementPicturePerfect": "Mükemmel Albüm",
+  "achievementPicturePerfectHint": "{count} karakter görseli topla.",
   "otherUserFriends": "Arkadaşlar",
   "otherUserRequested": "İstek gönderildi",
   "otherUserAddFriend": "Arkadaş ekle",

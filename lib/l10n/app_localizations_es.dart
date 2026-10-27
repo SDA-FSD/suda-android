@@ -748,6 +748,14 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get achievementPicturePerfect => 'Álbum perfecto';
+
+  @override
+  String achievementPicturePerfectHint(int count) {
+    return 'Colecciona $count imágenes de personajes.';
+  }
+
+  @override
   String get otherUserFriends => 'Amigos';
 
   @override
@@ -2042,6 +2050,14 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
       one: 'Desbloquea $count secreto de personaje.',
     );
     return '$_temp0';
+  }
+
+  @override
+  String get achievementPicturePerfect => 'Álbum perfecto';
+
+  @override
+  String achievementPicturePerfectHint(int count) {
+    return 'Colecciona $count imágenes de personajes.';
   }
 
   @override

@@ -750,6 +750,14 @@ class AppLocalizationsIt extends AppLocalizations {
   }
 
   @override
+  String get achievementPicturePerfect => 'Album perfetto';
+
+  @override
+  String achievementPicturePerfectHint(int count) {
+    return 'Colleziona $count immagini dei personaggi.';
+  }
+
+  @override
   String get otherUserFriends => 'Amici';
 
   @override

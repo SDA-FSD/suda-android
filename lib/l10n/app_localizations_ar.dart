@@ -736,6 +736,14 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get achievementPicturePerfect => 'ألبوم مثالي';
+
+  @override
+  String achievementPicturePerfectHint(int count) {
+    return 'اجمع $count صور شخصيات.';
+  }
+
+  @override
   String get otherUserFriends => 'الأصدقاء';
 
   @override

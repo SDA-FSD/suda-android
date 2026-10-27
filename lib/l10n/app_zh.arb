@@ -261,6 +261,8 @@
   "achievementSocialButterflyHint": "在 SUDA 上添加 {count} 位其他用户为好友。",
   "achievementSecretKeeper": "秘密守护者",
   "achievementSecretKeeperHint": "{count, plural, one{解锁 {count} 个角色秘密。} other{解锁 {count} 个角色秘密。}}",
+  "achievementPicturePerfect": "完美相册",
+  "achievementPicturePerfectHint": "收集 {count} 张角色图片。",
   "otherUserFriends": "好友",
   "otherUserRequested": "已发送请求",
   "otherUserAddFriend": "添加好友",

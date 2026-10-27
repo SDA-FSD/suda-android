@@ -746,6 +746,14 @@ class AppLocalizationsMs extends AppLocalizations {
   }
 
   @override
+  String get achievementPicturePerfect => 'Album Sempurna';
+
+  @override
+  String achievementPicturePerfectHint(int count) {
+    return 'Kumpul $count imej watak.';
+  }
+
+  @override
   String get otherUserFriends => 'Rakan';
 
   @override

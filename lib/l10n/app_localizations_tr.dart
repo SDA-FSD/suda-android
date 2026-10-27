@@ -740,6 +740,14 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
+  String get achievementPicturePerfect => 'Mükemmel Albüm';
+
+  @override
+  String achievementPicturePerfectHint(int count) {
+    return '$count karakter görseli topla.';
+  }
+
+  @override
   String get otherUserFriends => 'Arkadaşlar';
 
   @override

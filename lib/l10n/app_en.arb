@@ -275,6 +275,8 @@
   "achievementSocialButterflyHint": "Add {count} other users as friends on SUDA.",
   "achievementSecretKeeper": "Secret Keeper",
   "achievementSecretKeeperHint": "{count, plural, one{Unlock {count} character secret.} other{Unlock {count} character secrets.}}",
+  "achievementPicturePerfect": "Picture Perfect",
+  "achievementPicturePerfectHint": "Collect {count} character images.",
   "@achievementSceneStealerHint": {
     "placeholders": { "count": { "type": "int" } }
   },
@@ -285,6 +287,9 @@
     "placeholders": { "count": { "type": "int" } }
   },
   "@achievementSecretKeeperHint": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "@achievementPicturePerfectHint": {
     "placeholders": { "count": { "type": "int" } }
   },
   "@achievementPocketGuideHint": {

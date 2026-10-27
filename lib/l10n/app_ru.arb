@@ -261,6 +261,8 @@
   "achievementSocialButterflyHint": "Добавьте {count} других пользователей в друзья в SUDA.",
   "achievementSecretKeeper": "Хранитель секретов",
   "achievementSecretKeeperHint": "{count, plural, one{Откройте {count} секрет персонажа.} other{Откройте {count} секретов персонажей.}}",
+  "achievementPicturePerfect": "Идеальный альбом",
+  "achievementPicturePerfectHint": "Соберите {count} изображений персонажей.",
   "otherUserFriends": "Друзья",
   "otherUserRequested": "Запрос отправлен",
   "otherUserAddFriend": "Добавить в друзья",

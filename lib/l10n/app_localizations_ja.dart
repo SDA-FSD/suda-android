@@ -705,6 +705,14 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
+  String get achievementPicturePerfect => 'ぴったりアルバム';
+
+  @override
+  String achievementPicturePerfectHint(int count) {
+    return 'キャラクター画像を$count枚集めましょう。';
+  }
+
+  @override
   String get otherUserFriends => 'フレンド';
 
   @override

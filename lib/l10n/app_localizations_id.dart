@@ -745,6 +745,14 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
+  String get achievementPicturePerfect => 'Album Sempurna';
+
+  @override
+  String achievementPicturePerfectHint(int count) {
+    return 'Kumpulkan $count gambar karakter.';
+  }
+
+  @override
   String get otherUserFriends => 'Teman';
 
   @override

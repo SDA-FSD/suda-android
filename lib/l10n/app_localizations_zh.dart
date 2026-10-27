@@ -699,6 +699,14 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get achievementPicturePerfect => '完美相册';
+
+  @override
+  String achievementPicturePerfectHint(int count) {
+    return '收集 $count 张角色图片。';
+  }
+
+  @override
   String get otherUserFriends => '好友';
 
   @override
@@ -1912,6 +1920,14 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   }
 
   @override
+  String get achievementPicturePerfect => '完美相册';
+
+  @override
+  String achievementPicturePerfectHint(int count) {
+    return '收集 $count 张角色图片。';
+  }
+
+  @override
   String get otherUserFriends => '好友';
 
   @override
@@ -3122,6 +3138,14 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
       one: '解鎖 $count 個角色秘密。',
     );
     return '$_temp0';
+  }
+
+  @override
+  String get achievementPicturePerfect => '完美相簿';
+
+  @override
+  String achievementPicturePerfectHint(int count) {
+    return '收集 $count 張角色圖片。';
   }
 
   @override

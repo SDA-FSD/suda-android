@@ -261,6 +261,8 @@
   "achievementSocialButterflyHint": "Thêm {count} người dùng khác làm bạn trên SUDA.",
   "achievementSecretKeeper": "Người giữ bí mật",
   "achievementSecretKeeperHint": "{count, plural, one{Mở khóa {count} bí mật nhân vật.} other{Mở khóa {count} bí mật nhân vật.}}",
+  "achievementPicturePerfect": "Album hoàn hảo",
+  "achievementPicturePerfectHint": "Sưu tầm {count} ảnh nhân vật.",
   "otherUserFriends": "Bạn bè",
   "otherUserRequested": "Đã gửi lời mời",
   "otherUserAddFriend": "Thêm bạn",

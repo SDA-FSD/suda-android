@@ -744,6 +744,14 @@ class AppLocalizationsHi extends AppLocalizations {
   }
 
   @override
+  String get achievementPicturePerfect => 'परफेक्ट एल्बम';
+
+  @override
+  String achievementPicturePerfectHint(int count) {
+    return '$count किरदार चित्र इकट्ठा करें।';
+  }
+
+  @override
   String get otherUserFriends => 'मित्र';
 
   @override

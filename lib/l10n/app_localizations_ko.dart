@@ -708,6 +708,14 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
+  String get achievementPicturePerfect => '차곡차곡 앨범';
+
+  @override
+  String achievementPicturePerfectHint(int count) {
+    return '캐릭터 이미지를 $count장 수집하세요.';
+  }
+
+  @override
   String get otherUserFriends => '친구';
 
   @override

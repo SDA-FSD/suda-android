@@ -261,6 +261,8 @@
   "achievementSocialButterflyHint": "Adicione {count} outros usuários como amigos no SUDA.",
   "achievementSecretKeeper": "Guardião de Segredos",
   "achievementSecretKeeperHint": "{count, plural, one{Desbloqueie {count} dos segredo de personagens.} other{Desbloqueie {count} dos segredos de personagens.}}",
+  "achievementPicturePerfect": "Álbum Perfeito",
+  "achievementPicturePerfectHint": "Colecione {count} imagens de personagens.",
   "otherUserFriends": "Amigos",
   "otherUserRequested": "Solicitação enviada",
   "otherUserAddFriend": "Adicionar amigo",

@@ -742,6 +742,14 @@ class AppLocalizationsVi extends AppLocalizations {
   }
 
   @override
+  String get achievementPicturePerfect => 'Album hoàn hảo';
+
+  @override
+  String achievementPicturePerfectHint(int count) {
+    return 'Sưu tầm $count ảnh nhân vật.';
+  }
+
+  @override
   String get otherUserFriends => 'Bạn bè';
 
   @override
