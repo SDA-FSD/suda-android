@@ -756,6 +756,20 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get achievementCharacterCollector => 'Coleccionista de personajes';
+
+  @override
+  String achievementCharacterCollectorHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Colecciona $count personajes diferentes.',
+      one: 'Colecciona $count personaje diferente.',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get otherUserFriends => 'Amigos';
 
   @override
@@ -2058,6 +2072,20 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
   @override
   String achievementPicturePerfectHint(int count) {
     return 'Colecciona $count imágenes de personajes.';
+  }
+
+  @override
+  String get achievementCharacterCollector => 'Coleccionista de personajes';
+
+  @override
+  String achievementCharacterCollectorHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Colecciona $count personajes diferentes.',
+      one: 'Colecciona $count personaje diferente.',
+    );
+    return '$_temp0';
   }
 
   @override

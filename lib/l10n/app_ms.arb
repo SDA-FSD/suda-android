@@ -263,6 +263,8 @@
   "achievementSecretKeeperHint": "{count, plural, one{Buka {count} rahsia watak.} other{Buka {count} rahsia watak.}}",
   "achievementPicturePerfect": "Album Sempurna",
   "achievementPicturePerfectHint": "Kumpul {count} imej watak.",
+  "achievementCharacterCollector": "Pengumpul Watak",
+  "achievementCharacterCollectorHint": "{count, plural, one{Kumpul {count} watak berbeza.} other{Kumpul {count} watak berbeza.}}",
   "otherUserFriends": "Rakan",
   "otherUserRequested": "Permintaan dihantar",
   "otherUserAddFriend": "Tambah rakan",

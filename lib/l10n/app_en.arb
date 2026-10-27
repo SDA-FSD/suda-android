@@ -277,6 +277,8 @@
   "achievementSecretKeeperHint": "{count, plural, one{Unlock {count} character secret.} other{Unlock {count} character secrets.}}",
   "achievementPicturePerfect": "Picture Perfect",
   "achievementPicturePerfectHint": "Collect {count} character images.",
+  "achievementCharacterCollector": "Character Collector",
+  "achievementCharacterCollectorHint": "{count, plural, one{Collect {count} different character.} other{Collect {count} different characters.}}",
   "@achievementSceneStealerHint": {
     "placeholders": { "count": { "type": "int" } }
   },
@@ -290,6 +292,9 @@
     "placeholders": { "count": { "type": "int" } }
   },
   "@achievementPicturePerfectHint": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "@achievementCharacterCollectorHint": {
     "placeholders": { "count": { "type": "int" } }
   },
   "@achievementPocketGuideHint": {

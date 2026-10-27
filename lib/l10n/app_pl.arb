@@ -263,6 +263,8 @@
   "achievementSecretKeeperHint": "{count, plural, one{Odblokuj {count} sekret postaci.} other{Odblokuj {count} sekretów postaci.}}",
   "achievementPicturePerfect": "Idealny album",
   "achievementPicturePerfectHint": "Zbierz {count} obrazów postaci.",
+  "achievementCharacterCollector": "Kolekcjoner postaci",
+  "achievementCharacterCollectorHint": "{count, plural, one{Zbierz {count} inną postać.} other{Zbierz {count} różnych postaci.}}",
   "otherUserFriends": "Przyjaciele",
   "otherUserRequested": "Wysłano zaproszenie",
   "otherUserAddFriend": "Dodaj znajomego",

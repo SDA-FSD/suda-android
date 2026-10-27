@@ -263,6 +263,8 @@
   "achievementSecretKeeperHint": "{count, plural, one{キャラクターの秘密を{count}個解放してください。} other{キャラクターの秘密を{count}個解放してください。}}",
   "achievementPicturePerfect": "ぴったりアルバム",
   "achievementPicturePerfectHint": "キャラクター画像を{count}枚集めましょう。",
+  "achievementCharacterCollector": "キャラクターコレクター",
+  "achievementCharacterCollectorHint": "{count, plural, one{異なるキャラクターを{count}人集めましょう。} other{異なるキャラクターを{count}人集めましょう。}}",
   "otherUserFriends": "フレンド",
   "otherUserRequested": "リクエスト済み",
   "otherUserAddFriend": "フレンド追加",

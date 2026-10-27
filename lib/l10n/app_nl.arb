@@ -263,6 +263,8 @@
   "achievementSecretKeeperHint": "{count, plural, one{Ontgrendel {count} personagegeheim.} other{Ontgrendel {count} personagegeheimen.}}",
   "achievementPicturePerfect": "Perfect album",
   "achievementPicturePerfectHint": "Verzamel {count} personageafbeeldingen.",
+  "achievementCharacterCollector": "Personageverzamelaar",
+  "achievementCharacterCollectorHint": "{count, plural, one{Verzamel {count} ander personage.} other{Verzamel {count} verschillende personages.}}",
   "otherUserFriends": "Vrienden",
   "otherUserRequested": "Verzoek verzonden",
   "otherUserAddFriend": "Vriend toevoegen",

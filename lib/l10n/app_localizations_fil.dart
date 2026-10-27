@@ -762,6 +762,20 @@ class AppLocalizationsFil extends AppLocalizations {
   }
 
   @override
+  String get achievementCharacterCollector => 'Kolektor ng Character';
+
+  @override
+  String achievementCharacterCollectorHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Kolektahin ang $count (na) natatanging character.',
+      one: 'Kolektahin ang $count natatanging character.',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get otherUserFriends => 'Mga Kaibigan';
 
   @override

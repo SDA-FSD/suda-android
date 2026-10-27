@@ -263,6 +263,8 @@
   "achievementSecretKeeperHint": "{count, plural, one{Desbloqueie {count} dos segredo de personagens.} other{Desbloqueie {count} dos segredos de personagens.}}",
   "achievementPicturePerfect": "Álbum Perfeito",
   "achievementPicturePerfectHint": "Colecione {count} imagens de personagens.",
+  "achievementCharacterCollector": "Colecionador de Personagens",
+  "achievementCharacterCollectorHint": "{count, plural, one{Colecione {count} personagem diferente.} other{Colecione {count} personagens diferentes.}}",
   "otherUserFriends": "Amigos",
   "otherUserRequested": "Solicitação enviada",
   "otherUserAddFriend": "Adicionar amigo",

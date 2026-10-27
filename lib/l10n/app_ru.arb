@@ -263,6 +263,8 @@
   "achievementSecretKeeperHint": "{count, plural, one{Откройте {count} секрет персонажа.} other{Откройте {count} секретов персонажей.}}",
   "achievementPicturePerfect": "Идеальный альбом",
   "achievementPicturePerfectHint": "Соберите {count} изображений персонажей.",
+  "achievementCharacterCollector": "Коллекционер персонажей",
+  "achievementCharacterCollectorHint": "{count, plural, one{Соберите {count} другого персонажа.} other{Соберите {count} разных персонажей.}}",
   "otherUserFriends": "Друзья",
   "otherUserRequested": "Запрос отправлен",
   "otherUserAddFriend": "Добавить в друзья",

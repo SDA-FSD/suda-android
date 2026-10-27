@@ -263,6 +263,8 @@
   "achievementSecretKeeperHint": "{count, plural, one{解鎖 {count} 個角色秘密。} other{解鎖 {count} 個角色秘密。}}",
   "achievementPicturePerfect": "完美相簿",
   "achievementPicturePerfectHint": "收集 {count} 張角色圖片。",
+  "achievementCharacterCollector": "角色收藏家",
+  "achievementCharacterCollectorHint": "{count, plural, one{收集 {count} 個不同角色。} other{收集 {count} 個不同角色。}}",
   "otherUserFriends": "好友",
   "otherUserRequested": "已送出請求",
   "otherUserAddFriend": "新增好友",

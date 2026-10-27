@@ -750,6 +750,20 @@ class AppLocalizationsVi extends AppLocalizations {
   }
 
   @override
+  String get achievementCharacterCollector => 'Nhà sưu tầm nhân vật';
+
+  @override
+  String achievementCharacterCollectorHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Sưu tầm $count nhân vật khác nhau.',
+      one: 'Sưu tầm $count nhân vật khác nhau.',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get otherUserFriends => 'Bạn bè';
 
   @override

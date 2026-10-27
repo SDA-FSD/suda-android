@@ -1451,6 +1451,18 @@ abstract class AppLocalizations {
   /// **'Collect {count} character images.'**
   String achievementPicturePerfectHint(int count);
 
+  /// No description provided for @achievementCharacterCollector.
+  ///
+  /// In en, this message translates to:
+  /// **'Character Collector'**
+  String get achievementCharacterCollector;
+
+  /// No description provided for @achievementCharacterCollectorHint.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{Collect {count} different character.} other{Collect {count} different characters.}}'**
+  String achievementCharacterCollectorHint(int count);
+
   /// No description provided for @otherUserFriends.
   ///
   /// In en, this message translates to:

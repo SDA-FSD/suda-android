@@ -263,6 +263,8 @@
   "achievementSecretKeeperHint": "{count, plural, one{I-unlock ang {count} sikreto ng character.} other{I-unlock ang {count} (na) sikreto ng character.}}",
   "achievementPicturePerfect": "Perpektong Album",
   "achievementPicturePerfectHint": "Kolektahin ang {count} larawan ng character.",
+  "achievementCharacterCollector": "Kolektor ng Character",
+  "achievementCharacterCollectorHint": "{count, plural, one{Kolektahin ang {count} natatanging character.} other{Kolektahin ang {count} (na) natatanging character.}}",
   "otherUserFriends": "Mga Kaibigan",
   "otherUserRequested": "Naipadala ang request",
   "otherUserAddFriend": "Magdagdag ng kaibigan",

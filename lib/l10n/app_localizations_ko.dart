@@ -716,6 +716,20 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
+  String get achievementCharacterCollector => '캐릭터 수집가';
+
+  @override
+  String achievementCharacterCollectorHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '서로 다른 캐릭터를 $count명 수집하세요.',
+      one: '서로 다른 캐릭터를 $count명 수집하세요.',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get otherUserFriends => '친구';
 
   @override

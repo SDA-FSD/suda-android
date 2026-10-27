@@ -752,6 +752,20 @@ class AppLocalizationsHi extends AppLocalizations {
   }
 
   @override
+  String get achievementCharacterCollector => 'किरदार संग्रहकर्ता';
+
+  @override
+  String achievementCharacterCollectorHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count अलग किरदार इकट्ठा करें।',
+      one: '$count अलग किरदार इकट्ठा करें।',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get otherUserFriends => 'मित्र';
 
   @override

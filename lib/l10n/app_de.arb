@@ -263,6 +263,8 @@
   "achievementSecretKeeperHint": "{count, plural, one{Schalte {count} Charaktergeheimnis frei.} other{Schalte {count} Charaktergeheimnisse frei.}}",
   "achievementPicturePerfect": "Perfektes Album",
   "achievementPicturePerfectHint": "Sammle {count} Charakterbilder.",
+  "achievementCharacterCollector": "Charaktersammler",
+  "achievementCharacterCollectorHint": "{count, plural, one{Sammle {count} verschiedenen Charakter.} other{Sammle {count} verschiedene Charaktere.}}",
   "otherUserFriends": "Freunde",
   "otherUserRequested": "Angefragt",
   "otherUserAddFriend": "Freund hinzufügen",

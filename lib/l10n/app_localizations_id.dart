@@ -753,6 +753,20 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
+  String get achievementCharacterCollector => 'Kolektor Karakter';
+
+  @override
+  String achievementCharacterCollectorHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Kumpulkan $count karakter yang berbeda.',
+      one: 'Kumpulkan $count karakter yang berbeda.',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get otherUserFriends => 'Teman';
 
   @override

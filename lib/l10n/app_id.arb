@@ -263,6 +263,8 @@
   "achievementSecretKeeperHint": "{count, plural, one{Buka {count} rahasia karakter.} other{Buka {count} rahasia karakter.}}",
   "achievementPicturePerfect": "Album Sempurna",
   "achievementPicturePerfectHint": "Kumpulkan {count} gambar karakter.",
+  "achievementCharacterCollector": "Kolektor Karakter",
+  "achievementCharacterCollectorHint": "{count, plural, one{Kumpulkan {count} karakter yang berbeda.} other{Kumpulkan {count} karakter yang berbeda.}}",
   "otherUserFriends": "Teman",
   "otherUserRequested": "Permintaan terkirim",
   "otherUserAddFriend": "Tambah teman",

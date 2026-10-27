@@ -748,6 +748,20 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
+  String get achievementCharacterCollector => 'Karakter Koleksiyoncusu';
+
+  @override
+  String achievementCharacterCollectorHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count farklı karakter topla.',
+      one: '$count farklı karakter topla.',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get otherUserFriends => 'Arkadaşlar';
 
   @override

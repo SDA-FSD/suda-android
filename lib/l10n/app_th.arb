@@ -263,6 +263,8 @@
   "achievementSecretKeeperHint": "{count, plural, one{ปลดล็อกความลับของตัวละคร {count} อย่าง} other{ปลดล็อกความลับของตัวละคร {count} อย่าง}}",
   "achievementPicturePerfect": "อัลบั้มสมบูรณ์",
   "achievementPicturePerfectHint": "สะสมภาพตัวละคร {count} ภาพ",
+  "achievementCharacterCollector": "นักสะสมตัวละคร",
+  "achievementCharacterCollectorHint": "{count, plural, one{สะสมตัวละครที่แตกต่างกัน {count} ตัว} other{สะสมตัวละครที่แตกต่างกัน {count} ตัว}}",
   "otherUserFriends": "เพื่อน",
   "otherUserRequested": "ส่งคำขอแล้ว",
   "otherUserAddFriend": "เพิ่มเพื่อน",

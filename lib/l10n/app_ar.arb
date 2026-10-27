@@ -263,6 +263,8 @@
   "achievementSecretKeeperHint": "{count, plural, one{افتح {count} سر شخصية.} other{افتح {count} من أسرار الشخصيات.}}",
   "achievementPicturePerfect": "ألبوم مثالي",
   "achievementPicturePerfectHint": "اجمع {count} صور شخصيات.",
+  "achievementCharacterCollector": "جامع الشخصيات",
+  "achievementCharacterCollectorHint": "{count, plural, one{اجمع {count} شخصية مختلفة.} other{اجمع {count} شخصيات مختلفة.}}",
   "otherUserFriends": "الأصدقاء",
   "otherUserRequested": "تم إرسال الطلب",
   "otherUserAddFriend": "إضافة صديق",

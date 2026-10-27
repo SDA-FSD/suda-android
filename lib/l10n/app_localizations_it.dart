@@ -758,6 +758,20 @@ class AppLocalizationsIt extends AppLocalizations {
   }
 
   @override
+  String get achievementCharacterCollector => 'Collezionista di personaggi';
+
+  @override
+  String achievementCharacterCollectorHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Colleziona $count personaggi diversi.',
+      one: 'Colleziona $count personaggio diverso.',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get otherUserFriends => 'Amici';
 
   @override

@@ -707,6 +707,20 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get achievementCharacterCollector => '角色收藏家';
+
+  @override
+  String achievementCharacterCollectorHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '收集 $count 个不同角色。',
+      one: '收集 $count 个不同角色。',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get otherUserFriends => '好友';
 
   @override
@@ -1928,6 +1942,20 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   }
 
   @override
+  String get achievementCharacterCollector => '角色收藏家';
+
+  @override
+  String achievementCharacterCollectorHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '收集 $count 个不同角色。',
+      one: '收集 $count 个不同角色。',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get otherUserFriends => '好友';
 
   @override
@@ -3146,6 +3174,20 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   @override
   String achievementPicturePerfectHint(int count) {
     return '收集 $count 張角色圖片。';
+  }
+
+  @override
+  String get achievementCharacterCollector => '角色收藏家';
+
+  @override
+  String achievementCharacterCollectorHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '收集 $count 個不同角色。',
+      one: '收集 $count 個不同角色。',
+    );
+    return '$_temp0';
   }
 
   @override

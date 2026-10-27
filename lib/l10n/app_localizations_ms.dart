@@ -754,6 +754,20 @@ class AppLocalizationsMs extends AppLocalizations {
   }
 
   @override
+  String get achievementCharacterCollector => 'Pengumpul Watak';
+
+  @override
+  String achievementCharacterCollectorHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Kumpul $count watak berbeza.',
+      one: 'Kumpul $count watak berbeza.',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get otherUserFriends => 'Rakan';
 
   @override

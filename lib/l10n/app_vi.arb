@@ -263,6 +263,8 @@
   "achievementSecretKeeperHint": "{count, plural, one{Mở khóa {count} bí mật nhân vật.} other{Mở khóa {count} bí mật nhân vật.}}",
   "achievementPicturePerfect": "Album hoàn hảo",
   "achievementPicturePerfectHint": "Sưu tầm {count} ảnh nhân vật.",
+  "achievementCharacterCollector": "Nhà sưu tầm nhân vật",
+  "achievementCharacterCollectorHint": "{count, plural, one{Sưu tầm {count} nhân vật khác nhau.} other{Sưu tầm {count} nhân vật khác nhau.}}",
   "otherUserFriends": "Bạn bè",
   "otherUserRequested": "Đã gửi lời mời",
   "otherUserAddFriend": "Thêm bạn",

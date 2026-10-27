@@ -263,6 +263,8 @@
   "achievementSecretKeeperHint": "{count, plural, one{캐릭터의 비밀을 {count}개 해금하세요.} other{캐릭터의 비밀을 {count}개 해금하세요.}}",
   "achievementPicturePerfect": "차곡차곡 앨범",
   "achievementPicturePerfectHint": "캐릭터 이미지를 {count}장 수집하세요.",
+  "achievementCharacterCollector": "캐릭터 수집가",
+  "achievementCharacterCollectorHint": "{count, plural, one{서로 다른 캐릭터를 {count}명 수집하세요.} other{서로 다른 캐릭터를 {count}명 수집하세요.}}",
   "otherUserFriends": "친구",
   "otherUserRequested": "요청 보냄",
   "otherUserAddFriend": "친구 추가",
