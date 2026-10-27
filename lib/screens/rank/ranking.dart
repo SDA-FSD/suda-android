@@ -1,10 +1,11 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:ui' show ImageFilter;
+import 'dart:ui' show ImageFilter, lerpDouble;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:marquee/marquee.dart';
 import 'package:vibration/vibration.dart';
 
@@ -170,6 +171,27 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
   double _bumpRowHeight = 56;
   final ScrollController _scrollController = ScrollController();
   final GlobalKey _meRowKey = GlobalKey();
+
+  /// COLLECT 포디움 접힘. px 0 = 펼침, distance = 3칸 요약.
+  final _PodiumSnap _podiumSnap = _PodiumSnap();
+  bool _holdListScroll = false;
+  bool _absorbing = false;
+  bool _podiumReturning = false;
+  bool _podiumGateScheduled = false;
+  bool _podiumFlingHandled = false;
+  bool _flingQueued = false;
+  int _flingGen = 0;
+  double? _pendingFlingVelocity;
+  double _flingStartPx = 0;
+  double _flingVelocity = 0;
+  Simulation? _flingSim;
+  VoidCallback? _podiumReturnTick;
+  late final AnimationController _podiumFlingController;
+  late final AnimationController _podiumReturnController;
+  late final _PodiumCollapsePhysics _podiumPhysics = _PodiumCollapsePhysics(
+    snap: _podiumSnap,
+    onFling: _onPodiumFling,
+  );
   bool _loading = true;
   bool _loadFailed = false;
 
@@ -219,6 +241,11 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
       begin: 0.9,
       end: 1.0,
     ).animate(curved);
+    _podiumFlingController = AnimationController.unbounded(vsync: this);
+    _podiumReturnController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 280),
+    );
     _scrollController.addListener(_onScroll);
     if (widget.rankBumpPreview != null) {
       _installBumpPreview(widget.rankBumpPreview!);
@@ -263,6 +290,10 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
     _rankingRewardClaimAppearController.dispose();
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
+    _detachFlingListeners();
+    _podiumFlingController.dispose();
+    _podiumReturnController.dispose();
+    _podiumSnap.dispose();
     super.dispose();
   }
 
@@ -432,11 +463,7 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
     final totalPages = dto.totalPages;
     final snap = dto.snapshotMinute;
     if (totalPages <= 1) {
-      return (
-        entries: _pageZeroBoard(dto),
-        startRank: 1,
-        coversRankOne: true,
-      );
+      return (entries: _pageZeroBoard(dto), startRank: 1, coversRankOne: true);
     }
     final last = totalPages - 1;
     final first = totalPages <= 3 ? 0 : last - 2;
@@ -445,11 +472,7 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
     if (fetchFrom <= last) {
       final fetched = await Future.wait([
         for (var pageNum = fetchFrom; pageNum <= last; pageNum++)
-          _fetchRankPage(
-            pageNum,
-            snapshotMinute: snap,
-            noteMeta: false,
-          ),
+          _fetchRankPage(pageNum, snapshotMinute: snap, noteMeta: false),
       ]);
       if (fetched.any((page) => page == null)) return null;
       for (final page in fetched) {
@@ -523,7 +546,9 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
     );
   }
 
-  RankEntryDto? _entryAfterPersonalization(RankPersonalization? personalization) {
+  RankEntryDto? _entryAfterPersonalization(
+    RankPersonalization? personalization,
+  ) {
     final me = _serverMyEntry;
     if (me == null || personalization == null) return me;
     return me.copyWith(
@@ -972,15 +997,276 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
   List<RankEntryDto> _buildDisplayRows() => _layoutBoard();
 
   void _jumpToListTop() {
+    _stopPodiumMotion();
+    _holdListScroll = false;
+    _podiumSnap.listWasScrolled = false;
+    _podiumSnap.px = 0;
     if (_scrollController.hasClients) {
       _scrollController.jumpTo(0);
     }
   }
 
   void _onScroll() {
+    if (_absorbing) return;
+    _absorbListIntoPodium();
+    _noteListScrolled();
     _updateMeRowSlot();
     _requestLoadMoreIfNeeded();
     _requestLoadPreviousIfNeeded();
+  }
+
+  /// 접힘이 끝나기 전에 목록 오프셋만 늘어나면, 그 거리를 포디움으로 되돌린다.
+  void _absorbListIntoPodium() {
+    if (_holdListScroll || !_podiumSnap.canCollapse) return;
+    if (_podiumReturning || _podiumFlingController.isAnimating) return;
+    if (!_scrollController.hasClients) return;
+    final pos = _scrollController.position;
+    final room = _podiumSnap.distance - _podiumSnap.px;
+    if (room <= 0.5 || pos.pixels <= 0.5) return;
+    final consume = math.min(pos.pixels, room);
+    _absorbing = true;
+    _podiumSnap.px += consume;
+    // 이번 프레임 layout은 이미 pixels 변경으로 dirty. 값만 고친다.
+    pos.correctPixels(pos.pixels - consume);
+    _absorbing = false;
+  }
+
+  void _noteListScrolled() {
+    if (!_scrollController.hasClients) return;
+    final distance = _podiumSnap.distance;
+    if (distance <= 0) return;
+    if (_scrollController.position.pixels > 8 &&
+        _podiumSnap.px >= distance - 1) {
+      _podiumSnap.listWasScrolled = true;
+    }
+  }
+
+  void _syncPodiumGate() {
+    if (!mounted || _isAnnouncePhase || !_scrollController.hasClients) return;
+    final overflow =
+        _scrollController.position.maxScrollExtent + _podiumSnap.px;
+    final next = overflow > 8 && _podiumSnap.distance > 0;
+    if (next == _podiumSnap.canCollapse) return;
+    _podiumSnap.canCollapse = next;
+    if (!next) {
+      _stopPodiumMotion();
+      _podiumSnap.listWasScrolled = false;
+      _podiumSnap.px = 0;
+    }
+    setState(() {});
+  }
+
+  void _schedulePodiumGate() {
+    if (_podiumGateScheduled) return;
+    _podiumGateScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _podiumGateScheduled = false;
+      _syncPodiumGate();
+    });
+  }
+
+  void _onPodiumFling(double velocity) {
+    _pendingFlingVelocity = velocity;
+    if (_flingQueued) return;
+    _flingQueued = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _flingQueued = false;
+      final pending = _pendingFlingVelocity;
+      _pendingFlingVelocity = null;
+      if (!mounted || pending == null) return;
+      _startPodiumFling(pending);
+    });
+  }
+
+  void _startPodiumFling(double velocity) {
+    _flingGen++;
+    if (!_podiumSnap.canCollapse || _podiumSnap.distance <= 0) return;
+    final tolerance = Tolerance.defaultTolerance.velocity;
+    if (velocity.abs() < tolerance) return;
+    if (velocity > 0 && _podiumSnap.px >= _podiumSnap.distance - 0.5) return;
+    if (velocity < 0 && _podiumSnap.px <= 0.5) return;
+    _stopPodiumReturn();
+    _detachFlingListeners();
+    _podiumFlingController.stop();
+    _flingStartPx = _podiumSnap.px;
+    _flingVelocity = velocity;
+    _podiumFlingHandled = false;
+    _flingSim = ClampingScrollSimulation(
+      position: 0,
+      velocity: velocity,
+      tolerance: Tolerance.defaultTolerance,
+    );
+    _podiumFlingController
+      ..addListener(_onFlingTick)
+      ..addStatusListener(_onFlingStatus)
+      ..animateWith(_flingSim!);
+  }
+
+  void _onFlingTick() {
+    if (_podiumFlingHandled || !mounted) return;
+    final traveled = _podiumFlingController.value;
+    final distance = _podiumSnap.distance;
+    if (_flingVelocity > 0) {
+      final room = distance - _flingStartPx;
+      if (traveled < room) {
+        _podiumSnap.px = _flingStartPx + traveled;
+        return;
+      }
+      _podiumFlingHandled = true;
+      final sim = _flingSim;
+      final gen = _flingGen;
+      scheduleMicrotask(() {
+        if (!mounted || gen != _flingGen) return;
+        _stopFlingController();
+        _podiumSnap.px = _podiumSnap.distance;
+        _handoffListFling(sim, room);
+      });
+      return;
+    }
+    final next = _flingStartPx + traveled;
+    if (next > 0) {
+      _podiumSnap.px = next;
+      return;
+    }
+    _podiumFlingHandled = true;
+    final gen = _flingGen;
+    scheduleMicrotask(() {
+      if (!mounted || gen != _flingGen) return;
+      _stopFlingController();
+      _podiumSnap.px = 0;
+    });
+  }
+
+  void _onFlingStatus(AnimationStatus status) {
+    if (status != AnimationStatus.completed &&
+        status != AnimationStatus.dismissed) {
+      return;
+    }
+    _detachFlingListeners();
+  }
+
+  void _handoffListFling(Simulation? sim, double room) {
+    if (sim == null || !_scrollController.hasClients) return;
+    final pos = _scrollController.position;
+    if (pos is! ScrollPositionWithSingleContext) return;
+    final tCross = _simulationTimeAt(sim, room, positive: true);
+    final remainV = sim.dx(tCross);
+    if (remainV > pos.physics.toleranceFor(pos).velocity) {
+      pos.goBallistic(remainV);
+    }
+  }
+
+  double _simulationTimeAt(
+    Simulation sim,
+    double target, {
+    required bool positive,
+  }) {
+    var lo = 0.0;
+    var hi = 6.0;
+    final end = sim.x(hi);
+    if (positive ? end < target : end > target) return hi;
+    for (var i = 0; i < 22; i++) {
+      final mid = (lo + hi) / 2;
+      final before = positive ? sim.x(mid) < target : sim.x(mid) > target;
+      if (before) {
+        lo = mid;
+      } else {
+        hi = mid;
+      }
+    }
+    return hi;
+  }
+
+  void _detachFlingListeners() {
+    _podiumFlingController
+      ..removeListener(_onFlingTick)
+      ..removeStatusListener(_onFlingStatus);
+  }
+
+  void _stopFlingController() {
+    _detachFlingListeners();
+    _podiumFlingController.stop();
+    _flingSim = null;
+  }
+
+  void _stopPodiumReturn() {
+    _podiumReturning = false;
+    final tick = _podiumReturnTick;
+    if (tick != null) {
+      _podiumReturnController.removeListener(tick);
+      _podiumReturnTick = null;
+    }
+    _podiumReturnController.stop();
+  }
+
+  void _stopPodiumMotion() {
+    _flingGen++;
+    _pendingFlingVelocity = null;
+    _podiumFlingHandled = true;
+    _stopFlingController();
+    _stopPodiumReturn();
+  }
+
+  /// 4위가 목록 맨 위에 다시 오면 포디움을 펼친다.
+  /// 이번 제스처로 높이를 이미 움직였으면 반발로 이어 펼치지 않는다.
+  void _maybeExpandPodium() {
+    final adjusted = _podiumSnap.userAdjusted;
+    _podiumSnap.userAdjusted = false;
+    if (adjusted || _holdListScroll) return;
+    if (_podiumReturning || _podiumFlingController.isAnimating) return;
+    if (_flingQueued || _pendingFlingVelocity != null) return;
+    if (!_podiumSnap.canCollapse || !_podiumSnap.listWasScrolled) return;
+    if (!_scrollController.hasClients) return;
+    if (_scrollController.position.pixels > 1) return;
+    if (_podiumSnap.px <= 0.5) {
+      _podiumSnap.listWasScrolled = false;
+      return;
+    }
+    _animatePodiumOpen();
+  }
+
+  void _animatePodiumOpen() {
+    if (_podiumReturning) return;
+    final start = _podiumSnap.px;
+    _podiumSnap.listWasScrolled = false;
+    if (start <= 0.5) {
+      _podiumSnap.px = 0;
+      return;
+    }
+    _podiumReturning = true;
+    _stopFlingController();
+    final tick = _podiumReturnTick;
+    if (tick != null) {
+      _podiumReturnController.removeListener(tick);
+    }
+    void onTick() {
+      final t = Curves.easeInOutCubic.transform(_podiumReturnController.value);
+      _podiumSnap.px = start * (1 - t);
+    }
+
+    _podiumReturnTick = onTick;
+    _podiumReturnController
+      ..stop()
+      ..reset()
+      ..addListener(onTick);
+    _podiumReturnController.forward().whenComplete(() {
+      if (identical(_podiumReturnTick, onTick)) {
+        _podiumReturnController.removeListener(onTick);
+        _podiumReturnTick = null;
+      }
+      _podiumReturning = false;
+      if (mounted) _podiumSnap.px = 0;
+    });
+  }
+
+  bool _onRankScrollNotification(ScrollNotification notification) {
+    if (notification is ScrollStartNotification &&
+        notification.dragDetails != null) {
+      _stopPodiumMotion();
+    } else if (notification is ScrollEndNotification) {
+      _maybeExpandPodium();
+    }
+    return false;
   }
 
   void _openOtherUserProfile(RankEntryDto? entry) {
@@ -1289,14 +1575,22 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
   void _scrollMyRowIntoCenter({required bool sweepFromTop}) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || !_scrollController.hasClients) {
+        _holdListScroll = false;
         if (mounted) setState(() => _jumpingToMe = false);
         return;
       }
+      if (_podiumSnap.canCollapse && _podiumSnap.distance > 0) {
+        _stopPodiumMotion();
+        _podiumSnap.px = _podiumSnap.distance;
+        _podiumSnap.listWasScrolled = true;
+      }
+      _holdListScroll = true;
       if (sweepFromTop) _scrollController.jumpTo(0);
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         if (!mounted) return;
         final ctx = _meRowKey.currentContext;
         if (ctx == null || !_scrollController.hasClients) {
+          _holdListScroll = false;
           setState(() => _jumpingToMe = false);
           return;
         }
@@ -1307,12 +1601,16 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
                 0.05,
                 0.95,
               );
-        await Scrollable.ensureVisible(
-          ctx,
-          alignment: align,
-          duration: Duration(milliseconds: sweepFromTop ? 750 : 450),
-          curve: Curves.easeOut,
-        );
+        try {
+          await Scrollable.ensureVisible(
+            ctx,
+            alignment: align,
+            duration: Duration(milliseconds: sweepFromTop ? 750 : 450),
+            curve: Curves.easeOut,
+          );
+        } finally {
+          _holdListScroll = false;
+        }
         if (!mounted) return;
         setState(() => _jumpingToMe = false);
         _updateMeRowSlot();
@@ -1397,18 +1695,18 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
                 onTap: _onStickyTap,
                 behavior: HitTestBehavior.opaque,
                 child: _RankMyEntrySticky(
-                entry: _myEntryKept!,
-                displayRank: _bumpAnimating && !_bumpListMotion
-                    ? _lerpInt(_bumpFromRank, _bumpToRank, _bumpT)
-                    : null,
-                displayLike: _bumpAnimating && !_bumpListMotion
-                    ? _lerpInt(_bumpFromLike, _bumpToLike, _bumpT)
-                    : null,
-                pulseValues: _bumpAnimating && !_bumpListMotion,
-                pulseT: _bumpT,
-                defaultProfile: _defaultProfile,
-                premiumBadge: _premiumBadge,
-              ),
+                  entry: _myEntryKept!,
+                  displayRank: _bumpAnimating && !_bumpListMotion
+                      ? _lerpInt(_bumpFromRank, _bumpToRank, _bumpT)
+                      : null,
+                  displayLike: _bumpAnimating && !_bumpListMotion
+                      ? _lerpInt(_bumpFromLike, _bumpToLike, _bumpT)
+                      : null,
+                  pulseValues: _bumpAnimating && !_bumpListMotion,
+                  pulseT: _bumpT,
+                  defaultProfile: _defaultProfile,
+                  premiumBadge: _premiumBadge,
+                ),
               ),
             )
           : null,
@@ -1753,15 +2051,27 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
                   ),
                   maxHeight: constraints.maxHeight,
                 );
+                final fullH =
+                    (_figmaPodiumH + _podiumDown) *
+                    _podiumScale(contentConstraints);
+                _podiumSnap.adoptDistance(fullH - _CompactPodiumBar.height);
+                _schedulePodiumGate();
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    AnimatedBuilder(
+                      animation: _podiumSnap,
+                      builder: (context, _) => _buildCollapsingPodium(
+                        context,
+                        contentConstraints,
+                        fullH,
+                      ),
+                    ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: side),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          _buildPodium(context, contentConstraints),
                           const SizedBox(height: 12),
                           _buildListHeader(context, contentConstraints),
                           const SizedBox(height: 4),
@@ -1769,76 +2079,82 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
                       ),
                     ),
                     Expanded(
-                      child: Builder(
-                        builder: (context) {
-                          final displayRows = _scrollRows();
-                          final anchor = _anchorIndex.clamp(
-                            0,
-                            displayRows.length,
-                          );
-                          final forwardCount = displayRows.length - anchor;
-                          return CustomScrollView(
-                            controller: _scrollController,
-                            center: _listCenterKey,
-                            cacheExtent: _jumpingToMe ? 1000000 : 250,
-                            clipBehavior: Clip.hardEdge,
-                            physics: const AlwaysScrollableScrollPhysics(),
-                            slivers: [
-                              SliverList(
-                                delegate: SliverChildBuilderDelegate(
-                                  (context, i) {
+                      child: NotificationListener<ScrollNotification>(
+                        onNotification: _onRankScrollNotification,
+                        child: Builder(
+                          builder: (context) {
+                            final displayRows = _scrollRows();
+                            final anchor = _anchorIndex.clamp(
+                              0,
+                              displayRows.length,
+                            );
+                            final forwardCount = displayRows.length - anchor;
+                            return CustomScrollView(
+                              controller: _scrollController,
+                              center: _listCenterKey,
+                              cacheExtent: _jumpingToMe ? 1000000 : 250,
+                              clipBehavior: Clip.hardEdge,
+                              physics: _podiumSnap.canCollapse
+                                  ? _podiumPhysics
+                                  : const AlwaysScrollableScrollPhysics(),
+                              slivers: [
+                                SliverList(
+                                  delegate: SliverChildBuilderDelegate((
+                                    context,
+                                    i,
+                                  ) {
                                     final index = anchor - 1 - i;
                                     return _buildRankScrollTile(
                                       displayRows[index],
                                       side,
                                     );
-                                  },
-                                  childCount: anchor,
+                                  }, childCount: anchor),
                                 ),
-                              ),
-                              SliverPadding(
-                                key: _listCenterKey,
-                                padding: const EdgeInsets.only(
-                                  bottom: GnbBar.contentHeight,
-                                ),
-                                sliver: SliverList(
-                                  delegate: SliverChildBuilderDelegate(
-                                    (context, i) {
-                                      final index = anchor + i;
-                                      if (index >= displayRows.length) {
-                                        return const Padding(
-                                          padding: EdgeInsets.symmetric(
-                                            vertical: 16,
-                                          ),
-                                          child: Center(
-                                            child: SizedBox(
-                                              width: 24,
-                                              height: 24,
-                                              child: CircularProgressIndicator(
-                                                strokeWidth: 2,
-                                                color: Colors.white,
+                                SliverPadding(
+                                  key: _listCenterKey,
+                                  padding: const EdgeInsets.only(
+                                    bottom: GnbBar.contentHeight,
+                                  ),
+                                  sliver: SliverList(
+                                    delegate: SliverChildBuilderDelegate(
+                                      (context, i) {
+                                        final index = anchor + i;
+                                        if (index >= displayRows.length) {
+                                          return const Padding(
+                                            padding: EdgeInsets.symmetric(
+                                              vertical: 16,
+                                            ),
+                                            child: Center(
+                                              child: SizedBox(
+                                                width: 24,
+                                                height: 24,
+                                                child:
+                                                    CircularProgressIndicator(
+                                                      strokeWidth: 2,
+                                                      color: Colors.white,
+                                                    ),
                                               ),
                                             ),
-                                          ),
+                                          );
+                                        }
+                                        if (_hasMorePages &&
+                                            index >= displayRows.length - 5) {
+                                          unawaited(_loadMore());
+                                        }
+                                        return _buildRankScrollTile(
+                                          displayRows[index],
+                                          side,
                                         );
-                                      }
-                                      if (_hasMorePages &&
-                                          index >= displayRows.length - 5) {
-                                        unawaited(_loadMore());
-                                      }
-                                      return _buildRankScrollTile(
-                                        displayRows[index],
-                                        side,
-                                      );
-                                    },
-                                    childCount:
-                                        forwardCount + (_loadingMore ? 1 : 0),
+                                      },
+                                      childCount:
+                                          forwardCount + (_loadingMore ? 1 : 0),
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
-                          );
-                        },
+                              ],
+                            );
+                          },
+                        ),
                       ),
                     ),
                   ],
@@ -1968,7 +2284,6 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
   }
 
   /// 포디움 스케일: 가로만 (contentWidth/440).
-  /// 1~10을 한 화면에 맞추려고 높이로 줄이지 않음 — 스크롤 허용.
   double _podiumScale(BoxConstraints bodyConstraints) {
     final maxW = bodyConstraints.maxWidth;
     if (!maxW.isFinite || maxW <= 0) return 1;
@@ -1976,6 +2291,63 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
   }
 
   static const _podiumDown = 22.0;
+
+  /// 스크롤 거리만큼 큰 포디움이 줄고, 3칸 요약이 그 자리를 채운다.
+  Widget _buildCollapsingPodium(
+    BuildContext context,
+    BoxConstraints contentConstraints,
+    double fullH,
+  ) {
+    final distance = _podiumSnap.distance;
+    final can = _podiumSnap.canCollapse && distance > 0;
+    final t = can ? (_podiumSnap.px / distance).clamp(0.0, 1.0) : 0.0;
+    final shownH = can
+        ? lerpDouble(fullH, _CompactPodiumBar.height, t)!
+        : fullH;
+    final fullOpacity = can ? (1 - t * 1.8).clamp(0.0, 1.0) : 1.0;
+    final compactOpacity = can ? ((t - 0.2) / 0.8).clamp(0.0, 1.0) : 0.0;
+    return SizedBox(
+      height: shownH,
+      width: double.infinity,
+      child: ClipRect(
+        child: Stack(
+          alignment: Alignment.topCenter,
+          clipBehavior: Clip.hardEdge,
+          children: [
+            IgnorePointer(
+              ignoring: fullOpacity < 0.5,
+              child: Opacity(
+                opacity: fullOpacity,
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: SizedBox(
+                    width: contentConstraints.maxWidth,
+                    child: _buildPodium(context, contentConstraints),
+                  ),
+                ),
+              ),
+            ),
+            if (can)
+              IgnorePointer(
+                ignoring: compactOpacity < 0.5,
+                child: Opacity(
+                  opacity: compactOpacity,
+                  child: _CompactPodiumBar(
+                    second: _entryAt(2),
+                    first: _entryAt(1),
+                    third: _entryAt(3),
+                    defaultProfile: _defaultProfile,
+                    premiumBadge: _premiumBadge,
+                    crownAsset: _podiumCrown,
+                    onOpen: _openOtherUserProfile,
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
 
   Widget _buildPodium(BuildContext context, BoxConstraints bodyConstraints) {
     final first = _entryAt(1);
@@ -2402,9 +2774,7 @@ class _RankListRow extends StatelessWidget {
     final displayName = (isEmpty || name.isEmpty) ? '—' : name;
     final isMe = entry?.isMe == true;
     final isPremium = !isEmpty && entry!.subscribedYn == 'Y';
-    final likeText = isEmpty
-        ? '—'
-        : '${likeOverride ?? entry!.weeklyLike}';
+    final likeText = isEmpty ? '—' : '${likeOverride ?? entry!.weeklyLike}';
     const nameStyle = TextStyle(
       fontFamily: 'ChironHeiHK',
       color: Colors.white,
@@ -2424,12 +2794,13 @@ class _RankListRow extends StatelessWidget {
               pulse: pulseValues,
               t: pulseT,
               text: '$rank',
-              style: (Theme.of(context).textTheme.titleSmall ??
-                      const TextStyle(fontSize: 14))
-                  .copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.w700,
-              ),
+              style:
+                  (Theme.of(context).textTheme.titleSmall ??
+                          const TextStyle(fontSize: 14))
+                      .copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                      ),
             ),
           ),
           const SizedBox(width: 10),
@@ -2518,11 +2889,7 @@ class _RankListRow extends StatelessWidget {
                     const SizedBox(width: 4),
                     Transform.translate(
                       offset: const Offset(0, 1),
-                      child: Image.asset(
-                        premiumBadge,
-                        width: 14,
-                        height: 14,
-                      ),
+                      child: Image.asset(premiumBadge, width: 14, height: 14),
                     ),
                   ],
                 ],
@@ -3047,5 +3414,419 @@ class _RenderSoftLightLayer extends RenderProxyBox {
     );
     context.paintChild(child!, offset);
     context.canvas.restore();
+  }
+}
+
+/// COLLECT 포디움 접힘 진행. [px] 변경만 포디움 높이를 다시 그린다.
+class _PodiumSnap extends ChangeNotifier {
+  double _px = 0;
+  double distance = 0;
+  bool canCollapse = false;
+  bool listWasScrolled = false;
+
+  /// 이번 포인터 제스처가 포디움 높이를 직접 움직였는지.
+  bool userAdjusted = false;
+
+  double get px => _px;
+
+  set px(double value) {
+    final maxPx = distance < 0 ? 0.0 : distance;
+    final next = value.clamp(0.0, maxPx);
+    if (next == _px) return;
+    _px = next;
+    _emit();
+  }
+
+  /// 레이아웃 중 호출. 알림 없이 거리만 맞춘다.
+  void adoptDistance(double next) {
+    final safe = next.isFinite ? math.max(0.0, next) : 0.0;
+    distance = safe;
+    if (_px > distance) _px = distance;
+  }
+
+  void _emit() {
+    if (SchedulerBinding.instance.schedulerPhase ==
+        SchedulerPhase.persistentCallbacks) {
+      if (_emitScheduled) return;
+      _emitScheduled = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _emitScheduled = false;
+        if (hasListeners) notifyListeners();
+      });
+      return;
+    }
+    notifyListeners();
+  }
+
+  bool _emitScheduled = false;
+}
+
+/// 타이머 아래를 2·1·3으로 나눈 최소 정보.
+class _CompactPodiumBar extends StatelessWidget {
+  const _CompactPodiumBar({
+    required this.second,
+    required this.first,
+    required this.third,
+    required this.defaultProfile,
+    required this.premiumBadge,
+    required this.crownAsset,
+    required this.onOpen,
+  });
+
+  final RankEntryDto? second;
+  final RankEntryDto? first;
+  final RankEntryDto? third;
+  final String defaultProfile;
+  final String premiumBadge;
+  final String crownAsset;
+  final void Function(RankEntryDto? entry) onOpen;
+
+  static const height = 104.0;
+  static const avatar = 40.0;
+  static const _avatarTop = 22.0;
+  static const _nameTop = 66.0;
+  static const _likeTop = 84.0;
+
+  /// `#411B7C` 79%.
+  static const background = Color(0xC9411B7C);
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: background,
+      child: SizedBox(
+        height: height,
+        width: double.infinity,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: _CompactPodiumSlot(
+                  place: 2,
+                  entry: second,
+                  winner: false,
+                  defaultProfile: defaultProfile,
+                  premiumBadge: premiumBadge,
+                  crownAsset: crownAsset,
+                  onOpen: onOpen,
+                ),
+              ),
+              Expanded(
+                child: _CompactPodiumSlot(
+                  place: 1,
+                  entry: first,
+                  winner: true,
+                  defaultProfile: defaultProfile,
+                  premiumBadge: premiumBadge,
+                  crownAsset: crownAsset,
+                  onOpen: onOpen,
+                ),
+              ),
+              Expanded(
+                child: _CompactPodiumSlot(
+                  place: 3,
+                  entry: third,
+                  winner: false,
+                  defaultProfile: defaultProfile,
+                  premiumBadge: premiumBadge,
+                  crownAsset: crownAsset,
+                  onOpen: onOpen,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CompactPodiumSlot extends StatelessWidget {
+  const _CompactPodiumSlot({
+    required this.place,
+    required this.entry,
+    required this.winner,
+    required this.defaultProfile,
+    required this.premiumBadge,
+    required this.crownAsset,
+    required this.onOpen,
+  });
+
+  final int place;
+  final RankEntryDto? entry;
+  final bool winner;
+  final String defaultProfile;
+  final String premiumBadge;
+  final String crownAsset;
+  final void Function(RankEntryDto? entry) onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final name = (entry?.name ?? '').trim();
+    final displayName = name.isEmpty ? '—' : name;
+    final isPremium = entry?.subscribedYn == 'Y';
+    final scale = _CompactPodiumBar.avatar / RankCrownAvatar.avatarOuter;
+    const nameStyle = TextStyle(
+      fontFamily: 'ChironHeiHK',
+      color: Colors.white,
+      fontWeight: FontWeight.w700,
+      fontVariations: [FontVariation('wght', 700)],
+      fontSize: 12,
+      height: 1.1,
+    );
+    const likeStyle = TextStyle(
+      fontFamily: 'ChironHeiHK',
+      color: Colors.white,
+      fontWeight: FontWeight.w400,
+      fontVariations: [FontVariation('wght', 400)],
+      fontSize: 12,
+      height: 1,
+    );
+    // 축소 링은 4위+ 리스트와 같다. 왕관·등급 이중 링은 쓰지 않는다.
+    final frame = isPremium
+        ? RankProfileFrameStyle.premium
+        : RankProfileFrameStyle.free;
+    final rankStyle = Theme.of(
+      context,
+    ).textTheme.headlineSmall?.copyWith(color: const Color(0x33FFFFFF));
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        final avatarLeft = (width - _CompactPodiumBar.avatar) / 2;
+        // 숫자 우하단 = 아바타 왼쪽 세로 가운데. 아바타보다 먼저 그려 뒤에 가린다.
+        final anchorX = avatarLeft;
+        final anchorY =
+            _CompactPodiumBar._avatarTop + _CompactPodiumBar.avatar / 2;
+        return SizedBox(
+          height: _CompactPodiumBar.height,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Positioned(
+                right: width - anchorX,
+                bottom: _CompactPodiumBar.height - anchorY,
+                child: Text(
+                  '$place',
+                  maxLines: 1,
+                  textAlign: TextAlign.right,
+                  style: rankStyle,
+                ),
+              ),
+              Positioned(
+                top: _CompactPodiumBar._avatarTop,
+                left: avatarLeft,
+                child: GestureDetector(
+                  onTap: () => onOpen(entry),
+                  behavior: HitTestBehavior.opaque,
+                  child: SizedBox(
+                    width: _CompactPodiumBar.avatar,
+                    height: _CompactPodiumBar.avatar,
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        RankProfileFrame(
+                          imgPath: entry == null
+                              ? null
+                              : UserImgPath.orFallback(entry!.imgPath),
+                          outer: _RankListRow._listAvatarOuter,
+                          borderWidth: _RankListRow._listBorderW,
+                          style: frame,
+                          defaultAsset: defaultProfile,
+                        ),
+                        if (winner)
+                          Positioned(
+                            left: RankCrownAvatar.crownLeftOnAvatar * scale,
+                            top: RankCrownAvatar.crownTopOnAvatar * scale,
+                            child: IgnorePointer(
+                              child: Image.asset(
+                                crownAsset,
+                                width: RankCrownAvatar.crownW * scale,
+                                height: RankCrownAvatar.crownH * scale,
+                                fit: BoxFit.fill,
+                                filterQuality: FilterQuality.high,
+                              ),
+                            ),
+                          ),
+                        if (entry != null)
+                          Positioned(
+                            right: -2,
+                            bottom: -2,
+                            child: RankPodiumLevelBadge(
+                              level: entry!.level,
+                              size: 16,
+                              fontSize: 9,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                top: _CompactPodiumBar._nameTop,
+                left: 2,
+                right: 2,
+                height: 16,
+                child: GestureDetector(
+                  onTap: () => onOpen(entry),
+                  behavior: HitTestBehavior.opaque,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          displayName,
+                          maxLines: 1,
+                          softWrap: false,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                          style: nameStyle,
+                        ),
+                      ),
+                      if (isPremium) ...[
+                        const SizedBox(width: 2),
+                        Image.asset(premiumBadge, width: 12, height: 12),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+              Positioned(
+                top: _CompactPodiumBar._likeTop,
+                left: 0,
+                right: 0,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Image.asset(
+                      'assets/images/like_at_result.png',
+                      width: 12,
+                      height: 12,
+                    ),
+                    const SizedBox(width: 2),
+                    Text(
+                      entry == null ? '—' : '${entry!.weeklyLike}',
+                      style: likeStyle,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// 목록 오프셋보다 먼저 포디움 높이가 스크롤 거리를 먹는다.
+class _PodiumCollapsePhysics extends ScrollPhysics {
+  const _PodiumCollapsePhysics({
+    required this.snap,
+    required this.onFling,
+    super.parent,
+  });
+
+  final _PodiumSnap snap;
+  final ValueChanged<double> onFling;
+
+  @override
+  _PodiumCollapsePhysics applyTo(ScrollPhysics? ancestor) {
+    return _PodiumCollapsePhysics(
+      snap: snap,
+      onFling: onFling,
+      parent: buildParent(ancestor),
+    );
+  }
+
+  @override
+  bool shouldAcceptUserOffset(ScrollMetrics position) {
+    if (snap.canCollapse && snap.distance > 0) return true;
+    return super.shouldAcceptUserOffset(position);
+  }
+
+  bool _atRankBoundary(ScrollMetrics position) =>
+      position.pixels <= position.minScrollExtent + 0.5;
+
+  @override
+  double applyPhysicsToUserOffset(ScrollMetrics position, double offset) {
+    if (!snap.canCollapse || snap.distance <= 0 || offset == 0) {
+      return super.applyPhysicsToUserOffset(position, offset);
+    }
+    var rest = offset;
+    // delta < 0 = 위로 스와이프(아래 순위를 더 보는 방향) → 목록 영역이 넓어진다.
+    // delta > 0 = 아래로 스와이프, 4위가 맨 위일 때만 포디움이 다시 커진다.
+    if (rest < 0 && snap.px < snap.distance) {
+      final consume = math.min(-rest, snap.distance - snap.px);
+      snap.px += consume;
+      snap.userAdjusted = true;
+      rest += consume;
+    } else if (rest > 0 && _atRankBoundary(position) && snap.px > 0) {
+      final consume = math.min(rest, snap.px);
+      snap.px -= consume;
+      snap.userAdjusted = true;
+      rest -= consume;
+    }
+    if (rest == 0) return 0;
+    return super.applyPhysicsToUserOffset(position, rest);
+  }
+
+  @override
+  double applyBoundaryConditions(ScrollMetrics position, double value) {
+    // 접힌 채 4위에 닿으면 위로 넘어가 고무줄이 되지 않게 막는다.
+    if (snap.canCollapse && snap.px > 0.5 && value < position.minScrollExtent) {
+      return value - position.minScrollExtent;
+    }
+    return super.applyBoundaryConditions(position, value);
+  }
+
+  @override
+  double adjustPositionForNewDimensions({
+    required ScrollMetrics oldPosition,
+    required ScrollMetrics newPosition,
+    required bool isScrolling,
+    required double velocity,
+  }) {
+    // 포디움 높이만 바뀌었을 때 오프셋을 되튀기지 않는다.
+    if (snap.canCollapse && _atRankBoundary(oldPosition)) {
+      return oldPosition.minScrollExtent;
+    }
+    return super.adjustPositionForNewDimensions(
+      oldPosition: oldPosition,
+      newPosition: newPosition,
+      isScrolling: isScrolling,
+      velocity: velocity,
+    );
+  }
+
+  @override
+  Simulation? createBallisticSimulation(
+    ScrollMetrics position,
+    double velocity,
+  ) {
+    if (snap.canCollapse && snap.distance > 0) {
+      final tolerance = toleranceFor(position);
+      final atTop = _atRankBoundary(position);
+      final collapsing = velocity > 0 && snap.px < snap.distance - 0.5;
+      final expanding = velocity < 0 && atTop && snap.px > 0.5;
+      if ((collapsing || expanding) && velocity.abs() >= tolerance.velocity) {
+        onFling(velocity);
+        return null;
+      }
+      // 접힌 상태의 4위 경계에는 스프링 반발을 두지 않는다.
+      if (snap.px > 0.5 && atTop && velocity <= 0) return null;
+      if (snap.px > 0.5 && velocity < 0) {
+        return ClampingScrollSimulation(
+          position: position.pixels,
+          velocity: velocity,
+          tolerance: tolerance,
+        );
+      }
+    }
+    return super.createBallisticSimulation(position, velocity);
   }
 }
