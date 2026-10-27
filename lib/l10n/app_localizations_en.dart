@@ -430,7 +430,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tutorialRoleplayMissions => 'Missions';
 
   @override
-  String get tutorialRoleplayMission1 => 'Greet the taxi driver';
+  String get tutorialRoleplayMission1 => 'Greet Betty';
 
   @override
   String get tutorialRoleplayMission2 => 'Tell the driver where you\'re going';
@@ -449,10 +449,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'Today, you\'re moving to a new neighborhood.\nSay hello to Betty, your taxi driver!';
 
   @override
-  String get tutorialRoleplayResultSubtitle => 'First conversation complete!';
+  String get tutorialRoleplayResultTitle => 'First conversation complete!';
 
   @override
-  String get tutorialRoleplayResultContinue => 'Keep It Going!';
+  String get tutorialRoleplayResultSubtitle =>
+      'Meet your new neighbors and practice English in everyday situations!';
+
+  @override
+  String get tutorialRoleplayResultContinue => 'View Your First Episode';
 
   @override
   String get tutorialRoleplayGreetingSuccess =>
@@ -481,8 +485,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Didn\'t catch that. Try saying \'Hello\' again.';
 
   @override
-  String get tutorialRoleplayHintGuide =>
-      'Not sure what to say?\nTap the light bulb for a hint.';
+  String get tutorialRoleplayHintGuide => 'Tap the hint.';
 
   @override
   String get tutorialRoleplayHintDestinationNative => '';
@@ -495,8 +498,12 @@ class AppLocalizationsEn extends AppLocalizations {
       'Try answering with this sentence.';
 
   @override
+  String get tutorialRoleplayArrivalNarration =>
+      'The taxi arrives at your destination.';
+
+  @override
   String get tutorialRoleplayFreeAnswerGuide =>
-      'Answer in your own words.\nNeed help? Tap the light bulb.';
+      'Answer in your own words.\nNeed help? Tap the hint.';
 
   @override
   String get actionConfirm => 'Confirm';
@@ -556,10 +563,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get roleplayAutoHintGuide => 'Turn on Auto Hint';
 
   @override
-  String get roleplayHintLabel => 'Hint';
+  String get roleplayHintLabel => 'You can say';
 
   @override
-  String get roleplayHintShowAnswer => 'Tap to see the English answer';
+  String get roleplayHintShowAnswer => 'See how to say it';
+
+  @override
+  String get roleplayHintEnglishLabel => 'Example in English';
 
   @override
   String get roleplayVoiceSpeed => 'Voice Speed';

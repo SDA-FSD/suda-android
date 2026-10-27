@@ -431,7 +431,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get tutorialRoleplayMissions => 'Misiones';
 
   @override
-  String get tutorialRoleplayMission1 => 'Saluda al taxista';
+  String get tutorialRoleplayMission1 => 'Saluda a Betty';
 
   @override
   String get tutorialRoleplayMission2 => 'Di a dónde vas';
@@ -451,11 +451,14 @@ class AppLocalizationsEs extends AppLocalizations {
       'Hoy te mudas a un barrio nuevo.\n¡Saluda a Betty, tu taxista!';
 
   @override
-  String get tutorialRoleplayResultSubtitle =>
-      '¡Primera conversación completa!';
+  String get tutorialRoleplayResultTitle => '¡Primera conversación completa!';
 
   @override
-  String get tutorialRoleplayResultContinue => '¡Sigamos!';
+  String get tutorialRoleplayResultSubtitle =>
+      'Conoce a tus nuevos vecinos y practica inglés en situaciones cotidianas.';
+
+  @override
+  String get tutorialRoleplayResultContinue => 'Ver tu primer episodio';
 
   @override
   String get tutorialRoleplayGreetingSuccess =>
@@ -485,8 +488,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'No te escuchamos. Intenta decir ‘Hello’ otra vez.';
 
   @override
-  String get tutorialRoleplayHintGuide =>
-      '¿No sabes qué decir?\nToca la bombilla para ver una pista.';
+  String get tutorialRoleplayHintGuide => 'Toca la pista.';
 
   @override
   String get tutorialRoleplayHintDestinationNative => 'A SUDA City, por favor.';
@@ -499,8 +501,11 @@ class AppLocalizationsEs extends AppLocalizations {
       'Intenta responder con esta frase.';
 
   @override
+  String get tutorialRoleplayArrivalNarration => 'El taxi llega a tu destino.';
+
+  @override
   String get tutorialRoleplayFreeAnswerGuide =>
-      'Responde con tus propias palabras.\n¿Necesitas ayuda? Toca la bombilla.';
+      'Responde con tus propias palabras.\n¿Necesitas ayuda? Toca la pista.';
 
   @override
   String get actionConfirm => 'Confirmar';
@@ -562,11 +567,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get roleplayAutoHintGuide => 'Activa las pistas automáticas';
 
   @override
-  String get roleplayHintLabel => 'Pista';
+  String get roleplayHintLabel => 'Puedes decir';
 
   @override
-  String get roleplayHintShowAnswer =>
-      'Toca para ver una respuesta sugerida en inglés';
+  String get roleplayHintShowAnswer => 'Ver cómo se dice en inglés';
+
+  @override
+  String get roleplayHintEnglishLabel => 'Ejemplo en inglés';
 
   @override
   String get roleplayVoiceSpeed => 'Velocidad de voz';
@@ -1776,7 +1783,7 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
   String get tutorialRoleplayMissions => 'Misiones';
 
   @override
-  String get tutorialRoleplayMission1 => 'Saluda al taxista';
+  String get tutorialRoleplayMission1 => 'Saluda a Betty';
 
   @override
   String get tutorialRoleplayMission2 => 'Di a dónde vas';
@@ -1796,11 +1803,14 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
       'Hoy te mudas a un barrio nuevo.\n¡Saluda a Betty, tu taxista!';
 
   @override
-  String get tutorialRoleplayResultSubtitle =>
-      '¡Primera conversación completa!';
+  String get tutorialRoleplayResultTitle => '¡Primera conversación completa!';
 
   @override
-  String get tutorialRoleplayResultContinue => '¡Sigamos!';
+  String get tutorialRoleplayResultSubtitle =>
+      'Conoce a tus nuevos vecinos y practica inglés en situaciones cotidianas.';
+
+  @override
+  String get tutorialRoleplayResultContinue => 'Ver tu primer episodio';
 
   @override
   String get tutorialRoleplayGreetingSuccess =>
@@ -1830,8 +1840,7 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
       'No te escuchamos. Intenta decir ‘Hello’ otra vez.';
 
   @override
-  String get tutorialRoleplayHintGuide =>
-      '¿No sabes qué decir?\nToca el foco para ver una pista.';
+  String get tutorialRoleplayHintGuide => 'Toca la pista.';
 
   @override
   String get tutorialRoleplayHintDestinationNative => 'A SUDA City, por favor.';
@@ -1844,8 +1853,11 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
       'Intenta responder con esta frase.';
 
   @override
+  String get tutorialRoleplayArrivalNarration => 'El taxi llega a tu destino.';
+
+  @override
   String get tutorialRoleplayFreeAnswerGuide =>
-      'Responde con tus propias palabras.\n¿Necesitas ayuda? Toca el foco.';
+      'Responde con tus propias palabras.\n¿Necesitas ayuda? Toca la pista.';
 
   @override
   String get actionConfirm => 'Confirmar';
@@ -1907,11 +1919,13 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
   String get roleplayAutoHintGuide => 'Activa las pistas automáticas';
 
   @override
-  String get roleplayHintLabel => 'Pista';
+  String get roleplayHintLabel => 'Puedes decir';
 
   @override
-  String get roleplayHintShowAnswer =>
-      'Toca para ver una respuesta sugerida en inglés';
+  String get roleplayHintShowAnswer => 'Ver cómo se dice en inglés';
+
+  @override
+  String get roleplayHintEnglishLabel => 'Ejemplo en inglés';
 
   @override
   String get roleplayVoiceSpeed => 'Velocidad de voz';

@@ -433,7 +433,7 @@ class AppLocalizationsMs extends AppLocalizations {
   String get tutorialRoleplayMissions => 'Misi';
 
   @override
-  String get tutorialRoleplayMission1 => 'Sapa pemandu teksi';
+  String get tutorialRoleplayMission1 => 'Sapa Betty';
 
   @override
   String get tutorialRoleplayMission2 => 'Beritahu ke mana anda pergi';
@@ -452,10 +452,14 @@ class AppLocalizationsMs extends AppLocalizations {
       'Hari ini anda berpindah ke kawasan baharu.\nUcapkan salam kepada Betty, pemandu teksi anda!';
 
   @override
-  String get tutorialRoleplayResultSubtitle => 'Perbualan pertama selesai!';
+  String get tutorialRoleplayResultTitle => 'Perbualan pertama selesai!';
 
   @override
-  String get tutorialRoleplayResultContinue => 'Jom teruskan!';
+  String get tutorialRoleplayResultSubtitle =>
+      'Kenali jiran baharu anda dan latih bahasa Inggeris dalam situasi harian!';
+
+  @override
+  String get tutorialRoleplayResultContinue => 'Lihat episod pertama';
 
   @override
   String get tutorialRoleplayGreetingSuccess =>
@@ -485,8 +489,7 @@ class AppLocalizationsMs extends AppLocalizations {
       'Tidak kedengaran. Cuba sebut ‘Hello’ sekali lagi.';
 
   @override
-  String get tutorialRoleplayHintGuide =>
-      'Tak pasti nak cakap apa?\nKetik mentol untuk lihat petunjuk.';
+  String get tutorialRoleplayHintGuide => 'Ketik petunjuk.';
 
   @override
   String get tutorialRoleplayHintDestinationNative => 'Ke SUDA City, tolong.';
@@ -499,8 +502,12 @@ class AppLocalizationsMs extends AppLocalizations {
   String get tutorialRoleplayHintAnswerGuide => 'Cuba jawab dengan ayat ini.';
 
   @override
+  String get tutorialRoleplayArrivalNarration =>
+      'Teksi tiba di destinasi anda.';
+
+  @override
   String get tutorialRoleplayFreeAnswerGuide =>
-      'Jawab dengan kata-kata sendiri.\nPerlukan bantuan? Ketik mentol.';
+      'Jawab dengan kata-kata sendiri.\nPerlukan bantuan? Ketik petunjuk.';
 
   @override
   String get actionConfirm => 'Sahkan';
@@ -561,11 +568,14 @@ class AppLocalizationsMs extends AppLocalizations {
   String get roleplayAutoHintGuide => 'Hidupkan petunjuk automatik';
 
   @override
-  String get roleplayHintLabel => 'Petunjuk';
+  String get roleplayHintLabel => 'Anda boleh kata';
 
   @override
   String get roleplayHintShowAnswer =>
-      'Ketik untuk melihat cadangan jawapan dalam bahasa Inggeris';
+      'Lihat cara mengatakannya dalam bahasa Inggeris';
+
+  @override
+  String get roleplayHintEnglishLabel => 'Contoh dalam bahasa Inggeris';
 
   @override
   String get roleplayVoiceSpeed => 'Kelajuan Pertuturan';

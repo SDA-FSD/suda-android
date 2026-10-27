@@ -239,7 +239,8 @@ class _FirstUsernameScreenState extends State<FirstUsernameScreen>
     return onboardingTitle(l10n.firstUsernameTitle, theme);
   }
 
-  /// 아바타 + 이름 필드(하단 정렬). 키보드 시 아바타만 48·좌측.
+  /// 아바타 + 이름 필드(하단 정렬). 키보드 시 아바타는 최대 48·좌측.
+  /// 남는 높이가 48보다 작으면 그 높이까지 줄인다.
   /// 전환 중에는 스테이지 아바타만 쓰므로 여기 아바타는 숨긴다.
   Widget _buildNameSection(
     TextTheme theme,
@@ -248,12 +249,24 @@ class _FirstUsernameScreenState extends State<FirstUsernameScreen>
   }) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final maxAvatarSize =
-            constraints.maxHeight - _fieldHeight - _avatarGap;
+        final maxH = constraints.maxHeight;
+        final maxAvatarSize = maxH - _fieldHeight - _avatarGap;
         final fullAvatarSize =
             maxAvatarSize.clamp(0.0, constraints.maxWidth * 0.5);
-        final avatarSize =
-            isKeyboardVisible ? _keyboardAvatarSize : fullAvatarSize;
+        final double avatarSize;
+        final double avatarGap;
+        if (isKeyboardVisible) {
+          if (maxAvatarSize >= 0) {
+            avatarGap = _avatarGap;
+            avatarSize = maxAvatarSize.clamp(0.0, _keyboardAvatarSize);
+          } else {
+            avatarSize = 0;
+            avatarGap = (maxH - _fieldHeight).clamp(0.0, _avatarGap);
+          }
+        } else {
+          avatarGap = _avatarGap;
+          avatarSize = fullAvatarSize;
+        }
 
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -288,7 +301,7 @@ class _FirstUsernameScreenState extends State<FirstUsernameScreen>
                         ),
                 ),
               ),
-              const SizedBox(height: _avatarGap),
+              SizedBox(height: avatarGap),
               _buildNameField(theme),
             ],
           ),
@@ -385,12 +398,7 @@ class _FirstUsernameScreenState extends State<FirstUsernameScreen>
   }
 
   Widget _buildBottomSection(AppLocalizations l10n, TextTheme theme) {
-    return Column(
-      children: [
-        const Expanded(child: SizedBox.shrink()),
-        Expanded(child: Center(child: _buildActions(l10n, theme))),
-        const Expanded(child: SizedBox.shrink()),
-      ],
-    );
+    // 하단 1/3 전체를 기준으로 가운데. 가운데 1/3만 주면 힌트+버튼이 약 13px 넘친다.
+    return Center(child: _buildActions(l10n, theme));
   }
 }

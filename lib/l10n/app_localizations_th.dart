@@ -422,7 +422,7 @@ class AppLocalizationsTh extends AppLocalizations {
   String get tutorialRoleplayMissions => 'ภารกิจ';
 
   @override
-  String get tutorialRoleplayMission1 => 'ทักทายคนขับแท็กซี่';
+  String get tutorialRoleplayMission1 => 'ทักทาย Betty';
 
   @override
   String get tutorialRoleplayMission2 => 'บอกว่าคุณจะไปที่ไหน';
@@ -441,10 +441,14 @@ class AppLocalizationsTh extends AppLocalizations {
       'วันนี้คุณย้ายไปอยู่ย่านใหม่\nทักทาย Betty คนขับแท็กซี่ของคุณกันเถอะ';
 
   @override
-  String get tutorialRoleplayResultSubtitle => 'จบการสนทนาแรกแล้ว!';
+  String get tutorialRoleplayResultTitle => 'จบบทสนทนาแรกแล้ว!';
 
   @override
-  String get tutorialRoleplayResultContinue => 'พูดต่อกันเลย!';
+  String get tutorialRoleplayResultSubtitle =>
+      'พบเพื่อนบ้านใหม่และฝึกภาษาอังกฤษในชีวิตประจำวัน!';
+
+  @override
+  String get tutorialRoleplayResultContinue => 'ดูตอนแรก';
 
   @override
   String get tutorialRoleplayGreetingSuccess =>
@@ -474,8 +478,7 @@ class AppLocalizationsTh extends AppLocalizations {
       'ไม่ได้ยินเสียง ลองพูด ‘Hello’ อีกครั้ง';
 
   @override
-  String get tutorialRoleplayHintGuide =>
-      'นึกไม่ออกเหรอ?\nแตะหลอดไฟเพื่อดูคำใบ้';
+  String get tutorialRoleplayHintGuide => 'แตะคำใบ้';
 
   @override
   String get tutorialRoleplayHintDestinationNative => 'ไป SUDA City หน่อยค่ะ';
@@ -487,8 +490,11 @@ class AppLocalizationsTh extends AppLocalizations {
   String get tutorialRoleplayHintAnswerGuide => 'ลองตอบด้วยประโยคนี้';
 
   @override
+  String get tutorialRoleplayArrivalNarration => 'แท็กซี่มาถึงจุดหมายแล้ว';
+
+  @override
   String get tutorialRoleplayFreeAnswerGuide =>
-      'ตอบด้วยคำพูดของคุณเอง\nต้องการความช่วยเหลือไหม? แตะหลอดไฟ';
+      'ตอบด้วยคำพูดของคุณเอง\nต้องการความช่วยเหลือไหม? แตะคำใบ้';
 
   @override
   String get actionConfirm => 'ยืนยัน';
@@ -548,10 +554,13 @@ class AppLocalizationsTh extends AppLocalizations {
   String get roleplayAutoHintGuide => 'เปิดคำใบ้อัตโนมัติ';
 
   @override
-  String get roleplayHintLabel => 'คำใบ้';
+  String get roleplayHintLabel => 'ลองพูดแบบนี้';
 
   @override
-  String get roleplayHintShowAnswer => 'แตะเพื่อดูคำตอบภาษาอังกฤษที่แนะนำ';
+  String get roleplayHintShowAnswer => 'ดูวิธีพูดภาษาอังกฤษ';
+
+  @override
+  String get roleplayHintEnglishLabel => 'ตัวอย่างภาษาอังกฤษ';
 
   @override
   String get roleplayVoiceSpeed => 'ความเร็วในการพูด';

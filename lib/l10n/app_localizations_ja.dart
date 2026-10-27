@@ -409,7 +409,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get tutorialRoleplayMissions => 'ミッション';
 
   @override
-  String get tutorialRoleplayMission1 => 'タクシーの運転手にあいさつする';
+  String get tutorialRoleplayMission1 => 'Bettyにあいさつする';
 
   @override
   String get tutorialRoleplayMission2 => '行き先を伝える';
@@ -428,10 +428,13 @@ class AppLocalizationsJa extends AppLocalizations {
       '今日は新しい街へ引っ越す日です。\nタクシー運転手のBettyにごあいさつしてみませんか？';
 
   @override
-  String get tutorialRoleplayResultSubtitle => '初めての会話が終わりました！';
+  String get tutorialRoleplayResultTitle => '初めての会話、完了！';
 
   @override
-  String get tutorialRoleplayResultContinue => 'このまま話してみましょう！';
+  String get tutorialRoleplayResultSubtitle => '新しい近所の人たちと、日常の場面で英語を話してみましょう！';
+
+  @override
+  String get tutorialRoleplayResultContinue => '最初のエピソードを見る';
 
   @override
   String get tutorialRoleplayGreetingSuccess => '最初のあいさつ、成功！\nよくできました！';
@@ -458,7 +461,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get tutorialRoleplayMicNoSpeech => '声が聞き取れませんでした。もう一度‘Hello’と言ってください。';
 
   @override
-  String get tutorialRoleplayHintGuide => '何を言えばいいか分からなければ\n電球をタップしてください。';
+  String get tutorialRoleplayHintGuide => 'ヒントをタップしてください。';
 
   @override
   String get tutorialRoleplayHintDestinationNative => 'SUDA Cityまでお願いします。';
@@ -470,7 +473,11 @@ class AppLocalizationsJa extends AppLocalizations {
   String get tutorialRoleplayHintAnswerGuide => 'この文で答えてみて。';
 
   @override
-  String get tutorialRoleplayFreeAnswerGuide => '自分の言葉で答えてみて。\n困ったら電球をタップして。';
+  String get tutorialRoleplayArrivalNarration => 'タクシーが目的地に着きました。';
+
+  @override
+  String get tutorialRoleplayFreeAnswerGuide =>
+      '自分の言葉で答えてみて。\n困ったらヒントをタップしてください。';
 
   @override
   String get actionConfirm => '決定';
@@ -527,10 +534,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get roleplayAutoHintGuide => '自動ヒントをオン';
 
   @override
-  String get roleplayHintLabel => 'ヒント';
+  String get roleplayHintLabel => 'こう言ってみて';
 
   @override
-  String get roleplayHintShowAnswer => 'タップして英語の回答例を見てください';
+  String get roleplayHintShowAnswer => '英語の言い方を見る';
+
+  @override
+  String get roleplayHintEnglishLabel => '英語の例';
 
   @override
   String get roleplayVoiceSpeed => '音声速度';

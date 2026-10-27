@@ -11,8 +11,8 @@ import 'onboarding_backdrop.dart';
 
 /// 온보딩 Username 다음. 프로필·문구·Start → 마이크 권한 → 장면 문구 → 롤플레이.
 class TutorialIntroScreen extends StatefulWidget {
-  /// 이번 배포는 false라 Username 다음이 홈이다. 다음 배포에서 true.
-  static const onboardingEnabled = false;
+  /// false면 Username 다음이 홈이다. true면 `ONBOARDING_TUTORIAL != Y`일 때 Intro.
+  static const onboardingEnabled = true;
   final UserDto? user;
   final VoidCallback onStartTutorial;
   final bool preview;
@@ -40,8 +40,12 @@ class _TutorialIntroScreenState extends State<TutorialIntroScreen>
   late final AnimationController _introFade;
   late final AnimationController _gradient;
   late final AnimationController _caption;
+  late final AnimationController _continueFade;
+  late final AnimationController _continueBlink;
   bool _requestingMic = false;
   bool _sceneRunning = false;
+  bool _continueReady = false;
+  bool _continued = false;
   int _sceneGen = 0;
 
   @override
@@ -54,6 +58,11 @@ class _TutorialIntroScreenState extends State<TutorialIntroScreen>
     _introFade = AnimationController(vsync: this, duration: _fade);
     _gradient = AnimationController(vsync: this, duration: _fade);
     _caption = AnimationController(vsync: this, duration: _fade);
+    _continueFade = AnimationController(vsync: this, duration: _fade);
+    _continueBlink = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..value = 1;
     if (widget.playEntrance) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) _entrance.forward();
@@ -70,6 +79,8 @@ class _TutorialIntroScreenState extends State<TutorialIntroScreen>
     _introFade.dispose();
     _gradient.dispose();
     _caption.dispose();
+    _continueFade.dispose();
+    _continueBlink.dispose();
     super.dispose();
   }
 
@@ -133,20 +144,43 @@ class _TutorialIntroScreenState extends State<TutorialIntroScreen>
     await _playSceneThenStart();
   }
 
-  /// 인트로가 걷히면 선명한 배경. 1.5초 뒤 그라데이션, 이어서 문구.
-  /// 글자가 보이기 시작한 시점부터 5초면 대화. 400ms 페이드는 그 5초에 포함된다.
+  /// 인트로가 걷히면 선명한 배경. 0.6초 뒤 그라데이션, 이어서 문구.
+  /// 문구 페이드가 끝난 뒤 0.5초 지나 «탭해서 계속하기»가 뜨고, 그 탭으로만 대화로 간다.
   Future<void> _playSceneThenStart() async {
     final gen = ++_sceneGen;
     setState(() => _sceneRunning = true);
     await _introFade.forward();
     if (!_sceneAlive(gen)) return;
-    await Future<void>.delayed(const Duration(milliseconds: 1500));
+    await Future<void>.delayed(const Duration(milliseconds: 600));
     if (!_sceneAlive(gen)) return;
     await _gradient.forward();
     if (!_sceneAlive(gen)) return;
-    unawaited(_caption.forward());
-    await Future<void>.delayed(const Duration(seconds: 5));
+    await _caption.forward();
     if (!_sceneAlive(gen)) return;
+    await Future<void>.delayed(const Duration(milliseconds: 500));
+    if (!_sceneAlive(gen)) return;
+    await _continueFade.forward();
+    if (!_sceneAlive(gen)) return;
+    setState(() => _continueReady = true);
+    _continueBlink.repeat(reverse: true);
+  }
+
+  void _onTapContinue() {
+    if (!_continueReady || _continued) return;
+    _continued = true;
+    _sceneGen++;
+    _continueBlink.stop();
+    unawaited(_fadeOutThenContinue());
+  }
+
+  /// 문구·안내를 걷어 선명한 배경만 남긴 뒤 대화 화면으로 넘긴다.
+  Future<void> _fadeOutThenContinue() async {
+    await Future.wait([
+      _caption.reverse(),
+      _continueFade.reverse(),
+      _gradient.reverse(),
+    ]);
+    if (!mounted) return;
     widget.onStartTutorial();
   }
 
@@ -164,7 +198,10 @@ class _TutorialIntroScreenState extends State<TutorialIntroScreen>
       canPop: widget.preview && !_sceneRunning,
       child: Scaffold(
         backgroundColor: const Color(0xFF121212),
-        body: Stack(
+        body: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: _continueReady && !_continued ? _onTapContinue : null,
+          child: Stack(
           fit: StackFit.expand,
           children: [
             if (_sceneRunning) const TutorialRoleplayBackdrop(blurAmount: 0),
@@ -183,21 +220,66 @@ class _TutorialIntroScreenState extends State<TutorialIntroScreen>
                 ),
               ),
             if (_sceneRunning)
-              FadeTransition(
-                opacity: _caption,
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    size.width * 0.08,
-                    size.height * 0.77,
-                    size.width * 0.08,
-                    0,
-                  ),
-                  child: Text(
-                    l10n.tutorialRoleplaySceneCaption,
-                    textAlign: TextAlign.center,
-                    softWrap: true,
-                    style: captionStyle,
-                  ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                  size.width * 0.08,
+                  size.height * 0.77,
+                  size.width * 0.08,
+                  0,
+                ),
+                child: Column(
+                  children: [
+                    FadeTransition(
+                      opacity: _caption,
+                      child: Text(
+                        l10n.tutorialRoleplaySceneCaption,
+                        textAlign: TextAlign.center,
+                        softWrap: true,
+                        style: captionStyle,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    FadeTransition(
+                      opacity: _continueFade,
+                      child: IgnorePointer(
+                        ignoring: !_continueReady,
+                        child: GestureDetector(
+                          onTap: _onTapContinue,
+                          behavior: HitTestBehavior.opaque,
+                          child: FadeTransition(
+                            opacity: Tween<double>(begin: 0.35, end: 1).animate(
+                              _continueBlink,
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 10,
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    l10n.tutorialRoleplayGuideMissionTapContinue,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyLarge
+                                        ?.copyWith(
+                                          color: const Color(0xCCFFFFFF),
+                                        ),
+                                  ),
+                                  const Icon(
+                                    Icons.chevron_right,
+                                    color: Color(0xCCFFFFFF),
+                                    size: 22,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             FadeTransition(
@@ -220,6 +302,7 @@ class _TutorialIntroScreenState extends State<TutorialIntroScreen>
           ],
         ),
       ),
-    );
+    ),
+  );
   }
 }

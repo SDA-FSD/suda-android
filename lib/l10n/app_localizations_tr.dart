@@ -430,7 +430,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get tutorialRoleplayMissions => 'Görevler';
 
   @override
-  String get tutorialRoleplayMission1 => 'Taksi şoförüne selam ver';
+  String get tutorialRoleplayMission1 => 'Betty\'ye selam ver';
 
   @override
   String get tutorialRoleplayMission2 => 'Nereye gittiğini söyle';
@@ -450,10 +450,14 @@ class AppLocalizationsTr extends AppLocalizations {
       'Bugün yeni bir mahalleye taşınıyorsun.\nTaksi şoförün Betty\'ye merhaba de!';
 
   @override
-  String get tutorialRoleplayResultSubtitle => 'İlk sohbet tamam!';
+  String get tutorialRoleplayResultTitle => 'İlk sohbet tamam!';
 
   @override
-  String get tutorialRoleplayResultContinue => 'Devam edelim!';
+  String get tutorialRoleplayResultSubtitle =>
+      'Yeni komşularınla tanış ve günlük durumlarda İngilizce pratik yap!';
+
+  @override
+  String get tutorialRoleplayResultContinue => 'İlk bölümü gör';
 
   @override
   String get tutorialRoleplayGreetingSuccess => 'İlk selamlama tamam!\nHarika!';
@@ -482,8 +486,7 @@ class AppLocalizationsTr extends AppLocalizations {
       'Duyamadık. Tekrar ‘Hello’ demeyi dene.';
 
   @override
-  String get tutorialRoleplayHintGuide =>
-      'Ne diyeceğini bilmiyor musun?\nİpucu için ampule dokun.';
+  String get tutorialRoleplayHintGuide => 'İpucuna dokun.';
 
   @override
   String get tutorialRoleplayHintDestinationNative => 'SUDA City\'ye lütfen.';
@@ -495,8 +498,11 @@ class AppLocalizationsTr extends AppLocalizations {
   String get tutorialRoleplayHintAnswerGuide => 'Bu cümleyle cevaplamayı dene.';
 
   @override
+  String get tutorialRoleplayArrivalNarration => 'Taksi varış noktana ulaştı.';
+
+  @override
   String get tutorialRoleplayFreeAnswerGuide =>
-      'Kendi cümlelerinle cevapla.\nYardıma mı ihtiyacın var? Ampule dokun.';
+      'Kendi cümlelerinle cevapla.\nYardıma mı ihtiyacın var? İpucuna dokun.';
 
   @override
   String get actionConfirm => 'Onayla';
@@ -556,11 +562,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get roleplayAutoHintGuide => 'Otomatik İpucunu aç';
 
   @override
-  String get roleplayHintLabel => 'İpucu';
+  String get roleplayHintLabel => 'Şöyle diyebilirsin';
 
   @override
-  String get roleplayHintShowAnswer =>
-      'Önerilen İngilizce yanıtı görmek için dokun';
+  String get roleplayHintShowAnswer => 'İngilizcesini gör';
+
+  @override
+  String get roleplayHintEnglishLabel => 'İngilizce örnek';
 
   @override
   String get roleplayVoiceSpeed => 'Ses Hızı';

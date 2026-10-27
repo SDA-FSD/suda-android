@@ -430,7 +430,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get tutorialRoleplayMissions => 'Missies';
 
   @override
-  String get tutorialRoleplayMission1 => 'Groet de taxichauffeur';
+  String get tutorialRoleplayMission1 => 'Groet Betty';
 
   @override
   String get tutorialRoleplayMission2 => 'Zeg waar je naartoe gaat';
@@ -449,10 +449,14 @@ class AppLocalizationsNl extends AppLocalizations {
       'Vandaag verhuis je naar een nieuwe buurt.\nZeg hallo tegen Betty, je taxichauffeur!';
 
   @override
-  String get tutorialRoleplayResultSubtitle => 'Eerste gesprek voltooid!';
+  String get tutorialRoleplayResultTitle => 'Eerste gesprek voltooid!';
 
   @override
-  String get tutorialRoleplayResultContinue => 'Ga zo door!';
+  String get tutorialRoleplayResultSubtitle =>
+      'Ontmoet je nieuwe buren en oefen Engels in alledaagse situaties!';
+
+  @override
+  String get tutorialRoleplayResultContinue => 'Bekijk je eerste aflevering';
 
   @override
   String get tutorialRoleplayGreetingSuccess =>
@@ -482,8 +486,7 @@ class AppLocalizationsNl extends AppLocalizations {
       'We hebben je niet gehoord. Probeer nog eens ‘Hello’ te zeggen.';
 
   @override
-  String get tutorialRoleplayHintGuide =>
-      'Weet je niet wat je moet zeggen?\nTik op de gloeilamp voor een hint.';
+  String get tutorialRoleplayHintGuide => 'Tik op de hint.';
 
   @override
   String get tutorialRoleplayHintDestinationNative =>
@@ -498,8 +501,12 @@ class AppLocalizationsNl extends AppLocalizations {
       'Probeer te antwoorden met deze zin.';
 
   @override
+  String get tutorialRoleplayArrivalNarration =>
+      'De taxi is op je bestemming aangekomen.';
+
+  @override
   String get tutorialRoleplayFreeAnswerGuide =>
-      'Antwoord in je eigen woorden.\nHulp nodig? Tik op de gloeilamp.';
+      'Antwoord in je eigen woorden.\nHulp nodig? Tik op de hint.';
 
   @override
   String get actionConfirm => 'Bevestigen';
@@ -560,10 +567,13 @@ class AppLocalizationsNl extends AppLocalizations {
   String get roleplayAutoHintGuide => 'Zet automatische hint aan';
 
   @override
-  String get roleplayHintLabel => 'Hint';
+  String get roleplayHintLabel => 'Je kunt zeggen';
 
   @override
-  String get roleplayHintShowAnswer => 'Engels voorbeeldantwoord bekijken';
+  String get roleplayHintShowAnswer => 'Bekijk hoe je het in het Engels zegt';
+
+  @override
+  String get roleplayHintEnglishLabel => 'Voorbeeld in het Engels';
 
   @override
   String get roleplayVoiceSpeed => 'Spreeksnelheid';
