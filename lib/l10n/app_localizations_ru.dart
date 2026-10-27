@@ -731,6 +731,20 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
+  String get achievementSecretKeeper => 'Хранитель секретов';
+
+  @override
+  String achievementSecretKeeperHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Откройте $count секретов персонажей.',
+      one: 'Откройте $count секрет персонажа.',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get otherUserFriends => 'Друзья';
 
   @override

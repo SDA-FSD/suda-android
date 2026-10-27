@@ -259,6 +259,8 @@
   "achievementOnARollHint": "Luyện tập {count} ngày liên tiếp.",
   "achievementSocialButterfly": "Kết bạn rộng",
   "achievementSocialButterflyHint": "Thêm {count} người dùng khác làm bạn trên SUDA.",
+  "achievementSecretKeeper": "Người giữ bí mật",
+  "achievementSecretKeeperHint": "{count, plural, one{Mở khóa {count} bí mật nhân vật.} other{Mở khóa {count} bí mật nhân vật.}}",
   "otherUserFriends": "Bạn bè",
   "otherUserRequested": "Đã gửi lời mời",
   "otherUserAddFriend": "Thêm bạn",

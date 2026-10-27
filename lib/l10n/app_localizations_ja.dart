@@ -691,6 +691,20 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
+  String get achievementSecretKeeper => '秘密の守り人';
+
+  @override
+  String achievementSecretKeeperHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'キャラクターの秘密を$count個解放してください。',
+      one: 'キャラクターの秘密を$count個解放してください。',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get otherUserFriends => 'フレンド';
 
   @override

@@ -273,6 +273,8 @@
   "achievementOnARollHint": "Practice for {count} days in a row.",
   "achievementSocialButterfly": "Social Butterfly",
   "achievementSocialButterflyHint": "Add {count} other users as friends on SUDA.",
+  "achievementSecretKeeper": "Secret Keeper",
+  "achievementSecretKeeperHint": "{count, plural, one{Unlock {count} character secret.} other{Unlock {count} character secrets.}}",
   "@achievementSceneStealerHint": {
     "placeholders": { "count": { "type": "int" } }
   },
@@ -280,6 +282,9 @@
     "placeholders": { "count": { "type": "int" } }
   },
   "@achievementSocialButterflyHint": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "@achievementSecretKeeperHint": {
     "placeholders": { "count": { "type": "int" } }
   },
   "@achievementPocketGuideHint": {

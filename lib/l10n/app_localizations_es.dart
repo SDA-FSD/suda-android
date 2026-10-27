@@ -734,6 +734,20 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get achievementSecretKeeper => 'Guardián de secretos';
+
+  @override
+  String achievementSecretKeeperHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Desbloquea $count secretos de personajes.',
+      one: 'Desbloquea $count secreto de personaje.',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get otherUserFriends => 'Amigos';
 
   @override
@@ -2014,6 +2028,20 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
   @override
   String achievementSocialButterflyHint(int count) {
     return 'Agrega a $count usuarios más como amigos en SUDA.';
+  }
+
+  @override
+  String get achievementSecretKeeper => 'Guardián de secretos';
+
+  @override
+  String achievementSecretKeeperHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Desbloquea $count secretos de personajes.',
+      one: 'Desbloquea $count secreto de personaje.',
+    );
+    return '$_temp0';
   }
 
   @override

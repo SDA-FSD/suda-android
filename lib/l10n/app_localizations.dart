@@ -1427,6 +1427,18 @@ abstract class AppLocalizations {
   /// **'Add {count} other users as friends on SUDA.'**
   String achievementSocialButterflyHint(int count);
 
+  /// No description provided for @achievementSecretKeeper.
+  ///
+  /// In en, this message translates to:
+  /// **'Secret Keeper'**
+  String get achievementSecretKeeper;
+
+  /// No description provided for @achievementSecretKeeperHint.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{Unlock {count} character secret.} other{Unlock {count} character secrets.}}'**
+  String achievementSecretKeeperHint(int count);
+
   /// No description provided for @otherUserFriends.
   ///
   /// In en, this message translates to:

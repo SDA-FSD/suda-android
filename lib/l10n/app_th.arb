@@ -259,6 +259,8 @@
   "achievementOnARollHint": "ฝึกต่อเนื่อง {count} วัน",
   "achievementSocialButterfly": "นักสังคม",
   "achievementSocialButterflyHint": "เพิ่มผู้ใช้อื่น {count} คนเป็นเพื่อนบน SUDA",
+  "achievementSecretKeeper": "ผู้พิทักษ์ความลับ",
+  "achievementSecretKeeperHint": "{count, plural, one{ปลดล็อกความลับของตัวละคร {count} อย่าง} other{ปลดล็อกความลับของตัวละคร {count} อย่าง}}",
   "otherUserFriends": "เพื่อน",
   "otherUserRequested": "ส่งคำขอแล้ว",
   "otherUserAddFriend": "เพิ่มเพื่อน",

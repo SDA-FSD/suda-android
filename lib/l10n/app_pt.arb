@@ -259,6 +259,8 @@
   "achievementOnARollHint": "Pratique por {count} dias seguidos.",
   "achievementSocialButterfly": "Amigo de Todos",
   "achievementSocialButterflyHint": "Adicione {count} outros usuários como amigos no SUDA.",
+  "achievementSecretKeeper": "Guardião de Segredos",
+  "achievementSecretKeeperHint": "{count, plural, one{Desbloqueie {count} dos segredo de personagens.} other{Desbloqueie {count} dos segredos de personagens.}}",
   "otherUserFriends": "Amigos",
   "otherUserRequested": "Solicitação enviada",
   "otherUserAddFriend": "Adicionar amigo",

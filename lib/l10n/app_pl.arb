@@ -259,6 +259,8 @@
   "achievementOnARollHint": "Ćwicz przez {count} dni z rzędu.",
   "achievementSocialButterfly": "Towarzyski motyl",
   "achievementSocialButterflyHint": "Dodaj {count} innych użytkowników jako znajomych na SUDA.",
+  "achievementSecretKeeper": "Strażnik sekretów",
+  "achievementSecretKeeperHint": "{count, plural, one{Odblokuj {count} sekret postaci.} other{Odblokuj {count} sekretów postaci.}}",
   "otherUserFriends": "Przyjaciele",
   "otherUserRequested": "Wysłano zaproszenie",
   "otherUserAddFriend": "Dodaj znajomego",

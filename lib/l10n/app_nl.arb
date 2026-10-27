@@ -259,6 +259,8 @@
   "achievementOnARollHint": "Oefen {count} dagen achter elkaar.",
   "achievementSocialButterfly": "Sociale vlinder",
   "achievementSocialButterflyHint": "Voeg {count} andere gebruikers toe als vrienden op SUDA.",
+  "achievementSecretKeeper": "Geheimhouder",
+  "achievementSecretKeeperHint": "{count, plural, one{Ontgrendel {count} personagegeheim.} other{Ontgrendel {count} personagegeheimen.}}",
   "otherUserFriends": "Vrienden",
   "otherUserRequested": "Verzoek verzonden",
   "otherUserAddFriend": "Vriend toevoegen",

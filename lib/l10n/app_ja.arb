@@ -259,6 +259,8 @@
   "achievementOnARollHint": "{count}日連続で学習してください。",
   "achievementSocialButterfly": "社交の達人",
   "achievementSocialButterflyHint": "SUDAで他のユーザー{count}人を友達に追加してください。",
+  "achievementSecretKeeper": "秘密の守り人",
+  "achievementSecretKeeperHint": "{count, plural, one{キャラクターの秘密を{count}個解放してください。} other{キャラクターの秘密を{count}個解放してください。}}",
   "otherUserFriends": "フレンド",
   "otherUserRequested": "リクエスト済み",
   "otherUserAddFriend": "フレンド追加",

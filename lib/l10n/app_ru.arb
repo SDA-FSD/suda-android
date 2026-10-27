@@ -259,6 +259,8 @@
   "achievementOnARollHint": "Занимайтесь {count} дней подряд.",
   "achievementSocialButterfly": "Социальная бабочка",
   "achievementSocialButterflyHint": "Добавьте {count} других пользователей в друзья в SUDA.",
+  "achievementSecretKeeper": "Хранитель секретов",
+  "achievementSecretKeeperHint": "{count, plural, one{Откройте {count} секрет персонажа.} other{Откройте {count} секретов персонажей.}}",
   "otherUserFriends": "Друзья",
   "otherUserRequested": "Запрос отправлен",
   "otherUserAddFriend": "Добавить в друзья",

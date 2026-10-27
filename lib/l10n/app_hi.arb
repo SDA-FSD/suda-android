@@ -259,6 +259,8 @@
   "achievementOnARollHint": "लगातार {count} दिन अभ्यास करें।",
   "achievementSocialButterfly": "सोशल बटरफ्लाई",
   "achievementSocialButterflyHint": "SUDA पर {count} अन्य उपयोगकर्ताओं को मित्र बनाएँ।",
+  "achievementSecretKeeper": "रहस्य रक्षक",
+  "achievementSecretKeeperHint": "{count, plural, one{{count} किरदार रहस्य अनलॉक करें।} other{{count} किरदार रहस्य अनलॉक करें।}}",
   "otherUserFriends": "मित्र",
   "otherUserRequested": "अनुरोध भेजा गया",
   "otherUserAddFriend": "मित्र जोड़ें",

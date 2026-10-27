@@ -731,6 +731,20 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
+  String get achievementSecretKeeper => 'Penjaga Rahasia';
+
+  @override
+  String achievementSecretKeeperHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Buka $count rahasia karakter.',
+      one: 'Buka $count rahasia karakter.',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get otherUserFriends => 'Teman';
 
   @override

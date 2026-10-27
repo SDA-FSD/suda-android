@@ -259,6 +259,8 @@
   "achievementOnARollHint": "Entraînez-vous {count} jours d'affilée.",
   "achievementSocialButterfly": "Papillon social",
   "achievementSocialButterflyHint": "Ajoutez {count} autres utilisateurs comme amis sur SUDA.",
+  "achievementSecretKeeper": "Gardien des secrets",
+  "achievementSecretKeeperHint": "{count, plural, one{Débloquez {count} secret de personnage.} other{Débloquez {count} secrets de personnages.}}",
   "otherUserFriends": "Amis",
   "otherUserRequested": "Demande envoyée",
   "otherUserAddFriend": "Ajouter un ami",

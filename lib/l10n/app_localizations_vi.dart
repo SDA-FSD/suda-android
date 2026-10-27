@@ -728,6 +728,20 @@ class AppLocalizationsVi extends AppLocalizations {
   }
 
   @override
+  String get achievementSecretKeeper => 'Người giữ bí mật';
+
+  @override
+  String achievementSecretKeeperHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Mở khóa $count bí mật nhân vật.',
+      one: 'Mở khóa $count bí mật nhân vật.',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get otherUserFriends => 'Bạn bè';
 
   @override

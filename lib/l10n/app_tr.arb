@@ -259,6 +259,8 @@
   "achievementOnARollHint": "Üst üste {count} gün çalış.",
   "achievementSocialButterfly": "Sosyal Kelebek",
   "achievementSocialButterflyHint": "SUDA'da {count} başka kullanıcıyı arkadaş olarak ekle.",
+  "achievementSecretKeeper": "Sır Tutucu",
+  "achievementSecretKeeperHint": "{count, plural, one{{count} karakter sırrının kilidini aç.} other{{count} karakter sırrının kilidini aç.}}",
   "otherUserFriends": "Arkadaşlar",
   "otherUserRequested": "İstek gönderildi",
   "otherUserAddFriend": "Arkadaş ekle",

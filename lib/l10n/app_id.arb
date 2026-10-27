@@ -259,6 +259,8 @@
   "achievementOnARollHint": "Berlatih {count} hari berturut-turut.",
   "achievementSocialButterfly": "Kupu-kupu Sosial",
   "achievementSocialButterflyHint": "Tambahkan {count} pengguna lain sebagai teman di SUDA.",
+  "achievementSecretKeeper": "Penjaga Rahasia",
+  "achievementSecretKeeperHint": "{count, plural, one{Buka {count} rahasia karakter.} other{Buka {count} rahasia karakter.}}",
   "otherUserFriends": "Teman",
   "otherUserRequested": "Permintaan terkirim",
   "otherUserAddFriend": "Tambah teman",

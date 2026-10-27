@@ -694,6 +694,20 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
+  String get achievementSecretKeeper => '비밀 지킴이';
+
+  @override
+  String achievementSecretKeeperHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '캐릭터의 비밀을 $count개 해금하세요.',
+      one: '캐릭터의 비밀을 $count개 해금하세요.',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get otherUserFriends => '친구';
 
   @override

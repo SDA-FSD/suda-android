@@ -685,6 +685,20 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get achievementSecretKeeper => '秘密守护者';
+
+  @override
+  String achievementSecretKeeperHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '解锁 $count 个角色秘密。',
+      one: '解锁 $count 个角色秘密。',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get otherUserFriends => '好友';
 
   @override
@@ -1884,6 +1898,20 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   }
 
   @override
+  String get achievementSecretKeeper => '秘密守护者';
+
+  @override
+  String achievementSecretKeeperHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '解锁 $count 个角色秘密。',
+      one: '解锁 $count 个角色秘密。',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get otherUserFriends => '好友';
 
   @override
@@ -3080,6 +3108,20 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   @override
   String achievementSocialButterflyHint(int count) {
     return '在 SUDA 上新增 $count 位其他使用者為好友。';
+  }
+
+  @override
+  String get achievementSecretKeeper => '秘密守護者';
+
+  @override
+  String achievementSecretKeeperHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '解鎖 $count 個角色秘密。',
+      one: '解鎖 $count 個角色秘密。',
+    );
+    return '$_temp0';
   }
 
   @override

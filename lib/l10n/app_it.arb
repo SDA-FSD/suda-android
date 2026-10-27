@@ -259,6 +259,8 @@
   "achievementOnARollHint": "Esercitati per {count} giorni di fila.",
   "achievementSocialButterfly": "Farfalla sociale",
   "achievementSocialButterflyHint": "Aggiungi {count} altri utenti come amici su SUDA.",
+  "achievementSecretKeeper": "Custode dei segreti",
+  "achievementSecretKeeperHint": "{count, plural, one{Sblocca {count} segreto del personaggio.} other{Sblocca {count} segreti dei personaggi.}}",
   "otherUserFriends": "Amici",
   "otherUserRequested": "Richiesta inviata",
   "otherUserAddFriend": "Aggiungi amico",

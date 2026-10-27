@@ -734,6 +734,20 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get achievementSecretKeeper => 'Hüter der Geheimnisse';
+
+  @override
+  String achievementSecretKeeperHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Schalte $count Charaktergeheimnisse frei.',
+      one: 'Schalte $count Charaktergeheimnis frei.',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get otherUserFriends => 'Freunde';
 
   @override

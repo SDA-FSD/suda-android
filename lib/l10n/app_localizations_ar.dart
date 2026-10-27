@@ -722,6 +722,20 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get achievementSecretKeeper => 'حارس الأسرار';
+
+  @override
+  String achievementSecretKeeperHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'افتح $count من أسرار الشخصيات.',
+      one: 'افتح $count سر شخصية.',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get otherUserFriends => 'الأصدقاء';
 
   @override

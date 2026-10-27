@@ -259,6 +259,8 @@
   "achievementOnARollHint": "Übe {count} Tage hintereinander.",
   "achievementSocialButterfly": "Sozialer Schmetterling",
   "achievementSocialButterflyHint": "Füge {count} andere Nutzer auf SUDA als Freunde hinzu.",
+  "achievementSecretKeeper": "Hüter der Geheimnisse",
+  "achievementSecretKeeperHint": "{count, plural, one{Schalte {count} Charaktergeheimnis frei.} other{Schalte {count} Charaktergeheimnisse frei.}}",
   "otherUserFriends": "Freunde",
   "otherUserRequested": "Angefragt",
   "otherUserAddFriend": "Freund hinzufügen",
