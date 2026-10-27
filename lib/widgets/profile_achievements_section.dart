@@ -11,6 +11,8 @@ class ProfileAchievementsSection extends StatelessWidget {
   final bool unlockedOnly;
   final bool showClaim;
   final Future<void> Function(ProfileAchievementItem item)? onClaim;
+  final int? foldAfter;
+  final bool expanded;
 
   const ProfileAchievementsSection({
     super.key,
@@ -19,6 +21,8 @@ class ProfileAchievementsSection extends StatelessWidget {
     this.unlockedOnly = false,
     this.showClaim = false,
     this.onClaim,
+    this.foldAfter,
+    this.expanded = true,
   });
 
   static const _hPad = 40.0;
@@ -73,42 +77,69 @@ class ProfileAchievementsSection extends StatelessWidget {
       }
       rows.add(row);
     }
+    final headCount = foldAfter == null
+        ? rows.length
+        : (foldAfter! / 3).ceil();
+    final head = headCount >= rows.length ? rows : rows.sublist(0, headCount);
+    final tail = headCount >= rows.length
+        ? const <List<ProfileAchievementItem?>>[]
+        : rows.sublist(headCount);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: _hPad),
       child: Column(
         children: [
-          for (var r = 0; r < rows.length; r++) ...[
+          for (var r = 0; r < head.length; r++) ...[
             if (r > 0) const SizedBox(height: 16),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                for (var i = 0; i < rows[r].length; i++) ...[
-                  if (i > 0) const SizedBox(width: _colGap),
-                  Expanded(
-                    child: rows[r][i] == null
-                        ? const SizedBox.shrink()
-                        : _AchievementCell(
-                            item: rows[r][i]!,
-                            grayscale: _grayscale,
-                            titleGap: _titleGap,
-                            progressGap: _progressGap,
-                            progressColor: _progressColor,
-                            popupImageSize: _popupImageSize,
-                            tapEnabled: tapEnabled,
-                            showClaim: showClaim,
-                            onClaim: onClaim,
-                          ),
-                  ),
-                ],
-              ],
-            ),
+            _achievementRow(head[r]),
           ],
+          if (tail.isNotEmpty)
+            ClipRect(
+              child: AnimatedAlign(
+                alignment: Alignment.topCenter,
+                heightFactor: expanded ? 1 : 0,
+                duration: const Duration(milliseconds: 220),
+                curve: Curves.easeInOut,
+                child: Column(
+                  children: [
+                    for (final row in tail) ...[
+                      const SizedBox(height: 16),
+                      _achievementRow(row),
+                    ],
+                  ],
+                ),
+              ),
+            ),
         ],
       ),
     );
   }
-}
 
+  Widget _achievementRow(List<ProfileAchievementItem?> row) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (var i = 0; i < row.length; i++) ...[
+          if (i > 0) const SizedBox(width: _colGap),
+          Expanded(
+            child: row[i] == null
+                ? const SizedBox.shrink()
+                : _AchievementCell(
+                    item: row[i]!,
+                    grayscale: _grayscale,
+                    titleGap: _titleGap,
+                    progressGap: _progressGap,
+                    progressColor: _progressColor,
+                    popupImageSize: _popupImageSize,
+                    tapEnabled: tapEnabled,
+                    showClaim: showClaim,
+                    onClaim: onClaim,
+                  ),
+          ),
+        ],
+      ],
+    );
+  }
+}
 class _AchievementCopy {
   final String title;
   final String hint;

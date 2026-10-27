@@ -145,6 +145,108 @@ class SeriesApi {
     );
   }
 
+  static Future<String> getSeriesCefrLevel({
+    required String accessToken,
+    required int seriesId,
+  }) async {
+    return await SudaHttpClient.executeWithRefresh(
+      () => _getSeriesCefrLevelInternal(accessToken, seriesId),
+      retryWithNewToken: (newToken) =>
+          _getSeriesCefrLevelInternal(newToken, seriesId),
+    );
+  }
+
+  static Future<String> _getSeriesCefrLevelInternal(
+    String accessToken,
+    int seriesId,
+  ) async {
+    final uri = SudaHttpClient.buildUri('/rps2/series/$seriesId/cefr-level');
+
+    late final http.Response response;
+    try {
+      response = await SudaHttpClient.client
+          .get(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+              'Content-Type': 'application/json',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      rethrow;
+    }
+
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return _cefrLevelFromBody(response.body);
+    }
+
+    throw Exception(
+      'GET /rps2/series/$seriesId/cefr-level failed: HTTP ${response.statusCode} ${response.body}',
+    );
+  }
+
+  static Future<String> updateSeriesCefrLevel({
+    required String accessToken,
+    required int seriesId,
+    required String cefrLevel,
+  }) async {
+    return await SudaHttpClient.executeWithRefresh(
+      () => _updateSeriesCefrLevelInternal(accessToken, seriesId, cefrLevel),
+      retryWithNewToken: (newToken) =>
+          _updateSeriesCefrLevelInternal(newToken, seriesId, cefrLevel),
+    );
+  }
+
+  static Future<String> _updateSeriesCefrLevelInternal(
+    String accessToken,
+    int seriesId,
+    String cefrLevel,
+  ) async {
+    final uri = SudaHttpClient.buildUri(
+      '/rps2/series/$seriesId/cefr-level',
+      {'cefrLevel': cefrLevel},
+    );
+
+    late final http.Response response;
+    try {
+      response = await SudaHttpClient.client
+          .put(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+              'Content-Type': 'application/json',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      rethrow;
+    }
+
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return _cefrLevelFromBody(response.body);
+    }
+
+    throw Exception(
+      'PUT /rps2/series/$seriesId/cefr-level failed: HTTP ${response.statusCode} ${response.body}',
+    );
+  }
+
+  static String _cefrLevelFromBody(String body) {
+    final dynamic data = jsonDecode(body);
+    final level = data is Map ? data['cefrLevel'] : null;
+    if (level is String && level.isNotEmpty) return level;
+    throw Exception('CEFR level missing');
+  }
+
   static Future<RpS2SessionDto> createSession({
     required String accessToken,
     required int seriesId,

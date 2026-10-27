@@ -20,7 +20,6 @@ import '../../widgets/cdn_thumb_image.dart';
 import '../../widgets/suda_label_tabs.dart';
 import '../../navigation/app_route_observer.dart';
 import '../../routes/roleplay_router.dart';
-import '../setting/cefr_level.dart';
 import 'series_information.dart';
 import 'widgets/series_episode_tab_content.dart';
 import 'widgets/series_similar_topic_tab_content.dart';
@@ -55,6 +54,9 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
   int _scrollToUnlockToken = 0;
   bool _isSynopsisExpanded = false;
   int _overviewTabIndex = 0;
+  bool _cefrExpanded = false;
+  bool _cefrSaving = false;
+  String? _seriesCefrLevel;
 
   static const _heroHeightFactor = 0.6;
   static const _infoIconSize = 24.0;
@@ -113,6 +115,7 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
           _errorMessage = null;
           _overview = null;
           _isSynopsisExpanded = false;
+          _cefrExpanded = false;
         });
 
         if (widget.user != null) {
@@ -132,9 +135,14 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
           overview: overview,
           user: widget.user,
         );
+        final seriesCefr = await _fetchSeriesCefrLevel(accessToken);
+        if (!mounted) return;
+        SeriesStateService.instance.setSeriesCefrLevel(seriesCefr);
 
         setState(() {
           _overview = overview;
+          _seriesCefrLevel = seriesCefr;
+          _cefrExpanded = false;
           _isLoading = false;
           _scrollToUnlockToken++;
         });
@@ -146,6 +154,18 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
         });
       }
     });
+  }
+
+  Future<String> _fetchSeriesCefrLevel(String accessToken) async {
+    try {
+      final level = await SudaApiClient.getSeriesCefrLevel(
+        accessToken: accessToken,
+        seriesId: widget.seriesId,
+      );
+      return EnglishLevelUtil.toPlayable(level);
+    } catch (_) {
+      return SeriesStateService.instance.playableCefrLevel(widget.user);
+    }
   }
 
   String? _complexityIconAsset(String? level) {
@@ -194,6 +214,9 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
     setState(() {
       _isFloatingHeaderVisible = shouldShowHeader;
       _isInfoIconVisible = shouldShowInfoIcon;
+      if (!shouldShowHeader) {
+        _cefrExpanded = false;
+      }
     });
   }
 
@@ -245,21 +268,48 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
     } catch (_) {}
   }
 
-  Future<void> _openCefrLevelScreen() async {
-    final levelBefore = EnglishLevelUtil.readLevelFromUser(widget.user);
+  void _toggleSeriesCefr() {
+    if (_cefrSaving) return;
+    setState(() => _cefrExpanded = !_cefrExpanded);
+  }
 
-    await Navigator.push(
-      context,
-      SubScreenRoute(page: CefrLevelScreen(user: widget.user)),
-    );
-    if (!mounted) return;
-
-    final levelAfter = EnglishLevelUtil.readLevelFromUser(widget.user);
-    if (levelBefore != levelAfter) {
-      await _loadOverview();
-    } else if (mounted) {
-      setState(() {});
+  Future<void> _selectSeriesCefr(String level) async {
+    if (_cefrSaving) return;
+    final current = _currentSeriesCefr();
+    if (level == current) {
+      setState(() => _cefrExpanded = false);
+      return;
     }
+
+    setState(() {
+      _cefrExpanded = false;
+      _cefrSaving = true;
+    });
+    try {
+      final accessToken = await TokenStorage.loadAccessToken();
+      if (!mounted || accessToken == null) return;
+      final saved = await SudaApiClient.updateSeriesCefrLevel(
+        accessToken: accessToken,
+        seriesId: widget.seriesId,
+        cefrLevel: level,
+      );
+      if (!mounted) return;
+      final playable = EnglishLevelUtil.toPlayable(saved);
+      SeriesStateService.instance.setSeriesCefrLevel(playable);
+      setState(() => _seriesCefrLevel = playable);
+      await _loadOverview();
+    } catch (_) {
+      // 저장 실패 시 이전 레벨을 유지한다.
+    } finally {
+      if (mounted) setState(() => _cefrSaving = false);
+    }
+  }
+
+  String _currentSeriesCefr() {
+    return EnglishLevelUtil.toPlayable(
+      _seriesCefrLevel ??
+          SeriesStateService.instance.playableCefrLevel(widget.user),
+    );
   }
 
   Widget _buildBackButton(BuildContext context) {
@@ -290,75 +340,133 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
   Widget _buildLanguageLevelButton(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context).textTheme;
-    final level = EnglishLevelUtil.readLevelFromUser(widget.user);
+    final level = _currentSeriesCefr();
     final label = EnglishLevelUtil.localizedLabel(l10n, level);
     const pillRadius = 12.0;
 
-    return GestureDetector(
-      onTap: _openCefrLevelScreen,
-      behavior: HitTestBehavior.opaque,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(pillRadius),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.14),
-              blurRadius: 10,
-              offset: const Offset(0, 2),
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(pillRadius),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.14),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(pillRadius),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(pillRadius),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.36),
+                width: 1,
+              ),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Colors.white.withValues(alpha: 0.22),
+                  Colors.white.withValues(alpha: 0.14),
+                ],
+              ),
             ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(pillRadius),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(pillRadius),
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.36),
-                  width: 1,
-                ),
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Colors.white.withValues(alpha: 0.22),
-                    Colors.white.withValues(alpha: 0.14),
-                  ],
-                ),
-              ),
-              child: SizedBox(
-                height: 24,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const SizedBox(width: 8),
-                    Image.asset(
-                      'assets/images/icons/circle_usa_flag.png',
-                      width: 13,
-                      height: 13,
+            child: IntrinsicWidth(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                GestureDetector(
+                  onTap: _toggleSeriesCefr,
+                  behavior: HitTestBehavior.opaque,
+                  child: SizedBox(
+                    height: 24,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const SizedBox(width: 8),
+                        Image.asset(
+                          'assets/images/icons/circle_usa_flag.png',
+                          width: 13,
+                          height: 13,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 14),
+                          child: Text(
+                            label,
+                            style: theme.labelSmall?.copyWith(
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        Image.asset(
+                          _cefrExpanded
+                              ? 'assets/images/icons/click_to_fold.png'
+                              : 'assets/images/icons/click_to_expand.png',
+                          height: 13,
+                          fit: BoxFit.fitHeight,
+                        ),
+                        const SizedBox(width: 8),
+                      ],
                     ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 14),
-                      child: Text(
-                        label,
-                        style: theme.labelSmall?.copyWith(color: Colors.white),
-                      ),
-                    ),
-                    Image.asset(
-                      'assets/images/icons/closing_angle_bracket.png',
-                      height: 13,
-                      fit: BoxFit.fitHeight,
-                    ),
-                    const SizedBox(width: 8),
-                  ],
+                  ),
                 ),
-              ),
+                AnimatedSize(
+                  duration: const Duration(milliseconds: 220),
+                  curve: Curves.easeInOut,
+                  alignment: Alignment.topCenter,
+                  child: _cefrExpanded
+                      ? _buildSeriesCefrChoices(context, level)
+                      : const SizedBox.shrink(),
+                ),
+              ],
+            ),
             ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildSeriesCefrChoices(BuildContext context, String selected) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context).textTheme;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ColoredBox(
+          color: const Color(0xFFD9D9D9).withValues(alpha: 0.2),
+          child: const SizedBox(height: 1),
+        ),
+        for (final code in EnglishLevelUtil.visibleLevels)
+          GestureDetector(
+            onTap: () => _selectSeriesCefr(code),
+            behavior: HitTestBehavior.opaque,
+            child: SizedBox(
+              height: 24,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 35, right: 8),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    EnglishLevelUtil.localizedLabel(l10n, code),
+                    style: theme.labelSmall?.copyWith(
+                      color: code == selected
+                          ? const Color(0xFF353535)
+                          : Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 
@@ -376,10 +484,14 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
             child: Padding(
               padding: const EdgeInsets.only(top: 16, left: 16, right: 16),
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildBackButton(context),
                   const Spacer(),
-                  _buildLanguageLevelButton(context),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: _buildLanguageLevelButton(context),
+                  ),
                 ],
               ),
             ),
@@ -695,8 +807,15 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
               ),
             ),
           ),
-          _buildFloatingHeader(context),
           if (overview != null) _buildInfoIconOverlay(heroHeight),
+          if (_cefrExpanded)
+            Positioned.fill(
+              child: GestureDetector(
+                onTap: () => setState(() => _cefrExpanded = false),
+                behavior: HitTestBehavior.opaque,
+              ),
+            ),
+          _buildFloatingHeader(context),
           if (_isLoading)
             const Center(
               child: CircularProgressIndicator(color: Colors.white),

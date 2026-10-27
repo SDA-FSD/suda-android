@@ -1,5 +1,6 @@
 import '../models/series_models.dart';
 import '../models/user_models.dart';
+import '../utils/english_level_util.dart';
 
 /// S2 시리즈 플레이 컨텍스트를 메모리에 보관한다.
 /// 다른 Series Overview 진입 시 [setSeriesOverview]로 refresh된다.
@@ -12,6 +13,7 @@ class SeriesStateService {
   RpS2SeriesOverviewDto? _overview;
   int? _selectedEpisodeId;
   UserDto? _user;
+  String? _seriesCefrLevel;
   RpS2SessionDto? _session;
   RpS2UserHistoryDto? _cachedUserHistory;
   bool _bestScoreRefreshPending = false;
@@ -21,6 +23,7 @@ class SeriesStateService {
   RpS2SeriesOverviewDto? get overview => _overview;
   int? get selectedEpisodeId => _selectedEpisodeId;
   UserDto? get user => _user;
+  String? get seriesCefrLevel => _seriesCefrLevel;
   RpS2SessionDto? get session => _session;
   RpS2UserHistoryDto? get cachedUserHistory => _cachedUserHistory;
   String? get sessionId => _session?.sessionId;
@@ -56,6 +59,7 @@ class SeriesStateService {
       _selectedEpisodeId = null;
       _session = null;
       _cachedUserHistory = null;
+      _seriesCefrLevel = null;
     }
     _seriesId = seriesId;
     _overview = overview;
@@ -74,6 +78,21 @@ class SeriesStateService {
 
   void setUser(UserDto? user) {
     _user = user;
+  }
+
+  void setSeriesCefrLevel(String level) {
+    _seriesCefrLevel = level;
+  }
+
+  /// 이 시리즈에 적용 중인 CEFR. 저장값이 없으면 사용자 기본값이고, `C1`은 `B1`이다.
+  String playableCefrLevel([UserDto? user]) {
+    final stored = _seriesCefrLevel;
+    if (stored != null && stored.isNotEmpty) {
+      return EnglishLevelUtil.toPlayable(stored);
+    }
+    return EnglishLevelUtil.toPlayable(
+      EnglishLevelUtil.readLevelFromUser(user ?? _user),
+    );
   }
 
   void setSession(RpS2SessionDto session) {
@@ -117,6 +136,7 @@ class SeriesStateService {
     _overview = null;
     _selectedEpisodeId = null;
     _user = null;
+    _seriesCefrLevel = null;
     _session = null;
     _cachedUserHistory = null;
     _bestScoreRefreshPending = false;

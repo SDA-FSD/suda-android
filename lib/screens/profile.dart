@@ -93,6 +93,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _isProgressLoading = true;
   bool _showPremiumCta = true;
   bool _claimingLevelReward = false;
+  bool _achievementsExpanded = false;
   int _myProfileRequestId = 0;
   int _progressRequestId = 0;
 
@@ -890,6 +891,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       return _buildProgressCardsShimmer();
     }
     final progress = _progress;
+    final achievementItems = _profileAchievementItems(progress);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -972,19 +974,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
         const SizedBox(height: 36),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Text(
-            l10n.profileAchievements,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.w700,
-              fontVariations: const [FontVariation('wght', 700)],
-            ),
+          child: Row(
+            children: [
+              Text(
+                l10n.profileAchievements,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                  fontVariations: const [FontVariation('wght', 700)],
+                ),
+              ),
+              const Spacer(),
+              GestureDetector(
+                onTap: () => setState(
+                  () => _achievementsExpanded = !_achievementsExpanded,
+                ),
+                child: Image.asset(
+                  _achievementsExpanded
+                      ? 'assets/images/icons/click_to_fold.png'
+                      : 'assets/images/icons/click_to_expand.png',
+                  width: 24,
+                  height: 24,
+                ),
+              ),
+            ],
           ),
         ),
         const SizedBox(height: 10),
         ProfileAchievementsSection(
-          items: _profileAchievementItems(progress),
+          items: achievementItems,
           showClaim: true,
+          foldAfter: 6,
+          expanded: _achievementsExpanded,
           onClaim: _onActivityAchievementClaim,
         ),
       ],

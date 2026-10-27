@@ -14,7 +14,6 @@ import '../../config/app_config.dart';
 import '../../services/series_state_service.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
-import '../../utils/english_level_util.dart';
 import 'ios_audio_teardown.dart';
 
 /// S2 Playing — **단계 1(AI 시작 말풍선·음성·번역)** 및 힌트 트리거 훅.
@@ -161,7 +160,7 @@ mixin PlayingConversationMixin<T extends StatefulWidget> on State<T> {
     final episode = SeriesStateService.instance.selectedEpisode;
     final user = SeriesStateService.instance.user;
     if (episode == null) return null;
-    final cefrCode = EnglishLevelUtil.readLevelFromUser(user);
+    final cefrCode = SeriesStateService.instance.playableCefrLevel(user);
     return episode.cefrMap[cefrCode]?.startLine;
   }
 

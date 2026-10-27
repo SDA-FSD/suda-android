@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/series_models.dart';
 import '../../models/user_models.dart';
+import '../../services/series_state_service.dart';
 import '../../utils/english_level_util.dart';
 import '../../utils/suda_json_util.dart';
 import '../../widgets/app_scaffold.dart';
@@ -153,7 +154,7 @@ class SeriesInformationScreen extends StatelessWidget {
   }
 
   Widget _buildLanguageLevelLine(AppLocalizations l10n, TextTheme theme) {
-    final cefrCode = EnglishLevelUtil.readLevelFromUser(user);
+    final cefrCode = SeriesStateService.instance.playableCefrLevel(user);
     final cefrLabel = EnglishLevelUtil.localizedLabel(l10n, cefrCode);
     final bodyStyle = _bodySmallWhite(theme);
     final boldStyle = _bodySmallBoldWhite(theme);
@@ -301,7 +302,7 @@ class SeriesInformationScreen extends StatelessWidget {
       seriesTitle,
       headerTitleStyle,
     );
-    final cefrCode = EnglishLevelUtil.readLevelFromUser(user);
+    final cefrCode = SeriesStateService.instance.playableCefrLevel(user);
     final heroHeight = _heroHeight(context);
     final scaffoldBackground = Theme.of(context).scaffoldBackgroundColor;
 

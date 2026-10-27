@@ -37,6 +37,14 @@ class EnglishLevelUtil {
     return trimmed;
   }
 
+  /// 시리즈 플레이에 쓰는 레벨. `C1`은 `B1`, 그 외 미지원 값은 [defaultLevel].
+  static String toPlayable(String? raw) {
+    final level = normalizeToCefr(raw);
+    if (level == fadedLevel) return 'B1';
+    if (visibleLevels.contains(level)) return level;
+    return defaultLevel;
+  }
+
   static String readLevelFromUser(UserDto? user) {
     final meta = user?.metaInfo;
     if (meta == null) return defaultLevel;

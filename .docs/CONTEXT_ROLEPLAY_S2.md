@@ -77,7 +77,7 @@ Home (시리즈 썸네일)
 | 단계 | 내용 | 데이터/API | 코드 상태 |
 |------|------|------------|-----------|
 | **Opening** | 세션 생성 | `POST /rps2/sessions` → `RpS2SessionDto` | ✅ `opening.dart`. briefing `stop()`은 `_stopBriefingAudio`에서 2s timeout(AOS·iOS Start·AOS dispose 동일). hang 시 Playing 진입. iOS dispose는 `IosAudioTeardown` 큐. |
-| **① AI 시작** | 진입 직후 첫 AI 말풍선·TTS·번역 아이콘 | 텍스트: `cefrMap[ENGLISH_LEVEL].startLine` · 음성: `session.aiSound` · 아바타: `aiCharacter.rpImgPath` · 번역: `GET /rps2/sessions/{id}/translation?rpMsgId=` | ✅ `playing_conversation_mixin.dart` **`startAiOpeningFlow`만**. iOS: Opening AVPlayer teardown를 `IosAudioTeardown` 큐(job timeout 2s)로 직렬화, CDN을 파일로 받아 `setFilePath`, duration=0을 로드 실패로 보지 않음. Playing iOS 오디오 세션은 TTS부터 `playAndRecord`+`defaultToSpeaker`(Bluetooth 미사용 전제, 탭 시 category 전환 없음). **AOS Playing `AudioPlayer.stop()`은 Opening과 같은 2s timeout** (`_stopPlayingAudioPlayer`: TTS prepare·힌트/finish `stopPlayingConversationAudio`). HTTP·나레이션·`setAudioSource`는 timeout 대상 아님. |
+| **① AI 시작** | 진입 직후 첫 AI 말풍선·TTS·번역 아이콘 | 텍스트: `cefrMap[시리즈 CEFR].startLine` · 음성: `session.aiSound` · 아바타: `aiCharacter.rpImgPath` · 번역: `GET /rps2/sessions/{id}/translation?rpMsgId=` | ✅ `playing_conversation_mixin.dart` **`startAiOpeningFlow`만**. iOS: Opening AVPlayer teardown를 `IosAudioTeardown` 큐(job timeout 2s)로 직렬화, CDN을 파일로 받아 `setFilePath`, duration=0을 로드 실패로 보지 않음. Playing iOS 오디오 세션은 TTS부터 `playAndRecord`+`defaultToSpeaker`(Bluetooth 미사용 전제, 탭 시 category 전환 없음). **AOS Playing `AudioPlayer.stop()`은 Opening과 같은 2s timeout** (`_stopPlayingAudioPlayer`: TTS prepare·힌트/finish `stopPlayingConversationAudio`). HTTP·나레이션·`setAudioSource`는 timeout 대상 아님. |
 | **② 힌트 자동** | AI 발화 후 조건부 | `_autoHintEnabled` + `GET /rps2/sessions/{id}/hint/{rpMsgId}` (`rpMsgId` = 마지막 AI의 서버 id, 없으면 `conversationIndex`) | ✅ `playing_hint_mixin.dart` — 오토힌트 ON 자동 노출 후 사용자 턴·OFF 아이콘 탭+사용자 턴·AI 음성 종료 트리거·3s blink. 힌트 텍스트 202 not-ready 시 최대 15회 재시도 |
 | **③ 사용자 발화** | 마이크/타이핑 전송 | `POST /rps2/sessions/{id}/user-message/audio`, `POST /rps2/sessions/{id}/user-message/text` | ✅ `playing_input_mixin.dart`. iOS: 탭 시 세션 재설정 없이 `recorder.start`(플러그인 `manageAudioSession=false`). 말풍선은 start 전에 노출. AOS 녹음 경로는 세션 전환 없음(기존과 동일). **`recorder.stop`/`cancel`은 Playing 오디오와 같은 2s timeout** (`_stopRecording`. 직렬 큐 유지. POST/말한 길이와 무관). 무발화는 업로드하지 않음: 녹음 중 100ms dBFS, 처음 150ms 제외, 0은 제외. 하위 20%와 최댓값 차이가 10dB 미만이고 최댓값도 -30dBFS 미만이면 무발화. 유효 샘플 3개 미만이면 업로드. 무발화로 지우면 `MIC_RECORDING_NO_SPEECH`. |
 | **④ 나레이션+후속 AI+턴바** | 사용자 1회 발화 후 서버 처리 | `RpS2UserMessageResponseDto(userText,userGrade,narration,aiText,missionCompletedIndex,serviceMessage?)` + `GET /rps2/sessions/{id}/ai-message/audio` | ✅ 사용자 말풍선·턴바 등급 효과·미션 완료 효과·나레이션·후속 AI 말풍선/음성 |
@@ -149,8 +149,8 @@ Home (시리즈 썸네일)
 
 - **파일**: `lib/screens/series/overview.dart`
 - **appPath**: `/series/overview/{seriesId}` → `SeriesRouter.pushOverview`
-- **API**: `GET /rps2/series/{seriesId}/overview`(`category` 포함), `GET /rps2/series/{seriesId}/best-score`
-- **복귀 시 bestScore 갱신**: `RoleplayRouter.popToOverview` 직전 `markBestScoreRefreshPending` → Overview `RouteAware.didPopNext`에서 `GET .../best-score` 재조회(현재 CEFR 기준). CEFR 변경은 overview를 다시 로드한다.
+- **API**: `GET /rps2/series/{seriesId}/overview`(`category` 포함), `GET /rps2/series/{seriesId}/best-score`, `GET|PUT /rps2/series/{seriesId}/cefr-level`
+- **복귀 시 bestScore 갱신**: `RoleplayRouter.popToOverview` 직전 `markBestScoreRefreshPending` → Overview `RouteAware.didPopNext`에서 `GET .../best-score` 재조회(시리즈 CEFR 기준). 시리즈 CEFR 변경은 overview를 다시 로드한다.
 - **로드 시**: `SeriesStateService.setSeriesOverview`, **`FIRST_OVERVIEW`** 통계 (`POST /v1/users/first-overview`, metaInfo `FIRST_OVERVIEW=Y` 가드)
 - **에피소드 Play**: `setSelectedEpisodeId(episode.id)` → `RoleplayRouter.pushTutorial`
 - **Similar Topic 탭**: `SeriesSimilarTopicTabContent` — `GET /v2/home/series?category=` 초기 0–2페이지 로드·스크롤 추가 페이징, 현재 series 제외, 3열 썸네일(`CdnThumbSlot.similarGrid`) 탭 시 Overview push
@@ -206,7 +206,7 @@ Home (시리즈 썸네일)
 - **턴바영역 (turn bar area)** — `RoleplayScaffold.belowHeader` + `lib/widgets/roleplay_turn_bar_area.dart`
   - **위치**: 헤더 타이틀 영역(`effectiveHeaderTopSpacing` **60**, `headerTopSpacingDelta -10`) **바로 아래**, 간격 0
   - **크기**: height **20**, 좌우 **마진 24** (`RoleplayTurnBarArea.horizontalMargin`) — 턴박스 Row는 마진 안쪽에서 전폭 채움
-  - **턴박스 개수**: `selectedEpisode.cefrMap[EnglishLevelUtil.readLevelFromUser(user)].requiredSpeechCount` (`RpS2CefrDto`). `null` 또는 `<1`이면 영역 **미노출**
+  - **턴박스 개수**: `selectedEpisode.cefrMap[SeriesStateService.playableCefrLevel].requiredSpeechCount` (`RpS2CefrDto`). `null` 또는 `<1`이면 영역 **미노출**
   - **가로 배치**: `requiredSpeechCount`개 `Expanded` 턴박스 + 턴박스 사이 **gap 6**만 → 개수가 적을수록 턴박스 하나의 width가 커짐
   - **턴박스 내부**(세로, height 20 안):
     - **하단**: turn bar — height **4**, **좌우 둥근 캡슐**(borderRadius = height/2 = **2**) — 턴 상태 색
@@ -235,7 +235,7 @@ Home (시리즈 썸네일)
 
 **미션 패널 (mission panel)** — `lib/widgets/roleplay_mission_panel.dart`, 본문 `Stack` 상단 고정 오버레이
 
-- **데이터**: `selectedEpisode.cefrMap[ENGLISH_LEVEL].missions` (`List<RpS2CefrMissionDto>`, 보통 3개). `instruction`은 `SudaJsonUtil.localizedMapText`
+- **데이터**: `selectedEpisode.cefrMap[시리즈 CEFR].missions` (`List<RpS2CefrMissionDto>`, 보통 3개). `instruction`은 `SudaJsonUtil.localizedMapText`
 - **위치**: 본문 `Stack` 상단에서 **top 2** (`PlayingConversationLayout.missionPanelTop`, gap 8 아래 추가 여백)
 - **레이아웃(접힘)**: 전폭(본문 inset 24 안) · height **54** · **글래스 프레임**(설정패널과 동일: `BackdropFilter` blur 12 · white gradient border α0.36 · gradient α0.22→0.14 · shadow blur 10) · borderRadius **27**(알약형, height/2)
   - 좌 **15**: `rps2_mission_off.png`/완료 시 `rps2_mission_on.png` 24×24 세로 중앙

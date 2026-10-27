@@ -10,7 +10,6 @@ import '../../services/series_state_service.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
 import '../../services/perf_monitoring_service.dart';
-import '../../utils/english_level_util.dart';
 import '../../utils/suda_json_util.dart';
 import '../../effects/mission_complete_effect.dart';
 import '../../widgets/guide_bubble.dart';
@@ -420,17 +419,17 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     final user = SeriesStateService.instance.user;
     if (episode == null) return const [];
 
-    final cefrCode = EnglishLevelUtil.readLevelFromUser(user);
+    final cefrCode = SeriesStateService.instance.playableCefrLevel(user);
     return episode.cefrMap[cefrCode]?.missions ?? const [];
   }
 
-  /// `selectedEpisode.cefrMap[사용자 ENGLISH_LEVEL].requiredSpeechCount`
+  /// `selectedEpisode.cefrMap[시리즈 CEFR].requiredSpeechCount`
   int _resolveRequiredSpeechCount() {
     final episode = SeriesStateService.instance.selectedEpisode;
     final user = SeriesStateService.instance.user;
     if (episode == null) return 0;
 
-    final cefrCode = EnglishLevelUtil.readLevelFromUser(user);
+    final cefrCode = SeriesStateService.instance.playableCefrLevel(user);
     final count = episode.cefrMap[cefrCode]?.requiredSpeechCount;
     if (count == null || count < 1) return 0;
     return count;
