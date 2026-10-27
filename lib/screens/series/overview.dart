@@ -42,7 +42,7 @@ class SeriesOverviewScreen extends StatefulWidget {
 }
 
 class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
-    with RouteAware {
+    with RouteAware, TickerProviderStateMixin {
   bool _isLoading = true;
   String? _errorMessage;
   RpS2SeriesOverviewDto? _overview;
@@ -57,15 +57,49 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
   bool _cefrExpanded = false;
   bool _cefrSaving = false;
   String? _seriesCefrLevel;
+  int _cefrSeq = 0;
+  Future<void> _cefrQueue = Future<void>.value();
+  late final AnimationController _cefrWidthController;
+  late final AnimationController _cefrListController;
+  late final CurvedAnimation _cefrWidthT;
+  late final CurvedAnimation _cefrListT;
 
   static const _heroHeightFactor = 0.6;
   static const _infoIconSize = 24.0;
+  static const _cefrPhaseDuration = Duration(milliseconds: 250);
 
   @override
   void initState() {
     super.initState();
+    _cefrWidthController = AnimationController(
+      vsync: this,
+      duration: _cefrPhaseDuration,
+    );
+    _cefrListController = AnimationController(
+      vsync: this,
+      duration: _cefrPhaseDuration,
+    );
+    _cefrWidthT = CurvedAnimation(
+      parent: _cefrWidthController,
+      curve: Curves.easeInOutCubic,
+    );
+    _cefrListT = CurvedAnimation(
+      parent: _cefrListController,
+      curve: Curves.easeInOutCubic,
+    );
     _loadOverview();
     _scrollController.addListener(_handleScroll);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      precacheImage(
+        const AssetImage('assets/images/icons/click_to_expand.png'),
+        context,
+      );
+      precacheImage(
+        const AssetImage('assets/images/icons/click_to_fold.png'),
+        context,
+      );
+    });
   }
 
   @override
@@ -82,6 +116,10 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
     appRouteObserver.unsubscribe(this);
     _scrollController.removeListener(_handleScroll);
     _scrollController.dispose();
+    _cefrWidthT.dispose();
+    _cefrListT.dispose();
+    _cefrWidthController.dispose();
+    _cefrListController.dispose();
     super.dispose();
   }
 
@@ -110,12 +148,12 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
 
     await PerfMonitoringService.instance.trace('series_overview_load', () async {
       try {
+        _snapSeriesCefrClosed();
         setState(() {
           _isLoading = true;
           _errorMessage = null;
           _overview = null;
           _isSynopsisExpanded = false;
-          _cefrExpanded = false;
         });
 
         if (widget.user != null) {
@@ -139,10 +177,10 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
         if (!mounted) return;
         SeriesStateService.instance.setSeriesCefrLevel(seriesCefr);
 
+        _snapSeriesCefrClosed();
         setState(() {
           _overview = overview;
           _seriesCefrLevel = seriesCefr;
-          _cefrExpanded = false;
           _isLoading = false;
           _scrollToUnlockToken++;
         });
@@ -211,12 +249,12 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
       return;
     }
 
+    if (!shouldShowHeader) {
+      _snapSeriesCefrClosed();
+    }
     setState(() {
       _isFloatingHeaderVisible = shouldShowHeader;
       _isInfoIconVisible = shouldShowInfoIcon;
-      if (!shouldShowHeader) {
-        _cefrExpanded = false;
-      }
     });
   }
 
@@ -268,23 +306,68 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
     } catch (_) {}
   }
 
+  void _snapSeriesCefrClosed() {
+    _cefrSeq++;
+    _cefrExpanded = false;
+    _cefrWidthController.value = 0;
+    _cefrListController.value = 0;
+  }
+
+  Future<void> _enqueueCefr(Future<void> Function() action) {
+    final next = _cefrQueue.then((_) async {
+      if (!mounted) return;
+      await action();
+    });
+    _cefrQueue = next.catchError((Object _) {});
+    return next;
+  }
+
+  Future<void> _openSeriesCefr() async {
+    final seq = _cefrSeq;
+    if (_cefrExpanded || _cefrWidthController.value > 0) return;
+    setState(() => _cefrExpanded = true);
+    await _cefrWidthController.forward();
+    if (!mounted || seq != _cefrSeq) return;
+    await _cefrListController.forward();
+  }
+
+  Future<void> _closeSeriesCefr() async {
+    final seq = _cefrSeq;
+    if (!_cefrExpanded &&
+        _cefrWidthController.value == 0 &&
+        _cefrListController.value == 0) {
+      return;
+    }
+    setState(() => _cefrExpanded = false);
+    await _cefrListController.reverse();
+    if (!mounted || seq != _cefrSeq) return;
+    await _cefrWidthController.reverse();
+  }
+
   void _toggleSeriesCefr() {
     if (_cefrSaving) return;
-    setState(() => _cefrExpanded = !_cefrExpanded);
+    if (_cefrExpanded) {
+      _enqueueCefr(_closeSeriesCefr);
+    } else {
+      _enqueueCefr(_openSeriesCefr);
+    }
   }
 
   Future<void> _selectSeriesCefr(String level) async {
     if (_cefrSaving) return;
     final current = _currentSeriesCefr();
     if (level == current) {
-      setState(() => _cefrExpanded = false);
+      await _enqueueCefr(_closeSeriesCefr);
       return;
     }
 
+    final previousLevel = _seriesCefrLevel;
     setState(() {
-      _cefrExpanded = false;
       _cefrSaving = true;
+      _seriesCefrLevel = level;
     });
+    SeriesStateService.instance.setSeriesCefrLevel(level);
+    final close = _enqueueCefr(_closeSeriesCefr);
     try {
       final accessToken = await TokenStorage.loadAccessToken();
       if (!mounted || accessToken == null) return;
@@ -297,9 +380,14 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
       final playable = EnglishLevelUtil.toPlayable(saved);
       SeriesStateService.instance.setSeriesCefrLevel(playable);
       setState(() => _seriesCefrLevel = playable);
+      await close;
       await _loadOverview();
     } catch (_) {
-      // 저장 실패 시 이전 레벨을 유지한다.
+      SeriesStateService.instance.setSeriesCefrLevel(
+        previousLevel ??
+            EnglishLevelUtil.readLevelFromUser(widget.user),
+      );
+      if (mounted) setState(() => _seriesCefrLevel = previousLevel);
     } finally {
       if (mounted) setState(() => _cefrSaving = false);
     }
@@ -343,6 +431,11 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
     final level = _currentSeriesCefr();
     final label = EnglishLevelUtil.localizedLabel(l10n, level);
     const pillRadius = 12.0;
+    final labelStyle = theme.labelSmall?.copyWith(color: Colors.white);
+    final levelLabels = [
+      for (final code in EnglishLevelUtil.visibleLevels)
+        EnglishLevelUtil.localizedLabel(l10n, code),
+    ];
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -375,56 +468,85 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
                 ],
               ),
             ),
-            child: IntrinsicWidth(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                GestureDetector(
-                  onTap: _toggleSeriesCefr,
-                  behavior: HitTestBehavior.opaque,
-                  child: SizedBox(
-                    height: 24,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const SizedBox(width: 8),
-                        Image.asset(
-                          'assets/images/icons/circle_usa_flag.png',
-                          width: 13,
-                          height: 13,
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 14),
-                          child: Text(
-                            label,
-                            style: theme.labelSmall?.copyWith(
-                              color: Colors.white,
-                            ),
+            child: AnimatedBuilder(
+              animation: Listenable.merge([_cefrWidthT, _cefrListT]),
+              builder: (context, _) {
+                final style = labelStyle ?? const TextStyle();
+                final scaler = MediaQuery.textScalerOf(context);
+                final selectedWidth = _cefrTextWidth(label, style, scaler);
+                var longestWidth = selectedWidth;
+                for (final text in levelLabels) {
+                  final width = _cefrTextWidth(text, style, scaler);
+                  if (width > longestWidth) longestWidth = width;
+                }
+                final slotWidth = selectedWidth +
+                    (longestWidth - selectedWidth) * _cefrWidthT.value;
+                final showList = !_cefrListController.isDismissed;
+                return IntrinsicWidth(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      GestureDetector(
+                        onTap: _toggleSeriesCefr,
+                        behavior: HitTestBehavior.opaque,
+                        child: SizedBox(
+                          height: 24,
+                          child: Stack(
+                            alignment: Alignment.centerLeft,
+                            children: [
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  const SizedBox(width: 8),
+                                  Image.asset(
+                                    'assets/images/icons/circle_usa_flag.png',
+                                    width: 13,
+                                    height: 13,
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 8),
+                                    child: SizedBox(
+                                      width: slotWidth,
+                                      child: Text(
+                                        label,
+                                        style: labelStyle,
+                                        maxLines: 1,
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 5),
+                                  Opacity(
+                                    opacity: 0,
+                                    child: _cefrExpandIcon(),
+                                  ),
+                                  const SizedBox(width: 8),
+                                ],
+                              ),
+                              Positioned(
+                                right: 8,
+                                top: 0,
+                                bottom: 0,
+                                child: Center(child: _cefrExpandIcon()),
+                              ),
+                            ],
                           ),
                         ),
-                        Image.asset(
-                          _cefrExpanded
-                              ? 'assets/images/icons/click_to_fold.png'
-                              : 'assets/images/icons/click_to_expand.png',
-                          height: 13,
-                          fit: BoxFit.fitHeight,
+                      ),
+                      if (showList)
+                        ClipRect(
+                          child: Align(
+                            alignment: Alignment.topCenter,
+                            heightFactor: _cefrListT.value,
+                            child: _buildSeriesCefrChoices(context, level),
+                          ),
                         ),
-                        const SizedBox(width: 8),
-                      ],
-                    ),
+                    ],
                   ),
-                ),
-                AnimatedSize(
-                  duration: const Duration(milliseconds: 220),
-                  curve: Curves.easeInOut,
-                  alignment: Alignment.topCenter,
-                  child: _cefrExpanded
-                      ? _buildSeriesCefrChoices(context, level)
-                      : const SizedBox.shrink(),
-                ),
-              ],
-            ),
+                );
+              },
             ),
           ),
         ),
@@ -432,41 +554,65 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
     );
   }
 
+  Widget _cefrExpandIcon() {
+    return Image.asset(
+      _cefrExpanded
+          ? 'assets/images/icons/click_to_fold.png'
+          : 'assets/images/icons/click_to_expand.png',
+      width: 13,
+      height: 13,
+      fit: BoxFit.contain,
+    );
+  }
+
+  double _cefrTextWidth(String text, TextStyle style, TextScaler scaler) {
+    final painter = TextPainter(
+      text: TextSpan(text: text, style: style),
+      textDirection: TextDirection.ltr,
+      textScaler: scaler,
+      maxLines: 1,
+    )..layout();
+    return painter.width;
+  }
+
   Widget _buildSeriesCefrChoices(BuildContext context, String selected) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context).textTheme;
+    const bottomInset = (24 - 12 * 1.2) / 2;
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        ColoredBox(
-          color: const Color(0xFFD9D9D9).withValues(alpha: 0.2),
-          child: const SizedBox(height: 1),
-        ),
-        for (final code in EnglishLevelUtil.visibleLevels)
-          GestureDetector(
-            onTap: () => _selectSeriesCefr(code),
-            behavior: HitTestBehavior.opaque,
-            child: SizedBox(
-              height: 24,
-              child: Padding(
-                padding: const EdgeInsets.only(left: 35, right: 8),
-                child: Align(
-                  alignment: Alignment.centerLeft,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: bottomInset),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 10),
+            child: ColoredBox(
+              color: Color(0x33D9D9D9),
+              child: SizedBox(height: 1),
+            ),
+          ),
+          for (final code in EnglishLevelUtil.visibleLevels)
+            GestureDetector(
+              onTap: () => _selectSeriesCefr(code),
+              behavior: HitTestBehavior.opaque,
+              child: SizedBox(
+                height: 24,
+                child: Center(
                   child: Text(
                     EnglishLevelUtil.localizedLabel(l10n, code),
                     style: theme.labelSmall?.copyWith(
                       color: code == selected
-                          ? const Color(0xFF353535)
+                          ? const Color(0xFF0CABA8)
                           : Colors.white,
                     ),
                   ),
                 ),
               ),
             ),
-          ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -808,13 +954,20 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
             ),
           ),
           if (overview != null) _buildInfoIconOverlay(heroHeight),
-          if (_cefrExpanded)
-            Positioned.fill(
-              child: GestureDetector(
-                onTap: () => setState(() => _cefrExpanded = false),
-                behavior: HitTestBehavior.opaque,
-              ),
+          Positioned.fill(
+            child: AnimatedBuilder(
+              animation: _cefrListController,
+              builder: (context, _) {
+                final show =
+                    _cefrExpanded || _cefrListController.value > 0;
+                if (!show) return const SizedBox.shrink();
+                return GestureDetector(
+                  onTap: () => _enqueueCefr(_closeSeriesCefr),
+                  behavior: HitTestBehavior.opaque,
+                );
+              },
             ),
+          ),
           _buildFloatingHeader(context),
           if (_isLoading)
             const Center(
