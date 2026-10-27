@@ -257,6 +257,8 @@
   "achievementSceneStealerHint": "Voltooi {count} Roleplays.",
   "achievementOnARoll": "Op stoom",
   "achievementOnARollHint": "Oefen {count} dagen achter elkaar.",
+  "achievementSocialButterfly": "Sociale vlinder",
+  "achievementSocialButterflyHint": "Voeg {count} andere gebruikers toe als vrienden op SUDA.",
   "otherUserFriends": "Vrienden",
   "otherUserRequested": "Verzoek verzonden",
   "otherUserAddFriend": "Vriend toevoegen",

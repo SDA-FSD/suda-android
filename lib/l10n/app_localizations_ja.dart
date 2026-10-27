@@ -683,6 +683,14 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
+  String get achievementSocialButterfly => '社交の達人';
+
+  @override
+  String achievementSocialButterflyHint(int count) {
+    return 'SUDAで他のユーザー$count人を友達に追加してください。';
+  }
+
+  @override
   String get otherUserFriends => 'フレンド';
 
   @override

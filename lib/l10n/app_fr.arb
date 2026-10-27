@@ -257,6 +257,8 @@
   "achievementSceneStealerHint": "Terminez {count} Roleplays.",
   "achievementOnARoll": "Sur sa lancée",
   "achievementOnARollHint": "Entraînez-vous {count} jours d'affilée.",
+  "achievementSocialButterfly": "Papillon social",
+  "achievementSocialButterflyHint": "Ajoutez {count} autres utilisateurs comme amis sur SUDA.",
   "otherUserFriends": "Amis",
   "otherUserRequested": "Demande envoyée",
   "otherUserAddFriend": "Ajouter un ami",

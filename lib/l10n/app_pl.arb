@@ -257,6 +257,8 @@
   "achievementSceneStealerHint": "Ukończ {count} odgrywań ról.",
   "achievementOnARoll": "Na fali",
   "achievementOnARollHint": "Ćwicz przez {count} dni z rzędu.",
+  "achievementSocialButterfly": "Towarzyski motyl",
+  "achievementSocialButterflyHint": "Dodaj {count} innych użytkowników jako znajomych na SUDA.",
   "otherUserFriends": "Przyjaciele",
   "otherUserRequested": "Wysłano zaproszenie",
   "otherUserAddFriend": "Dodaj znajomego",

@@ -723,6 +723,14 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
+  String get achievementSocialButterfly => 'Kupu-kupu Sosial';
+
+  @override
+  String achievementSocialButterflyHint(int count) {
+    return 'Tambahkan $count pengguna lain sebagai teman di SUDA.';
+  }
+
+  @override
   String get otherUserFriends => 'Teman';
 
   @override

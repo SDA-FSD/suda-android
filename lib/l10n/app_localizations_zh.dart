@@ -677,6 +677,14 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get achievementSocialButterfly => '社交达人';
+
+  @override
+  String achievementSocialButterflyHint(int count) {
+    return '在 SUDA 上添加 $count 位其他用户为好友。';
+  }
+
+  @override
   String get otherUserFriends => '好友';
 
   @override
@@ -1868,6 +1876,14 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   }
 
   @override
+  String get achievementSocialButterfly => '社交达人';
+
+  @override
+  String achievementSocialButterflyHint(int count) {
+    return '在 SUDA 上添加 $count 位其他用户为好友。';
+  }
+
+  @override
   String get otherUserFriends => '好友';
 
   @override
@@ -3056,6 +3072,14 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   @override
   String achievementOnARollHint(int count) {
     return '連續學習 $count 天。';
+  }
+
+  @override
+  String get achievementSocialButterfly => '社交達人';
+
+  @override
+  String achievementSocialButterflyHint(int count) {
+    return '在 SUDA 上新增 $count 位其他使用者為好友。';
   }
 
   @override

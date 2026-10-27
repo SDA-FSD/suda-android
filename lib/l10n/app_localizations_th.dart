@@ -710,6 +710,14 @@ class AppLocalizationsTh extends AppLocalizations {
   }
 
   @override
+  String get achievementSocialButterfly => 'นักสังคม';
+
+  @override
+  String achievementSocialButterflyHint(int count) {
+    return 'เพิ่มผู้ใช้อื่น $count คนเป็นเพื่อนบน SUDA';
+  }
+
+  @override
   String get otherUserFriends => 'เพื่อน';
 
   @override

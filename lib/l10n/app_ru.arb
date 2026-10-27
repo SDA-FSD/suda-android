@@ -257,6 +257,8 @@
   "achievementSceneStealerHint": "Завершите {count} ролевых игр.",
   "achievementOnARoll": "На кураже",
   "achievementOnARollHint": "Занимайтесь {count} дней подряд.",
+  "achievementSocialButterfly": "Социальная бабочка",
+  "achievementSocialButterflyHint": "Добавьте {count} других пользователей в друзья в SUDA.",
   "otherUserFriends": "Друзья",
   "otherUserRequested": "Запрос отправлен",
   "otherUserAddFriend": "Добавить в друзья",

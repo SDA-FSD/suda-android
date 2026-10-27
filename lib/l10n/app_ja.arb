@@ -257,6 +257,8 @@
   "achievementSceneStealerHint": "ロールプレイを{count}回完了してください。",
   "achievementOnARoll": "連勝街道",
   "achievementOnARollHint": "{count}日連続で学習してください。",
+  "achievementSocialButterfly": "社交の達人",
+  "achievementSocialButterflyHint": "SUDAで他のユーザー{count}人を友達に追加してください。",
   "otherUserFriends": "フレンド",
   "otherUserRequested": "リクエスト済み",
   "otherUserAddFriend": "フレンド追加",

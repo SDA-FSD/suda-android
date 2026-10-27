@@ -726,6 +726,14 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get achievementSocialButterfly => 'Mariposa social';
+
+  @override
+  String achievementSocialButterflyHint(int count) {
+    return 'Agrega a $count usuarios más como amigos en SUDA.';
+  }
+
+  @override
   String get otherUserFriends => 'Amigos';
 
   @override
@@ -1998,6 +2006,14 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
   @override
   String achievementOnARollHint(int count) {
     return 'Practica $count días seguidos.';
+  }
+
+  @override
+  String get achievementSocialButterfly => 'Mariposa social';
+
+  @override
+  String achievementSocialButterflyHint(int count) {
+    return 'Agrega a $count usuarios más como amigos en SUDA.';
   }
 
   @override

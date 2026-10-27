@@ -720,6 +720,14 @@ class AppLocalizationsVi extends AppLocalizations {
   }
 
   @override
+  String get achievementSocialButterfly => 'Kết bạn rộng';
+
+  @override
+  String achievementSocialButterflyHint(int count) {
+    return 'Thêm $count người dùng khác làm bạn trên SUDA.';
+  }
+
+  @override
   String get otherUserFriends => 'Bạn bè';
 
   @override

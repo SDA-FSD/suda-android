@@ -257,6 +257,8 @@
   "achievementSceneStealerHint": "{count} रोलप्ले पूरे करें।",
   "achievementOnARoll": "लगातार जोश",
   "achievementOnARollHint": "लगातार {count} दिन अभ्यास करें।",
+  "achievementSocialButterfly": "सोशल बटरफ्लाई",
+  "achievementSocialButterflyHint": "SUDA पर {count} अन्य उपयोगकर्ताओं को मित्र बनाएँ।",
   "otherUserFriends": "मित्र",
   "otherUserRequested": "अनुरोध भेजा गया",
   "otherUserAddFriend": "मित्र जोड़ें",

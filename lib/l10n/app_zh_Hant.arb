@@ -257,6 +257,8 @@
   "achievementSceneStealerHint": "完成 {count} 次角色扮演。",
   "achievementOnARoll": "勢不可擋",
   "achievementOnARollHint": "連續學習 {count} 天。",
+  "achievementSocialButterfly": "社交達人",
+  "achievementSocialButterflyHint": "在 SUDA 上新增 {count} 位其他使用者為好友。",
   "otherUserFriends": "好友",
   "otherUserRequested": "已送出請求",
   "otherUserAddFriend": "新增好友",

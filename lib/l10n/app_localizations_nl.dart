@@ -723,6 +723,14 @@ class AppLocalizationsNl extends AppLocalizations {
   }
 
   @override
+  String get achievementSocialButterfly => 'Sociale vlinder';
+
+  @override
+  String achievementSocialButterflyHint(int count) {
+    return 'Voeg $count andere gebruikers toe als vrienden op SUDA.';
+  }
+
+  @override
   String get otherUserFriends => 'Vrienden';
 
   @override

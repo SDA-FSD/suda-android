@@ -257,6 +257,8 @@
   "achievementSceneStealerHint": "롤플레이를 {count}회 완료하세요.",
   "achievementOnARoll": "불꽃질주",
   "achievementOnARollHint": "{count}일 연속으로 학습하세요.",
+  "achievementSocialButterfly": "사교의 달인",
+  "achievementSocialButterflyHint": "SUDA의 다른 사용자 {count}명과 친구를 맺으세요.",
   "otherUserFriends": "친구",
   "otherUserRequested": "요청 보냄",
   "otherUserAddFriend": "친구 추가",

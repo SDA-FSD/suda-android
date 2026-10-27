@@ -257,6 +257,8 @@
   "achievementSceneStealerHint": "เล่น Roleplay ให้จบ {count} ครั้ง",
   "achievementOnARoll": "แรงไม่ตก",
   "achievementOnARollHint": "ฝึกต่อเนื่อง {count} วัน",
+  "achievementSocialButterfly": "นักสังคม",
+  "achievementSocialButterflyHint": "เพิ่มผู้ใช้อื่น {count} คนเป็นเพื่อนบน SUDA",
   "otherUserFriends": "เพื่อน",
   "otherUserRequested": "ส่งคำขอแล้ว",
   "otherUserAddFriend": "เพิ่มเพื่อน",

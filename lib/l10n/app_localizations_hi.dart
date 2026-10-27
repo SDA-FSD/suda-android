@@ -722,6 +722,14 @@ class AppLocalizationsHi extends AppLocalizations {
   }
 
   @override
+  String get achievementSocialButterfly => 'सोशल बटरफ्लाई';
+
+  @override
+  String achievementSocialButterflyHint(int count) {
+    return 'SUDA पर $count अन्य उपयोगकर्ताओं को मित्र बनाएँ।';
+  }
+
+  @override
   String get otherUserFriends => 'मित्र';
 
   @override

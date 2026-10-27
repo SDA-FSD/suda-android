@@ -257,6 +257,8 @@
   "achievementSceneStealerHint": "Schließe {count} Roleplays ab.",
   "achievementOnARoll": "Im Flow",
   "achievementOnARollHint": "Übe {count} Tage hintereinander.",
+  "achievementSocialButterfly": "Sozialer Schmetterling",
+  "achievementSocialButterflyHint": "Füge {count} andere Nutzer auf SUDA als Freunde hinzu.",
   "otherUserFriends": "Freunde",
   "otherUserRequested": "Angefragt",
   "otherUserAddFriend": "Freund hinzufügen",

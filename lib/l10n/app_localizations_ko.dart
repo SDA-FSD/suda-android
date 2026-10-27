@@ -686,6 +686,14 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
+  String get achievementSocialButterfly => '사교의 달인';
+
+  @override
+  String achievementSocialButterflyHint(int count) {
+    return 'SUDA의 다른 사용자 $count명과 친구를 맺으세요.';
+  }
+
+  @override
   String get otherUserFriends => '친구';
 
   @override

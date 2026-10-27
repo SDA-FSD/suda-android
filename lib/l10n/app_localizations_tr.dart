@@ -718,6 +718,14 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
+  String get achievementSocialButterfly => 'Sosyal Kelebek';
+
+  @override
+  String achievementSocialButterflyHint(int count) {
+    return 'SUDA\'da $count başka kullanıcıyı arkadaş olarak ekle.';
+  }
+
+  @override
   String get otherUserFriends => 'Arkadaşlar';
 
   @override

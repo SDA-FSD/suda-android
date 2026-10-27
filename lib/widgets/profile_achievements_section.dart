@@ -148,6 +148,7 @@ String _activityAsset(String code, int level) {
     'TA' => 'TA',
     'SC' => 'SC',
     'ON' => 'ON',
+    'SB' => 'SB',
     _ => 'PG',
   };
   return 'assets/images/achievement/$prefix-$level.png';
@@ -184,6 +185,12 @@ _AchievementCopy _activityCopy(
         title: l10n.achievementOnARoll,
         hint: l10n.achievementOnARollHint(goal),
         asset: 'assets/images/achievement/ON-$badge.png',
+      );
+    case 'SB':
+      return _AchievementCopy(
+        title: l10n.achievementSocialButterfly,
+        hint: l10n.achievementSocialButterflyHint(goal),
+        asset: 'assets/images/achievement/SB-$badge.png',
       );
     default:
       return _AchievementCopy(

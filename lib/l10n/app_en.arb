@@ -271,10 +271,15 @@
   "achievementSceneStealerHint": "Complete {count} Roleplays.",
   "achievementOnARoll": "On a Roll",
   "achievementOnARollHint": "Practice for {count} days in a row.",
+  "achievementSocialButterfly": "Social Butterfly",
+  "achievementSocialButterflyHint": "Add {count} other users as friends on SUDA.",
   "@achievementSceneStealerHint": {
     "placeholders": { "count": { "type": "int" } }
   },
   "@achievementOnARollHint": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "@achievementSocialButterflyHint": {
     "placeholders": { "count": { "type": "int" } }
   },
   "@achievementPocketGuideHint": {

@@ -257,6 +257,8 @@
   "achievementSceneStealerHint": "أكمل {count} من تمثيل الأدوار.",
   "achievementOnARoll": "متواصل",
   "achievementOnARollHint": "تدرّب {count} أيام متتالية.",
+  "achievementSocialButterfly": "فراشة اجتماعية",
+  "achievementSocialButterflyHint": "أضف {count} مستخدمين آخرين كأصدقاء على SUDA.",
   "otherUserFriends": "الأصدقاء",
   "otherUserRequested": "تم إرسال الطلب",
   "otherUserAddFriend": "إضافة صديق",

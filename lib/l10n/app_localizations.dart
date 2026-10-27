@@ -1415,6 +1415,18 @@ abstract class AppLocalizations {
   /// **'Practice for {count} days in a row.'**
   String achievementOnARollHint(int count);
 
+  /// No description provided for @achievementSocialButterfly.
+  ///
+  /// In en, this message translates to:
+  /// **'Social Butterfly'**
+  String get achievementSocialButterfly;
+
+  /// No description provided for @achievementSocialButterflyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add {count} other users as friends on SUDA.'**
+  String achievementSocialButterflyHint(int count);
+
   /// No description provided for @otherUserFriends.
   ///
   /// In en, this message translates to:

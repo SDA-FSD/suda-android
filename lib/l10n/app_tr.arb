@@ -257,6 +257,8 @@
   "achievementSceneStealerHint": "{count} Roleplay tamamla.",
   "achievementOnARoll": "Durdurulamaz",
   "achievementOnARollHint": "Üst üste {count} gün çalış.",
+  "achievementSocialButterfly": "Sosyal Kelebek",
+  "achievementSocialButterflyHint": "SUDA'da {count} başka kullanıcıyı arkadaş olarak ekle.",
   "otherUserFriends": "Arkadaşlar",
   "otherUserRequested": "İstek gönderildi",
   "otherUserAddFriend": "Arkadaş ekle",

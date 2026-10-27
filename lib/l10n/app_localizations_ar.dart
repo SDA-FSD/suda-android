@@ -714,6 +714,14 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get achievementSocialButterfly => 'فراشة اجتماعية';
+
+  @override
+  String achievementSocialButterflyHint(int count) {
+    return 'أضف $count مستخدمين آخرين كأصدقاء على SUDA.';
+  }
+
+  @override
   String get otherUserFriends => 'الأصدقاء';
 
   @override

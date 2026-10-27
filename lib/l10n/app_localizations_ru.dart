@@ -723,6 +723,14 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
+  String get achievementSocialButterfly => 'Социальная бабочка';
+
+  @override
+  String achievementSocialButterflyHint(int count) {
+    return 'Добавьте $count других пользователей в друзья в SUDA.';
+  }
+
+  @override
   String get otherUserFriends => 'Друзья';
 
   @override

@@ -257,6 +257,8 @@
   "achievementSceneStealerHint": "Completa {count} Roleplays.",
   "achievementOnARoll": "Imparable",
   "achievementOnARollHint": "Practica {count} días seguidos.",
+  "achievementSocialButterfly": "Mariposa social",
+  "achievementSocialButterflyHint": "Agrega a {count} usuarios más como amigos en SUDA.",
   "otherUserFriends": "Amigos",
   "otherUserRequested": "Solicitud enviada",
   "otherUserAddFriend": "Agregar amigo",
