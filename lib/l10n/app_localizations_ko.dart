@@ -756,6 +756,14 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
+  String get achievementPhraseHunter => '표현 사냥꾼';
+
+  @override
+  String achievementPhraseHunterHint(int count) {
+    return '표현을 $count개 저장하세요.';
+  }
+
+  @override
   String get otherUserFriends => '친구';
 
   @override

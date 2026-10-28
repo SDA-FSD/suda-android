@@ -272,6 +272,8 @@
   "achievementStarPerformerHint": "Raih 3 bintang di {count} episode.",
   "achievementStoryExplorer": "Penjelajah Cerita",
   "achievementStoryExplorerHint": "Selesaikan {count} seri.",
+  "achievementPhraseHunter": "Pemburu Frasa",
+  "achievementPhraseHunterHint": "Simpan {count} ekspresi ke koleksimu.",
   "otherUserFriends": "Teman",
   "otherUserRequested": "Permintaan terkirim",
   "otherUserAddFriend": "Tambah teman",

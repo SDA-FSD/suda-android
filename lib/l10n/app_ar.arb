@@ -272,6 +272,8 @@
   "achievementStarPerformerHint": "احقق 3 نجوم في {count} حلقات.",
   "achievementStoryExplorer": "مستكشف القصص",
   "achievementStoryExplorerHint": "{count, plural, one{أكمل {count} سلسلة.} other{أكمل {count} سلاسل.}}",
+  "achievementPhraseHunter": "صائد العبارات",
+  "achievementPhraseHunterHint": "احفظ {count} تعبيرات في مجموعتك.",
   "otherUserFriends": "الأصدقاء",
   "otherUserRequested": "تم إرسال الطلب",
   "otherUserAddFriend": "إضافة صديق",

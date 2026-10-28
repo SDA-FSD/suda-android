@@ -789,6 +789,14 @@ class AppLocalizationsVi extends AppLocalizations {
   }
 
   @override
+  String get achievementPhraseHunter => 'Thợ săn cụm từ';
+
+  @override
+  String achievementPhraseHunterHint(int count) {
+    return 'Lưu $count cụm từ vào bộ sưu tập của bạn.';
+  }
+
+  @override
   String get otherUserFriends => 'Bạn bè';
 
   @override

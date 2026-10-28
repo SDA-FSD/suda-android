@@ -272,6 +272,8 @@
   "achievementStarPerformerHint": "Zdobądź 3 gwiazdki w {count} odcinkach.",
   "achievementStoryExplorer": "Odkrywca historii",
   "achievementStoryExplorerHint": "{count, plural, one{Ukończ {count} serię.} few{Ukończ {count} serie.} many{Ukończ {count} serii.} other{Ukończ {count} serii.}}",
+  "achievementPhraseHunter": "Łowca zwrotów",
+  "achievementPhraseHunterHint": "Zapisz {count} wyrażeń w swojej kolekcji.",
   "otherUserFriends": "Przyjaciele",
   "otherUserRequested": "Wysłano zaproszenie",
   "otherUserAddFriend": "Dodaj znajomego",

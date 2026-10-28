@@ -802,6 +802,14 @@ class AppLocalizationsIt extends AppLocalizations {
   }
 
   @override
+  String get achievementPhraseHunter => 'Cacciatore di espressioni';
+
+  @override
+  String achievementPhraseHunterHint(int count) {
+    return 'Salva $count espressioni nella tua raccolta.';
+  }
+
+  @override
   String get otherUserFriends => 'Amici';
 
   @override

@@ -1505,6 +1505,18 @@ abstract class AppLocalizations {
   /// **'{count, plural, one{Complete {count} series.} other{Complete {count} series.}}'**
   String achievementStoryExplorerHint(int count);
 
+  /// No description provided for @achievementPhraseHunter.
+  ///
+  /// In en, this message translates to:
+  /// **'Phrase Hunter'**
+  String get achievementPhraseHunter;
+
+  /// No description provided for @achievementPhraseHunterHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Save {count} expressions to your collection.'**
+  String achievementPhraseHunterHint(int count);
+
   /// No description provided for @otherUserFriends.
   ///
   /// In en, this message translates to:

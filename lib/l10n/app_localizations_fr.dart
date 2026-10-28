@@ -804,6 +804,14 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get achievementPhraseHunter => 'Chasseur d\'expressions';
+
+  @override
+  String achievementPhraseHunterHint(int count) {
+    return 'Enregistrez $count expressions dans votre collection.';
+  }
+
+  @override
   String get otherUserFriends => 'Amis';
 
   @override

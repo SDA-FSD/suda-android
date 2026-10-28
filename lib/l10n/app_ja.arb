@@ -272,6 +272,8 @@
   "achievementStarPerformerHint": "{count}個のエピソードで星3つを達成しましょう。",
   "achievementStoryExplorer": "ストーリー探検家",
   "achievementStoryExplorerHint": "シリーズを{count}個完了してください。",
+  "achievementPhraseHunter": "表現ハンター",
+  "achievementPhraseHunterHint": "表現を{count}個コレクションに保存してください。",
   "otherUserFriends": "フレンド",
   "otherUserRequested": "リクエスト済み",
   "otherUserAddFriend": "フレンド追加",

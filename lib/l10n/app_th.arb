@@ -272,6 +272,8 @@
   "achievementStarPerformerHint": "ทำได้ 3 ดาวใน {count} ตอน",
   "achievementStoryExplorer": "นักสำรวจเรื่องราว",
   "achievementStoryExplorerHint": "ทำซีรีส์ให้ครบ {count} เรื่อง",
+  "achievementPhraseHunter": "นักล่าสำนวน",
+  "achievementPhraseHunterHint": "บันทึกสำนวน {count} รายการลงในคอลเลกชันของคุณ",
   "otherUserFriends": "เพื่อน",
   "otherUserRequested": "ส่งคำขอแล้ว",
   "otherUserAddFriend": "เพิ่มเพื่อน",

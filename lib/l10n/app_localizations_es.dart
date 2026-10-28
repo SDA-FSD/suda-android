@@ -799,6 +799,14 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get achievementPhraseHunter => 'Cazador de expresiones';
+
+  @override
+  String achievementPhraseHunterHint(int count) {
+    return 'Guarda $count expresiones en tu colección.';
+  }
+
+  @override
   String get otherUserFriends => 'Amigos';
 
   @override
@@ -2162,6 +2170,14 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
       one: 'Completa $count serie.',
     );
     return '$_temp0';
+  }
+
+  @override
+  String get achievementPhraseHunter => 'Cazador de expresiones';
+
+  @override
+  String achievementPhraseHunterHint(int count) {
+    return 'Guarda $count expresiones en tu colección.';
   }
 
   @override

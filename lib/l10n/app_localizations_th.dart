@@ -779,6 +779,14 @@ class AppLocalizationsTh extends AppLocalizations {
   }
 
   @override
+  String get achievementPhraseHunter => 'นักล่าสำนวน';
+
+  @override
+  String achievementPhraseHunterHint(int count) {
+    return 'บันทึกสำนวน $count รายการลงในคอลเลกชันของคุณ';
+  }
+
+  @override
   String get otherUserFriends => 'เพื่อน';
 
   @override

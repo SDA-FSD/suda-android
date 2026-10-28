@@ -786,6 +786,14 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
+  String get achievementPhraseHunter => 'İfade Avcısı';
+
+  @override
+  String achievementPhraseHunterHint(int count) {
+    return '$count ifadeyi koleksiyonuna kaydet.';
+  }
+
+  @override
   String get otherUserFriends => 'Arkadaşlar';
 
   @override

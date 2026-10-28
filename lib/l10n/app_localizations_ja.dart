@@ -753,6 +753,14 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
+  String get achievementPhraseHunter => '表現ハンター';
+
+  @override
+  String achievementPhraseHunterHint(int count) {
+    return '表現を$count個コレクションに保存してください。';
+  }
+
+  @override
   String get otherUserFriends => 'フレンド';
 
   @override

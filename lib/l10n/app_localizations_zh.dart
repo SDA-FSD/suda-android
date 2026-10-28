@@ -746,6 +746,14 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get achievementPhraseHunter => '表达猎手';
+
+  @override
+  String achievementPhraseHunterHint(int count) {
+    return '将 $count 个表达保存到你的收藏。';
+  }
+
+  @override
   String get otherUserFriends => '好友';
 
   @override
@@ -2023,6 +2031,14 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   }
 
   @override
+  String get achievementPhraseHunter => '表达猎手';
+
+  @override
+  String achievementPhraseHunterHint(int count) {
+    return '将 $count 个表达保存到你的收藏。';
+  }
+
+  @override
   String get otherUserFriends => '好友';
 
   @override
@@ -3297,6 +3313,14 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   @override
   String achievementStoryExplorerHint(int count) {
     return '完成 $count 個系列。';
+  }
+
+  @override
+  String get achievementPhraseHunter => '表達獵手';
+
+  @override
+  String achievementPhraseHunterHint(int count) {
+    return '將 $count 個表達儲存到你的收藏。';
   }
 
   @override

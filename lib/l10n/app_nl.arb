@@ -272,6 +272,8 @@
   "achievementStarPerformerHint": "Behaal 3 sterren in {count} afleveringen.",
   "achievementStoryExplorer": "Verhalenverkenner",
   "achievementStoryExplorerHint": "{count, plural, one{Voltooi {count} serie.} other{Voltooi {count} series.}}",
+  "achievementPhraseHunter": "Uitdrukkingenjager",
+  "achievementPhraseHunterHint": "Sla {count} uitdrukkingen op in je verzameling.",
   "otherUserFriends": "Vrienden",
   "otherUserRequested": "Verzoek verzonden",
   "otherUserAddFriend": "Vriend toevoegen",
