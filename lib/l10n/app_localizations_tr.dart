@@ -770,6 +770,14 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
+  String get achievementStoryExplorer => 'Hikaye Kaşifi';
+
+  @override
+  String achievementStoryExplorerHint(int count) {
+    return '$count seri tamamla.';
+  }
+
+  @override
   String get otherUserFriends => 'Arkadaşlar';
 
   @override

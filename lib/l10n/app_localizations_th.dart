@@ -762,6 +762,14 @@ class AppLocalizationsTh extends AppLocalizations {
   }
 
   @override
+  String get achievementStoryExplorer => 'นักสำรวจเรื่องราว';
+
+  @override
+  String achievementStoryExplorerHint(int count) {
+    return 'ทำซีรีส์ให้ครบ $count เรื่อง';
+  }
+
+  @override
   String get otherUserFriends => 'เพื่อน';
 
   @override

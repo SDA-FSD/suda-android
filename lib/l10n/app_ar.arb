@@ -267,6 +267,8 @@
   "achievementCharacterCollectorHint": "{count, plural, one{اجمع {count} شخصية مختلفة.} other{اجمع {count} شخصيات مختلفة.}}",
   "achievementStarPerformer": "نجم الحوار",
   "achievementStarPerformerHint": "احقق 3 نجوم في {count} حلقات.",
+  "achievementStoryExplorer": "مستكشف القصص",
+  "achievementStoryExplorerHint": "{count, plural, one{أكمل {count} سلسلة.} other{أكمل {count} سلاسل.}}",
   "otherUserFriends": "الأصدقاء",
   "otherUserRequested": "تم إرسال الطلب",
   "otherUserAddFriend": "إضافة صديق",

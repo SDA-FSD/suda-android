@@ -267,6 +267,8 @@
   "achievementCharacterCollectorHint": "{count, plural, one{Соберите {count} другого персонажа.} other{Соберите {count} разных персонажей.}}",
   "achievementStarPerformer": "Звезда разговора",
   "achievementStarPerformerHint": "Получите 3 звезды в {count} эпизодах.",
+  "achievementStoryExplorer": "Исследователь историй",
+  "achievementStoryExplorerHint": "{count, plural, one{Завершите {count} серию.} few{Завершите {count} серии.} many{Завершите {count} серий.} other{Завершите {count} серий.}}",
   "otherUserFriends": "Друзья",
   "otherUserRequested": "Запрос отправлен",
   "otherUserAddFriend": "Добавить в друзья",

@@ -778,6 +778,20 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get achievementStoryExplorer => 'Explorador de historias';
+
+  @override
+  String achievementStoryExplorerHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Completa $count series.',
+      one: 'Completa $count serie.',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get otherUserFriends => 'Amigos';
 
   @override
@@ -2120,6 +2134,20 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
   @override
   String achievementStarPerformerHint(int count) {
     return 'Consigue 3 estrellas en $count episodios.';
+  }
+
+  @override
+  String get achievementStoryExplorer => 'Explorador de historias';
+
+  @override
+  String achievementStoryExplorerHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Completa $count series.',
+      one: 'Completa $count serie.',
+    );
+    return '$_temp0';
   }
 
   @override

@@ -729,6 +729,14 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get achievementStoryExplorer => '故事探索者';
+
+  @override
+  String achievementStoryExplorerHint(int count) {
+    return '完成 $count 个系列。';
+  }
+
+  @override
   String get otherUserFriends => '好友';
 
   @override
@@ -1989,6 +1997,14 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   }
 
   @override
+  String get achievementStoryExplorer => '故事探索者';
+
+  @override
+  String achievementStoryExplorerHint(int count) {
+    return '完成 $count 个系列。';
+  }
+
+  @override
   String get otherUserFriends => '好友';
 
   @override
@@ -3246,6 +3262,14 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   @override
   String achievementStarPerformerHint(int count) {
     return '在 $count 個劇集中獲得 3 顆星。';
+  }
+
+  @override
+  String get achievementStoryExplorer => '故事探索者';
+
+  @override
+  String achievementStoryExplorerHint(int count) {
+    return '完成 $count 個系列。';
   }
 
   @override

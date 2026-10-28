@@ -775,6 +775,22 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
+  String get achievementStoryExplorer => 'Исследователь историй';
+
+  @override
+  String achievementStoryExplorerHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Завершите $count серий.',
+      many: 'Завершите $count серий.',
+      few: 'Завершите $count серии.',
+      one: 'Завершите $count серию.',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get otherUserFriends => 'Друзья';
 
   @override

@@ -1475,6 +1475,18 @@ abstract class AppLocalizations {
   /// **'Achieve 3 stars in {count} episodes.'**
   String achievementStarPerformerHint(int count);
 
+  /// No description provided for @achievementStoryExplorer.
+  ///
+  /// In en, this message translates to:
+  /// **'Story Explorer'**
+  String get achievementStoryExplorer;
+
+  /// No description provided for @achievementStoryExplorerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{Complete {count} series.} other{Complete {count} series.}}'**
+  String achievementStoryExplorerHint(int count);
+
   /// No description provided for @otherUserFriends.
   ///
   /// In en, this message translates to:

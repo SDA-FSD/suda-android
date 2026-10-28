@@ -784,6 +784,14 @@ class AppLocalizationsFil extends AppLocalizations {
   }
 
   @override
+  String get achievementStoryExplorer => 'Tagagalugad ng Kwento';
+
+  @override
+  String achievementStoryExplorerHint(int count) {
+    return 'Kumpletuhin ang $count serye.';
+  }
+
+  @override
   String get otherUserFriends => 'Mga Kaibigan';
 
   @override

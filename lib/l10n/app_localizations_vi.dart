@@ -772,6 +772,14 @@ class AppLocalizationsVi extends AppLocalizations {
   }
 
   @override
+  String get achievementStoryExplorer => 'Nhà thám hiểm câu chuyện';
+
+  @override
+  String achievementStoryExplorerHint(int count) {
+    return 'Hoàn thành $count series.';
+  }
+
+  @override
   String get otherUserFriends => 'Bạn bè';
 
   @override

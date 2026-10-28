@@ -738,6 +738,14 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
+  String get achievementStoryExplorer => '스토리 탐험가';
+
+  @override
+  String achievementStoryExplorerHint(int count) {
+    return '시리즈 $count개를 완료하세요.';
+  }
+
+  @override
   String get otherUserFriends => '친구';
 
   @override

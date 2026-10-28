@@ -267,6 +267,8 @@
   "achievementCharacterCollectorHint": "{count, plural, one{Collectionnez {count} personnage différent.} other{Collectionnez {count} personnages différents.}}",
   "achievementStarPerformer": "Star de la conversation",
   "achievementStarPerformerHint": "Obtenez 3 étoiles dans {count} épisodes.",
+  "achievementStoryExplorer": "Explorateur d'histoires",
+  "achievementStoryExplorerHint": "{count, plural, one{Terminez {count} série.} other{Terminez {count} séries.}}",
   "otherUserFriends": "Amis",
   "otherUserRequested": "Demande envoyée",
   "otherUserAddFriend": "Ajouter un ami",

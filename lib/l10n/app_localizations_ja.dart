@@ -735,6 +735,14 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
+  String get achievementStoryExplorer => 'ストーリー探検家';
+
+  @override
+  String achievementStoryExplorerHint(int count) {
+    return 'シリーズを$count個完了してください。';
+  }
+
+  @override
   String get otherUserFriends => 'フレンド';
 
   @override

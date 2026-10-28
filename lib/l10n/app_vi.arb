@@ -267,6 +267,8 @@
   "achievementCharacterCollectorHint": "{count, plural, one{Sưu tầm {count} nhân vật khác nhau.} other{Sưu tầm {count} nhân vật khác nhau.}}",
   "achievementStarPerformer": "Ngôi sao hội thoại",
   "achievementStarPerformerHint": "Đạt 3 sao trong {count} tập.",
+  "achievementStoryExplorer": "Nhà thám hiểm câu chuyện",
+  "achievementStoryExplorerHint": "Hoàn thành {count} series.",
   "otherUserFriends": "Bạn bè",
   "otherUserRequested": "Đã gửi lời mời",
   "otherUserAddFriend": "Thêm bạn",

@@ -267,6 +267,8 @@
   "achievementCharacterCollectorHint": "{count, plural, one{Sammle {count} verschiedenen Charakter.} other{Sammle {count} verschiedene Charaktere.}}",
   "achievementStarPerformer": "Gesprächsstar",
   "achievementStarPerformerHint": "Erreiche 3 Sterne in {count} Episoden.",
+  "achievementStoryExplorer": "Geschichtenentdecker",
+  "achievementStoryExplorerHint": "{count, plural, one{Schließe {count} Serie ab.} other{Schließe {count} Serien ab.}}",
   "otherUserFriends": "Freunde",
   "otherUserRequested": "Angefragt",
   "otherUserAddFriend": "Freund hinzufügen",

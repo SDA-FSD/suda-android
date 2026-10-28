@@ -267,6 +267,8 @@
   "achievementCharacterCollectorHint": "{count, plural, one{Verzamel {count} ander personage.} other{Verzamel {count} verschillende personages.}}",
   "achievementStarPerformer": "Ster van het gesprek",
   "achievementStarPerformerHint": "Behaal 3 sterren in {count} afleveringen.",
+  "achievementStoryExplorer": "Verhalenverkenner",
+  "achievementStoryExplorerHint": "{count, plural, one{Voltooi {count} serie.} other{Voltooi {count} series.}}",
   "otherUserFriends": "Vrienden",
   "otherUserRequested": "Verzoek verzonden",
   "otherUserAddFriend": "Vriend toevoegen",

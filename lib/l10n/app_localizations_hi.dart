@@ -774,6 +774,14 @@ class AppLocalizationsHi extends AppLocalizations {
   }
 
   @override
+  String get achievementStoryExplorer => 'कहानी खोजकर्ता';
+
+  @override
+  String achievementStoryExplorerHint(int count) {
+    return '$count सीरीज़ पूरी करें।';
+  }
+
+  @override
   String get otherUserFriends => 'मित्र';
 
   @override

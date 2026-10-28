@@ -778,6 +778,20 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
+  String get achievementStoryExplorer => 'Explorador de Histórias';
+
+  @override
+  String achievementStoryExplorerHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Conclua $count séries.',
+      one: 'Conclua $count série.',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get otherUserFriends => 'Amigos';
 
   @override

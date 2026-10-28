@@ -267,6 +267,8 @@
   "achievementCharacterCollectorHint": "{count, plural, one{Kolektahin ang {count} natatanging character.} other{Kolektahin ang {count} (na) natatanging character.}}",
   "achievementStarPerformer": "Bituin ng Usapan",
   "achievementStarPerformerHint": "Makamit ang 3 bituin sa {count} episode.",
+  "achievementStoryExplorer": "Tagagalugad ng Kwento",
+  "achievementStoryExplorerHint": "Kumpletuhin ang {count} serye.",
   "otherUserFriends": "Mga Kaibigan",
   "otherUserRequested": "Naipadala ang request",
   "otherUserAddFriend": "Magdagdag ng kaibigan",

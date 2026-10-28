@@ -776,6 +776,14 @@ class AppLocalizationsMs extends AppLocalizations {
   }
 
   @override
+  String get achievementStoryExplorer => 'Peneroka Cerita';
+
+  @override
+  String achievementStoryExplorerHint(int count) {
+    return 'Selesaikan $count siri.';
+  }
+
+  @override
   String get otherUserFriends => 'Rakan';
 
   @override

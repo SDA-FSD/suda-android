@@ -161,6 +161,7 @@ int _activityBadgeLevel(ProfileAchievementItem item, {required bool showClaim}) 
 int _activityMaxLevel(String code) {
   return switch (code) {
     'TA' || 'SC' || 'ON' || 'SK' || 'CC' || 'SP' => 4,
+    'SE' => 5,
     'PP' => 3,
     _ => 2,
   };
@@ -180,6 +181,7 @@ String _activityAsset(String code, int level) {
     'TA' => 'TA',
     'SC' => 'SC',
     'ON' => 'ON',
+    'SE' => 'SE',
     'SB' => 'SB',
     'SK' => 'SK',
     'PP' => 'PP',
@@ -221,6 +223,12 @@ _AchievementCopy _activityCopy(
         title: l10n.achievementOnARoll,
         hint: l10n.achievementOnARollHint(goal),
         asset: 'assets/images/achievement/ON-$badge.png',
+      );
+    case 'SE':
+      return _AchievementCopy(
+        title: l10n.achievementStoryExplorer,
+        hint: l10n.achievementStoryExplorerHint(goal),
+        asset: 'assets/images/achievement/SE-$badge.png',
       );
     case 'SB':
       return _AchievementCopy(

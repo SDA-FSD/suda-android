@@ -775,6 +775,14 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
+  String get achievementStoryExplorer => 'Penjelajah Cerita';
+
+  @override
+  String achievementStoryExplorerHint(int count) {
+    return 'Selesaikan $count seri.';
+  }
+
+  @override
   String get otherUserFriends => 'Teman';
 
   @override

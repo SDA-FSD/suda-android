@@ -267,6 +267,8 @@
   "achievementCharacterCollectorHint": "{count, plural, one{{count} अलग किरदार इकट्ठा करें।} other{{count} अलग किरदार इकट्ठा करें।}}",
   "achievementStarPerformer": "बातचीत का सितारा",
   "achievementStarPerformerHint": "{count} एपिसोड में 3 सितारे हासिल करें।",
+  "achievementStoryExplorer": "कहानी खोजकर्ता",
+  "achievementStoryExplorerHint": "{count} सीरीज़ पूरी करें।",
   "otherUserFriends": "मित्र",
   "otherUserRequested": "अनुरोध भेजा गया",
   "otherUserAddFriend": "मित्र जोड़ें",

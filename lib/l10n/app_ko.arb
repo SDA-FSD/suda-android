@@ -267,6 +267,8 @@
   "achievementCharacterCollectorHint": "{count, plural, one{서로 다른 캐릭터를 {count}명 수집하세요.} other{서로 다른 캐릭터를 {count}명 수집하세요.}}",
   "achievementStarPerformer": "대화의 스타",
   "achievementStarPerformerHint": "에피소드 {count}개에서 별 3개를 달성하세요.",
+  "achievementStoryExplorer": "스토리 탐험가",
+  "achievementStoryExplorerHint": "시리즈 {count}개를 완료하세요.",
   "otherUserFriends": "친구",
   "otherUserRequested": "요청 보냄",
   "otherUserAddFriend": "친구 추가",

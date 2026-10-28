@@ -267,6 +267,8 @@
   "achievementCharacterCollectorHint": "{count, plural, one{{count} farklı karakter topla.} other{{count} farklı karakter topla.}}",
   "achievementStarPerformer": "Sohbetin Yıldızı",
   "achievementStarPerformerHint": "{count} bölümde 3 yıldız kazan.",
+  "achievementStoryExplorer": "Hikaye Kaşifi",
+  "achievementStoryExplorerHint": "{count} seri tamamla.",
   "otherUserFriends": "Arkadaşlar",
   "otherUserRequested": "İstek gönderildi",
   "otherUserAddFriend": "Arkadaş ekle",

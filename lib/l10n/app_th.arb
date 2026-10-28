@@ -267,6 +267,8 @@
   "achievementCharacterCollectorHint": "{count, plural, one{สะสมตัวละครที่แตกต่างกัน {count} ตัว} other{สะสมตัวละครที่แตกต่างกัน {count} ตัว}}",
   "achievementStarPerformer": "ดาวแห่งการสนทนา",
   "achievementStarPerformerHint": "ทำได้ 3 ดาวใน {count} ตอน",
+  "achievementStoryExplorer": "นักสำรวจเรื่องราว",
+  "achievementStoryExplorerHint": "ทำซีรีส์ให้ครบ {count} เรื่อง",
   "otherUserFriends": "เพื่อน",
   "otherUserRequested": "ส่งคำขอแล้ว",
   "otherUserAddFriend": "เพิ่มเพื่อน",

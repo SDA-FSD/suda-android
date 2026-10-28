@@ -267,6 +267,8 @@
   "achievementCharacterCollectorHint": "{count, plural, one{Kumpul {count} watak berbeza.} other{Kumpul {count} watak berbeza.}}",
   "achievementStarPerformer": "Bintang Perbualan",
   "achievementStarPerformerHint": "Capai 3 bintang dalam {count} episod.",
+  "achievementStoryExplorer": "Peneroka Cerita",
+  "achievementStoryExplorerHint": "Selesaikan {count} siri.",
   "otherUserFriends": "Rakan",
   "otherUserRequested": "Permintaan dihantar",
   "otherUserAddFriend": "Tambah rakan",
