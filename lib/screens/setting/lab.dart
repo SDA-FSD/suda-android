@@ -4,6 +4,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../config/app_config.dart';
+import '../../services/auth_service.dart';
+import '../../services/suda_api_client.dart';
+import '../../services/token_storage.dart';
 import '../../effects/like_progress_effect.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/series_models.dart';
@@ -13,6 +16,7 @@ import '../../services/rank_like_overlay.dart';
 import '../../services/series_state_service.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/default_toast.dart';
+import '../../utils/sub_screen_route.dart';
 import '../../widgets/main_reregistration_restricted_popup.dart'
     show
         showMainReregistrationRestrictedAuthCheckDefaultPopupForLab,
@@ -131,7 +135,9 @@ const List<_LabTutorialLocaleOption> _kLabTutorialLocaleOptions = [
 ];
 
 class LabScreen extends StatefulWidget {
-  const LabScreen({super.key});
+  final VoidCallback? onSignOut;
+
+  const LabScreen({super.key, this.onSignOut});
 
   @override
   State<LabScreen> createState() => _LabScreenState();
@@ -139,35 +145,6 @@ class LabScreen extends StatefulWidget {
 
 class _LabScreenState extends State<LabScreen> {
   bool _guarded = false;
-  bool _toastIsWarning = false;
-  String? _selectedLabDefaultPopupId;
-  String _selectedTutorialLocaleId = 'en';
-  bool _energyPopupPlaying = false;
-  bool _energyPopupUnlimited = false;
-  bool _energyPopupSubscribed = false;
-  bool _energyPopupShowUnlimited = false;
-  bool _energyPopupShowCapacity6 = false;
-  bool _energyPopupShowCapacity7 = false;
-  bool _energyPopupForceGoPremium = false;
-  bool _energyPopupForceEnablePush = false;
-  final TextEditingController _energyPopupCountController =
-      TextEditingController(text: '3');
-  static const _longToastTestMessage = 'Test Popup, Test Toast, 가나다라마바사아자차카타파하';
-  static const _stylePreviewLines = ['말해요!?', 'Talk', 'E sua vez primeiro!'];
-
-  @override
-  void dispose() {
-    _energyPopupCountController.dispose();
-    super.dispose();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    if (kLabDefaultPopupOptions.isNotEmpty) {
-      _selectedLabDefaultPopupId = kLabDefaultPopupOptions.first.id;
-    }
-  }
 
   @override
   void didChangeDependencies() {
@@ -183,101 +160,171 @@ class _LabScreenState extends State<LabScreen> {
     }
   }
 
-  Future<void> _showSelectedLabDefaultPopup() async {
-    final id = _selectedLabDefaultPopupId;
-    if (id == null) return;
-    LabDefaultPopupOption? found;
-    for (final o in kLabDefaultPopupOptions) {
-      if (o.id == id) {
-        found = o;
-        break;
-      }
-    }
-    if (found == null) return;
-    await found.show(context);
+  void _openGroup(Widget page) {
+    Navigator.push(context, SubScreenRoute(page: page));
   }
 
-  void _showTestToast() {
-    final message = 'Test Popup, Test Toast';
-    DefaultToast.show(context, message, isError: _toastIsWarning);
-  }
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
 
-  void _showTestToastLong() {
-    DefaultToast.show(context, _longToastTestMessage, isError: _toastIsWarning);
+    return AppScaffold(
+      centerTitle: l10n.settingsFsdLaboratory,
+      body: ListView(
+        children: [
+          _LabIndexRow(
+            label: 'Onboarding',
+            onTap: () => _openGroup(const _LabOnboardingPage()),
+          ),
+          _LabIndexRow(
+            label: 'Roleplay',
+            onTap: () => _openGroup(const _LabRoleplayPage()),
+          ),
+          _LabIndexRow(
+            label: 'Monetization',
+            onTap: () => _openGroup(const _LabMonetizationPage()),
+          ),
+          _LabIndexRow(
+            label: 'Ranking',
+            onTap: () => _openGroup(const _LabRankingPage()),
+          ),
+          _LabIndexRow(
+            label: 'Feedback',
+            onTap: () => _openGroup(const _LabFeedbackPage()),
+          ),
+          _LabIndexRow(
+            label: 'Style',
+            onTap: () => _openGroup(const _LabStylePage()),
+          ),
+          const SizedBox(height: 16),
+          const Divider(height: 1, thickness: 1, color: Color(0xFF353535)),
+          const SizedBox(height: 8),
+          _LabIndexRow(
+            label: 'Account',
+            onTap: () => _openGroup(_LabAccountPage(onSignOut: widget.onSignOut)),
+          ),
+        ],
+      ),
+    );
   }
+}
 
-  Future<void> _openRankingBumpPreview(RankBumpPreview preview) async {
-    if (!mounted) return;
-    await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (routeContext) => Ranking(
-          rankBumpPreview: preview,
-          isActive: true,
-          onNavigateToHome: () => Navigator.of(routeContext).pop(),
-          onNavigateToAlarm: () => Navigator.of(routeContext).pop(),
-          onNavigateToProfile: () => Navigator.of(routeContext).pop(),
+class _LabIndexRow extends StatelessWidget {
+  const _LabIndexRow({required this.label, required this.onTap});
+
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context).textTheme;
+    return InkWell(
+      onTap: onTap,
+      child: SizedBox(
+        height: 52,
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                label,
+                style: theme.bodyLarge?.copyWith(color: Colors.white),
+              ),
+            ),
+            const Icon(Icons.chevron_right, color: Color(0xFF9E9E9E)),
+          ],
         ),
       ),
     );
   }
+}
 
-  Future<void> _openRankingAnnouncePreview() async {
-    if (!mounted) return;
-    await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (routeContext) => Ranking(
-          forceAnnouncePhase: true,
-          isActive: true,
-          onNavigateToHome: () => Navigator.of(routeContext).pop(),
-          onNavigateToAlarm: () => Navigator.of(routeContext).pop(),
-          onNavigateToProfile: () => Navigator.of(routeContext).pop(),
+class _LabActionRow extends StatelessWidget {
+  const _LabActionRow({required this.label, required this.onTap});
+
+  final String label;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context).textTheme;
+    final enabled = onTap != null;
+    return InkWell(
+      onTap: onTap,
+      child: SizedBox(
+        height: 48,
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                label,
+                style: theme.bodyLarge?.copyWith(
+                  color: enabled ? Colors.white : const Color(0xFF635F5F),
+                ),
+              ),
+            ),
+            Icon(
+              Icons.chevron_right,
+              color: enabled ? const Color(0xFF9E9E9E) : const Color(0xFF353535),
+            ),
+          ],
         ),
       ),
     );
   }
+}
 
-  Future<void> _openRankingRewardClaimPreviewFirst() async {
-    if (!mounted) return;
-    await _openRankingRewardClaimPreview(place: 1);
-  }
+class _LabPage extends StatelessWidget {
+  const _LabPage({required this.title, required this.children});
 
-  Future<void> _openRankingRewardClaimPreviewSecond() async {
-    if (!mounted) return;
-    await _openRankingRewardClaimPreview(place: 2);
-  }
+  final String title;
+  final List<Widget> children;
 
-  Future<void> _openRankingRewardClaimPreviewThird() async {
-    if (!mounted) return;
-    await _openRankingRewardClaimPreview(place: 3);
-  }
-
-  Future<void> _openRewardUnboxingPreview() async {
-    if (!mounted) return;
-    final items = CharacterRewardClaimDto.labUnboxingPreviewItems();
-    await RewardUnboxing.preload(context, items);
-    if (!mounted) return;
-    await RewardUnboxing.push(context, items);
-  }
-
-  Future<void> _openRankingRewardClaimPreview({required int place}) async {
-    if (!mounted) return;
-    await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (routeContext) => Ranking(
-          forceRankingRewardClaimPreview: true,
-          forceRankingRewardClaimPlace: place,
-          forceAnnouncePhase: true,
-          isActive: true,
-          onNavigateToHome: () => Navigator.of(routeContext).pop(),
-          onNavigateToAlarm: () => Navigator.of(routeContext).pop(),
-          onNavigateToProfile: () => Navigator.of(routeContext).pop(),
-        ),
+  @override
+  Widget build(BuildContext context) {
+    return AppScaffold(
+      centerTitle: title,
+      body: ListView(
+        children: [
+          for (var i = 0; i < children.length; i++) ...[
+            if (i > 0) const SizedBox(height: 4),
+            children[i],
+          ],
+          const SizedBox(height: 24),
+        ],
       ),
     );
   }
+}
+
+InputDecoration _labDropdownDecoration() {
+  return InputDecoration(
+    filled: true,
+    fillColor: const Color(0xFF1E1E1E),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(16),
+      borderSide: const BorderSide(color: Color(0xFF353535)),
+    ),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(16),
+      borderSide: const BorderSide(color: Color(0xFF353535)),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(16),
+      borderSide: const BorderSide(color: Color(0xFF80D7CF)),
+    ),
+    contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+  );
+}
+
+class _LabOnboardingPage extends StatefulWidget {
+  const _LabOnboardingPage();
+
+  @override
+  State<_LabOnboardingPage> createState() => _LabOnboardingPageState();
+}
+
+class _LabOnboardingPageState extends State<_LabOnboardingPage> {
+  String _selectedTutorialLocaleId = 'en';
 
   Future<void> _openFirstCefrLevelScreen() async {
     if (!mounted) return;
@@ -312,15 +359,71 @@ class _LabScreenState extends State<LabScreen> {
       ),
     );
   }
-  Future<void> _openPaywallScreen() async {
-    if (!mounted) return;
-    await PaywallScreen.push(context, screen: PaywallImpressionScreen.lab);
+
+  Future<void> _openTutorialPreview() async {
+    _LabTutorialLocaleOption? found;
+    for (final o in _kLabTutorialLocaleOptions) {
+      if (o.id == _selectedTutorialLocaleId) {
+        found = o;
+        break;
+      }
+    }
+    if (found == null || !mounted) return;
+    await RoleplayRouter.pushTutorialPreview(context, locale: found.locale);
   }
 
-  Future<void> _openPaywallCompletedScreen() async {
-    if (!mounted) return;
-    await PaywallCompletedScreen.push(context);
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context).textTheme;
+    return _LabPage(
+      title: 'Onboarding',
+      children: [
+        _LabActionRow(
+          label: 'Open First CEFR Level',
+          onTap: () => unawaited(_openFirstCefrLevelScreen()),
+        ),
+        _LabActionRow(
+          label: 'Open First Profile Image',
+          onTap: () => unawaited(_openFirstProfileImageScreen()),
+        ),
+        _LabActionRow(
+          label: 'Open Tutorial Intro',
+          onTap: () => unawaited(_openTutorialIntroScreen()),
+        ),
+        const SizedBox(height: 12),
+        InputDecorator(
+          decoration: _labDropdownDecoration(),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              isExpanded: true,
+              value: _selectedTutorialLocaleId,
+              dropdownColor: const Color(0xFF1E1E1E),
+              style: theme.bodyLarge?.copyWith(color: Colors.white),
+              items: [
+                for (final o in _kLabTutorialLocaleOptions)
+                  DropdownMenuItem<String>(
+                    value: o.id,
+                    child: Text(o.label),
+                  ),
+              ],
+              onChanged: (v) {
+                if (v == null) return;
+                setState(() => _selectedTutorialLocaleId = v);
+              },
+            ),
+          ),
+        ),
+        _LabActionRow(
+          label: 'Open Tutorial',
+          onTap: () => unawaited(_openTutorialPreview()),
+        ),
+      ],
+    );
   }
+}
+
+class _LabRoleplayPage extends StatelessWidget {
+  const _LabRoleplayPage();
 
   void _seedLabS2TryAgainState() {
     SeriesStateService.instance.setSeriesOverview(
@@ -345,31 +448,56 @@ class _LabScreenState extends State<LabScreen> {
     SeriesStateService.instance.setSelectedEpisodeId(1);
   }
 
-  Future<void> _openTryAgainScreen() async {
+  Future<void> _openTryAgainScreen(BuildContext context) async {
     _seedLabS2TryAgainState();
-    if (!mounted) return;
+    if (!context.mounted) return;
     await Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => const RoleplayTryAgainScreen()),
     );
   }
 
-  Future<void> _openTryAgainReportScreen() async {
-    if (!mounted) return;
-    await RoleplayRouter.pushTryAgainReport(context);
+  @override
+  Widget build(BuildContext context) {
+    return _LabPage(
+      title: 'Roleplay',
+      children: [
+        _LabActionRow(
+          label: 'Open Try Again Screen',
+          onTap: () => unawaited(_openTryAgainScreen(context)),
+        ),
+        _LabActionRow(
+          label: 'Open Try Again Report Screen',
+          onTap: () => unawaited(RoleplayRouter.pushTryAgainReport(context)),
+        ),
+      ],
+    );
   }
+}
 
-  Future<void> _openTutorialPreview() async {
-    _LabTutorialLocaleOption? found;
-    for (final o in _kLabTutorialLocaleOptions) {
-      if (o.id == _selectedTutorialLocaleId) {
-        found = o;
-        break;
-      }
-    }
-    if (found == null) return;
-    if (!mounted) return;
-    await RoleplayRouter.pushTutorialPreview(context, locale: found.locale);
+class _LabMonetizationPage extends StatefulWidget {
+  const _LabMonetizationPage();
+
+  @override
+  State<_LabMonetizationPage> createState() => _LabMonetizationPageState();
+}
+
+class _LabMonetizationPageState extends State<_LabMonetizationPage> {
+  bool _energyPopupPlaying = false;
+  bool _energyPopupUnlimited = false;
+  bool _energyPopupSubscribed = false;
+  bool _energyPopupShowUnlimited = false;
+  bool _energyPopupShowCapacity6 = false;
+  bool _energyPopupShowCapacity7 = false;
+  bool _energyPopupForceGoPremium = false;
+  bool _energyPopupForceEnablePush = false;
+  final TextEditingController _energyPopupCountController =
+      TextEditingController(text: '3');
+
+  @override
+  void dispose() {
+    _energyPopupCountController.dispose();
+    super.dispose();
   }
 
   int _parseEnergyPopupCount() {
@@ -397,7 +525,7 @@ class _LabScreenState extends State<LabScreen> {
     );
   }
 
-  Widget _buildLabCheckbox({
+  Widget _checkbox({
     required String label,
     required bool value,
     required ValueChanged<bool> onChanged,
@@ -414,43 +542,361 @@ class _LabScreenState extends State<LabScreen> {
     );
   }
 
-  Widget _buildLabScreenButton({
-    required String label,
-    required VoidCallback onPressed,
-  }) {
-    return SizedBox(
-      width: double.infinity,
-      height: 56,
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF0CABA8),
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context).textTheme;
+    return _LabPage(
+      title: 'Monetization',
+      children: [
+        _LabActionRow(
+          label: 'Open Paywall',
+          onTap: () => unawaited(
+            PaywallScreen.push(context, screen: PaywallImpressionScreen.lab),
           ),
-          elevation: 0,
         ),
-        child: Text(label),
+        _LabActionRow(
+          label: 'Open Paywall Completed',
+          onTap: () => unawaited(PaywallCompletedScreen.push(context)),
+        ),
+        const SizedBox(height: 16),
+        Text(
+          'Energy Popup',
+          style: theme.headlineSmall?.copyWith(color: Colors.white),
+        ),
+        const SizedBox(height: 8),
+        _checkbox(
+          label: 'playing',
+          value: _energyPopupPlaying,
+          onChanged: (v) => setState(() => _energyPopupPlaying = v),
+        ),
+        _checkbox(
+          label: '무제한 모드',
+          value: _energyPopupUnlimited,
+          onChanged: (v) => setState(() => _energyPopupUnlimited = v),
+        ),
+        _checkbox(
+          label: '구독중 (subscribedYn=Y)',
+          value: _energyPopupSubscribed,
+          onChanged: (v) => setState(() => _energyPopupSubscribed = v),
+        ),
+        _checkbox(
+          label: 'show Unlimited Pass',
+          value: _energyPopupShowUnlimited,
+          onChanged: (v) => setState(() => _energyPopupShowUnlimited = v),
+        ),
+        _checkbox(
+          label: 'show Capacity 6',
+          value: _energyPopupShowCapacity6,
+          onChanged: (v) => setState(() => _energyPopupShowCapacity6 = v),
+        ),
+        _checkbox(
+          label: 'show Capacity 7',
+          value: _energyPopupShowCapacity7,
+          onChanged: (v) => setState(() => _energyPopupShowCapacity7 = v),
+        ),
+        _checkbox(
+          label: 'force Go Premium',
+          value: _energyPopupForceGoPremium,
+          onChanged: (v) => setState(() => _energyPopupForceGoPremium = v),
+        ),
+        _checkbox(
+          label: 'force Enable Notifications',
+          value: _energyPopupForceEnablePush,
+          onChanged: (v) => setState(() => _energyPopupForceEnablePush = v),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: _energyPopupCountController,
+          keyboardType: TextInputType.number,
+          style: theme.bodyLarge?.copyWith(color: Colors.white),
+          decoration: _labDropdownDecoration().copyWith(
+            labelText: 'Energy count (0~5)',
+            labelStyle: theme.bodyMedium?.copyWith(
+              color: const Color(0xFF9E9E9E),
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 12,
+            ),
+          ),
+        ),
+        _LabActionRow(
+          label: 'Show Energy Popup',
+          onTap: () => unawaited(_showEnergyPopupTest()),
+        ),
+      ],
+    );
+  }
+}
+
+class _LabRankingPage extends StatelessWidget {
+  const _LabRankingPage();
+
+  Future<void> _openRanking(
+    BuildContext context, {
+    RankBumpPreview? rankBumpPreview,
+    bool forceAnnouncePhase = false,
+    bool forceRankingRewardClaimPreview = false,
+    int? forceRankingRewardClaimPlace,
+  }) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (routeContext) => Ranking(
+          rankBumpPreview: rankBumpPreview,
+          forceAnnouncePhase: forceAnnouncePhase,
+          forceRankingRewardClaimPreview: forceRankingRewardClaimPreview,
+          forceRankingRewardClaimPlace: forceRankingRewardClaimPlace ?? 1,
+          isActive: true,
+          onNavigateToHome: () => Navigator.of(routeContext).pop(),
+          onNavigateToAlarm: () => Navigator.of(routeContext).pop(),
+          onNavigateToProfile: () => Navigator.of(routeContext).pop(),
+        ),
       ),
     );
   }
 
-  Widget _buildSectionDivider() {
-    return const Padding(
-      padding: EdgeInsets.symmetric(vertical: 24),
-      child: Divider(height: 1, thickness: 1, color: Color(0xFF353535)),
-    );
+  Future<void> _openRewardUnboxing(BuildContext context) async {
+    final items = CharacterRewardClaimDto.labUnboxingPreviewItems();
+    await RewardUnboxing.preload(context, items);
+    if (!context.mounted) return;
+    await RewardUnboxing.push(context, items);
   }
 
-  Widget _buildStylePreview(
-    BuildContext context, {
-    required String label,
-    required TextStyle? style,
-  }) {
+  @override
+  Widget build(BuildContext context) {
+    return _LabPage(
+      title: 'Ranking',
+      children: [
+        _LabActionRow(
+          label: 'Play Ranking Bump (on screen)',
+          onTap: () => unawaited(
+            _openRanking(context, rankBumpPreview: RankBumpPreview.onScreen),
+          ),
+        ),
+        _LabActionRow(
+          label: 'Play Ranking Bump (sticky)',
+          onTap: () => unawaited(
+            _openRanking(context, rankBumpPreview: RankBumpPreview.sticky),
+          ),
+        ),
+        _LabActionRow(
+          label: 'Open Ranking Announce Preview',
+          onTap: () => unawaited(
+            _openRanking(context, forceAnnouncePhase: true),
+          ),
+        ),
+        _LabActionRow(
+          label: 'Open Ranking Reward Claim Preview (1st)',
+          onTap: () => unawaited(
+            _openRanking(
+              context,
+              forceAnnouncePhase: true,
+              forceRankingRewardClaimPreview: true,
+              forceRankingRewardClaimPlace: 1,
+            ),
+          ),
+        ),
+        _LabActionRow(
+          label: 'Open Ranking Reward Claim Preview (2nd)',
+          onTap: () => unawaited(
+            _openRanking(
+              context,
+              forceAnnouncePhase: true,
+              forceRankingRewardClaimPreview: true,
+              forceRankingRewardClaimPlace: 2,
+            ),
+          ),
+        ),
+        _LabActionRow(
+          label: 'Open Ranking Reward Claim Preview (3rd)',
+          onTap: () => unawaited(
+            _openRanking(
+              context,
+              forceAnnouncePhase: true,
+              forceRankingRewardClaimPreview: true,
+              forceRankingRewardClaimPlace: 3,
+            ),
+          ),
+        ),
+        _LabActionRow(
+          label: 'Open Reward Unboxing',
+          onTap: () => unawaited(_openRewardUnboxing(context)),
+        ),
+      ],
+    );
+  }
+}
+
+class _LabFeedbackPage extends StatefulWidget {
+  const _LabFeedbackPage();
+
+  @override
+  State<_LabFeedbackPage> createState() => _LabFeedbackPageState();
+}
+
+class _LabFeedbackPageState extends State<_LabFeedbackPage> {
+  static const _longToastTestMessage =
+      'Test Popup, Test Toast, 가나다라마바사아자차카타파하';
+
+  bool _toastIsWarning = false;
+  String? _selectedLabDefaultPopupId;
+
+  @override
+  void initState() {
+    super.initState();
+    if (kLabDefaultPopupOptions.isNotEmpty) {
+      _selectedLabDefaultPopupId = kLabDefaultPopupOptions.first.id;
+    }
+  }
+
+  Future<void> _showSelectedLabDefaultPopup() async {
+    final id = _selectedLabDefaultPopupId;
+    if (id == null) return;
+    LabDefaultPopupOption? found;
+    for (final o in kLabDefaultPopupOptions) {
+      if (o.id == id) {
+        found = o;
+        break;
+      }
+    }
+    if (found == null) return;
+    await found.show(context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context).textTheme;
+    return _LabPage(
+      title: 'Feedback',
+      children: [
+        Text(
+          'Default Popup',
+          style: theme.headlineSmall?.copyWith(color: Colors.white),
+        ),
+        const SizedBox(height: 8),
+        if (kLabDefaultPopupOptions.isEmpty)
+          Text(
+            'No migrated DefaultPopup yet. Entries are added in '
+            '`kLabDefaultPopupOptions` after each migration.',
+            style: theme.bodyMedium?.copyWith(color: const Color(0xFF9E9E9E)),
+          )
+        else
+          InputDecorator(
+            decoration: _labDropdownDecoration(),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                isExpanded: true,
+                value: _selectedLabDefaultPopupId,
+                dropdownColor: const Color(0xFF1E1E1E),
+                hint: Text(
+                  'Select popup',
+                  style: theme.bodyLarge?.copyWith(
+                    color: const Color(0xFF635F5F),
+                  ),
+                ),
+                style: theme.bodyLarge?.copyWith(color: Colors.white),
+                items: [
+                  for (final o in kLabDefaultPopupOptions)
+                    DropdownMenuItem<String>(
+                      value: o.id,
+                      child: Text(o.label),
+                    ),
+                ],
+                onChanged: (v) => setState(() => _selectedLabDefaultPopupId = v),
+              ),
+            ),
+          ),
+        _LabActionRow(
+          label: 'Show Popup',
+          onTap: kLabDefaultPopupOptions.isEmpty
+              ? null
+              : () => unawaited(_showSelectedLabDefaultPopup()),
+        ),
+        const SizedBox(height: 16),
+        Text(
+          'Toast',
+          style: theme.headlineSmall?.copyWith(color: Colors.white),
+        ),
+        CheckboxListTile(
+          value: _toastIsWarning,
+          onChanged: (v) => setState(() => _toastIsWarning = v ?? false),
+          contentPadding: EdgeInsets.zero,
+          controlAffinity: ListTileControlAffinity.leading,
+          activeColor: const Color(0xFF0CABA8),
+          checkColor: Colors.white,
+          title: Text(
+            'Warning (red)',
+            style: theme.bodyLarge?.copyWith(color: Colors.white),
+          ),
+        ),
+        _LabActionRow(
+          label: 'Show Toast',
+          onTap: () => DefaultToast.show(
+            context,
+            'Test Popup, Test Toast',
+            isError: _toastIsWarning,
+          ),
+        ),
+        _LabActionRow(
+          label: 'Show Toast(Long Text)',
+          onTap: () => DefaultToast.show(
+            context,
+            _longToastTestMessage,
+            isError: _toastIsWarning,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Text(
+          'Like Effect',
+          style: theme.headlineSmall?.copyWith(color: Colors.white),
+        ),
+        const SizedBox(height: 8),
+        _LabActionRow(
+          label: 'Simple Like Effect',
+          onTap: () => unawaited(
+            LikeProgressEffect.play(
+              context,
+              params: const LikeProgressEffectParams(
+                asIsLikePoint: 36,
+                toBeLikePoint: 72,
+                asIsLevel: 36,
+                toBeLevel: 36,
+                asIsProgress: 25,
+                toBeProgress: 75,
+              ),
+            ),
+          ),
+        ),
+        _LabActionRow(
+          label: 'Levelup Like Effect',
+          onTap: () => unawaited(
+            LikeProgressEffect.play(
+              context,
+              params: const LikeProgressEffectParams(
+                asIsLikePoint: 36,
+                toBeLikePoint: 172,
+                asIsLevel: 36,
+                toBeLevel: 38,
+                asIsProgress: 25,
+                toBeProgress: 75,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _LabStylePage extends StatelessWidget {
+  const _LabStylePage();
+
+  static const _lines = ['말해요!?', 'Talk', 'E sua vez primeiro!'];
+
+  Widget _preview(BuildContext context, String label, TextStyle? style) {
     final theme = Theme.of(context).textTheme;
     final previewStyle = style?.copyWith(color: Colors.white);
-
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: Column(
@@ -461,7 +907,7 @@ class _LabScreenState extends State<LabScreen> {
             style: theme.labelSmall?.copyWith(color: const Color(0xFF80D7CF)),
           ),
           const SizedBox(height: 8),
-          for (final line in _stylePreviewLines) ...[
+          for (final line in _lines) ...[
             Text(line, style: previewStyle),
             const SizedBox(height: 6),
           ],
@@ -472,501 +918,93 @@ class _LabScreenState extends State<LabScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context).textTheme;
-
-    return AppScaffold(
-      centerTitle: l10n.settingsFsdLaboratory,
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'First CEFR Level',
-              style: theme.headlineSmall?.copyWith(color: Colors.white),
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: _openFirstCefrLevelScreen,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0CABA8),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  elevation: 0,
-                ),
-                child: const Text('Open First CEFR Level'),
-              ),
-            ),
-            const SizedBox(height: 8),
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: _openFirstProfileImageScreen,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0CABA8),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  elevation: 0,
-                ),
-                child: const Text('Open First Profile Image'),
-              ),
-            ),
-            const SizedBox(height: 8),
-            _buildLabScreenButton(
-              label: 'Open Tutorial Intro',
-              onPressed: () => unawaited(_openTutorialIntroScreen()),
-            ),
-            _buildSectionDivider(),
-            Text(
-              'Paywall',
-              style: theme.headlineSmall?.copyWith(color: Colors.white),
-            ),
-            const SizedBox(height: 12),
-            _buildLabScreenButton(
-              label: 'Open Paywall',
-              onPressed: () => unawaited(_openPaywallScreen()),
-            ),
-            const SizedBox(height: 8),
-            _buildLabScreenButton(
-              label: 'Open Paywall Completed',
-              onPressed: () => unawaited(_openPaywallCompletedScreen()),
-            ),
-            _buildSectionDivider(),
-            Text(
-              'Roleplay Try Again',
-              style: theme.headlineSmall?.copyWith(color: Colors.white),
-            ),
-            const SizedBox(height: 12),
-            _buildLabScreenButton(
-              label: 'Open Try Again Screen',
-              onPressed: () => unawaited(_openTryAgainScreen()),
-            ),
-            const SizedBox(height: 8),
-            _buildLabScreenButton(
-              label: 'Open Try Again Report Screen',
-              onPressed: () => unawaited(_openTryAgainReportScreen()),
-            ),
-            _buildSectionDivider(),
-            Text(
-              'Tutorial',
-              style: theme.headlineSmall?.copyWith(color: Colors.white),
-            ),
-            const SizedBox(height: 12),
-            InputDecorator(
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: const Color(0xFF1E1E1E),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: const BorderSide(color: Color(0xFF353535)),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: const BorderSide(color: Color(0xFF353535)),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: const BorderSide(color: Color(0xFF80D7CF)),
-                ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-              ),
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton<String>(
-                  isExpanded: true,
-                  value: _selectedTutorialLocaleId,
-                  dropdownColor: const Color(0xFF1E1E1E),
-                  style: theme.bodyLarge?.copyWith(color: Colors.white),
-                  items: [
-                    for (final o in _kLabTutorialLocaleOptions)
-                      DropdownMenuItem<String>(
-                        value: o.id,
-                        child: Text(o.label),
-                      ),
-                  ],
-                  onChanged: (v) {
-                    if (v == null) return;
-                    setState(() => _selectedTutorialLocaleId = v);
-                  },
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            _buildLabScreenButton(
-              label: 'Open Tutorial',
-              onPressed: () => unawaited(_openTutorialPreview()),
-            ),
-            _buildSectionDivider(),
-            Text(
-              'Default Popup Test',
-              style: theme.headlineSmall?.copyWith(color: Colors.white),
-            ),
-            const SizedBox(height: 12),
-            if (kLabDefaultPopupOptions.isEmpty) ...[
-              Text(
-                'No migrated DefaultPopup yet. Entries are added in '
-                '`kLabDefaultPopupOptions` after each migration.',
-                style: theme.bodyMedium?.copyWith(
-                  color: const Color(0xFF9E9E9E),
-                ),
-              ),
-            ] else ...[
-              InputDecorator(
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: const Color(0xFF1E1E1E),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: const BorderSide(color: Color(0xFF353535)),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: const BorderSide(color: Color(0xFF353535)),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: const BorderSide(color: Color(0xFF80D7CF)),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-                ),
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    isExpanded: true,
-                    value: _selectedLabDefaultPopupId,
-                    dropdownColor: const Color(0xFF1E1E1E),
-                    hint: Text(
-                      'Select popup',
-                      style: theme.bodyLarge?.copyWith(
-                        color: const Color(0xFF635F5F),
-                      ),
-                    ),
-                    style: theme.bodyLarge?.copyWith(color: Colors.white),
-                    items: [
-                      for (final o in kLabDefaultPopupOptions)
-                        DropdownMenuItem<String>(
-                          value: o.id,
-                          child: Text(o.label),
-                        ),
-                    ],
-                    onChanged: (v) =>
-                        setState(() => _selectedLabDefaultPopupId = v),
-                  ),
-                ),
-              ),
-            ],
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: kLabDefaultPopupOptions.isEmpty
-                    ? null
-                    : () => unawaited(_showSelectedLabDefaultPopup()),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0CABA8),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  elevation: 0,
-                ),
-                child: const Text('Show Popup'),
-              ),
-            ),
-            _buildSectionDivider(),
-            Text(
-              'Energy Popup Test',
-              style: theme.headlineSmall?.copyWith(color: Colors.white),
-            ),
-            const SizedBox(height: 12),
-            _buildLabCheckbox(
-              label: 'playing',
-              value: _energyPopupPlaying,
-              onChanged: (v) => setState(() => _energyPopupPlaying = v),
-            ),
-            _buildLabCheckbox(
-              label: '무제한 모드',
-              value: _energyPopupUnlimited,
-              onChanged: (v) => setState(() => _energyPopupUnlimited = v),
-            ),
-            _buildLabCheckbox(
-              label: '구독중 (subscribedYn=Y)',
-              value: _energyPopupSubscribed,
-              onChanged: (v) => setState(() => _energyPopupSubscribed = v),
-            ),
-            _buildLabCheckbox(
-              label: 'show Unlimited Pass',
-              value: _energyPopupShowUnlimited,
-              onChanged: (v) => setState(() => _energyPopupShowUnlimited = v),
-            ),
-            _buildLabCheckbox(
-              label: 'show Capacity 6',
-              value: _energyPopupShowCapacity6,
-              onChanged: (v) => setState(() => _energyPopupShowCapacity6 = v),
-            ),
-            _buildLabCheckbox(
-              label: 'show Capacity 7',
-              value: _energyPopupShowCapacity7,
-              onChanged: (v) => setState(() => _energyPopupShowCapacity7 = v),
-            ),
-            _buildLabCheckbox(
-              label: 'force Go Premium',
-              value: _energyPopupForceGoPremium,
-              onChanged: (v) => setState(() => _energyPopupForceGoPremium = v),
-            ),
-            _buildLabCheckbox(
-              label: 'force Enable Notifications',
-              value: _energyPopupForceEnablePush,
-              onChanged: (v) => setState(() => _energyPopupForceEnablePush = v),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _energyPopupCountController,
-              keyboardType: TextInputType.number,
-              style: theme.bodyLarge?.copyWith(color: Colors.white),
-              decoration: InputDecoration(
-                labelText: 'Energy count (0~5)',
-                labelStyle: theme.bodyMedium?.copyWith(
-                  color: const Color(0xFF9E9E9E),
-                ),
-                filled: true,
-                fillColor: const Color(0xFF1E1E1E),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: const BorderSide(color: Color(0xFF353535)),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: const BorderSide(color: Color(0xFF353535)),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: const BorderSide(color: Color(0xFF80D7CF)),
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            _buildLabScreenButton(
-              label: 'Show Energy Popup',
-              onPressed: () => unawaited(_showEnergyPopupTest()),
-            ),
-            _buildSectionDivider(),
-            Text(
-              'Default Toast Test',
-              style: theme.headlineSmall?.copyWith(color: Colors.white),
-            ),
-            const SizedBox(height: 12),
-            CheckboxListTile(
-              value: _toastIsWarning,
-              onChanged: (v) => setState(() => _toastIsWarning = v ?? false),
-              contentPadding: EdgeInsets.zero,
-              controlAffinity: ListTileControlAffinity.leading,
-              activeColor: const Color(0xFF0CABA8),
-              checkColor: Colors.white,
-              title: Text(
-                'Warning (red)',
-                style: theme.bodyLarge?.copyWith(color: Colors.white),
-              ),
-            ),
-            const SizedBox(height: 8),
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: _showTestToast,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0CABA8),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  elevation: 0,
-                ),
-                child: const Text('Show Toast'),
-              ),
-            ),
-            const SizedBox(height: 8),
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: _showTestToastLong,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0CABA8),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  elevation: 0,
-                ),
-                child: const Text('Show Toast(Long Text)'),
-              ),
-            ),
-            _buildSectionDivider(),
-            Text(
-              'Like Effect Test',
-              style: theme.headlineSmall?.copyWith(color: Colors.white),
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: () => _playLikeEffect(
-                  const LikeProgressEffectParams(
-                    asIsLikePoint: 36,
-                    toBeLikePoint: 72,
-                    asIsLevel: 36,
-                    toBeLevel: 36,
-                    asIsProgress: 25,
-                    toBeProgress: 75,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0CABA8),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  elevation: 0,
-                ),
-                child: const Text('Simple Like Effect'),
-              ),
-            ),
-            const SizedBox(height: 8),
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: () => _playLikeEffect(
-                  const LikeProgressEffectParams(
-                    asIsLikePoint: 36,
-                    toBeLikePoint: 172,
-                    asIsLevel: 36,
-                    toBeLevel: 38,
-                    asIsProgress: 25,
-                    toBeProgress: 75,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0CABA8),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  elevation: 0,
-                ),
-                child: const Text('Levelup Like Effect'),
-              ),
-            ),
-            _buildSectionDivider(),
-            Text(
-              'Ranking',
-              style: theme.headlineSmall?.copyWith(color: Colors.white),
-            ),
-            const SizedBox(height: 12),
-            _buildLabScreenButton(
-              label: 'Play Ranking Bump (on screen)',
-              onPressed: () =>
-                  unawaited(_openRankingBumpPreview(RankBumpPreview.onScreen)),
-            ),
-            const SizedBox(height: 12),
-            _buildLabScreenButton(
-              label: 'Play Ranking Bump (sticky)',
-              onPressed: () =>
-                  unawaited(_openRankingBumpPreview(RankBumpPreview.sticky)),
-            ),
-            const SizedBox(height: 12),
-            _buildLabScreenButton(
-              label: 'Open Ranking Announce Preview',
-              onPressed: () => unawaited(_openRankingAnnouncePreview()),
-            ),
-            const SizedBox(height: 12),
-            _buildLabScreenButton(
-              label: 'Open Ranking Reward Claim Preview (1st)',
-              onPressed: () => unawaited(_openRankingRewardClaimPreviewFirst()),
-            ),
-            const SizedBox(height: 12),
-            _buildLabScreenButton(
-              label: 'Open Ranking Reward Claim Preview (2nd)',
-              onPressed: () => unawaited(_openRankingRewardClaimPreviewSecond()),
-            ),
-            const SizedBox(height: 12),
-            _buildLabScreenButton(
-              label: 'Open Ranking Reward Claim Preview (3rd)',
-              onPressed: () => unawaited(_openRankingRewardClaimPreviewThird()),
-            ),
-            const SizedBox(height: 12),
-            _buildLabScreenButton(
-              label: 'Open Reward Unboxing',
-              onPressed: () => unawaited(_openRewardUnboxingPreview()),
-            ),
-            _buildSectionDivider(),
-            Text(
-              'Style',
-              style: theme.headlineSmall?.copyWith(color: Colors.white),
-            ),
-            const SizedBox(height: 16),
-            _buildStylePreview(
-              context,
-              label: 'heading1 (headlineLarge)',
-              style: theme.headlineLarge,
-            ),
-            _buildStylePreview(
-              context,
-              label: 'heading2 (headlineMedium)',
-              style: theme.headlineMedium,
-            ),
-            _buildStylePreview(
-              context,
-              label: 'heading3 (headlineSmall)',
-              style: theme.headlineSmall,
-            ),
-            _buildStylePreview(
-              context,
-              label: 'body-default (bodyLarge)',
-              style: theme.bodyLarge,
-            ),
-            _buildStylePreview(
-              context,
-              label: 'body-secondary (bodyMedium)',
-              style: theme.bodyMedium,
-            ),
-            _buildStylePreview(
-              context,
-              label: 'body-caption (bodySmall)',
-              style: theme.bodySmall,
-            ),
-            _buildStylePreview(
-              context,
-              label: 'body-tiny (labelSmall)',
-              style: theme.labelSmall,
-            ),
-            _buildStylePreview(
-              context,
-              label: 'body-tiny2 (labelMini)',
-              style: theme.labelMini,
-            ),
-            const SizedBox(height: 24),
-          ],
-        ),
-      ),
+    return _LabPage(
+      title: 'Style',
+      children: [
+        _preview(context, 'heading1 (headlineLarge)', theme.headlineLarge),
+        _preview(context, 'heading2 (headlineMedium)', theme.headlineMedium),
+        _preview(context, 'heading3 (headlineSmall)', theme.headlineSmall),
+        _preview(context, 'body-default (bodyLarge)', theme.bodyLarge),
+        _preview(context, 'body-secondary (bodyMedium)', theme.bodyMedium),
+        _preview(context, 'body-caption (bodySmall)', theme.bodySmall),
+        _preview(context, 'body-tiny (labelSmall)', theme.labelSmall),
+        _preview(context, 'body-tiny2 (labelMini)', theme.labelMini),
+      ],
     );
   }
+}
 
-  Future<void> _playLikeEffect(LikeProgressEffectParams params) async {
-    await LikeProgressEffect.play(context, params: params);
+class _LabAccountPage extends StatefulWidget {
+  const _LabAccountPage({this.onSignOut});
+
+  final VoidCallback? onSignOut;
+
+  @override
+  State<_LabAccountPage> createState() => _LabAccountPageState();
+}
+
+class _LabAccountPageState extends State<_LabAccountPage> {
+  bool _removingMetaInfo = false;
+
+  Future<void> _removeMetaInfo() async {
+    if (_removingMetaInfo) return;
+    setState(() => _removingMetaInfo = true);
+    try {
+      final token = await TokenStorage.loadAccessToken();
+      if (token == null || token.isEmpty) {
+        throw Exception('missing access token');
+      }
+      await SudaApiClient.clearMetaInfo(accessToken: token);
+      try {
+        final refreshToken = await TokenStorage.loadRefreshToken();
+        if (refreshToken != null && refreshToken.isNotEmpty) {
+          final deviceId = await TokenStorage.getDeviceId();
+          await SudaApiClient.logout(
+            refreshToken: refreshToken,
+            deviceId: deviceId,
+          );
+        }
+      } catch (_) {}
+      await AuthService.signOut();
+      await TokenStorage.clearTokens();
+      if (!mounted) return;
+      Navigator.of(context).popUntil((route) => route.isFirst);
+      widget.onSignOut?.call();
+    } catch (error) {
+      if (mounted) {
+        DefaultToast.show(context, 'Remove MetaInfo failed: $error', isError: true);
+      }
+    } finally {
+      if (mounted) setState(() => _removingMetaInfo = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _LabPage(
+      title: 'Account',
+      children: [
+        SizedBox(
+          width: double.infinity,
+          height: 56,
+          child: ElevatedButton(
+            onPressed: _removingMetaInfo ? null : () => unawaited(_removeMetaInfo()),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF0CABA8),
+              foregroundColor: Colors.white,
+              disabledBackgroundColor: const Color(0xFF0CABA8),
+              disabledForegroundColor: Colors.white54,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              elevation: 0,
+            ),
+            child: const Text('Remove MetaInfo'),
+          ),
+        ),
+      ],
+    );
   }
 }
 

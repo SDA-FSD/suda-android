@@ -781,6 +781,10 @@ class SudaApiClient {
     return UserApi.tutorialShown(accessToken: accessToken);
   }
 
+  static Future<void> clearMetaInfo({required String accessToken}) {
+    return UserApi.clearMetaInfo(accessToken: accessToken);
+  }
+
   static Future<void> tutorial1To2({required String accessToken}) {
     return UserApi.tutorialStep(
       accessToken: accessToken,

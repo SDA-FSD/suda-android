@@ -363,6 +363,37 @@ class UserApi {
     );
   }
 
+  /// POST /v1/users/meta/clear — local·dev only. 실패 시 throw.
+  static Future<void> clearMetaInfo({
+    required String accessToken,
+  }) async {
+    final uri = SudaHttpClient.buildUri('/v1/users/meta/clear');
+
+    late final http.Response response;
+    try {
+      response = await SudaHttpClient.client
+          .post(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      rethrow;
+    }
+
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return;
+    }
+    throw Exception(
+      'POST /v1/users/meta/clear failed: HTTP ${response.statusCode} ${response.body}',
+    );
+  }
+
   /// POST /v1/users/tutorial-shown (best-effort; 200 only)
   static Future<void> tutorialShown({
     required String accessToken,

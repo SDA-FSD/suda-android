@@ -140,7 +140,10 @@ class SettingScreen extends StatelessWidget {
             _buildMenuItem(
               context,
               l10n.settingsFsdLaboratory,
-              () => _navigateToSubScreen(context, const LabScreen()),
+              () => _navigateToSubScreen(
+                    context,
+                    LabScreen(onSignOut: onSignOut),
+                  ),
             ),
           const Spacer(),
           // 하단 푸터 메뉴 (Privacy, Terms, Open source) — 위로 올림
