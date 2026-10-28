@@ -427,7 +427,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get tutorialRoleplayMissions => 'المهام';
 
   @override
-  String get tutorialRoleplayMission1 => 'ألقِ التحية على سائق التاكسي';
+  String get tutorialRoleplayMission1 => 'ألقِ التحية على Betty';
 
   @override
   String get tutorialRoleplayMission2 => 'أخبر السائق إلى أين تذهب';
@@ -446,10 +446,14 @@ class AppLocalizationsAr extends AppLocalizations {
       'اليوم تنتقل إلى حي جديد.\nألقِ التحية على Betty، سائقة التاكسي!';
 
   @override
-  String get tutorialRoleplayResultSubtitle => 'اكتملت المحادثة الأولى!';
+  String get tutorialRoleplayResultTitle => 'اكتملت المحادثة الأولى!';
 
   @override
-  String get tutorialRoleplayResultContinue => 'لنواصل!';
+  String get tutorialRoleplayResultSubtitle =>
+      'قابل جيرانك الجدد وتدرّب على الإنجليزية في مواقف يومية!';
+
+  @override
+  String get tutorialRoleplayResultContinue => 'شاهد الحلقة الأولى';
 
   @override
   String get tutorialRoleplayGreetingSuccess => 'اكتملت التحية الأولى!\nأحسنت!';
@@ -478,8 +482,7 @@ class AppLocalizationsAr extends AppLocalizations {
       'لم نسمعك. حاول قول ‘Hello’ مرة أخرى.';
 
   @override
-  String get tutorialRoleplayHintGuide =>
-      'مش عارف تقول إيه؟\nاضغط على اللمبة عشان تشوف التلميح.';
+  String get tutorialRoleplayHintGuide => 'اضغط على التلميح.';
 
   @override
   String get tutorialRoleplayHintDestinationNative => 'على SUDA City لو سمحت.';
@@ -491,8 +494,11 @@ class AppLocalizationsAr extends AppLocalizations {
   String get tutorialRoleplayHintAnswerGuide => 'حاول ترد بالجملة دي.';
 
   @override
+  String get tutorialRoleplayArrivalNarration => 'التاكسي وصل لوجهتك.';
+
+  @override
   String get tutorialRoleplayFreeAnswerGuide =>
-      'جاوب بكلامك.\nمحتاج مساعدة؟ اضغط على اللمبة.';
+      'جاوب بكلامك.\nمحتاج مساعدة؟ اضغط على التلميح.';
 
   @override
   String get actionConfirm => 'تأكيد';
@@ -552,10 +558,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get roleplayAutoHintGuide => 'فعّل التلميح التلقائي';
 
   @override
-  String get roleplayHintLabel => 'تلميح';
+  String get roleplayHintLabel => 'يمكنك أن تقول';
 
   @override
-  String get roleplayHintShowAnswer => 'اضغط لعرض الإجابة المقترحة بالإنجليزية';
+  String get roleplayHintShowAnswer => 'شوف كيف تقولها بالإنجليزية';
+
+  @override
+  String get roleplayHintEnglishLabel => 'مثال بالإنجليزية';
 
   @override
   String get roleplayVoiceSpeed => 'سرعة الصوت';

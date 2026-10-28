@@ -908,7 +908,7 @@ abstract class AppLocalizations {
   /// No description provided for @tutorialRoleplayMission1.
   ///
   /// In en, this message translates to:
-  /// **'Greet the taxi driver'**
+  /// **'Greet Betty'**
   String get tutorialRoleplayMission1;
 
   /// No description provided for @tutorialRoleplayMission2.
@@ -941,16 +941,22 @@ abstract class AppLocalizations {
   /// **'Today, you\'re moving to a new neighborhood.\nSay hello to Betty, your taxi driver!'**
   String get tutorialRoleplaySceneCaption;
 
-  /// No description provided for @tutorialRoleplayResultSubtitle.
+  /// No description provided for @tutorialRoleplayResultTitle.
   ///
   /// In en, this message translates to:
   /// **'First conversation complete!'**
+  String get tutorialRoleplayResultTitle;
+
+  /// No description provided for @tutorialRoleplayResultSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Meet your new neighbors and practice English in everyday situations!'**
   String get tutorialRoleplayResultSubtitle;
 
   /// No description provided for @tutorialRoleplayResultContinue.
   ///
   /// In en, this message translates to:
-  /// **'Keep It Going!'**
+  /// **'View Your First Episode'**
   String get tutorialRoleplayResultContinue;
 
   /// No description provided for @tutorialRoleplayGreetingSuccess.
@@ -998,7 +1004,7 @@ abstract class AppLocalizations {
   /// No description provided for @tutorialRoleplayHintGuide.
   ///
   /// In en, this message translates to:
-  /// **'Not sure what to say?\nTap the light bulb for a hint.'**
+  /// **'Tap the hint.'**
   String get tutorialRoleplayHintGuide;
 
   /// No description provided for @tutorialRoleplayHintDestinationNative.
@@ -1019,10 +1025,16 @@ abstract class AppLocalizations {
   /// **'Try answering with this sentence.'**
   String get tutorialRoleplayHintAnswerGuide;
 
+  /// No description provided for @tutorialRoleplayArrivalNarration.
+  ///
+  /// In en, this message translates to:
+  /// **'The taxi arrives at your destination.'**
+  String get tutorialRoleplayArrivalNarration;
+
   /// No description provided for @tutorialRoleplayFreeAnswerGuide.
   ///
   /// In en, this message translates to:
-  /// **'Answer in your own words.\nNeed help? Tap the light bulb.'**
+  /// **'Answer in your own words.\nNeed help? Tap the hint.'**
   String get tutorialRoleplayFreeAnswerGuide;
 
   /// No description provided for @actionConfirm.
@@ -1136,14 +1148,20 @@ abstract class AppLocalizations {
   /// No description provided for @roleplayHintLabel.
   ///
   /// In en, this message translates to:
-  /// **'Hint'**
+  /// **'You can say'**
   String get roleplayHintLabel;
 
   /// No description provided for @roleplayHintShowAnswer.
   ///
   /// In en, this message translates to:
-  /// **'Tap to see the English answer'**
+  /// **'See how to say it'**
   String get roleplayHintShowAnswer;
+
+  /// No description provided for @roleplayHintEnglishLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Example in English'**
+  String get roleplayHintEnglishLabel;
 
   /// No description provided for @roleplayVoiceSpeed.
   ///

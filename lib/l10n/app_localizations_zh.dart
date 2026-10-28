@@ -407,7 +407,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get tutorialRoleplayMissions => '任务';
 
   @override
-  String get tutorialRoleplayMission1 => '向出租车司机打招呼';
+  String get tutorialRoleplayMission1 => '向Betty打招呼';
 
   @override
   String get tutorialRoleplayMission2 => '告诉司机你要去哪里';
@@ -425,10 +425,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get tutorialRoleplaySceneCaption => '今天要搬到新的街区了。\n和出租车司机Betty打个招呼吧！';
 
   @override
-  String get tutorialRoleplayResultSubtitle => '第一次对话完成了！';
+  String get tutorialRoleplayResultTitle => '第一次对话完成！';
 
   @override
-  String get tutorialRoleplayResultContinue => '继续说下去！';
+  String get tutorialRoleplayResultSubtitle => '认识新邻居，在日常场景中练习英语吧！';
+
+  @override
+  String get tutorialRoleplayResultContinue => '去看第一集';
 
   @override
   String get tutorialRoleplayGreetingSuccess => '第一次打招呼成功！\n做得好！';
@@ -453,7 +456,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get tutorialRoleplayMicNoSpeech => '没有听清。请再说一次 ‘Hello’。';
 
   @override
-  String get tutorialRoleplayHintGuide => '不知道该说什么？\n点灯泡看提示。';
+  String get tutorialRoleplayHintGuide => '点击提示。';
 
   @override
   String get tutorialRoleplayHintDestinationNative => '请去 SUDA City。';
@@ -465,7 +468,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get tutorialRoleplayHintAnswerGuide => '试着用这句话回答。';
 
   @override
-  String get tutorialRoleplayFreeAnswerGuide => '用自己的话回答吧。\n需要帮助的话，点灯泡。';
+  String get tutorialRoleplayArrivalNarration => '出租车到达了你的目的地。';
+
+  @override
+  String get tutorialRoleplayFreeAnswerGuide => '用自己的话回答吧。\n需要帮助的话，点击提示。';
 
   @override
   String get actionConfirm => '确认';
@@ -522,10 +528,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get roleplayAutoHintGuide => '开启自动提示';
 
   @override
-  String get roleplayHintLabel => '提示';
+  String get roleplayHintLabel => '可以这样说';
 
   @override
-  String get roleplayHintShowAnswer => '点击查看英文参考回复';
+  String get roleplayHintShowAnswer => '查看英语表达';
+
+  @override
+  String get roleplayHintEnglishLabel => '英语示例';
 
   @override
   String get roleplayVoiceSpeed => '语速';
@@ -1675,7 +1684,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get tutorialRoleplayMissions => '任务';
 
   @override
-  String get tutorialRoleplayMission1 => '向出租车司机打招呼';
+  String get tutorialRoleplayMission1 => '向Betty打招呼';
 
   @override
   String get tutorialRoleplayMission2 => '告诉司机你要去哪里';
@@ -1693,10 +1702,13 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get tutorialRoleplaySceneCaption => '今天要搬到新的街区了。\n和出租车司机Betty打个招呼吧！';
 
   @override
-  String get tutorialRoleplayResultSubtitle => '第一次对话完成了！';
+  String get tutorialRoleplayResultTitle => '第一次对话完成！';
 
   @override
-  String get tutorialRoleplayResultContinue => '继续说下去！';
+  String get tutorialRoleplayResultSubtitle => '认识新邻居，在日常场景中练习英语吧！';
+
+  @override
+  String get tutorialRoleplayResultContinue => '去看第一集';
 
   @override
   String get tutorialRoleplayGreetingSuccess => '第一次打招呼成功！\n做得好！';
@@ -1721,7 +1733,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get tutorialRoleplayMicNoSpeech => '没有听清。请再说一次 ‘Hello’。';
 
   @override
-  String get tutorialRoleplayHintGuide => '不知道该说什么？\n点灯泡看提示。';
+  String get tutorialRoleplayHintGuide => '点击提示。';
 
   @override
   String get tutorialRoleplayHintDestinationNative => '请去 SUDA City。';
@@ -1733,7 +1745,10 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get tutorialRoleplayHintAnswerGuide => '试着用这句话回答。';
 
   @override
-  String get tutorialRoleplayFreeAnswerGuide => '用自己的话回答吧。\n需要帮助的话，点灯泡。';
+  String get tutorialRoleplayArrivalNarration => '出租车到达了你的目的地。';
+
+  @override
+  String get tutorialRoleplayFreeAnswerGuide => '用自己的话回答吧。\n需要帮助的话，点击提示。';
 
   @override
   String get actionConfirm => '确认';
@@ -1790,10 +1805,13 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get roleplayAutoHintGuide => '开启自动提示';
 
   @override
-  String get roleplayHintLabel => '提示';
+  String get roleplayHintLabel => '可以这样说';
 
   @override
-  String get roleplayHintShowAnswer => '点击查看英文参考回复';
+  String get roleplayHintShowAnswer => '查看英语表达';
+
+  @override
+  String get roleplayHintEnglishLabel => '英语示例';
 
   @override
   String get roleplayVoiceSpeed => '语速';
@@ -2943,7 +2961,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get tutorialRoleplayMissions => '任務';
 
   @override
-  String get tutorialRoleplayMission1 => '向計程車司機打招呼';
+  String get tutorialRoleplayMission1 => '向Betty打招呼';
 
   @override
   String get tutorialRoleplayMission2 => '告訴司機你要去哪裡';
@@ -2961,10 +2979,13 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get tutorialRoleplaySceneCaption => '今天要搬到新的社區了。\n和計程車司機Betty打個招呼吧！';
 
   @override
-  String get tutorialRoleplayResultSubtitle => '第一次對話完成了！';
+  String get tutorialRoleplayResultTitle => '第一次對話完成！';
 
   @override
-  String get tutorialRoleplayResultContinue => '繼續說下去！';
+  String get tutorialRoleplayResultSubtitle => '認識新鄰居，在日常情境中練習英語吧！';
+
+  @override
+  String get tutorialRoleplayResultContinue => '去看第一集';
 
   @override
   String get tutorialRoleplayGreetingSuccess => '第一次打招呼成功！\n做得好！';
@@ -2989,7 +3010,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get tutorialRoleplayMicNoSpeech => '沒有聽清楚。請再說一次 ‘Hello’。';
 
   @override
-  String get tutorialRoleplayHintGuide => '不知道該說什麼？\n點燈泡看提示。';
+  String get tutorialRoleplayHintGuide => '點一下提示。';
 
   @override
   String get tutorialRoleplayHintDestinationNative => '請去 SUDA City。';
@@ -3001,7 +3022,10 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get tutorialRoleplayHintAnswerGuide => '試著用這句話回答。';
 
   @override
-  String get tutorialRoleplayFreeAnswerGuide => '用自己的話回答吧。\n需要幫忙的話，點燈泡。';
+  String get tutorialRoleplayArrivalNarration => '計程車到達了你的目的地。';
+
+  @override
+  String get tutorialRoleplayFreeAnswerGuide => '用自己的話回答吧。\n需要幫忙的話，點一下提示。';
 
   @override
   String get actionConfirm => '確認';
@@ -3058,10 +3082,13 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get roleplayAutoHintGuide => '開啟自動提示';
 
   @override
-  String get roleplayHintLabel => '提示';
+  String get roleplayHintLabel => '可以這樣說';
 
   @override
-  String get roleplayHintShowAnswer => '點一下查看建議的英文回覆';
+  String get roleplayHintShowAnswer => '查看英語表達';
+
+  @override
+  String get roleplayHintEnglishLabel => '英語示例';
 
   @override
   String get roleplayVoiceSpeed => '語音速度';

@@ -409,7 +409,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get tutorialRoleplayMissions => '미션';
 
   @override
-  String get tutorialRoleplayMission1 => '택시 기사에게 인사하기';
+  String get tutorialRoleplayMission1 => 'Betty와 인사하기';
 
   @override
   String get tutorialRoleplayMission2 => '목적지 말하기';
@@ -428,10 +428,14 @@ class AppLocalizationsKo extends AppLocalizations {
       '오늘은 새 동네로 이사하는 날이에요.\n택시 기사 Betty에게 인사해 볼까요?';
 
   @override
-  String get tutorialRoleplayResultSubtitle => '첫 대화를 성공적으로 마쳤어요!';
+  String get tutorialRoleplayResultTitle => '첫 대화 성공!';
 
   @override
-  String get tutorialRoleplayResultContinue => '더 말하러 가기';
+  String get tutorialRoleplayResultSubtitle =>
+      '새로운 이웃들과 다양한 일상 속에서 영어로 대화해 보세요!';
+
+  @override
+  String get tutorialRoleplayResultContinue => '첫 에피소드 보러 가기';
 
   @override
   String get tutorialRoleplayGreetingSuccess => '첫 인사 성공!\n잘했어요!';
@@ -459,7 +463,7 @@ class AppLocalizationsKo extends AppLocalizations {
       '목소리가 들리지 않았어요. 다시 \'Hello\'라고 말해보세요.';
 
   @override
-  String get tutorialRoleplayHintGuide => '뭐라고 말할지 모르겠다면\n전구를 눌러보세요.';
+  String get tutorialRoleplayHintGuide => '힌트를 눌러보세요.';
 
   @override
   String get tutorialRoleplayHintDestinationNative => '수다 시티로 가주세요.';
@@ -471,8 +475,11 @@ class AppLocalizationsKo extends AppLocalizations {
   String get tutorialRoleplayHintAnswerGuide => '이 문장으로 답해보세요.';
 
   @override
+  String get tutorialRoleplayArrivalNarration => '택시가 목적지에 도착했습니다.';
+
+  @override
   String get tutorialRoleplayFreeAnswerGuide =>
-      '자유롭게 답해보세요.\n도움이 필요하면 전구를 누르세요.';
+      '자유롭게 답해보세요.\n도움이 필요하면 힌트를 눌러보세요.';
 
   @override
   String get actionConfirm => '확인';
@@ -529,10 +536,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get roleplayAutoHintGuide => '자동 힌트 켜기';
 
   @override
-  String get roleplayHintLabel => '답변힌트';
+  String get roleplayHintLabel => '이렇게 말해보세요';
 
   @override
-  String get roleplayHintShowAnswer => '영어 답변 보기';
+  String get roleplayHintShowAnswer => '영어 표현 보기';
+
+  @override
+  String get roleplayHintEnglishLabel => '영어 예시';
 
   @override
   String get roleplayVoiceSpeed => '음성 속도';

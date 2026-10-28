@@ -228,59 +228,52 @@ class _FirstProfileImageScreenState extends State<FirstProfileImageScreen> {
   }
 
   Widget _buildBottomSection(AppLocalizations l10n, TextTheme theme) {
-    return Column(
-      children: [
-        const Expanded(child: SizedBox.shrink()),
-        Expanded(
-          child: Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Text(
-                    l10n.firstCefrLevelSettingsHint,
-                    style: theme.labelSmall?.copyWith(
-                      color: _hintColor,
-                      fontStyle: FontStyle.italic,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                const SizedBox(height: 14),
-                SizedBox(
-                  height: 60,
-                  child: ElevatedButton(
-                    onPressed: _isSubmitting ? null : _onConfirm,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.black,
-                      disabledBackgroundColor: Colors.white.withOpacity(0.6),
-                      disabledForegroundColor: Colors.black.withOpacity(0.6),
-                      elevation: 0,
-                      shape: const StadiumBorder(),
-                      minimumSize: Size.zero,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      padding: const EdgeInsets.symmetric(horizontal: 32),
-                    ),
-                    child: _isSubmitting
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.black,
-                            ),
-                          )
-                        : Text(l10n.firstAppLanguageContinue),
-                  ),
-                ),
-              ],
+    // 하단 1/3 전체를 기준으로 가운데. 가운데 칸만 주면 힌트+버튼이 넘친다.
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Text(
+              l10n.firstCefrLevelSettingsHint,
+              style: theme.labelSmall?.copyWith(
+                color: _hintColor,
+                fontStyle: FontStyle.italic,
+              ),
+              textAlign: TextAlign.center,
             ),
           ),
-        ),
-        const Expanded(child: SizedBox.shrink()),
-      ],
+          const SizedBox(height: 14),
+          SizedBox(
+            height: 60,
+            child: ElevatedButton(
+              onPressed: _isSubmitting ? null : _onConfirm,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: Colors.black,
+                disabledBackgroundColor: Colors.white.withOpacity(0.6),
+                disabledForegroundColor: Colors.black.withOpacity(0.6),
+                elevation: 0,
+                shape: const StadiumBorder(),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                padding: const EdgeInsets.symmetric(horizontal: 32),
+              ),
+              child: _isSubmitting
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.black,
+                      ),
+                    )
+                  : Text(l10n.firstAppLanguageContinue),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

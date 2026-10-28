@@ -431,7 +431,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get tutorialRoleplayMissions => 'Misi';
 
   @override
-  String get tutorialRoleplayMission1 => 'Sapa sopir taksi';
+  String get tutorialRoleplayMission1 => 'Sapa Betty';
 
   @override
   String get tutorialRoleplayMission2 => 'Beri tahu ke mana kamu pergi';
@@ -450,10 +450,14 @@ class AppLocalizationsId extends AppLocalizations {
       'Hari ini kamu pindah ke lingkungan baru.\nSapa Betty, sopir taksimu!';
 
   @override
-  String get tutorialRoleplayResultSubtitle => 'Percakapan pertama selesai!';
+  String get tutorialRoleplayResultTitle => 'Percakapan pertama selesai!';
 
   @override
-  String get tutorialRoleplayResultContinue => 'Ayo lanjut!';
+  String get tutorialRoleplayResultSubtitle =>
+      'Temui tetangga barumu dan latih bahasa Inggris dalam situasi sehari-hari!';
+
+  @override
+  String get tutorialRoleplayResultContinue => 'Lihat episode pertama';
 
   @override
   String get tutorialRoleplayGreetingSuccess =>
@@ -483,8 +487,7 @@ class AppLocalizationsId extends AppLocalizations {
       'Tidak terdengar. Coba ucapkan ‘Hello’ lagi.';
 
   @override
-  String get tutorialRoleplayHintGuide =>
-      'Bingung mau bilang apa?\nKetuk bohlam untuk lihat petunjuk.';
+  String get tutorialRoleplayHintGuide => 'Ketuk petunjuk.';
 
   @override
   String get tutorialRoleplayHintDestinationNative => 'Ke SUDA City, ya.';
@@ -498,8 +501,11 @@ class AppLocalizationsId extends AppLocalizations {
       'Coba jawab dengan kalimat ini.';
 
   @override
+  String get tutorialRoleplayArrivalNarration => 'Taksi tiba di tujuanmu.';
+
+  @override
   String get tutorialRoleplayFreeAnswerGuide =>
-      'Jawab dengan kata-katamu sendiri.\nButuh bantuan? Ketuk bohlamnya.';
+      'Jawab dengan kata-katamu sendiri.\nButuh bantuan? Ketuk petunjuk.';
 
   @override
   String get actionConfirm => 'Konfirmasi';
@@ -560,11 +566,14 @@ class AppLocalizationsId extends AppLocalizations {
   String get roleplayAutoHintGuide => 'Aktifkan petunjuk otomatis';
 
   @override
-  String get roleplayHintLabel => 'Petunjuk';
+  String get roleplayHintLabel => 'Kamu bisa bilang';
 
   @override
   String get roleplayHintShowAnswer =>
-      'Ketuk untuk melihat saran jawaban dalam bahasa Inggris';
+      'Lihat cara mengatakannya dalam bahasa Inggris';
+
+  @override
+  String get roleplayHintEnglishLabel => 'Contoh dalam bahasa Inggris';
 
   @override
   String get roleplayVoiceSpeed => 'Kecepatan bicara';

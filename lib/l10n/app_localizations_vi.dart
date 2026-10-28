@@ -432,7 +432,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get tutorialRoleplayMissions => 'Nhiệm vụ';
 
   @override
-  String get tutorialRoleplayMission1 => 'Chào tài xế taxi';
+  String get tutorialRoleplayMission1 => 'Chào Betty';
 
   @override
   String get tutorialRoleplayMission2 => 'Nói bạn đang đi đâu';
@@ -451,11 +451,15 @@ class AppLocalizationsVi extends AppLocalizations {
       'Hôm nay bạn chuyển đến một khu phố mới.\nHãy chào Betty, tài xế taxi của bạn!';
 
   @override
-  String get tutorialRoleplayResultSubtitle =>
+  String get tutorialRoleplayResultTitle =>
       'Hoàn thành cuộc hội thoại đầu tiên!';
 
   @override
-  String get tutorialRoleplayResultContinue => 'Tiếp tục nói nào!';
+  String get tutorialRoleplayResultSubtitle =>
+      'Gặp những người hàng xóm mới và luyện tiếng Anh trong các tình huống hàng ngày!';
+
+  @override
+  String get tutorialRoleplayResultContinue => 'Xem tập đầu tiên';
 
   @override
   String get tutorialRoleplayGreetingSuccess =>
@@ -484,8 +488,7 @@ class AppLocalizationsVi extends AppLocalizations {
       'Chưa nghe rõ. Hãy thử nói ‘Hello’ lần nữa.';
 
   @override
-  String get tutorialRoleplayHintGuide =>
-      'Không biết nói gì?\nChạm vào bóng đèn để xem gợi ý.';
+  String get tutorialRoleplayHintGuide => 'Chạm vào gợi ý.';
 
   @override
   String get tutorialRoleplayHintDestinationNative => 'Đến SUDA City, làm ơn.';
@@ -497,8 +500,12 @@ class AppLocalizationsVi extends AppLocalizations {
   String get tutorialRoleplayHintAnswerGuide => 'Thử trả lời bằng câu này.';
 
   @override
+  String get tutorialRoleplayArrivalNarration =>
+      'Taxi đã đến nơi bạn muốn đến.';
+
+  @override
   String get tutorialRoleplayFreeAnswerGuide =>
-      'Hãy trả lời bằng lời của bạn.\nCần giúp đỡ? Chạm vào bóng đèn.';
+      'Hãy trả lời bằng lời của bạn.\nCần giúp đỡ? Chạm vào gợi ý.';
 
   @override
   String get actionConfirm => 'Xác nhận';
@@ -558,11 +565,13 @@ class AppLocalizationsVi extends AppLocalizations {
   String get roleplayAutoHintGuide => 'Bật gợi ý tự động';
 
   @override
-  String get roleplayHintLabel => 'Gợi ý';
+  String get roleplayHintLabel => 'Bạn có thể nói';
 
   @override
-  String get roleplayHintShowAnswer =>
-      'Nhấn để xem gợi ý trả lời bằng tiếng Anh';
+  String get roleplayHintShowAnswer => 'Xem cách nói tiếng Anh';
+
+  @override
+  String get roleplayHintEnglishLabel => 'Ví dụ tiếng Anh';
 
   @override
   String get roleplayVoiceSpeed => 'Tốc độ giọng đọc';

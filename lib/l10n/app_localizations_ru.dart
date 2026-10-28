@@ -431,7 +431,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get tutorialRoleplayMissions => 'Миссии';
 
   @override
-  String get tutorialRoleplayMission1 => 'Поздоровайтесь с таксистом';
+  String get tutorialRoleplayMission1 => 'Поздоровайтесь с Betty';
 
   @override
   String get tutorialRoleplayMission2 => 'Скажите, куда вы едете';
@@ -452,10 +452,14 @@ class AppLocalizationsRu extends AppLocalizations {
       'Сегодня вы переезжаете в новый район.\nПоприветствуйте Betty, вашу таксистку!';
 
   @override
-  String get tutorialRoleplayResultSubtitle => 'Первый разговор завершён!';
+  String get tutorialRoleplayResultTitle => 'Первый разговор завершён!';
 
   @override
-  String get tutorialRoleplayResultContinue => 'Продолжаем!';
+  String get tutorialRoleplayResultSubtitle =>
+      'Познакомьтесь с новыми соседями и практикуйте английский в повседневных ситуациях!';
+
+  @override
+  String get tutorialRoleplayResultContinue => 'Смотреть первый эпизод';
 
   @override
   String get tutorialRoleplayGreetingSuccess =>
@@ -485,8 +489,7 @@ class AppLocalizationsRu extends AppLocalizations {
       'Вас не слышно. Попробуйте ещё раз сказать ‘Hello’.';
 
   @override
-  String get tutorialRoleplayHintGuide =>
-      'Не знаешь, что сказать?\nНажми на лампочку, чтобы увидеть подсказку.';
+  String get tutorialRoleplayHintGuide => 'Нажмите на подсказку.';
 
   @override
   String get tutorialRoleplayHintDestinationNative =>
@@ -500,8 +503,12 @@ class AppLocalizationsRu extends AppLocalizations {
       'Попробуй ответить этим предложением.';
 
   @override
+  String get tutorialRoleplayArrivalNarration =>
+      'Такси прибыло к месту назначения.';
+
+  @override
   String get tutorialRoleplayFreeAnswerGuide =>
-      'Ответь своими словами.\nНужна помощь? Нажми на лампочку.';
+      'Ответь своими словами.\nНужна помощь? Нажми на подсказку.';
 
   @override
   String get actionConfirm => 'Подтвердить';
@@ -561,10 +568,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get roleplayAutoHintGuide => 'Включите автоподсказки';
 
   @override
-  String get roleplayHintLabel => 'Подсказка';
+  String get roleplayHintLabel => 'Можно сказать так';
 
   @override
-  String get roleplayHintShowAnswer => 'Показать вариант ответа на английском';
+  String get roleplayHintShowAnswer => 'Посмотреть, как сказать по-английски';
+
+  @override
+  String get roleplayHintEnglishLabel => 'Пример на английском';
 
   @override
   String get roleplayVoiceSpeed => 'Скорость речи';

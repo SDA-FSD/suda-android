@@ -430,7 +430,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get tutorialRoleplayMissions => 'मिशन';
 
   @override
-  String get tutorialRoleplayMission1 => 'टैक्सी ड्राइवर को नमस्ते कहें';
+  String get tutorialRoleplayMission1 => 'Betty को नमस्ते कहें';
 
   @override
   String get tutorialRoleplayMission2 => 'बताएँ कि आप कहाँ जा रहे हैं';
@@ -450,10 +450,14 @@ class AppLocalizationsHi extends AppLocalizations {
       'आज आप नए मोहल्ले में शिफ्ट हो रहे हैं।\nअपनी टैक्सी ड्राइवर Betty को नमस्ते कहिए!';
 
   @override
-  String get tutorialRoleplayResultSubtitle => 'पहली बातचीत पूरी हुई!';
+  String get tutorialRoleplayResultTitle => 'पहली बातचीत पूरी हुई!';
 
   @override
-  String get tutorialRoleplayResultContinue => 'आगे बढ़ते रहें!';
+  String get tutorialRoleplayResultSubtitle =>
+      'नए पड़ोसियों से मिलें और रोज़मर्रा की स्थितियों में अंग्रेज़ी का अभ्यास करें!';
+
+  @override
+  String get tutorialRoleplayResultContinue => 'पहला एपिसोड देखें';
 
   @override
   String get tutorialRoleplayGreetingSuccess =>
@@ -483,8 +487,7 @@ class AppLocalizationsHi extends AppLocalizations {
       'आवाज़ सुनाई नहीं दी। फिर से ‘Hello’ कहकर देखें।';
 
   @override
-  String get tutorialRoleplayHintGuide =>
-      'क्या कहें, समझ नहीं आ रहा?\nसंकेत के लिए बल्ब पर टैप करें।';
+  String get tutorialRoleplayHintGuide => 'संकेत पर टैप करें।';
 
   @override
   String get tutorialRoleplayHintDestinationNative => 'SUDA City चलिए, प्लीज़।';
@@ -498,8 +501,12 @@ class AppLocalizationsHi extends AppLocalizations {
       'इस वाक्य से जवाब देने की कोशिश करें।';
 
   @override
+  String get tutorialRoleplayArrivalNarration =>
+      'टैक्सी आपकी मंज़िल पर पहुँच गई।';
+
+  @override
   String get tutorialRoleplayFreeAnswerGuide =>
-      'अपने शब्दों में जवाब दें।\nमदद चाहिए? बल्ब पर टैप करें।';
+      'अपने शब्दों में जवाब दें।\nमदद चाहिए? संकेत पर टैप करें।';
 
   @override
   String get actionConfirm => 'कन्फ़र्म करें';
@@ -559,11 +566,13 @@ class AppLocalizationsHi extends AppLocalizations {
   String get roleplayAutoHintGuide => 'ऑटो हिंट चालू करें';
 
   @override
-  String get roleplayHintLabel => 'हिंट';
+  String get roleplayHintLabel => 'आप ऐसे कह सकते हैं';
 
   @override
-  String get roleplayHintShowAnswer =>
-      'सुझाया गया अंग्रेज़ी जवाब देखने के लिए टैप करें';
+  String get roleplayHintShowAnswer => 'अंग्रेज़ी में कैसे कहें देखें';
+
+  @override
+  String get roleplayHintEnglishLabel => 'अंग्रेज़ी उदाहरण';
 
   @override
   String get roleplayVoiceSpeed => 'आवाज़ की स्पीड';

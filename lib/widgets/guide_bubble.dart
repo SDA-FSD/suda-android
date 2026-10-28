@@ -32,6 +32,9 @@ class GuideBubble extends StatefulWidget {
   /// 말풍선 전체 최대 폭. 기본은 [defaultMaxWidth].
   final double maxWidth;
 
+  /// 꼬리 여백 위에 더하는 글자 여백. 본문 안에서는 위아래가 같다.
+  final EdgeInsets contentPadding;
+
   /// true면 채우기 아래에 그림자를 그린다. X 0, Y 4, blur 4, spread 0, #000000 25%.
   final bool dropShadow;
 
@@ -51,6 +54,7 @@ class GuideBubble extends StatefulWidget {
     this.onTap,
     this.maxWidth = defaultMaxWidth,
     this.dropShadow = false,
+    this.contentPadding = EdgeInsets.zero,
   });
 
   @override
@@ -104,7 +108,7 @@ class _GuideBubbleState extends State<GuideBubble>
       GuideBubbleTail.bottom => EdgeInsets.fromLTRB(14, 10, 14, 10 + tail),
       GuideBubbleTail.left => EdgeInsets.fromLTRB(14 + tail, 10, 14, 10),
       GuideBubbleTail.right => EdgeInsets.fromLTRB(14, 10, 14 + tail, 10),
-    };
+    }.add(widget.contentPadding);
     Widget bubble = ConstrainedBox(
       constraints: BoxConstraints(maxWidth: widget.maxWidth),
       child: CustomPaint(

@@ -437,7 +437,7 @@ class AppLocalizationsFil extends AppLocalizations {
   String get tutorialRoleplayMissions => 'Mga misyon';
 
   @override
-  String get tutorialRoleplayMission1 => 'Batiin ang drayber ng taxi';
+  String get tutorialRoleplayMission1 => 'Batiin si Betty';
 
   @override
   String get tutorialRoleplayMission2 => 'Sabihin kung saan ka pupunta';
@@ -457,10 +457,14 @@ class AppLocalizationsFil extends AppLocalizations {
       'Ngayon, lilipat ka sa isang bagong lugar.\nKumusta ka muna kay Betty, ang driver ng taxi mo!';
 
   @override
-  String get tutorialRoleplayResultSubtitle => 'Tapos na ang unang usapan!';
+  String get tutorialRoleplayResultTitle => 'Tapos na ang unang usapan!';
 
   @override
-  String get tutorialRoleplayResultContinue => 'Ituloy natin!';
+  String get tutorialRoleplayResultSubtitle =>
+      'Makilala ang mga bagong kapitbahay at magsanay ng English sa araw-araw!';
+
+  @override
+  String get tutorialRoleplayResultContinue => 'Tingnan ang unang episode';
 
   @override
   String get tutorialRoleplayGreetingSuccess =>
@@ -490,8 +494,7 @@ class AppLocalizationsFil extends AppLocalizations {
       'Hindi narinig. Subukang sabihin ulit ang ‘Hello’.';
 
   @override
-  String get tutorialRoleplayHintGuide =>
-      'Hindi alam ang sasabihin?\nI-tap ang bumbilya para sa hint.';
+  String get tutorialRoleplayHintGuide => 'I-tap ang hint.';
 
   @override
   String get tutorialRoleplayHintDestinationNative => 'Sa SUDA City, pakiusap.';
@@ -504,8 +507,12 @@ class AppLocalizationsFil extends AppLocalizations {
       'Subukang sumagot gamit ang pangungusap na ito.';
 
   @override
+  String get tutorialRoleplayArrivalNarration =>
+      'Dumating na ang taxi sa destinasyon mo.';
+
+  @override
   String get tutorialRoleplayFreeAnswerGuide =>
-      'Sumagot gamit ang sarili mong salita.\nKailangan ng tulong? I-tap ang bumbilya.';
+      'Sumagot gamit ang sarili mong salita.\nKailangan ng tulong? I-tap ang hint.';
 
   @override
   String get actionConfirm => 'Kumpirmahin';
@@ -568,11 +575,13 @@ class AppLocalizationsFil extends AppLocalizations {
   String get roleplayAutoHintGuide => 'I-on ang Auto Hint';
 
   @override
-  String get roleplayHintLabel => 'Hint';
+  String get roleplayHintLabel => 'Pwede mong sabihin';
 
   @override
-  String get roleplayHintShowAnswer =>
-      'I-tap para makita ang mungkahing sagot sa English';
+  String get roleplayHintShowAnswer => 'Tingnan kung paano sabihin sa English';
+
+  @override
+  String get roleplayHintEnglishLabel => 'Halimbawa sa English';
 
   @override
   String get roleplayVoiceSpeed => 'Bilis ng pagsasalita';

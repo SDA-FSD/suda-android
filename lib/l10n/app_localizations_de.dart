@@ -433,7 +433,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get tutorialRoleplayMissions => 'Missionen';
 
   @override
-  String get tutorialRoleplayMission1 => 'Begrüße den Taxifahrer';
+  String get tutorialRoleplayMission1 => 'Begrüße Betty';
 
   @override
   String get tutorialRoleplayMission2 => 'Sag, wohin du fährst';
@@ -454,10 +454,14 @@ class AppLocalizationsDe extends AppLocalizations {
       'Heute ziehst du in ein neues Viertel.\nSag Hallo zu Betty, deiner Taxifahrerin!';
 
   @override
-  String get tutorialRoleplayResultSubtitle => 'Erstes Gespräch geschafft!';
+  String get tutorialRoleplayResultTitle => 'Erstes Gespräch geschafft!';
 
   @override
-  String get tutorialRoleplayResultContinue => 'Weiter so!';
+  String get tutorialRoleplayResultSubtitle =>
+      'Triff deine neuen Nachbarn und übe Englisch im Alltag!';
+
+  @override
+  String get tutorialRoleplayResultContinue => 'Erste Episode ansehen';
 
   @override
   String get tutorialRoleplayGreetingSuccess =>
@@ -487,8 +491,7 @@ class AppLocalizationsDe extends AppLocalizations {
       'Das haben wir nicht gehört. Sag noch einmal ‘Hello’.';
 
   @override
-  String get tutorialRoleplayHintGuide =>
-      'Du weißt nicht, was du sagen sollst?\nTipp auf die Glühbirne für einen Hinweis.';
+  String get tutorialRoleplayHintGuide => 'Tipp auf den Hinweis.';
 
   @override
   String get tutorialRoleplayHintDestinationNative => 'Nach SUDA City, bitte.';
@@ -501,8 +504,12 @@ class AppLocalizationsDe extends AppLocalizations {
       'Versuch, mit diesem Satz zu antworten.';
 
   @override
+  String get tutorialRoleplayArrivalNarration =>
+      'Das Taxi kommt an deinem Ziel an.';
+
+  @override
   String get tutorialRoleplayFreeAnswerGuide =>
-      'Antworte mit deinen eigenen Worten.\nBrauchst du Hilfe? Tipp auf die Glühbirne.';
+      'Antworte mit deinen eigenen Worten.\nBrauchst du Hilfe? Tipp auf den Hinweis.';
 
   @override
   String get actionConfirm => 'Bestätigen';
@@ -563,10 +570,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get roleplayAutoHintGuide => 'Auto-Tipp einschalten';
 
   @override
-  String get roleplayHintLabel => 'Tipp';
+  String get roleplayHintLabel => 'Du kannst sagen';
 
   @override
-  String get roleplayHintShowAnswer => 'Englischen Antwortvorschlag ansehen';
+  String get roleplayHintShowAnswer => 'Englische Formulierung ansehen';
+
+  @override
+  String get roleplayHintEnglishLabel => 'Beispiel auf Englisch';
 
   @override
   String get roleplayVoiceSpeed => 'Sprechtempo';

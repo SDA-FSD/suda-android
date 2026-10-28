@@ -246,7 +246,7 @@ Home (시리즈 썸네일)
 - **스크롤 정책**: 본문 `SingleChildScrollView`는 `ScrollController`를 사용한다. AI/User/Narration entry 또는 힌트 bubble이 새로 추가될 때만 최하단으로 250ms 애니메이션 이동한다. 사용자가 상하 드래그로 과거 메시지를 보는 중에는 새 요소 추가가 없는 한 강제로 하단 고정하지 않는다.
 - AI 말풍선 (`playing_conversation_mixin` `_buildAiMessage`): 배경 `#353535`·padding **10**·radius 12. 본문 `bodyMedium` 흰색. 번역 `labelSmall` `#777373`. 아바타 40×40은 말풍선 컨테이너 **상단** 정렬(`CrossAxisAlignment.start`). 번역 펼침 시 가려지면 `scrollToRevealBubbleIfNeeded` — `getOffsetToReveal`+하단 inset **8**, 필요 시에만 아래로 최소 스크롤, `maxScrollExtent` 강제 없음.
 - 사용자 말풍선 (`_buildUserMessage`): 우측 정렬·max 너비 `bodyWidth×0.7`. 배경 흰색 **30%**·padding 좌우 12 상하 10·radius 12. 본문 `bodyMedium` 흰색.
-- 힌트 `roleplayHintShowAnswer` 버튼: 너비 본문 `bodyWidth×0.9`. 바깥 상하 padding **10**, 라벨 좌우 **16**·상하 **12**. (`playing_hint_mixin` `_buildHintShowAnswerButton`)
+- 힌트 `roleplayHintShowAnswer` 버튼: 너비 본문 `bodyWidth×0.9`. 바깥 상하 padding **10**, 라벨 좌우 **16**·상하 **12**. (`playing_hint_mixin` `_buildHintShowAnswerButton`). 문구 키는 `roleplayHintLabel`/`roleplayHintShowAnswer`/`roleplayHintEnglishLabel`(en You can say / See how to say it / Example in English). 본편 박스 레이아웃은 이전 모양.
 - 녹음 중 말풍선 (`_buildRecordingBubble`): S1과 동일 — 녹음 시작 시 entry append·150ms fade-in·우측 말풍선·3점 wave(900ms sin, opacity 0.3~1.0). 배경·점 색은 사용자 말풍선과 동일(흰 30%·흰 점). **힌트박스가 노출된 턴**에는 힌트박스 **아래**에 배치(`_buildConversationWithHint`에서 recording을 hint 뒤로 렌더). 녹음 종료/취소 시 제거 후 STT 결과 말풍선 노출.
 - **첫 AI 말풍선 Y**: 본문 스크롤 영역 상단에 **고정 `SizedBox(height: 68)`** (`PlayingConversationLayout.firstBubbleTopOffset`) — 패널에 가리지 않음. 추가 말풍선은 아래로 쌓이며 스크롤 시 패널 뒤로 이동
 - **AI 아바타**: `selectedEpisode.aiCharacter.rpImgPath` — Opening `initState`·Playing 전환 직전 `precacheImage`
