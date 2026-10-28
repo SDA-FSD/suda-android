@@ -5,6 +5,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 import '../../../l10n/app_localizations.dart';
 import '../../../services/suda_api_client.dart';
+import '../../../services/token_storage.dart';
 import '../../../utils/default_toast.dart';
 import 'intro_stage.dart';
 import 'backdrop.dart';
@@ -63,6 +64,9 @@ class _TutorialIntroScreenState extends State<TutorialIntroScreen>
       vsync: this,
       duration: const Duration(milliseconds: 1200),
     )..value = 1;
+    if (!widget.preview) {
+      unawaited(_postOnboardingTutorialShownBestEffort());
+    }
     if (widget.playEntrance) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) _entrance.forward();
@@ -82,6 +86,14 @@ class _TutorialIntroScreenState extends State<TutorialIntroScreen>
     _continueFade.dispose();
     _continueBlink.dispose();
     super.dispose();
+  }
+
+  Future<void> _postOnboardingTutorialShownBestEffort() async {
+    try {
+      final token = await TokenStorage.loadAccessToken();
+      if (token == null || token.isEmpty) return;
+      await SudaApiClient.postOnboardingTutorialShown(accessToken: token);
+    } catch (_) {}
   }
 
   String get _displayName {

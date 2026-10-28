@@ -233,7 +233,7 @@
 - **스크린 타입**: **Full Screen**
 
 ### 스크린 용도
-- Username 직후. `onboardingEnabled == true`이고 `ONBOARDING_TUTORIAL` != Y일 때. Start Tutorial → 마이크 권한(Opening과 동일) → 인트로 페이드 후 장면 문구. 문구가 뜬 뒤 0.5초 지나 아래 흰 `tutorialRoleplayGuideMissionTapContinue`와 오른쪽 `>`가 뜨고 1.2초 간격으로 깜박인다. 그 줄은 흰색 80%이고, 뜬 뒤 화면 어디를 눌러도 된다. 문구·안내가 400ms에 걷히고 선명한 배경이 남은 뒤, 대화 화면이 그 배경을 0.5초에 걸쳐 블러하며 미션·마이크를 페이드인한다. Skip 확정 시 `POST /v1/users/onboarding-tutorial`(best-effort)
+- Username 직후. Intro가 뜨면(preview 제외) `POST /v1/users/onboarding-tutorial-shown`(best-effort). `onboardingEnabled == true`이고 `ONBOARDING_TUTORIAL` != Y일 때. Start Tutorial → 마이크 권한(Opening과 동일) → 인트로 페이드 후 장면 문구. 문구가 뜬 뒤 0.5초 지나 아래 흰 `tutorialRoleplayGuideMissionTapContinue`와 오른쪽 `>`가 뜨고 1.2초 간격으로 깜박인다. 그 줄은 흰색 80%이고, 뜬 뒤 화면 어디를 눌러도 된다. 문구·안내가 400ms에 걷히고 선명한 배경이 남은 뒤, 대화 화면이 그 배경을 0.5초에 걸쳐 블러하며 미션·마이크를 페이드인한다. Skip 확정 시 `POST /v1/users/onboarding-tutorial`(best-effort)
 
 ### 이전 스크린 정보 (진입점)
 - **FirstUsernameScreen** 완료 / `_assignEntryFlags` 재진입
