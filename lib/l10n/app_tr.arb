@@ -272,6 +272,8 @@
   "achievementStarPerformerHint": "{count} bölümde 3 yıldız kazan.",
   "achievementStoryExplorer": "Hikaye Kaşifi",
   "achievementStoryExplorerHint": "{count} seri tamamla.",
+  "achievementPhraseHunter": "İfade Avcısı",
+  "achievementPhraseHunterHint": "{count} ifadeyi koleksiyonuna kaydet.",
   "otherUserFriends": "Arkadaşlar",
   "otherUserRequested": "İstek gönderildi",
   "otherUserAddFriend": "Arkadaş ekle",

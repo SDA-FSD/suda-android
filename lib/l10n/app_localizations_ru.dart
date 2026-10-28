@@ -801,6 +801,14 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
+  String get achievementPhraseHunter => 'Охотник за фразами';
+
+  @override
+  String achievementPhraseHunterHint(int count) {
+    return 'Сохраните $count выражений в свою коллекцию.';
+  }
+
+  @override
   String get otherUserFriends => 'Друзья';
 
   @override

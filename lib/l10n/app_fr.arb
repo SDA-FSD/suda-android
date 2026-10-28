@@ -272,6 +272,8 @@
   "achievementStarPerformerHint": "Obtenez 3 étoiles dans {count} épisodes.",
   "achievementStoryExplorer": "Explorateur d'histoires",
   "achievementStoryExplorerHint": "{count, plural, one{Terminez {count} série.} other{Terminez {count} séries.}}",
+  "achievementPhraseHunter": "Chasseur d'expressions",
+  "achievementPhraseHunterHint": "Enregistrez {count} expressions dans votre collection.",
   "otherUserFriends": "Amis",
   "otherUserRequested": "Demande envoyée",
   "otherUserAddFriend": "Ajouter un ami",

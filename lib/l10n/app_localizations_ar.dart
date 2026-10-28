@@ -789,6 +789,14 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get achievementPhraseHunter => 'صائد العبارات';
+
+  @override
+  String achievementPhraseHunterHint(int count) {
+    return 'احفظ $count تعبيرات في مجموعتك.';
+  }
+
+  @override
   String get otherUserFriends => 'الأصدقاء';
 
   @override

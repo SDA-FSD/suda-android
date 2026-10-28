@@ -272,6 +272,8 @@
   "achievementStarPerformerHint": "在 {count} 个剧集中获得 3 颗星。",
   "achievementStoryExplorer": "故事探索者",
   "achievementStoryExplorerHint": "完成 {count} 个系列。",
+  "achievementPhraseHunter": "表达猎手",
+  "achievementPhraseHunterHint": "将 {count} 个表达保存到你的收藏。",
   "otherUserFriends": "好友",
   "otherUserRequested": "已发送请求",
   "otherUserAddFriend": "添加好友",

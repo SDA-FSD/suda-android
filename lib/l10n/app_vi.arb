@@ -272,6 +272,8 @@
   "achievementStarPerformerHint": "Đạt 3 sao trong {count} tập.",
   "achievementStoryExplorer": "Nhà thám hiểm câu chuyện",
   "achievementStoryExplorerHint": "Hoàn thành {count} series.",
+  "achievementPhraseHunter": "Thợ săn cụm từ",
+  "achievementPhraseHunterHint": "Lưu {count} cụm từ vào bộ sưu tập của bạn.",
   "otherUserFriends": "Bạn bè",
   "otherUserRequested": "Đã gửi lời mời",
   "otherUserAddFriend": "Thêm bạn",

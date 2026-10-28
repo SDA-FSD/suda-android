@@ -794,6 +794,14 @@ class AppLocalizationsMs extends AppLocalizations {
   }
 
   @override
+  String get achievementPhraseHunter => 'Pemburu Frasa';
+
+  @override
+  String achievementPhraseHunterHint(int count) {
+    return 'Simpan $count ungkapan ke dalam koleksi anda.';
+  }
+
+  @override
   String get otherUserFriends => 'Rakan';
 
   @override

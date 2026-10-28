@@ -272,6 +272,8 @@
   "achievementStarPerformerHint": "Erreiche 3 Sterne in {count} Episoden.",
   "achievementStoryExplorer": "Geschichtenentdecker",
   "achievementStoryExplorerHint": "{count, plural, one{Schließe {count} Serie ab.} other{Schließe {count} Serien ab.}}",
+  "achievementPhraseHunter": "Ausdrucksjäger",
+  "achievementPhraseHunterHint": "Speichere {count} Ausdrücke in deiner Sammlung.",
   "otherUserFriends": "Freunde",
   "otherUserRequested": "Angefragt",
   "otherUserAddFriend": "Freund hinzufügen",

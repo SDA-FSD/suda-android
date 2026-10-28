@@ -794,6 +794,14 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get achievementPhraseHunter => 'Phrase Hunter';
+
+  @override
+  String achievementPhraseHunterHint(int count) {
+    return 'Save $count expressions to your collection.';
+  }
+
+  @override
   String get otherUserFriends => 'Friends';
 
   @override

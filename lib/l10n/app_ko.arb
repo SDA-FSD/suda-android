@@ -272,6 +272,8 @@
   "achievementStarPerformerHint": "에피소드 {count}개에서 별 3개를 달성하세요.",
   "achievementStoryExplorer": "스토리 탐험가",
   "achievementStoryExplorerHint": "시리즈 {count}개를 완료하세요.",
+  "achievementPhraseHunter": "표현 사냥꾼",
+  "achievementPhraseHunterHint": "표현을 {count}개 저장하세요.",
   "otherUserFriends": "친구",
   "otherUserRequested": "요청 보냄",
   "otherUserAddFriend": "친구 추가",

@@ -162,7 +162,7 @@ int _activityMaxLevel(String code) {
   return switch (code) {
     'TA' || 'SC' || 'ON' || 'SK' || 'CC' || 'SP' => 4,
     'SE' => 5,
-    'PP' => 3,
+    'PH' || 'PP' => 3,
     _ => 2,
   };
 }
@@ -182,6 +182,7 @@ String _activityAsset(String code, int level) {
     'SC' => 'SC',
     'ON' => 'ON',
     'SE' => 'SE',
+    'PH' => 'PH',
     'SB' => 'SB',
     'SK' => 'SK',
     'PP' => 'PP',
@@ -229,6 +230,12 @@ _AchievementCopy _activityCopy(
         title: l10n.achievementStoryExplorer,
         hint: l10n.achievementStoryExplorerHint(goal),
         asset: 'assets/images/achievement/SE-$badge.png',
+      );
+    case 'PH':
+      return _AchievementCopy(
+        title: l10n.achievementPhraseHunter,
+        hint: l10n.achievementPhraseHunterHint(goal),
+        asset: 'assets/images/achievement/PH-$badge.png',
       );
     case 'SB':
       return _AchievementCopy(

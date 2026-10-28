@@ -799,6 +799,14 @@ class AppLocalizationsNl extends AppLocalizations {
   }
 
   @override
+  String get achievementPhraseHunter => 'Uitdrukkingenjager';
+
+  @override
+  String achievementPhraseHunterHint(int count) {
+    return 'Sla $count uitdrukkingen op in je verzameling.';
+  }
+
+  @override
   String get otherUserFriends => 'Vrienden';
 
   @override

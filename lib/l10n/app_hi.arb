@@ -272,6 +272,8 @@
   "achievementStarPerformerHint": "{count} एपिसोड में 3 सितारे हासिल करें।",
   "achievementStoryExplorer": "कहानी खोजकर्ता",
   "achievementStoryExplorerHint": "{count} सीरीज़ पूरी करें।",
+  "achievementPhraseHunter": "वाक्यांश शिकारी",
+  "achievementPhraseHunterHint": "{count} अभिव्यक्तियाँ अपने संग्रह में सहेजें।",
   "otherUserFriends": "मित्र",
   "otherUserRequested": "अनुरोध भेजा गया",
   "otherUserAddFriend": "मित्र जोड़ें",

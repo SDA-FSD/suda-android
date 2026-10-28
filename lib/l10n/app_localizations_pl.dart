@@ -801,6 +801,14 @@ class AppLocalizationsPl extends AppLocalizations {
   }
 
   @override
+  String get achievementPhraseHunter => 'Łowca zwrotów';
+
+  @override
+  String achievementPhraseHunterHint(int count) {
+    return 'Zapisz $count wyrażeń w swojej kolekcji.';
+  }
+
+  @override
   String get otherUserFriends => 'Przyjaciele';
 
   @override

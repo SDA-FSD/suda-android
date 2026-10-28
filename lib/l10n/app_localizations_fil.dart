@@ -801,6 +801,14 @@ class AppLocalizationsFil extends AppLocalizations {
   }
 
   @override
+  String get achievementPhraseHunter => 'Mangangaso ng Parirala';
+
+  @override
+  String achievementPhraseHunterHint(int count) {
+    return 'I-save ang $count ekspresyon sa koleksyon mo.';
+  }
+
+  @override
   String get otherUserFriends => 'Mga Kaibigan';
 
   @override

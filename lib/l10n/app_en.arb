@@ -286,6 +286,8 @@
   "achievementStarPerformerHint": "Achieve 3 stars in {count} episodes.",
   "achievementStoryExplorer": "Story Explorer",
   "achievementStoryExplorerHint": "{count, plural, one{Complete {count} series.} other{Complete {count} series.}}",
+  "achievementPhraseHunter": "Phrase Hunter",
+  "achievementPhraseHunterHint": "Save {count} expressions to your collection.",
   "@achievementSceneStealerHint": {
     "placeholders": { "count": { "type": "int" } }
   },
@@ -308,6 +310,9 @@
     "placeholders": { "count": { "type": "int" } }
   },
   "@achievementStoryExplorerHint": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "@achievementPhraseHunterHint": {
     "placeholders": { "count": { "type": "int" } }
   },
   "@achievementPocketGuideHint": {

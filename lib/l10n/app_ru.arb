@@ -272,6 +272,8 @@
   "achievementStarPerformerHint": "Получите 3 звезды в {count} эпизодах.",
   "achievementStoryExplorer": "Исследователь историй",
   "achievementStoryExplorerHint": "{count, plural, one{Завершите {count} серию.} few{Завершите {count} серии.} many{Завершите {count} серий.} other{Завершите {count} серий.}}",
+  "achievementPhraseHunter": "Охотник за фразами",
+  "achievementPhraseHunterHint": "Сохраните {count} выражений в свою коллекцию.",
   "otherUserFriends": "Друзья",
   "otherUserRequested": "Запрос отправлен",
   "otherUserAddFriend": "Добавить в друзья",

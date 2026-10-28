@@ -791,6 +791,14 @@ class AppLocalizationsHi extends AppLocalizations {
   }
 
   @override
+  String get achievementPhraseHunter => 'वाक्यांश शिकारी';
+
+  @override
+  String achievementPhraseHunterHint(int count) {
+    return '$count अभिव्यक्तियाँ अपने संग्रह में सहेजें।';
+  }
+
+  @override
   String get otherUserFriends => 'मित्र';
 
   @override
