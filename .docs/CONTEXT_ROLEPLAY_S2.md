@@ -86,9 +86,9 @@ Home (시리즈 썸네일)
 ### 입력(마이크·타이핑) 활성 규칙
 
 - `activateUserTurn()` / `deactivateUserTurn()` (`playing_input_mixin.dart`)로만 제어.
-- **현재**: Playing 진입 시 `deactivateUserTurn()` → AI 음성 종료 후 오토힌트 ON이면 `showPlayingHint()` 완료 뒤 `activateUserTurn(enableHintButton:false)`, OFF이면 `onHintAvailableAfterAi()` 직후 `activateUserTurn()`.
+- **현재**: Playing 진입 시 `deactivateUserTurn()` → AI 음성 종료 후 오토힌트 ON이면 `showPlayingHint()` 완료 뒤, 박스가 열려 있으면 `activateUserTurn(enableHintButton:false)`, X로 이미 닫혀 있으면 `enableHintButton:true`. OFF이면 `onHintAvailableAfterAi()` 직후 `activateUserTurn()`.
 - 사용자 발화 준비 시점에만 `activateUserTurn()` 호출. 발화 전송 시작 시 사용자 턴·힌트 비활성, 응답 실패 시 사용자 턴 복구. 녹음 시작 중 release/cancel이 들어오는 경우 시작 완료 후 pending finish/cancel을 처리해 요청 누락을 방지한다.
-- **② 힌트**: AI 음성 종료 후 트리거. 오토힌트 ON → 자동 노출 후 사용자 턴, 이 턴의 힌트 버튼은 disabled 유지. OFF → 아이콘 enabled·3s blink·탭 시 노출. 발화 완료(녹음 종료·텍스트 전송) 시 힌트 제거(녹음 시작 시 유지).
+- **② 힌트**: AI 음성 종료 후 트리거. 오토힌트 ON → 자동 노출 후 사용자 턴. 박스가 열려 있으면 힌트 버튼 disabled, X로 닫으면 활성. OFF → 아이콘 enabled·3s blink·탭 시 노출, 열린 동안 disabled, X로 닫으면 활성. 같은 턴 재탭은 캐시(영어 펼침 유지, API 재호출 없음). 발화 완료(녹음 종료·텍스트 전송) 시 힌트 제거(녹음 시작 시 유지).
 
 ### agent 주의 (범위 침범 방지)
 
@@ -221,7 +221,7 @@ Home (시리즈 썸네일)
   - **노출**: 케밥 탭 토글 · `top = safeArea + 56` · `right = 24` · 미션패널 포함 최상단
   - **닫기**: 케밥 재탭 · 패널 외부 탭 (`Listener` dismiss)
   - **프레임**: Series Overview 언어레벨 버튼과 동일 글래스(BackdropFilter σ12 + gradient border, radius 16)
-  - **오토힌트**: l10n `roleplayAutoHint` · push agreement 동일 토글 · meta `RP_AUTO_HINT`=`Y`만 on, 키 없음·그 외는 off(CEFR 무관) · 토글 시 로컬 user meta + `PUT /v1/users/auto-hint?value=Y|N`(실패 무시) · 같은 RP 이후 턴과 다음 RP에 유지 · 사용자 턴 중 ON이면 그 턴 힌트 1회 자동 노출 후 힌트 버튼 disabled · `_autoHintEnabled`
+  - **오토힌트**: l10n `roleplayAutoHint` · push agreement 동일 토글 · meta `RP_AUTO_HINT`=`Y`만 on, 키 없음·그 외는 off(CEFR 무관) · 토글 시 로컬 user meta + `PUT /v1/users/auto-hint?value=Y|N`(실패 무시) · 같은 RP 이후 턴과 다음 RP에 유지 · 사용자 턴 중 ON이면 그 턴 힌트 1회 자동 노출. 박스가 열려 있으면 힌트 버튼 disabled, X로 닫으면 활성, 재탭은 캐시 · `_autoHintEnabled`
   - **오토힌트 가이드**: `GuideBubble`(위 꼭지·`#0CABA8`·흔들림). 이번 RP에서 수동 힌트가 2번 열린 뒤, 그 다음 사용자 턴 시작에 케밥 아래 노출. 조건은 자동 힌트 off이고 meta `RP_AUTO_HINT_GUIDE`가 `Y`가 아님. 노출 즉시 그 meta `Y` + `PUT /v1/users/auto-hint-guide`(실패 무시). 문구 `roleplayAutoHintGuide`. 버블 탭은 닫기만. 케밥 탭은 버블을 닫고 설정패널을 연 뒤 토글을 ON으로 저장하고 그 턴 힌트를 연다.
   - **속도**: l10n `roleplayVoiceSpeed` · 가로 레일 200×4 · thumb 9 흰 원 · 좌측~thumb `#80D7CF` · 0.7/1.0/1.2/1.5 · 탭 시 1단 이동 + `PUT` speed-rate
   - **구분선**: `SizedBox` 200×1 직접 그림, `#FFFFFF` 40% (`panelLineColor`), 상·하 여백 **16**
@@ -246,7 +246,7 @@ Home (시리즈 썸네일)
 - **스크롤 정책**: 본문 `SingleChildScrollView`는 `ScrollController`를 사용한다. AI/User/Narration entry 또는 힌트 bubble이 새로 추가될 때만 최하단으로 250ms 애니메이션 이동한다. 사용자가 상하 드래그로 과거 메시지를 보는 중에는 새 요소 추가가 없는 한 강제로 하단 고정하지 않는다.
 - AI 말풍선 (`playing_conversation_mixin` `_buildAiMessage`): 배경 `#353535`·padding **10**·radius 12. 본문 `bodyMedium` 흰색. 번역 `labelSmall` `#777373`. 아바타 40×40은 말풍선 컨테이너 **상단** 정렬(`CrossAxisAlignment.start`). 번역 펼침 시 가려지면 `scrollToRevealBubbleIfNeeded` — `getOffsetToReveal`+하단 inset **8**, 필요 시에만 아래로 최소 스크롤, `maxScrollExtent` 강제 없음.
 - 사용자 말풍선 (`_buildUserMessage`): 우측 정렬·max 너비 `bodyWidth×0.7`. 배경 흰색 **30%**·padding 좌우 12 상하 10·radius 12. 본문 `bodyMedium` 흰색.
-- 힌트 `roleplayHintShowAnswer` 버튼: 너비 본문 `bodyWidth×0.9`. 바깥 상하 padding **10**, 라벨 좌우 **16**·상하 **12**. (`playing_hint_mixin` `_buildHintShowAnswerButton`). 문구 키는 `roleplayHintLabel`/`roleplayHintShowAnswer`/`roleplayHintEnglishLabel`(en You can say / See how to say it / Example in English). 본편 박스 레이아웃은 이전 모양.
+- 힌트 박스 (`playing_hint_mixin` `_PlayingHintCard`): 마지막 AI 말풍선 아래·채팅 전폭·radius 16. 배경 `#0CABA8` 70% + 에피소드 배경 blur 15. 상단 전구+`roleplayHintLabel`(`bodyMedium` `#80D7CF`)·우측 X. 영어 사용자 또는 번역 없음은 구분선 아래 `roleplayHintEnglishLabel`과 영어 문장. 그 외는 모국어 `bodyLarge` 흰색 + `roleplayHintShowAnswer`(`#EDEDED`·radius 25·테두리 `#80D7CF`·아래 화살표). 버튼 탭 시 버튼을 숨기고 영어 라벨·문장을 연다. 메가폰은 문장 TTS, 단어 탭은 단어 TTS. 재생 중 아이콘·글자·밑줄 `#054544`, 대기 중 흰색. 다른 재생을 누르면 기존 음성을 끊는다. X는 재생을 멈추고 박스를 닫으며 힌트 버튼을 다시 켠다. 같은 턴 재탭은 캐시.
 - 녹음 중 말풍선 (`_buildRecordingBubble`): S1과 동일 — 녹음 시작 시 entry append·150ms fade-in·우측 말풍선·3점 wave(900ms sin, opacity 0.3~1.0). 배경·점 색은 사용자 말풍선과 동일(흰 30%·흰 점). **힌트박스가 노출된 턴**에는 힌트박스 **아래**에 배치(`_buildConversationWithHint`에서 recording을 hint 뒤로 렌더). 녹음 종료/취소 시 제거 후 STT 결과 말풍선 노출.
 - **첫 AI 말풍선 Y**: 본문 스크롤 영역 상단에 **고정 `SizedBox(height: 68)`** (`PlayingConversationLayout.firstBubbleTopOffset`) — 패널에 가리지 않음. 추가 말풍선은 아래로 쌓이며 스크롤 시 패널 뒤로 이동
 - **AI 아바타**: `selectedEpisode.aiCharacter.rpImgPath` — Opening `initState`·Playing 전환 직전 `precacheImage`

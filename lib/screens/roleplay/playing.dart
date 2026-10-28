@@ -111,6 +111,8 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     scrollPlayingBodyToBottomHandler = scrollPlayingBodyToBottom;
     scrollToRevealBubbleIfNeededHandler = scrollToRevealBubbleIfNeeded;
     scrollPlayingHintToBottomHandler = scrollPlayingBodyToBottom;
+    playingHintSceneryTick = playingBodyScrollTick;
+    onPlayingHintClosedByUser = enableHintButtonAfterClose;
     playingAiVoicePlaybackCompletedHandler = _onAiVoicePlaybackCompleted;
     playingSessionNotFoundHandler = onRpS2SessionNotFound;
     deactivateUserTurn();
@@ -132,8 +134,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
   }
 
   double _scaffoldBodyLeadHeight() {
-    final turnBarHeight =
-        _turnCount > 0 ? RoleplayTurnBarArea.areaHeight : 0.0;
+    final turnBarHeight = _turnCount > 0 ? RoleplayTurnBarArea.areaHeight : 0.0;
     return _playingHeaderTopSpacing +
         turnBarHeight +
         PlayingConversationLayout.bodyTopGap;
@@ -177,7 +178,9 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
   Future<void> _showAutoHintThenActivateUserTurn() async {
     await showPlayingHint();
     if (!mounted) return;
-    activateUserTurn(enableHintButton: false);
+    final entry = activeHintEntry;
+    final closedByUser = entry != null && !entry.isVisible;
+    activateUserTurn(enableHintButton: closedByUser);
   }
 
   Future<void> _handleRpS2UserMessageResponse(
@@ -202,9 +205,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     final narrationText = response.narration?.trim() ?? '';
     final aiText = response.aiText?.trim() ?? '';
     if (reachedRequiredSpeechCount) {
-      startPlayingAnalyzingBlink(
-        message: response.serviceMessage?.trim(),
-      );
+      startPlayingAnalyzingBlink(message: response.serviceMessage?.trim());
     }
 
     Future<RpS2SoundResDto?>? aiAudioFuture;
@@ -480,7 +481,10 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
   Future<void> _showAutoHintForCurrentUserTurn() async {
     await showPlayingHint();
     if (!mounted || !isUserTurn) return;
-    disableHintButtonAfterAutoShow();
+    final entry = activeHintEntry;
+    if (entry == null || entry.isVisible) {
+      disableHintButtonAfterAutoShow();
+    }
   }
 
   void _persistAutoHint(bool enabled) {

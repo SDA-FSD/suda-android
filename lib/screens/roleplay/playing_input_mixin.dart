@@ -39,8 +39,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
   static const String _eventRecordingBelow500Ms = 'MIC_RECORDING_BELOW_500MS';
   static const String _eventRecordingReleasedInCancelZone =
       'MIC_RECORDING_RELEASED_IN_CANCEL_ZONE';
-  static const String _eventRecordingScreenLeave =
-      'MIC_RECORDING_SCREEN_LEAVE';
+  static const String _eventRecordingScreenLeave = 'MIC_RECORDING_SCREEN_LEAVE';
   static const String _eventRecordingPointerCancel =
       'MIC_RECORDING_POINTER_CANCEL';
   static const String _eventMicPermissionDenied = 'MIC_PERMISSION_DENIED';
@@ -79,6 +78,8 @@ mixin PlayingInputMixin<T extends StatefulWidget>
   Timer? _holdToSpeakIdleTimer;
   Timer? _serviceMessageTimer;
   final ScrollController _bodyScrollController = ScrollController();
+
+  Listenable get playingBodyScrollTick => _bodyScrollController;
   bool _isServiceMessageVisible = false;
   String? _serviceMessageText;
   Color? _serviceMessageColor;
@@ -795,6 +796,23 @@ mixin PlayingInputMixin<T extends StatefulWidget>
     _cancelHintIdleAndBlink();
   }
 
+  /// 힌트 박스를 닫은 뒤, 같은 턴에서 다시 열 수 있게 버튼을 켠다.
+  void enableHintButtonAfterClose() {
+    if (!mounted || !_isUserTurn || _isInputLocked) return;
+    _hintUsedThisTurn = false;
+    _setHintEnabled(true);
+    _cancelHintIdleAndBlink();
+    _hintIdleTimer = Timer(const Duration(seconds: 3), () {
+      if (!mounted) return;
+      if (_isUserTurn &&
+          _isHintEnabled &&
+          !_hintUsedThisTurn &&
+          !_isInputLocked) {
+        _hintBlinkController.repeat(reverse: true);
+      }
+    });
+  }
+
   void _setTypingEnabled(bool isEnabled) {
     if (!mounted) return;
     setState(() => _isTypingEnabled = isEnabled);
@@ -957,11 +975,17 @@ mixin PlayingInputMixin<T extends StatefulWidget>
     _hintUsedThisTurn = true;
     _setHintEnabled(false);
     _cancelHintIdleAndBlink();
+    final cached = activeHintEntry;
+    final reopening =
+        cached != null &&
+        !cached.isLoading &&
+        (cached.hintText?.isNotEmpty ?? false);
     try {
       await showPlayingHint();
     } finally {
       _isFetchingHintForTap = false;
     }
+    if (reopening) return;
     final shown = activeHintEntry;
     if (shown != null &&
         !shown.isLoading &&

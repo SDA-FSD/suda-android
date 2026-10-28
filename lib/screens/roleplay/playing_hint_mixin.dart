@@ -1,5 +1,6 @@
 import 'dart:async' show StreamSubscription, unawaited;
 import 'dart:math' as math;
+import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
@@ -10,6 +11,7 @@ import '../../services/series_state_service.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
 import '../../utils/language_util.dart';
+import '../../widgets/roleplay_overview_backdrop.dart';
 import 'playing_conversation_mixin.dart';
 
 class PlayingHintEntry {
@@ -29,19 +31,12 @@ class PlayingHintEntry {
 /// S2 Playing 힌트 영역·API·음성 재생 (S1 `playing_backup` 힌트 박스 기반).
 mixin PlayingHintMixin<T extends StatefulWidget>
     on State<T>, PlayingConversationMixin<T> {
-  static const Color _hintBubbleBg = Color(0xFF194847);
-  static const Color _hintPlaybackTeal = Color(0xFF0CABA8);
-  static const Color _hintAccent = Color(0xFF80D7CF);
-  static const double _hintGuideIconSize = 14;
-
-  /// 로딩 중 본문 최소 높이 — 번역 1줄 + 답변보기 버튼 + 상하 마진 합산.
-  static const double _hintLoadingBodyMinHeight = 98;
-  static const double _hintWordUnderlineGap = 2;
-
   PlayingHintEntry? _hintEntry;
   bool _isFetchingHint = false;
   StreamSubscription<PlayerState>? _hintPlaybackSub;
   void Function({GlobalKey? anchorKey})? scrollPlayingHintToBottomHandler;
+  Listenable? playingHintSceneryTick;
+  VoidCallback? onPlayingHintClosedByUser;
 
   PlayingHintEntry? get activeHintEntry => _hintEntry;
 
@@ -61,17 +56,22 @@ mixin PlayingHintMixin<T extends StatefulWidget>
   }
 
   Future<void> showPlayingHint() async {
-    if (_isFetchingHint || !mounted) return;
-    final rpMsgId = _resolveLastAiRpMsgId();
-    if (rpMsgId == null) return;
-
-    // 동일 턴 힌트가 이미 로드됐으면 상태(showAnswerBody 등) 유지.
+    if (!mounted) return;
     final existing = _hintEntry;
     if (existing != null &&
-        !existing.isLoading &&
-        (existing.hintText?.isNotEmpty ?? false)) {
+        (existing.isLoading || (existing.hintText?.isNotEmpty ?? false))) {
+      if (!existing.isVisible) {
+        setState(() => existing.isVisible = true);
+        if (existing.showAnswerBody) {
+          _acknowledgeHintEnglishDeliveredBestEffort(existing);
+        }
+        _scrollHintToVisible(existing);
+      }
       return;
     }
+    if (_isFetchingHint) return;
+    final rpMsgId = _resolveLastAiRpMsgId();
+    if (rpMsgId == null) return;
 
     final accessToken = await TokenStorage.loadAccessToken();
     final sessionId = SeriesStateService.instance.sessionId;
@@ -101,17 +101,18 @@ mixin PlayingHintMixin<T extends StatefulWidget>
       final isEnglishUser = LanguageUtil.getCurrentLanguageCode() == 'en';
       final translated = dto.translatedHint?.trim() ?? '';
       final revealEnglishImmediately = isEnglishUser || translated.isEmpty;
+      final stillOpen = entry.isVisible;
       setState(() {
         entry.isLoading = false;
         entry.hintText = hint;
         entry.translatedHint = translated.isEmpty ? null : translated;
         entry.showAnswerBody = revealEnglishImmediately;
-        entry.isVisible = true;
+        entry.isVisible = stillOpen;
       });
-      if (revealEnglishImmediately) {
+      if (revealEnglishImmediately && stillOpen) {
         _acknowledgeHintEnglishDeliveredBestEffort(entry);
       }
-      _scrollHintToVisible(entry);
+      if (stillOpen) _scrollHintToVisible(entry);
     } on RpS2SessionNotFoundException catch (_) {
       if (!mounted) return;
       setState(() => _hintEntry = null);
@@ -151,6 +152,23 @@ mixin PlayingHintMixin<T extends StatefulWidget>
     });
   }
 
+  void closePlayingHint() {
+    final entry = _hintEntry;
+    if (entry == null || !entry.isVisible) return;
+    final stopAudio =
+        entry.hintSentenceHighlightActive ||
+        entry.hintWordHighlightIndex != null;
+    _hintPlaybackSub?.cancel();
+    _hintPlaybackSub = null;
+    setState(() {
+      entry.isVisible = false;
+      entry.hintSentenceHighlightActive = false;
+      entry.hintWordHighlightIndex = null;
+    });
+    if (stopAudio) unawaited(stopPlayingConversationAudio());
+    onPlayingHintClosedByUser?.call();
+  }
+
   void _revealHintAnswerBody(PlayingHintEntry entry) {
     _acknowledgeHintEnglishDeliveredBestEffort(entry);
     setState(() => entry.showAnswerBody = true);
@@ -184,311 +202,39 @@ mixin PlayingHintMixin<T extends StatefulWidget>
 
   Widget? buildHintBubble(double bodyWidth) {
     final entry = _hintEntry;
-    if (entry == null) return null;
-    if (entry.isLoading) {
-      return _buildHintBubbleLoading(bodyWidth, entry);
-    }
+    if (entry == null || !entry.isVisible) return null;
+    final l10n = AppLocalizations.of(context)!;
     final text = entry.hintText ?? '';
-    if (text.isEmpty) return null;
-    return _buildHintBubble(bodyWidth, entry, text);
-  }
+    if (!entry.isLoading && text.isEmpty) return null;
 
-  Widget _buildHintGuideBar(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-    final labelStyle =
-        theme.elevatedButtonTheme.style?.textStyle
-            ?.resolve(const <WidgetState>{})
-            ?.copyWith(color: _hintAccent) ??
-        theme.textTheme.bodyMedium?.copyWith(color: _hintAccent);
-
-    return Container(
-      height: 27,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: const Color(0xFF054544),
-        borderRadius: BorderRadius.circular(13.5),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.4),
-            blurRadius: 6,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          ColorFiltered(
-            colorFilter: const ColorFilter.mode(_hintAccent, BlendMode.srcIn),
-            child: Image.asset(
-              'assets/images/icons/lightball.png',
-              height: _hintGuideIconSize,
-              fit: BoxFit.contain,
-              filterQuality: FilterQuality.medium,
-            ),
-          ),
-          const SizedBox(width: 6),
-          Text(
-            l10n.roleplayHintLabel,
-            style: labelStyle,
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHintTranslatedSection(PlayingHintEntry entry) {
-    final translated = entry.translatedHint;
-    if (translated == null || translated.isEmpty) {
-      return const SizedBox.shrink();
-    }
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
-      child: Text(
-        translated,
-        style: Theme.of(
-          context,
-        ).textTheme.bodyMedium?.copyWith(color: _hintAccent),
-        textAlign: TextAlign.center,
-      ),
-    );
-  }
-
-  Widget _buildHintShowAnswerButton(double bodyWidth, PlayingHintEntry entry) {
-    final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-    final textStyle =
-        theme.elevatedButtonTheme.style?.textStyle
-            ?.resolve(const <WidgetState>{})
-            ?.copyWith(color: const Color(0xFF1B3B3B)) ??
-        theme.textTheme.bodyMedium?.copyWith(color: const Color(0xFF1B3B3B));
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
-      child: Center(
-        child: SizedBox(
-          width: bodyWidth * 0.9,
-          child: Material(
-            color: const Color(0xFF076766),
-            borderRadius: BorderRadius.circular(22),
-            child: InkWell(
-              onTap: () => _revealHintAnswerBody(entry),
-              borderRadius: BorderRadius.circular(22),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 12,
-                  horizontal: 16,
-                ),
-                child: Text(
-                  l10n.roleplayHintShowAnswer,
-                  style: textStyle,
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHintAnswerBody(PlayingHintEntry entry, String text) {
-    final words = text
-        .trim()
-        .split(RegExp(r'\s+'))
-        .where((w) => w.isNotEmpty)
-        .toList();
-    final theme = Theme.of(context).textTheme;
-    final headline = theme.headlineSmall ?? theme.bodyLarge;
-
-    return Padding(
-      padding: const EdgeInsets.all(12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          SizedBox(
-            width: 40,
-            child: Center(
-              child: GestureDetector(
-                onTap: () => unawaited(_onHintMegaphoneTap(entry)),
-                behavior: HitTestBehavior.opaque,
-                child: Image.asset(
-                  _isHintMegaphonePlaying(entry)
-                      ? 'assets/images/icons/megaphone_fill.png'
-                      : 'assets/images/icons/megaphone.png',
-                  width: 24,
-                  height: 24,
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(left: 8),
-              child: Wrap(
-                alignment: WrapAlignment.start,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                runSpacing: 4,
-                children: [
-                  for (var i = 0; i < words.length; i++) ...[
-                    if (i > 0) Text(' ', style: headline),
-                    _buildHintWordWithDottedUnderline(
-                      entry: entry,
-                      wordIndex: i,
-                      word: words[i],
-                      headline: headline,
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHintBubble(
-    double bodyWidth,
-    PlayingHintEntry entry,
-    String text,
-  ) {
     final isEnglishUser = LanguageUtil.getCurrentLanguageCode() == 'en';
-    final hasTranslated = entry.translatedHint?.isNotEmpty ?? false;
-    final showTranslated = !isEnglishUser && hasTranslated;
-    final showButton = !isEnglishUser && !entry.showAnswerBody && hasTranslated;
+    final native = entry.translatedHint;
+    final hasNative = !isEnglishUser && native != null && native.isNotEmpty;
+    final imagePath =
+        SeriesStateService.instance.selectedEpisode?.thumbnailImgPath;
 
-    return AnimatedOpacity(
-      opacity: entry.isVisible ? 1 : 0,
-      duration: const Duration(milliseconds: 150),
-      child: Align(
-        alignment: Alignment.center,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: bodyWidth),
-          child: Container(
-            clipBehavior: Clip.antiAlias,
-            decoration: BoxDecoration(
-              color: _hintBubbleBg.withValues(alpha: 0.7),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: AnimatedSize(
-              duration: const Duration(milliseconds: 220),
-              curve: Curves.easeInOut,
-              alignment: Alignment.topCenter,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _buildHintGuideBar(context),
-                  if (showTranslated) _buildHintTranslatedSection(entry),
-                  if (showButton) _buildHintShowAnswerButton(bodyWidth, entry),
-                  if (entry.showAnswerBody) _buildHintAnswerBody(entry, text),
-                ],
-              ),
-            ),
-          ),
+    return Align(
+      alignment: Alignment.center,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: bodyWidth),
+        child: _PlayingHintCard(
+          sceneryTick: playingHintSceneryTick,
+          imagePath: imagePath,
+          loading: entry.isLoading,
+          label: l10n.roleplayHintLabel,
+          nativeText: hasNative ? native : null,
+          showRevealButton: hasNative && !entry.showAnswerBody,
+          revealLabel: l10n.roleplayHintShowAnswer,
+          showEnglish: !entry.isLoading && entry.showAnswerBody,
+          englishLabel: l10n.roleplayHintEnglishLabel,
+          english: text,
+          sentencePlaying: entry.hintSentenceHighlightActive,
+          wordPlayingIndex: entry.hintWordHighlightIndex,
+          onClose: closePlayingHint,
+          onReveal: () => _revealHintAnswerBody(entry),
+          onSentence: () => unawaited(_onHintMegaphoneTap(entry)),
+          onWord: (index) => unawaited(_onHintWordTap(entry, index)),
         ),
-      ),
-    );
-  }
-
-  Widget _buildHintBubbleLoading(double bodyWidth, PlayingHintEntry entry) {
-    return AnimatedOpacity(
-      opacity: entry.isVisible ? 1 : 0,
-      duration: const Duration(milliseconds: 150),
-      child: Align(
-        alignment: Alignment.center,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: bodyWidth),
-          child: Container(
-            clipBehavior: Clip.antiAlias,
-            decoration: BoxDecoration(
-              color: _hintBubbleBg.withValues(alpha: 0.7),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: AnimatedSize(
-              duration: const Duration(milliseconds: 220),
-              curve: Curves.easeInOut,
-              alignment: Alignment.topCenter,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _buildHintGuideBar(context),
-                  ConstrainedBox(
-                    constraints: const BoxConstraints(
-                      minHeight: _hintLoadingBodyMinHeight,
-                    ),
-                    child: const Center(
-                      child: SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  bool _isHintMegaphonePlaying(PlayingHintEntry entry) {
-    return entry.hintSentenceHighlightActive ||
-        entry.hintWordHighlightIndex != null;
-  }
-
-  Color _hintWordTextColor(PlayingHintEntry entry, int wordIndex) {
-    if (entry.hintSentenceHighlightActive) return _hintPlaybackTeal;
-    if (entry.hintWordHighlightIndex == wordIndex) return _hintPlaybackTeal;
-    return Colors.white;
-  }
-
-  double _measureHintWordWidth(String word, TextStyle? style) {
-    final tp = TextPainter(
-      text: TextSpan(text: word, style: style),
-      textDirection: TextDirection.ltr,
-    )..layout();
-    return tp.width;
-  }
-
-  Widget _buildHintWordWithDottedUnderline({
-    required PlayingHintEntry entry,
-    required int wordIndex,
-    required String word,
-    required TextStyle? headline,
-  }) {
-    final wordStyle = headline?.copyWith(
-      color: _hintWordTextColor(entry, wordIndex),
-      height: 1.35,
-      fontStyle: FontStyle.italic,
-    );
-    final underlineWidth = _measureHintWordWidth(word, wordStyle);
-    return GestureDetector(
-      onTap: () => unawaited(_onHintWordTap(entry, wordIndex)),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(word, style: wordStyle),
-          const SizedBox(height: _hintWordUnderlineGap),
-          SizedBox(
-            width: underlineWidth,
-            height: 3,
-            child: CustomPaint(
-              painter: _HintDottedUnderlinePainter(color: _hintPlaybackTeal),
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -601,6 +347,412 @@ mixin PlayingHintMixin<T extends StatefulWidget>
       }
     });
     await playPreparedHintVoice(source);
+  }
+}
+
+/// 본편 힌트 상자. 온보딩 `_ClassicHintCard`와 같은 레이아웃.
+class _PlayingHintCard extends StatelessWidget {
+  static const _bg = Color(0xFF0CABA8);
+  static const _accent = Color(0xFF80D7CF);
+  static const _playback = Color(0xFF054544);
+  static const _buttonFill = Color(0xFFEDEDED);
+  static const _buttonText = Color(0xFF0CABA8);
+  static const _blurSigma = 15.0;
+
+  final Listenable? sceneryTick;
+  final String? imagePath;
+  final bool loading;
+  final String label;
+  final String? nativeText;
+  final bool showRevealButton;
+  final String revealLabel;
+  final bool showEnglish;
+  final String englishLabel;
+  final String english;
+  final bool sentencePlaying;
+  final int? wordPlayingIndex;
+  final VoidCallback onClose;
+  final VoidCallback onReveal;
+  final VoidCallback onSentence;
+  final void Function(int index) onWord;
+
+  const _PlayingHintCard({
+    required this.sceneryTick,
+    required this.imagePath,
+    required this.loading,
+    required this.label,
+    required this.nativeText,
+    required this.showRevealButton,
+    required this.revealLabel,
+    required this.showEnglish,
+    required this.englishLabel,
+    required this.english,
+    required this.sentencePlaying,
+    required this.wordPlayingIndex,
+    required this.onClose,
+    required this.onReveal,
+    required this.onSentence,
+    required this.onWord,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final hasNative = nativeText != null && nativeText!.isNotEmpty;
+    final labelStyle = theme.textTheme.bodyMedium?.copyWith(color: _accent);
+    final nativeStyle = theme.textTheme.bodyLarge?.copyWith(
+      color: Colors.white,
+    );
+    final englishLabelStyle = theme.textTheme.bodySmall?.copyWith(
+      color: _accent,
+    );
+    final buttonStyle =
+        theme.elevatedButtonTheme.style?.textStyle
+            ?.resolve(const <WidgetState>{})
+            ?.copyWith(color: _buttonText) ??
+        theme.textTheme.bodyMedium?.copyWith(color: _buttonText);
+    final words = english
+        .trim()
+        .split(RegExp(r'\s+'))
+        .where((word) => word.isNotEmpty)
+        .toList();
+    final headline = theme.textTheme.headlineSmall ?? theme.textTheme.bodyLarge;
+    final playing = sentencePlaying || wordPlayingIndex != null;
+    final tint = _bg.withValues(alpha: 0.7);
+
+    final titleRow = Row(
+      children: [
+        ColorFiltered(
+          colorFilter: const ColorFilter.mode(_accent, BlendMode.srcIn),
+          child: Image.asset(
+            'assets/images/icons/lightball.png',
+            height: 14,
+            fit: BoxFit.contain,
+            filterQuality: FilterQuality.medium,
+          ),
+        ),
+        const SizedBox(width: 6),
+        Expanded(
+          child: Text(label, style: labelStyle, textAlign: TextAlign.start),
+        ),
+        GestureDetector(
+          onTap: onClose,
+          behavior: HitTestBehavior.opaque,
+          child: const SizedBox(
+            width: 40,
+            height: 40,
+            child: Icon(Icons.close, size: 20, color: Colors.white),
+          ),
+        ),
+      ],
+    );
+    final top = <Widget>[
+      titleRow,
+      if (hasNative)
+        Padding(
+          padding: const EdgeInsets.only(top: 4, right: 8),
+          child: Text(
+            nativeText!,
+            textAlign: TextAlign.start,
+            style: nativeStyle,
+          ),
+        ),
+      if (showRevealButton)
+        Padding(
+          padding: const EdgeInsets.only(top: 12, right: 8),
+          child: Material(
+            color: _buttonFill,
+            borderRadius: BorderRadius.circular(25),
+            child: InkWell(
+              onTap: onReveal,
+              borderRadius: BorderRadius.circular(25),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 15,
+                ),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(25),
+                  border: Border.all(color: _accent, width: 1),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        revealLabel,
+                        style: buttonStyle,
+                        textAlign: TextAlign.start,
+                      ),
+                    ),
+                    const Icon(
+                      Icons.keyboard_arrow_down,
+                      size: 20,
+                      color: _buttonText,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      if (loading)
+        const Padding(
+          padding: EdgeInsets.only(top: 16, bottom: 8),
+          child: Center(
+            child: SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ),
+    ];
+    final englishBody = <Widget>[
+      Text(englishLabel, style: englishLabelStyle),
+      Padding(
+        padding: const EdgeInsets.only(top: 8, right: 8),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            GestureDetector(
+              onTap: onSentence,
+              behavior: HitTestBehavior.opaque,
+              child: ColorFiltered(
+                colorFilter: ColorFilter.mode(
+                  playing ? _playback : Colors.white,
+                  BlendMode.srcIn,
+                ),
+                child: Image.asset(
+                  playing
+                      ? 'assets/images/icons/megaphone_fill.png'
+                      : 'assets/images/icons/megaphone.png',
+                  width: 24,
+                  height: 24,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Wrap(
+                alignment: WrapAlignment.start,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                runSpacing: 4,
+                children: [
+                  for (var i = 0; i < words.length; i++) ...[
+                    if (i > 0) Text(' ', style: headline),
+                    _PlayingHintWord(
+                      word: words[i],
+                      headline: headline,
+                      textColor: (sentencePlaying || wordPlayingIndex == i)
+                          ? _playback
+                          : Colors.white,
+                      underlineColor: (sentencePlaying || wordPlayingIndex == i)
+                          ? _playback
+                          : Colors.white,
+                      onTap: () => onWord(i),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    ];
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: _PlayingHintFrostedScene(
+              tick: sceneryTick,
+              imagePath: imagePath,
+            ),
+          ),
+          AnimatedSize(
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeInOut,
+            alignment: Alignment.topCenter,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                ColoredBox(
+                  color: tint,
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      16,
+                      10,
+                      8,
+                      showEnglish ? 12 : 16,
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: top,
+                    ),
+                  ),
+                ),
+                if (showEnglish) ...[
+                  ColoredBox(
+                    color: tint,
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      child: SizedBox(
+                        width: double.infinity,
+                        height: 1,
+                        child: ColoredBox(color: Color(0xFF0CABA8)),
+                      ),
+                    ),
+                  ),
+                  ColoredBox(
+                    color: tint,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 12, 8, 16),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: englishBody,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PlayingHintFrostedScene extends StatefulWidget {
+  final Listenable? tick;
+  final String? imagePath;
+
+  const _PlayingHintFrostedScene({required this.tick, required this.imagePath});
+
+  @override
+  State<_PlayingHintFrostedScene> createState() =>
+      _PlayingHintFrostedSceneState();
+}
+
+class _PlayingHintFrostedSceneState extends State<_PlayingHintFrostedScene> {
+  @override
+  void initState() {
+    super.initState();
+    widget.tick?.addListener(_retick);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void didUpdateWidget(covariant _PlayingHintFrostedScene oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.tick != widget.tick) {
+      oldWidget.tick?.removeListener(_retick);
+      widget.tick?.addListener(_retick);
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.tick?.removeListener(_retick);
+    super.dispose();
+  }
+
+  void _retick() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final screen = MediaQuery.sizeOf(context);
+    final box = context.findRenderObject() as RenderBox?;
+    final origin = (box != null && box.hasSize)
+        ? box.localToGlobal(Offset.zero)
+        : Offset.zero;
+    final path = widget.imagePath;
+    final scenery = path != null && path.isNotEmpty
+        ? RoleplayOverviewBackdrop(imagePath: path)
+        : const ColoredBox(color: Color(0xFF121212));
+    return IgnorePointer(
+      child: ClipRect(
+        child: Stack(
+          clipBehavior: Clip.hardEdge,
+          children: [
+            Positioned(
+              left: -origin.dx,
+              top: -origin.dy,
+              width: screen.width,
+              height: screen.height,
+              child: ImageFiltered(
+                imageFilter: ImageFilter.blur(
+                  sigmaX: _PlayingHintCard._blurSigma,
+                  sigmaY: _PlayingHintCard._blurSigma,
+                ),
+                child: scenery,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PlayingHintWord extends StatelessWidget {
+  final String word;
+  final TextStyle? headline;
+  final Color textColor;
+  final Color underlineColor;
+  final VoidCallback onTap;
+
+  const _PlayingHintWord({
+    required this.word,
+    required this.headline,
+    required this.textColor,
+    required this.underlineColor,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final style = headline?.copyWith(
+      color: textColor,
+      height: 1.35,
+      fontWeight: FontWeight.w700,
+      fontStyle: FontStyle.italic,
+    );
+    final painter = TextPainter(
+      text: TextSpan(text: word, style: style),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    final width = painter.width;
+    painter.dispose();
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(word, style: style),
+          const SizedBox(height: 2),
+          SizedBox(
+            width: width,
+            height: 3,
+            child: CustomPaint(
+              painter: _HintDottedUnderlinePainter(color: underlineColor),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
