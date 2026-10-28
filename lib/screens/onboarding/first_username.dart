@@ -6,6 +6,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
+import '../../services/version_check_service.dart';
 import '../../utils/default_toast.dart';
 import '../../widgets/onboarding_step_bar.dart';
 import '../../widgets/user_profile_avatar.dart';
@@ -128,7 +129,8 @@ class _FirstUsernameScreenState extends State<FirstUsernameScreen>
       if (mounted) {
         setState(() => _isSubmitting = false);
         if (saved) {
-          if (TutorialIntroScreen.onboardingEnabled) {
+          if (TutorialIntroScreen.onboardingEnabled &&
+              !VersionCheckService.skipOnboardingTutorial) {
             await _playTransitionToIntro(updated);
           } else {
             widget.onComplete(updated);

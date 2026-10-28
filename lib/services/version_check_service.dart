@@ -10,6 +10,13 @@ import 'package:suda/services/app_version_service.dart';
 /// 
 /// 앱 실행 시 최신 버전 정보를 확인하고 강제 업데이트 여부를 판단
 class VersionCheckService {
+  /// 최신 `app_version` 행. 응답에 없으면 N. Y일 때만 해당 튜토리얼 화면을 건너뛴다.
+  static String skipOnboardingTutorialYn = 'N';
+  static String skipRoleplayTutorialYn = 'N';
+
+  static bool get skipOnboardingTutorial => skipOnboardingTutorialYn == 'Y';
+  static bool get skipRoleplayTutorial => skipRoleplayTutorialYn == 'Y';
+
   /// 버전 비교 (1: version1 > version2, 0: 같음, -1: version1 < version2)
   static int compareVersions(String version1, String version2) {
     final v1Parts = version1.split('.').map(int.parse).toList();
@@ -44,8 +51,10 @@ class VersionCheckService {
       final versionInfo = await SudaApiClient.getLatestVersion(
         clientVersion: currentVersion,
       );
+      skipOnboardingTutorialYn = versionInfo.skipOnboardingTutorialYn;
+      skipRoleplayTutorialYn = versionInfo.skipRoleplayTutorialYn;
       debugPrint(
-        '[DEBUG] VersionCheckService.checkVersion fetched: latestVersion=${versionInfo.latestVersion}, forceUpdateYn=${versionInfo.forceUpdateYn}',
+        '[DEBUG] VersionCheckService.checkVersion fetched: latestVersion=${versionInfo.latestVersion}, forceUpdateYn=${versionInfo.forceUpdateYn}, skipOnboardingTutorialYn=$skipOnboardingTutorialYn, skipRoleplayTutorialYn=$skipRoleplayTutorialYn',
       );
       
       // 최신 버전 정보를 영구 저장 영역에 저장

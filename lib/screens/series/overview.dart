@@ -12,6 +12,7 @@ import '../../services/roleplay_state_service.dart';
 import '../../services/series_state_service.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
+import '../../services/version_check_service.dart';
 import '../../utils/english_level_util.dart';
 import '../../utils/suda_json_util.dart';
 import '../../utils/sub_screen_route.dart';
@@ -859,7 +860,11 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
       SeriesStateService.instance.setUser(user);
       RoleplayStateService.instance.setUser(user);
     }
-    RoleplayRouter.pushTutorial(context);
+    if (VersionCheckService.skipRoleplayTutorial) {
+      RoleplayRouter.pushOpening(context);
+    } else {
+      RoleplayRouter.pushTutorial(context);
+    }
   }
 
   Widget _buildOverviewTabs(

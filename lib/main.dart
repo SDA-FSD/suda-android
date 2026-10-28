@@ -728,7 +728,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         !_needsFirstCefrLevel &&
         !_needsFirstProfileImage &&
         !_needsFirstUsername &&
-        !user.hasMetaInfoValue(key: 'ONBOARDING_TUTORIAL', value: 'Y');
+        !user.hasMetaInfoValue(key: 'ONBOARDING_TUTORIAL', value: 'Y') &&
+        !VersionCheckService.skipOnboardingTutorial;
     // 콜드스타트 재진입은 Intro 입장 애니 재생.
     _tutorialIntroPlayEntrance = _needsTutorialIntro;
     _needsTutorialRoleplay = false;
@@ -781,7 +782,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             key: 'ONBOARDING_TUTORIAL',
             value: 'Y',
           ) ??
-          false);
+          false) &&
+          !VersionCheckService.skipOnboardingTutorial;
       _needsTutorialIntro = TutorialIntroScreen.onboardingEnabled && needsIntro;
       // Username 화면에서 Confirm→Intro 전환 애니를 이미 재생함.
       _tutorialIntroPlayEntrance = false;
