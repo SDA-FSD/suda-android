@@ -5,6 +5,24 @@ import '../l10n/app_localizations.dart';
 import '../models/user_models.dart';
 import 'default_popup.dart';
 
+const knownActivityAchievementCodes = <String>{
+  'PG',
+  'HI',
+  'TA',
+  'SC',
+  'ON',
+  'SE',
+  'PH',
+  'SP',
+  'CC',
+  'PP',
+  'SK',
+  'SB',
+};
+
+bool showsProfileAchievement(ProfileAchievementItem item) =>
+    !item.isActivity || knownActivityAchievementCodes.contains(item.code);
+
 class ProfileAchievementsSection extends StatelessWidget {
   final List<ProfileAchievementItem> items;
   final bool tapEnabled;
@@ -64,9 +82,9 @@ class ProfileAchievementsSection extends StatelessWidget {
             ProfileAchievementItem(place: 3),
           ]
         : items;
-    final visible = unlockedOnly
-        ? source.where((item) => item.unlocked).toList()
-        : source;
+    final visible = (unlockedOnly ? source.where((item) => item.unlocked) : source)
+        .where(showsProfileAchievement)
+        .toList();
     if (visible.isEmpty) return const SizedBox.shrink();
     final rows = <List<ProfileAchievementItem?>>[];
     for (var i = 0; i < visible.length; i += 3) {

@@ -606,7 +606,9 @@ List<ProfileAchievementItem> _otherAchievements(OtherUserProfileDto? progress) {
           for (final rank in progress?.achievements ?? const <RankedPlaceAchievementDto>[])
             ProfileAchievementItem.rank(rank),
         ];
-  return source.where((item) => item.unlocked).toList();
+  return source
+      .where((item) => item.unlocked && showsProfileAchievement(item))
+      .toList();
 }
 
 String _formatSpokenCount(int n) {
