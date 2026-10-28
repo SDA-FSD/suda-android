@@ -245,7 +245,7 @@ class MyProfileDto {
   }
 }
 
-/// `GET /v1/users/progress`
+/// `GET /v2/users/progress`
 class UserProgressDto {
   final int currentStreakDays;
   final int wordsSpokenCount;
@@ -559,7 +559,7 @@ class FriendApiException implements Exception {
   bool get isLimitExceeded => code == 'FRIEND_LIMIT_EXCEEDED';
 }
 
-/// `GET /v1/users/{userId}/profile`
+/// `GET /v2/users/{userId}/profile`
 class OtherUserProfileDto {
   final int id;
   final String? name;

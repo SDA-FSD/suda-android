@@ -167,7 +167,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   String _homeRankBadgeYn = 'N';
   String _homeProfileBadgeYn = 'N';
 
-  /// `GET /v2/home/badges` 세대. 늦게 도착한 응답은 버린다.
+  /// `GET /v3/home/badges` 세대. 늦게 도착한 응답은 버린다.
   int _gnbBadgeRefreshGen = 0;
 
   /// `GET /v1/users/notification?pageNum=0` 기준 미읽음 존재 여부

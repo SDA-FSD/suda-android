@@ -10,7 +10,7 @@ Map<String, String> _localizedMapFromJson(dynamic value) {
   return const {};
 }
 
-/// GET /v2/home/contents 응답 DTO
+/// GET /v3/home/contents 응답 DTO
 class HomeDto {
   final String restYn;
   final DateTime? restStartsAt;
@@ -84,7 +84,7 @@ class HomeDto {
   }
 }
 
-/// GET /v2/home/badges 응답. 랭킹·프로필 GNB 점만.
+/// GET /v3/home/badges 응답. 랭킹·프로필 GNB 점만.
 class GnbBadgeDto {
   final String rankBadgeYn;
   final String profileBadgeYn;

@@ -16,12 +16,16 @@
 /v1/purchases/verify
 /v2/home/contents
 /v2/home/badges
+/v3/home/contents
+/v3/home/badges
 /v2/home/series
 /v1/users
 /v1/users/profile
 /v1/users/my-profile
 /v1/users/progress
+/v2/users/progress
 /v1/users/*/profile
+/v2/users/*/profile
 /v1/users/friends/*/request
 /v1/users/friends/*
 /v1/users/character-rewards/claim

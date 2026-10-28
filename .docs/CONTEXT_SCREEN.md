@@ -332,7 +332,7 @@
       - 기능: 레이지 로딩(페이징) 지원, 로딩 중 Shimmer 스켈레톤 노출
       - 탭: `SeriesOverviewScreen` (Sub)
 - **API 연동**:
-  - **홈 콘텐츠 통합 조회**: `GET /v2/home/contents` (`SudaApiClient.getHomeContents()`)
+  - **홈 콘텐츠 통합 조회**: `GET /v3/home/contents` (`SudaApiClient.getHomeContents()`)
     - 응답: HomeDto (banners, seriesList, restYn, restStartsAt, restEndsAt, notiboxUnreadYn)
     - banners: `MainHomeBannerDto(imgPath, overlayText, appPath?)`
   - **시리즈 페이징 조회**: `GET /v2/home/series?category={enumValue}&pageNum=…` (`SudaApiClient.getSeriesByCategory()`)
@@ -360,7 +360,7 @@
 - 사용자 프로필 화면
 - 로그아웃 기능 제공
 - 사용자 프로필 이미지/이름 및 지표(Level/Like/Friends) 요약 표시
-- Profile 화면 노출 시점마다 `GET /v1/users/my-profile`(헤더)과 `GET /v1/users/progress`(Progress 탭)를 병렬 호출. 전역 `_user`/GNB는 이 API로 갱신하지 않음. 기존 `GET /v1/users/profile` 클라 폐기. Progress 탭만 다시 받을 때는 `/progress`만.
+- Profile 화면 노출 시점마다 `GET /v1/users/my-profile`(헤더)과 `GET /v2/users/progress`(Progress 탭)를 병렬 호출. 전역 `_user`/GNB는 이 API로 갱신하지 않음. 기존 `GET /v1/users/profile` 클라 폐기. Progress 탭만 다시 받을 때는 `/v2/users/progress`만.
 
 ### 이전 스크린 정보 (진입점)
 - **HomeScreen**: GNB의 Profile 버튼 클릭 시
@@ -1131,7 +1131,7 @@
   - 백 → 이전 스크린. 설정·Paywall·Saved/History 없음
 
 ### 스크린 내부 구현 특이사항
-- 데이터 `GET /v1/users/{userId}/profile`. 배경은 **대상** `subscribedYn`
+- 데이터 `GET /v2/users/{userId}/profile`. 배경은 **대상** `subscribedYn`
 - 설정 아이콘·구독 CTA·레벨바·Saved/History 탭 없음. Progress 탭 라벨만 (`SudaLabelTabs` 1개 허용)
 - Level/Like/Friends 표시만. 그 아래 알약(스탯 컬럼과 동일 width, 세로 padding 6)
 - 헤더(알약)와 Progress 탭 사이 여백 없음

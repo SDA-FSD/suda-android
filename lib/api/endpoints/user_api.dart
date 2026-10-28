@@ -102,7 +102,7 @@ class UserApi {
   }
 
   static Future<UserProgressDto> _getProgressInternal(String accessToken) async {
-    final uri = SudaHttpClient.buildUri('/v1/users/progress');
+    final uri = SudaHttpClient.buildUri('/v2/users/progress');
 
     late final http.Response response;
     try {
@@ -129,7 +129,7 @@ class UserApi {
     }
 
     throw Exception(
-      'GET /v1/users/progress failed: HTTP ${response.statusCode} ${response.body}',
+      'GET /v2/users/progress failed: HTTP ${response.statusCode} ${response.body}',
     );
   }
 
@@ -1306,7 +1306,7 @@ class UserApi {
     String accessToken,
     int userId,
   ) async {
-    final uri = SudaHttpClient.buildUri('/v1/users/$userId/profile');
+    final uri = SudaHttpClient.buildUri('/v2/users/$userId/profile');
     late final http.Response response;
     try {
       response = await SudaHttpClient.client
@@ -1324,7 +1324,7 @@ class UserApi {
       return OtherUserProfileDto.fromJson(data);
     }
     throw Exception(
-      'GET /v1/users/$userId/profile failed: HTTP ${response.statusCode} ${response.body}',
+      'GET /v2/users/$userId/profile failed: HTTP ${response.statusCode} ${response.body}',
     );
   }
 

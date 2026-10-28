@@ -18,7 +18,7 @@ class HomeApi {
   }
 
   static Future<HomeDto> _getHomeContentsInternal(String accessToken) async {
-    final uri = SudaHttpClient.buildUri('/v2/home/contents');
+    final uri = SudaHttpClient.buildUri('/v3/home/contents');
     late final http.Response response;
     try {
       response = await SudaHttpClient.client
@@ -44,7 +44,7 @@ class HomeApi {
     }
 
     throw Exception(
-      'GET /v2/home/contents failed: HTTP ${response.statusCode} ${response.body}',
+      'GET /v3/home/contents failed: HTTP ${response.statusCode} ${response.body}',
     );
   }
 
@@ -58,7 +58,7 @@ class HomeApi {
   }
 
   static Future<GnbBadgeDto> _getGnbBadgesInternal(String accessToken) async {
-    final uri = SudaHttpClient.buildUri('/v2/home/badges');
+    final uri = SudaHttpClient.buildUri('/v3/home/badges');
     late final http.Response response;
     try {
       response = await SudaHttpClient.client
@@ -84,7 +84,7 @@ class HomeApi {
     }
 
     throw Exception(
-      'GET /v2/home/badges failed: HTTP ${response.statusCode} ${response.body}',
+      'GET /v3/home/badges failed: HTTP ${response.statusCode} ${response.body}',
     );
   }
 
