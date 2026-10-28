@@ -9,23 +9,23 @@ import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:record/record.dart';
 
-import '../../api/endpoints/onboarding_tutorial_api.dart';
-import '../../api/suda_api_client.dart';
-import '../../l10n/app_localizations.dart';
-import '../../models/series_models.dart';
-import '../../screens/roleplay/playing_conversation_mixin.dart'
+import '../../../api/endpoints/onboarding_tutorial_api.dart';
+import '../../../api/suda_api_client.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../../models/series_models.dart';
+import '../../../screens/roleplay/playing_conversation_mixin.dart'
     show PlayingConversationLayout;
-import '../../screens/roleplay/suda_tts_audio_player.dart';
-import '../../services/token_storage.dart';
-import '../../effects/mission_complete_effect.dart';
-import '../../widgets/default_popup.dart';
-import '../../widgets/guide_bubble.dart';
-import '../../widgets/roleplay_mic_button_area.dart';
-import '../../widgets/roleplay_mission_panel.dart';
-import '../../widgets/roleplay_turn_bar_area.dart';
-import 'onboarding_pointer.dart';
-import 'onboarding_result.dart';
-import 'onboarding_backdrop.dart';
+import '../../../screens/roleplay/suda_tts_audio_player.dart';
+import '../../../services/token_storage.dart';
+import '../../../effects/mission_complete_effect.dart';
+import '../../../widgets/default_popup.dart';
+import '../../../widgets/guide_bubble.dart';
+import '../../../widgets/roleplay_mic_button_area.dart';
+import '../../../widgets/roleplay_mission_panel.dart';
+import '../../../widgets/roleplay_turn_bar_area.dart';
+import 'pointer.dart';
+import 'result.dart';
+import 'backdrop.dart';
 
 /// 마이크 가이드 문구. 기본은 AI 발화 후, 나머지는 홀드/짧은 탭/무인식.
 enum _TutorialMicGuide { afterVoice, holding, tooShort, noSpeech }

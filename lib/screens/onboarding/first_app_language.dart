@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../l10n/app_localizations.dart';
-import '../services/suda_api_client.dart';
-import '../utils/app_language_options.dart';
-import '../utils/default_toast.dart';
-import '../widgets/app_language_option_list.dart';
-import '../widgets/onboarding_step_bar.dart';
+import '../../l10n/app_localizations.dart';
+import '../../services/suda_api_client.dart';
+import '../../utils/app_language_options.dart';
+import '../../utils/default_toast.dart';
+import '../../widgets/app_language_option_list.dart';
+import '../../widgets/onboarding_step_bar.dart';
 
 /// 약관 동의 뒤, `LANGUAGE_TAG`가 없을 때 한 번 고르는 전체 화면.
 class FirstAppLanguageScreen extends StatefulWidget {

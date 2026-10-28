@@ -3,14 +3,14 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import '../l10n/app_localizations.dart';
-import '../services/suda_api_client.dart';
-import '../services/token_storage.dart';
-import '../utils/default_toast.dart';
-import '../widgets/onboarding_step_bar.dart';
-import '../widgets/user_profile_avatar.dart';
-import 'tutorial/onboarding_intro.dart';
-import 'tutorial/onboarding_intro_stage.dart';
+import '../../l10n/app_localizations.dart';
+import '../../services/suda_api_client.dart';
+import '../../services/token_storage.dart';
+import '../../utils/default_toast.dart';
+import '../../widgets/onboarding_step_bar.dart';
+import '../../widgets/user_profile_avatar.dart';
+import 'tutorial/intro.dart';
+import 'tutorial/intro_stage.dart';
 
 /// 온보딩(meta `ONBOARDING_USERNAME` != Y)의 이름 확인·수정 Full Screen.
 class FirstUsernameScreen extends StatefulWidget {

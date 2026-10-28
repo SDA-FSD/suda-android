@@ -2,7 +2,7 @@ import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
 
-import '../../widgets/roleplay_overview_backdrop.dart'
+import '../../../widgets/roleplay_overview_backdrop.dart'
     show
         kRoleplayOverviewBackdropBlurSigma,
         kRoleplayOverviewBackdropDim,

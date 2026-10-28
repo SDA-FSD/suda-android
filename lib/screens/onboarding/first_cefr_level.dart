@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:vibration/vibration.dart';
 
-import '../l10n/app_localizations.dart';
-import '../services/suda_api_client.dart';
-import '../services/token_storage.dart';
-import '../utils/default_toast.dart';
-import '../utils/english_level_util.dart';
-import '../widgets/onboarding_step_bar.dart';
+import '../../l10n/app_localizations.dart';
+import '../../services/suda_api_client.dart';
+import '../../services/token_storage.dart';
+import '../../utils/default_toast.dart';
+import '../../utils/english_level_util.dart';
+import '../../widgets/onboarding_step_bar.dart';
 
 /// 최초 서비스 이용 동의 직후 1회 노출되는 CEFR 레벨 선택 Full Screen.
 class FirstCefrLevelScreen extends StatefulWidget {

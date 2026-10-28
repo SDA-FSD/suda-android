@@ -24,12 +24,12 @@ import '../profile.dart'
 import 'announcements.dart'
     show showAnnouncementsPostNoLongerAvailableDefaultPopupForLab;
 import '../roleplay/try_again.dart';
-import '../first_cefr_level.dart';
-import '../first_profile_image.dart';
+import '../onboarding/first_cefr_level.dart';
+import '../onboarding/first_profile_image.dart';
 import '../series/cefr_level_up_popup.dart'
     show showCefrLevelUpPopupForLab;
-import '../tutorial/onboarding_intro.dart';
-import '../tutorial/onboarding_roleplay.dart';
+import '../onboarding/tutorial/intro.dart';
+import '../onboarding/tutorial/roleplay.dart';
 import '../paywall/paywall.dart';
 import '../paywall/paywall_completed.dart';
 import '../rank/ranking.dart';

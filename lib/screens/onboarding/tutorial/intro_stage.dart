@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import '../../l10n/app_localizations.dart';
-import '../../widgets/user_profile_avatar.dart';
-import 'onboarding_backdrop.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../../widgets/user_profile_avatar.dart';
+import 'backdrop.dart';
 
 /// Username→Intro 프로토타입 `.go`와 동일한 스테이지 (0=Username쪽, 1=Intro 최종).
 class TutorialIntroStage extends StatelessWidget {

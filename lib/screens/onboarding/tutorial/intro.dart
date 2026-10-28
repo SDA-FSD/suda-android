@@ -3,11 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-import '../../l10n/app_localizations.dart';
-import '../../services/suda_api_client.dart';
-import '../../utils/default_toast.dart';
-import 'onboarding_intro_stage.dart';
-import 'onboarding_backdrop.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../../services/suda_api_client.dart';
+import '../../../utils/default_toast.dart';
+import 'intro_stage.dart';
+import 'backdrop.dart';
 
 /// 온보딩 Username 다음. 프로필·문구·Start → 마이크 권한 → 장면 문구 → 롤플레이.
 class TutorialIntroScreen extends StatefulWidget {
