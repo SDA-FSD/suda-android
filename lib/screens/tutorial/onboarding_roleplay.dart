@@ -55,6 +55,7 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
 
   late final AnimationController _bgFade;
   late final AnimationController _blurUi;
+  late final AnimationController _playingExit;
   late final AnimationController _micLoadingRotation;
   late final Animation<double> _chromeOpacity;
 
@@ -133,6 +134,10 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
       vsync: this,
       duration: const Duration(milliseconds: 500),
     );
+    _playingExit = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    );
     _micLoadingRotation = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1000),
@@ -164,6 +169,7 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
     _aiVoice.dispose();
     _bgFade.dispose();
     _blurUi.dispose();
+    _playingExit.dispose();
     _micLoadingRotation.dispose();
     _greetingSuccess.dispose();
     _missionCompleteTimer?.cancel();
@@ -630,8 +636,16 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
     });
     _scrollTalkToEnd();
     if (!widget.preview) unawaited(_completeOnboarding());
+    unawaited(
+      precacheImage(
+        const AssetImage(TutorialResultScreen.endingAsset),
+        context,
+      ),
+    );
     _roleplayEndTimer?.cancel();
-    _roleplayEndTimer = Timer(const Duration(seconds: 2), () {
+    _roleplayEndTimer = Timer(const Duration(seconds: 2), () async {
+      if (!mounted) return;
+      await _playingExit.forward();
       if (!mounted) return;
       _openEnding();
     });
@@ -933,6 +947,17 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
             return Stack(
               fit: StackFit.expand,
               children: [
+                const ColoredBox(color: Colors.black),
+                FadeTransition(
+                  opacity: Tween<double>(begin: 1, end: 0).animate(
+                    CurvedAnimation(
+                      parent: _playingExit,
+                      curve: Curves.easeInOut,
+                    ),
+                  ),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
                 Opacity(
                   opacity: bgOpacity,
                   child: TutorialRoleplayBackdrop(blurAmount: blurAmount),
@@ -1032,6 +1057,9 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
                   ),
                 if (_showGreetingSuccess)
                   IgnorePointer(child: _greetingSuccessOverlay(l10n, theme)),
+                    ],
+                  ),
+                ),
               ],
             );
           },

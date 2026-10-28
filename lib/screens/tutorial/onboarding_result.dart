@@ -29,7 +29,7 @@ class _TutorialResultScreenState extends State<TutorialResultScreen>
     super.initState();
     _imageFade = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1800),
+      duration: const Duration(milliseconds: 2000),
     );
     _gradient = AnimationController(
       vsync: this,
@@ -47,11 +47,18 @@ class _TutorialResultScreenState extends State<TutorialResultScreen>
       vsync: this,
       duration: const Duration(milliseconds: 420),
     );
-    _play();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _play();
+    });
   }
 
   Future<void> _play() async {
-    await _imageFade.forward();
+    await precacheImage(
+      const AssetImage(TutorialResultScreen.endingAsset),
+      context,
+    );
+    if (!mounted) return;
+    await _imageFade.forward(from: 0);
     await Future<void>.delayed(const Duration(milliseconds: 1200));
     if (!mounted) return;
     await _gradient.forward();
