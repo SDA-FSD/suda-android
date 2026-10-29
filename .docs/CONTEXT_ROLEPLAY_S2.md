@@ -352,7 +352,6 @@ Home (시리즈 썸네일)
 | POST | `/rps2/user-histories/{rpUserHistoryId}/expressions/{expressionIndex}` | void (200) | Result Key Expression 북마크 저장 | ✅ |
 | DELETE | `/rps2/user-histories/{rpUserHistoryId}/expressions/{expressionIndex}` | void (200) | Result Key Expression 북마크 삭제 | ✅ |
 | GET | `/rps2/user-histories/{rpUserHistoryId}/messages/{rpMsgId}/audio` | `TtsResultDto` (`cdnYn`, `cdnPath`, `sound`) | Result Speech Feedback 카드·메가폰 탭 | ✅ |
-| GET | `/rps2/user-histories/{rpUserHistoryId}/feedbacks/{rpMsgId}/audio` | `TtsResultDto` (`cdnYn`, `cdnPath`, `sound`) | 구버전 앱 전용. 사용자 언어 피드백 본문 TTS. 신규 앱은 호출하지 않음 | ✅ |
 | GET | `/rps2/user-histories/{rpUserHistoryId}/feedbacks/{rpMsgId}/improved-sentence/audio` | `TtsResultDto` | 펼침 자동재생·개선 문장 메가폰. 문장 없으면 요청 없이 펼침만. lock Y 응답에는 필드 없음 | ✅ |
 | PUT | `/rps2/user-histories/{rpUserHistoryId}/user-star-rating` | req: `{userStarRating: 0~5}` | Ending 별 탭마다 | ✅ |
 | POST | `/rps2/user-histories/{rpUserHistoryId}/report` | req: `{content: string}` | Result Report Send | ✅ |

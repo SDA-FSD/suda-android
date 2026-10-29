@@ -14,17 +14,13 @@
 /v1/auth/logout
 /v1/latest-version
 /v1/purchases/verify
-/v2/home/contents
-/v2/home/badges
 /v3/home/contents
 /v3/home/badges
 /v2/home/series
 /v1/users
 /v1/users/profile
 /v1/users/my-profile
-/v1/users/progress
 /v2/users/progress
-/v1/users/*/profile
 /v2/users/*/profile
 /v1/users/friends/*/request
 /v1/users/friends/*
@@ -71,7 +67,6 @@
 /rps2/user-histories/*/expressions/*/sound
 /rps2/user-histories/*/expressions/*
 /rps2/user-histories/*/messages/*/audio
-/rps2/user-histories/*/feedbacks/*/audio
 /rps2/user-histories/*/feedbacks/*/tap
 /rps2/user-histories/*/user-star-rating
 /rps2/user-histories/*/report
