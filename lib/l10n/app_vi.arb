@@ -506,5 +506,7 @@
   },
   "cefrLevelUpCaption": "Tiến độ và lịch sử chơi ở cấp độ trước sẽ được giữ nguyên.",
   "cefrLevelUpTryNext": "Thử cấp độ tiếp theo",
-  "cefrLevelUpLater": "Để sau"
+  "cefrLevelUpLater": "Để sau",
+  "firstRpRecommendBadge": "Đề xuất",
+  "firstRpRecommendPlay": "Chơi ngay"
 }

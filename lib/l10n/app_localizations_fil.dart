@@ -1383,4 +1383,10 @@ class AppLocalizationsFil extends AppLocalizations {
 
   @override
   String get cefrLevelUpLater => 'Mamaya na';
+
+  @override
+  String get firstRpRecommendBadge => 'Inirerekomenda';
+
+  @override
+  String get firstRpRecommendPlay => 'Maglaro ngayon';
 }

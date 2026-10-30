@@ -1371,4 +1371,10 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get cefrLevelUpLater => 'Nanti saja';
+
+  @override
+  String get firstRpRecommendBadge => 'Rekomendasi';
+
+  @override
+  String get firstRpRecommendPlay => 'Main sekarang';
 }

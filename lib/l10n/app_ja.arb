@@ -506,5 +506,7 @@
   },
   "cefrLevelUpCaption": "レベルを変えても、前のレベルの進行状況とプレイ履歴はそのまま残ります。",
   "cefrLevelUpTryNext": "次のレベルに挑戦",
-  "cefrLevelUpLater": "あとで"
+  "cefrLevelUpLater": "あとで",
+  "firstRpRecommendBadge": "おすすめ",
+  "firstRpRecommendPlay": "今すぐプレイ"
 }

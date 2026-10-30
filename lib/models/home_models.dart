@@ -20,6 +20,7 @@ class HomeDto {
   final String profileBadgeYn;
   final List<MainHomeBannerDto> banners;
   final List<HomeSeriesGroupDto> seriesList;
+  final HomeFirstRpRecommendDto? firstRpRecommend;
 
   const HomeDto({
     required this.restYn,
@@ -30,6 +31,7 @@ class HomeDto {
     this.profileBadgeYn = 'N',
     required this.banners,
     required this.seriesList,
+    this.firstRpRecommend,
   });
 
   factory HomeDto.fromJson(Map<String, dynamic> json) {
@@ -80,6 +82,55 @@ class HomeDto {
       profileBadgeYn: sudaYnFromJson(json['profileBadgeYn']),
       banners: banners,
       seriesList: seriesList,
+      firstRpRecommend: HomeFirstRpRecommendDto.fromJson(
+        json['firstRpRecommend'],
+      ),
+    );
+  }
+}
+
+/// 첫 롤플레이 추천 팝업. 이력 없거나 노출 시리즈가 아니면 서버가 필드를 비운다.
+class HomeFirstRpRecommendDto {
+  final int seriesId;
+  final String? thumbnailImgPath;
+  final Map<String, String> title;
+  final HomeCategoryDto? category;
+  final String? synopsisComplexityLevel;
+  final String localizedTitleShowYn;
+  final double titleBoxLeft;
+  final double titleBoxTop;
+  final double titleBoxWidth;
+
+  const HomeFirstRpRecommendDto({
+    required this.seriesId,
+    this.thumbnailImgPath,
+    required this.title,
+    this.category,
+    this.synopsisComplexityLevel,
+    this.localizedTitleShowYn = 'N',
+    this.titleBoxLeft = 0,
+    this.titleBoxTop = 0,
+    this.titleBoxWidth = 0,
+  });
+
+  static HomeFirstRpRecommendDto? fromJson(dynamic raw) {
+    if (raw is! Map) return null;
+    final json = Map<String, dynamic>.from(raw);
+    final seriesId = (json['seriesId'] as num?)?.toInt();
+    if (seriesId == null) return null;
+    final categoryRaw = json['category'];
+    return HomeFirstRpRecommendDto(
+      seriesId: seriesId,
+      thumbnailImgPath: json['thumbnailImgPath'] as String?,
+      title: _localizedMapFromJson(json['title']),
+      category: categoryRaw is Map
+          ? HomeCategoryDto.fromJson(Map<String, dynamic>.from(categoryRaw))
+          : null,
+      synopsisComplexityLevel: json['synopsisComplexityLevel'] as String?,
+      localizedTitleShowYn: json['localizedTitleShowYn'] == 'Y' ? 'Y' : 'N',
+      titleBoxLeft: (json['titleBoxLeft'] as num?)?.toDouble() ?? 0,
+      titleBoxTop: (json['titleBoxTop'] as num?)?.toDouble() ?? 0,
+      titleBoxWidth: (json['titleBoxWidth'] as num?)?.toDouble() ?? 0,
     );
   }
 }

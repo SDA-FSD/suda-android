@@ -333,7 +333,8 @@
       - 탭: `SeriesOverviewScreen` (Sub)
 - **API 연동**:
   - **홈 콘텐츠 통합 조회**: `GET /v3/home/contents` (`SudaApiClient.getHomeContents()`)
-    - 응답: HomeDto (banners, seriesList, restYn, restStartsAt, restEndsAt, notiboxUnreadYn)
+    - 응답: HomeDto (banners, seriesList, restYn, restStartsAt, restEndsAt, notiboxUnreadYn, firstRpRecommend)
+    - **첫 롤플레이 추천**: `firstRpRecommend`가 있고 홈 탭이 보일 때 2:3 팝업. 딤 `0x66000000`, 딤 탭은 닫지 않음. 닫기는 카드 밖 왼쪽 위. 이번 홈 체류에서만 닫힘. 홈에 다시 들어오면 contents를 다시 받아 아직 값이 있으면 다시 연다. WelcomeGift가 위에 있고, 그게 닫힌 뒤에 보인다. 썸네일 `BoxFit.cover`. 아래 10% `#121212`, 그 위 40% 높이까지 그라데이션. 배지 l10n `#0CABA8`(`bodySmall`). 카테고리는 사용자 언어, 난이도는 Easy/Normal/Hard. 영어가 아니고 `localizedTitleShowYn=Y`일 때만 제목(`headlineSmall`, 최대 3줄, 넘치면 잘림, 그림자 X0 Y4 blur6 `#000` 90%). Play는 팝업을 닫고 `SeriesRouter.pushOverview`.
     - banners: `MainHomeBannerDto(imgPath, overlayText, appPath?)`
   - **시리즈 페이징 조회**: `GET /v2/home/series?category={enumValue}&pageNum=…` (`SudaApiClient.getSeriesByCategory()`)
   - **푸시 토큰 등록**: `_registerPushToken()` (`POST /v1/users/push-token`)

@@ -506,5 +506,7 @@
   },
   "cefrLevelUpCaption": "即使更换难度，之前难度的进度和游玩记录也会保留。",
   "cefrLevelUpTryNext": "挑战下一级",
-  "cefrLevelUpLater": "以后再说"
+  "cefrLevelUpLater": "以后再说",
+  "firstRpRecommendBadge": "推荐",
+  "firstRpRecommendPlay": "立即开始"
 }

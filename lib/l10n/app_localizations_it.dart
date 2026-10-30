@@ -1380,4 +1380,10 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get cefrLevelUpLater => 'Forse più tardi';
+
+  @override
+  String get firstRpRecommendBadge => 'Consigliato';
+
+  @override
+  String get firstRpRecommendPlay => 'Gioca ora';
 }

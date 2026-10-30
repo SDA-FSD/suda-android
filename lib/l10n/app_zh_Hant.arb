@@ -506,5 +506,7 @@
   },
   "cefrLevelUpCaption": "即使更換難度，先前難度的進度與遊玩紀錄都會保留。",
   "cefrLevelUpTryNext": "挑戰下一級",
-  "cefrLevelUpLater": "以後再說"
+  "cefrLevelUpLater": "以後再說",
+  "firstRpRecommendBadge": "推薦",
+  "firstRpRecommendPlay": "立即開始"
 }

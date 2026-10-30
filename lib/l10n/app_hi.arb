@@ -506,5 +506,7 @@
   },
   "cefrLevelUpCaption": "पिछला स्तर बदलने पर भी आपकी प्रगति और खेल इतिहास सुरक्षित रहेगा।",
   "cefrLevelUpTryNext": "अगला स्तर आज़माएँ",
-  "cefrLevelUpLater": "बाद में"
+  "cefrLevelUpLater": "बाद में",
+  "firstRpRecommendBadge": "सुझाव",
+  "firstRpRecommendPlay": "अभी खेलें"
 }

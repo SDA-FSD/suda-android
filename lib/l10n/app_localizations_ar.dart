@@ -1362,4 +1362,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get cefrLevelUpLater => 'ربما لاحقًا';
+
+  @override
+  String get firstRpRecommendBadge => 'موصى به';
+
+  @override
+  String get firstRpRecommendPlay => 'العب الآن';
 }

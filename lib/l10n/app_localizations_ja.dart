@@ -1299,4 +1299,10 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get cefrLevelUpLater => 'あとで';
+
+  @override
+  String get firstRpRecommendBadge => 'おすすめ';
+
+  @override
+  String get firstRpRecommendPlay => '今すぐプレイ';
 }

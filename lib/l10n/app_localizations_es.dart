@@ -1376,6 +1376,12 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get cefrLevelUpLater => 'Quizá más tarde';
+
+  @override
+  String get firstRpRecommendBadge => 'Recomendado';
+
+  @override
+  String get firstRpRecommendPlay => 'Jugar ahora';
 }
 
 /// The translations for Spanish Castilian, as used in Latin America and the Caribbean (`es_419`).
@@ -2750,4 +2756,10 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
 
   @override
   String get cefrLevelUpLater => 'Quizá más tarde';
+
+  @override
+  String get firstRpRecommendBadge => 'Recomendado';
+
+  @override
+  String get firstRpRecommendPlay => 'Jugar ahora';
 }

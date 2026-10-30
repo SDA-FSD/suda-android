@@ -128,7 +128,7 @@ xcrun altool --upload-app --type ios -f build/ios/ipa/suda.ipa --apiKey "$(cat ~
 - Enable Notifications 슬롯: detail `showEnablePushFreeChargeYn=Y` **그리고** `screen` ∈ {`home`,`opening`,`opening_insufficient`}. 탭 시 impression `productId=enable_push_free_charge` → `GET /v1/users` → PushAgreement Sub Screen. `completeYn=Y`면 토스트(에너지 팝업 경로만) + 제거 애니 + detail 재조회. Setting>Notification 자동닫힘은 토스트 없음. OFF→ON OS 권한: iOS FCM settings, AOS `Permission.notification`. iOS ON 성공 시 `POST /v1/users/push-token` 추가(실토큰만, 상세 `CONTEXT_SCREEN.md` PushAgreement)
 
 ### 홈·시리즈
-- `GET /v3/home/contents` → banners, seriesList, restYn, notiboxUnreadYn, rankBadgeYn, profileBadgeYn. `RestStatusService`에 rest·배지 동기화. 랭킹·프로필 점은 알림 점과 별개. 구버전 응답에 필드가 없으면 `N`
+- `GET /v3/home/contents` → banners, seriesList, restYn, notiboxUnreadYn, rankBadgeYn, profileBadgeYn, `firstRpRecommend`(없으면 null). `RestStatusService`에 rest·배지 동기화. 랭킹·프로필 점은 알림 점과 별개. 구버전 응답에 필드가 없으면 `N`
 - `GET /v3/home/badges` → `rankBadgeYn`, `profileBadgeYn`만. 홈·알림·프로필 탭 진입과 메인 복귀 시 이 값으로 GNB 점을 덮는다. 랭킹 탭은 `POST /v1/rank/seen` 다음. 늦게 온 응답은 버린다
 - 썸네일 탭 → `SeriesRouter.pushOverview`. 카테고리 페이징 `GET /v2/home/series`
 - rest 중 Overview 진입 시 `RestOverlay` (`shouldShowRestOverlay`)

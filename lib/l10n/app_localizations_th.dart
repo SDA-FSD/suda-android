@@ -1339,4 +1339,10 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get cefrLevelUpLater => 'ไว้ทีหลัง';
+
+  @override
+  String get firstRpRecommendBadge => 'แนะนำ';
+
+  @override
+  String get firstRpRecommendPlay => 'เล่นเลย';
 }

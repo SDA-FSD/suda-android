@@ -506,5 +506,7 @@
   },
   "cefrLevelUpCaption": "ความคืบหน้าและประวัติการเล่นในระดับก่อนหน้าจะยังคงอยู่",
   "cefrLevelUpTryNext": "ลองระดับถัดไป",
-  "cefrLevelUpLater": "ไว้ทีหลัง"
+  "cefrLevelUpLater": "ไว้ทีหลัง",
+  "firstRpRecommendBadge": "แนะนำ",
+  "firstRpRecommendPlay": "เล่นเลย"
 }

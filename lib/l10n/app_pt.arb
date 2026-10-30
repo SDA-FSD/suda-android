@@ -506,5 +506,7 @@
   },
   "cefrLevelUpCaption": "Ao mudar de nível, seu progresso e histórico de jogo no nível anterior serão mantidos.",
   "cefrLevelUpTryNext": "Experimentar o próximo nível",
-  "cefrLevelUpLater": "Talvez mais tarde"
+  "cefrLevelUpLater": "Talvez mais tarde",
+  "firstRpRecommendBadge": "Recomendado",
+  "firstRpRecommendPlay": "Jogar agora"
 }

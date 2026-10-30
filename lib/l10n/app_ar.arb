@@ -506,5 +506,7 @@
   },
   "cefrLevelUpCaption": "سيبقى تقدمك وسجل لعبك في المستوى السابق محفوظين.",
   "cefrLevelUpTryNext": "جرّب المستوى التالي",
-  "cefrLevelUpLater": "ربما لاحقًا"
+  "cefrLevelUpLater": "ربما لاحقًا",
+  "firstRpRecommendBadge": "موصى به",
+  "firstRpRecommendPlay": "العب الآن"
 }

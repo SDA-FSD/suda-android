@@ -589,5 +589,7 @@
   },
   "cefrLevelUpCaption": "Your progress and play history at the previous level will be kept.",
   "cefrLevelUpTryNext": "Try the Next Level",
-  "cefrLevelUpLater": "Maybe Later"
+  "cefrLevelUpLater": "Maybe Later",
+  "firstRpRecommendBadge": "Recommended",
+  "firstRpRecommendPlay": "Play Now"
 }

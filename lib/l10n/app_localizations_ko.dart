@@ -1303,4 +1303,10 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get cefrLevelUpLater => '나중에';
+
+  @override
+  String get firstRpRecommendBadge => '추천';
+
+  @override
+  String get firstRpRecommendPlay => '지금 플레이하기';
 }

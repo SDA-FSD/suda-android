@@ -506,5 +506,7 @@
   },
   "cefrLevelUpCaption": "난이도를 바꿔도 이전 난이도의 진행 상황과 플레이 기록은 그대로 유지돼요.",
   "cefrLevelUpTryNext": "다음 난이도 도전하기",
-  "cefrLevelUpLater": "나중에"
+  "cefrLevelUpLater": "나중에",
+  "firstRpRecommendBadge": "추천",
+  "firstRpRecommendPlay": "지금 플레이하기"
 }

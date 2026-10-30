@@ -506,5 +506,7 @@
   },
   "cefrLevelUpCaption": "Seviye değişse de önceki seviyedeki ilerlemen ve oyun geçmişin korunur.",
   "cefrLevelUpTryNext": "Sonraki seviyeyi dene",
-  "cefrLevelUpLater": "Daha sonra"
+  "cefrLevelUpLater": "Daha sonra",
+  "firstRpRecommendBadge": "Önerilen",
+  "firstRpRecommendPlay": "Şimdi oyna"
 }

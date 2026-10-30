@@ -506,5 +506,7 @@
   },
   "cefrLevelUpCaption": "Votre progression et votre historique de jeu du niveau précédent seront conservés.",
   "cefrLevelUpTryNext": "Essayer le niveau suivant",
-  "cefrLevelUpLater": "Plus tard"
+  "cefrLevelUpLater": "Plus tard",
+  "firstRpRecommendBadge": "Recommandé",
+  "firstRpRecommendPlay": "Jouer"
 }

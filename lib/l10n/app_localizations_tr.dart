@@ -1363,4 +1363,10 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get cefrLevelUpLater => 'Daha sonra';
+
+  @override
+  String get firstRpRecommendBadge => 'Önerilen';
+
+  @override
+  String get firstRpRecommendPlay => 'Şimdi oyna';
 }

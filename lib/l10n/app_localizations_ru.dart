@@ -1382,4 +1382,10 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get cefrLevelUpLater => 'Позже';
+
+  @override
+  String get firstRpRecommendBadge => 'Рекомендуем';
+
+  @override
+  String get firstRpRecommendPlay => 'Играть';
 }

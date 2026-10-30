@@ -1382,4 +1382,10 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get cefrLevelUpLater => 'Może później';
+
+  @override
+  String get firstRpRecommendBadge => 'Polecane';
+
+  @override
+  String get firstRpRecommendPlay => 'Zagraj teraz';
 }

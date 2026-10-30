@@ -1353,4 +1353,10 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get cefrLevelUpLater => 'Để sau';
+
+  @override
+  String get firstRpRecommendBadge => 'Đề xuất';
+
+  @override
+  String get firstRpRecommendPlay => 'Chơi ngay';
 }

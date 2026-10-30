@@ -506,5 +506,7 @@
   },
   "cefrLevelUpCaption": "Mananatili ang progress at play history mo sa nakaraang level.",
   "cefrLevelUpTryNext": "Subukan ang susunod na level",
-  "cefrLevelUpLater": "Mamaya na"
+  "cefrLevelUpLater": "Mamaya na",
+  "firstRpRecommendBadge": "Inirerekomenda",
+  "firstRpRecommendPlay": "Maglaro ngayon"
 }

@@ -1357,4 +1357,10 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get cefrLevelUpLater => 'बाद में';
+
+  @override
+  String get firstRpRecommendBadge => 'सुझाव';
+
+  @override
+  String get firstRpRecommendPlay => 'अभी खेलें';
 }

@@ -18,6 +18,7 @@ import '../widgets/app_scaffold.dart';
 import '../widgets/cdn_thumb_image.dart';
 import '../widgets/energy_header_badge.dart';
 import '../widgets/gnb_bar.dart';
+import '../widgets/first_rp_recommend_popup.dart';
 import '../widgets/welcome_gift_layer.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -68,6 +69,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   bool _bannerTimerStarted = false; // 타이머 시작 여부 플래그
   int _visibleCategoryCount = 0; // 현재 렌더링 허용된 카테고리 개수
   bool _showWelcomeGift = false;
+  HomeFirstRpRecommendDto? _firstRpRecommend;
+  bool _recommendDismissed = false;
+  int _recommendRefreshGen = 0;
   /// 우상단 번개(`energy_sub`)와 동일 소스 — EnergyHeaderBadge onEnergyChanged.
   bool _isPremium = false;
   bool _pushRegisterInFlight = false;
@@ -103,6 +107,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.user != widget.user) {
       _maybeShowWelcomeGift();
+    }
+    final returned =
+        widget.homeTabSelectedCounter != oldWidget.homeTabSelectedCounter;
+    final becameActive = widget.isActive && !oldWidget.isActive;
+    if (widget.isActive && (returned || becameActive)) {
+      setState(() => _recommendDismissed = true);
+      unawaited(_refreshFirstRpRecommend());
     }
   }
 
@@ -179,6 +190,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         setState(() {
           _banners = banners;
           _seriesGroups = groups;
+          _firstRpRecommend = home.firstRpRecommend;
           _isLoadingBanners = false;
           _isLoadingSeriesGroups = false;
           if (banners.isNotEmpty) {
@@ -203,6 +215,24 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         }
       }
     });
+  }
+
+  /// 홈에 다시 들어올 때 추천만 다시 받는다. 배너·목록은 유지한다.
+  Future<void> _refreshFirstRpRecommend() async {
+    final token = _accessToken;
+    if (token == null || token.isEmpty) return;
+    final gen = ++_recommendRefreshGen;
+    try {
+      final home = await SudaApiClient.getHomeContents(accessToken: token);
+      if (!mounted || gen != _recommendRefreshGen) return;
+      setState(() {
+        _firstRpRecommend = home.firstRpRecommend;
+        _recommendDismissed = false;
+      });
+    } catch (_) {
+      if (!mounted || gen != _recommendRefreshGen) return;
+      setState(() => _recommendDismissed = false);
+    }
   }
 
   /// 모든 배너 이미지를 미리 로드
@@ -380,6 +410,23 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             ),
           ),
         ),
+        if (widget.isActive &&
+            !_showWelcomeGift &&
+            !_recommendDismissed &&
+            _firstRpRecommend != null)
+          Positioned.fill(
+            child: FirstRpRecommendPopup(
+              recommend: _firstRpRecommend!,
+              onClose: () {
+                if (mounted) setState(() => _recommendDismissed = true);
+              },
+              onPlay: () {
+                final seriesId = _firstRpRecommend?.seriesId;
+                if (mounted) setState(() => _recommendDismissed = true);
+                if (seriesId != null) _navigateToSeriesOverview(seriesId);
+              },
+            ),
+          ),
         if (_showWelcomeGift)
           Positioned.fill(
             child: WelcomeGiftLayer(

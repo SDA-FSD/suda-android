@@ -506,5 +506,7 @@
   },
   "cefrLevelUpCaption": "Progres dan riwayat bermain di level sebelumnya akan tetap tersimpan.",
   "cefrLevelUpTryNext": "Coba level berikutnya",
-  "cefrLevelUpLater": "Nanti saja"
+  "cefrLevelUpLater": "Nanti saja",
+  "firstRpRecommendBadge": "Rekomendasi",
+  "firstRpRecommendPlay": "Main sekarang"
 }

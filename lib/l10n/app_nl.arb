@@ -506,5 +506,7 @@
   },
   "cefrLevelUpCaption": "Je voortgang en speelgeschiedenis van het vorige niveau blijven bewaard.",
   "cefrLevelUpTryNext": "Probeer het volgende niveau",
-  "cefrLevelUpLater": "Misschien later"
+  "cefrLevelUpLater": "Misschien later",
+  "firstRpRecommendBadge": "Aanbevolen",
+  "firstRpRecommendPlay": "Nu spelen"
 }

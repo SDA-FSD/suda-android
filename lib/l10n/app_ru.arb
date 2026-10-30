@@ -506,5 +506,7 @@
   },
   "cefrLevelUpCaption": "Прогресс и история игры на предыдущем уровне сохранятся.",
   "cefrLevelUpTryNext": "Попробовать следующий уровень",
-  "cefrLevelUpLater": "Позже"
+  "cefrLevelUpLater": "Позже",
+  "firstRpRecommendBadge": "Рекомендуем",
+  "firstRpRecommendPlay": "Играть"
 }

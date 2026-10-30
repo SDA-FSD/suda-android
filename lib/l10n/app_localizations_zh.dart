@@ -1287,6 +1287,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get cefrLevelUpLater => '以后再说';
+
+  @override
+  String get firstRpRecommendBadge => '推荐';
+
+  @override
+  String get firstRpRecommendPlay => '立即开始';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -2572,6 +2578,12 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get cefrLevelUpLater => '以后再说';
+
+  @override
+  String get firstRpRecommendBadge => '推荐';
+
+  @override
+  String get firstRpRecommendPlay => '立即开始';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -3857,4 +3869,10 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get cefrLevelUpLater => '以後再說';
+
+  @override
+  String get firstRpRecommendBadge => '推薦';
+
+  @override
+  String get firstRpRecommendPlay => '立即開始';
 }

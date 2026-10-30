@@ -2536,6 +2536,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Maybe Later'**
   String get cefrLevelUpLater;
+
+  /// No description provided for @firstRpRecommendBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended'**
+  String get firstRpRecommendBadge;
+
+  /// No description provided for @firstRpRecommendPlay.
+  ///
+  /// In en, this message translates to:
+  /// **'Play Now'**
+  String get firstRpRecommendPlay;
 }
 
 class _AppLocalizationsDelegate
