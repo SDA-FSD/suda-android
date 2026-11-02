@@ -88,7 +88,7 @@ class FirstRpRecommendPopup extends StatelessWidget {
               children: [
                 Positioned(
                   top: 0,
-                  left: 0,
+                  right: 0,
                   child: GestureDetector(
                     onTap: onClose,
                     behavior: HitTestBehavior.opaque,
@@ -110,13 +110,15 @@ class FirstRpRecommendPopup extends StatelessWidget {
                   left: 0,
                   right: 0,
                   height: cardHeight,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        _thumbnail(),
-                        const DecoratedBox(
+                  child: CustomPaint(
+                    foregroundPainter: const _TagStrokePainter(),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(24),
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          _thumbnail(),
+                          const DecoratedBox(
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               begin: Alignment.topCenter,
@@ -131,19 +133,20 @@ class FirstRpRecommendPopup extends StatelessWidget {
                             ),
                           ),
                         ),
-                        if (_showLocalizedTitle) _title(context),
-                        Positioned(
-                          top: 12,
-                          right: 12,
-                          child: _badge(context, l10n.firstRpRecommendBadge),
-                        ),
-                        Positioned(
-                          left: 14,
-                          right: 14,
-                          bottom: 16,
-                          child: _bottomChrome(context, l10n.firstRpRecommendPlay),
-                        ),
-                      ],
+                          if (_showLocalizedTitle) _title(context),
+                          Positioned(
+                            top: 12,
+                            right: 12,
+                            child: _badge(context, l10n.firstRpRecommendBadge),
+                          ),
+                          Positioned(
+                            left: 14,
+                            right: 14,
+                            bottom: 16,
+                            child: _bottomChrome(context, l10n.firstRpRecommendPlay),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -269,21 +272,114 @@ class FirstRpRecommendPopup extends StatelessWidget {
   }
 
   Widget _glassPill(BuildContext context, String label) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(999),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          color: Colors.white.withValues(alpha: 0.22),
-          child: Text(
-            label,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Colors.white,
+    const radius = 24.0;
+    return DecoratedBox(
+      decoration: const BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(radius)),
+        boxShadow: [
+          BoxShadow(
+            color: Color(0x26000000),
+            offset: Offset(-1.86, -1.73),
+            blurRadius: 12,
+            spreadRadius: -8,
+          ),
+          BoxShadow(
+            color: Color(0x26000000),
+            offset: Offset(-11.15, -10.39),
+            blurRadius: 48,
+            spreadRadius: -12,
+          ),
+        ],
+      ),
+      child: CustomPaint(
+        foregroundPainter: const _TagStrokePainter(),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(radius),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+            child: Stack(
+              children: [
+                const Positioned.fill(
+                  child: ColoredBox(color: Color(0x0AFFFFFF)),
+                ),
+                const Positioned.fill(
+                  child: CustomPaint(painter: _TagInnerShadowPainter()),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  child: Text(
+                    label,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
       ),
     );
   }
+}
+
+/// 바깥 1px. 둘레는 흰색 16%. 밝은 면은 안쪽 그림자가 맡는다.
+class _TagStrokePainter extends CustomPainter {
+  const _TagStrokePainter();
+
+  static const _strokeWidth = 1.0;
+  static const _radius = 24.0;
+  static const _white16 = Color(0x28FFFFFF);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rrect = RRect.fromRectAndRadius(
+      Offset.zero & size,
+      const Radius.circular(_radius),
+    );
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = _strokeWidth
+      ..isAntiAlias = true
+      ..color = _white16;
+    canvas.drawRRect(rrect.deflate(_strokeWidth / 2), paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _TagStrokePainter oldDelegate) => false;
+}
+
+class _TagInnerShadowPainter extends CustomPainter {
+  const _TagInnerShadowPainter();
+
+  static const _color = Color.fromRGBO(255, 255, 255, 0.1035);
+  static const _radius = 24.0;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rrect = RRect.fromRectAndRadius(
+      Offset.zero & size,
+      const Radius.circular(_radius),
+    );
+    canvas.save();
+    canvas.clipRRect(rrect);
+    _draw(canvas, rrect, const Offset(1.86, 1.73), 6);
+    _draw(canvas, rrect, const Offset(2.79, 2.6), 12);
+    canvas.restore();
+  }
+
+  void _draw(Canvas canvas, RRect rrect, Offset offset, double blur) {
+    final paint = Paint()
+      ..color = _color
+      ..maskFilter = MaskFilter.blur(BlurStyle.normal, _sigma(blur));
+    final outer = Path()..addRect(rrect.outerRect.inflate(blur * 2));
+    final hole = Path()..addRRect(rrect.shift(offset));
+    canvas.drawPath(Path.combine(PathOperation.difference, outer, hole), paint);
+  }
+
+  /// [BoxShadow]와 같은 흐림 변환.
+  double _sigma(double radius) => radius * 0.57735 + 0.5;
+
+  @override
+  bool shouldRepaint(covariant _TagInnerShadowPainter oldDelegate) => false;
 }
