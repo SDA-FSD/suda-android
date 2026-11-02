@@ -40,7 +40,6 @@
 /v1/users/push-token
 /v1/users/push-agreement
 /v1/users/push-agreement/categories
-/v1/users/speed-rate
 /v1/users/auto-hint
 /v1/users/auto-hint-guide
 /v1/users/feedback

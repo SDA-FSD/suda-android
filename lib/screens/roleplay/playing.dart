@@ -45,7 +45,6 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
         PlayingInputMixin,
         PlayingFinishMixin,
         PlayingEnergyMixin {
-  static const List<int> _speedRateSteps = [70, 100, 120, 150];
   static const String _autoHintMetaKey = 'RP_AUTO_HINT';
   static const String _autoHintGuideMetaKey = 'RP_AUTO_HINT_GUIDE';
   static const double _playingHeaderTopSpacing = 60;
@@ -57,7 +56,6 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
   bool _autoHintGuidePending = false;
   int _manualHintOpens = 0;
   late bool _autoHintEnabled;
-  late int _speedIndex;
   late final int _turnCount;
   late List<Color> _turnBarColors;
   late List<String?> _turnLabelTexts;
@@ -94,7 +92,6 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     _autoHintGuideSeen = _readAutoHintGuideSeen();
     onManualHintShown = _onManualHintShown;
     onUserTurnActivated = _maybeShowAutoHintGuide;
-    _speedIndex = _resolveInitialSpeedIndex();
     _turnCount = _resolveRequiredSpeechCount();
     _missions = _resolveMissions();
     _turnBarColors = List<Color>.filled(
@@ -138,26 +135,6 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     return _playingHeaderTopSpacing +
         turnBarHeight +
         PlayingConversationLayout.bodyTopGap;
-  }
-
-  int _resolveInitialSpeedIndex() {
-    final metaInfo = SeriesStateService.instance.user?.metaInfo;
-    var initialRate = 100;
-    if (metaInfo != null) {
-      for (final item in metaInfo) {
-        if (item.key == 'RP_SPEED_RATE') {
-          final parsed = int.tryParse(item.value);
-          if (parsed != null) {
-            initialRate = parsed;
-          }
-          break;
-        }
-      }
-    }
-    final index = _speedRateSteps.indexOf(initialRate);
-    if (index >= 0) return index;
-    final defaultIndex = _speedRateSteps.indexOf(100);
-    return defaultIndex >= 0 ? defaultIndex : 1;
   }
 
   void _onAiVoicePlaybackCompleted() {
@@ -574,25 +551,6 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     }
   }
 
-  void _onSpeedIndexChanged(int nextIndex) {
-    if (_speedIndex == nextIndex) return;
-    setState(() => _speedIndex = nextIndex);
-    _updateSpeedRate(_speedRateSteps[nextIndex]);
-  }
-
-  Future<void> _updateSpeedRate(int speedRate) async {
-    final accessToken = await TokenStorage.loadAccessToken();
-    if (accessToken == null) return;
-    try {
-      await SudaApiClient.updateRoleplaySpeedRate(
-        accessToken: accessToken,
-        speedRate: speedRate.toString(),
-      );
-    } catch (_) {
-      // S1과 동일: 에러 무시
-    }
-  }
-
   Widget _buildExitLayer(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context).textTheme;
@@ -760,8 +718,6 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
               child: RoleplayConfigurationPanel(
                 autoHintEnabled: _autoHintEnabled,
                 onAutoHintChanged: _onAutoHintChanged,
-                speedIndex: _speedIndex,
-                onSpeedIndexChanged: _onSpeedIndexChanged,
               ),
             ),
           if (_showAutoHintGuide)

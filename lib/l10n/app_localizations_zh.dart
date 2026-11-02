@@ -537,9 +537,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get roleplayHintEnglishLabel => '英语示例';
 
   @override
-  String get roleplayVoiceSpeed => '语速';
-
-  @override
   String get roleplayEndedFailed => '任务失败…';
 
   @override
@@ -1828,9 +1825,6 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get roleplayHintEnglishLabel => '英语示例';
 
   @override
-  String get roleplayVoiceSpeed => '语速';
-
-  @override
   String get roleplayEndedFailed => '任务失败…';
 
   @override
@@ -3117,9 +3111,6 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get roleplayHintEnglishLabel => '英語示例';
-
-  @override
-  String get roleplayVoiceSpeed => '語音速度';
 
   @override
   String get roleplayEndedFailed => '任務失敗⋯⋯';

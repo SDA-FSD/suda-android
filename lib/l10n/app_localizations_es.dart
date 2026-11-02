@@ -576,9 +576,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get roleplayHintEnglishLabel => 'Ejemplo en inglés';
 
   @override
-  String get roleplayVoiceSpeed => 'Velocidad de voz';
-
-  @override
   String get roleplayEndedFailed => 'Misión fallida...';
 
   @override
@@ -1954,9 +1951,6 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
 
   @override
   String get roleplayHintEnglishLabel => 'Ejemplo en inglés';
-
-  @override
-  String get roleplayVoiceSpeed => 'Velocidad de voz';
 
   @override
   String get roleplayEndedFailed => 'Misión fallida...';

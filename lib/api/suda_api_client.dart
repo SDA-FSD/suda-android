@@ -479,16 +479,6 @@ class SudaApiClient {
     );
   }
 
-  static Future<void> updateRoleplaySpeedRate({
-    required String accessToken,
-    required String speedRate,
-  }) {
-    return RoleplayApi.updateSpeedRate(
-      accessToken: accessToken,
-      speedRate: speedRate,
-    );
-  }
-
   static Future<void> updateRoleplayAutoHint({
     required String accessToken,
     required String value,

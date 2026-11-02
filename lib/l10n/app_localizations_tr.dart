@@ -571,9 +571,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get roleplayHintEnglishLabel => 'İngilizce örnek';
 
   @override
-  String get roleplayVoiceSpeed => 'Ses Hızı';
-
-  @override
   String get roleplayEndedFailed => 'Görev başarısız oldu...';
 
   @override

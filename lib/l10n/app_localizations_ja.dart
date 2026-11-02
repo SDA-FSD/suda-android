@@ -543,9 +543,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get roleplayHintEnglishLabel => '英語の例';
 
   @override
-  String get roleplayVoiceSpeed => '音声速度';
-
-  @override
   String get roleplayEndedFailed => 'ミッション失敗…';
 
   @override

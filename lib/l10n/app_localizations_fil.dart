@@ -584,9 +584,6 @@ class AppLocalizationsFil extends AppLocalizations {
   String get roleplayHintEnglishLabel => 'Halimbawa sa English';
 
   @override
-  String get roleplayVoiceSpeed => 'Bilis ng pagsasalita';
-
-  @override
   String get roleplayEndedFailed => 'Hindi nakumpleto ang mission...';
 
   @override

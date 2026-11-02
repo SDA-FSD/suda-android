@@ -567,9 +567,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get roleplayHintEnglishLabel => 'مثال بالإنجليزية';
 
   @override
-  String get roleplayVoiceSpeed => 'سرعة الصوت';
-
-  @override
   String get roleplayEndedFailed => 'فشلت المهمة...';
 
   @override

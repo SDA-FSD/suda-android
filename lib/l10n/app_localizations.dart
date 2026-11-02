@@ -1163,12 +1163,6 @@ abstract class AppLocalizations {
   /// **'Example in English'**
   String get roleplayHintEnglishLabel;
 
-  /// No description provided for @roleplayVoiceSpeed.
-  ///
-  /// In en, this message translates to:
-  /// **'Voice Speed'**
-  String get roleplayVoiceSpeed;
-
   /// No description provided for @roleplayEndedFailed.
   ///
   /// In en, this message translates to:

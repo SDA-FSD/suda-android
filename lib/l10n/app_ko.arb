@@ -215,7 +215,6 @@
   "roleplayHintLabel": "이렇게 말해보세요",
   "roleplayHintShowAnswer": "영어 표현 보기",
   "roleplayHintEnglishLabel": "영어 예시",
-  "roleplayVoiceSpeed": "음성 속도",
   "roleplayEndedFailed": "미션을 실패했습니다...",
   "roleplayEndedComplete": "롤플레이를 완료했습니다",
   "roleplayEndedEnding": "엔딩으로 이동합니다...",

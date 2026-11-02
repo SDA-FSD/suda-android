@@ -106,7 +106,7 @@ Home (시리즈 썸네일)
 | ① 세션 만료 | 사용자 유발 API(번역·힌트 조회/sound·발화 audio/text) **HTTP 404** | 즉시 `PUT finish` 1회 → 분기 |
 | ② 정상 마무리 | 마지막 AI `GET ai-message/audio` **수신 이후** (`aiText` 없으면 나레이션 후) | `PUT finish` 백그라운드 시작 · 전환은 AI 종료+finish 완료 후 |
 
-404 **제외**: `GET ai-message/audio`(자동), Opening TTS, `PUT speed-rate`
+404 **제외**: `GET ai-message/audio`(자동), Opening TTS
 
 #### `PUT /rps2/sessions/{rpSessionId}/finish`
 
@@ -223,9 +223,6 @@ Home (시리즈 썸네일)
   - **프레임**: Series Overview 언어레벨 버튼과 동일 글래스(BackdropFilter σ12 + gradient border, radius 16)
   - **오토힌트**: l10n `roleplayAutoHint` · push agreement 동일 토글 · meta `RP_AUTO_HINT`=`Y`만 on, 키 없음·그 외는 off(CEFR 무관) · 토글 시 로컬 user meta + `PUT /v1/users/auto-hint?value=Y|N`(실패 무시) · 같은 RP 이후 턴과 다음 RP에 유지 · 사용자 턴 중 ON이면 그 턴 힌트 1회 자동 노출. 박스가 열려 있으면 힌트 버튼 disabled, X로 닫으면 활성, 재탭은 캐시 · `_autoHintEnabled`
   - **오토힌트 가이드**: `GuideBubble`(위 꼭지·`#0CABA8`·흔들림). 이번 RP에서 수동 힌트가 2번 열린 뒤, 그 다음 사용자 턴 시작에 케밥 아래 노출. 조건은 자동 힌트 off이고 meta `RP_AUTO_HINT_GUIDE`가 `Y`가 아님. 노출 즉시 그 meta `Y` + `PUT /v1/users/auto-hint-guide`(실패 무시). 문구 `roleplayAutoHintGuide`. 버블 탭은 닫기만. 케밥 탭은 버블을 닫고 설정패널을 연 뒤 토글을 ON으로 저장하고 그 턴 힌트를 연다.
-  - **속도**: l10n `roleplayVoiceSpeed` · 가로 레일 200×4 · thumb 9 흰 원 · 좌측~thumb `#80D7CF` · 0.7/1.0/1.2/1.5 · 탭 시 1단 이동 + `PUT` speed-rate
-  - **구분선**: `SizedBox` 200×1 직접 그림, `#FFFFFF` 40% (`panelLineColor`), 상·하 여백 **16**
-  - **슬라이더**: 레일 기본색 `panelLineColor` · 터치 영역 = 레일+라벨 전체 · 탭 1단 이동 · 드래그 후 가장 가까운 4단계 스냅
 
 #### 레이아웃 구역 (턴바영역 아래)
 

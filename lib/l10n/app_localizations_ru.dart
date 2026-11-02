@@ -577,9 +577,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get roleplayHintEnglishLabel => 'Пример на английском';
 
   @override
-  String get roleplayVoiceSpeed => 'Скорость речи';
-
-  @override
   String get roleplayEndedFailed => 'Миссия провалена...';
 
   @override

@@ -574,9 +574,6 @@ class AppLocalizationsVi extends AppLocalizations {
   String get roleplayHintEnglishLabel => 'Ví dụ tiếng Anh';
 
   @override
-  String get roleplayVoiceSpeed => 'Tốc độ giọng đọc';
-
-  @override
   String get roleplayEndedFailed => 'Nhiệm vụ thất bại...';
 
   @override

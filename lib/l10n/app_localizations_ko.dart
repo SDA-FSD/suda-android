@@ -545,9 +545,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get roleplayHintEnglishLabel => '영어 예시';
 
   @override
-  String get roleplayVoiceSpeed => '음성 속도';
-
-  @override
   String get roleplayEndedFailed => '미션을 실패했습니다...';
 
   @override

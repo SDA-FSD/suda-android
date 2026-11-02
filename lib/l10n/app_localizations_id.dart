@@ -576,9 +576,6 @@ class AppLocalizationsId extends AppLocalizations {
   String get roleplayHintEnglishLabel => 'Contoh dalam bahasa Inggris';
 
   @override
-  String get roleplayVoiceSpeed => 'Kecepatan bicara';
-
-  @override
   String get roleplayEndedFailed => 'Misi gagal...';
 
   @override
