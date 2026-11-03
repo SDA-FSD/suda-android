@@ -613,6 +613,12 @@ class AppLocalizationsTh extends AppLocalizations {
   String get endingNext => 'ถัดไป';
 
   @override
+  String get roleplayResultNextEpisode => 'ตอนถัดไป';
+
+  @override
+  String get roleplayResultCompleteSeries => 'จบซีรีส์';
+
+  @override
   String get reportTitle => 'รายงานปัญหา';
 
   @override

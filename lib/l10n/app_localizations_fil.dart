@@ -635,6 +635,12 @@ class AppLocalizationsFil extends AppLocalizations {
   String get endingNext => 'Susunod';
 
   @override
+  String get roleplayResultNextEpisode => 'Susunod na episode';
+
+  @override
+  String get roleplayResultCompleteSeries => 'Kumpletuhin ang serye';
+
+  @override
   String get reportTitle => 'I-report ang Problema';
 
   @override

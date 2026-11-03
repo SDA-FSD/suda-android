@@ -321,7 +321,10 @@ Home (시리즈 썸네일)
     - **펼침/접힘(View Chat USER)**: USER 말풍선 카드 영역 탭 또는 Feedback pill 탭. 여는 탭은 같은 API `{sourceScreen: VIEW_CHAT}`. lock Y여도 접힘 grade는 노출. score·feedback 본문 없으면 Feedback 버튼 미노출. 펼침 재생은 Result와 동일(개선 문장 오디오·스피너, 문장 없으면 펼침만).
     - **재생**: 메가폰은 발화 왼쪽(항상). `audioInputYn == 'Y'`만 `GET /rps2/user-histories/{rpUserHistoryId}/messages/{rpMsgId}/audio`(`TtsResultDto`, `rpMsgId` = `speechFeedback` 키 = `messages[].id`). `N`은 토스트 `speechFeedbackNoRecording`. fetch 중 16×16 `CircularProgressIndicator`(strokeWidth 2, 발화색). 재생 중 `megaphone_fill.png` 같은 색 + 발화 w700. Key Expression·Feedback TTS 등 다른 재생 중이면 중단 후 우선 적용.
     - **iOS TTS**: Result Key Expression·Speech Feedback·View Chat·**Profile Saved**는 `SudaTtsAudioPlayer` (`suda_tts_audio_player.dart`). Playing과 같이 byte[]·CDN을 임시 파일로 `setFilePath` + `audio_session` speech. `Uri.dataFromBytes` 미사용(첫 생성 byte[] 무음 방지). AOS는 HTTP/`data:` URI.
-  - Footer: Got it! / Report(S1과 동일 UX) — S2는 `POST /rps2/user-histories/{rpUserHistoryId}/report`. **Profile History 진입**(`showReportLink: false`, `exitViaPop`)은 Report 없음·페이월 없이 pop. 정상 종료 Result의 Got it·시스템 뒤로가기는 `feedbackLockedYn=='Y'`일 때 Paywall `rp_result_got_it`(Result 위, 전환 후 Result 제거, 닫히면 Overview). `'N'`은 `popToOverview`.
+  - Footer: 다음 에피소드면 `roleplayResultNextEpisode`, 마지막 에피소드면 `roleplayResultCompleteSeries`. en/ko/pt는 요청 문구(Next Episode·다음 에피소드·Próximo episódio / Complete Series·시리즈 완료하기·Concluir série). 나머지 locale도 각 언어의 에피소드·시리즈 용어로 번역. **Profile History**(`exitViaPop`)는 `Got it!`. Report는 S1과 동일 UX, S2는 `POST /rps2/user-histories/{rpUserHistoryId}/report`. History(`showReportLink: false`)는 Report 없음·페이월 없이 pop.
+  - **다음 에피소드** 버튼: `popToOverview`(+ bestScore 갱신). 다음 롤플레이는 열지 않고, Overview 칸 이동 후 사용자가 Play. `feedbackLockedYn=='Y'`면 `markRpResultGotItPaywallPending` — Overview에서 칸 이동 애니 완료(없으면 갱신 직후 Play 활성) 시 Paywall `rp_result_got_it`(bottom-up). `'N'`은 페이월 없이 칸 이동만.
+  - **좌상단 X**(`close.svg`, `showCloseButton`): Result는 페이월 없이 `popToOverview`. History도 X 노출·탭 시 Profile로 `pop`(하단 `Got it!` 유지).
+  - **Complete Series**·시스템 뒤로가기: `feedbackLockedYn=='Y'`이면 Paywall `rp_result_got_it`(Result 위, 전환 후 Result 제거, 닫히면 Overview). `'N'`은 `popToOverview`.
 
 ---
 

@@ -128,14 +128,15 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
   void initState() {
     super.initState();
     unawaited(PerfMonitoringService.instance.start('feedback_screen_ready'));
-    _panelMoveController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 700),
-    )..addListener(() {
-        if (mounted) {
-          setState(() {});
-        }
-      });
+    _panelMoveController =
+        AnimationController(
+          vsync: this,
+          duration: const Duration(milliseconds: 700),
+        )..addListener(() {
+          if (mounted) {
+            setState(() {});
+          }
+        });
     _keyExpressionSectionEntranceController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 450),
@@ -334,6 +335,53 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
     super.dispose();
   }
 
+  bool get _opensNextEpisodeSlot =>
+      !widget.exitViaPop && !SeriesStateService.instance.isLastEpisode;
+
+  String _resultPrimaryLabel(AppLocalizations l10n) {
+    if (widget.exitViaPop) return 'Got it!';
+    if (SeriesStateService.instance.isLastEpisode) {
+      return l10n.roleplayResultCompleteSeries;
+    }
+    return l10n.roleplayResultNextEpisode;
+  }
+
+  void _onResultPrimaryAction(BuildContext context) {
+    if (_opensNextEpisodeSlot) {
+      _exitNextEpisode(context);
+      return;
+    }
+    _exitResult(context);
+  }
+
+  /// 좌상단 X. History는 Profile로 pop. Result는 페이월 없이 Overview.
+  Future<void> _onClosePressed(BuildContext context) async {
+    if (_isLeavingToOverview) return;
+    if (widget.exitViaPop) {
+      setState(() => _isLeavingToOverview = true);
+      Navigator.of(context).pop();
+      return;
+    }
+    setState(() => _isLeavingToOverview = true);
+    await _refreshCurrentUser();
+    if (!context.mounted) return;
+    RoleplayRouter.popToOverview(context);
+  }
+
+  /// 다음 에피소드. Overview로 돌아가고 Play는 사용자가 누른다.
+  /// 잠금이면 Overview 칸 이동(없으면 즉시) 후 Play 활성 시점에 `rp_result_got_it` 페이월.
+  Future<void> _exitNextEpisode(BuildContext context) async {
+    if (_isLeavingToOverview) return;
+    setState(() => _isLeavingToOverview = true);
+    await _refreshCurrentUser();
+    if (!context.mounted) return;
+
+    if (_s2History?.feedbackLockedYn == 'Y') {
+      SeriesStateService.instance.markRpResultGotItPaywallPending();
+    }
+    RoleplayRouter.popToOverview(context);
+  }
+
   Future<void> _exitResult(BuildContext context) async {
     if (widget.exitViaPop) {
       Navigator.of(context).pop();
@@ -464,10 +512,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
     }
 
     if (missionIcons.isEmpty) {
-      return const Text(
-        '—',
-        style: TextStyle(color: Colors.white),
-      );
+      return const Text('—', style: TextStyle(color: Colors.white));
     }
 
     return Wrap(
@@ -494,7 +539,8 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
     required Widget child,
   }) {
     final theme = Theme.of(context).textTheme;
-    final labelPrimary = theme.bodyLarge?.copyWith(
+    final labelPrimary =
+        theme.bodyLarge?.copyWith(
           fontFamily: 'ChironGoRoundTC',
           fontSize: 18,
           fontWeight: FontWeight.w600,
@@ -531,14 +577,8 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              title,
-              style: labelPrimary,
-              textAlign: TextAlign.center,
-            ),
-            Expanded(
-              child: Center(child: child),
-            ),
+            Text(title, style: labelPrimary, textAlign: TextAlign.center),
+            Expanded(child: Center(child: child)),
           ],
         ),
       ),
@@ -687,10 +727,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             for (var i = 0; i < itemCount; i++) ...[
-              SizedBox(
-                width: itemW,
-                child: itemBuilder(context, i),
-              ),
+              SizedBox(width: itemW, child: itemBuilder(context, i)),
               if (i < itemCount - 1) const SizedBox(width: between),
             ],
             SizedBox(width: sw - itemW - 48),
@@ -774,8 +811,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
 
       setState(() => _keyExpressionIsPlaying = true);
 
-      _keyExpressionAudioSub =
-          _ttsPlayer.playerStateStream.listen((state) {
+      _keyExpressionAudioSub = _ttsPlayer.playerStateStream.listen((state) {
         if (state.processingState == ProcessingState.completed) {
           _keyExpressionAudioSub?.cancel();
           _keyExpressionAudioSub = null;
@@ -864,8 +900,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
 
       setState(() => _speechFeedbackIsPlaying = true);
 
-      _keyExpressionAudioSub =
-          _ttsPlayer.playerStateStream.listen((state) {
+      _keyExpressionAudioSub = _ttsPlayer.playerStateStream.listen((state) {
         if (state.processingState == ProcessingState.completed) {
           _keyExpressionAudioSub?.cancel();
           _keyExpressionAudioSub = null;
@@ -1039,8 +1074,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
         _improvedSentenceMsgId = rpMsgId;
         _improvedSentenceIsPlaying = true;
       });
-      _keyExpressionAudioSub =
-          _ttsPlayer.playerStateStream.listen((state) {
+      _keyExpressionAudioSub = _ttsPlayer.playerStateStream.listen((state) {
         if (state.processingState == ProcessingState.completed) {
           _keyExpressionAudioSub?.cancel();
           _keyExpressionAudioSub = null;
@@ -1086,8 +1120,9 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
         return;
       }
 
-      final isBookmarked =
-          _keyExpressionBookmarkedIndexes.contains(keyExpressionIndex);
+      final isBookmarked = _keyExpressionBookmarkedIndexes.contains(
+        keyExpressionIndex,
+      );
 
       if (isBookmarked) {
         await SudaApiClient.deleteRpS2UserHistoryExpression(
@@ -1110,9 +1145,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
         if (!mounted) {
           return;
         }
-        setState(
-          () => _keyExpressionBookmarkedIndexes.add(keyExpressionIndex),
-        );
+        setState(() => _keyExpressionBookmarkedIndexes.add(keyExpressionIndex));
         final l10n = AppLocalizations.of(context)!;
         DefaultToast.show(context, l10n.expressionSavedToProfile);
       }
@@ -1210,10 +1243,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
             _buildSectionTitleRow(
               context,
               title: 'Speech Feedback',
-              trailing: _buildViewChatButton(
-                context,
-                onTap: _onS2ViewChatTap,
-              ),
+              trailing: _buildViewChatButton(context, onTap: _onS2ViewChatTap),
             ),
             const SizedBox(height: 16),
             Padding(
@@ -1236,11 +1266,13 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
   void _reportSpeechFeedbackOpen(int rpMsgId) {
     final historyId = _s2History?.id;
     if (historyId == null) return;
-    unawaited(_sendSpeechFeedbackTap(
-      historyId: historyId,
-      rpMsgId: rpMsgId,
-      sourceScreen: widget.profileHistory ? 'HISTORY' : 'RESULT',
-    ));
+    unawaited(
+      _sendSpeechFeedbackTap(
+        historyId: historyId,
+        rpMsgId: rpMsgId,
+        sourceScreen: widget.profileHistory ? 'HISTORY' : 'RESULT',
+      ),
+    );
   }
 
   Future<void> _sendSpeechFeedbackTap({
@@ -1288,15 +1320,16 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
     final speechFeedback = history.speechFeedback;
 
     if (feedbackLocked) {
-      final userMessages = history.messages
-          .where(
-            (m) =>
-                m.role == 'USER' &&
-                m.id != null &&
-                (m.content?.trim().isNotEmpty ?? false),
-          )
-          .toList()
-        ..sort((a, b) => a.id!.compareTo(b.id!));
+      final userMessages =
+          history.messages
+              .where(
+                (m) =>
+                    m.role == 'USER' &&
+                    m.id != null &&
+                    (m.content?.trim().isNotEmpty ?? false),
+              )
+              .toList()
+            ..sort((a, b) => a.id!.compareTo(b.id!));
       if (userMessages.isEmpty) return const [];
 
       return [
@@ -1306,7 +1339,8 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
             feedback: _lockedSpeechFeedbackGrade(speechFeedback?[message.id]),
             feedbackLockedYn: history.feedbackLockedYn,
             profileHistory: widget.profileHistory,
-            onUnlockedAfterPaywall: _refreshUserHistoryAfterSpeechFeedbackUnlock,
+            onUnlockedAfterPaywall:
+                _refreshUserHistoryAfterSpeechFeedbackUnlock,
             onLoadAndPlayFeedbackAudio: _loadAndPlayFeedbackAudio,
             onStopImprovedAudio: _stopImprovedSentence,
             userSpeech: message.content ?? '',
@@ -1324,8 +1358,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
             improvedPlaying:
                 _improvedSentenceMsgId == message.id &&
                 _improvedSentenceIsPlaying,
-            onImprovedTap: () =>
-                unawaited(_onImprovedSentenceTap(message.id!)),
+            onImprovedTap: () => unawaited(_onImprovedSentenceTap(message.id!)),
             onOpenFeedback: _reportSpeechFeedbackOpen,
           ),
       ];
@@ -1371,8 +1404,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
               _improvedSentenceMsgId == messageId &&
               !_improvedSentenceIsPlaying,
           improvedPlaying:
-              _improvedSentenceMsgId == messageId &&
-              _improvedSentenceIsPlaying,
+              _improvedSentenceMsgId == messageId && _improvedSentenceIsPlaying,
           onImprovedTap: () => unawaited(_onImprovedSentenceTap(messageId)),
           onOpenFeedback: _reportSpeechFeedbackOpen,
         ),
@@ -1403,8 +1435,9 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
             )
           : GestureDetector(
               onTap: () async {
-                final result =
-                    await RoleplayRouter.pushResultReport<bool>(context);
+                final result = await RoleplayRouter.pushResultReport<bool>(
+                  context,
+                );
                 if (result == true && mounted) {
                   setState(() => _reportSubmitted = true);
                 }
@@ -1419,6 +1452,8 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
   }
 
   Widget _buildS2FooterActions(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return FadeTransition(
       opacity: CurvedAnimation(
         parent: _footerFadeController,
@@ -1444,7 +1479,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
               child: ElevatedButton(
                 onPressed: _isLeavingToOverview
                     ? null
-                    : () => _exitResult(context),
+                    : () => _onResultPrimaryAction(context),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: _teal,
                   foregroundColor: Colors.white,
@@ -1457,7 +1492,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
                   ),
                   elevation: 0,
                 ),
-                child: const Text('Got it!'),
+                child: Text(_resultPrimaryLabel(l10n)),
               ),
             ),
           ),
@@ -1491,10 +1526,16 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
   @override
   Widget build(BuildContext context) {
     _scheduleMeasurePanel();
-    final moveProgress = Curves.easeOutCubic.transform(_panelMoveController.value);
+    final moveProgress = Curves.easeOutCubic.transform(
+      _panelMoveController.value,
+    );
     final screenHeight = MediaQuery.sizeOf(context).height;
-    final targetHeight = (_panelMeasuredHeight ?? screenHeight).clamp(0.0, screenHeight);
-    final boxHeight = lerpDouble(screenHeight, targetHeight, moveProgress) ?? screenHeight;
+    final targetHeight = (_panelMeasuredHeight ?? screenHeight).clamp(
+      0.0,
+      screenHeight,
+    );
+    final boxHeight =
+        lerpDouble(screenHeight, targetHeight, moveProgress) ?? screenHeight;
 
     return PopScope(
       canPop: false,
@@ -1530,12 +1571,45 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
                     ),
                   ),
                   if (_effectDone)
-                    Expanded(
-                      child: _buildS2PostEffectBody(context),
-                    ),
+                    Expanded(child: _buildS2PostEffectBody(context)),
                 ],
               ),
+              if (widget.showCloseButton)
+                PositionedDirectional(
+                  top: MediaQuery.paddingOf(context).top + 16,
+                  start: 16,
+                  child: _ResultCloseButton(
+                    onPressed: _isLeavingToOverview
+                        ? null
+                        : () => _onClosePressed(context),
+                  ),
+                ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ResultCloseButton extends StatelessWidget {
+  const _ResultCloseButton({required this.onPressed});
+
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onPressed,
+      behavior: HitTestBehavior.opaque,
+      child: SizedBox(
+        width: 40,
+        height: 40,
+        child: Center(
+          child: SvgPicture.asset(
+            'assets/images/icons/close.svg',
+            width: 24,
+            height: 24,
           ),
         ),
       ),
@@ -1565,10 +1639,7 @@ class _SpeechFeedbackCardShell extends StatelessWidget {
         borderRadius: BorderRadius.circular(18),
         child: ColoredBox(
           color: Colors.white,
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: child,
-          ),
+          child: Padding(padding: const EdgeInsets.all(16), child: child),
         ),
       ),
     );
@@ -1823,8 +1894,7 @@ class _SpeechFeedbackFeedbackButton extends StatelessWidget {
   final bool expanded;
   final bool loading;
 
-  static const String _clickToFoldPng =
-      'assets/images/icons/click_to_fold.png';
+  static const String _clickToFoldPng = 'assets/images/icons/click_to_fold.png';
   static const Color _teal = Color(0xFF0CABA8);
 
   @override
@@ -1844,10 +1914,7 @@ class _SpeechFeedbackFeedbackButton extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              'Feedback',
-              style: theme.labelSmall?.copyWith(color: _teal),
-            ),
+            Text('Feedback', style: theme.labelSmall?.copyWith(color: _teal)),
             const SizedBox(width: 4),
             if (loading)
               SizedBox(
@@ -1905,7 +1972,8 @@ class _SpeechFeedbackRow extends StatefulWidget {
   final Future<bool> Function(
     int rpMsgId, {
     required VoidCallback onReadyToPlay,
-  }) onLoadAndPlayFeedbackAudio;
+  })
+  onLoadAndPlayFeedbackAudio;
   final Future<void> Function(int rpMsgId) onStopImprovedAudio;
   final String userSpeech;
   final bool audioInputEnabled;
@@ -2045,10 +2113,7 @@ class _SpeechFeedbackRowState extends State<_SpeechFeedbackRow> {
           child: SizedBox(
             width: 16,
             height: 16,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              color: color,
-            ),
+            child: CircularProgressIndicator(strokeWidth: 2, color: color),
           ),
         ),
       );
@@ -2063,7 +2128,10 @@ class _SpeechFeedbackRowState extends State<_SpeechFeedbackRow> {
     );
   }
 
-  Widget _buildUserSpeechLine(BuildContext context, {required Color speechColor}) {
+  Widget _buildUserSpeechLine(
+    BuildContext context, {
+    required Color speechColor,
+  }) {
     final theme = Theme.of(context).textTheme;
     final playing = widget.playingActive;
     return Directionality(
@@ -2094,9 +2162,7 @@ class _SpeechFeedbackRowState extends State<_SpeechFeedbackRow> {
                 style: theme.bodyLarge?.copyWith(
                   color: speechColor,
                   fontWeight: playing ? FontWeight.w700 : FontWeight.w400,
-                  fontVariations: [
-                    FontVariation('wght', playing ? 700 : 400),
-                  ],
+                  fontVariations: [FontVariation('wght', playing ? 700 : 400)],
                 ),
               ),
             ),
@@ -2170,16 +2236,15 @@ class _SpeechFeedbackRowState extends State<_SpeechFeedbackRow> {
       padding: const EdgeInsets.only(top: _sectionGap),
       child: Text(
         feedbackText,
-        style: theme.bodySmall?.copyWith(
-          color: _feedbackTextColor,
-        ),
+        style: theme.bodySmall?.copyWith(color: _feedbackTextColor),
       ),
     );
   }
 
   Widget _buildExpandedScoreBox(BuildContext context) {
-    final gradeStyle =
-        _SpeechFeedbackGradeStyle.resolve(widget.feedback?.grade);
+    final gradeStyle = _SpeechFeedbackGradeStyle.resolve(
+      widget.feedback?.grade,
+    );
     if (widget.feedback?.score == null) {
       return const SizedBox(width: double.infinity);
     }
@@ -2422,16 +2487,12 @@ class _KeyExpressionCard extends StatelessWidget {
                   const SizedBox(height: 15),
                   Text(
                     sampleAnswerEn,
-                    style: theme.bodyMedium?.copyWith(
-                      color: _exprTextPrimary,
-                    ),
+                    style: theme.bodyMedium?.copyWith(color: _exprTextPrimary),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     sampleAnswerUserLang,
-                    style: theme.bodySmall?.copyWith(
-                      color: _exprTextSecondary,
-                    ),
+                    style: theme.bodySmall?.copyWith(color: _exprTextSecondary),
                   ),
                   const Spacer(),
                   const SizedBox(height: 15),
@@ -2474,7 +2535,11 @@ class _LeftSnapScrollPhysics extends ScrollPhysics {
     return _LeftSnapScrollPhysics(step: step, parent: buildParent(ancestor));
   }
 
-  double _targetPixels(ScrollMetrics position, Tolerance tolerance, double velocity) {
+  double _targetPixels(
+    ScrollMetrics position,
+    Tolerance tolerance,
+    double velocity,
+  ) {
     double p = position.pixels / step;
     if (velocity < -tolerance.velocity) {
       p = p.floorToDouble();
@@ -2487,7 +2552,10 @@ class _LeftSnapScrollPhysics extends ScrollPhysics {
   }
 
   @override
-  Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
+  Simulation? createBallisticSimulation(
+    ScrollMetrics position,
+    double velocity,
+  ) {
     if ((velocity <= 0 && position.pixels <= position.minScrollExtent) ||
         (velocity >= 0 && position.pixels >= position.maxScrollExtent)) {
       return super.createBallisticSimulation(position, velocity);

@@ -621,6 +621,12 @@ class AppLocalizationsTr extends AppLocalizations {
   String get endingNext => 'İleri';
 
   @override
+  String get roleplayResultNextEpisode => 'Sonraki bölüm';
+
+  @override
+  String get roleplayResultCompleteSeries => 'Seriyi tamamla';
+
+  @override
   String get reportTitle => 'Sorun Bildir';
 
   @override

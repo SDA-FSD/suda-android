@@ -595,6 +595,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get endingNext => '다음';
 
   @override
+  String get roleplayResultNextEpisode => '다음 에피소드';
+
+  @override
+  String get roleplayResultCompleteSeries => '시리즈 완료하기';
+
+  @override
   String get reportTitle => '문제 신고';
 
   @override

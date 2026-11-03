@@ -625,6 +625,12 @@ class AppLocalizationsHi extends AppLocalizations {
   String get endingNext => 'अगला';
 
   @override
+  String get roleplayResultNextEpisode => 'अगला एपिसोड';
+
+  @override
+  String get roleplayResultCompleteSeries => 'सीरीज़ पूरी करें';
+
+  @override
   String get reportTitle => 'समस्या रिपोर्ट करें';
 
   @override

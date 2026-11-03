@@ -94,18 +94,14 @@ class RoleplayRouter {
   static void replaceWithPlaying(BuildContext context) {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(
-        builder: (context) => const RoleplayPlayingScreen(),
-      ),
+      MaterialPageRoute(builder: (context) => const RoleplayPlayingScreen()),
     );
   }
 
   static void replaceWithEnding(BuildContext context) {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(
-        builder: (context) => const RoleplayEndingScreen(),
-      ),
+      MaterialPageRoute(builder: (context) => const RoleplayEndingScreen()),
     );
   }
 
@@ -139,18 +135,20 @@ class RoleplayRouter {
       FullScreenRoute(
         transition: FullScreenTransition.bottomUp,
         settings: const RouteSettings(name: RoleplayResultScreen.routeName),
-        page: Container(
-          color: teal,
-          child: const RoleplayResultScreen(),
-        ),
+        page: Container(color: teal, child: const RoleplayResultScreen()),
       ),
     );
   }
 
-  static void popToOverview(BuildContext context) {
-    SeriesStateService.instance
-      ..markBestScoreRefreshPending()
-      ..markProfileHistoryRefreshPending();
+  static void popToOverview(
+    BuildContext context, {
+    bool refreshBestScore = true,
+  }) {
+    final series = SeriesStateService.instance;
+    series.markProfileHistoryRefreshPending();
+    if (refreshBestScore) {
+      series.markBestScoreRefreshPending();
+    }
     Navigator.of(context).popUntil((route) {
       return route.isFirst ||
           route.settings.name == SeriesOverviewScreen.routeName;

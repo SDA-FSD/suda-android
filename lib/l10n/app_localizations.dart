@@ -1259,6 +1259,18 @@ abstract class AppLocalizations {
   /// **'Next'**
   String get endingNext;
 
+  /// No description provided for @roleplayResultNextEpisode.
+  ///
+  /// In en, this message translates to:
+  /// **'Next Episode'**
+  String get roleplayResultNextEpisode;
+
+  /// No description provided for @roleplayResultCompleteSeries.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete Series'**
+  String get roleplayResultCompleteSeries;
+
   /// No description provided for @reportTitle.
   ///
   /// In en, this message translates to:

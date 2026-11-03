@@ -585,6 +585,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get endingNext => '下一步';
 
   @override
+  String get roleplayResultNextEpisode => '下一集';
+
+  @override
+  String get roleplayResultCompleteSeries => '完成系列';
+
+  @override
   String get reportTitle => '报告问题';
 
   @override
@@ -1873,6 +1879,12 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get endingNext => '下一步';
 
   @override
+  String get roleplayResultNextEpisode => '下一集';
+
+  @override
+  String get roleplayResultCompleteSeries => '完成系列';
+
+  @override
   String get reportTitle => '报告问题';
 
   @override
@@ -3159,6 +3171,12 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get endingNext => '下一步';
+
+  @override
+  String get roleplayResultNextEpisode => '下一集';
+
+  @override
+  String get roleplayResultCompleteSeries => '完成系列';
 
   @override
   String get reportTitle => '回報問題';

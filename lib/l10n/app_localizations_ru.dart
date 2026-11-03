@@ -627,6 +627,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get endingNext => 'Далее';
 
   @override
+  String get roleplayResultNextEpisode => 'Следующий эпизод';
+
+  @override
+  String get roleplayResultCompleteSeries => 'Завершить серию';
+
+  @override
   String get reportTitle => 'Сообщить о проблеме';
 
   @override

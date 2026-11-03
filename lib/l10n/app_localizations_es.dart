@@ -627,6 +627,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get endingNext => 'Siguiente';
 
   @override
+  String get roleplayResultNextEpisode => 'Siguiente episodio';
+
+  @override
+  String get roleplayResultCompleteSeries => 'Completar serie';
+
+  @override
   String get reportTitle => 'Reportar un problema';
 
   @override
@@ -2002,6 +2008,12 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
 
   @override
   String get endingNext => 'Siguiente';
+
+  @override
+  String get roleplayResultNextEpisode => 'Siguiente episodio';
+
+  @override
+  String get roleplayResultCompleteSeries => 'Completar serie';
 
   @override
   String get reportTitle => 'Reportar un problema';

@@ -628,6 +628,12 @@ class AppLocalizationsMs extends AppLocalizations {
   String get endingNext => 'Seterusnya';
 
   @override
+  String get roleplayResultNextEpisode => 'Episod seterusnya';
+
+  @override
+  String get roleplayResultCompleteSeries => 'Selesaikan siri';
+
+  @override
   String get reportTitle => 'Laporkan Masalah';
 
   @override

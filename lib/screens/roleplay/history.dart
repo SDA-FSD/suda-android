@@ -115,7 +115,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     return const RoleplayResultScreen(
       skipEntranceAnimation: true,
       exitViaPop: true,
-      showCloseButton: false,
+      showCloseButton: true,
       showReportLink: false,
       profileHistory: true,
     );

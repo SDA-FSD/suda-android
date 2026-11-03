@@ -627,6 +627,12 @@ class AppLocalizationsPl extends AppLocalizations {
   String get endingNext => 'Dalej';
 
   @override
+  String get roleplayResultNextEpisode => 'Następny odcinek';
+
+  @override
+  String get roleplayResultCompleteSeries => 'Ukończ serię';
+
+  @override
   String get reportTitle => 'Zgłoś problem';
 
   @override

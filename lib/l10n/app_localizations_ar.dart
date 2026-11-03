@@ -617,6 +617,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get endingNext => 'التالي';
 
   @override
+  String get roleplayResultNextEpisode => 'الحلقة التالية';
+
+  @override
+  String get roleplayResultCompleteSeries => 'إكمال السلسلة';
+
+  @override
   String get reportTitle => 'الإبلاغ عن مشكلة';
 
   @override

@@ -627,6 +627,12 @@ class AppLocalizationsNl extends AppLocalizations {
   String get endingNext => 'Volgende';
 
   @override
+  String get roleplayResultNextEpisode => 'Volgende aflevering';
+
+  @override
+  String get roleplayResultCompleteSeries => 'Serie afronden';
+
+  @override
   String get reportTitle => 'Probleem melden';
 
   @override

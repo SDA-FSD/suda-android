@@ -624,6 +624,12 @@ class AppLocalizationsVi extends AppLocalizations {
   String get endingNext => 'Tiếp';
 
   @override
+  String get roleplayResultNextEpisode => 'Tập tiếp theo';
+
+  @override
+  String get roleplayResultCompleteSeries => 'Hoàn thành series';
+
+  @override
   String get reportTitle => 'Báo cáo sự cố';
 
   @override

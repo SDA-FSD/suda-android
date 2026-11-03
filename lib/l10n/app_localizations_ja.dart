@@ -592,6 +592,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get endingNext => '次へ';
 
   @override
+  String get roleplayResultNextEpisode => '次のエピソード';
+
+  @override
+  String get roleplayResultCompleteSeries => 'シリーズを完了';
+
+  @override
   String get reportTitle => '問題を報告';
 
   @override

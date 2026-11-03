@@ -51,11 +51,15 @@ class SeriesEpisodeTabContent extends StatefulWidget {
   final void Function(RpS2SeriesEpisodeDto episode)? onPlayEpisode;
   final int scrollToUnlockToken;
 
+  /// 해금 칸 이동 애니 완료(또는 앵커 실패로 Play가 즉시 살아난) 직후 1회.
+  final VoidCallback? onUnlockAdvanceFinished;
+
   const SeriesEpisodeTabContent({
     super.key,
     required this.overview,
     this.onPlayEpisode,
     this.scrollToUnlockToken = 0,
+    this.onUnlockAdvanceFinished,
   });
 
   @override
@@ -133,7 +137,9 @@ class _SeriesEpisodeTabContentState extends State<SeriesEpisodeTabContent>
         _advanceTo = null;
         _anchorsReady = false;
         _advanceTicksEnabled = false;
+        _episodeButtonsLocked = false;
       });
+      widget.onUnlockAdvanceFinished?.call();
     });
     _scheduleScrollToUnlock();
   }
@@ -225,6 +231,7 @@ class _SeriesEpisodeTabContentState extends State<SeriesEpisodeTabContent>
         _anchorsReady = false;
         _episodeButtonsLocked = false;
         if (mounted) setState(() {});
+        widget.onUnlockAdvanceFinished?.call();
         return;
       }
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -233,7 +240,7 @@ class _SeriesEpisodeTabContentState extends State<SeriesEpisodeTabContent>
       return;
     }
     _anchorAttempts = 0;
-    _episodeButtonsLocked = false;
+    // Play는 칸 이동 애니 완료 후에만 활성(페이월 타이밍·중간 탭 방지).
     setState(() {});
     _advanceTicksEnabled = true;
     _advanceController.forward(from: 0);

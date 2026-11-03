@@ -630,6 +630,12 @@ class AppLocalizationsPt extends AppLocalizations {
   String get endingNext => 'Próximo';
 
   @override
+  String get roleplayResultNextEpisode => 'Próximo episódio';
+
+  @override
+  String get roleplayResultCompleteSeries => 'Concluir série';
+
+  @override
   String get reportTitle => 'Relatar Problema';
 
   @override

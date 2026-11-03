@@ -21,6 +21,8 @@ import '../../widgets/cdn_thumb_image.dart';
 import '../../widgets/suda_label_tabs.dart';
 import '../../navigation/app_route_observer.dart';
 import '../../routes/roleplay_router.dart';
+import '../../screens/paywall/paywall.dart';
+import '../../utils/paywall_impression_screen.dart';
 import 'series_information.dart';
 import 'cefr_level_up_popup.dart';
 import 'widgets/series_episode_tab_content.dart';
@@ -116,6 +118,7 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
 
   @override
   void dispose() {
+    SeriesStateService.instance.clearRpResultGotItPaywallPending();
     appRouteObserver.unsubscribe(this);
     _scrollController.removeListener(_handleScroll);
     _scrollController.dispose();
@@ -307,7 +310,39 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
         }
         _scrollToUnlockToken++;
       });
+      // 칸 이동 없으면 Play가 바로 살아나므로 직후 페이월. 전진이면 애니 완료 콜백.
+      if (!unlockAdvanced) {
+        _maybeShowRpResultGotItPaywall();
+      }
       unawaited(_maybeShowCefrLevelUp(updated));
+    } catch (_) {}
+  }
+
+  void _onUnlockAdvanceFinished() {
+    _maybeShowRpResultGotItPaywall();
+  }
+
+  void _maybeShowRpResultGotItPaywall() {
+    if (!SeriesStateService.instance.consumeRpResultGotItPaywallPending()) {
+      return;
+    }
+    unawaited(_showRpResultGotItPaywall());
+  }
+
+  Future<void> _showRpResultGotItPaywall() async {
+    if (!mounted) return;
+    final subscribed = await PaywallScreen.push<bool>(
+      context,
+      screen: PaywallImpressionScreen.rpResultGotIt,
+    );
+    if (subscribed != true || !mounted) return;
+    final token = await TokenStorage.loadAccessToken();
+    if (token == null || token.isEmpty || !mounted) return;
+    try {
+      final user = await SudaApiClient.getCurrentUser(accessToken: token);
+      MainUserSync.instance.notifyUserUpdated(user);
+      SeriesStateService.instance.setUser(user);
+      RoleplayStateService.instance.setUser(user);
     } catch (_) {}
   }
 
@@ -884,6 +919,7 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
             overview: overview,
             onPlayEpisode: _onEpisodePlay,
             scrollToUnlockToken: _scrollToUnlockToken,
+            onUnlockAdvanceFinished: _onUnlockAdvanceFinished,
           ),
         ),
         SudaLabelTab(

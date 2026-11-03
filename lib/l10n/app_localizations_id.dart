@@ -626,6 +626,12 @@ class AppLocalizationsId extends AppLocalizations {
   String get endingNext => 'Berikutnya';
 
   @override
+  String get roleplayResultNextEpisode => 'Episode berikutnya';
+
+  @override
+  String get roleplayResultCompleteSeries => 'Selesaikan seri';
+
+  @override
   String get reportTitle => 'Laporkan masalah';
 
   @override
