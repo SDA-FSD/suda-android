@@ -70,8 +70,9 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
   late final AnimationController _cefrListController;
   late final CurvedAnimation _cefrWidthT;
   late final CurvedAnimation _cefrListT;
+  final LayerLink _cefrLink = LayerLink();
 
-  static const _heroHeightFactor = 0.6;
+  static const _heroHeightFactor = 0.7;
   static const _infoIconSize = 24.0;
   static const _cefrPhaseDuration = Duration(milliseconds: 250);
 
@@ -723,24 +724,12 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
             child: Padding(
               padding: const EdgeInsets.only(top: 16, left: 16, right: 16),
               child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   _buildBackButton(context),
                   const Spacer(),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        const EnergyHeaderBadge(
-                          energyOfferScreen: EnergyOfferScreen.overview,
-                          contentAlignment: Alignment.centerRight,
-                        ),
-                        const SizedBox(width: 8),
-                        _buildLanguageLevelButton(context),
-                      ],
-                    ),
+                  const EnergyHeaderBadge(
+                    energyOfferScreen: EnergyOfferScreen.overview,
                   ),
                 ],
               ),
@@ -919,11 +908,19 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
     BuildContext context,
     RpS2SeriesOverviewDto overview,
   ) {
+    // CEFR 자리는 탭 라벨 오른쪽. 실제 pill은 딤 위 Follower.
     return SudaLabelTabs(
       contentGap: 24,
       maintainState: true,
       selectedIndex: _overviewTabIndex,
       onTabChanged: (index) => setState(() => _overviewTabIndex = index),
+      labelTrailing: CompositedTransformTarget(
+        link: _cefrLink,
+        child: SizedBox(
+          width: _cefrCollapsedWidth(context),
+          height: 24,
+        ),
+      ),
       tabs: [
         SudaLabelTab(
           label: SudaTabLabel.l10n((l10n) => l10n.seriesOverviewTabEpisodes),
@@ -936,7 +933,8 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
           ),
         ),
         SudaLabelTab(
-          label: SudaTabLabel.l10n((l10n) => l10n.seriesOverviewTabSimilarTopic),
+          label:
+              SudaTabLabel.l10n((l10n) => l10n.seriesOverviewTabSimilarTopic),
           child: SeriesSimilarTopicTabContent(
             category: overview.category,
             excludeSeriesId: widget.seriesId,
@@ -949,12 +947,30 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
     );
   }
 
+  /// 접힌 CEFR pill 너비(국기·라벨·아이콘·패딩). 탭 라벨과 겹치지 않게 trailing 예약.
+  double _cefrCollapsedWidth(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context).textTheme;
+    final label = EnglishLevelUtil.localizedLabel(l10n, _currentSeriesCefr());
+    final style = theme.labelSmall ?? const TextStyle();
+    final labelWidth = _cefrTextWidth(
+      label,
+      style,
+      MediaQuery.textScalerOf(context),
+    );
+    // 8 + flag13 + 8 + label + 5 + icon13 + 8
+    return 8 + 13 + 8 + labelWidth + 5 + 13 + 8;
+  }
+
   @override
   Widget build(BuildContext context) {
     final overview = _overview;
     final theme = Theme.of(context).textTheme;
     final scaffoldBackground = Theme.of(context).scaffoldBackgroundColor;
     final heroHeight = _heroHeight(context);
+    final topInset = MediaQuery.paddingOf(context).top;
+    // 플로팅 헤더(타이머 밴드)보다 살짝 더 길게 페이드
+    final topFadeHeight = topInset + 16 + 40 + 24;
     final thumbnailPath = overview?.thumbnailImgPath;
     final title = overview == null
         ? ''
@@ -981,7 +997,8 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
                     width: double.infinity,
                     height: heroHeight,
                     fit: BoxFit.cover,
-                    alignment: Alignment.center,
+                    // center(0)보다 살짝 위 — topCenter(-1)까지는 올리지 않음
+                    alignment: const Alignment(0, -0.3),
                     placeholder: (context, url) =>
                         _buildBackgroundShimmer(heroHeight),
                     errorWidget: (context, url, error) => Container(
@@ -1062,6 +1079,28 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
               ),
             ),
           ),
+          if (topFadeHeight > 0)
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              height: topFadeHeight,
+              child: const IgnorePointer(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.black,
+                        Colors.transparent,
+                      ],
+                      stops: [0.0, 1.0],
+                    ),
+                  ),
+                ),
+              ),
+            ),
           if (overview != null) _buildInfoIconOverlay(heroHeight),
           Positioned.fill(
             child: AnimatedBuilder(
@@ -1077,6 +1116,18 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
               },
             ),
           ),
+          if (overview != null)
+            Positioned(
+              top: 0,
+              left: 0,
+              child: CompositedTransformFollower(
+                link: _cefrLink,
+                showWhenUnlinked: false,
+                targetAnchor: Alignment.topRight,
+                followerAnchor: Alignment.topRight,
+                child: _buildLanguageLevelButton(context),
+              ),
+            ),
           _buildFloatingHeader(context),
           if (_isLoading)
             const Center(

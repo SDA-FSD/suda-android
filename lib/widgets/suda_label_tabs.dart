@@ -51,6 +51,9 @@ class SudaLabelTabs extends StatefulWidget {
   /// true면 탭 콘텐츠가 남은 높이를 채운다. 부모 높이가 유한해야 한다.
   final bool expandContent;
 
+  /// 탭 라벨 줄 오른쪽 끝 (예: Overview CEFR). 라벨과 같은 스크롤 흐름.
+  final Widget? labelTrailing;
+
   const SudaLabelTabs({
     super.key,
     required this.tabs,
@@ -62,6 +65,7 @@ class SudaLabelTabs extends StatefulWidget {
     this.labelPadding = EdgeInsets.zero,
     this.maintainState = false,
     this.expandContent = false,
+    this.labelTrailing,
   }) : assert(tabs.length >= 1, 'SudaLabelTabs requires at least 1 tab');
 
   @override
@@ -151,12 +155,20 @@ class _SudaLabelTabsState extends State<SudaLabelTabs> {
       children: [
         Padding(
           padding: widget.labelPadding,
-          child: Wrap(
-            spacing: widget.tabSpacing,
-            crossAxisAlignment: WrapCrossAlignment.end,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              for (int i = 0; i < widget.tabs.length; i++)
-                _buildTabLabel(context, theme, i),
+              Expanded(
+                child: Wrap(
+                  spacing: widget.tabSpacing,
+                  crossAxisAlignment: WrapCrossAlignment.end,
+                  children: [
+                    for (int i = 0; i < widget.tabs.length; i++)
+                      _buildTabLabel(context, theme, i),
+                  ],
+                ),
+              ),
+              if (widget.labelTrailing != null) widget.labelTrailing!,
             ],
           ),
         ),

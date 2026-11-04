@@ -35,7 +35,7 @@ class EnergyHeaderBadge extends StatefulWidget {
   /// 에너지 DTO 적용 시 (번개 아이콘과 동일 소스). Home 프리미엄 뱃지 등.
   final ValueChanged<UserEnergyDto>? onEnergyChanged;
 
-  /// 48 탭 영역 안에서의 배지 정렬. Overview CEFR과 수평 맞출 때 `centerRight`.
+  /// 40 탭 영역 안에서의 배지 정렬. 헤더 X/뒤로와 세로 중앙 맞출 때 `centerRight`.
   final AlignmentGeometry contentAlignment;
 
   const EnergyHeaderBadge({
@@ -45,7 +45,7 @@ class EnergyHeaderBadge extends StatefulWidget {
     this.active = true,
     this.energyOfferScreen = EnergyOfferScreen.home,
     this.onEnergyChanged,
-    this.contentAlignment = Alignment.topRight,
+    this.contentAlignment = Alignment.centerRight,
   });
 
   @override
@@ -215,8 +215,8 @@ class _EnergyHeaderBadgeState extends State<EnergyHeaderBadge> {
     final badge = GestureDetector(
       onTap: _onTap,
       behavior: HitTestBehavior.opaque,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+      child: SizedBox(
+        height: 40,
         child: Align(
           alignment: widget.contentAlignment,
           child: _buildBadge(context),
@@ -242,6 +242,7 @@ class _EnergyHeaderBadgeState extends State<EnergyHeaderBadge> {
     if (energy == null) {
       return Row(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Image.asset(
             'assets/images/icons/energy.png',
@@ -265,6 +266,7 @@ class _EnergyHeaderBadgeState extends State<EnergyHeaderBadge> {
     final count = energy.energyCount;
     return Row(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         _TimerGlassPill(label: timerLabel, foreground: timerColor),
         const SizedBox(width: 6),
