@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
 
@@ -11,6 +12,9 @@ import '../utils/energy_timer_refetch.dart';
 import 'energy_info_popup.dart';
 
 const _energyZeroColor = Color(0xFFE60000);
+const _timerMint = Color(0xFF0CABA8);
+const _timerCharging = Color(0x99FFFFFF); // white 60%
+const _clockAsset = 'assets/images/icons/clock.png';
 
 /// 홈·Opening 등 우상단 에너지/무제한 배지. 탭 시 에너지 정보 팝업.
 class EnergyHeaderBadge extends StatefulWidget {
@@ -31,6 +35,9 @@ class EnergyHeaderBadge extends StatefulWidget {
   /// 에너지 DTO 적용 시 (번개 아이콘과 동일 소스). Home 프리미엄 뱃지 등.
   final ValueChanged<UserEnergyDto>? onEnergyChanged;
 
+  /// 48 탭 영역 안에서의 배지 정렬. Overview CEFR과 수평 맞출 때 `centerRight`.
+  final AlignmentGeometry contentAlignment;
+
   const EnergyHeaderBadge({
     super.key,
     this.refreshCounter,
@@ -38,6 +45,7 @@ class EnergyHeaderBadge extends StatefulWidget {
     this.active = true,
     this.energyOfferScreen = EnergyOfferScreen.home,
     this.onEnergyChanged,
+    this.contentAlignment = Alignment.topRight,
   });
 
   @override
@@ -193,16 +201,6 @@ class _EnergyHeaderBadgeState extends State<EnergyHeaderBadge> {
       energy.maxEnergyCount > 0 &&
       energy.energyCount == energy.maxEnergyCount;
 
-  String _formatUnlimitedRemaining(DateTime endsAt) {
-    final nowUtc = DateTime.now().toUtc();
-    var remaining = endsAt.difference(nowUtc);
-    if (remaining.isNegative) remaining = Duration.zero;
-    final totalSeconds = remaining.inSeconds;
-    final minutes = totalSeconds ~/ 60;
-    final seconds = totalSeconds % 60;
-    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-  }
-
   Future<void> _onTap() async {
     await showEnergyInfoPopup(
       context,
@@ -220,7 +218,7 @@ class _EnergyHeaderBadgeState extends State<EnergyHeaderBadge> {
       child: ConstrainedBox(
         constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
         child: Align(
-          alignment: Alignment.topRight,
+          alignment: widget.contentAlignment,
           child: _buildBadge(context),
         ),
       ),
@@ -233,9 +231,7 @@ class _EnergyHeaderBadgeState extends State<EnergyHeaderBadge> {
   }
 
   Widget _buildBadge(BuildContext context) {
-    final textStyle = Theme.of(
-      context,
-    ).textTheme.bodyMedium?.copyWith(
+    final countStyle = Theme.of(context).textTheme.bodyMedium?.copyWith(
           color: Colors.white,
           fontWeight: FontWeight.w700,
           fontVariations: const [FontVariation('wght', 700)],
@@ -243,46 +239,112 @@ class _EnergyHeaderBadgeState extends State<EnergyHeaderBadge> {
     final energy = _energy;
     final nowUtc = DateTime.now().toUtc();
 
-    if (energy != null && energy.isUnlimitedActiveAt(nowUtc)) {
+    if (energy == null) {
       return Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Image.asset(
-            energyIconAssetPath(energy, nowUtc),
+            'assets/images/icons/energy.png',
             width: 24,
             height: 24,
           ),
-          const SizedBox(width: 5),
-          Text(
-            _formatUnlimitedRemaining(energy.unlimitedEndsAt!),
-            style: textStyle,
-          ),
+          Text('0', style: countStyle),
         ],
       );
     }
 
-    final count = energy?.energyCount ?? 0;
+    final unlimited = energy.isUnlimitedActiveAt(nowUtc);
+    final full = !unlimited && _isEnergyFull(energy);
+    final timerColor = (unlimited || full) ? _timerMint : _timerCharging;
+    final timerLabel = unlimited
+        ? formatEnergyMmSs(energyUnlimitedRemaining(energy, nowUtc))
+        : full
+            ? 'Full'
+            : formatEnergyMmSs(energyRechargeRemaining(energy, nowUtc));
+
+    final count = energy.energyCount;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
+        _TimerGlassPill(label: timerLabel, foreground: timerColor),
+        const SizedBox(width: 6),
         Image.asset(
-          energy == null
-              ? 'assets/images/icons/energy.png'
-              : energyIconAssetPath(energy, nowUtc),
+          energyIconAssetPath(energy, nowUtc),
           width: 24,
           height: 24,
         ),
-        Text(
-          '$count',
-          style: count == 0
-              ? textStyle?.copyWith(color: _energyZeroColor) ??
-                  const TextStyle(
-                    color: _energyZeroColor,
-                    fontWeight: FontWeight.w700,
-                  )
-              : textStyle,
-        ),
+        if (!unlimited)
+          Text(
+            '$count',
+            style: count == 0
+                ? countStyle?.copyWith(color: _energyZeroColor) ??
+                    const TextStyle(
+                      color: _energyZeroColor,
+                      fontWeight: FontWeight.w700,
+                    )
+                : countStyle,
+          ),
       ],
+    );
+  }
+}
+
+class _TimerGlassPill extends StatelessWidget {
+  const _TimerGlassPill({
+    required this.label,
+    required this.foreground,
+  });
+
+  final String label;
+  final Color foreground;
+
+  @override
+  Widget build(BuildContext context) {
+    final textStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
+          color: foreground,
+          fontWeight: FontWeight.w700,
+          fontVariations: const [FontVariation('wght', 700)],
+        );
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(999),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(999),
+            color: Colors.white.withValues(alpha: 0.14),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.36),
+            ),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x1A000000),
+                blurRadius: 10,
+                offset: Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ColorFiltered(
+                  colorFilter: ColorFilter.mode(foreground, BlendMode.srcIn),
+                  child: Image.asset(
+                    _clockAsset,
+                    width: 12,
+                    height: 12,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Text(label, style: textStyle),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

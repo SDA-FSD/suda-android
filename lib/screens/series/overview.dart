@@ -18,6 +18,8 @@ import '../../utils/suda_json_util.dart';
 import '../../utils/sub_screen_route.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../widgets/cdn_thumb_image.dart';
+import '../../widgets/energy_header_badge.dart';
+import '../../widgets/energy_info_popup.dart';
 import '../../widgets/suda_label_tabs.dart';
 import '../../navigation/app_route_observer.dart';
 import '../../routes/roleplay_router.dart';
@@ -727,7 +729,18 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
                   const Spacer(),
                   Padding(
                     padding: const EdgeInsets.only(top: 8),
-                    child: _buildLanguageLevelButton(context),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const EnergyHeaderBadge(
+                          energyOfferScreen: EnergyOfferScreen.overview,
+                          contentAlignment: Alignment.centerRight,
+                        ),
+                        const SizedBox(width: 8),
+                        _buildLanguageLevelButton(context),
+                      ],
+                    ),
                   ),
                 ],
               ),

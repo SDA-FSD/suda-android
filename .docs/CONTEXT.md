@@ -120,7 +120,9 @@ xcrun altool --upload-app --type ios -f build/ios/ipa/suda.ipa --apiKey "$(cat ~
 - **simple** `GET /v1/users/energy/simple`: 배지·Playing·구독 상태 등. 상품 플래그 없음
 - **detail** `GET /v1/users/energy/detail?screen=…`: 팝업 오픈·팝업 재조회·구매 후만
 - Playing 중 **사용자 발화 처리마다** 1 소비. Start 시 소비 없음
-- 구독 아이콘: `lib/utils/energy_icon.dart`. 배지 `EnergyHeaderBadge`. 팝업 `showEnergyInfoPopup`
+- 구독 아이콘: `lib/utils/energy_icon.dart`. 배지 `EnergyHeaderBadge`(글래스 타이머 pill + 번개/∞). 팝업 `showEnergyInfoPopup`
+- 배지 pill: 충전중·0 → 흰 60% `mm:ss`(`lastAutoChargedAt`+30분), Full → 민트 영어 `Full`, 무제한 → 민트 남은시간 + `unlimited.png`/`unlimited_sub.png`. 숫자 `0`만 `#E60000`. 잔여·00:00 재조회는 기존 `energy_timer_refetch` / simple GET
+- `EnergyOfferScreen`: `home`·`opening`·`opening_insufficient`·`playing`·`playing_insufficient`·`overview`·`lab`. Overview 배지 탭 detail `screen=overview`
 - 비가시(비활성 탭·위 라우트)면 타이머·GET 중단. 결제 성공은 `EnergyRefreshBus`로 추가 GET 없이 반영
 - Playing 0/402 → `showPlayingEnergyInsufficientPopup` → `endRoleplay`면 Wait 레이어(세션 유지)
 - Opening Start `sessionId=='0'` → 에너지 부족 팝업, Opening 유지

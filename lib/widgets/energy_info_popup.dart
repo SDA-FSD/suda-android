@@ -25,6 +25,7 @@ class EnergyOfferScreen {
   static const String openingInsufficient = 'opening_insufficient';
   static const String playing = 'playing';
   static const String playingInsufficient = 'playing_insufficient';
+  static const String overview = 'overview';
   // Lab은 구현에서 제외(팝업 내 상세 refetch/impression 미호출).
   static const String lab = 'lab';
 }
@@ -397,14 +398,7 @@ class _EnergyInfoPopupBodyState extends State<EnergyInfoPopupBody> {
     }
   }
 
-  String _formatMmSs(Duration remaining) {
-    var r = remaining;
-    if (r.isNegative) r = Duration.zero;
-    final totalSeconds = r.inSeconds;
-    final minutes = totalSeconds ~/ 60;
-    final seconds = totalSeconds % 60;
-    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-  }
+  String _formatMmSs(Duration remaining) => formatEnergyMmSs(remaining);
 
   @override
   Widget build(BuildContext context) {
@@ -659,12 +653,6 @@ extension _UserEnergyPopupX on UserEnergyDto {
   bool get isEnergyFull =>
       maxEnergyCount > 0 && energyCount == maxEnergyCount;
 
-  Duration rechargeRemaining(DateTime nowUtc) {
-    final last = lastAutoChargedAt;
-    if (last == null) return Duration.zero;
-    final next = last.add(const Duration(minutes: 30));
-    final remaining = next.difference(nowUtc);
-    if (remaining.isNegative) return Duration.zero;
-    return remaining;
-  }
+  Duration rechargeRemaining(DateTime nowUtc) =>
+      energyRechargeRemaining(this, nowUtc);
 }
