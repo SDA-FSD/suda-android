@@ -256,6 +256,54 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen> {
     }
   }
 
+  Widget _buildAiCharacterAvatar(String? rpImgPath) {
+    const size = 120.0;
+    final path = rpImgPath?.trim() ?? '';
+    final url = path.isEmpty
+        ? null
+        : (path.startsWith('http') ? path : '${AppConfig.cdnBaseUrl}$path');
+
+    return ClipOval(
+      child: SizedBox(
+        width: size,
+        height: size,
+        child: url == null
+            ? const ColoredBox(color: Color(0xFF353535))
+            : CachedNetworkImage(
+                imageUrl: url,
+                fit: BoxFit.cover,
+                width: size,
+                height: size,
+                placeholder: (context, url) =>
+                    const ColoredBox(color: Color(0xFF353535)),
+                errorWidget: (context, url, error) =>
+                    const ColoredBox(color: Color(0xFF353535)),
+              ),
+      ),
+    );
+  }
+
+  Widget _buildAiCharacterNameBadge(String name, TextTheme theme) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: const Color(0xFF635F5F), width: 1),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        child: Text(
+          name,
+          style: theme.bodySmall?.copyWith(
+            color: Colors.white,
+            letterSpacing: -0.14,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final episode = SeriesStateService.instance.selectedEpisode;
@@ -291,43 +339,48 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen> {
           RoleplayScaffold(
             backgroundColor: hasBackdrop ? Colors.transparent : null,
             showCloseButton: widget.showCloseButton,
-            title: title.isEmpty ? null : title,
-            titleStyle: RoleplayScaffold.episodeTitleStyle(theme),
-            titleMaxLines: 1,
-            centerTitleInHeaderActionRow: true,
             body: Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    l10n.roleplayOpeningAiCharacter,
-                    style: theme.headlineSmall?.copyWith(color: Colors.white),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    aiCharacterName,
-                    style: theme.headlineLarge?.copyWith(
-                      color: const Color(0xFF0CABA8),
+                  // 레이아웃상 제목 위치는 유지하고, 아바타·이름만 위로 그림.
+                  Transform.translate(
+                    offset: const Offset(0, -24),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _buildAiCharacterAvatar(
+                          episode?.aiCharacter?.rpImgPath,
+                        ),
+                        if (aiCharacterName.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          _buildAiCharacterNameBadge(aiCharacterName, theme),
+                        ],
+                      ],
                     ),
-                    textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 40),
-                  Text(
-                    l10n.roleplayOpeningScenario,
-                    style: theme.headlineSmall?.copyWith(color: Colors.white),
-                  ),
-                  const SizedBox(height: 20),
-                  Text.rich(
-                    TextSpan(
-                      style: theme.bodyLarge?.copyWith(color: Colors.white),
-                      children: DefaultMarkdown.buildSpans(
-                        briefing,
-                        theme.bodyLarge?.copyWith(color: Colors.white) ??
-                            const TextStyle(color: Colors.white),
+                  if (title.isNotEmpty) ...[
+                    const SizedBox(height: 20),
+                    Text(
+                      title,
+                      style: theme.headlineSmall?.copyWith(color: Colors.white),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                  if (briefing.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    Text.rich(
+                      TextSpan(
+                        style: theme.bodyLarge?.copyWith(color: Colors.white),
+                        children: DefaultMarkdown.buildSpans(
+                          briefing,
+                          theme.bodyLarge?.copyWith(color: Colors.white) ??
+                              const TextStyle(color: Colors.white),
+                        ),
                       ),
+                      textAlign: TextAlign.center,
                     ),
-                    textAlign: TextAlign.center,
-                  ),
+                  ],
                 ],
               ),
             ),
