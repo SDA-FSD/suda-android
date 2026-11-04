@@ -302,7 +302,7 @@
   - `onNavigateToProfile` 콜백 호출 → `_MyAppState._navigateToProfile()` 실행 → 상태 업데이트로 전환
 - **SeriesOverviewScreen** (Sub): Home 시리즈 썸네일 탭 시 `SeriesRouter.pushOverview`. appPath `/series/overview/{seriesId}`. `lib/screens/series/overview.dart`.
   - 진입 시 `GET /rps2/series/{seriesId}/overview` (`SudaApiClient.getSeriesOverview`) → `RpS2SeriesOverviewDto` 파싱.
-  - **레이아웃**(rp overview와 동일 골격): `Scaffold`+`Stack` — 상단 배경 `thumbnailImgPath`(원본 CDN, 너비×**60%** 높이. 메모리 `_300`이 있으면 먼저 노출 후 원본 즉시 교체)·히어로 그라데이션·스크롤 본문(`information.png` 24×24(타이틀 **상단** 좌측·탭 → `SeriesInformationScreen`) → 타이틀 `headlineSmall` → gap 4 → `synopsisComplexityLevel` 태그 → 진행률 바(l10n `seriesOverviewCompletionPercent`) → gap 8 → `synopsis`)·**플로팅 헤더**(좌 뒤로가기: 히트 40·암점 원 28 RadialGradient 검정 중앙 α0.22→투명 / 우 시리즈 CEFR 글래스: 접힘 24h. 닫힘 너비는 선택된 라벨, 열림 너비는 현재 언어에서 가장 긴 라벨. 닫힘→열림은 너비 250ms `easeInOutCubic` 후 목록 250ms. 열림→닫힘은 목록을 먼저 닫고 넓은 너비를 유지한 뒤 너비를 줄인다. `ClipRRect`+`BackdropFilter` blur 12, white α0.14~0.22, border white α0.36, shadow blur 10 offset (0,2). 헤더는 좌 8·미국 국기·8·라벨 칸·5·아이콘·우 8(`click_to_expand.png`, 펼치면 `click_to_fold.png`, 아이콘 칸 13×13). 국기·라벨·아이콘은 24 높이 안에서 세로 중앙. 구분선 `#D9D9D9` 20% 1px, 좌우 10. 아래 네 레벨은 가로 중앙. 선택 글자 `#0CABA8`, 나머지 흰색. 마지막 레벨 아래 여백은 레벨 글자 사이 간격과 같다. 다른 레벨은 `PUT /rps2/series/{id}/cefr-level` 후 overview 재로드. 헤더 재탭·같은 레벨·바깥 탭은 저장 없이 닫힘. 레벨은 `GET /rps2/series/{id}/cefr-level`) 스크롤 시 타이틀 상단 도달하면 fade-out. Episode 탭 좌측 카드·Similar Topic 3열은 `CdnThumbImage`(`_300`).
+  - **레이아웃**(rp overview와 동일 골격): `Scaffold`+`Stack` — 상단 배경 `thumbnailImgPath`(원본 CDN, 너비×**60%** 높이. 메모리 `_300`이 있으면 먼저 노출 후 원본 즉시 교체)·히어로 그라데이션·스크롤 본문(`information.png` 24×24(타이틀 **상단** 좌측·탭 → `SeriesInformationScreen`) → 타이틀 `headlineSmall` → gap 4 → `synopsisComplexityLevel` 태그 → 진행률 바(l10n `seriesOverviewCompletionPercent`) → gap 8 → `synopsis`)·**플로팅 헤더**(좌 뒤로가기: 히트 40·암점 원 28 RadialGradient 검정 중앙 α0.22→투명 / 우 `EnergyHeaderBadge`(`screen=overview`, 글래스 타이머 pill)+gap8+시리즈 CEFR 글래스: 접힘 24h. 닫힘 너비는 선택된 라벨, 열림 너비는 현재 언어에서 가장 긴 라벨. 닫힘→열림은 너비 250ms `easeInOutCubic` 후 목록 250ms. 열림→닫힘은 목록을 먼저 닫고 넓은 너비를 유지한 뒤 너비를 줄인다. `ClipRRect`+`BackdropFilter` blur 12, white α0.14~0.22, border white α0.36, shadow blur 10 offset (0,2). 헤더는 좌 8·미국 국기·8·라벨 칸·5·아이콘·우 8(`click_to_expand.png`, 펼치면 `click_to_fold.png`, 아이콘 칸 13×13). 국기·라벨·아이콘은 24 높이 안에서 세로 중앙. 구분선 `#D9D9D9` 20% 1px, 좌우 10. 아래 네 레벨은 가로 중앙. 선택 글자 `#0CABA8`, 나머지 흰색. 마지막 레벨 아래 여백은 레벨 글자 사이 간격과 같다. 다른 레벨은 `PUT /rps2/series/{id}/cefr-level` 후 overview 재로드. 헤더 재탭·같은 레벨·바깥 탭은 저장 없이 닫힘. 레벨은 `GET /rps2/series/{id}/cefr-level`) 스크롤 시 타이틀 상단 도달하면 fade-out. Episode 탭 좌측 카드·Similar Topic 3열은 `CdnThumbImage`(`_300`).
   - **에피소드 목록** (`SeriesEpisodeTabContent`): 진행대기 = `bestScoreMap`에 없는 첫 에피소드(민트 채움 Play, 배경 `#1E1E1E`). 그 앞은 테두리 Play, 뒤는 Locked. 오버뷰에서 시리즈 CEFR을 바꾸면 `GET /rps2/series/{id}/overview`를 다시 호출한다. 실패 시 이전 `bestScoreMap`으로 Play를 열지 않는다.
   - **다음 난이도 팝업**: 현재 시리즈 CEFR의 마지막 에피소드가 `bestScoreMap`에 있고 다음 레벨이 있으면(`Pre-A1→A1→A2→B1`, `B1`은 없음) `DefaultPopup`. 오버뷰 진입과 플레이 복귀 갱신 때. 이미 `rp_s2_user_series_cefr_notice`에 있으면 다시 띄우지 않고, 팝업을 닫은 뒤 `POST /rps2/series/{id}/cefr-level-up-notice?cefrLevel=`로 기록. 다음 난이도 도전하기는 그 시리즈만 다음 레벨로 저장하고 overview를 다시 불러온다. 나중에는 닫기만. 본문 아래 8에 안내 `bodySmall` `#80D7CF`. 배경 탭으로 닫히지 않음. Lab `Series: Next CEFR level`.
   - **스크롤**: 진행대기가 1번이면 자동 스크롤 없음. 2번 이상이면 카드 세로 중앙을 화면 중앙에 맞춤(450ms `easeInOut`). 화면에 걸쳐 있어도 이동. 리스트 끝이면 최대 스크롤에서 멈춤.
@@ -318,6 +318,7 @@
   - **상단 여백**: 70 (표준)
   - **헤더**:
     - 좌측: "Hi, {userName}!" 인사말 (`AppScaffold.title` 사용)
+    - 우측: `EnergyHeaderBadge`(`screen=home`) — 글래스 타이머 pill(충전 `mm:ss` 흰 60% / Full 민트 / 무제한 민트 남은시간+∞ 아이콘) + 번개·숫자(`0`은 `#E60000`)
   - **메인 콘텐츠**:
     - **홈 배너**: 
       - 위치: 상단 여백 70 바로 아래
@@ -809,7 +810,7 @@
 ### 스크린 내부 구현 특이사항
 - 배경: episode `thumbnailImgPath` 원본 → `RoleplayOverviewBackdrop`. 본문: `aiCharacter.name` + briefing(`DefaultMarkdown`). duration 없음.
 - 시스템 뒤로가기: Opening 제거, Series Overview 노출
-- 우상단 `EnergyHeaderBadge` — Home과 동일(충전·무제한 타이머 포함)
+- 우상단 `EnergyHeaderBadge` — Home과 동일 글래스 타이머 pill(`screen=opening`). Playing은 타이머 없음
 - **Briefing TTS**: episode `briefingAudio`(언어→CDN path). 진입 첫 프레임 후 language tag(`ko-KR`)→languageCode(`ko`)→`en` 순으로 path 선택·`cdnBaseUrl` prepend·`just_audio` 자동재생. 없으면 스킵(다른 언어로 폴백 없음). 이탈/Playing 전환 시 즉시 stop. **`_stopBriefingAudio` 2s timeout**(AOS·iOS Start 공통. hang이 Playing 진입을 막지 않음). iOS dispose는 `IosAudioTeardown`. 재진입 시 다시 재생.
 - footer Start 버튼 아래 AI 안내(`l10n.roleplayOpeningAiDisclaimer`): `labelSmall`·`#8C8C8C`·중앙 정렬·두 문장 줄바꿈(`\n`). 버튼↔문구 12dp, 문구 아래 50dp.
 - **Start 마이크 권한**: status→request→영구거부 시 설정 안내만. 복귀 후 사용자가 다시 Start. iOS `PERMISSION_MICROPHONE=1` + `NSMicrophoneUsageDescription`. 상세 `CONTEXT_ROLEPLAY_S2.md` Opening Start.

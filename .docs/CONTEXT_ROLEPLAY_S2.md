@@ -169,7 +169,7 @@ Home (시리즈 썸네일)
 - **렌더**
   - 배경: episode `thumbnailImgPath` 원본 → `RoleplayOverviewBackdrop` (메모리 `_300` 있으면 먼저, 원본 즉시 교체)
   - 헤더 타이틀: episode `title` (`SudaJsonUtil.localizedMapText`) · `bodySmall` **w700** · **1줄** 말줄임 — X 밴드(top 16·height 40) 세로 중앙(`centerTitleInHeaderActionRow`, `RoleplayScaffold.episodeTitleStyle`)
-  - **우상단 에너지 배지**: `EnergyHeaderBadge` (`SafeArea top + 16`, `right: 16`) — Home과 동일 스펙·탭 시 `showEnergyInfoPopup`
+  - **우상단 에너지 배지**: `EnergyHeaderBadge` (`SafeArea top + 16`, `right: 16`, `screen=opening`) — Home과 동일 글래스 타이머 pill·탭 시 `showEnergyInfoPopup`. Playing은 타이머 없는 기존 푸터 지표만
   - **duration 없음** (S2)
   - AI 캐릭터: l10n `roleplayOpeningAiCharacter`(en AI Character / ko AI 캐릭터 / pt Personagem IA) + `selectedEpisode.aiCharacter.name` (`headlineLarge` `#0CABA8`)
   - 시나리오: l10n `roleplayOpeningScenario`(en Scenario / ko 시나리오 / pt Cenário) + episode `briefing` (`DefaultMarkdown`)
@@ -185,7 +185,7 @@ Home (시리즈 썸네일)
   3. `sessionId == '0'`: `showEnergyInsufficientPopup`(에너지 바 + l10n `energyInsufficient`) → Opening 유지, 재시도 가능
   4. `sessionId`가 `-`로 시작: "Cannot start roleplay" 토스트 → Opening 유지
   5. 정상 sessionId → `SeriesStateService.setSession(session)` → `replaceWithPlaying` (에너지 소비는 Playing 발화 처리 시, Start 시점 소비 없음)
-  6. **우상단 `EnergyHeaderBadge`**: Home과 동일 충전·무제한 타이머 — 화면 체류 중 30분 충전·무제한 만료 시 서버 재조회
+  6. **우상단 `EnergyHeaderBadge`**: Home과 동일 글래스 타이머 pill(충전 `mm:ss` / Full / 무제한 남은시간+∞ 아이콘) — 화면 체류 중 30분 충전·무제한 만료 시 서버 재조회
 
 ### 4-4. RoleplayPlayingScreen
 
