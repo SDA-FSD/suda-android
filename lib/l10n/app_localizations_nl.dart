@@ -567,6 +567,9 @@ class AppLocalizationsNl extends AppLocalizations {
   String get roleplayAutoHintGuide => 'Zet automatische hint aan';
 
   @override
+  String get roleplayTextMode => 'Tekstmodus';
+
+  @override
   String get roleplayHintLabel => 'Je kunt zeggen';
 
   @override

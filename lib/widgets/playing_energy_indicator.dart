@@ -5,7 +5,7 @@ import '../utils/energy_icon.dart';
 
 const _energyZeroColor = Color(0xFFE60000);
 
-/// Playing 푸터 중앙 에너지 표시. 무제한은 아이콘만, 일반은 아이콘+숫자.
+/// Playing 우상단 에너지 표시. 무제한은 아이콘만, 일반은 아이콘+숫자.
 class PlayingEnergyIndicator extends StatelessWidget {
   final UserEnergyDto? energy;
 

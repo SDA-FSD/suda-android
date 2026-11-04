@@ -219,6 +219,7 @@
   "roleplayExitExit": "Exit",
   "roleplayAutoHint": "Auto Hint",
   "roleplayAutoHintGuide": "Turn on Auto Hint",
+  "roleplayTextMode": "Text mode",
   "roleplayHintLabel": "You can say",
   "roleplayHintShowAnswer": "See how to say it",
   "roleplayHintEnglishLabel": "Example in English",

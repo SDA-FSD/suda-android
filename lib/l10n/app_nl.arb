@@ -212,6 +212,7 @@
   "roleplayExitExit": "Stoppen",
   "roleplayAutoHint": "Automatische hint",
   "roleplayAutoHintGuide": "Zet automatische hint aan",
+  "roleplayTextMode": "Tekstmodus",
   "roleplayHintLabel": "Je kunt zeggen",
   "roleplayHintShowAnswer": "Bekijk hoe je het in het Engels zegt",
   "roleplayHintEnglishLabel": "Voorbeeld in het Engels",

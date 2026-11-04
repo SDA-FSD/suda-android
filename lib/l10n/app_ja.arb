@@ -212,6 +212,7 @@
   "roleplayExitExit": "終了",
   "roleplayAutoHint": "ヒントを自動表示",
   "roleplayAutoHintGuide": "自動ヒントをオン",
+  "roleplayTextMode": "テキストモード",
   "roleplayHintLabel": "こう言ってみて",
   "roleplayHintShowAnswer": "英語の言い方を見る",
   "roleplayHintEnglishLabel": "英語の例",

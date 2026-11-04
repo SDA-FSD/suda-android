@@ -528,6 +528,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get roleplayAutoHintGuide => '开启自动提示';
 
   @override
+  String get roleplayTextMode => '文字模式';
+
+  @override
   String get roleplayHintLabel => '可以这样说';
 
   @override
@@ -1822,6 +1825,9 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get roleplayAutoHintGuide => '开启自动提示';
 
   @override
+  String get roleplayTextMode => '文字模式';
+
+  @override
   String get roleplayHintLabel => '可以这样说';
 
   @override
@@ -3114,6 +3120,9 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get roleplayAutoHintGuide => '開啟自動提示';
+
+  @override
+  String get roleplayTextMode => '文字模式';
 
   @override
   String get roleplayHintLabel => '可以這樣說';

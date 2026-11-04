@@ -103,12 +103,36 @@ mixin PlayingInputMixin<T extends StatefulWidget>
 
   bool Function()? checkCanSpendPlayingEnergy;
   void Function()? onPlayingEnergySpent;
-  Widget Function()? playingEnergyFooterBuilder;
+  final GlobalKey playingKebabAnchorKey = GlobalKey();
+  VoidCallback? onPlayingKebabTap;
+  bool showPlayingKebab = true;
 
   Future<void> Function(RpS2UserMessageResponseDto response)?
   handleRpS2UserMessageResponse;
 
   bool get isUserTurn => _isUserTurn;
+
+  bool get isPlayingTextMode => _inputMode == _PlayingInputMode.typing;
+
+  bool get isPlayingTextModeEnabled => !_isInputLocked;
+
+  /// 기존 좌하단 키보드 토글과 같은 전환.
+  void setPlayingTextMode(bool textMode) {
+    if (_isInputLocked || textMode == isPlayingTextMode) return;
+    final toRecording = !textMode;
+    if (!toRecording) {
+      _cancelHintIdleAndBlink();
+      _cancelHoldToSpeakIdle();
+    }
+    setState(() {
+      _inputMode = textMode
+          ? _PlayingInputMode.typing
+          : _PlayingInputMode.recording;
+    });
+    if (toRecording && _isUserTurn) {
+      _armHoldToSpeakIdle();
+    }
+  }
 
   bool get _isMicInteractive =>
       _micState == _PlayingMicButtonState.defaultState && _isUserTurn;
@@ -543,45 +567,37 @@ mixin PlayingInputMixin<T extends StatefulWidget>
     });
   }
 
-  Widget _buildFooterIconRow({Widget? center}) {
+  Widget _playingKebabSlot() {
+    final slot = SizedBox(
+      key: playingKebabAnchorKey,
+      width: 40,
+      height: 40,
+      child: showPlayingKebab
+          ? Center(
+              child: Image.asset(
+                'assets/images/icons/kebab.png',
+                width: 24,
+                height: 24,
+              ),
+            )
+          : null,
+    );
+    if (!showPlayingKebab || onPlayingKebabTap == null) return slot;
+    return GestureDetector(
+      onTap: onPlayingKebabTap,
+      behavior: HitTestBehavior.opaque,
+      child: slot,
+    );
+  }
+
+  Widget _buildFooterIconRow() {
     return Padding(
       padding: const EdgeInsets.only(left: 16, right: 16),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          GestureDetector(
-            onTap: _isInputLocked
-                ? null
-                : () {
-                    final toRecording = _inputMode == _PlayingInputMode.typing;
-                    if (!toRecording) {
-                      _cancelHintIdleAndBlink();
-                      _cancelHoldToSpeakIdle();
-                    }
-                    setState(() {
-                      _inputMode = toRecording
-                          ? _PlayingInputMode.recording
-                          : _PlayingInputMode.typing;
-                    });
-                    if (toRecording && _isUserTurn) {
-                      _armHoldToSpeakIdle();
-                    }
-                  },
-            child: SizedBox(
-              width: 40,
-              height: 40,
-              child: Center(
-                child: Image.asset(
-                  _inputMode == _PlayingInputMode.typing
-                      ? 'assets/images/icons/mic.png'
-                      : 'assets/images/icons/keyboard.png',
-                  height: 30,
-                  width: 30,
-                ),
-              ),
-            ),
-          ),
-          Expanded(child: Center(child: center ?? const SizedBox.shrink())),
+          _playingKebabSlot(),
+          const Expanded(child: SizedBox.shrink()),
           IgnorePointer(
             ignoring: !_isHintEnabled || _isInputLocked,
             child: AnimatedBuilder(
@@ -621,8 +637,6 @@ mixin PlayingInputMixin<T extends StatefulWidget>
 
   Widget buildPlayingFooter() {
     final l10n = AppLocalizations.of(context)!;
-    final energyIndicator =
-        playingEnergyFooterBuilder?.call() ?? const SizedBox.shrink();
 
     return SafeArea(
       top: false,
@@ -673,10 +687,11 @@ mixin PlayingInputMixin<T extends StatefulWidget>
                     right: 0,
                     bottom: 0,
                     height: roleplayFooterIconRowHeight,
-                    child: _buildFooterIconRow(center: energyIndicator),
+                    child: _buildFooterIconRow(),
                   ),
                   Positioned.fill(
                     child: RoleplayMicButtonArea(
+                      bottomInset: roleplayFooterIconRowHeight / 2,
                       isInteractive: _isMicInteractive && !_isInputLocked,
                       isLoading: _micState == _PlayingMicButtonState.loading,
                       isDisabled: _micState == _PlayingMicButtonState.disabled,
@@ -766,7 +781,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
           if (_inputMode != _PlayingInputMode.recording)
             SizedBox(
               height: roleplayFooterIconRowHeight,
-              child: _buildFooterIconRow(center: energyIndicator),
+              child: _buildFooterIconRow(),
             ),
         ],
       ),

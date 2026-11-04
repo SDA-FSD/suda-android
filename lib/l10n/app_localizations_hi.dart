@@ -566,6 +566,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get roleplayAutoHintGuide => 'ऑटो हिंट चालू करें';
 
   @override
+  String get roleplayTextMode => 'टेक्स्ट मोड';
+
+  @override
   String get roleplayHintLabel => 'आप ऐसे कह सकते हैं';
 
   @override

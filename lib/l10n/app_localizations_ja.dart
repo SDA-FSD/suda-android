@@ -534,6 +534,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get roleplayAutoHintGuide => '自動ヒントをオン';
 
   @override
+  String get roleplayTextMode => 'テキストモード';
+
+  @override
   String get roleplayHintLabel => 'こう言ってみて';
 
   @override

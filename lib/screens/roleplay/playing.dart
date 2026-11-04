@@ -73,6 +73,9 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
 
   bool _showMissionCompletedFlash = false;
   double _missionPanelOpacity = 1;
+  final GlobalKey _playingStackKey = GlobalKey();
+  Rect? _kebabAnchor;
+  double? _playingStackHeight;
 
   @override
   void initState() {
@@ -81,7 +84,8 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     initPlayingEnergy();
     checkCanSpendPlayingEnergy = hasSpendablePlayingEnergy;
     onPlayingEnergySpent = decrementPlayingEnergyCount;
-    playingEnergyFooterBuilder = buildPlayingEnergyFooterIndicator;
+    showPlayingKebab = widget.showCloseButton;
+    onPlayingKebabTap = _onHamburgerTap;
     onPlayingEnergyExitRequested = () {
       if (mounted) setState(() => _showExitLayer = true);
     };
@@ -626,6 +630,44 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     );
   }
 
+  bool _anchorNear(Rect a, Rect b) {
+    return (a.left - b.left).abs() < 0.5 &&
+        (a.top - b.top).abs() < 0.5 &&
+        (a.width - b.width).abs() < 0.5 &&
+        (a.height - b.height).abs() < 0.5;
+  }
+
+  void _syncKebabAnchor() {
+    if (!mounted) return;
+    final anchorContext = playingKebabAnchorKey.currentContext;
+    final stackContext = _playingStackKey.currentContext;
+    if (anchorContext == null || stackContext == null) return;
+    final box = anchorContext.findRenderObject() as RenderBox?;
+    final stackBox = stackContext.findRenderObject() as RenderBox?;
+    if (box == null ||
+        stackBox == null ||
+        !box.attached ||
+        !stackBox.attached ||
+        !box.hasSize ||
+        !stackBox.hasSize) {
+      return;
+    }
+    final rect = box.localToGlobal(Offset.zero, ancestor: stackBox) & box.size;
+    final height = stackBox.size.height;
+    final previous = _kebabAnchor;
+    final previousHeight = _playingStackHeight;
+    if (previous != null &&
+        previousHeight != null &&
+        _anchorNear(previous, rect) &&
+        (previousHeight - height).abs() < 0.5) {
+      return;
+    }
+    setState(() {
+      _kebabAnchor = rect;
+      _playingStackHeight = height;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -639,6 +681,9 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     final topInset = MediaQuery.of(context).padding.top;
     final bottomInset = MediaQuery.paddingOf(context).bottom;
     const systemChromeColor = Color(0xFF121212);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _syncKebabAnchor());
+    final kebabAnchor = _kebabAnchor;
+    final stackHeight = _playingStackHeight;
 
     return PopScope(
       canPop: false,
@@ -646,6 +691,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
         if (!didPop) _handleBackButton();
       },
       child: Stack(
+        key: _playingStackKey,
         fit: StackFit.expand,
         children: [
           if (hasBackdrop)
@@ -704,6 +750,11 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
             ),
             footer: buildPlayingFooter(),
           ),
+          Positioned(
+            top: topInset + 16,
+            right: 16,
+            child: buildPlayingEnergyFooterIndicator(),
+          ),
           if (widget.showCloseButton && _showConfigurationPanel)
             Positioned.fill(
               child: Listener(
@@ -711,44 +762,31 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
                 behavior: HitTestBehavior.translucent,
               ),
             ),
-          if (widget.showCloseButton && _showConfigurationPanel)
+          if (widget.showCloseButton &&
+              _showConfigurationPanel &&
+              kebabAnchor != null &&
+              stackHeight != null)
             Positioned(
-              top: topInset + 56,
-              right: 24,
+              left: kebabAnchor.left,
+              bottom: stackHeight - kebabAnchor.top,
               child: RoleplayConfigurationPanel(
                 autoHintEnabled: _autoHintEnabled,
                 onAutoHintChanged: _onAutoHintChanged,
+                textModeOn: isPlayingTextMode,
+                textModeEnabled: isPlayingTextModeEnabled,
+                onTextModeChanged: setPlayingTextMode,
               ),
             ),
-          if (_showAutoHintGuide)
+          if (_showAutoHintGuide && kebabAnchor != null && stackHeight != null)
             Positioned(
-              top: topInset + 16 + 40 - GuideBubble.tailLength,
-              right: 16,
+              left: kebabAnchor.left,
+              bottom: stackHeight - kebabAnchor.top - GuideBubble.tailLength,
               child: GuideBubble(
                 text: AppLocalizations.of(context)!.roleplayAutoHintGuide,
                 wobble: true,
-                tailOffsetFromEnd: 20,
+                tail: GuideBubbleTail.bottom,
+                tailOffsetFromEnd: GuideBubble.defaultMaxWidth,
                 onTap: _dismissAutoHintGuide,
-              ),
-            ),
-          if (widget.showCloseButton)
-            Positioned(
-              top: topInset + 16,
-              right: 16,
-              child: GestureDetector(
-                onTap: _onHamburgerTap,
-                behavior: HitTestBehavior.opaque,
-                child: SizedBox(
-                  width: 40,
-                  height: 40,
-                  child: Center(
-                    child: Image.asset(
-                      'assets/images/icons/kebab.png',
-                      width: 24,
-                      height: 24,
-                    ),
-                  ),
-                ),
               ),
             ),
           if (_showExitLayer) Positioned.fill(child: _buildExitLayer(context)),

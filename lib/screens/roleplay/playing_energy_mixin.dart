@@ -54,10 +54,15 @@ mixin PlayingEnergyMixin<T extends StatefulWidget> on State<T> {
     return GestureDetector(
       onTap: _onPlayingEnergyIndicatorTap,
       behavior: HitTestBehavior.opaque,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
-        child: Center(
-          child: PlayingEnergyIndicator(energy: _playingEnergy),
+      child: IntrinsicWidth(
+        child: SizedBox(
+          height: 40,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Center(
+              child: PlayingEnergyIndicator(energy: _playingEnergy),
+            ),
+          ),
         ),
       ),
     );

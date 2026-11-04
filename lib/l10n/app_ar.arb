@@ -212,6 +212,7 @@
   "roleplayExitExit": "خروج",
   "roleplayAutoHint": "تلميح تلقائي",
   "roleplayAutoHintGuide": "فعّل التلميح التلقائي",
+  "roleplayTextMode": "وضع النص",
   "roleplayHintLabel": "يمكنك أن تقول",
   "roleplayHintShowAnswer": "شوف كيف تقولها بالإنجليزية",
   "roleplayHintEnglishLabel": "مثال بالإنجليزية",

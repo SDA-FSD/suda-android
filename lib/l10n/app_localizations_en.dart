@@ -563,6 +563,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get roleplayAutoHintGuide => 'Turn on Auto Hint';
 
   @override
+  String get roleplayTextMode => 'Text mode';
+
+  @override
   String get roleplayHintLabel => 'You can say';
 
   @override

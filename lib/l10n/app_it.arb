@@ -212,6 +212,7 @@
   "roleplayExitExit": "Esci",
   "roleplayAutoHint": "Suggerimento automatico",
   "roleplayAutoHintGuide": "Attiva il suggerimento automatico",
+  "roleplayTextMode": "Modalità testo",
   "roleplayHintLabel": "Puoi dire",
   "roleplayHintShowAnswer": "Vedi come dirlo in inglese",
   "roleplayHintEnglishLabel": "Esempio in inglese",

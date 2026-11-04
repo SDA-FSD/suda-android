@@ -212,6 +212,7 @@
   "roleplayExitExit": "나가기",
   "roleplayAutoHint": "자동 힌트",
   "roleplayAutoHintGuide": "자동 힌트 켜기",
+  "roleplayTextMode": "텍스트 모드",
   "roleplayHintLabel": "이렇게 말해보세요",
   "roleplayHintShowAnswer": "영어 표현 보기",
   "roleplayHintEnglishLabel": "영어 예시",

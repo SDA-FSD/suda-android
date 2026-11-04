@@ -570,6 +570,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get roleplayAutoHintGuide => 'Ative as dicas automáticas';
 
   @override
+  String get roleplayTextMode => 'Modo de texto';
+
+  @override
   String get roleplayHintLabel => 'Que tal dizer assim?';
 
   @override

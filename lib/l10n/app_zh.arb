@@ -212,6 +212,7 @@
   "roleplayExitExit": "退出",
   "roleplayAutoHint": "自动提示",
   "roleplayAutoHintGuide": "开启自动提示",
+  "roleplayTextMode": "文字模式",
   "roleplayHintLabel": "可以这样说",
   "roleplayHintShowAnswer": "查看英语表达",
   "roleplayHintEnglishLabel": "英语示例",

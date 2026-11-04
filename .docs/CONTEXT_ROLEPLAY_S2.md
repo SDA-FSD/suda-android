@@ -202,7 +202,7 @@ Home (시리즈 썸네일)
   - 좌상 **X** → 나가기 확인 레이어
   - 중앙 **타이틀**: episode `title` (사용자 언어, fallback en) · `bodySmall` **w700** · **1줄** 말줄임
   - **duration 없음**
-  - 우상 **`kebab.png`** (40×40 탭 영역) — 탭 시 **설정패널(configuration panel)** 토글
+  - 우상 **에너지** — `PlayingEnergyIndicator`(일반: 아이콘+숫자, 무제한: 아이콘만). 탭은 0이면 부족 팝업, 그 외 정보 팝업
 - **턴바영역 (turn bar area)** — `RoleplayScaffold.belowHeader` + `lib/widgets/roleplay_turn_bar_area.dart`
   - **위치**: 헤더 타이틀 영역(`effectiveHeaderTopSpacing` **60**, `headerTopSpacingDelta -10`) **바로 아래**, 간격 0
   - **크기**: height **20**, 좌우 **마진 24** (`RoleplayTurnBarArea.horizontalMargin`) — 턴박스 Row는 마진 안쪽에서 전폭 채움
@@ -218,11 +218,12 @@ Home (시리즈 썸네일)
 - **시스템 뒤로가기**: `PopScope` → X와 동일하게 확인 레이어
 - **나가기 확정**: `RoleplayRouter.popToOverview` → Series Overview
 - **설정패널 (configuration panel)** — `lib/widgets/roleplay_configuration_panel.dart`
-  - **노출**: 케밥 탭 토글 · `top = safeArea + 56` · `right = 24` · 미션패널 포함 최상단
+  - **노출**: 좌하단 케밥 탭 토글. 패널 왼쪽·하단은 케밥 왼쪽·상단에 붙음. 키보드가 푸터를 올리면 케밥 위치에 다시 붙음. 미션패널 포함 최상단
   - **닫기**: 케밥 재탭 · 패널 외부 탭 (`Listener` dismiss)
   - **프레임**: Series Overview 언어레벨 버튼과 동일 글래스(BackdropFilter σ12 + gradient border, radius 16)
   - **오토힌트**: l10n `roleplayAutoHint` · push agreement 동일 토글 · meta `RP_AUTO_HINT`=`Y`만 on, 키 없음·그 외는 off(CEFR 무관) · 토글 시 로컬 user meta + `PUT /v1/users/auto-hint?value=Y|N`(실패 무시) · 같은 RP 이후 턴과 다음 RP에 유지 · 사용자 턴 중 ON이면 그 턴 힌트 1회 자동 노출. 박스가 열려 있으면 힌트 버튼 disabled, X로 닫으면 활성, 재탭은 캐시 · `_autoHintEnabled`
-  - **오토힌트 가이드**: `GuideBubble`(위 꼭지·`#0CABA8`·흔들림). 이번 RP에서 수동 힌트가 2번 열린 뒤, 그 다음 사용자 턴 시작에 케밥 아래 노출. 조건은 자동 힌트 off이고 meta `RP_AUTO_HINT_GUIDE`가 `Y`가 아님. 노출 즉시 그 meta `Y` + `PUT /v1/users/auto-hint-guide`(실패 무시). 문구 `roleplayAutoHintGuide`. 버블 탭은 닫기만. 케밥 탭은 버블을 닫고 설정패널을 연 뒤 토글을 ON으로 저장하고 그 턴 힌트를 연다.
+  - **텍스트 모드**: l10n `roleplayTextMode`. ON이면 타이핑, OFF면 녹음. 이번 플레이 동안만(메타 저장 없음). `_isInputLocked`면 스위치 opacity 0.4·탭 없음. 전환 시 힌트 blink·hold 안내 처리는 기존 키보드 토글과 같음
+  - **오토힌트 가이드**: `GuideBubble`(아래 꼭지·`#0CABA8`·흔들림). 이번 RP에서 수동 힌트가 2번 열린 뒤, 그 다음 사용자 턴 시작에 케밥 위 노출. 꼬리는 케밥 중앙. 조건은 자동 힌트 off이고 meta `RP_AUTO_HINT_GUIDE`가 `Y`가 아님. 노출 즉시 그 meta `Y` + `PUT /v1/users/auto-hint-guide`(실패 무시). 문구 `roleplayAutoHintGuide`. 버블 탭은 닫기만. 케밥 탭은 버블을 닫고 설정패널을 연 뒤 토글을 ON으로 저장하고 그 턴 힌트를 연다.
 
 #### 레이아웃 구역 (턴바영역 아래)
 
@@ -261,9 +262,9 @@ Home (시리즈 썸네일)
 
 1. **서비스메시지 영역**: height **24**, `bodyMedium` 중앙, 한 줄 ellipsis. `holdMicrophoneToSpeak` fade-in/out: 세션 첫 사용자 턴에 즉시, 녹음 500ms 미만이거나 녹음 시작 전 손을 뗄 때(에너지 부족으로 막힌 탭은 제외), 서버 `400 {"code":"AUDIO_TOO_SHORT"}`(파일 길이 0.1초 미만. 턴 유지·에너지 미차감), 녹음 모드에서 마이크 버튼을 누르지 않은 채 8초가 지날 때마다(같은 턴에서 반복, 손을 떼면 8초를 다시 셈). 무발화면 `roleplayNoWordsRecognized` 2초(업로드·에너지 차감 없음, 사용자 턴 유지). **마지막 턴** `POST user-message` 응답 **직후** 서버 `serviceMessage`(없으면 `roleplayAnalyzing`) blink(이후 나레이션·후속 AI 계속 노출).
 2. **입력 영역**:
-   - **녹음**: gap **10** + height **140** (`roleplayMicFooterStackHeight` = mic 100px + 에너지/아이콘 행 40px). 마이크 **이미지 하단**이 에너지·아이콘 행 **상단**에 정렬. 하단 행 중앙 `PlayingEnergyIndicator`(일반: energy+숫자, 무제한: unlimited 아이콘만). 좌 mic/keyboard·우 hint 아이콘과 동일 세로 높이.
+   - **녹음**: gap **10** + height **140** (`roleplayMicFooterStackHeight`). Playing 마이크 이미지 하단은 아이콘 행 **세로 중앙**(`bottomInset` = 행 높이 / 2). 튜토리얼은 기본 여백(행 상단)을 유지.
    - **타이핑**: gap 10 + 입력 height **44** (`#353535` stadium) + Send 44×44 + gap 10
-3. **하단 아이콘**: height **40**, 좌 mic↔keyboard(30×30)·우 hint lightball(24×24) — 토글·힌트 idle 3s 후 blink
+3. **하단 아이콘**: height **40**, 좌 `kebab.png`(24, 탭 40)·우 hint lightball(24×24). 에너지 없음. 힌트 idle 3s 후 blink
 
 **입력 활성 조건**: `_isUserTurn == true`일 때만 마이크·타이핑·Send 활성. 턴 엔진 전체는 **§3-1** 참조.
 

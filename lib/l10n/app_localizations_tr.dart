@@ -562,6 +562,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get roleplayAutoHintGuide => 'Otomatik İpucunu aç';
 
   @override
+  String get roleplayTextMode => 'Metin modu';
+
+  @override
   String get roleplayHintLabel => 'Şöyle diyebilirsin';
 
   @override

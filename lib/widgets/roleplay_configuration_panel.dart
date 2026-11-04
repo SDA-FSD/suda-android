@@ -4,18 +4,24 @@ import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
 
-/// S2 Playing 설정패널 (configuration panel) — 케밥 버튼 아래 글래스 오버레이.
+/// S2 Playing 설정패널 (configuration panel) — 케밥 버튼 위 글래스 오버레이.
 class RoleplayConfigurationPanel extends StatelessWidget {
   static const double panelBorderRadius = 16;
   static const double railWidth = 200;
 
   final bool autoHintEnabled;
   final ValueChanged<bool> onAutoHintChanged;
+  final bool textModeOn;
+  final bool textModeEnabled;
+  final ValueChanged<bool> onTextModeChanged;
 
   const RoleplayConfigurationPanel({
     super.key,
     required this.autoHintEnabled,
     required this.onAutoHintChanged,
+    required this.textModeOn,
+    required this.textModeEnabled,
+    required this.onTextModeChanged,
   });
 
   TextStyle _labelStyle(TextTheme theme) {
@@ -69,11 +75,19 @@ class RoleplayConfigurationPanel extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _AutoHintRow(
+                  _ConfigToggleRow(
                     label: l10n.roleplayAutoHint,
                     labelStyle: labelStyle,
                     isOn: autoHintEnabled,
                     onChanged: onAutoHintChanged,
+                  ),
+                  const SizedBox(height: 12),
+                  _ConfigToggleRow(
+                    label: l10n.roleplayTextMode,
+                    labelStyle: labelStyle,
+                    isOn: textModeOn,
+                    enabled: textModeEnabled,
+                    onChanged: onTextModeChanged,
                   ),
                 ],
               ),
@@ -85,17 +99,19 @@ class RoleplayConfigurationPanel extends StatelessWidget {
   }
 }
 
-class _AutoHintRow extends StatelessWidget {
+class _ConfigToggleRow extends StatelessWidget {
   final String label;
   final TextStyle labelStyle;
   final bool isOn;
+  final bool enabled;
   final ValueChanged<bool> onChanged;
 
-  const _AutoHintRow({
+  const _ConfigToggleRow({
     required this.label,
     required this.labelStyle,
     required this.isOn,
     required this.onChanged,
+    this.enabled = true,
   });
 
   @override
@@ -107,8 +123,11 @@ class _AutoHintRow extends StatelessWidget {
           Text(label, style: labelStyle),
           const Spacer(),
           GestureDetector(
-            onTap: () => onChanged(!isOn),
-            child: _SudaToggleSwitch(isOn: isOn),
+            onTap: enabled ? () => onChanged(!isOn) : null,
+            child: Opacity(
+              opacity: enabled ? 1 : 0.4,
+              child: _SudaToggleSwitch(isOn: isOn),
+            ),
           ),
         ],
       ),

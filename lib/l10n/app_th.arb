@@ -212,6 +212,7 @@
   "roleplayExitExit": "ออก",
   "roleplayAutoHint": "คำใบ้อัตโนมัติ",
   "roleplayAutoHintGuide": "เปิดคำใบ้อัตโนมัติ",
+  "roleplayTextMode": "โหมดข้อความ",
   "roleplayHintLabel": "ลองพูดแบบนี้",
   "roleplayHintShowAnswer": "ดูวิธีพูดภาษาอังกฤษ",
   "roleplayHintEnglishLabel": "ตัวอย่างภาษาอังกฤษ",

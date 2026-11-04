@@ -4,13 +4,14 @@ import 'package:flutter_svg/flutter_svg.dart';
 const double roleplayMicDefaultSize = 100;
 const double roleplayMicPressedSize = 115;
 
-/// 푸터 하단 mic↔keyboard·hint·에너지 행 높이.
+/// 푸터 하단 아이콘 행 높이.
 const double roleplayFooterIconRowHeight = 40;
 
-/// 마이크 이미지 하단 = 아이콘/에너지 행 상단(스택 하단 기준).
+/// 마이크 이미지 하단 기본 여백(스택 바닥 기준). 아이콘 행 상단.
+/// Playing은 행 세로 중앙(`height / 2`)을 넘긴다.
 const double roleplayMicBottomInsetFromStackBottom = roleplayFooterIconRowHeight;
 
-/// 녹음 모드: 마이크가 에너지 행 위에 오도록 하는 스택 높이.
+/// 녹음 모드 스택 높이. 마이크 100 + 아이콘 행 40.
 const double roleplayMicFooterStackHeight =
     roleplayMicDefaultSize + roleplayMicBottomInsetFromStackBottom;
 
@@ -39,6 +40,9 @@ class RoleplayMicButtonArea extends StatefulWidget {
   final void Function(bool cancel) onPressEnd;
   final VoidCallback onPressCancel;
 
+  /// 마이크 이미지 하단이 스택 바닥에서 떨어진 거리.
+  final double bottomInset;
+
   const RoleplayMicButtonArea({
     super.key,
     required this.isInteractive,
@@ -48,6 +52,7 @@ class RoleplayMicButtonArea extends StatefulWidget {
     required this.onPressStart,
     required this.onPressEnd,
     required this.onPressCancel,
+    this.bottomInset = roleplayMicBottomInsetFromStackBottom,
   });
 
   @override
@@ -317,8 +322,7 @@ class _RoleplayMicButtonAreaState extends State<RoleplayMicButtonArea>
         _lastMaxLeftOffset = maxLeftOffset;
 
         final areaHeight = constraints.maxHeight;
-        final micImageBottomFromTop =
-            areaHeight - roleplayMicBottomInsetFromStackBottom;
+        final micImageBottomFromTop = areaHeight - widget.bottomInset;
         final micRowTop = micImageBottomFromTop - roleplayMicPressedSize;
         final micRowHeight = roleplayMicPressedSize;
 

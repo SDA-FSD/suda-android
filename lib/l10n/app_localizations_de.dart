@@ -570,6 +570,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get roleplayAutoHintGuide => 'Auto-Tipp einschalten';
 
   @override
+  String get roleplayTextMode => 'Textmodus';
+
+  @override
   String get roleplayHintLabel => 'Du kannst sagen';
 
   @override

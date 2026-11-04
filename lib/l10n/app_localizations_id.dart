@@ -566,6 +566,9 @@ class AppLocalizationsId extends AppLocalizations {
   String get roleplayAutoHintGuide => 'Aktifkan petunjuk otomatis';
 
   @override
+  String get roleplayTextMode => 'Mode teks';
+
+  @override
   String get roleplayHintLabel => 'Kamu bisa bilang';
 
   @override

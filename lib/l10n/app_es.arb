@@ -212,6 +212,7 @@
   "roleplayExitExit": "Salir",
   "roleplayAutoHint": "Pista automática",
   "roleplayAutoHintGuide": "Activa las pistas automáticas",
+  "roleplayTextMode": "Modo de texto",
   "roleplayHintLabel": "Puedes decir",
   "roleplayHintShowAnswer": "Ver cómo se dice en inglés",
   "roleplayHintEnglishLabel": "Ejemplo en inglés",

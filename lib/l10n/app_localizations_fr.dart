@@ -573,6 +573,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get roleplayAutoHintGuide => 'Activez l\'indice automatique';
 
   @override
+  String get roleplayTextMode => 'Mode texte';
+
+  @override
   String get roleplayHintLabel => 'Tu peux dire';
 
   @override

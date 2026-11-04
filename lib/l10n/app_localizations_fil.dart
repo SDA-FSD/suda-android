@@ -575,6 +575,9 @@ class AppLocalizationsFil extends AppLocalizations {
   String get roleplayAutoHintGuide => 'I-on ang Auto Hint';
 
   @override
+  String get roleplayTextMode => 'Mode ng teksto';
+
+  @override
   String get roleplayHintLabel => 'Pwede mong sabihin';
 
   @override

@@ -567,6 +567,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get roleplayAutoHintGuide => 'Activa las pistas automáticas';
 
   @override
+  String get roleplayTextMode => 'Modo de texto';
+
+  @override
   String get roleplayHintLabel => 'Puedes decir';
 
   @override
@@ -1948,6 +1951,9 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
 
   @override
   String get roleplayAutoHintGuide => 'Activa las pistas automáticas';
+
+  @override
+  String get roleplayTextMode => 'Modo de texto';
 
   @override
   String get roleplayHintLabel => 'Puedes decir';

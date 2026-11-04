@@ -568,6 +568,9 @@ class AppLocalizationsPl extends AppLocalizations {
   String get roleplayAutoHintGuide => 'Włącz automatyczną podpowiedź';
 
   @override
+  String get roleplayTextMode => 'Tryb tekstowy';
+
+  @override
   String get roleplayHintLabel => 'Możesz powiedzieć';
 
   @override

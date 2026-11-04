@@ -212,6 +212,7 @@
   "roleplayExitExit": "Quitter",
   "roleplayAutoHint": "Indice automatique",
   "roleplayAutoHintGuide": "Activez l'indice automatique",
+  "roleplayTextMode": "Mode texte",
   "roleplayHintLabel": "Tu peux dire",
   "roleplayHintShowAnswer": "Voir comment le dire en anglais",
   "roleplayHintEnglishLabel": "Exemple en anglais",

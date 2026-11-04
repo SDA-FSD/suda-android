@@ -554,6 +554,9 @@ class AppLocalizationsTh extends AppLocalizations {
   String get roleplayAutoHintGuide => 'เปิดคำใบ้อัตโนมัติ';
 
   @override
+  String get roleplayTextMode => 'โหมดข้อความ';
+
+  @override
   String get roleplayHintLabel => 'ลองพูดแบบนี้';
 
   @override
