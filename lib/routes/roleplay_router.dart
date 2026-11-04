@@ -10,7 +10,9 @@ import '../screens/roleplay/result.dart';
 import '../screens/roleplay/try_again_report.dart';
 import '../screens/roleplay/result_report.dart';
 import '../screens/roleplay/tutorial.dart';
+import '../services/roleplay_state_service.dart';
 import '../services/series_state_service.dart';
+import '../services/version_check_service.dart';
 
 class RoleplayRouter {
   static const String openingRouteName = '/roleplay/opening';
@@ -111,6 +113,59 @@ class RoleplayRouter {
       MaterialPageRoute(
         settings: const RouteSettings(name: RoleplayTryAgainScreen.routeName),
         builder: (context) => const RoleplayTryAgainScreen(),
+      ),
+    );
+  }
+
+  /// 다음 에피소드. 결과 캐시를 버리고 Overview Play와 같은 진입(튜토리얼 또는 Opening).
+  /// [resultRoute]가 현재 라우트면 교체하고, 페이월 아래면 그 자리에서 바꾼다.
+  static void replaceResultWithNextEpisode(
+    NavigatorState nav, {
+    required Route<dynamic> resultRoute,
+    required int episodeId,
+  }) {
+    if (!resultRoute.isActive) return;
+    final series = SeriesStateService.instance;
+    series
+      ..markProfileHistoryRefreshPending()
+      ..markBestScoreRefreshPending();
+    series.setSelectedEpisodeId(episodeId);
+    final user = series.user;
+    if (user != null) {
+      RoleplayStateService.instance.setUser(user);
+    }
+    final route = _nextEpisodeEntryRoute();
+    if (resultRoute.isCurrent) {
+      nav.pushReplacement(route);
+      return;
+    }
+    nav.replace<void>(oldRoute: resultRoute, newRoute: route);
+  }
+
+  static Route<void> _nextEpisodeEntryRoute() {
+    if (VersionCheckService.skipRoleplayTutorial) {
+      return MaterialPageRoute<void>(
+        settings: const RouteSettings(name: openingRouteName),
+        builder: (_) => const RoleplayOpeningScreen(),
+      );
+    }
+    return MaterialPageRoute<void>(
+      settings: const RouteSettings(name: RoleplayTutorialScreen.routeName),
+      builder: (_) => const RoleplayTutorialScreen(),
+    );
+  }
+
+  /// Tutorial이 맨 위가 아닐 때(페이월 아래) 자기 라우트만 Opening으로 바꾼다.
+  static void replaceRouteWithOpening(
+    NavigatorState nav,
+    Route<dynamic> oldRoute,
+  ) {
+    if (!oldRoute.isActive || oldRoute.isCurrent) return;
+    nav.replace<void>(
+      oldRoute: oldRoute,
+      newRoute: MaterialPageRoute<void>(
+        settings: const RouteSettings(name: openingRouteName),
+        builder: (_) => const RoleplayOpeningScreen(),
       ),
     );
   }

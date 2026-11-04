@@ -306,7 +306,7 @@
   - **에피소드 목록** (`SeriesEpisodeTabContent`): 진행대기 = `bestScoreMap`에 없는 첫 에피소드(민트 채움 Play, 배경 `#1E1E1E`). 그 앞은 테두리 Play, 뒤는 Locked. 오버뷰에서 시리즈 CEFR을 바꾸면 `GET /rps2/series/{id}/overview`를 다시 호출한다. 실패 시 이전 `bestScoreMap`으로 Play를 열지 않는다.
   - **다음 난이도 팝업**: 현재 시리즈 CEFR의 마지막 에피소드가 `bestScoreMap`에 있고 다음 레벨이 있으면(`Pre-A1→A1→A2→B1`, `B1`은 없음) `DefaultPopup`. 오버뷰 진입과 플레이 복귀 갱신 때. 이미 `rp_s2_user_series_cefr_notice`에 있으면 다시 띄우지 않고, 팝업을 닫은 뒤 `POST /rps2/series/{id}/cefr-level-up-notice?cefrLevel=`로 기록. 다음 난이도 도전하기는 그 시리즈만 다음 레벨로 저장하고 overview를 다시 불러온다. 나중에는 닫기만. 본문 아래 8에 안내 `bodySmall` `#80D7CF`. 배경 탭으로 닫히지 않음. Lab `Series: Next CEFR level`.
   - **스크롤**: 진행대기가 1번이면 자동 스크롤 없음. 2번 이상이면 카드 세로 중앙을 화면 중앙에 맞춤(450ms `easeInOut`). 화면에 걸쳐 있어도 이동. 리스트 끝이면 최대 스크롤에서 멈춤.
-  - **해금 전진**: best score 갱신으로 진행대기가 정확히 다음 1칸이면, 갱신 전 화면을 300ms 유지한 뒤 위젯을 유지하고 1000ms. 홀드·애니 동안 에피소드 버튼 입력 없음(Play는 애니 완료 후 활성). 스크롤과 `#1E1E1E` 하이라이트가 같이 한 칸 이동(행 GlobalKey는 인덱스에 고정해 썸네일을 다시 만들지 않음), 이전 칸은 채움 Play→테두리 Play, 새 칸은 자물쇠가 커졌다 사라진 뒤 진행대기 Play가 오른쪽에서 들어오고, 그 순간에 강진동(30ms 최대 → 40ms 쉼 → 160ms 최대, sharpness 1). 재플레이·마지막 에피소드·점수만 변경은 즉시 교체. Result 다음 에피소드·잠금이면 애니 완료(또는 즉시 교체) 직후 `rp_result_got_it` 페이월.
+  - **해금 전진**: 진행 대기가 앞으로 가면, 앞선 클리어 칸은 이미 점수·다시하기로 두고 마지막 칸만 연출한다. 그 칸을 화면 위쪽(alignment 0.2)에 450ms로 맞춘 뒤 300ms 홀드, 이어서 1000ms. 홀드·애니 동안 에피소드 버튼 입력 없음. 스크롤과 `#1E1E1E` 하이라이트, 이전 칸은 채움 Play→테두리 Play, 새 칸은 자물쇠가 커졌다 사라진 뒤 진행대기 Play. 그 순간에 강진동(30ms 최대 → 40ms 쉼 → 160ms 최대, sharpness 1). 행 GlobalKey는 인덱스에 고정. 다음 칸이 없거나 진행 대기가 앞으로 가지 않으면 즉시 교체. Overview에서는 `rp_result_got_it`을 띄우지 않는다.
 - **SeriesInformationScreen** (Sub Screen, **S2**): Overview information 탭 → `SubScreenRoute` (`lib/screens/series/series_information.dart`). 부모가 로드한 `RpS2SeriesOverviewDto`·`UserDto` 전달(API 재호출 없음). 언어레벨·핵심 표현은 `SeriesStateService.playableCefrLevel`(시리즈 CEFR, `C1`은 `B1`). 헤더: Setting 계열 `AppScaffold`(좌 뒤로가기·우측 없음)+커스텀 중앙 title(`headlineSmall`·좌우 inset 40·max 2줄·`bodyTopPadding` 타이틀 높이 연동). 배경: 시리즈 thumbnail 원본(메모리 `_300` 있으면 먼저)·Opening과 동일 blur/dim. 본문: synopsis(bodySmall·justify) → gap10 → blockquote(좌 #353535 3px)·언어레벨·주제난이도(scl) → gap20 → 학습목표(headlineSmall) → gap10 → 에피소드별 learningFunction+#N title(gap10)·핵심 표현 불릿(`missions[].keyExpression` **en** 고정, 사용자 언어 미사용).
 
 ### 스크린 내부 구현 특이사항
@@ -952,17 +952,17 @@
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
 - **RoleplayResultReportScreen** (Sub): Report 문구
 - **ViewChatScreen** (Sub): Speech Feedback 헤더 View Chat
-- **다음 에피소드** 버튼: `popToOverview`. 다음 롤플레이는 열지 않는다. Overview 칸 이동 → Play 활성 직후, `feedbackLockedYn=='Y'`면 Paywall(`screen=rp_result_got_it`, bottom-up). 칸 이동이 없으면 갱신 직후 페이월. `'N'`은 페이월 없음. Play는 사용자가 누른다.
-- **좌상단 X**(`showCloseButton`): Result는 페이월 없이 `popToOverview`. History도 X 노출·탭 시 Profile로 `pop`.
-- **Complete Series**·시스템 뒤로가기: `feedbackLockedYn=='Y'`이면 Paywall(`screen=rp_result_got_it`)을 Result 위에 올리고, 전환이 끝나면 Result를 제거. 페이월이 닫히면 Overview. 구독 성공 시 `GET /v1/users` 재반영. `'N'`·History(`exitViaPop`)는 페이월 없이 기존 닫기. `N` 경로는 `popToOverview`.
+- **다음 에피소드** 버튼: 결과 캐시를 버리고 다음 에피소드 Tutorial 또는 Opening으로 Result를 교체. `feedbackLockedYn=='Y'`면 먼저 Result 위 Paywall(`screen=rp_result_got_it`). 페이월이 화면을 덮으면 그 아래에서 교체. 닫기·구독 모두 그 화면. 점수 갱신은 Overview로 돌아올 때.
+- **좌상단 X**(`showCloseButton`): Result는 시스템 뒤로가기와 같다. `feedbackLockedYn=='Y'`면 Result 위 `rp_result_got_it` 후 Overview. `'N'`은 페이월 없이 `popToOverview`. History는 Profile로 `pop`.
+- **Complete Series**·시스템 뒤로가기·X: `feedbackLockedYn=='Y'`이면 Paywall(`screen=rp_result_got_it`)을 Result 위에 올리고, 전환이 끝나면 Result를 제거. 페이월이 닫히면 Overview. 구독 성공 시 `GET /v1/users` 재반영. `'N'`·History(`exitViaPop`)는 페이월 없이 기존 닫기. `N` 경로는 `popToOverview`.
 
 ### 스크린 내부 구현 특이사항
-- 박스레이어: 별 + titles + Mission/Words/Like (`rps2_mission_on/off.png`). 1초 후 상단 이동 + `LikeProgressEffect`.
-- 본문: Key Expression + Speech Feedback + 하단 버튼/Report. 하단 버튼은 다음 에피소드 `roleplayResultNextEpisode`, 마지막 에피소드 `roleplayResultCompleteSeries`. History는 `Got it!`·Report 없음(`showReportLink: false`).
+- 박스레이어: 별 + titles + Mission/Words/Like (`rps2_mission_on/off.png`). 1초 후 상단 이동 + `LikeProgressEffect`. 연출이 끝나면 이 패널과 Key Expression·Speech Feedback·하단 버튼이 한 세로 스크롤. 패널과 Key Expression 사이 32. X는 스크롤이 상태표시줄+56을 넘으면 200ms fade-out, 위로 돌아오면 fade-in. History도 동일.
+- 본문: Key Expression + Speech Feedback + 하단 버튼/Report. 하단 버튼은 다음 에피소드 `roleplayResultNextEpisode`, 마지막 에피소드 `roleplayResultCompleteSeries`. 다음 에피소드는 처음 `#353535`·`#8C8C8C`·자물쇠(`seriesOverviewLocked`)이고, 버튼 전체가 화면에 들어오면(처음부터 보이면 푸터 fade 직후) Overview와 같은 자물쇠 팝 뒤 `#80D7CF` 알약이 오른쪽에서 들어온다. 글자 스타일은 Result 버튼(18 w600), 해금 글자는 흰색. 그림자 유지. 연출 전 탭 없음. 한 번만. 시리즈 완료·History Got it은 청록 버튼. History는 `Got it!`·Report 없음(`showReportLink: false`).
 - Speech Feedback 펼침: `feedbackLockedYn`. Result `'Y'` Paywall. Profile History `'Y'`는 구독 조회 후 토스트 또는 Paywall. `'N'` feedback TTS 후 펼침+재생.
 - Key Expression 카드 탭: `GET …/expressions/{i}/sound`. 북마크 POST/DELETE 동일 경로.
 - iOS TTS(Key Expression·Speech Feedback): `SudaTtsAudioPlayer` — Playing과 동일 파일 재생. History·View Chat 공유.
-- 시스템 뒤로가기 = Complete Series 경로 (`PopScope`). 잠금 시 Result 위 `rp_result_got_it` 페이월. 다음 에피소드 버튼의 잠금 페이월은 Overview 칸 이동 완료(또는 즉시 Play 활성) 직후.
+- 시스템 뒤로가기·X = Complete Series 경로 (`PopScope`·X). 잠금 시 Result 위 `rp_result_got_it` 후 Overview. 다음 에피소드 버튼의 잠금 페이월은 Result를 덮은 뒤, 그 아래에서 다음 에피소드로 교체. Overview는 이 페이월을 띄우지 않는다.
 
 ---
 

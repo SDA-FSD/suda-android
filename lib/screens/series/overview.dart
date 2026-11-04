@@ -23,8 +23,6 @@ import '../../widgets/energy_info_popup.dart';
 import '../../widgets/suda_label_tabs.dart';
 import '../../navigation/app_route_observer.dart';
 import '../../routes/roleplay_router.dart';
-import '../../screens/paywall/paywall.dart';
-import '../../utils/paywall_impression_screen.dart';
 import 'series_information.dart';
 import 'cefr_level_up_popup.dart';
 import 'widgets/series_episode_tab_content.dart';
@@ -121,7 +119,6 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
 
   @override
   void dispose() {
-    SeriesStateService.instance.clearRpResultGotItPaywallPending();
     appRouteObserver.unsubscribe(this);
     _scrollController.removeListener(_handleScroll);
     _scrollController.dispose();
@@ -296,7 +293,7 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
       );
       if (!mounted) return;
       final updated = overview.copyWith(bestScoreMap: bestScoreMap);
-      final unlockAdvanced = seriesOverviewUnlockAdvanced(
+      final unlockStep = seriesOverviewLastUnlockStep(
         before: overview,
         after: updated,
       );
@@ -307,45 +304,13 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
       );
       setState(() {
         _overview = updated;
-        // 해금이 한 칸 전진하면 같은 State에서 스크롤·하이라이트·버튼을 애니메이션한다.
-        if (!unlockAdvanced) {
+        // 마지막 한 칸 해금은 같은 State에서 스크롤·하이라이트·버튼을 애니메이션한다.
+        if (unlockStep == null) {
           _episodeContentKey++;
         }
         _scrollToUnlockToken++;
       });
-      // 칸 이동 없으면 Play가 바로 살아나므로 직후 페이월. 전진이면 애니 완료 콜백.
-      if (!unlockAdvanced) {
-        _maybeShowRpResultGotItPaywall();
-      }
       unawaited(_maybeShowCefrLevelUp(updated));
-    } catch (_) {}
-  }
-
-  void _onUnlockAdvanceFinished() {
-    _maybeShowRpResultGotItPaywall();
-  }
-
-  void _maybeShowRpResultGotItPaywall() {
-    if (!SeriesStateService.instance.consumeRpResultGotItPaywallPending()) {
-      return;
-    }
-    unawaited(_showRpResultGotItPaywall());
-  }
-
-  Future<void> _showRpResultGotItPaywall() async {
-    if (!mounted) return;
-    final subscribed = await PaywallScreen.push<bool>(
-      context,
-      screen: PaywallImpressionScreen.rpResultGotIt,
-    );
-    if (subscribed != true || !mounted) return;
-    final token = await TokenStorage.loadAccessToken();
-    if (token == null || token.isEmpty || !mounted) return;
-    try {
-      final user = await SudaApiClient.getCurrentUser(accessToken: token);
-      MainUserSync.instance.notifyUserUpdated(user);
-      SeriesStateService.instance.setUser(user);
-      RoleplayStateService.instance.setUser(user);
     } catch (_) {}
   }
 
@@ -929,7 +894,6 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
             overview: overview,
             onPlayEpisode: _onEpisodePlay,
             scrollToUnlockToken: _scrollToUnlockToken,
-            onUnlockAdvanceFinished: _onUnlockAdvanceFinished,
           ),
         ),
         SudaLabelTab(

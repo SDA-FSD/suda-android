@@ -23,8 +23,16 @@ int? seriesOverviewFirstUnlockIndex(RpS2SeriesOverviewDto overview) {
   return null;
 }
 
-/// 진행대기가 정확히 다음 1칸으로 옮겨졌고, 그 칸은 아직 점수가 없을 때.
-bool seriesOverviewUnlockAdvanced({
+/// 진행 대기가 앞으로 갔을 때, 연출할 마지막 한 칸.
+/// [from]은 새 진행 대기 직전(방금 끝낸 칸), [to]는 새 진행 대기.
+class SeriesOverviewUnlockStep {
+  final int from;
+  final int to;
+
+  const SeriesOverviewUnlockStep({required this.from, required this.to});
+}
+
+SeriesOverviewUnlockStep? seriesOverviewLastUnlockStep({
   required RpS2SeriesOverviewDto before,
   required RpS2SeriesOverviewDto after,
 }) {
@@ -32,18 +40,32 @@ bool seriesOverviewUnlockAdvanced({
   final afterEpisodes = after.episodes;
   if (beforeEpisodes.isEmpty ||
       beforeEpisodes.length != afterEpisodes.length) {
-    return false;
+    return null;
   }
   for (var i = 0; i < beforeEpisodes.length; i++) {
-    if (beforeEpisodes[i].id != afterEpisodes[i].id) return false;
+    if (beforeEpisodes[i].id != afterEpisodes[i].id) return null;
   }
-  final from = seriesOverviewFirstUnlockIndex(before);
-  final to = seriesOverviewFirstUnlockIndex(after);
-  if (from == null || to == null || to != from + 1) return false;
-  final completedId = beforeEpisodes[from].id;
-  if (!after.bestScoreMap.containsKey(completedId)) return false;
-  if (after.bestScoreMap.containsKey(afterEpisodes[to].id)) return false;
-  return true;
+  final oldFrontier = seriesOverviewFirstUnlockIndex(before);
+  final newFrontier = seriesOverviewFirstUnlockIndex(after);
+  if (oldFrontier == null || newFrontier == null || newFrontier <= oldFrontier) {
+    return null;
+  }
+  final from = newFrontier - 1;
+  final completedId = afterEpisodes[from].id;
+  if (!after.bestScoreMap.containsKey(completedId)) return null;
+  if (after.bestScoreMap.containsKey(afterEpisodes[newFrontier].id)) {
+    return null;
+  }
+  return SeriesOverviewUnlockStep(from: from, to: newFrontier);
+}
+
+RpS2SeriesOverviewDto seriesOverviewHoldBeforeUnlock(
+  RpS2SeriesOverviewDto after,
+  int from,
+) {
+  final scores = Map<int, int>.from(after.bestScoreMap)
+    ..remove(after.episodes[from].id);
+  return after.copyWith(bestScoreMap: scores);
 }
 
 class SeriesEpisodeTabContent extends StatefulWidget {
@@ -51,15 +73,11 @@ class SeriesEpisodeTabContent extends StatefulWidget {
   final void Function(RpS2SeriesEpisodeDto episode)? onPlayEpisode;
   final int scrollToUnlockToken;
 
-  /// 해금 칸 이동 애니 완료(또는 앵커 실패로 Play가 즉시 살아난) 직후 1회.
-  final VoidCallback? onUnlockAdvanceFinished;
-
   const SeriesEpisodeTabContent({
     super.key,
     required this.overview,
     this.onPlayEpisode,
     this.scrollToUnlockToken = 0,
-    this.onUnlockAdvanceFinished,
   });
 
   @override
@@ -139,7 +157,6 @@ class _SeriesEpisodeTabContentState extends State<SeriesEpisodeTabContent>
         _advanceTicksEnabled = false;
         _episodeButtonsLocked = false;
       });
-      widget.onUnlockAdvanceFinished?.call();
     });
     _scheduleScrollToUnlock();
   }
@@ -147,11 +164,11 @@ class _SeriesEpisodeTabContentState extends State<SeriesEpisodeTabContent>
   @override
   void didUpdateWidget(SeriesEpisodeTabContent oldWidget) {
     super.didUpdateWidget(oldWidget);
-    final advanced = seriesOverviewUnlockAdvanced(
+    final step = seriesOverviewLastUnlockStep(
       before: oldWidget.overview,
       after: widget.overview,
     );
-    if (advanced) {
+    if (step != null) {
       final generation = ++_advanceGeneration;
       _advanceHoldTimer?.cancel();
       _advanceTicksEnabled = false;
@@ -159,24 +176,14 @@ class _SeriesEpisodeTabContentState extends State<SeriesEpisodeTabContent>
       _advanceTo = null;
       _anchorsReady = false;
       _anchorAttempts = 0;
-      _heldOverview = oldWidget.overview;
+      _heldOverview = seriesOverviewHoldBeforeUnlock(widget.overview, step.from);
       _episodeButtonsLocked = true;
       _unlockHapticPlayed = false;
       if (_advanceController.value != 0) {
         _advanceController.value = 0;
       }
-      final from = seriesOverviewFirstUnlockIndex(oldWidget.overview);
-      final to = seriesOverviewFirstUnlockIndex(widget.overview);
-      _advanceHoldTimer = Timer(_unlockAdvanceHold, () {
-        if (!mounted || generation != _advanceGeneration) return;
-        setState(() {
-          _heldOverview = null;
-          _advanceFrom = from;
-          _advanceTo = to;
-          _anchorsReady = false;
-          _anchorAttempts = 0;
-        });
-        _scheduleScrollToUnlock(advanceGeneration: generation);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        unawaited(_alignThenHoldUnlock(generation, step.from, step.to));
       });
       return;
     }
@@ -231,7 +238,6 @@ class _SeriesEpisodeTabContentState extends State<SeriesEpisodeTabContent>
         _anchorsReady = false;
         _episodeButtonsLocked = false;
         if (mounted) setState(() {});
-        widget.onUnlockAdvanceFinished?.call();
         return;
       }
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -240,11 +246,42 @@ class _SeriesEpisodeTabContentState extends State<SeriesEpisodeTabContent>
       return;
     }
     _anchorAttempts = 0;
-    // Play는 칸 이동 애니 완료 후에만 활성(페이월 타이밍·중간 탭 방지).
+    // Play는 칸 이동 애니 동안 누르지 못한다.
     setState(() {});
     _advanceTicksEnabled = true;
     _advanceController.forward(from: 0);
-    _scrollToUnlockIfNeeded(duration: _unlockAdvanceDuration);
+  }
+
+  /// 홀드 전에 방금 끝낸 칸이 위에 오게 맞춘 뒤, 300ms 후 해금 연출을 시작한다.
+  Future<void> _alignThenHoldUnlock(int generation, int from, int to) async {
+    if (!mounted || generation != _advanceGeneration) return;
+    final targetContext = _rowKey(from).currentContext;
+    final renderObject = targetContext?.findRenderObject();
+    if (targetContext != null &&
+        renderObject is RenderBox &&
+        renderObject.hasSize) {
+      try {
+        await Scrollable.ensureVisible(
+          targetContext,
+          duration: _scrollToUnlockDuration,
+          curve: Curves.easeInOut,
+          alignment: 0.2,
+        );
+      } catch (_) {}
+    }
+    if (!mounted || generation != _advanceGeneration) return;
+    _advanceHoldTimer?.cancel();
+    _advanceHoldTimer = Timer(_unlockAdvanceHold, () {
+      if (!mounted || generation != _advanceGeneration) return;
+      setState(() {
+        _heldOverview = null;
+        _advanceFrom = from;
+        _advanceTo = to;
+        _anchorsReady = false;
+        _anchorAttempts = 0;
+      });
+      _scheduleScrollToUnlock(advanceGeneration: generation);
+    });
   }
 
   void _playUnlockHapticIfNeeded() {

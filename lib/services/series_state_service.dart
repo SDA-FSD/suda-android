@@ -18,8 +18,6 @@ class SeriesStateService {
   RpS2UserHistoryDto? _cachedUserHistory;
   bool _bestScoreRefreshPending = false;
   bool _profileHistoryRefreshPending = false;
-  /// Result 다음 에피소드·잠금. Overview 칸 이동(또는 즉시 Play 가능) 후 `rp_result_got_it` 페이월.
-  bool _rpResultGotItPaywallPending = false;
 
   int? get seriesId => _seriesId;
   RpS2SeriesOverviewDto? get overview => _overview;
@@ -133,20 +131,6 @@ class SeriesStateService {
     return true;
   }
 
-  void markRpResultGotItPaywallPending() {
-    _rpResultGotItPaywallPending = true;
-  }
-
-  bool consumeRpResultGotItPaywallPending() {
-    if (!_rpResultGotItPaywallPending) return false;
-    _rpResultGotItPaywallPending = false;
-    return true;
-  }
-
-  void clearRpResultGotItPaywallPending() {
-    _rpResultGotItPaywallPending = false;
-  }
-
   void clear() {
     _seriesId = null;
     _overview = null;
@@ -157,6 +141,5 @@ class SeriesStateService {
     _cachedUserHistory = null;
     _bestScoreRefreshPending = false;
     _profileHistoryRefreshPending = false;
-    _rpResultGotItPaywallPending = false;
   }
 }

@@ -84,6 +84,10 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
   bool _hasStartedEffectSequence = false;
   bool _effectDone = false;
   bool _showFooterActions = false;
+  bool _closeButtonVisible = true;
+  bool _nextEpisodeUnlockStarted = false;
+  final ScrollController _resultScrollController = ScrollController();
+  final GlobalKey _nextEpisodeButtonKey = GlobalKey();
   int _revealedGoldStars = 0;
   bool _reportSubmitted = false;
   bool _isLeavingToOverview = false;
@@ -145,6 +149,8 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
       vsync: this,
       duration: const Duration(milliseconds: 240),
     );
+    _footerFadeController.addStatusListener(_onFooterFadeStatus);
+    _resultScrollController.addListener(_handleResultScroll);
     if (widget.skipEntranceAnimation) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
@@ -322,6 +328,44 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
     });
   }
 
+  void _handleResultScroll() {
+    if (!mounted || !_resultScrollController.hasClients) return;
+    final hideAfter = MediaQuery.paddingOf(context).top + 56;
+    final visible = _resultScrollController.offset <= hideAfter;
+    final startUnlock = _shouldStartNextEpisodeUnlock();
+    if (visible == _closeButtonVisible && !startUnlock) return;
+    setState(() {
+      _closeButtonVisible = visible;
+      if (startUnlock) _nextEpisodeUnlockStarted = true;
+    });
+  }
+
+  void _onFooterFadeStatus(AnimationStatus status) {
+    if (status != AnimationStatus.completed) return;
+    if (!_shouldStartNextEpisodeUnlock()) return;
+    setState(() => _nextEpisodeUnlockStarted = true);
+  }
+
+  bool _shouldStartNextEpisodeUnlock() {
+    if (_nextEpisodeUnlockStarted || !_showFooterActions) return false;
+    if (!_opensNextEpisodeSlot) return false;
+    if (_footerFadeController.value < 1) return false;
+    return _isNextEpisodeButtonFullyVisible();
+  }
+
+  bool _isNextEpisodeButtonFullyVisible() {
+    final box =
+        _nextEpisodeButtonKey.currentContext?.findRenderObject() as RenderBox?;
+    if (box == null || !box.hasSize || !box.attached) return false;
+    final rect = box.localToGlobal(Offset.zero) & box.size;
+    final screen = MediaQuery.sizeOf(context);
+    const edge = 1.0;
+    return rect.top >= -edge &&
+        rect.left >= -edge &&
+        rect.bottom <= screen.height + edge &&
+        rect.right <= screen.width + edge;
+  }
+
   @override
   void dispose() {
     unawaited(PerfMonitoringService.instance.stop('feedback_screen_ready'));
@@ -329,6 +373,9 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
     _keyExpressionAudioSub = null;
     _ttsPlayer.dispose();
     _routeAnimation?.removeStatusListener(_onRouteAnimationStatusChanged);
+    _footerFadeController.removeStatusListener(_onFooterFadeStatus);
+    _resultScrollController.removeListener(_handleResultScroll);
+    _resultScrollController.dispose();
     _panelMoveController.dispose();
     _keyExpressionSectionEntranceController.dispose();
     _footerFadeController.dispose();
@@ -354,7 +401,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
     _exitResult(context);
   }
 
-  /// 좌상단 X. History는 Profile로 pop. Result는 페이월 없이 Overview.
+  /// 좌상단 X. History는 Profile로 pop. Result는 뒤로가기와 같이 Overview.
   Future<void> _onClosePressed(BuildContext context) async {
     if (_isLeavingToOverview) return;
     if (widget.exitViaPop) {
@@ -362,24 +409,85 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
       Navigator.of(context).pop();
       return;
     }
-    setState(() => _isLeavingToOverview = true);
-    await _refreshCurrentUser();
-    if (!context.mounted) return;
-    RoleplayRouter.popToOverview(context);
+    await _navigateToOverview(context);
   }
 
-  /// 다음 에피소드. Overview로 돌아가고 Play는 사용자가 누른다.
-  /// 잠금이면 Overview 칸 이동(없으면 즉시) 후 Play 활성 시점에 `rp_result_got_it` 페이월.
+  /// 다음 에피소드. 결과 캐시를 버리고 그 에피소드 Opening으로 간다.
+  /// 잠금이면 Result 위 `rp_result_got_it`. 페이월이 화면을 덮으면 그 아래에서 교체한다.
   Future<void> _exitNextEpisode(BuildContext context) async {
     if (_isLeavingToOverview) return;
+    final nextId = _nextEpisodeId();
+    if (nextId == null) {
+      await _navigateToOverview(context);
+      return;
+    }
     setState(() => _isLeavingToOverview = true);
+    unawaited(_ttsPlayer.stop());
     await _refreshCurrentUser();
     if (!context.mounted) return;
 
-    if (_s2History?.feedbackLockedYn == 'Y') {
-      SeriesStateService.instance.markRpResultGotItPaywallPending();
+    final resultRoute = ModalRoute.of(context);
+    final nav = Navigator.of(context);
+    if (resultRoute == null) return;
+
+    final locked = _s2History?.feedbackLockedYn == 'Y';
+    if (!locked) {
+      RoleplayRouter.replaceResultWithNextEpisode(
+        nav,
+        resultRoute: resultRoute,
+        episodeId: nextId,
+      );
+      return;
     }
-    RoleplayRouter.popToOverview(context);
+
+    final secondary = resultRoute.secondaryAnimation;
+    if (secondary == null) {
+      RoleplayRouter.replaceResultWithNextEpisode(
+        nav,
+        resultRoute: resultRoute,
+        episodeId: nextId,
+      );
+      return;
+    }
+
+    var replaced = false;
+    void onCovered(AnimationStatus status) {
+      if (status != AnimationStatus.completed || replaced) return;
+      replaced = true;
+      secondary.removeStatusListener(onCovered);
+      RoleplayRouter.replaceResultWithNextEpisode(
+        nav,
+        resultRoute: resultRoute,
+        episodeId: nextId,
+      );
+    }
+
+    secondary.addStatusListener(onCovered);
+    final subscribed = await PaywallScreen.push<bool>(
+      context,
+      screen: PaywallImpressionScreen.rpResultGotIt,
+    );
+    secondary.removeStatusListener(onCovered);
+    if (!replaced) {
+      RoleplayRouter.replaceResultWithNextEpisode(
+        nav,
+        resultRoute: resultRoute,
+        episodeId: nextId,
+      );
+    }
+    if (subscribed == true) {
+      await _refreshCurrentUser();
+    }
+  }
+
+  int? _nextEpisodeId() {
+    final series = SeriesStateService.instance;
+    final episodes = series.overview?.episodes;
+    final currentId = series.selectedEpisodeId;
+    if (episodes == null || currentId == null) return null;
+    final index = episodes.indexWhere((episode) => episode.id == currentId);
+    if (index < 0 || index + 1 >= episodes.length) return null;
+    return episodes[index + 1].id;
   }
 
   Future<void> _exitResult(BuildContext context) async {
@@ -1465,36 +1573,46 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
         children: [
           const SizedBox(height: 28),
           Center(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(999),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0x33000000),
-                    blurRadius: 18,
-                    offset: Offset(0, 5),
+            child: _opensNextEpisodeSlot
+                ? _NextEpisodeRevealButton(
+                    key: _nextEpisodeButtonKey,
+                    label: _resultPrimaryLabel(l10n),
+                    lockedLabel: l10n.seriesOverviewLocked,
+                    reveal: _nextEpisodeUnlockStarted,
+                    onPressed: _isLeavingToOverview
+                        ? null
+                        : () => _onResultPrimaryAction(context),
+                  )
+                : DecoratedBox(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(999),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Color(0x33000000),
+                          blurRadius: 18,
+                          offset: Offset(0, 5),
+                        ),
+                      ],
+                    ),
+                    child: ElevatedButton(
+                      onPressed: _isLeavingToOverview
+                          ? null
+                          : () => _onResultPrimaryAction(context),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _teal,
+                        foregroundColor: Colors.white,
+                        disabledBackgroundColor: _teal,
+                        disabledForegroundColor: Colors.white,
+                        shape: const StadiumBorder(),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 30,
+                          vertical: 18,
+                        ),
+                        elevation: 0,
+                      ),
+                      child: Text(_resultPrimaryLabel(l10n)),
+                    ),
                   ),
-                ],
-              ),
-              child: ElevatedButton(
-                onPressed: _isLeavingToOverview
-                    ? null
-                    : () => _onResultPrimaryAction(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: _teal,
-                  foregroundColor: Colors.white,
-                  disabledBackgroundColor: _teal,
-                  disabledForegroundColor: Colors.white,
-                  shape: const StadiumBorder(),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 30,
-                    vertical: 18,
-                  ),
-                  elevation: 0,
-                ),
-                child: Text(_resultPrimaryLabel(l10n)),
-              ),
-            ),
           ),
           if (widget.showReportLink) ...[
             const SizedBox(height: 35),
@@ -1510,10 +1628,13 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
     final bottomInset = MediaQuery.paddingOf(context).bottom;
 
     return SingleChildScrollView(
-      padding: EdgeInsets.fromLTRB(0, 32, 0, 16 + bottomInset),
+      controller: _resultScrollController,
+      padding: EdgeInsets.only(bottom: 16 + bottomInset),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          KeyedSubtree(key: _panelKey, child: _buildPanel(context)),
+          const SizedBox(height: 32),
           _buildKeyExpressionLayer(context),
           const SizedBox(height: 28),
           _buildSpeechFeedbackLayer(context),
@@ -1557,34 +1678,242 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
           child: Stack(
             fit: StackFit.expand,
             children: [
-              Column(
-                children: [
-                  SizedBox(
-                    height: boxHeight,
-                    width: double.infinity,
-                    child: Container(
-                      alignment: Alignment.center,
-                      child: KeyedSubtree(
-                        key: _panelKey,
-                        child: _buildPanel(context),
+              if (_effectDone)
+                _buildS2PostEffectBody(context)
+              else
+                Column(
+                  children: [
+                    SizedBox(
+                      height: boxHeight,
+                      width: double.infinity,
+                      child: Container(
+                        alignment: Alignment.center,
+                        child: KeyedSubtree(
+                          key: _panelKey,
+                          child: _buildPanel(context),
+                        ),
                       ),
                     ),
-                  ),
-                  if (_effectDone)
-                    Expanded(child: _buildS2PostEffectBody(context)),
-                ],
-              ),
+                  ],
+                ),
               if (widget.showCloseButton)
                 PositionedDirectional(
                   top: MediaQuery.paddingOf(context).top + 16,
                   start: 16,
-                  child: _ResultCloseButton(
-                    onPressed: _isLeavingToOverview
-                        ? null
-                        : () => _onClosePressed(context),
+                  child: AnimatedOpacity(
+                    opacity: _closeButtonVisible ? 1 : 0,
+                    duration: const Duration(milliseconds: 200),
+                    child: IgnorePointer(
+                      ignoring: !_closeButtonVisible,
+                      child: _ResultCloseButton(
+                        onPressed: _isLeavingToOverview
+                            ? null
+                            : () => _onClosePressed(context),
+                      ),
+                    ),
                   ),
                 ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _NextEpisodeRevealButton extends StatefulWidget {
+  final String label;
+  final String lockedLabel;
+  final bool reveal;
+  final VoidCallback? onPressed;
+
+  const _NextEpisodeRevealButton({
+    super.key,
+    required this.label,
+    required this.lockedLabel,
+    required this.reveal,
+    required this.onPressed,
+  });
+
+  @override
+  State<_NextEpisodeRevealButton> createState() =>
+      _NextEpisodeRevealButtonState();
+}
+
+class _NextEpisodeRevealButtonState extends State<_NextEpisodeRevealButton>
+    with SingleTickerProviderStateMixin {
+  static const _lockedFill = Color(0xFF353535);
+  static const _lockedText = Color(0xFF8C8C8C);
+  static const _mint = Color(0xFF80D7CF);
+  static const _lockPopEnd = 180 / 520;
+  static const _playSlideEnd = (180 + 220) / 520;
+
+  late final AnimationController _controller;
+  bool _hapticPlayed = false;
+  bool _interactive = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    )..addListener(_onTick);
+    _controller.addStatusListener((status) {
+      if (status != AnimationStatus.completed || !mounted) return;
+      setState(() => _interactive = true);
+    });
+    if (widget.reveal) {
+      _controller.forward();
+    }
+  }
+
+  @override
+  void didUpdateWidget(_NextEpisodeRevealButton oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.reveal && !oldWidget.reveal && !_controller.isAnimating) {
+      _controller.forward();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _onTick() {
+    if (!_hapticPlayed && _controller.value >= _lockPopEnd) {
+      _hapticPlayed = true;
+      unawaited(_vibrateUnlock());
+    }
+    setState(() {});
+  }
+
+  Future<void> _vibrateUnlock() async {
+    try {
+      await Vibration.vibrate(
+        pattern: [0, 30, 40, 160],
+        intensities: [0, 255, 0, 255],
+        sharpness: 1,
+      );
+    } catch (_) {}
+  }
+
+  TextStyle _labelStyle(BuildContext context, Color color) {
+    final base = Theme.of(context).elevatedButtonTheme.style?.textStyle
+        ?.resolve(const {});
+    return (base ??
+            const TextStyle(
+              fontFamily: 'ChironGoRoundTC',
+              fontFamilyFallback: ['ChironHeiHK'],
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              fontVariations: [FontVariation('wght', 600)],
+            ))
+        .copyWith(color: color);
+  }
+
+  Size _textSize(BuildContext context, String text, TextStyle style) {
+    final painter = TextPainter(
+      text: TextSpan(text: text, style: style),
+      textDirection: Directionality.of(context),
+      textScaler: MediaQuery.textScalerOf(context),
+      maxLines: 1,
+    )..layout();
+    return painter.size;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final nextStyle = _labelStyle(context, Colors.white);
+    final lockedStyle = _labelStyle(context, _lockedText);
+    final nextSize = _textSize(context, widget.label, nextStyle);
+    final lockedSize = _textSize(context, widget.lockedLabel, lockedStyle);
+    const padH = 30.0;
+    const padV = 18.0;
+    final width = math.max(nextSize.width, lockedSize.width + 28) + padH * 2;
+    final height = math.max(nextSize.height, lockedSize.height) + padV * 2;
+    final t = _controller.value;
+    final lockT = (t / _lockPopEnd).clamp(0.0, 1.0);
+    final double iconScale;
+    final double lockOpacity;
+    if (lockT < 0.4) {
+      iconScale = lerpDouble(1, 1.25, lockT / 0.4)!;
+      lockOpacity = 1;
+    } else {
+      final shrink = (lockT - 0.4) / 0.6;
+      iconScale = lerpDouble(1.25, 0, shrink)!;
+      lockOpacity = 1 - shrink;
+    }
+    final slideT = ((t - _lockPopEnd) / (_playSlideEnd - _lockPopEnd)).clamp(
+      0.0,
+      1.0,
+    );
+    final slide = Curves.easeOutCubic.transform(slideT);
+    final radius = BorderRadius.circular(height / 2);
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: radius,
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x33000000),
+            blurRadius: 18,
+            offset: Offset(0, 5),
+          ),
+        ],
+      ),
+      child: GestureDetector(
+        onTap: _interactive ? widget.onPressed : null,
+        behavior: HitTestBehavior.opaque,
+        child: ClipRRect(
+          borderRadius: radius,
+          child: SizedBox(
+            width: width,
+            height: height,
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: ColoredBox(
+                    color: _lockedFill,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Opacity(
+                          opacity: lockOpacity.clamp(0.0, 1.0),
+                          child: Transform.scale(
+                            scale: iconScale,
+                            child: Image.asset(
+                              'assets/images/icons/lock.png',
+                              width: 24,
+                              height: 24,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Opacity(
+                          opacity: lockOpacity.clamp(0.0, 1.0),
+                          child: Text(widget.lockedLabel, style: lockedStyle),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                if (t >= _lockPopEnd)
+                  Positioned.fill(
+                    child: FractionalTranslation(
+                      translation: Offset(1 - slide, 0),
+                      child: ColoredBox(
+                        color: _mint,
+                        child: Center(
+                          child: Text(widget.label, style: nextStyle),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),

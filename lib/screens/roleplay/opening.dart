@@ -17,6 +17,7 @@ import '../../utils/default_toast.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/token_refresh_service.dart';
+import '../../navigation/app_route_observer.dart';
 import '../../routes/roleplay_router.dart';
 import '../../utils/suda_json_util.dart';
 import '../../utils/default_markdown.dart';
@@ -37,8 +38,11 @@ class RoleplayOpeningScreen extends StatefulWidget {
   State<RoleplayOpeningScreen> createState() => _RoleplayOpeningScreenState();
 }
 
-class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen> {
+class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen>
+    with RouteAware {
   bool _isLoading = false;
+  bool _routeSubscribed = false;
+  bool _briefingStarted = false;
   final AudioPlayer _briefingAudioPlayer = AudioPlayer();
 
   void _restoreButton() {
@@ -51,12 +55,36 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       unawaited(_precacheAiCharacterImage());
-      unawaited(_playBriefingAudio());
+      _playBriefingWhenVisible();
     });
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final route = ModalRoute.of(context);
+    if (route == null || _routeSubscribed) return;
+    appRouteObserver.subscribe(this, route);
+    _routeSubscribed = true;
+  }
+
+  @override
+  void didPopNext() {
+    _playBriefingWhenVisible();
+  }
+
+  /// 페이월 아래에서 미리 깔린 Opening은 화면이 드러난 뒤에 브리핑을 재생한다.
+  void _playBriefingWhenVisible() {
+    if (_briefingStarted || !mounted) return;
+    final route = ModalRoute.of(context);
+    if (route != null && !route.isCurrent) return;
+    _briefingStarted = true;
+    unawaited(_playBriefingAudio());
+  }
+
+  @override
   void dispose() {
+    appRouteObserver.unsubscribe(this);
     if (Platform.isIOS) {
       final player = _briefingAudioPlayer;
       IosAudioTeardown.enqueue(() async {

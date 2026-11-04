@@ -455,6 +455,11 @@ class _RoleplayTutorialScreenState extends State<RoleplayTutorialScreen>
   void _scheduleReplaceWithOpening() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
+      final route = ModalRoute.of(context);
+      if (route != null && !route.isCurrent) {
+        RoleplayRouter.replaceRouteWithOpening(Navigator.of(context), route);
+        return;
+      }
       RoleplayRouter.replaceWithOpeningFromTutorial(context);
     });
   }
