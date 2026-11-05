@@ -759,7 +759,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
             Positioned.fill(
               child: Listener(
                 onPointerDown: (_) => _dismissConfigurationPanel(),
-                behavior: HitTestBehavior.translucent,
+                behavior: HitTestBehavior.opaque,
               ),
             ),
           if (widget.showCloseButton &&
