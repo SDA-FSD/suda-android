@@ -534,10 +534,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get roleplayHintLabel => '可以这样说';
 
   @override
-  String get roleplayHintShowAnswer => '查看英语表达';
+  String get roleplayHintShowAnswer => '查看表达';
 
   @override
-  String get roleplayHintEnglishLabel => '英语示例';
+  String get roleplayHintEnglishLabel => '示例';
 
   @override
   String get roleplayEndedFailed => '任务失败…';
@@ -1831,10 +1831,10 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get roleplayHintLabel => '可以这样说';
 
   @override
-  String get roleplayHintShowAnswer => '查看英语表达';
+  String get roleplayHintShowAnswer => '查看表达';
 
   @override
-  String get roleplayHintEnglishLabel => '英语示例';
+  String get roleplayHintEnglishLabel => '示例';
 
   @override
   String get roleplayEndedFailed => '任务失败…';
@@ -3128,10 +3128,10 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get roleplayHintLabel => '可以這樣說';
 
   @override
-  String get roleplayHintShowAnswer => '查看英語表達';
+  String get roleplayHintShowAnswer => '查看表達';
 
   @override
-  String get roleplayHintEnglishLabel => '英語示例';
+  String get roleplayHintEnglishLabel => '示例';
 
   @override
   String get roleplayEndedFailed => '任務失敗⋯⋯';

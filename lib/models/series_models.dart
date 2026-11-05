@@ -347,6 +347,8 @@ int? _optionalInt(dynamic value) {
 /// `GET /rps2/user-histories/{rpUserHistoryId}` 응답 DTO
 class RpS2UserHistoryDto {
   final int? id;
+  /// 이력 생성 시 학습 언어. 구버전 응답에서 없으면 EN으로 표시한다.
+  final String? targetLanguage;
   final List<RpS2UserHistoryMsgDto> messages;
   final List<bool> missions;
   final int? starScore;
@@ -369,6 +371,7 @@ class RpS2UserHistoryDto {
 
   const RpS2UserHistoryDto({
     this.id,
+    this.targetLanguage,
     this.messages = const [],
     this.missions = const [],
     this.starScore,
@@ -391,6 +394,7 @@ class RpS2UserHistoryDto {
   factory RpS2UserHistoryDto.fromJson(Map<String, dynamic> json) {
     return RpS2UserHistoryDto(
       id: _optionalInt(json['id']),
+      targetLanguage: json['targetLanguage'] as String?,
       messages: _userHistoryMessagesFromJson(json['messages']),
       missions: _boolListFromJson(json['missions']),
       starScore: _optionalInt(json['starScore']),

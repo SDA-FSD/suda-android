@@ -579,10 +579,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get roleplayHintLabel => 'Tu peux dire';
 
   @override
-  String get roleplayHintShowAnswer => 'Voir comment le dire en anglais';
+  String get roleplayHintShowAnswer => 'Voir comment le dire';
 
   @override
-  String get roleplayHintEnglishLabel => 'Exemple en anglais';
+  String get roleplayHintEnglishLabel => 'Exemple';
 
   @override
   String get roleplayEndedFailed => 'Mission échouée…';

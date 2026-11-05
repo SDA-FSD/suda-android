@@ -572,11 +572,10 @@ class AppLocalizationsId extends AppLocalizations {
   String get roleplayHintLabel => 'Kamu bisa bilang';
 
   @override
-  String get roleplayHintShowAnswer =>
-      'Lihat cara mengatakannya dalam bahasa Inggris';
+  String get roleplayHintShowAnswer => 'Lihat cara mengatakannya';
 
   @override
-  String get roleplayHintEnglishLabel => 'Contoh dalam bahasa Inggris';
+  String get roleplayHintEnglishLabel => 'Contoh';
 
   @override
   String get roleplayEndedFailed => 'Misi gagal...';

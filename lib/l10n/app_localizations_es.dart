@@ -573,10 +573,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get roleplayHintLabel => 'Puedes decir';
 
   @override
-  String get roleplayHintShowAnswer => 'Ver cómo se dice en inglés';
+  String get roleplayHintShowAnswer => 'Ver cómo se dice';
 
   @override
-  String get roleplayHintEnglishLabel => 'Ejemplo en inglés';
+  String get roleplayHintEnglishLabel => 'Ejemplo';
 
   @override
   String get roleplayEndedFailed => 'Misión fallida...';
@@ -1959,10 +1959,10 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
   String get roleplayHintLabel => 'Puedes decir';
 
   @override
-  String get roleplayHintShowAnswer => 'Ver cómo se dice en inglés';
+  String get roleplayHintShowAnswer => 'Ver cómo se dice';
 
   @override
-  String get roleplayHintEnglishLabel => 'Ejemplo en inglés';
+  String get roleplayHintEnglishLabel => 'Ejemplo';
 
   @override
   String get roleplayEndedFailed => 'Misión fallida...';

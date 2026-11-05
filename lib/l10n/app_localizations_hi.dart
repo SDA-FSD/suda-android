@@ -572,10 +572,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get roleplayHintLabel => 'आप ऐसे कह सकते हैं';
 
   @override
-  String get roleplayHintShowAnswer => 'अंग्रेज़ी में कैसे कहें देखें';
+  String get roleplayHintShowAnswer => 'कैसे कहें देखें';
 
   @override
-  String get roleplayHintEnglishLabel => 'अंग्रेज़ी उदाहरण';
+  String get roleplayHintEnglishLabel => 'उदाहरण';
 
   @override
   String get roleplayEndedFailed => 'मिशन फ़ेल हो गया...';

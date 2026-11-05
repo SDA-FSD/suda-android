@@ -560,10 +560,10 @@ class AppLocalizationsTh extends AppLocalizations {
   String get roleplayHintLabel => 'ลองพูดแบบนี้';
 
   @override
-  String get roleplayHintShowAnswer => 'ดูวิธีพูดภาษาอังกฤษ';
+  String get roleplayHintShowAnswer => 'ดูวิธีพูด';
 
   @override
-  String get roleplayHintEnglishLabel => 'ตัวอย่างภาษาอังกฤษ';
+  String get roleplayHintEnglishLabel => 'ตัวอย่าง';
 
   @override
   String get roleplayEndedFailed => 'ทำภารกิจไม่สำเร็จ...';

@@ -574,10 +574,10 @@ class AppLocalizationsPl extends AppLocalizations {
   String get roleplayHintLabel => 'Możesz powiedzieć';
 
   @override
-  String get roleplayHintShowAnswer => 'Zobacz, jak powiedzieć po angielsku';
+  String get roleplayHintShowAnswer => 'Zobacz, jak to powiedzieć';
 
   @override
-  String get roleplayHintEnglishLabel => 'Przykład po angielsku';
+  String get roleplayHintEnglishLabel => 'Przykład';
 
   @override
   String get roleplayEndedFailed => 'Misja nieudana...';

@@ -568,10 +568,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get roleplayHintLabel => 'Şöyle diyebilirsin';
 
   @override
-  String get roleplayHintShowAnswer => 'İngilizcesini gör';
+  String get roleplayHintShowAnswer => 'Nasıl söylenir gör';
 
   @override
-  String get roleplayHintEnglishLabel => 'İngilizce örnek';
+  String get roleplayHintEnglishLabel => 'Örnek';
 
   @override
   String get roleplayEndedFailed => 'Görev başarısız oldu...';

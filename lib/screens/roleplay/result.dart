@@ -1287,6 +1287,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
         final item = items[index];
         return _KeyExpressionCard(
           item: item,
+          targetLanguage: _s2History?.targetLanguage,
           fetchingActive:
               _keyExpressionActiveIndex == index && !_keyExpressionIsPlaying,
           playingActive:
@@ -2686,6 +2687,7 @@ class _SpeechFeedbackRowState extends State<_SpeechFeedbackRow> {
 class _KeyExpressionCard extends StatelessWidget {
   const _KeyExpressionCard({
     required this.item,
+    required this.targetLanguage,
     required this.fetchingActive,
     required this.playingActive,
     required this.bookmarked,
@@ -2694,6 +2696,7 @@ class _KeyExpressionCard extends StatelessWidget {
   });
 
   final RpS2KeyExpressionVo item;
+  final String? targetLanguage;
   final bool fetchingActive;
   final bool playingActive;
   final bool bookmarked;
@@ -2742,17 +2745,12 @@ class _KeyExpressionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context).textTheme;
-    final keyExpressionEn = SudaJsonUtil.localizedMapText(
-      item.keyExpression,
-      languageCode: 'en',
-    );
+    final languageCode = targetLanguage == 'KO' ? 'ko' : 'en';
+    final keyExpression = item.keyExpression[languageCode] ?? '';
     final keyExpressionUserLang = SudaJsonUtil.localizedMapText(
       item.keyExpression,
     );
-    final sampleAnswerEn = SudaJsonUtil.localizedMapText(
-      item.sampleAnswer,
-      languageCode: 'en',
-    );
+    final sampleAnswer = item.sampleAnswer[languageCode] ?? '';
     final sampleAnswerUserLang = SudaJsonUtil.localizedMapText(
       item.sampleAnswer,
     );
@@ -2794,7 +2792,7 @@ class _KeyExpressionCard extends StatelessWidget {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          keyExpressionEn,
+                          keyExpression,
                           style: theme.bodyLarge?.copyWith(
                             fontWeight: FontWeight.w700,
                             color: _exprTextPrimary,
@@ -2815,7 +2813,7 @@ class _KeyExpressionCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 15),
                   Text(
-                    sampleAnswerEn,
+                    sampleAnswer,
                     style: theme.bodyMedium?.copyWith(color: _exprTextPrimary),
                   ),
                   const SizedBox(height: 8),

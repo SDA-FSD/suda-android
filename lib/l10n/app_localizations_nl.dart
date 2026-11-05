@@ -573,10 +573,10 @@ class AppLocalizationsNl extends AppLocalizations {
   String get roleplayHintLabel => 'Je kunt zeggen';
 
   @override
-  String get roleplayHintShowAnswer => 'Bekijk hoe je het in het Engels zegt';
+  String get roleplayHintShowAnswer => 'Bekijk hoe je het zegt';
 
   @override
-  String get roleplayHintEnglishLabel => 'Voorbeeld in het Engels';
+  String get roleplayHintEnglishLabel => 'Voorbeeld';
 
   @override
   String get roleplayEndedFailed => 'Missie mislukt...';

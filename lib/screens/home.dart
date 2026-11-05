@@ -30,6 +30,7 @@ class HomeScreen extends StatefulWidget {
 
   /// 홈 탭이 선택될 때마다 증가. didUpdateWidget에서 변경 시 에너지 갱신.
   final int? homeTabSelectedCounter;
+
   /// IndexedStack에서 홈 탭이 선택된 경우 true (에너지 배지 타이머/GET).
   final bool isActive;
   final ValueChanged<HomeDto>? onHomeContentsLoaded;
@@ -73,6 +74,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   HomeFirstRpRecommendDto? _firstRpRecommend;
   bool _recommendDismissed = false;
   int _recommendRefreshGen = 0;
+  int _homeContentsRefreshGen = 0;
+
   /// 우상단 번개(`energy_sub`)와 동일 소스 — EnergyHeaderBadge onEnergyChanged.
   bool _isPremium = false;
   bool _pushRegisterInFlight = false;
@@ -114,13 +117,25 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     if (oldWidget.user != widget.user) {
       _maybeShowWelcomeGift();
     }
-    if (oldWidget.user?.targetLanguageQuery() != widget.user?.targetLanguageQuery()) {
+    final targetLanguageChanged =
+        (oldWidget.user?.targetLanguageQuery() ?? 'EN') !=
+        (widget.user?.targetLanguageQuery() ?? 'EN');
+    if (targetLanguageChanged) {
+      // 카테고리 내부 목록·페이지와 이전 언어의 추천 응답을 함께 초기화한다.
+      _recommendRefreshGen++;
+      _seriesGroups = null;
+      _isLoadingSeriesGroups = true;
+      _visibleCategoryCount = 0;
+      _firstRpRecommend = null;
+      _recommendDismissed = false;
       unawaited(_fetchHomeContents());
     }
     final returned =
         widget.homeTabSelectedCounter != oldWidget.homeTabSelectedCounter;
     final becameActive = widget.isActive && !oldWidget.isActive;
-    if (widget.isActive && (returned || becameActive)) {
+    if (!targetLanguageChanged &&
+        widget.isActive &&
+        (returned || becameActive)) {
       setState(() => _recommendDismissed = true);
       unawaited(_refreshFirstRpRecommend());
     }
@@ -170,6 +185,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   /// 홈 콘텐츠 조회 (배너 + 시리즈 통합 API)
   Future<void> _fetchHomeContents() async {
+    if (!mounted) return;
+    final gen = ++_homeContentsRefreshGen;
     if (_accessToken == null) {
       setState(() {
         _isLoadingBanners = false;
@@ -183,7 +200,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         final home = await SudaApiClient.getHomeContents(
           accessToken: _accessToken!,
         );
-        if (!mounted) return;
+        if (!mounted || gen != _homeContentsRefreshGen) return;
 
         RestStatusService.instance.update(
           restYn: home.restYn,
@@ -217,7 +234,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           _preloadAllBanners(banners);
         }
       } catch (e) {
-        if (mounted) {
+        if (mounted && gen == _homeContentsRefreshGen) {
           setState(() {
             _isLoadingBanners = false;
             _isLoadingSeriesGroups = false;
@@ -590,7 +607,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       if (i < _visibleCategoryCount) {
         categories.add(
           CategorySeriesRow(
-            key: ValueKey('category_${_seriesGroups![i].category.enumValue}'),
+            key: ValueKey(
+              'category_${widget.user?.targetLanguageQuery() ?? 'EN'}_'
+              '${_seriesGroups![i].category.enumValue}',
+            ),
             group: _seriesGroups![i],
             accessToken: _accessToken!,
             onSeriesTap: (item) => _navigateToSeriesOverview(item.id),

@@ -222,7 +222,7 @@
   "roleplayTextMode": "Text mode",
   "roleplayHintLabel": "You can say",
   "roleplayHintShowAnswer": "See how to say it",
-  "roleplayHintEnglishLabel": "Example in English",
+  "roleplayHintEnglishLabel": "Example",
   "roleplayEndedFailed": "Mission Failed...",
   "roleplayEndedComplete": "Roleplay Completed",
   "roleplayEndedEnding": "Moving to ending...",

@@ -574,10 +574,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get roleplayHintLabel => 'Можно сказать так';
 
   @override
-  String get roleplayHintShowAnswer => 'Посмотреть, как сказать по-английски';
+  String get roleplayHintShowAnswer => 'Посмотреть, как сказать';
 
   @override
-  String get roleplayHintEnglishLabel => 'Пример на английском';
+  String get roleplayHintEnglishLabel => 'Пример';
 
   @override
   String get roleplayEndedFailed => 'Миссия провалена...';

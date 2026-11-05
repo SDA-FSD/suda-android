@@ -581,10 +581,10 @@ class AppLocalizationsFil extends AppLocalizations {
   String get roleplayHintLabel => 'Pwede mong sabihin';
 
   @override
-  String get roleplayHintShowAnswer => 'Tingnan kung paano sabihin sa English';
+  String get roleplayHintShowAnswer => 'Tingnan kung paano sabihin';
 
   @override
-  String get roleplayHintEnglishLabel => 'Halimbawa sa English';
+  String get roleplayHintEnglishLabel => 'Halimbawa';
 
   @override
   String get roleplayEndedFailed => 'Hindi nakumpleto ang mission...';

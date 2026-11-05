@@ -1166,7 +1166,7 @@ abstract class AppLocalizations {
   /// No description provided for @roleplayHintEnglishLabel.
   ///
   /// In en, this message translates to:
-  /// **'Example in English'**
+  /// **'Example'**
   String get roleplayHintEnglishLabel;
 
   /// No description provided for @roleplayEndedFailed.

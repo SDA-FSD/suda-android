@@ -211,13 +211,9 @@ class SeriesInformationScreen extends StatelessWidget {
     final cefr = episode.cefrMap[cefrCode];
     if (cefr == null) return const [];
 
+    final languageCode = overview.targetLanguage == 'KO' ? 'ko' : 'en';
     return cefr.missions
-        .map(
-          (mission) => SudaJsonUtil.localizedMapText(
-            mission.keyExpression,
-            languageCode: 'en',
-          ),
-        )
+        .map((mission) => mission.keyExpression[languageCode] ?? '')
         .where((text) => text.isNotEmpty)
         .toList();
   }
@@ -339,8 +335,10 @@ class SeriesInformationScreen extends StatelessWidget {
                 const SizedBox(height: 20),
                 _buildQuoteBar(
                   children: [
-                    _buildLanguageLevelLine(l10n, theme),
-                    const SizedBox(height: 4),
+                    if (overview.targetLanguage != 'KO') ...[
+                      _buildLanguageLevelLine(l10n, theme),
+                      const SizedBox(height: 4),
+                    ],
                     _buildTopicDifficultyLine(
                       l10n,
                       theme,

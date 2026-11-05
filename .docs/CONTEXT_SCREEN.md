@@ -286,7 +286,7 @@
 - **appPath**: `/home`
 
 ### 스크린 용도
-- 로그인 후 메인. 배너 + 시리즈 카테고리 가로 썸네일.
+- 로그인 후 메인. 배너 + 시리즈 카테고리 가로 썸네일. Lab 학습언어 변경 시 홈 목록·카테고리 내부 페이지·추천을 초기화하고 재조회한다. 이전 언어로 요청했던 늦은 응답은 폐기한다.
 
 ### 이전 스크린 정보 (진입점)
 - **네이티브 스플래시**: 저장된 JWT 토큰이 유효하고 사용자 정보 조회 성공 시 (스플래시 제거 후 표시)
@@ -307,7 +307,7 @@
   - **다음 난이도 팝업**: 현재 시리즈 CEFR의 마지막 에피소드가 `bestScoreMap`에 있고 다음 레벨이 있으면(`Pre-A1→A1→A2→B1`, `B1`은 없음) `DefaultPopup`. 오버뷰 진입과 플레이 복귀 갱신 때. 이미 `rp_s2_user_series_cefr_notice`에 있으면 다시 띄우지 않고, 팝업을 닫은 뒤 `POST /rps2/series/{id}/cefr-level-up-notice?cefrLevel=`로 기록. 다음 난이도 도전하기는 그 시리즈만 다음 레벨로 저장하고 overview를 다시 불러온다. 나중에는 닫기만. 본문 아래 8에 안내 `bodySmall` `#80D7CF`. 배경 탭으로 닫히지 않음. Lab `Series: Next CEFR level`.
   - **스크롤**: 진행대기가 1번이면 자동 스크롤 없음. 2번 이상이면 카드 세로 중앙을 화면 중앙에 맞춤(450ms `easeInOut`). 화면에 걸쳐 있어도 이동. 리스트 끝이면 최대 스크롤에서 멈춤.
   - **해금 전진**: 진행 대기가 앞으로 가면, 앞선 클리어 칸은 이미 점수·다시하기로 두고 마지막 칸만 연출한다. 그 칸을 화면 위쪽(alignment 0.2)에 450ms로 맞춘 뒤 300ms 홀드, 이어서 1000ms. 홀드·애니 동안 에피소드 버튼 입력 없음. 스크롤과 `#1E1E1E` 하이라이트, 이전 칸은 채움 Play→테두리 Play, 새 칸은 자물쇠가 커졌다 사라진 뒤 진행대기 Play. 그 순간에 강진동(30ms 최대 → 40ms 쉼 → 160ms 최대, sharpness 1). 행 GlobalKey는 인덱스에 고정. 다음 칸이 없거나 진행 대기가 앞으로 가지 않으면 즉시 교체. Overview에서는 `rp_result_got_it`을 띄우지 않는다.
-- **SeriesInformationScreen** (Sub Screen, **S2**): Overview information 탭 → `SubScreenRoute` (`lib/screens/series/series_information.dart`). 부모가 로드한 `RpS2SeriesOverviewDto`·`UserDto` 전달(API 재호출 없음). 언어레벨·핵심 표현은 `SeriesStateService.playableCefrLevel`(시리즈 CEFR, `C1`은 `B1`). 헤더: Setting 계열 `AppScaffold`(좌 뒤로가기·우측 없음)+커스텀 중앙 title(`headlineSmall`·좌우 inset 40·max 2줄·`bodyTopPadding` 타이틀 높이 연동). 배경: 시리즈 thumbnail 원본(메모리 `_300` 있으면 먼저)·Opening과 동일 blur/dim. 본문: synopsis(bodySmall·justify) → gap10 → blockquote(좌 #353535 3px)·언어레벨·주제난이도(scl) → gap20 → 학습목표(headlineSmall) → gap10 → 에피소드별 learningFunction+#N title(gap10)·핵심 표현 불릿(`missions[].keyExpression` **en** 고정, 사용자 언어 미사용).
+- **SeriesInformationScreen** (Sub Screen, **S2**): Overview information 탭 → `SubScreenRoute` (`lib/screens/series/series_information.dart`). 부모가 로드한 `RpS2SeriesOverviewDto`·`UserDto` 전달(API 재호출 없음). 언어레벨·핵심 표현은 `SeriesStateService.playableCefrLevel`(시리즈 CEFR, `C1`은 `B1`). 헤더: Setting 계열 `AppScaffold`(좌 뒤로가기·우측 없음)+커스텀 중앙 title(`headlineSmall`·좌우 inset 40·max 2줄·`bodyTopPadding` 타이틀 높이 연동). 배경: 시리즈 thumbnail 원본(메모리 `_300` 있으면 먼저)·Opening과 동일 blur/dim. 본문: synopsis(bodySmall·justify) → gap10 → blockquote(좌 #353535 3px)·언어레벨·주제난이도(scl) → gap20 → 학습목표(headlineSmall) → gap10 → 에피소드별 learningFunction+#N title(gap10)·핵심 표현 불릿(`missions[].keyExpression`의 overview `targetLanguage`에 맞는 `ko`/`en` 원문, 다른 언어 대체 없음). KO에서는 CEFR 행을 숨긴다.
 
 ### 스크린 내부 구현 특이사항
 - **스크린 타입 특성**: Main Screen

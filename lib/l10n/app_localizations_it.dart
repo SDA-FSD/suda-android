@@ -577,10 +577,10 @@ class AppLocalizationsIt extends AppLocalizations {
   String get roleplayHintLabel => 'Puoi dire';
 
   @override
-  String get roleplayHintShowAnswer => 'Vedi come dirlo in inglese';
+  String get roleplayHintShowAnswer => 'Vedi come dirlo';
 
   @override
-  String get roleplayHintEnglishLabel => 'Esempio in inglese';
+  String get roleplayHintEnglishLabel => 'Esempio';
 
   @override
   String get roleplayEndedFailed => 'Missione fallita...';

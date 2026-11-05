@@ -540,10 +540,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get roleplayHintLabel => 'こう言ってみて';
 
   @override
-  String get roleplayHintShowAnswer => '英語の言い方を見る';
+  String get roleplayHintShowAnswer => '言い方を見る';
 
   @override
-  String get roleplayHintEnglishLabel => '英語の例';
+  String get roleplayHintEnglishLabel => '例文';
 
   @override
   String get roleplayEndedFailed => 'ミッション失敗…';

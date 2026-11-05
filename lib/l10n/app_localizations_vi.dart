@@ -571,10 +571,10 @@ class AppLocalizationsVi extends AppLocalizations {
   String get roleplayHintLabel => 'Bạn có thể nói';
 
   @override
-  String get roleplayHintShowAnswer => 'Xem cách nói tiếng Anh';
+  String get roleplayHintShowAnswer => 'Xem cách nói';
 
   @override
-  String get roleplayHintEnglishLabel => 'Ví dụ tiếng Anh';
+  String get roleplayHintEnglishLabel => 'Ví dụ';
 
   @override
   String get roleplayEndedFailed => 'Nhiệm vụ thất bại...';

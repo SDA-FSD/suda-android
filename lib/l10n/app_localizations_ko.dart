@@ -542,10 +542,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get roleplayHintLabel => '이렇게 말해보세요';
 
   @override
-  String get roleplayHintShowAnswer => '영어 표현 보기';
+  String get roleplayHintShowAnswer => '표현 보기';
 
   @override
-  String get roleplayHintEnglishLabel => '영어 예시';
+  String get roleplayHintEnglishLabel => '예시';
 
   @override
   String get roleplayEndedFailed => '미션을 실패했습니다...';

@@ -40,6 +40,16 @@ mixin PlayingHintMixin<T extends StatefulWidget>
 
   PlayingHintEntry? get activeHintEntry => _hintEntry;
 
+  bool get _isLearningLanguageUser {
+    final state = SeriesStateService.instance;
+    final targetLanguage =
+        state.overview?.targetLanguage ??
+        state.user?.targetLanguageQuery() ??
+        'EN';
+    return LanguageUtil.getCurrentLanguageCode().toLowerCase() ==
+        targetLanguage.toLowerCase();
+  }
+
   void disposePlayingHint() {
     _hintPlaybackSub?.cancel();
     _hintPlaybackSub = null;
@@ -98,18 +108,18 @@ mixin PlayingHintMixin<T extends StatefulWidget>
         setState(() => _hintEntry = null);
         return;
       }
-      final isEnglishUser = LanguageUtil.getCurrentLanguageCode() == 'en';
       final translated = dto.translatedHint?.trim() ?? '';
-      final revealEnglishImmediately = isEnglishUser || translated.isEmpty;
+      final revealAnswerImmediately =
+          _isLearningLanguageUser || translated.isEmpty;
       final stillOpen = entry.isVisible;
       setState(() {
         entry.isLoading = false;
         entry.hintText = hint;
         entry.translatedHint = translated.isEmpty ? null : translated;
-        entry.showAnswerBody = revealEnglishImmediately;
+        entry.showAnswerBody = revealAnswerImmediately;
         entry.isVisible = stillOpen;
       });
-      if (revealEnglishImmediately && stillOpen) {
+      if (revealAnswerImmediately && stillOpen) {
         _acknowledgeHintEnglishDeliveredBestEffort(entry);
       }
       if (stillOpen) _scrollHintToVisible(entry);
@@ -207,9 +217,9 @@ mixin PlayingHintMixin<T extends StatefulWidget>
     final text = entry.hintText ?? '';
     if (!entry.isLoading && text.isEmpty) return null;
 
-    final isEnglishUser = LanguageUtil.getCurrentLanguageCode() == 'en';
     final native = entry.translatedHint;
-    final hasNative = !isEnglishUser && native != null && native.isNotEmpty;
+    final hasNative =
+        !_isLearningLanguageUser && native != null && native.isNotEmpty;
     final imagePath =
         SeriesStateService.instance.selectedEpisode?.thumbnailImgPath;
 

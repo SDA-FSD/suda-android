@@ -564,10 +564,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get roleplayHintLabel => 'يمكنك أن تقول';
 
   @override
-  String get roleplayHintShowAnswer => 'شوف كيف تقولها بالإنجليزية';
+  String get roleplayHintShowAnswer => 'شوف كيف تقولها';
 
   @override
-  String get roleplayHintEnglishLabel => 'مثال بالإنجليزية';
+  String get roleplayHintEnglishLabel => 'مثال';
 
   @override
   String get roleplayEndedFailed => 'فشلت المهمة...';

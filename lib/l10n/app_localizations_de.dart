@@ -576,10 +576,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get roleplayHintLabel => 'Du kannst sagen';
 
   @override
-  String get roleplayHintShowAnswer => 'Englische Formulierung ansehen';
+  String get roleplayHintShowAnswer => 'Formulierung ansehen';
 
   @override
-  String get roleplayHintEnglishLabel => 'Beispiel auf Englisch';
+  String get roleplayHintEnglishLabel => 'Beispiel';
 
   @override
   String get roleplayEndedFailed => 'Mission fehlgeschlagen ...';

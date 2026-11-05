@@ -574,11 +574,10 @@ class AppLocalizationsMs extends AppLocalizations {
   String get roleplayHintLabel => 'Anda boleh kata';
 
   @override
-  String get roleplayHintShowAnswer =>
-      'Lihat cara mengatakannya dalam bahasa Inggeris';
+  String get roleplayHintShowAnswer => 'Lihat cara mengatakannya';
 
   @override
-  String get roleplayHintEnglishLabel => 'Contoh dalam bahasa Inggeris';
+  String get roleplayHintEnglishLabel => 'Contoh';
 
   @override
   String get roleplayEndedFailed => 'Misi Gagal...';
