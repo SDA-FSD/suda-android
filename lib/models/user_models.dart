@@ -891,6 +891,18 @@ extension UserDtoMetaInfoX on UserDto {
     if (current == null || current.isEmpty) return false;
     return current.any((m) => m.key == key && m.value == value);
   }
+
+  /// EN/KO만 쿼리로 보낸다. 없거나 그 외면 null(서버 기본 EN).
+  String? targetLanguageQuery() {
+    final meta = metaInfo;
+    if (meta == null) return null;
+    for (final item in meta) {
+      if (item.key != 'TARGET_LANGUAGE') continue;
+      final value = item.value.trim().toUpperCase();
+      if (value == 'EN' || value == 'KO') return value;
+    }
+    return null;
+  }
 }
 
 class NotificationDto {

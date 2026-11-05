@@ -84,8 +84,12 @@ class SeriesStateService {
     _seriesCefrLevel = level;
   }
 
-  /// 이 시리즈에 적용 중인 CEFR. 저장값이 없으면 사용자 기본값이고, `C1`은 `B1`이다.
+  /// 이 시리즈에 적용 중인 CEFR. KO는 `KO_A1`. EN은 저장값, 없으면 사용자 기본값이고 `C1`은 `B1`이다.
   String playableCefrLevel([UserDto? user]) {
+    if (_overview?.targetLanguage == 'KO' ||
+        (user ?? _user)?.targetLanguageQuery() == 'KO') {
+      return 'KO_A1';
+    }
     final stored = _seriesCefrLevel;
     if (stored != null && stored.isNotEmpty) {
       return EnglishLevelUtil.toPlayable(stored);

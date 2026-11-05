@@ -6,6 +6,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:marquee/marquee.dart';
+import '../services/home_contents_reload.dart';
 import '../services/rest_status_service.dart';
 import '../services/token_storage.dart';
 import '../services/suda_api_client.dart';
@@ -76,11 +77,16 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   bool _isPremium = false;
   bool _pushRegisterInFlight = false;
   StreamSubscription<String>? _pushRefreshSub;
+  late final void Function() _reloadHomeContents;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _reloadHomeContents = () {
+      unawaited(_fetchHomeContents());
+    };
+    HomeContentsReload.instance.register(_reloadHomeContents);
     _pageController = PageController(initialPage: 0);
     _performInitialization();
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -108,6 +114,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     if (oldWidget.user != widget.user) {
       _maybeShowWelcomeGift();
     }
+    if (oldWidget.user?.targetLanguageQuery() != widget.user?.targetLanguageQuery()) {
+      unawaited(_fetchHomeContents());
+    }
     final returned =
         widget.homeTabSelectedCounter != oldWidget.homeTabSelectedCounter;
     final becameActive = widget.isActive && !oldWidget.isActive;
@@ -132,6 +141,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   @override
   void dispose() {
+    HomeContentsReload.instance.unregister(_reloadHomeContents);
     WidgetsBinding.instance.removeObserver(this);
     unawaited(_pushRefreshSub?.cancel());
     _pushRefreshSub = null;

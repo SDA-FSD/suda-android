@@ -11,6 +11,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'l10n/app_localizations.dart';
 
 import 'services/auth_service.dart';
+import 'services/home_contents_reload.dart';
 import 'models/common_models.dart';
 import 'models/home_models.dart';
 import 'models/user_models.dart';
@@ -193,6 +194,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     super.initState();
     IapPurchaseService.instance.ensureListening();
     MainUserSync.instance.register(_onMainUserUpdatedFromSubflow);
+    HomeContentsReload.instance.register(_showHomeAndReload);
     WidgetsBinding.instance.addObserver(this);
     // 푸시 알림 클릭(백그라운드/포그라운드) 시 appPath·notificationId 보관
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
@@ -207,6 +209,14 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     );
     // initState에서는 버전 체크를 실행하지 않음
     // MaterialApp 빌드 후 builder에서 실행
+  }
+
+  void _showHomeAndReload() {
+    if (!mounted) return;
+    setState(() {
+      _currentMainScreen = 'home';
+      _homeTabSelectedCounter++;
+    });
   }
 
   void _onPendingAppPathChanged() {
@@ -396,6 +406,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   void dispose() {
     _fcmOnMessageSub?.cancel();
     MainUserSync.instance.unregister();
+    HomeContentsReload.instance.unregister(_showHomeAndReload);
     PendingAppPathService.instance.pendingNotifier.removeListener(
       _onPendingAppPathChanged,
     );

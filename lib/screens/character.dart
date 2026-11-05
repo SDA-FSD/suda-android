@@ -39,6 +39,7 @@ class CharacterScreen extends StatefulWidget {
 
 class _CharacterScreenState extends State<CharacterScreen> {
   CharacterDetailDto? _detail;
+  UserDto? _user;
   String? _imgPath;
   bool _savingProfile = false;
   String? _zoomPath;
@@ -56,17 +57,16 @@ class _CharacterScreenState extends State<CharacterScreen> {
         if (mounted) Navigator.of(context).maybePop();
         return;
       }
-      final results = await Future.wait([
-        SudaApiClient.getCharacter(
-          accessToken: token,
-          characterId: widget.characterId,
-        ),
-        SudaApiClient.getCurrentUser(accessToken: token),
-      ]);
+      final user = await SudaApiClient.getCurrentUser(accessToken: token);
+      final detail = await SudaApiClient.getCharacter(
+        accessToken: token,
+        characterId: widget.characterId,
+      );
       if (!mounted) return;
       setState(() {
-        _detail = results[0] as CharacterDetailDto;
-        _imgPath = (results[1] as UserDto).imgPath;
+        _detail = detail;
+        _user = user;
+        _imgPath = user.imgPath;
       });
     } catch (e) {
       if (!mounted) return;
@@ -564,7 +564,11 @@ class _CharacterScreenState extends State<CharacterScreen> {
                 child: SeriesThumbnail(
                   item: item,
                   width: width,
-                  onTap: () => SeriesRouter.pushOverview(context, item.id),
+                  onTap: () => SeriesRouter.pushOverview(
+                    context,
+                    item.id,
+                    user: _user,
+                  ),
                 ),
               ),
           ],

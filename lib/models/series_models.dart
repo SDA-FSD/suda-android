@@ -14,6 +14,8 @@ class RpS2SeriesOverviewDto {
   final Map<String, String> endingTitle;
   final Map<String, String> endingContent;
   final String? endingImgPath;
+  /// 이 응답을 만든 사용자의 배우고 싶은 언어. 없으면 EN.
+  final String? targetLanguage;
   final List<RpS2SeriesEpisodeDto> episodes;
   final Map<int, int> bestScoreMap;
 
@@ -26,6 +28,7 @@ class RpS2SeriesOverviewDto {
     required this.endingTitle,
     required this.endingContent,
     this.endingImgPath,
+    this.targetLanguage,
     required this.episodes,
     required this.bestScoreMap,
   });
@@ -50,6 +53,7 @@ class RpS2SeriesOverviewDto {
       endingTitle: SudaJsonUtil.localizedMapFromJson(json['endingTitle']),
       endingContent: SudaJsonUtil.localizedMapFromJson(json['endingContent']),
       endingImgPath: json['endingImgPath'] as String?,
+      targetLanguage: json['targetLanguage'] as String?,
       episodes: episodes,
       bestScoreMap: bestScoreMapFromJson(json['bestScoreMap']),
     );
@@ -65,6 +69,7 @@ class RpS2SeriesOverviewDto {
       endingTitle: endingTitle,
       endingContent: endingContent,
       endingImgPath: endingImgPath,
+      targetLanguage: targetLanguage,
       episodes: episodes,
       bestScoreMap: bestScoreMap ?? this.bestScoreMap,
     );

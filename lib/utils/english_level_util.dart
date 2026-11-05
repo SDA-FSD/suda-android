@@ -37,8 +37,10 @@ class EnglishLevelUtil {
     return trimmed;
   }
 
-  /// 시리즈 플레이에 쓰는 레벨. `C1`은 `B1`, 그 외 미지원 값은 [defaultLevel].
+  /// 시리즈 플레이에 쓰는 레벨. `C1`은 `B1`. `KO_A1`은 그대로 둔다.
   static String toPlayable(String? raw) {
+    final trimmed = raw?.trim();
+    if (trimmed == 'KO_A1') return 'KO_A1';
     final level = normalizeToCefr(raw);
     if (level == fadedLevel) return 'B1';
     if (visibleLevels.contains(level)) return level;

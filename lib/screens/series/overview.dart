@@ -6,6 +6,7 @@ import 'package:shimmer/shimmer.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../models/series_models.dart';
+import '../../services/home_contents_reload.dart';
 import '../../services/main_user_sync.dart';
 import '../../services/perf_monitoring_service.dart';
 import '../../services/roleplay_state_service.dart';
@@ -173,6 +174,11 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
           seriesId: widget.seriesId,
         );
         if (!mounted) return;
+        if (overview.episodes.isEmpty) {
+          HomeContentsReload.instance.request();
+          Navigator.of(context).popUntil((route) => route.isFirst);
+          return;
+        }
 
         SeriesStateService.instance.setSeriesOverview(
           seriesId: widget.seriesId,
@@ -401,6 +407,10 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
     }
   }
 
+  bool _targetLanguageIsKo() {
+    return _overview?.targetLanguage == 'KO';
+  }
+
   String _currentSeriesCefr() {
     return EnglishLevelUtil.toPlayable(
       _seriesCefrLevel ??
@@ -409,6 +419,7 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
   }
 
   Future<void> _maybeShowCefrLevelUp(RpS2SeriesOverviewDto overview) async {
+    if (_targetLanguageIsKo()) return;
     if (_cefrLevelUpInFlight || !mounted) return;
     final episodes = overview.episodes;
     if (episodes.isEmpty) return;
@@ -879,7 +890,9 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
       maintainState: true,
       selectedIndex: _overviewTabIndex,
       onTabChanged: (index) => setState(() => _overviewTabIndex = index),
-      labelTrailing: CompositedTransformTarget(
+      labelTrailing: _targetLanguageIsKo()
+          ? null
+          : CompositedTransformTarget(
         link: _cefrLink,
         child: SizedBox(
           width: _cefrCollapsedWidth(context),
@@ -1080,7 +1093,7 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
               },
             ),
           ),
-          if (overview != null)
+          if (overview != null && !_targetLanguageIsKo())
             Positioned(
               top: 0,
               left: 0,
