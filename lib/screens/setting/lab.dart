@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../../config/app_config.dart';
 import '../../services/auth_service.dart';
+import '../../services/main_user_sync.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
 import '../../effects/like_progress_effect.dart';
@@ -945,7 +946,89 @@ class _LabAccountPage extends StatefulWidget {
 }
 
 class _LabAccountPageState extends State<_LabAccountPage> {
+  static const _targetLanguageKey = 'TARGET_LANGUAGE';
+
+  String _targetLanguage = 'EN';
+  bool _targetLanguageReady = false;
+  bool _savingTargetLanguage = false;
   bool _removingMetaInfo = false;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_loadTargetLanguage());
+  }
+
+  String _targetLanguageOf(UserDto user) {
+    final meta = user.metaInfo;
+    if (meta == null) return 'EN';
+    for (final item in meta) {
+      if (item.key != _targetLanguageKey) continue;
+      final value = item.value.trim().toUpperCase();
+      if (value == 'EN' || value == 'KO') return value;
+    }
+    return 'EN';
+  }
+
+  Future<void> _loadTargetLanguage() async {
+    try {
+      final token = await TokenStorage.loadAccessToken();
+      if (token == null || token.isEmpty) {
+        throw Exception('missing access token');
+      }
+      final user = await SudaApiClient.getCurrentUser(accessToken: token);
+      if (!mounted) return;
+      setState(() {
+        _targetLanguage = _targetLanguageOf(user);
+        _targetLanguageReady = true;
+      });
+    } catch (error) {
+      if (mounted) {
+        DefaultToast.show(
+          context,
+          'TARGET_LANGUAGE load failed: $error',
+          isError: true,
+        );
+      }
+    }
+  }
+
+  Future<void> _changeTargetLanguage(String next) async {
+    if (!_targetLanguageReady || _savingTargetLanguage || next == _targetLanguage) {
+      return;
+    }
+    final previous = _targetLanguage;
+    setState(() {
+      _targetLanguage = next;
+      _savingTargetLanguage = true;
+    });
+    try {
+      final token = await TokenStorage.loadAccessToken();
+      if (token == null || token.isEmpty) {
+        throw Exception('missing access token');
+      }
+      await SudaApiClient.updateTargetLanguage(
+        accessToken: token,
+        targetLanguage: next,
+      );
+      final fresh = await SudaApiClient.getCurrentUser(accessToken: token);
+      final updated = fresh.upsertMetaInfo(key: _targetLanguageKey, value: next);
+      MainUserSync.instance.notifyUserUpdated(updated);
+      if (!mounted) return;
+      setState(() => _targetLanguage = _targetLanguageOf(updated));
+    } catch (error) {
+      if (mounted) {
+        setState(() => _targetLanguage = previous);
+        DefaultToast.show(
+          context,
+          'TARGET_LANGUAGE update failed: $error',
+          isError: true,
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _savingTargetLanguage = false);
+    }
+  }
 
   Future<void> _removeMetaInfo() async {
     if (_removingMetaInfo) return;
@@ -982,9 +1065,38 @@ class _LabAccountPageState extends State<_LabAccountPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context).textTheme;
+    final canChangeTargetLanguage = _targetLanguageReady && !_savingTargetLanguage;
     return _LabPage(
       title: 'Account',
       children: [
+        Text(
+          'TARGET_LANGUAGE',
+          style: theme.bodyMedium?.copyWith(color: Colors.white),
+        ),
+        const SizedBox(height: 8),
+        InputDecorator(
+          decoration: _labDropdownDecoration(),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              isExpanded: true,
+              value: _targetLanguage,
+              dropdownColor: const Color(0xFF1E1E1E),
+              style: theme.bodyLarge?.copyWith(color: Colors.white),
+              items: const [
+                DropdownMenuItem(value: 'EN', child: Text('EN')),
+                DropdownMenuItem(value: 'KO', child: Text('KO')),
+              ],
+              onChanged: canChangeTargetLanguage
+                  ? (value) {
+                      if (value == null) return;
+                      unawaited(_changeTargetLanguage(value));
+                    }
+                  : null,
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
         SizedBox(
           width: double.infinity,
           height: 56,

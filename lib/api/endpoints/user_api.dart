@@ -753,6 +753,38 @@ class UserApi {
     );
   }
 
+  static Future<void> updateTargetLanguage({
+    required String accessToken,
+    required String targetLanguage,
+  }) async {
+    final uri = SudaHttpClient.buildUri('/v1/users/target-language', {
+      'targetLanguage': targetLanguage,
+    });
+
+    late final http.Response response;
+    try {
+      response = await SudaHttpClient.client
+          .put(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+              'Content-Type': 'application/json',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      rethrow;
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return;
+    }
+
+    throw Exception(
+      'PUT /v1/users/target-language failed: HTTP ${response.statusCode} ${response.body}',
+    );
+  }
+
   static final Map<String, Future<UserEnergyDto>> _inflightEnergyDetail = {};
   static Future<UserEnergyDto>? _inflightEnergySimple;
 

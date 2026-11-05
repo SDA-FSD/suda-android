@@ -837,6 +837,16 @@ class SudaApiClient {
     );
   }
 
+  static Future<void> updateTargetLanguage({
+    required String accessToken,
+    required String targetLanguage,
+  }) {
+    return UserApi.updateTargetLanguage(
+      accessToken: accessToken,
+      targetLanguage: targetLanguage,
+    );
+  }
+
   static Future<void> updateProfileImage({
     required String accessToken,
     required String type,
