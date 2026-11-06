@@ -932,6 +932,13 @@ class AppLocalizationsPl extends AppLocalizations {
       'Ukończ poprzedni odcinek, aby odblokować kolejny.';
 
   @override
+  String get seriesOverviewEndingLabel => 'Zakończenie historii';
+
+  @override
+  String get seriesOverviewEndingLockedCaption =>
+      'Ukończ ostatni odcinek, aby odblokować zakończenie.';
+
+  @override
   String get notificationPermissionBlockedTitle => 'Powiadomienia są wyłączone';
 
   @override

@@ -318,6 +318,8 @@
   "seriesOverviewPlay": "开始",
   "seriesOverviewLocked": "未解锁",
   "seriesOverviewEpisodeLockedToast": "完成上一集即可解锁。",
+  "seriesOverviewEndingLabel": "故事结局",
+  "seriesOverviewEndingLockedCaption": "完成最后一集即可解锁结局。",
   "notificationPermissionBlockedTitle": "通知已关闭",
   "notificationPermissionBlockedMessage": "请在设备设置中开启通知，以接收推送消息。",
   "openSettings": "前往设置",

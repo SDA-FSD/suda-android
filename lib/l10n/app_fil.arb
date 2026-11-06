@@ -318,6 +318,8 @@
   "seriesOverviewPlay": "I-play",
   "seriesOverviewLocked": "Naka-lock",
   "seriesOverviewEpisodeLockedToast": "Tapusin muna ang nakaraang episode para ma-unlock ito.",
+  "seriesOverviewEndingLabel": "Wakas ng kuwento",
+  "seriesOverviewEndingLockedCaption": "Tapusin ang huling episode para ma-unlock ang ending.",
   "notificationPermissionBlockedTitle": "Naka-off ang mga notification",
   "notificationPermissionBlockedMessage": "I-on ang mga notification sa settings ng device para makatanggap ng mga push notification.",
   "openSettings": "Buksan ang Settings",

@@ -1739,6 +1739,18 @@ abstract class AppLocalizations {
   /// **'Complete the previous episode to unlock.'**
   String get seriesOverviewEpisodeLockedToast;
 
+  /// No description provided for @seriesOverviewEndingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Story Ending'**
+  String get seriesOverviewEndingLabel;
+
+  /// No description provided for @seriesOverviewEndingLockedCaption.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete the final episode to unlock the ending.'**
+  String get seriesOverviewEndingLockedCaption;
+
   /// No description provided for @notificationPermissionBlockedTitle.
   ///
   /// In en, this message translates to:

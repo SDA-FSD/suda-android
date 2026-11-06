@@ -928,6 +928,13 @@ class AppLocalizationsNl extends AppLocalizations {
       'Voltooi eerst de vorige aflevering.';
 
   @override
+  String get seriesOverviewEndingLabel => 'Einde van het verhaal';
+
+  @override
+  String get seriesOverviewEndingLockedCaption =>
+      'Rond de laatste aflevering af om het einde te openen.';
+
+  @override
   String get notificationPermissionBlockedTitle => 'Meldingen staan uit';
 
   @override

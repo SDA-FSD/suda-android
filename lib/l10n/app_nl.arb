@@ -318,6 +318,8 @@
   "seriesOverviewPlay": "Spelen",
   "seriesOverviewLocked": "Vergrendeld",
   "seriesOverviewEpisodeLockedToast": "Voltooi eerst de vorige aflevering.",
+  "seriesOverviewEndingLabel": "Einde van het verhaal",
+  "seriesOverviewEndingLockedCaption": "Rond de laatste aflevering af om het einde te openen.",
   "notificationPermissionBlockedTitle": "Meldingen staan uit",
   "notificationPermissionBlockedMessage": "Schakel meldingen in via de apparaatinstellingen om pushmeldingen te ontvangen.",
   "openSettings": "Instellingen openen",

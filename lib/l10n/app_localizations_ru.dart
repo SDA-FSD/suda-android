@@ -929,6 +929,13 @@ class AppLocalizationsRu extends AppLocalizations {
       'Чтобы открыть, завершите предыдущий эпизод.';
 
   @override
+  String get seriesOverviewEndingLabel => 'Концовка истории';
+
+  @override
+  String get seriesOverviewEndingLockedCaption =>
+      'Завершите последний эпизод, чтобы открыть концовку.';
+
+  @override
   String get notificationPermissionBlockedTitle => 'Уведомления отключены';
 
   @override

@@ -318,6 +318,8 @@
   "seriesOverviewPlay": "ابدأ",
   "seriesOverviewLocked": "مقفل",
   "seriesOverviewEpisodeLockedToast": "أكمل الحلقة السابقة لفتح هذه الحلقة.",
+  "seriesOverviewEndingLabel": "نهاية القصة",
+  "seriesOverviewEndingLockedCaption": "أكمل الحلقة الأخيرة لفتح النهاية.",
   "notificationPermissionBlockedTitle": "الإشعارات متوقفة",
   "notificationPermissionBlockedMessage": "فعّل الإشعارات من إعدادات جهازك لتلقي الإشعارات الفورية.",
   "openSettings": "فتح الإعدادات",

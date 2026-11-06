@@ -318,6 +318,8 @@
   "seriesOverviewPlay": "Oyna",
   "seriesOverviewLocked": "Kilitli",
   "seriesOverviewEpisodeLockedToast": "Kilidi açmak için önceki bölümü tamamla.",
+  "seriesOverviewEndingLabel": "Hikâyenin sonu",
+  "seriesOverviewEndingLockedCaption": "Finali açmak için son bölümü tamamla.",
   "notificationPermissionBlockedTitle": "Bildirimler kapalı",
   "notificationPermissionBlockedMessage": "Anlık bildirimleri almak için cihaz ayarlarından bildirimleri aç.",
   "openSettings": "Ayarları Aç",

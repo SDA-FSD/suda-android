@@ -917,6 +917,13 @@ class AppLocalizationsAr extends AppLocalizations {
       'أكمل الحلقة السابقة لفتح هذه الحلقة.';
 
   @override
+  String get seriesOverviewEndingLabel => 'نهاية القصة';
+
+  @override
+  String get seriesOverviewEndingLockedCaption =>
+      'أكمل الحلقة الأخيرة لفتح النهاية.';
+
+  @override
   String get notificationPermissionBlockedTitle => 'الإشعارات متوقفة';
 
   @override

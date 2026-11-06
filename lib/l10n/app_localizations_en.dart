@@ -923,6 +923,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Complete the previous episode to unlock.';
 
   @override
+  String get seriesOverviewEndingLabel => 'Story Ending';
+
+  @override
+  String get seriesOverviewEndingLockedCaption =>
+      'Complete the final episode to unlock the ending.';
+
+  @override
   String get notificationPermissionBlockedTitle => 'Notifications are off';
 
   @override

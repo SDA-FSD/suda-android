@@ -30,6 +30,7 @@ class SettingScreen extends StatelessWidget {
   final ValueChanged<UserDto>? onUserUpdated;
   /// PushAgreement 등에서 열 때 항상 최신 user를 쓰기 위한 콜백 (없으면 user 사용)
   final UserDto? Function()? getCurrentUser;
+  final VoidCallback? onNavigateToHome;
 
   const SettingScreen({
     super.key,
@@ -37,6 +38,7 @@ class SettingScreen extends StatelessWidget {
     this.user,
     this.onUserUpdated,
     this.getCurrentUser,
+    this.onNavigateToHome,
   });
 
   void _navigateToSubScreen(BuildContext context, Widget screen) {
@@ -142,7 +144,10 @@ class SettingScreen extends StatelessWidget {
               l10n.settingsFsdLaboratory,
               () => _navigateToSubScreen(
                     context,
-                    LabScreen(onSignOut: onSignOut),
+                    LabScreen(
+                      onSignOut: onSignOut,
+                      onNavigateToHome: onNavigateToHome,
+                    ),
                   ),
             ),
           const Spacer(),

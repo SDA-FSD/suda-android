@@ -318,6 +318,8 @@
   "seriesOverviewPlay": "Играть",
   "seriesOverviewLocked": "Заблокирован",
   "seriesOverviewEpisodeLockedToast": "Чтобы открыть, завершите предыдущий эпизод.",
+  "seriesOverviewEndingLabel": "Концовка истории",
+  "seriesOverviewEndingLockedCaption": "Завершите последний эпизод, чтобы открыть концовку.",
   "notificationPermissionBlockedTitle": "Уведомления отключены",
   "notificationPermissionBlockedMessage": "Чтобы получать push-уведомления, включите их в настройках устройства.",
   "openSettings": "Открыть настройки",

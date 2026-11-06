@@ -15,7 +15,10 @@ import '../../utils/suda_json_util.dart';
 /// 엔딩 이미지(있을 경우) → 1.5x→1x 축소 애니메이션 → 80% 검정 레이어 fade-in → 콘텐츠 fade-in.
 /// 이미지 없을 경우 바로 레이어·콘텐츠 노출.
 class RoleplayEndingScreen extends StatefulWidget {
-  const RoleplayEndingScreen({super.key});
+  /// 엔딩 카드에서 연 경우 Next는 Result 대신 이 화면만 닫는다.
+  final bool returnOnNext;
+
+  const RoleplayEndingScreen({super.key, this.returnOnNext = false});
 
   @override
   State<RoleplayEndingScreen> createState() => _RoleplayEndingScreenState();
@@ -126,6 +129,14 @@ class _RoleplayEndingScreenState extends State<RoleplayEndingScreen>
     }
   }
 
+  void _onNext(BuildContext context) {
+    if (widget.returnOnNext) {
+      Navigator.of(context).pop();
+      return;
+    }
+    _navigateToResult(context);
+  }
+
   void _navigateToResult(BuildContext context) {
     if (!context.mounted) return;
     RoleplayRouter.replaceWithResult(context);
@@ -230,7 +241,8 @@ class _RoleplayEndingScreenState extends State<RoleplayEndingScreen>
                       height: bottomAreaHeight,
                       child: Column(
                         children: [
-                          Expanded(
+                          if (!widget.returnOnNext)
+                            Expanded(
                             child: Center(
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(
@@ -282,7 +294,7 @@ class _RoleplayEndingScreenState extends State<RoleplayEndingScreen>
                           Expanded(
                             child: Center(
                               child: ElevatedButton(
-                                onPressed: () => _navigateToResult(context),
+                                onPressed: () => _onNext(context),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: const Color(0xFF0CABA8),
                                   foregroundColor: Colors.white,

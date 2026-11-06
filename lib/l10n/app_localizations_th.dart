@@ -907,6 +907,13 @@ class AppLocalizationsTh extends AppLocalizations {
       'เล่นตอนก่อนหน้าให้จบเพื่อปลดล็อก';
 
   @override
+  String get seriesOverviewEndingLabel => 'ตอนจบของเรื่อง';
+
+  @override
+  String get seriesOverviewEndingLockedCaption =>
+      'เล่นตอนสุดท้ายให้จบเพื่อปลดล็อกตอนจบ';
+
+  @override
   String get notificationPermissionBlockedTitle => 'ปิดการแจ้งเตือนอยู่';
 
   @override

@@ -318,6 +318,8 @@
   "seriesOverviewPlay": "Jugar",
   "seriesOverviewLocked": "Bloqueado",
   "seriesOverviewEpisodeLockedToast": "Completa el episodio anterior para desbloquearlo.",
+  "seriesOverviewEndingLabel": "Final de la historia",
+  "seriesOverviewEndingLockedCaption": "Completa el último episodio para desbloquear el final.",
   "notificationPermissionBlockedTitle": "Las notificaciones están desactivadas",
   "notificationPermissionBlockedMessage": "Activa las notificaciones en la configuración de tu dispositivo para recibir notificaciones push.",
   "openSettings": "Abrir configuración",

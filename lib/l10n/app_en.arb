@@ -387,6 +387,8 @@
   "seriesOverviewPlay": "Play",
   "seriesOverviewLocked": "Locked",
   "seriesOverviewEpisodeLockedToast": "Complete the previous episode to unlock.",
+  "seriesOverviewEndingLabel": "Story Ending",
+  "seriesOverviewEndingLockedCaption": "Complete the final episode to unlock the ending.",
   "notificationPermissionBlockedTitle": "Notifications are off",
   "notificationPermissionBlockedMessage": "Enable notifications in your device settings to receive push notifications.",
   "openSettings": "Open Settings",

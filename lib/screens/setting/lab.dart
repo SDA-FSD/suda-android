@@ -33,6 +33,8 @@ import '../onboarding/first_cefr_level.dart';
 import '../onboarding/first_profile_image.dart';
 import '../series/cefr_level_up_popup.dart'
     show showCefrLevelUpPopupForLab;
+import '../series/widgets/series_episode_tab_content.dart'
+    show SeriesEndingUnlockPreview;
 import '../onboarding/tutorial/intro.dart';
 import '../onboarding/tutorial/roleplay.dart';
 import '../paywall/paywall.dart';
@@ -137,8 +139,9 @@ const List<_LabTutorialLocaleOption> _kLabTutorialLocaleOptions = [
 
 class LabScreen extends StatefulWidget {
   final VoidCallback? onSignOut;
+  final VoidCallback? onNavigateToHome;
 
-  const LabScreen({super.key, this.onSignOut});
+  const LabScreen({super.key, this.onSignOut, this.onNavigateToHome});
 
   @override
   State<LabScreen> createState() => _LabScreenState();
@@ -179,7 +182,9 @@ class _LabScreenState extends State<LabScreen> {
           ),
           _LabIndexRow(
             label: 'Roleplay',
-            onTap: () => _openGroup(const _LabRoleplayPage()),
+            onTap: () => _openGroup(
+              _LabRoleplayPage(onNavigateToHome: widget.onNavigateToHome),
+            ),
           ),
           _LabIndexRow(
             label: 'Monetization',
@@ -424,7 +429,15 @@ class _LabOnboardingPageState extends State<_LabOnboardingPage> {
 }
 
 class _LabRoleplayPage extends StatelessWidget {
-  const _LabRoleplayPage();
+  final VoidCallback? onNavigateToHome;
+
+  const _LabRoleplayPage({this.onNavigateToHome});
+
+  void _previewEndingUnlock(BuildContext context) {
+    SeriesEndingUnlockPreview.arm();
+    Navigator.of(context).popUntil((route) => route.isFirst);
+    onNavigateToHome?.call();
+  }
 
   void _seedLabS2TryAgainState() {
     SeriesStateService.instance.setSeriesOverview(
@@ -470,6 +483,10 @@ class _LabRoleplayPage extends StatelessWidget {
         _LabActionRow(
           label: 'Open Try Again Report Screen',
           onTap: () => unawaited(RoleplayRouter.pushTryAgainReport(context)),
+        ),
+        _LabActionRow(
+          label: 'Preview Ending Unlock',
+          onTap: () => _previewEndingUnlock(context),
         ),
       ],
     );

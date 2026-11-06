@@ -880,6 +880,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get seriesOverviewEpisodeLockedToast => '이전 에피소드를 먼저 플레이하세요.';
 
   @override
+  String get seriesOverviewEndingLabel => '스토리 엔딩';
+
+  @override
+  String get seriesOverviewEndingLockedCaption => '마지막 에피소드를 완료하면 엔딩이 열려요.';
+
+  @override
   String get notificationPermissionBlockedTitle => '알림이 꺼져 있습니다';
 
   @override

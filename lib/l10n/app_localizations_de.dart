@@ -931,6 +931,13 @@ class AppLocalizationsDe extends AppLocalizations {
       'Schließe zum Freischalten zuerst die vorherige Folge ab.';
 
   @override
+  String get seriesOverviewEndingLabel => 'Ende der Geschichte';
+
+  @override
+  String get seriesOverviewEndingLockedCaption =>
+      'Schließe die letzte Folge ab, um das Ende freizuschalten.';
+
+  @override
   String get notificationPermissionBlockedTitle =>
       'Benachrichtigungen sind aus';
 

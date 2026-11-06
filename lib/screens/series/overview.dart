@@ -14,6 +14,7 @@ import '../../services/series_state_service.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
 import '../../services/version_check_service.dart';
+import '../roleplay/ending.dart';
 import '../../utils/english_level_util.dart';
 import '../../utils/suda_json_util.dart';
 import '../../utils/sub_screen_route.dart';
@@ -57,6 +58,8 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
   bool _isInfoIconVisible = true;
   int _episodeContentKey = 0;
   int _scrollToUnlockToken = 0;
+  int _endingUnlockToken = 0;
+  bool _holdEndingUnlocked = false;
   bool _isSynopsisExpanded = false;
   int _overviewTabIndex = 0;
   bool _cefrExpanded = false;
@@ -190,13 +193,16 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
         SeriesStateService.instance.setSeriesCefrLevel(seriesCefr);
 
         _snapSeriesCefrClosed();
+        final previewEnding = SeriesEndingUnlockPreview.take();
         setState(() {
           _overview = overview;
           _seriesCefrLevel = seriesCefr;
           _isLoading = false;
           _scrollToUnlockToken++;
+          _holdEndingUnlocked = previewEnding;
+          if (previewEnding) _endingUnlockToken++;
         });
-        unawaited(_maybeShowCefrLevelUp(overview));
+        if (!previewEnding) unawaited(_maybeShowCefrLevelUp(overview));
       } catch (_) {
         if (!mounted) return;
         setState(() {
@@ -303,6 +309,10 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
         before: overview,
         after: updated,
       );
+      final endingUnlock = seriesOverviewEndingJustUnlocked(
+        before: overview,
+        after: updated,
+      );
       SeriesStateService.instance.setSeriesOverview(
         seriesId: widget.seriesId,
         overview: updated,
@@ -310,13 +320,14 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
       );
       setState(() {
         _overview = updated;
-        // 마지막 한 칸 해금은 같은 State에서 스크롤·하이라이트·버튼을 애니메이션한다.
-        if (unlockStep == null) {
+        // 마지막 한 칸 해금·엔딩 해금은 같은 State에서 애니메이션한다.
+        if (unlockStep == null && !endingUnlock) {
           _episodeContentKey++;
         }
         _scrollToUnlockToken++;
+        if (endingUnlock) _endingUnlockToken++;
       });
-      unawaited(_maybeShowCefrLevelUp(updated));
+      if (!endingUnlock) unawaited(_maybeShowCefrLevelUp(updated));
     } catch (_) {}
   }
 
@@ -424,8 +435,11 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
     final episodes = overview.episodes;
     if (episodes.isEmpty) return;
     final cefr = _currentSeriesCefr();
+    if (cefr == 'KO_A1') return;
     final next = EnglishLevelUtil.nextPlayableLevel(cefr);
-    if (next == null) return;
+    if (next == null || !EnglishLevelUtil.visibleLevels.contains(next)) {
+      return;
+    }
     if (!overview.bestScoreMap.containsKey(episodes.last.id)) return;
 
     _cefrLevelUpInFlight = true;
@@ -461,6 +475,7 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
       );
       if (!mounted) return;
       final playable = EnglishLevelUtil.toPlayable(saved);
+      if (!EnglishLevelUtil.visibleLevels.contains(playable)) return;
       SeriesStateService.instance.setSeriesCefrLevel(playable);
       setState(() => _seriesCefrLevel = playable);
       await _loadOverview();
@@ -866,6 +881,21 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
     }
   }
 
+  void _openSeriesEnding() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const RoleplayEndingScreen(returnOnNext: true),
+      ),
+    );
+  }
+
+  void _onEndingUnlockSettled() {
+    final overview = _overview;
+    if (overview == null || !mounted) return;
+    unawaited(_maybeShowCefrLevelUp(overview));
+  }
+
   void _onEpisodePlay(RpS2SeriesEpisodeDto episode) {
     SeriesStateService.instance.setSelectedEpisodeId(episode.id);
     final user = SeriesStateService.instance.user ?? widget.user;
@@ -907,6 +937,10 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
             overview: overview,
             onPlayEpisode: _onEpisodePlay,
             scrollToUnlockToken: _scrollToUnlockToken,
+            endingUnlockToken: _endingUnlockToken,
+            holdEndingUnlocked: _holdEndingUnlocked,
+            onEndingUnlockSettled: _onEndingUnlockSettled,
+            onOpenEnding: _openSeriesEnding,
           ),
         ),
         SudaLabelTab(

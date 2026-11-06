@@ -921,6 +921,13 @@ class AppLocalizationsId extends AppLocalizations {
       'Selesaikan episode sebelumnya untuk membukanya.';
 
   @override
+  String get seriesOverviewEndingLabel => 'Akhir cerita';
+
+  @override
+  String get seriesOverviewEndingLockedCaption =>
+      'Selesaikan episode terakhir untuk membuka bagian akhir.';
+
+  @override
   String get notificationPermissionBlockedTitle => 'Notifikasi dinonaktifkan';
 
   @override

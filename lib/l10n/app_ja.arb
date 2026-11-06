@@ -318,6 +318,8 @@
   "seriesOverviewPlay": "プレイ",
   "seriesOverviewLocked": "ロック中",
   "seriesOverviewEpisodeLockedToast": "前のエピソードをクリアするとロックが解除されます。",
+  "seriesOverviewEndingLabel": "ストーリーエンディング",
+  "seriesOverviewEndingLockedCaption": "最後のエピソードをクリアするとエンディングが開きます。",
   "notificationPermissionBlockedTitle": "通知がオフになっています",
   "notificationPermissionBlockedMessage": "プッシュ通知を受け取るには、端末の設定で通知を有効にしてください。",
   "openSettings": "設定を開く",

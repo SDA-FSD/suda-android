@@ -930,6 +930,13 @@ class AppLocalizationsFil extends AppLocalizations {
       'Tapusin muna ang nakaraang episode para ma-unlock ito.';
 
   @override
+  String get seriesOverviewEndingLabel => 'Wakas ng kuwento';
+
+  @override
+  String get seriesOverviewEndingLockedCaption =>
+      'Tapusin ang huling episode para ma-unlock ang ending.';
+
+  @override
   String get notificationPermissionBlockedTitle =>
       'Naka-off ang mga notification';
 

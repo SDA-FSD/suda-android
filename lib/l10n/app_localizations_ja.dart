@@ -875,6 +875,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get seriesOverviewEpisodeLockedToast => '前のエピソードをクリアするとロックが解除されます。';
 
   @override
+  String get seriesOverviewEndingLabel => 'ストーリーエンディング';
+
+  @override
+  String get seriesOverviewEndingLockedCaption => '最後のエピソードをクリアするとエンディングが開きます。';
+
+  @override
   String get notificationPermissionBlockedTitle => '通知がオフになっています';
 
   @override

@@ -318,6 +318,8 @@
   "seriesOverviewPlay": "Play",
   "seriesOverviewLocked": "Locked",
   "seriesOverviewEpisodeLockedToast": "이전 에피소드를 먼저 플레이하세요.",
+  "seriesOverviewEndingLabel": "스토리 엔딩",
+  "seriesOverviewEndingLockedCaption": "마지막 에피소드를 완료하면 엔딩이 열려요.",
   "notificationPermissionBlockedTitle": "알림이 꺼져 있습니다",
   "notificationPermissionBlockedMessage": "푸시 알림을 받으려면 기기 설정에서 알림을 켜 주세요.",
   "openSettings": "설정 열기",

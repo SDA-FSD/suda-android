@@ -318,6 +318,8 @@
   "seriesOverviewPlay": "開始",
   "seriesOverviewLocked": "未解鎖",
   "seriesOverviewEpisodeLockedToast": "完成上一集即可解鎖。",
+  "seriesOverviewEndingLabel": "故事結局",
+  "seriesOverviewEndingLockedCaption": "完成最後一集即可解鎖結局。",
   "notificationPermissionBlockedTitle": "通知已關閉",
   "notificationPermissionBlockedMessage": "若要接收推播通知，請在裝置設定中開啟通知。",
   "openSettings": "開啟設定",

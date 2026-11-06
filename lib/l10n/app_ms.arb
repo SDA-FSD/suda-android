@@ -318,6 +318,8 @@
   "seriesOverviewPlay": "Main",
   "seriesOverviewLocked": "Dikunci",
   "seriesOverviewEpisodeLockedToast": "Selesaikan episod sebelumnya untuk membuka kunci.",
+  "seriesOverviewEndingLabel": "Pengakhiran cerita",
+  "seriesOverviewEndingLockedCaption": "Selesaikan episod terakhir untuk membuka pengakhiran.",
   "notificationPermissionBlockedTitle": "Pemberitahuan dimatikan",
   "notificationPermissionBlockedMessage": "Hidupkan pemberitahuan dalam tetapan peranti untuk menerima pemberitahuan push.",
   "openSettings": "Buka Tetapan",

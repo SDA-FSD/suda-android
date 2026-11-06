@@ -688,6 +688,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           user: _user ?? widget.user,
           onUserUpdated: widget.onUserUpdated,
           getCurrentUser: () => widget.user,
+          onNavigateToHome: widget.onNavigateToHome,
         ),
       ),
     );

@@ -921,6 +921,13 @@ class AppLocalizationsHi extends AppLocalizations {
       'अनलॉक करने के लिए पिछला एपिसोड पूरा करें।';
 
   @override
+  String get seriesOverviewEndingLabel => 'कहानी का अंत';
+
+  @override
+  String get seriesOverviewEndingLockedCaption =>
+      'एंडिंग खोलने के लिए आखिरी एपिसोड पूरा करें।';
+
+  @override
   String get notificationPermissionBlockedTitle => 'नोटिफ़िकेशन बंद हैं';
 
   @override

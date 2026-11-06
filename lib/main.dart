@@ -1004,6 +1004,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                       if (mounted) setState(() => _user = user);
                     },
                     getCurrentUser: () => _user,
+                    onNavigateToHome: _navigateToHome,
                   ),
                 ),
               );

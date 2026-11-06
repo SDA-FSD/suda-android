@@ -918,6 +918,13 @@ class AppLocalizationsVi extends AppLocalizations {
       'Hoàn thành tập trước để mở khóa.';
 
   @override
+  String get seriesOverviewEndingLabel => 'Cái kết của câu chuyện';
+
+  @override
+  String get seriesOverviewEndingLockedCaption =>
+      'Hoàn thành tập cuối để mở khóa cái kết.';
+
+  @override
   String get notificationPermissionBlockedTitle => 'Thông báo đang tắt';
 
   @override

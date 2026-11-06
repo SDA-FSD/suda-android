@@ -318,6 +318,8 @@
   "seriesOverviewPlay": "खेलें",
   "seriesOverviewLocked": "लॉक है",
   "seriesOverviewEpisodeLockedToast": "अनलॉक करने के लिए पिछला एपिसोड पूरा करें।",
+  "seriesOverviewEndingLabel": "कहानी का अंत",
+  "seriesOverviewEndingLockedCaption": "एंडिंग खोलने के लिए आखिरी एपिसोड पूरा करें।",
   "notificationPermissionBlockedTitle": "नोटिफ़िकेशन बंद हैं",
   "notificationPermissionBlockedMessage": "पुश नोटिफ़िकेशन पाने के लिए डिवाइस सेटिंग्स में नोटिफ़िकेशन चालू करें।",
   "openSettings": "सेटिंग्स खोलें",

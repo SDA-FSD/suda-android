@@ -318,6 +318,8 @@
   "seriesOverviewPlay": "เล่น",
   "seriesOverviewLocked": "ล็อกอยู่",
   "seriesOverviewEpisodeLockedToast": "เล่นตอนก่อนหน้าให้จบเพื่อปลดล็อก",
+  "seriesOverviewEndingLabel": "ตอนจบของเรื่อง",
+  "seriesOverviewEndingLockedCaption": "เล่นตอนสุดท้ายให้จบเพื่อปลดล็อกตอนจบ",
   "notificationPermissionBlockedTitle": "ปิดการแจ้งเตือนอยู่",
   "notificationPermissionBlockedMessage": "เปิดการแจ้งเตือนในการตั้งค่าอุปกรณ์เพื่อรับการแจ้งเตือนแบบพุช",
   "openSettings": "เปิดการตั้งค่า",

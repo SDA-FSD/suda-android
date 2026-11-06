@@ -1,10 +1,13 @@
 import 'dart:async' show Timer, unawaited;
-import 'dart:ui' show lerpDouble;
+import 'dart:math' as math;
+import 'dart:ui' show ImageFilter, lerpDouble;
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:vibration/vibration.dart';
 import 'package:shimmer/shimmer.dart';
 
+import '../../../config/app_config.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../models/series_models.dart';
 import '../../../utils/default_toast.dart';
@@ -68,16 +71,58 @@ RpS2SeriesOverviewDto seriesOverviewHoldBeforeUnlock(
   return after.copyWith(bestScoreMap: scores);
 }
 
+/// 마지막 에피소드가 이번 갱신에서 처음 클리어된 경우.
+bool seriesOverviewEndingJustUnlocked({
+  required RpS2SeriesOverviewDto before,
+  required RpS2SeriesOverviewDto after,
+}) {
+  final beforeEpisodes = before.episodes;
+  final afterEpisodes = after.episodes;
+  if (beforeEpisodes.isEmpty ||
+      beforeEpisodes.length != afterEpisodes.length) {
+    return false;
+  }
+  for (var i = 0; i < beforeEpisodes.length; i++) {
+    if (beforeEpisodes[i].id != afterEpisodes[i].id) return false;
+  }
+  final lastId = afterEpisodes.last.id;
+  return !before.bestScoreMap.containsKey(lastId) &&
+      after.bestScoreMap.containsKey(lastId);
+}
+
+/// Lab이 켠 뒤, 다음 Overview 로드가 한 번 가져간다.
+class SeriesEndingUnlockPreview {
+  SeriesEndingUnlockPreview._();
+
+  static bool _armed = false;
+
+  static void arm() => _armed = true;
+
+  static bool take() {
+    final armed = _armed;
+    _armed = false;
+    return armed;
+  }
+}
+
 class SeriesEpisodeTabContent extends StatefulWidget {
   final RpS2SeriesOverviewDto overview;
   final void Function(RpS2SeriesEpisodeDto episode)? onPlayEpisode;
   final int scrollToUnlockToken;
+  final int endingUnlockToken;
+  final bool holdEndingUnlocked;
+  final VoidCallback? onEndingUnlockSettled;
+  final VoidCallback? onOpenEnding;
 
   const SeriesEpisodeTabContent({
     super.key,
     required this.overview,
     this.onPlayEpisode,
     this.scrollToUnlockToken = 0,
+    this.endingUnlockToken = 0,
+    this.holdEndingUnlocked = false,
+    this.onEndingUnlockSettled,
+    this.onOpenEnding,
   });
 
   @override
@@ -85,7 +130,7 @@ class SeriesEpisodeTabContent extends StatefulWidget {
 }
 
 class _SeriesEpisodeTabContentState extends State<SeriesEpisodeTabContent>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   static const _episodeLabelColor = Color(0xFF635F5F);
   static const _mint = Color(0xFF0CABA8);
   static const _tealDark = Color(0xFF054544);
@@ -103,6 +148,20 @@ class _SeriesEpisodeTabContentState extends State<SeriesEpisodeTabContent>
   static const _unlockBlockVerticalBleed = 8.0;
   static const _playButtonHeight = 38.0;
   static const _summaryButtonGap = 4.0;
+  static const _endingGap = 40.0;
+  static const _endingCardHeight = 170.0;
+  static const _endingImageWidthFactor = 0.35;
+  static const _endingTextWidthFactor = 0.75;
+  static const _endingBorderWidth = 2.0;
+  static const _endingCardFill = Color(0xFF232323);
+  static const _endingUnlockDuration = Duration(milliseconds: 700);
+  static const _endingUnlockHold = Duration(milliseconds: 500);
+  static const _endingShakeDuration = Duration(milliseconds: 360);
+  static const _endingIconSize = 36.0;
+  static const _endingGlyphSize = 22.0;
+  static const _endingLineGap = 8.0;
+  static const _endingLockBlur = 12.0;
+  static const _unlockCircle = Color(0xFF80D7CF);
   static const _scrollToUnlockDuration = Duration(milliseconds: 450);
   static const _unlockAdvanceHold = Duration(milliseconds: 300);
   static const _unlockAdvanceDuration = Duration(milliseconds: 1000);
@@ -114,6 +173,10 @@ class _SeriesEpisodeTabContentState extends State<SeriesEpisodeTabContent>
   /// 행마다 고정. 해금 연출에서 키를 옮기면 썸네일 위젯이 다시 생겨 shimmer가 번쩍인다.
   final Map<int, GlobalKey> _rowKeys = {};
   late final AnimationController _advanceController;
+  late final AnimationController _endingController;
+  late final AnimationController _endingShakeController;
+  int _endingSeq = 0;
+  bool _endingUnlockPlaying = false;
 
   int _lastScrollToken = -1;
   int _advanceGeneration = 0;
@@ -155,15 +218,48 @@ class _SeriesEpisodeTabContentState extends State<SeriesEpisodeTabContent>
         _advanceTo = null;
         _anchorsReady = false;
         _advanceTicksEnabled = false;
-        _episodeButtonsLocked = false;
+        if (!_endingUnlockPlaying) _episodeButtonsLocked = false;
       });
     });
-    _scheduleScrollToUnlock();
+    _endingController = AnimationController(
+      vsync: this,
+      duration: _endingUnlockDuration,
+    );
+    _endingShakeController = AnimationController(
+      vsync: this,
+      duration: _endingShakeDuration,
+    );
+    _endingController.addListener(() {
+      if (!mounted || !_endingUnlockPlaying) return;
+      setState(() {});
+    });
+    _endingShakeController.addListener(() {
+      if (!mounted) return;
+      setState(() {});
+    });
+    if (widget.endingUnlockToken > 0) {
+      _endingUnlockPlaying = true;
+      _episodeButtonsLocked = true;
+      final seq = ++_endingSeq;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        unawaited(_runEndingUnlock(seq));
+      });
+    } else {
+      _scheduleScrollToUnlock();
+    }
   }
 
   @override
   void didUpdateWidget(SeriesEpisodeTabContent oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (widget.endingUnlockToken != oldWidget.endingUnlockToken) {
+      _armEndingUnlock();
+      final seq = ++_endingSeq;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        unawaited(_runEndingUnlock(seq));
+      });
+      return;
+    }
     final step = seriesOverviewLastUnlockStep(
       before: oldWidget.overview,
       after: widget.overview,
@@ -207,8 +303,11 @@ class _SeriesEpisodeTabContentState extends State<SeriesEpisodeTabContent>
 
   @override
   void dispose() {
+    _endingSeq++;
     _advanceHoldTimer?.cancel();
     _advanceController.dispose();
+    _endingController.dispose();
+    _endingShakeController.dispose();
     super.dispose();
   }
 
@@ -702,6 +801,7 @@ class _SeriesEpisodeTabContentState extends State<SeriesEpisodeTabContent>
     _EpisodePlayButtonKind buttonKind, {
     Key? blockKey,
     bool highlight = false,
+    bool connectToEnding = false,
     Widget? playButton,
   }) {
     final l10n = AppLocalizations.of(context)!;
@@ -798,6 +898,24 @@ class _SeriesEpisodeTabContentState extends State<SeriesEpisodeTabContent>
               bottom: -_unlockBlockVerticalBleed,
               child: ColoredBox(color: _unlockBlockBackground),
             ),
+          if (connectToEnding)
+            Positioned(
+              left: leftWidth / 2 - 0.5,
+              width: 1,
+              top: leftWidth * 1.35,
+              bottom: -_endingGap,
+              child: const IgnorePointer(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [_tealDark, _mint],
+                    ),
+                  ),
+                ),
+              ),
+            ),
           KeyedSubtree(key: const ValueKey('episode-body'), child: block),
         ],
       ),
@@ -829,9 +947,12 @@ class _SeriesEpisodeTabContentState extends State<SeriesEpisodeTabContent>
             _buttonKind(i, firstUnlockIndex),
             blockKey: _rowKey(i),
             highlight: _showsStaticHighlight(i, firstUnlockIndex),
+            connectToEnding: i == episodes.length - 1,
             playButton: _playButtonFor(context, l10n, i, episodes[i]),
           ),
         ],
+        const SizedBox(height: _endingGap),
+        _buildEndingCard(),
       ],
     );
 
@@ -861,8 +982,338 @@ class _SeriesEpisodeTabContentState extends State<SeriesEpisodeTabContent>
     );
   }
 
+  bool get _endingCleared {
+    if (widget.holdEndingUnlocked) return true;
+    final episodes = overview.episodes;
+    if (episodes.isEmpty) return false;
+    return overview.bestScoreMap.containsKey(episodes.last.id);
+  }
+
+  double get _endingMs =>
+      _endingController.value * _endingUnlockDuration.inMilliseconds;
+
+  double get _endingLockOpacity {
+    if (!_endingUnlockPlaying) return _endingCleared ? 0 : 1;
+    final ms = _endingMs;
+    if (ms >= 150) return 0;
+    return 1 - ms / 150;
+  }
+
+  double get _endingUnlockScale {
+    if (!_endingUnlockPlaying) return _endingCleared ? 1 : 0;
+    final ms = _endingMs;
+    if (ms < 80) return 0;
+    if (ms >= 480) return 1;
+    final u = (ms - 80) / (480 - 80);
+    if (u < 0.5) return lerpDouble(0.2, 1.12, u / 0.5)!;
+    return lerpDouble(1.12, 1, (u - 0.5) / 0.5)!;
+  }
+
+  double get _endingDim {
+    if (!_endingUnlockPlaying) return _endingCleared ? 0 : 0.7;
+    final ms = _endingMs;
+    if (ms >= 250) return 0;
+    return lerpDouble(0.7, 0, ms / 250)!;
+  }
+
+  double get _endingBlur {
+    if (!_endingUnlockPlaying) return _endingCleared ? 0 : _endingLockBlur;
+    final ms = _endingMs;
+    if (ms >= 250) return 0;
+    return lerpDouble(_endingLockBlur, 0, ms / 250)!;
+  }
+
+  double get _endingCardScale {
+    if (!_endingUnlockPlaying) return 1;
+    final ms = _endingMs;
+    if (ms < 200) return lerpDouble(1, 1.06, ms / 200)!;
+    if (ms < 400) return lerpDouble(1.06, 1, (ms - 200) / 200)!;
+    return 1;
+  }
+
+  double get _endingLockedCaptionOpacity {
+    if (!_endingUnlockPlaying) return _endingCleared ? 0 : 1;
+    final ms = _endingMs;
+    if (ms >= 150) return 0;
+    return 1 - ms / 150;
+  }
+
+  double get _endingTitleOpacity {
+    if (!_endingUnlockPlaying) return _endingCleared ? 1 : 0;
+    final ms = _endingMs;
+    if (ms < 150) return 0;
+    if (ms >= 400) return 1;
+    return (ms - 150) / 250;
+  }
+
+  double get _endingTitleScale {
+    if (!_endingUnlockPlaying) return 1;
+    final ms = _endingMs;
+    if (ms < 150 || ms >= 400) return 1;
+    return lerpDouble(1.12, 1, (ms - 150) / 250)!;
+  }
+
+  double get _endingShakeDx {
+    final t = _endingShakeController.value;
+    if (t == 0) return 0;
+    return math.sin(t * 3 * math.pi * 2) * 8;
+  }
+
+  void _armEndingUnlock() {
+    _advanceHoldTimer?.cancel();
+    _advanceTicksEnabled = false;
+    _advanceController.stop();
+    _endingShakeController.stop();
+    _endingShakeController.value = 0;
+    _heldOverview = null;
+    _advanceFrom = null;
+    _advanceTo = null;
+    _anchorsReady = false;
+    _endingUnlockPlaying = true;
+    _episodeButtonsLocked = true;
+    _endingController.value = 0;
+  }
+
+  Future<void> _runEndingUnlock(int seq) async {
+    if (!mounted || seq != _endingSeq) return;
+    final position = Scrollable.maybeOf(context)?.position;
+    if (position != null && position.hasContentDimensions) {
+      try {
+        await position.animateTo(
+          position.maxScrollExtent,
+          duration: _scrollToUnlockDuration,
+          curve: Curves.easeInOut,
+        );
+      } catch (_) {}
+    }
+    if (!mounted || seq != _endingSeq) return;
+    await Future<void>.delayed(_endingUnlockHold);
+    if (!mounted || seq != _endingSeq) return;
+    unawaited(_vibrateEndingShake());
+    try {
+      await _endingController.forward(from: 0);
+    } catch (_) {}
+    if (!mounted || seq != _endingSeq) return;
+    setState(() {
+      _endingUnlockPlaying = false;
+      _episodeButtonsLocked = false;
+    });
+    widget.onEndingUnlockSettled?.call();
+  }
+
+  Future<void> _vibrateEndingShake() async {
+    try {
+      await Vibration.vibrate(
+        pattern: [30, 45, 75, 45, 75, 45],
+        intensities: [0, 255, 0, 255, 0, 255],
+        sharpness: 1,
+      );
+    } catch (_) {}
+  }
+
+  void _onEndingTap() {
+    if (_endingUnlockPlaying) return;
+    if (_endingCleared) {
+      widget.onOpenEnding?.call();
+      return;
+    }
+    if (_endingShakeController.isAnimating) return;
+    unawaited(_vibrateEndingShake());
+    _endingShakeController.forward(from: 0);
+  }
+
+  Widget _endingIconBadge({
+    required Color color,
+    required Widget icon,
+  }) {
+    return DecoratedBox(
+      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+      child: SizedBox(
+        width: _endingIconSize,
+        height: _endingIconSize,
+        child: Center(child: icon),
+      ),
+    );
+  }
+
+  Widget _buildEndingCard() {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context).textTheme;
+    final innerHeight = _endingCardHeight - _endingBorderWidth * 2;
+    final innerRadius = BorderRadius.circular(
+      (_playButtonHeight / 2 - _endingBorderWidth)
+          .clamp(0.0, _playButtonHeight / 2),
+    );
+    final titleStyle = theme.bodyLarge?.copyWith(color: _mint);
+    final captionStyle = theme.labelSmall?.copyWith(color: Colors.white);
+    final endingTitle = SudaJsonUtil.localizedMapText(overview.endingTitle);
+    final lockOpacity = _endingLockOpacity.clamp(0.0, 1.0);
+    final unlockScale = _endingUnlockScale;
+    final lockedCaptionOpacity = _endingLockedCaptionOpacity.clamp(0.0, 1.0);
+    final titleOpacity = _endingTitleOpacity.clamp(0.0, 1.0);
+
+    final card = GestureDetector(
+      onTap: _onEndingTap,
+      behavior: HitTestBehavior.opaque,
+      child: SizedBox(
+        height: _endingCardHeight,
+        width: double.infinity,
+        child: DecoratedBox(
+          decoration: const BoxDecoration(
+            borderRadius: _playRadius,
+            gradient: LinearGradient(colors: [_mint, _tealDark]),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(_endingBorderWidth),
+            child: ClipRRect(
+              borderRadius: innerRadius,
+              child: ColoredBox(
+                color: _endingCardFill,
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final dpr = MediaQuery.devicePixelRatioOf(context);
+                    final imageWidth =
+                        (constraints.maxWidth * _endingImageWidthFactor * dpr)
+                                .round() /
+                            dpr;
+                    final textWidth =
+                        (constraints.maxWidth * _endingTextWidthFactor * dpr)
+                                .round() /
+                            dpr;
+                    return Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: _EndingArtwork(
+                      path: overview.endingImgPath,
+                      width: imageWidth,
+                      height: innerHeight,
+                      dim: _endingDim.clamp(0.0, 1.0),
+                      blur: _endingBlur,
+                    ),
+                    ),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: SizedBox(
+                        width: textWidth,
+                        child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Center(
+                            child: SizedBox(
+                              width: _endingIconSize,
+                              height: _endingIconSize,
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  Opacity(
+                                    opacity: lockOpacity,
+                                    child: _endingIconBadge(
+                                      color: _lockedFill,
+                                      icon: const ColorFiltered(
+                                        colorFilter: ColorFilter.mode(
+                                          Colors.white,
+                                          BlendMode.srcIn,
+                                        ),
+                                        child: Image(
+                                          image: AssetImage(
+                                            'assets/images/icons/lock.png',
+                                          ),
+                                          width: _endingGlyphSize,
+                                          height: _endingGlyphSize,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  if (unlockScale > 0)
+                                    Transform.scale(
+                                      scale: unlockScale,
+                                      child: _endingIconBadge(
+                                        color: _unlockCircle,
+                                        icon: const ColorFiltered(
+                                          colorFilter: ColorFilter.mode(
+                                            Color(0xFF353535),
+                                            BlendMode.srcIn,
+                                          ),
+                                          child: Image(
+                                            image: AssetImage(
+                                              'assets/images/icons/unlock.png',
+                                            ),
+                                            width: _endingGlyphSize,
+                                            height: _endingGlyphSize,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: _endingLineGap),
+                          Text(
+                            l10n.seriesOverviewEndingLabel,
+                            textAlign: TextAlign.center,
+                            style: titleStyle,
+                          ),
+                          const SizedBox(height: _endingLineGap),
+                          Align(
+                            child: FractionallySizedBox(
+                              widthFactor: 0.8,
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  Opacity(
+                                    opacity: lockedCaptionOpacity,
+                                    child: Text(
+                                      l10n.seriesOverviewEndingLockedCaption,
+                                      textAlign: TextAlign.center,
+                                      style: captionStyle,
+                                    ),
+                                  ),
+                                  Opacity(
+                                    opacity: titleOpacity,
+                                    child: Transform.scale(
+                                      scale: _endingTitleScale,
+                                      child: Text(
+                                        endingTitle,
+                                        textAlign: TextAlign.center,
+                                        style: captionStyle,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    return Transform.translate(
+      offset: Offset(_endingShakeDx, 0),
+      child: Transform.scale(
+        scale: _endingCardScale,
+        alignment: Alignment.center,
+        child: card,
+      ),
+    );
+  }
+
   Widget _ignoreEpisodeButtons(Widget child) {
-    if (!_episodeButtonsLocked) return child;
+    if (!_episodeButtonsLocked && !_endingUnlockPlaying) return child;
     return IgnorePointer(child: child);
   }
 
@@ -889,5 +1340,151 @@ class _SeriesEpisodeTabContentState extends State<SeriesEpisodeTabContent>
       return _buildUnlockArriveButton(context, l10n, onPlay);
     }
     return null;
+  }
+}
+
+class _EndingArtwork extends StatefulWidget {
+  final String? path;
+  final double width;
+  final double height;
+  final double dim;
+  final double blur;
+
+  const _EndingArtwork({
+    required this.path,
+    required this.width,
+    required this.height,
+    required this.dim,
+    required this.blur,
+  });
+
+  @override
+  State<_EndingArtwork> createState() => _EndingArtworkState();
+}
+
+class _EndingArtworkState extends State<_EndingArtwork> {
+  ImageStream? _stream;
+  ImageStreamListener? _listener;
+  ImageInfo? _info;
+  String? _resolvedPath;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _resolve();
+  }
+
+  @override
+  void didUpdateWidget(_EndingArtwork oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.path != widget.path) _resolve();
+  }
+
+  void _resolve() {
+    final path = widget.path;
+    if (path == null || path.isEmpty) {
+      _stop();
+      if (_info != null || _resolvedPath != null) {
+        setState(() {
+          _info = null;
+          _resolvedPath = null;
+        });
+      }
+      return;
+    }
+    if (_resolvedPath == path && _stream != null) return;
+    _stop();
+    _resolvedPath = path;
+    final provider = CachedNetworkImageProvider('${AppConfig.cdnBaseUrl}$path');
+    final stream = provider.resolve(createLocalImageConfiguration(context));
+    _stream = stream;
+    _listener = ImageStreamListener((info, _) {
+      if (!mounted) return;
+      setState(() => _info = info);
+    }, onError: (_, _) {
+      if (!mounted) return;
+      setState(() => _info = null);
+    });
+    stream.addListener(_listener!);
+  }
+
+  void _stop() {
+    final listener = _listener;
+    if (listener != null) _stream?.removeListener(listener);
+    _stream = null;
+    _listener = null;
+  }
+
+  @override
+  void dispose() {
+    _stop();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final info = _info;
+    final image = info?.image;
+    final dim = widget.dim <= 0
+        ? null
+        : ColoredBox(
+            color: const Color(0xFF121212).withValues(alpha: widget.dim),
+          );
+    final pictureHeight = image == null
+        ? widget.height
+        : widget.width * image.height / image.width;
+    final picture = image == null
+        ? const ColoredBox(color: Color(0xFF121212))
+        : RawImage(image: image, fit: BoxFit.fill);
+    final frame = SizedBox(
+      width: widget.width,
+      height: pictureHeight,
+      child: picture,
+    );
+    final blurred = widget.blur <= 0
+        ? frame
+        : ImageFiltered(
+            imageFilter: ImageFilter.blur(
+              sigmaX: widget.blur,
+              sigmaY: widget.blur,
+              tileMode: TileMode.decal,
+            ),
+            child: frame,
+          );
+    return SizedBox(
+      width: widget.width,
+      height: widget.height,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          ClipRect(
+            clipBehavior: Clip.hardEdge,
+            child: OverflowBox(
+              alignment: Alignment.center,
+              minWidth: widget.width,
+              maxWidth: widget.width,
+              minHeight: pictureHeight,
+              maxHeight: pictureHeight,
+              child: blurred,
+            ),
+          ),
+          ?dim,
+          const DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: [
+                  Color(0x00232323),
+                  Color(0x00232323),
+                  Color(0xFF232323),
+                ],
+                stops: [0, 0.75, 1],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

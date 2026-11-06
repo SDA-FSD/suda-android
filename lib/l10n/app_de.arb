@@ -318,6 +318,8 @@
   "seriesOverviewPlay": "Starten",
   "seriesOverviewLocked": "Gesperrt",
   "seriesOverviewEpisodeLockedToast": "Schließe zum Freischalten zuerst die vorherige Folge ab.",
+  "seriesOverviewEndingLabel": "Ende der Geschichte",
+  "seriesOverviewEndingLockedCaption": "Schließe die letzte Folge ab, um das Ende freizuschalten.",
   "notificationPermissionBlockedTitle": "Benachrichtigungen sind aus",
   "notificationPermissionBlockedMessage": "Aktiviere Benachrichtigungen in den Geräteeinstellungen, um Push-Benachrichtigungen zu erhalten.",
   "openSettings": "Einstellungen öffnen",

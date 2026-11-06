@@ -318,6 +318,8 @@
   "seriesOverviewPlay": "Chơi",
   "seriesOverviewLocked": "Đã khóa",
   "seriesOverviewEpisodeLockedToast": "Hoàn thành tập trước để mở khóa.",
+  "seriesOverviewEndingLabel": "Cái kết của câu chuyện",
+  "seriesOverviewEndingLockedCaption": "Hoàn thành tập cuối để mở khóa cái kết.",
   "notificationPermissionBlockedTitle": "Thông báo đang tắt",
   "notificationPermissionBlockedMessage": "Bật thông báo trong phần cài đặt của thiết bị để nhận thông báo đẩy.",
   "openSettings": "Mở cài đặt",

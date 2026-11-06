@@ -867,6 +867,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get seriesOverviewEpisodeLockedToast => '完成上一集即可解锁。';
 
   @override
+  String get seriesOverviewEndingLabel => '故事结局';
+
+  @override
+  String get seriesOverviewEndingLockedCaption => '完成最后一集即可解锁结局。';
+
+  @override
   String get notificationPermissionBlockedTitle => '通知已关闭';
 
   @override
@@ -2164,6 +2170,12 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get seriesOverviewEpisodeLockedToast => '完成上一集即可解锁。';
 
   @override
+  String get seriesOverviewEndingLabel => '故事结局';
+
+  @override
+  String get seriesOverviewEndingLockedCaption => '完成最后一集即可解锁结局。';
+
+  @override
   String get notificationPermissionBlockedTitle => '通知已关闭';
 
   @override
@@ -3459,6 +3471,12 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get seriesOverviewEpisodeLockedToast => '完成上一集即可解鎖。';
+
+  @override
+  String get seriesOverviewEndingLabel => '故事結局';
+
+  @override
+  String get seriesOverviewEndingLockedCaption => '完成最後一集即可解鎖結局。';
 
   @override
   String get notificationPermissionBlockedTitle => '通知已關閉';

@@ -915,6 +915,13 @@ class AppLocalizationsTr extends AppLocalizations {
       'Kilidi açmak için önceki bölümü tamamla.';
 
   @override
+  String get seriesOverviewEndingLabel => 'Hikâyenin sonu';
+
+  @override
+  String get seriesOverviewEndingLockedCaption =>
+      'Finali açmak için son bölümü tamamla.';
+
+  @override
   String get notificationPermissionBlockedTitle => 'Bildirimler kapalı';
 
   @override

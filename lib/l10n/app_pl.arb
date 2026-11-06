@@ -318,6 +318,8 @@
   "seriesOverviewPlay": "Graj",
   "seriesOverviewLocked": "Zablokowany",
   "seriesOverviewEpisodeLockedToast": "Ukończ poprzedni odcinek, aby odblokować kolejny.",
+  "seriesOverviewEndingLabel": "Zakończenie historii",
+  "seriesOverviewEndingLockedCaption": "Ukończ ostatni odcinek, aby odblokować zakończenie.",
   "notificationPermissionBlockedTitle": "Powiadomienia są wyłączone",
   "notificationPermissionBlockedMessage": "Włącz powiadomienia w ustawieniach urządzenia, aby otrzymywać powiadomienia push.",
   "openSettings": "Otwórz ustawienia",
