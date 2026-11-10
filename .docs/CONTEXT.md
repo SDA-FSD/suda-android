@@ -125,9 +125,9 @@ xcrun altool --upload-app --type ios -f build/ios/ipa/suda.ipa --apiKey "$(cat ~
 - `EnergyOfferScreen`: `home`·`opening`·`opening_insufficient`·`playing`·`playing_insufficient`·`overview`·`lab`. Overview 배지 탭 detail `screen=overview`
 - 비가시(비활성 탭·위 라우트)면 타이머·GET 중단. 결제 성공은 `EnergyRefreshBus`로 추가 GET 없이 반영
 - Playing 0/402 → `showPlayingEnergyInsufficientPopup` → `endRoleplay`면 Wait 레이어(세션 유지)
-- Opening Start `sessionId=='0'` → 에너지 부족 팝업, Opening 유지
+- Opening Start `sessionId=='0'` → Out of Energy 바텀시트(`out_of_energy_bottom_sheet.dart`). detail `subscriptionEverYn`으로 Premium CTA 분기. Playing 부족 UI는 아직 기존 팝업
 - 팝업 INAPP 탭: `POST /v1/impressions/products` (팝업 생명주기 내 동일 키 1회)
-- Enable Notifications 슬롯: detail `showEnablePushFreeChargeYn=Y` **그리고** `screen` ∈ {`home`,`opening`,`opening_insufficient`}. 탭 시 impression `productId=enable_push_free_charge` → `GET /v1/users` → PushAgreement Sub Screen. `completeYn=Y`면 토스트(에너지 팝업 경로만) + 제거 애니 + detail 재조회. Setting>Notification 자동닫힘은 토스트 없음. OFF→ON OS 권한: iOS FCM settings, AOS `Permission.notification`. iOS ON 성공 시 `POST /v1/users/push-token` 추가(실토큰만, 상세 `CONTEXT_SCREEN.md` PushAgreement)
+- Enable Notifications 슬롯: SUDA-1252 이후 detail `showEnablePushFreeChargeYn` 항상 N → 팝업 미노출(구버전 포함). 클라 슬롯 코드·Setting>Notification(`PushAgreement`)은 유지. 과거 조건은 `Y` **그리고** `screen` ∈ {`home`,`opening`,`opening_insufficient`}
 
 ### 홈·시리즈
 - `GET /v3/home/contents` → banners, seriesList, restYn, notiboxUnreadYn, rankBadgeYn, profileBadgeYn, `firstRpRecommend`(없으면 null). 시리즈 언어는 서버가 사용자 meta `TARGET_LANGUAGE`로 정한다. 없으면 `EN`. `RestStatusService`에 rest·배지 동기화. 랭킹·프로필 점은 알림 점과 별개. 구버전 응답에 필드가 없으면 `N`. meta `TARGET_LANGUAGE`가 바뀐 채 메인으로 돌아오면 Home을 다시 받는다
@@ -180,8 +180,8 @@ xcrun altool --upload-app --type ios -f build/ios/ipa/suda.ipa --apiKey "$(cat ~
 | 구분 | AOS productId | iOS productId | basePlanId (stat) | 진입 |
 |------|---------------|---------------|-------------------|------|
 | INAPP | `unlimited_energy_10_minute` | 동일 | consumable | 에너지 팝업 |
-| INAPP | `energy_capacity_6` / `energy_capacity_7` | 동일 | — | 에너지 팝업 |
-| 비IAP | `enable_push_free_charge` | 동일 | — | 에너지 팝업(home/opening/opening_insufficient) |
+| INAPP | `energy_capacity_6` / `energy_capacity_7` | 동일 | — | 팝업 미노출(SUDA-1252, detail 플래그 N). 상품·verify 유지 |
+| 비IAP | `enable_push_free_charge` | 동일 | — | 팝업 미노출(SUDA-1252, detail 플래그 N). Setting 알림 동의 경로는 별개 |
 | SUBS | `subscription_premium` | `premium_monthly` / `premium_yearly` (그룹 `22321554`, level 1) | `bp-premium-monthly` / `bp-premium-yearly` | Paywall |
 
 - Billing 키는 **productId만** (`po-…` 아님). ID는 앱 하드코딩

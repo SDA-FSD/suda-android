@@ -352,6 +352,33 @@
   "energyInfoFull": "طاقتك ممتلئة.",
   "energyInfoUnlimitedEndsIn": "وضع اللعب غير المحدود مفعّل",
   "energyInsufficient": "ليس لديك طاقة كافية.",
+  "outOfEnergyTitle": "نفدت طاقتك",
+  "outOfEnergySubtitle": "أعد شحن الطاقة لبدء المحادثة.",
+  "outOfEnergyRecommended": "موصى به",
+  "outOfEnergyPremiumBenefitEnergy": "الترقية إلى 30 طاقة كحد أقصى",
+  "outOfEnergyPremiumBenefitFeedback": "ملاحظات الذكاء الاصطناعي على الجمل",
+  "outOfEnergyTry7DaysFree": "جرّب 7 أيام مجانًا",
+  "outOfEnergyExplorePremium": "اكتشف بريميوم",
+  "outOfEnergyChatPassTitle": "تمريرة دردشة 10 دقائق",
+  "outOfEnergyPayOnce": "شراء لمرة واحدة",
+  "outOfEnergyChatPassDesc": "دردش 10 دقائق دون استهلاك الطاقة",
+  "outOfEnergyBuyAndStart": "اشترِ وابدأ · {price}",
+  "@outOfEnergyBuyAndStart": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "outOfEnergyWaitTitle": "انتظر إعادة الشحن",
+  "outOfEnergyFree": "مجاني",
+  "outOfEnergyNextRecharge": "إعادة الشحن التالية خلال @@TIME@@.",
+  "outOfEnergyComeBackLater": "سأعود لاحقًا",
+  "outOfEnergyReturnHomeHint": "ستعود إلى الشاشة الرئيسية",
+  "outOfEnergyClose": "إغلاق",
+  "outOfEnergyPushReminderTitle": "هل تريد تنبيهًا عندما تمتلئ طاقتك؟",
+  "outOfEnergyNotifyMe": "أعلمني",
+  "outOfEnergyMaybeLater": "لاحقًا",
   "endRoleplay": "إنهاء تمثيل الأدوار",
   "energyEnablePushTitle": "تفعيل الإشعارات",
   "energyEnablePushSubtitle": "فعّل الإشعارات وأعد تعبئة طاقتك بالكامل.",

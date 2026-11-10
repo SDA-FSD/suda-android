@@ -1007,6 +1007,68 @@ class AppLocalizationsHi extends AppLocalizations {
   String get energyInsufficient => 'आपके पास पर्याप्त एनर्जी नहीं है।';
 
   @override
+  String get outOfEnergyTitle => 'आपकी एनर्जी खत्म हो गई';
+
+  @override
+  String get outOfEnergySubtitle => 'चैट शुरू करने के लिए एनर्जी रिचार्ज करें।';
+
+  @override
+  String get outOfEnergyRecommended => 'सुझाया गया';
+
+  @override
+  String get outOfEnergyPremiumBenefitEnergy => 'अधिकतम 30 एनर्जी में अपग्रेड';
+
+  @override
+  String get outOfEnergyPremiumBenefitFeedback => 'AI वाक्य फ़ीडबैक';
+
+  @override
+  String get outOfEnergyTry7DaysFree => '7 दिन मुफ़्त आज़माएँ';
+
+  @override
+  String get outOfEnergyExplorePremium => 'प्रीमियम देखें';
+
+  @override
+  String get outOfEnergyChatPassTitle => '10-मिनट चैट पास';
+
+  @override
+  String get outOfEnergyPayOnce => 'एक बार खरीद';
+
+  @override
+  String get outOfEnergyChatPassDesc => 'एनर्जी खर्च किए बिना 10 मिनट चैट';
+
+  @override
+  String outOfEnergyBuyAndStart(String price) {
+    return 'खरीदें और शुरू करें · $price';
+  }
+
+  @override
+  String get outOfEnergyWaitTitle => 'रिचार्ज का इंतज़ार';
+
+  @override
+  String get outOfEnergyFree => 'मुफ़्त';
+
+  @override
+  String get outOfEnergyNextRecharge => 'अगला रिचार्ज @@TIME@@ में।';
+
+  @override
+  String get outOfEnergyComeBackLater => 'बाद में वापस आऊँगा/आऊँगी';
+
+  @override
+  String get outOfEnergyReturnHomeHint => 'आप होम स्क्रीन पर लौटेंगे';
+
+  @override
+  String get outOfEnergyClose => 'बंद करें';
+
+  @override
+  String get outOfEnergyPushReminderTitle => 'एनर्जी भरने पर सूचित करें?';
+
+  @override
+  String get outOfEnergyNotifyMe => 'मुझे सूचित करें';
+
+  @override
+  String get outOfEnergyMaybeLater => 'बाद में';
+
+  @override
   String get endRoleplay => 'रोलप्ले खत्म करें';
 
   @override

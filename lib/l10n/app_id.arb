@@ -352,6 +352,33 @@
   "energyInfoFull": "Energi Anda sudah penuh.",
   "energyInfoUnlimitedEndsIn": "Mode Tanpa Batas Aktif",
   "energyInsufficient": "Energi Anda tidak cukup.",
+  "outOfEnergyTitle": "Energimu habis",
+  "outOfEnergySubtitle": "Isi ulang energi untuk mulai mengobrol.",
+  "outOfEnergyRecommended": "Direkomendasikan",
+  "outOfEnergyPremiumBenefitEnergy": "Tingkatkan ke maks. 30 energi",
+  "outOfEnergyPremiumBenefitFeedback": "Masukan kalimat dari AI",
+  "outOfEnergyTry7DaysFree": "Coba gratis 7 hari",
+  "outOfEnergyExplorePremium": "Jelajahi Premium",
+  "outOfEnergyChatPassTitle": "Pass chat 10 menit",
+  "outOfEnergyPayOnce": "Beli sekali",
+  "outOfEnergyChatPassDesc": "Chat 10 menit tanpa memakai energi",
+  "outOfEnergyBuyAndStart": "Beli & mulai · {price}",
+  "@outOfEnergyBuyAndStart": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "outOfEnergyWaitTitle": "Tunggu pengisian",
+  "outOfEnergyFree": "Gratis",
+  "outOfEnergyNextRecharge": "Pengisian berikutnya dalam @@TIME@@.",
+  "outOfEnergyComeBackLater": "Nanti saya kembali",
+  "outOfEnergyReturnHomeHint": "Kamu akan kembali ke beranda",
+  "outOfEnergyClose": "Tutup",
+  "outOfEnergyPushReminderTitle": "Ingatkan saat energimu penuh?",
+  "outOfEnergyNotifyMe": "Beritahu saya",
+  "outOfEnergyMaybeLater": "Nanti saja",
   "endRoleplay": "Akhiri roleplay",
   "energyEnablePushTitle": "Aktifkan notifikasi",
   "energyEnablePushSubtitle": "Aktifkan notifikasi dan isi ulang energi hingga penuh.",

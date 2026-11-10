@@ -961,6 +961,68 @@ class AppLocalizationsJa extends AppLocalizations {
   String get energyInsufficient => 'エネルギーが足りません。';
 
   @override
+  String get outOfEnergyTitle => 'エネルギーが足りません';
+
+  @override
+  String get outOfEnergySubtitle => '会話を始めるにはエネルギーをチャージしてください。';
+
+  @override
+  String get outOfEnergyRecommended => 'おすすめ';
+
+  @override
+  String get outOfEnergyPremiumBenefitEnergy => '最大エネルギー30にアップグレード';
+
+  @override
+  String get outOfEnergyPremiumBenefitFeedback => 'AI文章フィードバック';
+
+  @override
+  String get outOfEnergyTry7DaysFree => '7日間無料で試す';
+
+  @override
+  String get outOfEnergyExplorePremium => 'プレミアムを見る';
+
+  @override
+  String get outOfEnergyChatPassTitle => '10分チャットパス';
+
+  @override
+  String get outOfEnergyPayOnce => '1回購入';
+
+  @override
+  String get outOfEnergyChatPassDesc => 'エネルギーを使わず10分会話';
+
+  @override
+  String outOfEnergyBuyAndStart(String price) {
+    return '購入して開始 · $price';
+  }
+
+  @override
+  String get outOfEnergyWaitTitle => 'チャージを待つ';
+
+  @override
+  String get outOfEnergyFree => '無料';
+
+  @override
+  String get outOfEnergyNextRecharge => '次のチャージまで @@TIME@@';
+
+  @override
+  String get outOfEnergyComeBackLater => 'チャージしたら戻ってきます';
+
+  @override
+  String get outOfEnergyReturnHomeHint => 'ホーム画面に戻ります';
+
+  @override
+  String get outOfEnergyClose => '閉じる';
+
+  @override
+  String get outOfEnergyPushReminderTitle => 'エネルギーが満タンになったらお知らせしますか？';
+
+  @override
+  String get outOfEnergyNotifyMe => '通知を受け取る';
+
+  @override
+  String get outOfEnergyMaybeLater => 'あとで';
+
+  @override
   String get endRoleplay => 'ロールプレイを終了';
 
   @override

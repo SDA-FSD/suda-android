@@ -1011,6 +1011,70 @@ class AppLocalizationsMs extends AppLocalizations {
   String get energyInsufficient => 'Tenaga anda tidak mencukupi.';
 
   @override
+  String get outOfEnergyTitle => 'Tenaga anda habis';
+
+  @override
+  String get outOfEnergySubtitle => 'Cas semula tenaga untuk mula berbual.';
+
+  @override
+  String get outOfEnergyRecommended => 'Disyorkan';
+
+  @override
+  String get outOfEnergyPremiumBenefitEnergy =>
+      'Naik taraf kepada maks. 30 tenaga';
+
+  @override
+  String get outOfEnergyPremiumBenefitFeedback => 'Maklum balas ayat AI';
+
+  @override
+  String get outOfEnergyTry7DaysFree => 'Cuba percuma 7 hari';
+
+  @override
+  String get outOfEnergyExplorePremium => 'Terokai Premium';
+
+  @override
+  String get outOfEnergyChatPassTitle => 'Pas sembang 10 min';
+
+  @override
+  String get outOfEnergyPayOnce => 'Beli sekali';
+
+  @override
+  String get outOfEnergyChatPassDesc =>
+      'Sembang 10 minit tanpa menggunakan tenaga';
+
+  @override
+  String outOfEnergyBuyAndStart(String price) {
+    return 'Beli & mula · $price';
+  }
+
+  @override
+  String get outOfEnergyWaitTitle => 'Tunggu pengecasan';
+
+  @override
+  String get outOfEnergyFree => 'Percuma';
+
+  @override
+  String get outOfEnergyNextRecharge => 'Pengecasan seterusnya dalam @@TIME@@.';
+
+  @override
+  String get outOfEnergyComeBackLater => 'Saya akan kembali nanti';
+
+  @override
+  String get outOfEnergyReturnHomeHint => 'Anda akan kembali ke skrin utama';
+
+  @override
+  String get outOfEnergyClose => 'Tutup';
+
+  @override
+  String get outOfEnergyPushReminderTitle => 'Maklumkan bila tenaga penuh?';
+
+  @override
+  String get outOfEnergyNotifyMe => 'Beritahu saya';
+
+  @override
+  String get outOfEnergyMaybeLater => 'Nanti';
+
+  @override
   String get endRoleplay => 'Tamatkan lakon peranan';
 
   @override

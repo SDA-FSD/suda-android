@@ -352,6 +352,33 @@
   "energyInfoFull": "Puno ang Energy mo.",
   "energyInfoUnlimitedEndsIn": "Aktibo ang Unlimited Mode",
   "energyInsufficient": "Kulang ang Energy mo.",
+  "outOfEnergyTitle": "Naubos na ang energy mo",
+  "outOfEnergySubtitle": "Mag-recharge para makapagsimulang mag-chat.",
+  "outOfEnergyRecommended": "Inirerekomenda",
+  "outOfEnergyPremiumBenefitEnergy": "I-upgrade sa max na 30 energy",
+  "outOfEnergyPremiumBenefitFeedback": "AI feedback sa mga pangungusap",
+  "outOfEnergyTry7DaysFree": "Subukan nang libre nang 7 araw",
+  "outOfEnergyExplorePremium": "Tuklasin ang Premium",
+  "outOfEnergyChatPassTitle": "10-min na Chat Pass",
+  "outOfEnergyPayOnce": "Isang beses na bili",
+  "outOfEnergyChatPassDesc": "Mag-chat ng 10 minuto nang walang energy",
+  "outOfEnergyBuyAndStart": "Bumili at magsimula · {price}",
+  "@outOfEnergyBuyAndStart": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "outOfEnergyWaitTitle": "Maghintay mag-recharge",
+  "outOfEnergyFree": "Libre",
+  "outOfEnergyNextRecharge": "Susunod na recharge sa @@TIME@@.",
+  "outOfEnergyComeBackLater": "Babalik ako mamaya",
+  "outOfEnergyReturnHomeHint": "Babalik ka sa home screen",
+  "outOfEnergyClose": "Isara",
+  "outOfEnergyPushReminderTitle": "Ipaalala kapag puno na ang energy?",
+  "outOfEnergyNotifyMe": "Abisuhan ako",
+  "outOfEnergyMaybeLater": "Mamaya na",
   "endRoleplay": "Tapusin ang Roleplay",
   "energyEnablePushTitle": "I-on ang mga Notification",
   "energyEnablePushSubtitle": "I-on ang mga notification at punuin ang Energy mo.",

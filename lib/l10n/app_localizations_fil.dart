@@ -1019,6 +1019,72 @@ class AppLocalizationsFil extends AppLocalizations {
   String get energyInsufficient => 'Kulang ang Energy mo.';
 
   @override
+  String get outOfEnergyTitle => 'Naubos na ang energy mo';
+
+  @override
+  String get outOfEnergySubtitle =>
+      'Mag-recharge para makapagsimulang mag-chat.';
+
+  @override
+  String get outOfEnergyRecommended => 'Inirerekomenda';
+
+  @override
+  String get outOfEnergyPremiumBenefitEnergy => 'I-upgrade sa max na 30 energy';
+
+  @override
+  String get outOfEnergyPremiumBenefitFeedback =>
+      'AI feedback sa mga pangungusap';
+
+  @override
+  String get outOfEnergyTry7DaysFree => 'Subukan nang libre nang 7 araw';
+
+  @override
+  String get outOfEnergyExplorePremium => 'Tuklasin ang Premium';
+
+  @override
+  String get outOfEnergyChatPassTitle => '10-min na Chat Pass';
+
+  @override
+  String get outOfEnergyPayOnce => 'Isang beses na bili';
+
+  @override
+  String get outOfEnergyChatPassDesc =>
+      'Mag-chat ng 10 minuto nang walang energy';
+
+  @override
+  String outOfEnergyBuyAndStart(String price) {
+    return 'Bumili at magsimula · $price';
+  }
+
+  @override
+  String get outOfEnergyWaitTitle => 'Maghintay mag-recharge';
+
+  @override
+  String get outOfEnergyFree => 'Libre';
+
+  @override
+  String get outOfEnergyNextRecharge => 'Susunod na recharge sa @@TIME@@.';
+
+  @override
+  String get outOfEnergyComeBackLater => 'Babalik ako mamaya';
+
+  @override
+  String get outOfEnergyReturnHomeHint => 'Babalik ka sa home screen';
+
+  @override
+  String get outOfEnergyClose => 'Isara';
+
+  @override
+  String get outOfEnergyPushReminderTitle =>
+      'Ipaalala kapag puno na ang energy?';
+
+  @override
+  String get outOfEnergyNotifyMe => 'Abisuhan ako';
+
+  @override
+  String get outOfEnergyMaybeLater => 'Mamaya na';
+
+  @override
   String get endRoleplay => 'Tapusin ang Roleplay';
 
   @override

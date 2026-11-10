@@ -1901,6 +1901,126 @@ abstract class AppLocalizations {
   /// **'You don\'t have enough energy.'**
   String get energyInsufficient;
 
+  /// No description provided for @outOfEnergyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re out of energy'**
+  String get outOfEnergyTitle;
+
+  /// No description provided for @outOfEnergySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recharge your energy to start chatting.'**
+  String get outOfEnergySubtitle;
+
+  /// No description provided for @outOfEnergyRecommended.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended'**
+  String get outOfEnergyRecommended;
+
+  /// No description provided for @outOfEnergyPremiumBenefitEnergy.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade to 30 energy'**
+  String get outOfEnergyPremiumBenefitEnergy;
+
+  /// No description provided for @outOfEnergyPremiumBenefitFeedback.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Sentence feedback'**
+  String get outOfEnergyPremiumBenefitFeedback;
+
+  /// No description provided for @outOfEnergyTry7DaysFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Try 7 days free'**
+  String get outOfEnergyTry7DaysFree;
+
+  /// No description provided for @outOfEnergyExplorePremium.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore Premium'**
+  String get outOfEnergyExplorePremium;
+
+  /// No description provided for @outOfEnergyChatPassTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'10-min Chat Pass'**
+  String get outOfEnergyChatPassTitle;
+
+  /// No description provided for @outOfEnergyPayOnce.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay once'**
+  String get outOfEnergyPayOnce;
+
+  /// No description provided for @outOfEnergyChatPassDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat for 10 minutes without using energy'**
+  String get outOfEnergyChatPassDesc;
+
+  /// No description provided for @outOfEnergyBuyAndStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Buy & start now · {price}'**
+  String outOfEnergyBuyAndStart(String price);
+
+  /// No description provided for @outOfEnergyWaitTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Wait to recharge'**
+  String get outOfEnergyWaitTitle;
+
+  /// No description provided for @outOfEnergyFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Free'**
+  String get outOfEnergyFree;
+
+  /// No description provided for @outOfEnergyNextRecharge.
+  ///
+  /// In en, this message translates to:
+  /// **'Next recharge in @@TIME@@.'**
+  String get outOfEnergyNextRecharge;
+
+  /// No description provided for @outOfEnergyComeBackLater.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'ll come back later'**
+  String get outOfEnergyComeBackLater;
+
+  /// No description provided for @outOfEnergyReturnHomeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ll return to the home screen'**
+  String get outOfEnergyReturnHomeHint;
+
+  /// No description provided for @outOfEnergyClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get outOfEnergyClose;
+
+  /// No description provided for @outOfEnergyPushReminderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Want a reminder when your energy is full?'**
+  String get outOfEnergyPushReminderTitle;
+
+  /// No description provided for @outOfEnergyNotifyMe.
+  ///
+  /// In en, this message translates to:
+  /// **'Notify me'**
+  String get outOfEnergyNotifyMe;
+
+  /// No description provided for @outOfEnergyMaybeLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Maybe later'**
+  String get outOfEnergyMaybeLater;
+
   /// No description provided for @endRoleplay.
   ///
   /// In en, this message translates to:

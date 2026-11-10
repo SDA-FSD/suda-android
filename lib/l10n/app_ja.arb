@@ -352,6 +352,33 @@
   "energyInfoFull": "エネルギーは満タンです。",
   "energyInfoUnlimitedEndsIn": "無制限モード利用中",
   "energyInsufficient": "エネルギーが足りません。",
+  "outOfEnergyTitle": "エネルギーが足りません",
+  "outOfEnergySubtitle": "会話を始めるにはエネルギーをチャージしてください。",
+  "outOfEnergyRecommended": "おすすめ",
+  "outOfEnergyPremiumBenefitEnergy": "最大エネルギー30にアップグレード",
+  "outOfEnergyPremiumBenefitFeedback": "AI文章フィードバック",
+  "outOfEnergyTry7DaysFree": "7日間無料で試す",
+  "outOfEnergyExplorePremium": "プレミアムを見る",
+  "outOfEnergyChatPassTitle": "10分チャットパス",
+  "outOfEnergyPayOnce": "1回購入",
+  "outOfEnergyChatPassDesc": "エネルギーを使わず10分会話",
+  "outOfEnergyBuyAndStart": "購入して開始 · {price}",
+  "@outOfEnergyBuyAndStart": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "outOfEnergyWaitTitle": "チャージを待つ",
+  "outOfEnergyFree": "無料",
+  "outOfEnergyNextRecharge": "次のチャージまで @@TIME@@",
+  "outOfEnergyComeBackLater": "チャージしたら戻ってきます",
+  "outOfEnergyReturnHomeHint": "ホーム画面に戻ります",
+  "outOfEnergyClose": "閉じる",
+  "outOfEnergyPushReminderTitle": "エネルギーが満タンになったらお知らせしますか？",
+  "outOfEnergyNotifyMe": "通知を受け取る",
+  "outOfEnergyMaybeLater": "あとで",
   "endRoleplay": "ロールプレイを終了",
   "energyEnablePushTitle": "通知をオンにする",
   "energyEnablePushSubtitle": "通知をオンにして、エネルギーを全回復しましょう。",

@@ -1019,6 +1019,71 @@ class AppLocalizationsDe extends AppLocalizations {
   String get energyInsufficient => 'Du hast nicht genug Energie.';
 
   @override
+  String get outOfEnergyTitle => 'Deine Energie ist alle';
+
+  @override
+  String get outOfEnergySubtitle => 'Lade Energie auf, um zu chatten.';
+
+  @override
+  String get outOfEnergyRecommended => 'Empfohlen';
+
+  @override
+  String get outOfEnergyPremiumBenefitEnergy => 'Upgrade auf max. 30 Energie';
+
+  @override
+  String get outOfEnergyPremiumBenefitFeedback => 'KI-Satzfeedback';
+
+  @override
+  String get outOfEnergyTry7DaysFree => '7 Tage gratis testen';
+
+  @override
+  String get outOfEnergyExplorePremium => 'Premium entdecken';
+
+  @override
+  String get outOfEnergyChatPassTitle => '10-Min-Chat-Pass';
+
+  @override
+  String get outOfEnergyPayOnce => 'Einmalkauf';
+
+  @override
+  String get outOfEnergyChatPassDesc =>
+      '10 Minuten chatten ohne Energieverbrauch';
+
+  @override
+  String outOfEnergyBuyAndStart(String price) {
+    return 'Kaufen & starten · $price';
+  }
+
+  @override
+  String get outOfEnergyWaitTitle => 'Aufladen abwarten';
+
+  @override
+  String get outOfEnergyFree => 'Kostenlos';
+
+  @override
+  String get outOfEnergyNextRecharge => 'Nächste Aufladung in @@TIME@@.';
+
+  @override
+  String get outOfEnergyComeBackLater => 'Ich komme später wieder';
+
+  @override
+  String get outOfEnergyReturnHomeHint =>
+      'Du kehrst zum Startbildschirm zurück';
+
+  @override
+  String get outOfEnergyClose => 'Schließen';
+
+  @override
+  String get outOfEnergyPushReminderTitle =>
+      'Benachrichtigung, wenn deine Energie voll ist?';
+
+  @override
+  String get outOfEnergyNotifyMe => 'Benachrichtigen';
+
+  @override
+  String get outOfEnergyMaybeLater => 'Später';
+
+  @override
   String get endRoleplay => 'Rollenspiel beenden';
 
   @override

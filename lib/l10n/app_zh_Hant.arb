@@ -352,6 +352,33 @@
   "energyInfoFull": "能量已滿。",
   "energyInfoUnlimitedEndsIn": "無限暢玩模式使用中",
   "energyInsufficient": "你的能量不足。",
+  "outOfEnergyTitle": "能量不足",
+  "outOfEnergySubtitle": "請先補充能量再開始對話。",
+  "outOfEnergyRecommended": "推薦",
+  "outOfEnergyPremiumBenefitEnergy": "能量上限升級至30",
+  "outOfEnergyPremiumBenefitFeedback": "提供AI句子回饋",
+  "outOfEnergyTry7DaysFree": "免費試用7天",
+  "outOfEnergyExplorePremium": "了解高級會員",
+  "outOfEnergyChatPassTitle": "10分鐘暢聊通行證",
+  "outOfEnergyPayOnce": "單次購買",
+  "outOfEnergyChatPassDesc": "10分鐘對話不消耗能量",
+  "outOfEnergyBuyAndStart": "購買並開始 · {price}",
+  "@outOfEnergyBuyAndStart": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "outOfEnergyWaitTitle": "等待充能",
+  "outOfEnergyFree": "免費",
+  "outOfEnergyNextRecharge": "距離下次充能還有 @@TIME@@",
+  "outOfEnergyComeBackLater": "充好了再回來",
+  "outOfEnergyReturnHomeHint": "將返回首頁",
+  "outOfEnergyClose": "關閉",
+  "outOfEnergyPushReminderTitle": "能量充滿時要提醒你嗎？",
+  "outOfEnergyNotifyMe": "接收通知",
+  "outOfEnergyMaybeLater": "稍後",
   "endRoleplay": "結束角色扮演",
   "energyEnablePushTitle": "開啟通知",
   "energyEnablePushSubtitle": "開啟通知，即可將能量完全補滿。",

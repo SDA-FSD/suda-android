@@ -421,6 +421,33 @@
   "energyInfoFull": "Your energy is full.",
   "energyInfoUnlimitedEndsIn": "Unlimited Mode Active",
   "energyInsufficient": "You don't have enough energy.",
+  "outOfEnergyTitle": "You're out of energy",
+  "outOfEnergySubtitle": "Recharge your energy to start chatting.",
+  "outOfEnergyRecommended": "Recommended",
+  "outOfEnergyPremiumBenefitEnergy": "Upgrade to 30 energy",
+  "outOfEnergyPremiumBenefitFeedback": "AI Sentence feedback",
+  "outOfEnergyTry7DaysFree": "Try 7 days free",
+  "outOfEnergyExplorePremium": "Explore Premium",
+  "outOfEnergyChatPassTitle": "10-min Chat Pass",
+  "outOfEnergyPayOnce": "Pay once",
+  "outOfEnergyChatPassDesc": "Chat for 10 minutes without using energy",
+  "outOfEnergyBuyAndStart": "Buy & start now · {price}",
+  "@outOfEnergyBuyAndStart": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "outOfEnergyWaitTitle": "Wait to recharge",
+  "outOfEnergyFree": "Free",
+  "outOfEnergyNextRecharge": "Next recharge in @@TIME@@.",
+  "outOfEnergyComeBackLater": "I'll come back later",
+  "outOfEnergyReturnHomeHint": "You'll return to the home screen",
+  "outOfEnergyClose": "Close",
+  "outOfEnergyPushReminderTitle": "Want a reminder when your energy is full?",
+  "outOfEnergyNotifyMe": "Notify me",
+  "outOfEnergyMaybeLater": "Maybe later",
   "endRoleplay": "End Roleplay",
   "energyEnablePushTitle": "Enable Notifications",
   "energyEnablePushSubtitle": "Turn on notifications and fully refill your Energy.",

@@ -1002,6 +1002,70 @@ class AppLocalizationsTr extends AppLocalizations {
   String get energyInsufficient => 'Yeterli enerjin yok.';
 
   @override
+  String get outOfEnergyTitle => 'Enerjin bitti';
+
+  @override
+  String get outOfEnergySubtitle => 'Sohbete başlamak için enerjini doldur.';
+
+  @override
+  String get outOfEnergyRecommended => 'Önerilen';
+
+  @override
+  String get outOfEnergyPremiumBenefitEnergy => 'Maks. 30 enerjiye yükselt';
+
+  @override
+  String get outOfEnergyPremiumBenefitFeedback =>
+      'Yapay zekâ cümle geri bildirimi';
+
+  @override
+  String get outOfEnergyTry7DaysFree => '7 gün ücretsiz dene';
+
+  @override
+  String get outOfEnergyExplorePremium => 'Premium\'u keşfet';
+
+  @override
+  String get outOfEnergyChatPassTitle => '10 dk sohbet geçişi';
+
+  @override
+  String get outOfEnergyPayOnce => 'Tek seferlik';
+
+  @override
+  String get outOfEnergyChatPassDesc => 'Enerji harcamadan 10 dakika sohbet';
+
+  @override
+  String outOfEnergyBuyAndStart(String price) {
+    return 'Satın al ve başla · $price';
+  }
+
+  @override
+  String get outOfEnergyWaitTitle => 'Şarj olmasını bekle';
+
+  @override
+  String get outOfEnergyFree => 'Ücretsiz';
+
+  @override
+  String get outOfEnergyNextRecharge => 'Sonraki şarja @@TIME@@ kaldı.';
+
+  @override
+  String get outOfEnergyComeBackLater => 'Sonra döneceğim';
+
+  @override
+  String get outOfEnergyReturnHomeHint => 'Ana ekrana döneceksin';
+
+  @override
+  String get outOfEnergyClose => 'Kapat';
+
+  @override
+  String get outOfEnergyPushReminderTitle =>
+      'Enerjin dolunca haber verilsin mi?';
+
+  @override
+  String get outOfEnergyNotifyMe => 'Bana bildir';
+
+  @override
+  String get outOfEnergyMaybeLater => 'Sonra';
+
+  @override
   String get endRoleplay => 'Rol Yapmayı Bitir';
 
   @override

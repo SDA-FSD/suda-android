@@ -14,6 +14,9 @@ class UserEnergyDto {
   /// Play Billing base plan id (예: `bp-premium-monthly` / `bp-premium-yearly`).
   final String? subscriptionBasePlanId;
 
+  /// detail 전용. 구독 이력 한 번이라도 있으면 `Y` (무료체험 CTA). simple은 `N`.
+  final String subscriptionEverYn;
+
   /// detail 전용. simple 응답에는 없음 → 기본 `N`.
   final String showEnablePushFreeChargeYn;
   final String showUnlimitedPurchaseYn;
@@ -32,6 +35,7 @@ class UserEnergyDto {
     this.subscribedYn = 'N',
     this.subscriptionExpiredAt,
     this.subscriptionBasePlanId,
+    this.subscriptionEverYn = 'N',
     this.showEnablePushFreeChargeYn = 'N',
     this.showUnlimitedPurchaseYn = 'N',
     this.showCapacity6PurchaseYn = 'N',
@@ -60,6 +64,7 @@ class UserEnergyDto {
       subscribedYn: json['subscribedYn'] as String? ?? 'N',
       subscriptionExpiredAt: parseInstant(json['subscriptionExpiredAt']),
       subscriptionBasePlanId: json['subscriptionBasePlanId'] as String?,
+      subscriptionEverYn: json['subscriptionEverYn'] as String? ?? 'N',
       showEnablePushFreeChargeYn:
           json['showEnablePushFreeChargeYn'] as String? ?? 'N',
       showUnlimitedPurchaseYn:
@@ -80,6 +85,7 @@ class UserEnergyDto {
     String? subscribedYn,
     DateTime? subscriptionExpiredAt,
     String? subscriptionBasePlanId,
+    String? subscriptionEverYn,
     String? showEnablePushFreeChargeYn,
     String? showUnlimitedPurchaseYn,
     String? showCapacity6PurchaseYn,
@@ -96,6 +102,7 @@ class UserEnergyDto {
           subscriptionExpiredAt ?? this.subscriptionExpiredAt,
       subscriptionBasePlanId:
           subscriptionBasePlanId ?? this.subscriptionBasePlanId,
+      subscriptionEverYn: subscriptionEverYn ?? this.subscriptionEverYn,
       showEnablePushFreeChargeYn:
           showEnablePushFreeChargeYn ?? this.showEnablePushFreeChargeYn,
       showUnlimitedPurchaseYn:
@@ -133,6 +140,7 @@ class UserEnergyDto {
   bool get showUnlimitedPurchase => showUnlimitedPurchaseYn == 'Y';
   bool get showCapacity6Purchase => showCapacity6PurchaseYn == 'Y';
   bool get showCapacity7Purchase => showCapacity7PurchaseYn == 'Y';
+  bool get hasSubscriptionEver => subscriptionEverYn == 'Y';
 }
 
 /// POST /v1/purchases/verify 응답

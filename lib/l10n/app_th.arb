@@ -352,6 +352,33 @@
   "energyInfoFull": "พลังงานเต็มแล้ว",
   "energyInfoUnlimitedEndsIn": "กำลังใช้โหมดไม่จำกัด",
   "energyInsufficient": "พลังงานไม่พอ",
+  "outOfEnergyTitle": "พลังงานของคุณหมดแล้ว",
+  "outOfEnergySubtitle": "เติมพลังงานเพื่อเริ่มสนทนา",
+  "outOfEnergyRecommended": "แนะนำ",
+  "outOfEnergyPremiumBenefitEnergy": "อัปเกรดพลังงานสูงสุดเป็น 30",
+  "outOfEnergyPremiumBenefitFeedback": "ฟีดแบ็กประโยคจาก AI",
+  "outOfEnergyTry7DaysFree": "ทดลองใช้ฟรี 7 วัน",
+  "outOfEnergyExplorePremium": "ดูพรีเมียม",
+  "outOfEnergyChatPassTitle": "พาสแชท 10 นาที",
+  "outOfEnergyPayOnce": "ซื้อครั้งเดียว",
+  "outOfEnergyChatPassDesc": "คุย 10 นาทีโดยไม่ใช้พลังงาน",
+  "outOfEnergyBuyAndStart": "ซื้อแล้วเริ่ม · {price}",
+  "@outOfEnergyBuyAndStart": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "outOfEnergyWaitTitle": "รอเติมพลังงาน",
+  "outOfEnergyFree": "ฟรี",
+  "outOfEnergyNextRecharge": "เติมพลังงานครั้งถัดไปใน @@TIME@@",
+  "outOfEnergyComeBackLater": "เดี๋ยวค่อยกลับมา",
+  "outOfEnergyReturnHomeHint": "คุณจะกลับไปหน้าแรก",
+  "outOfEnergyClose": "ปิด",
+  "outOfEnergyPushReminderTitle": "ต้องการแจ้งเตือนเมื่อพลังงานเต็มไหม?",
+  "outOfEnergyNotifyMe": "แจ้งเตือนฉัน",
+  "outOfEnergyMaybeLater": "ไว้ทีหลัง",
   "endRoleplay": "จบโรลเพลย์",
   "energyEnablePushTitle": "เปิดการแจ้งเตือน",
   "energyEnablePushSubtitle": "เปิดการแจ้งเตือนเพื่อเติมพลังงานให้เต็ม",

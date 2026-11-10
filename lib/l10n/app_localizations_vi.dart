@@ -1005,6 +1005,68 @@ class AppLocalizationsVi extends AppLocalizations {
   String get energyInsufficient => 'Bạn không có đủ năng lượng.';
 
   @override
+  String get outOfEnergyTitle => 'Bạn đã hết năng lượng';
+
+  @override
+  String get outOfEnergySubtitle => 'Hãy nạp năng lượng để bắt đầu trò chuyện.';
+
+  @override
+  String get outOfEnergyRecommended => 'Đề xuất';
+
+  @override
+  String get outOfEnergyPremiumBenefitEnergy => 'Nâng cấp tối đa 30 năng lượng';
+
+  @override
+  String get outOfEnergyPremiumBenefitFeedback => 'Phản hồi câu từ AI';
+
+  @override
+  String get outOfEnergyTry7DaysFree => 'Dùng thử miễn phí 7 ngày';
+
+  @override
+  String get outOfEnergyExplorePremium => 'Khám phá Premium';
+
+  @override
+  String get outOfEnergyChatPassTitle => 'Vé chat 10 phút';
+
+  @override
+  String get outOfEnergyPayOnce => 'Mua một lần';
+
+  @override
+  String get outOfEnergyChatPassDesc => 'Chat 10 phút không tốn năng lượng';
+
+  @override
+  String outOfEnergyBuyAndStart(String price) {
+    return 'Mua và bắt đầu · $price';
+  }
+
+  @override
+  String get outOfEnergyWaitTitle => 'Chờ nạp lại';
+
+  @override
+  String get outOfEnergyFree => 'Miễn phí';
+
+  @override
+  String get outOfEnergyNextRecharge => 'Lần nạp tiếp theo còn @@TIME@@.';
+
+  @override
+  String get outOfEnergyComeBackLater => 'Tôi sẽ quay lại sau';
+
+  @override
+  String get outOfEnergyReturnHomeHint => 'Bạn sẽ quay về màn hình chính';
+
+  @override
+  String get outOfEnergyClose => 'Đóng';
+
+  @override
+  String get outOfEnergyPushReminderTitle => 'Nhắc bạn khi năng lượng đầy chứ?';
+
+  @override
+  String get outOfEnergyNotifyMe => 'Nhắc tôi';
+
+  @override
+  String get outOfEnergyMaybeLater => 'Để sau';
+
+  @override
   String get endRoleplay => 'Kết thúc nhập vai';
 
   @override

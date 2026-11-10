@@ -951,6 +951,68 @@ class AppLocalizationsZh extends AppLocalizations {
   String get energyInsufficient => '能量不足。';
 
   @override
+  String get outOfEnergyTitle => '能量不足';
+
+  @override
+  String get outOfEnergySubtitle => '请先补充能量再开始对话。';
+
+  @override
+  String get outOfEnergyRecommended => '推荐';
+
+  @override
+  String get outOfEnergyPremiumBenefitEnergy => '能量上限升级至30';
+
+  @override
+  String get outOfEnergyPremiumBenefitFeedback => '提供AI句子反馈';
+
+  @override
+  String get outOfEnergyTry7DaysFree => '免费试用7天';
+
+  @override
+  String get outOfEnergyExplorePremium => '了解高级会员';
+
+  @override
+  String get outOfEnergyChatPassTitle => '10分钟畅聊通行证';
+
+  @override
+  String get outOfEnergyPayOnce => '单次购买';
+
+  @override
+  String get outOfEnergyChatPassDesc => '10分钟对话不消耗能量';
+
+  @override
+  String outOfEnergyBuyAndStart(String price) {
+    return '购买并开始 · $price';
+  }
+
+  @override
+  String get outOfEnergyWaitTitle => '等待充能';
+
+  @override
+  String get outOfEnergyFree => '免费';
+
+  @override
+  String get outOfEnergyNextRecharge => '距离下次充能还有 @@TIME@@';
+
+  @override
+  String get outOfEnergyComeBackLater => '充好了再回来';
+
+  @override
+  String get outOfEnergyReturnHomeHint => '将返回首页';
+
+  @override
+  String get outOfEnergyClose => '关闭';
+
+  @override
+  String get outOfEnergyPushReminderTitle => '能量充满时要提醒你吗？';
+
+  @override
+  String get outOfEnergyNotifyMe => '接收通知';
+
+  @override
+  String get outOfEnergyMaybeLater => '稍后';
+
+  @override
   String get endRoleplay => '结束情景对话';
 
   @override
@@ -2248,6 +2310,68 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get energyInsufficient => '能量不足。';
 
   @override
+  String get outOfEnergyTitle => '能量不足';
+
+  @override
+  String get outOfEnergySubtitle => '请先补充能量再开始对话。';
+
+  @override
+  String get outOfEnergyRecommended => '推荐';
+
+  @override
+  String get outOfEnergyPremiumBenefitEnergy => '能量上限升级至30';
+
+  @override
+  String get outOfEnergyPremiumBenefitFeedback => '提供AI句子反馈';
+
+  @override
+  String get outOfEnergyTry7DaysFree => '免费试用7天';
+
+  @override
+  String get outOfEnergyExplorePremium => '了解高级会员';
+
+  @override
+  String get outOfEnergyChatPassTitle => '10分钟畅聊通行证';
+
+  @override
+  String get outOfEnergyPayOnce => '单次购买';
+
+  @override
+  String get outOfEnergyChatPassDesc => '10分钟对话不消耗能量';
+
+  @override
+  String outOfEnergyBuyAndStart(String price) {
+    return '购买并开始 · $price';
+  }
+
+  @override
+  String get outOfEnergyWaitTitle => '等待充能';
+
+  @override
+  String get outOfEnergyFree => '免费';
+
+  @override
+  String get outOfEnergyNextRecharge => '距离下次充能还有 @@TIME@@';
+
+  @override
+  String get outOfEnergyComeBackLater => '充好了再回来';
+
+  @override
+  String get outOfEnergyReturnHomeHint => '将返回首页';
+
+  @override
+  String get outOfEnergyClose => '关闭';
+
+  @override
+  String get outOfEnergyPushReminderTitle => '能量充满时要提醒你吗？';
+
+  @override
+  String get outOfEnergyNotifyMe => '接收通知';
+
+  @override
+  String get outOfEnergyMaybeLater => '稍后';
+
+  @override
   String get endRoleplay => '结束情景对话';
 
   @override
@@ -3543,6 +3667,68 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get energyInsufficient => '你的能量不足。';
+
+  @override
+  String get outOfEnergyTitle => '能量不足';
+
+  @override
+  String get outOfEnergySubtitle => '請先補充能量再開始對話。';
+
+  @override
+  String get outOfEnergyRecommended => '推薦';
+
+  @override
+  String get outOfEnergyPremiumBenefitEnergy => '能量上限升級至30';
+
+  @override
+  String get outOfEnergyPremiumBenefitFeedback => '提供AI句子回饋';
+
+  @override
+  String get outOfEnergyTry7DaysFree => '免費試用7天';
+
+  @override
+  String get outOfEnergyExplorePremium => '了解高級會員';
+
+  @override
+  String get outOfEnergyChatPassTitle => '10分鐘暢聊通行證';
+
+  @override
+  String get outOfEnergyPayOnce => '單次購買';
+
+  @override
+  String get outOfEnergyChatPassDesc => '10分鐘對話不消耗能量';
+
+  @override
+  String outOfEnergyBuyAndStart(String price) {
+    return '購買並開始 · $price';
+  }
+
+  @override
+  String get outOfEnergyWaitTitle => '等待充能';
+
+  @override
+  String get outOfEnergyFree => '免費';
+
+  @override
+  String get outOfEnergyNextRecharge => '距離下次充能還有 @@TIME@@';
+
+  @override
+  String get outOfEnergyComeBackLater => '充好了再回來';
+
+  @override
+  String get outOfEnergyReturnHomeHint => '將返回首頁';
+
+  @override
+  String get outOfEnergyClose => '關閉';
+
+  @override
+  String get outOfEnergyPushReminderTitle => '能量充滿時要提醒你嗎？';
+
+  @override
+  String get outOfEnergyNotifyMe => '接收通知';
+
+  @override
+  String get outOfEnergyMaybeLater => '稍後';
 
   @override
   String get endRoleplay => '結束角色扮演';

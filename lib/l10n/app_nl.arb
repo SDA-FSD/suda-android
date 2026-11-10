@@ -352,6 +352,33 @@
   "energyInfoFull": "Je energie is vol.",
   "energyInfoUnlimitedEndsIn": "Onbeperkte modus actief",
   "energyInsufficient": "Je hebt niet genoeg energie.",
+  "outOfEnergyTitle": "Je energie is op",
+  "outOfEnergySubtitle": "Laad energie op om te chatten.",
+  "outOfEnergyRecommended": "Aanbevolen",
+  "outOfEnergyPremiumBenefitEnergy": "Upgrade naar max. 30 energie",
+  "outOfEnergyPremiumBenefitFeedback": "AI-zinsfeedback",
+  "outOfEnergyTry7DaysFree": "7 dagen gratis proberen",
+  "outOfEnergyExplorePremium": "Premium ontdekken",
+  "outOfEnergyChatPassTitle": "10-min chatpas",
+  "outOfEnergyPayOnce": "Eenmalige aankoop",
+  "outOfEnergyChatPassDesc": "10 minuten chatten zonder energie",
+  "outOfEnergyBuyAndStart": "Kopen en starten · {price}",
+  "@outOfEnergyBuyAndStart": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "outOfEnergyWaitTitle": "Wachten op opladen",
+  "outOfEnergyFree": "Gratis",
+  "outOfEnergyNextRecharge": "Volgende oplading over @@TIME@@.",
+  "outOfEnergyComeBackLater": "Ik kom later terug",
+  "outOfEnergyReturnHomeHint": "Je keert terug naar het startscherm",
+  "outOfEnergyClose": "Sluiten",
+  "outOfEnergyPushReminderTitle": "Melding wanneer je energie vol is?",
+  "outOfEnergyNotifyMe": "Meld het me",
+  "outOfEnergyMaybeLater": "Later",
   "endRoleplay": "Rollenspel beëindigen",
   "energyEnablePushTitle": "Meldingen inschakelen",
   "energyEnablePushSubtitle": "Zet meldingen aan en vul je energie helemaal aan.",
