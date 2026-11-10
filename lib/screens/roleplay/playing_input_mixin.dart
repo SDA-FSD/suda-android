@@ -14,7 +14,6 @@ import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
 import '../../services/perf_monitoring_service.dart';
 import '../../utils/default_toast.dart';
-import '../../widgets/energy_info_popup.dart';
 import '../../widgets/roleplay_mic_button_area.dart';
 import '../../widgets/roleplay_mission_panel.dart';
 import 'playing_conversation_mixin.dart';
@@ -103,6 +102,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
 
   bool Function()? checkCanSpendPlayingEnergy;
   void Function()? onPlayingEnergySpent;
+  Future<void> Function()? showPlayingEnergyBlockedUi;
   final GlobalKey playingKebabAnchorKey = GlobalKey();
   VoidCallback? onPlayingKebabTap;
   bool showPlayingKebab = true;
@@ -931,13 +931,13 @@ mixin PlayingInputMixin<T extends StatefulWidget>
 
   Future<void> _showPlayingEnergyBlockedPopup() async {
     if (!mounted) return;
-    await showPlayingEnergyInsufficientPopup(
-      context,
-      onEndRoleplay: () {
-        onPlayingEnergyExitRequested?.call();
-      },
-      screen: EnergyOfferScreen.playingInsufficient,
-    );
+    final show = showPlayingEnergyBlockedUi;
+    if (show != null) {
+      await show();
+      return;
+    }
+    // 폴백: PlayingEnergyMixin 미연결 시 종료 유도만.
+    onPlayingEnergyExitRequested?.call();
   }
 
   void _onMicPressEnd(bool cancel) {

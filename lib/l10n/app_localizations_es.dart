@@ -1079,6 +1079,26 @@ class AppLocalizationsEs extends AppLocalizations {
   String get outOfEnergyMaybeLater => 'Más tarde';
 
   @override
+  String get outOfEnergyPlayingTitle => 'Sigue la conversación';
+
+  @override
+  String get outOfEnergyPlayingSubtitle =>
+      'Toca una opción abajo para saber más.';
+
+  @override
+  String get playingEnergyInductionEnergyLabel => 'Energía:';
+
+  @override
+  String get playingEnergyInductionTitle => '¿Seguimos chateando?';
+
+  @override
+  String get playingEnergyInductionBody =>
+      'Te quedaste sin energía.\nMira cómo puedes seguir chateando.';
+
+  @override
+  String get playingEnergyInductionCta => 'Ver opciones';
+
+  @override
   String get endRoleplay => 'Finalizar el juego de rol';
 
   @override
@@ -2527,6 +2547,26 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
 
   @override
   String get outOfEnergyMaybeLater => 'Más tarde';
+
+  @override
+  String get outOfEnergyPlayingTitle => 'Sigue la conversación';
+
+  @override
+  String get outOfEnergyPlayingSubtitle =>
+      'Toca una opción abajo para saber más.';
+
+  @override
+  String get playingEnergyInductionEnergyLabel => 'Energía:';
+
+  @override
+  String get playingEnergyInductionTitle => '¿Seguimos chateando?';
+
+  @override
+  String get playingEnergyInductionBody =>
+      'Te quedaste sin energía.\nMira cómo puedes seguir chateando.';
+
+  @override
+  String get playingEnergyInductionCta => 'Ver opciones';
 
   @override
   String get endRoleplay => 'Finalizar el juego de rol';

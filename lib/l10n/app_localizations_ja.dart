@@ -1023,6 +1023,24 @@ class AppLocalizationsJa extends AppLocalizations {
   String get outOfEnergyMaybeLater => 'あとで';
 
   @override
+  String get outOfEnergyPlayingTitle => '会話を続けましょう';
+
+  @override
+  String get outOfEnergyPlayingSubtitle => '下の方法をタップして確認してください。';
+
+  @override
+  String get playingEnergyInductionEnergyLabel => 'エネルギー:';
+
+  @override
+  String get playingEnergyInductionTitle => 'もう少し話しませんか？';
+
+  @override
+  String get playingEnergyInductionBody => 'エネルギーを使い切りました。\n会話を続ける方法を確認しましょう。';
+
+  @override
+  String get playingEnergyInductionCta => '続ける方法を見る';
+
+  @override
   String get endRoleplay => 'ロールプレイを終了';
 
   @override

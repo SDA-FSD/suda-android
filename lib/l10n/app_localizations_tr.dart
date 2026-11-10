@@ -1066,6 +1066,26 @@ class AppLocalizationsTr extends AppLocalizations {
   String get outOfEnergyMaybeLater => 'Sonra';
 
   @override
+  String get outOfEnergyPlayingTitle => 'Sohbete devam et';
+
+  @override
+  String get outOfEnergyPlayingSubtitle =>
+      'Daha fazlası için aşağıdaki bir seçeneğe dokun.';
+
+  @override
+  String get playingEnergyInductionEnergyLabel => 'Enerji:';
+
+  @override
+  String get playingEnergyInductionTitle => 'Sohbete devam edelim mi?';
+
+  @override
+  String get playingEnergyInductionBody =>
+      'Enerjin bitti.\nSohbete nasıl devam edebileceğini gör.';
+
+  @override
+  String get playingEnergyInductionCta => 'Seçenekleri gör';
+
+  @override
   String get endRoleplay => 'Rol Yapmayı Bitir';
 
   @override

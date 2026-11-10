@@ -2021,6 +2021,42 @@ abstract class AppLocalizations {
   /// **'Maybe later'**
   String get outOfEnergyMaybeLater;
 
+  /// No description provided for @outOfEnergyPlayingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep the conversation going'**
+  String get outOfEnergyPlayingTitle;
+
+  /// No description provided for @outOfEnergyPlayingSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap an option below to learn more.'**
+  String get outOfEnergyPlayingSubtitle;
+
+  /// No description provided for @playingEnergyInductionEnergyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Energy:'**
+  String get playingEnergyInductionEnergyLabel;
+
+  /// No description provided for @playingEnergyInductionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Want to keep chatting?'**
+  String get playingEnergyInductionTitle;
+
+  /// No description provided for @playingEnergyInductionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re out of energy.\nSee how you can keep chatting.'**
+  String get playingEnergyInductionBody;
+
+  /// No description provided for @playingEnergyInductionCta.
+  ///
+  /// In en, this message translates to:
+  /// **'See options'**
+  String get playingEnergyInductionCta;
+
   /// No description provided for @endRoleplay.
   ///
   /// In en, this message translates to:

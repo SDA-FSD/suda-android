@@ -1080,6 +1080,26 @@ class AppLocalizationsRu extends AppLocalizations {
   String get outOfEnergyMaybeLater => 'Позже';
 
   @override
+  String get outOfEnergyPlayingTitle => 'Продолжайте разговор';
+
+  @override
+  String get outOfEnergyPlayingSubtitle =>
+      'Нажмите вариант ниже, чтобы узнать больше.';
+
+  @override
+  String get playingEnergyInductionEnergyLabel => 'Энергия:';
+
+  @override
+  String get playingEnergyInductionTitle => 'Хотите продолжить общение?';
+
+  @override
+  String get playingEnergyInductionBody =>
+      'Энергия закончилась.\nПосмотрите, как продолжить разговор.';
+
+  @override
+  String get playingEnergyInductionCta => 'Посмотреть варианты';
+
+  @override
   String get endRoleplay => 'Завершить ролевую игру';
 
   @override

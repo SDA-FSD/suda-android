@@ -1069,6 +1069,26 @@ class AppLocalizationsHi extends AppLocalizations {
   String get outOfEnergyMaybeLater => 'बाद में';
 
   @override
+  String get outOfEnergyPlayingTitle => 'बातचीत जारी रखें';
+
+  @override
+  String get outOfEnergyPlayingSubtitle =>
+      'और जानने के लिए नीचे कोई विकल्प टैप करें।';
+
+  @override
+  String get playingEnergyInductionEnergyLabel => 'एनर्जी:';
+
+  @override
+  String get playingEnergyInductionTitle => 'बात जारी रखें?';
+
+  @override
+  String get playingEnergyInductionBody =>
+      'आपकी एनर्जी खत्म हो गई।\nबात जारी रखने के तरीके देखें।';
+
+  @override
+  String get playingEnergyInductionCta => 'विकल्प देखें';
+
+  @override
   String get endRoleplay => 'रोलप्ले खत्म करें';
 
   @override

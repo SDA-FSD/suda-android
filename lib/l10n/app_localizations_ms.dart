@@ -1075,6 +1075,26 @@ class AppLocalizationsMs extends AppLocalizations {
   String get outOfEnergyMaybeLater => 'Nanti';
 
   @override
+  String get outOfEnergyPlayingTitle => 'Teruskan perbualan';
+
+  @override
+  String get outOfEnergyPlayingSubtitle =>
+      'Ketik pilihan di bawah untuk ketahui lebih lanjut.';
+
+  @override
+  String get playingEnergyInductionEnergyLabel => 'Tenaga:';
+
+  @override
+  String get playingEnergyInductionTitle => 'Nak terus berbual?';
+
+  @override
+  String get playingEnergyInductionBody =>
+      'Tenaga anda habis.\nLihat cara untuk terus berbual.';
+
+  @override
+  String get playingEnergyInductionCta => 'Lihat pilihan';
+
+  @override
   String get endRoleplay => 'Tamatkan lakon peranan';
 
   @override

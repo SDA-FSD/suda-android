@@ -23,10 +23,12 @@ const _pink = Color(0xFFFF00A6);
 
 enum _OutOfEnergySheetResult { goHome, askPush }
 
-/// Opening 에너지 부족(`sessionId == '0'`)용 충전 바텀시트.
+/// Opening/Playing 에너지 부족 충전 바텀시트.
+/// [playingHeader]면 타이틀·안내만 Playing 문구 + Betty 웃는 이미지.
 Future<void> showOpeningOutOfEnergyBottomSheet(
   BuildContext context, {
   required String screen,
+  bool playingHeader = false,
 }) async {
   await TokenRefreshService.instance.refreshIfNeeded();
   if (!context.mounted) return;
@@ -53,6 +55,7 @@ Future<void> showOpeningOutOfEnergyBottomSheet(
       initialEnergy: energy,
       accessToken: accessToken,
       screen: screen,
+      playingHeader: playingHeader,
     ),
   );
   if (!context.mounted) return;
@@ -118,12 +121,14 @@ class OutOfEnergyBottomSheet extends StatefulWidget {
   final UserEnergyDto initialEnergy;
   final String accessToken;
   final String screen;
+  final bool playingHeader;
 
   const OutOfEnergyBottomSheet({
     super.key,
     required this.initialEnergy,
     required this.accessToken,
     required this.screen,
+    this.playingHeader = false,
   });
 
   @override
@@ -348,30 +353,89 @@ class _OutOfEnergyBottomSheetState extends State<OutOfEnergyBottomSheet> {
                 padding: EdgeInsets.fromLTRB(20, 20, 20, 16 + bottom),
                 child: SafeArea(
                   top: false,
+                  bottom: false,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text(
-                        l10n.outOfEnergyTitle,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
-                          fontWeight: FontWeight.w700,
-                          height: 1.25,
+                      if (widget.playingHeader) ...[
+                        // Betty + H2 타이틀 · 안내 18 — 모두 가운데
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            return Center(
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Image.asset(
+                                    'assets/images/icons/roleplay_energy_happy.png',
+                                    width: 56,
+                                    height: 56,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  ConstrainedBox(
+                                    constraints: BoxConstraints(
+                                      maxWidth:
+                                          (constraints.maxWidth - 68).clamp(
+                                        0,
+                                        constraints.maxWidth,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      l10n.outOfEnergyPlayingTitle,
+                                      textAlign: TextAlign.center,
+                                      style: Theme.of(context)
+                                              .textTheme
+                                              .headlineMedium
+                                              ?.copyWith(color: Colors.white) ??
+                                          const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 24,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        l10n.outOfEnergySubtitle,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.72),
-                          fontSize: 14,
-                          height: 1.3,
+                        const SizedBox(height: 12),
+                        Text(
+                          l10n.outOfEnergyPlayingSubtitle,
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                    color: Colors.white.withValues(alpha: 0.92),
+                                    height: 1.35,
+                                  ) ??
+                              TextStyle(
+                                color: Colors.white.withValues(alpha: 0.92),
+                                fontSize: 18,
+                                height: 1.35,
+                              ),
                         ),
-                      ),
+                      ] else ...[
+                        Text(
+                          l10n.outOfEnergyTitle,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.w700,
+                            height: 1.25,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          l10n.outOfEnergySubtitle,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.72),
+                            fontSize: 14,
+                            height: 1.3,
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 20),
                       if (_showPremium) ...[
                         _AccordionCard(

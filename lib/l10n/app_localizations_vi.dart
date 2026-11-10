@@ -1067,6 +1067,26 @@ class AppLocalizationsVi extends AppLocalizations {
   String get outOfEnergyMaybeLater => 'Để sau';
 
   @override
+  String get outOfEnergyPlayingTitle => 'Tiếp tục cuộc trò chuyện';
+
+  @override
+  String get outOfEnergyPlayingSubtitle =>
+      'Chạm một tùy chọn bên dưới để tìm hiểu thêm.';
+
+  @override
+  String get playingEnergyInductionEnergyLabel => 'Năng lượng:';
+
+  @override
+  String get playingEnergyInductionTitle => 'Muốn trò chuyện tiếp chứ?';
+
+  @override
+  String get playingEnergyInductionBody =>
+      'Bạn đã hết năng lượng.\nXem cách tiếp tục trò chuyện.';
+
+  @override
+  String get playingEnergyInductionCta => 'Xem tùy chọn';
+
+  @override
   String get endRoleplay => 'Kết thúc nhập vai';
 
   @override

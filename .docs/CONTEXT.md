@@ -125,7 +125,7 @@ xcrun altool --upload-app --type ios -f build/ios/ipa/suda.ipa --apiKey "$(cat ~
 - `EnergyOfferScreen`: `home`·`opening`·`opening_insufficient`·`playing`·`playing_insufficient`·`overview`·`lab`. Overview 배지 탭 detail `screen=overview`
 - 비가시(비활성 탭·위 라우트)면 타이머·GET 중단. 결제 성공은 `EnergyRefreshBus`로 추가 GET 없이 반영
 - Playing 0/402 → `showPlayingEnergyInsufficientPopup` → `endRoleplay`면 Wait 레이어(세션 유지)
-- Opening Start `sessionId=='0'` → Out of Energy 바텀시트(`out_of_energy_bottom_sheet.dart`). detail `subscriptionEverYn`으로 Premium CTA 분기. Playing 부족 UI는 아직 기존 팝업
+- Opening Start `sessionId=='0'` → Out of Energy 바텀시트(`out_of_energy_bottom_sheet.dart`). detail `subscriptionEverYn`으로 Premium CTA 분기. Playing 에너지 0: 세션 첫 차단은 유도 시트(`playing_energy_induction_sheet.dart`) → See options/이후는 동일 충전 시트에 Playing 헤더(웃는 Betty + Keep the conversation going, `playingHeader`)
 - 팝업 INAPP 탭: `POST /v1/impressions/products` (팝업 생명주기 내 동일 키 1회)
 - Enable Notifications 슬롯: SUDA-1252 이후 detail `showEnablePushFreeChargeYn` 항상 N → 팝업 미노출(구버전 포함). 클라 슬롯 코드·Setting>Notification(`PushAgreement`)은 유지. 과거 조건은 `Y` **그리고** `screen` ∈ {`home`,`opening`,`opening_insufficient`}
 

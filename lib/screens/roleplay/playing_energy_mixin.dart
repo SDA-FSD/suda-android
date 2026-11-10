@@ -7,7 +7,9 @@ import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
 import '../../utils/energy_timer_refetch.dart';
 import '../../widgets/energy_info_popup.dart';
+import '../../widgets/out_of_energy_bottom_sheet.dart';
 import '../../widgets/playing_energy_indicator.dart';
+import '../../widgets/playing_energy_induction_sheet.dart';
 
 /// Playing 화면 에너지 상태·충전 타이머·로컬 차감.
 mixin PlayingEnergyMixin<T extends StatefulWidget> on State<T> {
@@ -19,6 +21,9 @@ mixin PlayingEnergyMixin<T extends StatefulWidget> on State<T> {
   final EnergyTimerRefetchTracker _playingRefetchTracker =
       EnergyTimerRefetchTracker();
   bool _energyRefreshBusAttached = false;
+
+  /// 이번 Playing 세션에서 대화 유도 시트를 한 번이라도 닫았는지.
+  bool _playingEnergyInductionDismissed = false;
 
   UserEnergyDto? get playingEnergy => _playingEnergy;
 
@@ -75,19 +80,36 @@ mixin PlayingEnergyMixin<T extends StatefulWidget> on State<T> {
     final nowUtc = DateTime.now().toUtc();
     final isUnlimited = energy.isUnlimitedActiveAt(nowUtc);
     if (!isUnlimited && energy.energyCount == 0) {
-      await showPlayingEnergyInsufficientPopup(
-        context,
-        onEndRoleplay: () {
-          onPlayingEnergyIndicatorEndRoleplay?.call();
-        },
-        screen: EnergyOfferScreen.playingInsufficient,
-      );
+      await showPlayingEnergyBlockedFlow();
     } else {
       await showEnergyInfoPopup(
         context,
         screen: EnergyOfferScreen.playing,
       );
     }
+    if (!mounted) return;
+    await _fetchPlayingEnergy();
+  }
+
+  /// 마이크/타이핑/배지/402 공통: 첫 차단은 유도 시트, 이후·See options는 충전 시트.
+  Future<void> showPlayingEnergyBlockedFlow() async {
+    if (!mounted) return;
+    if (!_playingEnergyInductionDismissed) {
+      final induction = await showPlayingEnergyInductionSheet(
+        context,
+        energy: _playingEnergy,
+      );
+      if (!mounted) return;
+      _playingEnergyInductionDismissed = true;
+      if (induction != PlayingEnergyInductionResult.seeOptions) {
+        return;
+      }
+    }
+    await showOpeningOutOfEnergyBottomSheet(
+      context,
+      screen: EnergyOfferScreen.playingInsufficient,
+      playingHeader: true,
+    );
     if (!mounted) return;
     await _fetchPlayingEnergy();
   }

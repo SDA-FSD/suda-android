@@ -1013,6 +1013,24 @@ class AppLocalizationsZh extends AppLocalizations {
   String get outOfEnergyMaybeLater => '稍后';
 
   @override
+  String get outOfEnergyPlayingTitle => '继续对话吧';
+
+  @override
+  String get outOfEnergyPlayingSubtitle => '点击下方方式了解详情。';
+
+  @override
+  String get playingEnergyInductionEnergyLabel => '能量：';
+
+  @override
+  String get playingEnergyInductionTitle => '还想继续聊吗？';
+
+  @override
+  String get playingEnergyInductionBody => '能量已经用完了。\n看看如何继续对话吧。';
+
+  @override
+  String get playingEnergyInductionCta => '查看继续方式';
+
+  @override
   String get endRoleplay => '结束情景对话';
 
   @override
@@ -2372,6 +2390,24 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get outOfEnergyMaybeLater => '稍后';
 
   @override
+  String get outOfEnergyPlayingTitle => '继续对话吧';
+
+  @override
+  String get outOfEnergyPlayingSubtitle => '点击下方方式了解详情。';
+
+  @override
+  String get playingEnergyInductionEnergyLabel => '能量：';
+
+  @override
+  String get playingEnergyInductionTitle => '还想继续聊吗？';
+
+  @override
+  String get playingEnergyInductionBody => '能量已经用完了。\n看看如何继续对话吧。';
+
+  @override
+  String get playingEnergyInductionCta => '查看继续方式';
+
+  @override
   String get endRoleplay => '结束情景对话';
 
   @override
@@ -3729,6 +3765,24 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get outOfEnergyMaybeLater => '稍後';
+
+  @override
+  String get outOfEnergyPlayingTitle => '繼續對話吧';
+
+  @override
+  String get outOfEnergyPlayingSubtitle => '點擊下方方式了解詳情。';
+
+  @override
+  String get playingEnergyInductionEnergyLabel => '能量：';
+
+  @override
+  String get playingEnergyInductionTitle => '還想繼續聊嗎？';
+
+  @override
+  String get playingEnergyInductionBody => '能量已經用完了。\n看看如何繼續對話吧。';
+
+  @override
+  String get playingEnergyInductionCta => '查看繼續方式';
 
   @override
   String get endRoleplay => '結束角色扮演';

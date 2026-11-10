@@ -1067,6 +1067,25 @@ class AppLocalizationsAr extends AppLocalizations {
   String get outOfEnergyMaybeLater => 'لاحقًا';
 
   @override
+  String get outOfEnergyPlayingTitle => 'واصل المحادثة';
+
+  @override
+  String get outOfEnergyPlayingSubtitle => 'اضغط خيارًا أدناه لمعرفة المزيد.';
+
+  @override
+  String get playingEnergyInductionEnergyLabel => 'الطاقة:';
+
+  @override
+  String get playingEnergyInductionTitle => 'هل تريد متابعة الدردشة؟';
+
+  @override
+  String get playingEnergyInductionBody =>
+      'نفدت طاقتك.\nاطلع على كيفية متابعة المحادثة.';
+
+  @override
+  String get playingEnergyInductionCta => 'عرض الخيارات';
+
+  @override
   String get endRoleplay => 'إنهاء تمثيل الأدوار';
 
   @override

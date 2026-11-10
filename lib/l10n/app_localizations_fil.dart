@@ -1085,6 +1085,26 @@ class AppLocalizationsFil extends AppLocalizations {
   String get outOfEnergyMaybeLater => 'Mamaya na';
 
   @override
+  String get outOfEnergyPlayingTitle => 'Ituloy ang usapan';
+
+  @override
+  String get outOfEnergyPlayingSubtitle =>
+      'I-tap ang option sa ibaba para malaman pa.';
+
+  @override
+  String get playingEnergyInductionEnergyLabel => 'Energy:';
+
+  @override
+  String get playingEnergyInductionTitle => 'Gusto mo pang mag-chat?';
+
+  @override
+  String get playingEnergyInductionBody =>
+      'Naubos na ang energy mo.\nTingnan kung paano ka makakapagpatuloy.';
+
+  @override
+  String get playingEnergyInductionCta => 'Tingnan ang options';
+
+  @override
   String get endRoleplay => 'Tapusin ang Roleplay';
 
   @override

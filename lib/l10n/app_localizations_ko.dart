@@ -1028,6 +1028,25 @@ class AppLocalizationsKo extends AppLocalizations {
   String get outOfEnergyMaybeLater => '나중에';
 
   @override
+  String get outOfEnergyPlayingTitle => '대화를 계속 이어가세요';
+
+  @override
+  String get outOfEnergyPlayingSubtitle => '아래 방법을 눌러 확인해보세요.';
+
+  @override
+  String get playingEnergyInductionEnergyLabel => '에너지:';
+
+  @override
+  String get playingEnergyInductionTitle => '더 이야기해볼까요?';
+
+  @override
+  String get playingEnergyInductionBody =>
+      '에너지를 모두 사용했어요.\n대화를 이어갈 방법을 확인해보세요.';
+
+  @override
+  String get playingEnergyInductionCta => '계속할 방법 보기';
+
+  @override
   String get endRoleplay => '롤플레이 종료하기';
 
   @override

@@ -1056,6 +1056,26 @@ class AppLocalizationsTh extends AppLocalizations {
   String get outOfEnergyMaybeLater => 'ไว้ทีหลัง';
 
   @override
+  String get outOfEnergyPlayingTitle => 'คุยต่อเลย';
+
+  @override
+  String get outOfEnergyPlayingSubtitle =>
+      'แตะตัวเลือกด้านล่างเพื่อดูรายละเอียด';
+
+  @override
+  String get playingEnergyInductionEnergyLabel => 'พลังงาน:';
+
+  @override
+  String get playingEnergyInductionTitle => 'อยากคุยต่อไหม?';
+
+  @override
+  String get playingEnergyInductionBody =>
+      'คุณใช้พลังงานหมดแล้ว\nดูวิธีคุยต่อได้ที่นี่';
+
+  @override
+  String get playingEnergyInductionCta => 'ดูตัวเลือก';
+
+  @override
   String get endRoleplay => 'จบโรลเพลย์';
 
   @override

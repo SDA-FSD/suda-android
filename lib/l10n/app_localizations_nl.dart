@@ -1078,6 +1078,26 @@ class AppLocalizationsNl extends AppLocalizations {
   String get outOfEnergyMaybeLater => 'Later';
 
   @override
+  String get outOfEnergyPlayingTitle => 'Ga door met het gesprek';
+
+  @override
+  String get outOfEnergyPlayingSubtitle =>
+      'Tik hieronder op een optie voor meer info.';
+
+  @override
+  String get playingEnergyInductionEnergyLabel => 'Energie:';
+
+  @override
+  String get playingEnergyInductionTitle => 'Nog even chatten?';
+
+  @override
+  String get playingEnergyInductionBody =>
+      'Je energie is op.\nBekijk hoe je kunt blijven chatten.';
+
+  @override
+  String get playingEnergyInductionCta => 'Opties bekijken';
+
+  @override
   String get endRoleplay => 'Rollenspel beëindigen';
 
   @override

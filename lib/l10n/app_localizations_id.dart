@@ -1070,6 +1070,26 @@ class AppLocalizationsId extends AppLocalizations {
   String get outOfEnergyMaybeLater => 'Nanti saja';
 
   @override
+  String get outOfEnergyPlayingTitle => 'Lanjutkan percakapan';
+
+  @override
+  String get outOfEnergyPlayingSubtitle =>
+      'Ketuk opsi di bawah untuk info selengkapnya.';
+
+  @override
+  String get playingEnergyInductionEnergyLabel => 'Energi:';
+
+  @override
+  String get playingEnergyInductionTitle => 'Mau lanjut ngobrol?';
+
+  @override
+  String get playingEnergyInductionBody =>
+      'Energimu habis.\nLihat cara melanjutkan obrolan.';
+
+  @override
+  String get playingEnergyInductionCta => 'Lihat opsi';
+
+  @override
   String get endRoleplay => 'Akhiri roleplay';
 
   @override

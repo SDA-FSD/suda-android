@@ -1073,6 +1073,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get outOfEnergyMaybeLater => 'Maybe later';
 
   @override
+  String get outOfEnergyPlayingTitle => 'Keep the conversation going';
+
+  @override
+  String get outOfEnergyPlayingSubtitle => 'Tap an option below to learn more.';
+
+  @override
+  String get playingEnergyInductionEnergyLabel => 'Energy:';
+
+  @override
+  String get playingEnergyInductionTitle => 'Want to keep chatting?';
+
+  @override
+  String get playingEnergyInductionBody =>
+      'You\'re out of energy.\nSee how you can keep chatting.';
+
+  @override
+  String get playingEnergyInductionCta => 'See options';
+
+  @override
   String get endRoleplay => 'End Roleplay';
 
   @override
