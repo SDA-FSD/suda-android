@@ -354,6 +354,39 @@
   "energyInfoFull": "能量已滿。",
   "energyInfoUnlimitedEndsIn": "無限暢玩模式使用中",
   "energyInsufficient": "你的能量不足。",
+  "outOfEnergyTitle": "能量不足",
+  "outOfEnergySubtitle": "請先補充能量再開始對話。",
+  "outOfEnergyRecommended": "推薦",
+  "outOfEnergyPremiumBenefitEnergy": "能量上限升級至30",
+  "outOfEnergyPremiumBenefitFeedback": "提供AI句子回饋",
+  "outOfEnergyTry7DaysFree": "免費試用7天",
+  "outOfEnergyExplorePremium": "了解高級會員",
+  "outOfEnergyChatPassTitle": "10分鐘暢聊通行證",
+  "outOfEnergyPayOnce": "單次購買",
+  "outOfEnergyChatPassDesc": "10分鐘對話不消耗能量",
+  "outOfEnergyBuyAndStart": "購買並開始 · {price}",
+  "@outOfEnergyBuyAndStart": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "outOfEnergyWaitTitle": "等待充能",
+  "outOfEnergyFree": "免費",
+  "outOfEnergyNextRecharge": "距離下次充能還有 @@TIME@@",
+  "outOfEnergyComeBackLater": "充好了再回來",
+  "outOfEnergyReturnHomeHint": "將返回首頁",
+  "outOfEnergyClose": "關閉",
+  "outOfEnergyPushReminderTitle": "能量充滿時要提醒你嗎？",
+  "outOfEnergyNotifyMe": "接收通知",
+  "outOfEnergyMaybeLater": "稍後",
+  "outOfEnergyPlayingTitle": "繼續對話吧",
+  "outOfEnergyPlayingSubtitle": "點擊下方方式了解詳情。",
+  "playingEnergyInductionEnergyLabel": "能量：",
+  "playingEnergyInductionTitle": "還想繼續聊嗎？",
+  "playingEnergyInductionBody": "能量已經用完了。\n看看如何繼續對話吧。",
+  "playingEnergyInductionCta": "查看繼續方式",
   "endRoleplay": "結束角色扮演",
   "energyEnablePushTitle": "開啟通知",
   "energyEnablePushSubtitle": "開啟通知，即可將能量完全補滿。",
@@ -391,6 +424,8 @@
   "paywallMonthlyPlanSubtitle": "彈性按月使用。",
   "paywallBestBadge": "最划算",
   "paywallCta": "立即訂閱",
+  "paywallTrialCaptionAnnual": "7天免費試用後按年計費",
+  "paywallTrialCaptionMonthly": "7天免費試用後按月計費",
   "paywallAutoRenewNotice": "若未在本期計費週期結束前至少 24 小時取消訂閱，訂閱將自動續訂。",
   "paywallPricePerMonth": "{price}/月",
   "@paywallPricePerMonth": {

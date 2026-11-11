@@ -1014,6 +1014,88 @@ class AppLocalizationsId extends AppLocalizations {
   String get energyInsufficient => 'Energi Anda tidak cukup.';
 
   @override
+  String get outOfEnergyTitle => 'Energimu habis';
+
+  @override
+  String get outOfEnergySubtitle => 'Isi ulang energi untuk mulai mengobrol.';
+
+  @override
+  String get outOfEnergyRecommended => 'Direkomendasikan';
+
+  @override
+  String get outOfEnergyPremiumBenefitEnergy => 'Tingkatkan ke maks. 30 energi';
+
+  @override
+  String get outOfEnergyPremiumBenefitFeedback => 'Masukan kalimat dari AI';
+
+  @override
+  String get outOfEnergyTry7DaysFree => 'Coba gratis 7 hari';
+
+  @override
+  String get outOfEnergyExplorePremium => 'Jelajahi Premium';
+
+  @override
+  String get outOfEnergyChatPassTitle => 'Pass chat 10 menit';
+
+  @override
+  String get outOfEnergyPayOnce => 'Beli sekali';
+
+  @override
+  String get outOfEnergyChatPassDesc => 'Chat 10 menit tanpa memakai energi';
+
+  @override
+  String outOfEnergyBuyAndStart(String price) {
+    return 'Beli & mulai · $price';
+  }
+
+  @override
+  String get outOfEnergyWaitTitle => 'Tunggu pengisian';
+
+  @override
+  String get outOfEnergyFree => 'Gratis';
+
+  @override
+  String get outOfEnergyNextRecharge => 'Pengisian berikutnya dalam @@TIME@@.';
+
+  @override
+  String get outOfEnergyComeBackLater => 'Nanti saya kembali';
+
+  @override
+  String get outOfEnergyReturnHomeHint => 'Kamu akan kembali ke beranda';
+
+  @override
+  String get outOfEnergyClose => 'Tutup';
+
+  @override
+  String get outOfEnergyPushReminderTitle => 'Ingatkan saat energimu penuh?';
+
+  @override
+  String get outOfEnergyNotifyMe => 'Beritahu saya';
+
+  @override
+  String get outOfEnergyMaybeLater => 'Nanti saja';
+
+  @override
+  String get outOfEnergyPlayingTitle => 'Lanjutkan percakapan';
+
+  @override
+  String get outOfEnergyPlayingSubtitle =>
+      'Ketuk opsi di bawah untuk info selengkapnya.';
+
+  @override
+  String get playingEnergyInductionEnergyLabel => 'Energi:';
+
+  @override
+  String get playingEnergyInductionTitle => 'Mau lanjut ngobrol?';
+
+  @override
+  String get playingEnergyInductionBody =>
+      'Energimu habis.\nLihat cara melanjutkan obrolan.';
+
+  @override
+  String get playingEnergyInductionCta => 'Lihat opsi';
+
+  @override
   String get endRoleplay => 'Akhiri roleplay';
 
   @override
@@ -1131,6 +1213,14 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get paywallCta => 'Berlangganan sekarang';
+
+  @override
+  String get paywallTrialCaptionAnnual =>
+      'Ditagih tahunan setelah 7 hari gratis';
+
+  @override
+  String get paywallTrialCaptionMonthly =>
+      'Ditagih bulanan setelah 7 hari gratis';
 
   @override
   String get paywallAutoRenewNotice =>

@@ -1022,6 +1022,89 @@ class AppLocalizationsNl extends AppLocalizations {
   String get energyInsufficient => 'Je hebt niet genoeg energie.';
 
   @override
+  String get outOfEnergyTitle => 'Je energie is op';
+
+  @override
+  String get outOfEnergySubtitle => 'Laad energie op om te chatten.';
+
+  @override
+  String get outOfEnergyRecommended => 'Aanbevolen';
+
+  @override
+  String get outOfEnergyPremiumBenefitEnergy => 'Upgrade naar max. 30 energie';
+
+  @override
+  String get outOfEnergyPremiumBenefitFeedback => 'AI-zinsfeedback';
+
+  @override
+  String get outOfEnergyTry7DaysFree => '7 dagen gratis proberen';
+
+  @override
+  String get outOfEnergyExplorePremium => 'Premium ontdekken';
+
+  @override
+  String get outOfEnergyChatPassTitle => '10-min chatpas';
+
+  @override
+  String get outOfEnergyPayOnce => 'Eenmalige aankoop';
+
+  @override
+  String get outOfEnergyChatPassDesc => '10 minuten chatten zonder energie';
+
+  @override
+  String outOfEnergyBuyAndStart(String price) {
+    return 'Kopen en starten · $price';
+  }
+
+  @override
+  String get outOfEnergyWaitTitle => 'Wachten op opladen';
+
+  @override
+  String get outOfEnergyFree => 'Gratis';
+
+  @override
+  String get outOfEnergyNextRecharge => 'Volgende oplading over @@TIME@@.';
+
+  @override
+  String get outOfEnergyComeBackLater => 'Ik kom later terug';
+
+  @override
+  String get outOfEnergyReturnHomeHint => 'Je keert terug naar het startscherm';
+
+  @override
+  String get outOfEnergyClose => 'Sluiten';
+
+  @override
+  String get outOfEnergyPushReminderTitle =>
+      'Melding wanneer je energie vol is?';
+
+  @override
+  String get outOfEnergyNotifyMe => 'Meld het me';
+
+  @override
+  String get outOfEnergyMaybeLater => 'Later';
+
+  @override
+  String get outOfEnergyPlayingTitle => 'Ga door met het gesprek';
+
+  @override
+  String get outOfEnergyPlayingSubtitle =>
+      'Tik hieronder op een optie voor meer info.';
+
+  @override
+  String get playingEnergyInductionEnergyLabel => 'Energie:';
+
+  @override
+  String get playingEnergyInductionTitle => 'Nog even chatten?';
+
+  @override
+  String get playingEnergyInductionBody =>
+      'Je energie is op.\nBekijk hoe je kunt blijven chatten.';
+
+  @override
+  String get playingEnergyInductionCta => 'Opties bekijken';
+
+  @override
   String get endRoleplay => 'Rollenspel beëindigen';
 
   @override
@@ -1137,6 +1220,14 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get paywallCta => 'Nu abonneren';
+
+  @override
+  String get paywallTrialCaptionAnnual =>
+      'Jaarlijkse facturering na 7 dagen gratis';
+
+  @override
+  String get paywallTrialCaptionMonthly =>
+      'Maandelijkse facturering na 7 dagen gratis';
 
   @override
   String get paywallAutoRenewNotice =>

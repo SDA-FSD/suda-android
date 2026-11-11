@@ -18,7 +18,15 @@ class PushAgreementScreen extends StatefulWidget {
   final UserDto? user;
   final ValueChanged<UserDto>? onUserUpdated;
 
-  const PushAgreementScreen({super.key, this.user, this.onUserUpdated});
+  /// Out of Energy 푸시 유도: 진입 시 알림 토글을 ON으로 시도(OS 권한 포함).
+  final bool autoEnableOnOpen;
+
+  const PushAgreementScreen({
+    super.key,
+    this.user,
+    this.onUserUpdated,
+    this.autoEnableOnOpen = false,
+  });
 
   @override
   State<PushAgreementScreen> createState() => _PushAgreementScreenState();
@@ -48,6 +56,12 @@ class _PushAgreementScreenState extends State<PushAgreementScreen> {
     super.initState();
     _isOn = _initialOnFromUser(widget.user);
     unawaited(_loadCategories());
+    if (widget.autoEnableOnOpen && !_isOn) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || _isOn || _isUpdating) return;
+        unawaited(_onToggleTap());
+      });
+    }
   }
 
   /// metaInfo PUSH_AGREEMENT == 'Y'인 경우만 ON, 그 외 OFF

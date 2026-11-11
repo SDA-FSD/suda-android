@@ -354,6 +354,39 @@
   "energyInfoFull": "Tenaga anda penuh.",
   "energyInfoUnlimitedEndsIn": "Mod Tanpa Had Aktif",
   "energyInsufficient": "Tenaga anda tidak mencukupi.",
+  "outOfEnergyTitle": "Tenaga anda habis",
+  "outOfEnergySubtitle": "Cas semula tenaga untuk mula berbual.",
+  "outOfEnergyRecommended": "Disyorkan",
+  "outOfEnergyPremiumBenefitEnergy": "Naik taraf kepada maks. 30 tenaga",
+  "outOfEnergyPremiumBenefitFeedback": "Maklum balas ayat AI",
+  "outOfEnergyTry7DaysFree": "Cuba percuma 7 hari",
+  "outOfEnergyExplorePremium": "Terokai Premium",
+  "outOfEnergyChatPassTitle": "Pas sembang 10 min",
+  "outOfEnergyPayOnce": "Beli sekali",
+  "outOfEnergyChatPassDesc": "Sembang 10 minit tanpa menggunakan tenaga",
+  "outOfEnergyBuyAndStart": "Beli & mula · {price}",
+  "@outOfEnergyBuyAndStart": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "outOfEnergyWaitTitle": "Tunggu pengecasan",
+  "outOfEnergyFree": "Percuma",
+  "outOfEnergyNextRecharge": "Pengecasan seterusnya dalam @@TIME@@.",
+  "outOfEnergyComeBackLater": "Saya akan kembali nanti",
+  "outOfEnergyReturnHomeHint": "Anda akan kembali ke skrin utama",
+  "outOfEnergyClose": "Tutup",
+  "outOfEnergyPushReminderTitle": "Maklumkan bila tenaga penuh?",
+  "outOfEnergyNotifyMe": "Beritahu saya",
+  "outOfEnergyMaybeLater": "Nanti",
+  "outOfEnergyPlayingTitle": "Teruskan perbualan",
+  "outOfEnergyPlayingSubtitle": "Ketik pilihan di bawah untuk ketahui lebih lanjut.",
+  "playingEnergyInductionEnergyLabel": "Tenaga:",
+  "playingEnergyInductionTitle": "Nak terus berbual?",
+  "playingEnergyInductionBody": "Tenaga anda habis.\nLihat cara untuk terus berbual.",
+  "playingEnergyInductionCta": "Lihat pilihan",
   "endRoleplay": "Tamatkan lakon peranan",
   "energyEnablePushTitle": "Hidupkan Pemberitahuan",
   "energyEnablePushSubtitle": "Hidupkan pemberitahuan dan isi semula tenaga hingga penuh.",
@@ -391,6 +424,8 @@
   "paywallMonthlyPlanSubtitle": "Akses bulanan yang fleksibel.",
   "paywallBestBadge": "TERBAIK",
   "paywallCta": "Langgan Sekarang",
+  "paywallTrialCaptionAnnual": "Dibil secara tahunan selepas 7 hari percuma",
+  "paywallTrialCaptionMonthly": "Dibil secara bulanan selepas 7 hari percuma",
   "paywallAutoRenewNotice": "Langganan diperbaharui secara automatik kecuali dibatalkan sekurang-kurangnya 24 jam sebelum tempoh pengebilan semasa berakhir.",
   "paywallPricePerMonth": "{price}/bulan",
   "@paywallPricePerMonth": {

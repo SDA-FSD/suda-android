@@ -423,6 +423,39 @@
   "energyInfoFull": "Your energy is full.",
   "energyInfoUnlimitedEndsIn": "Unlimited Mode Active",
   "energyInsufficient": "You don't have enough energy.",
+  "outOfEnergyTitle": "You're out of energy",
+  "outOfEnergySubtitle": "Recharge your energy to start chatting.",
+  "outOfEnergyRecommended": "Recommended",
+  "outOfEnergyPremiumBenefitEnergy": "Upgrade to 30 energy",
+  "outOfEnergyPremiumBenefitFeedback": "AI Sentence feedback",
+  "outOfEnergyTry7DaysFree": "Try 7 days free",
+  "outOfEnergyExplorePremium": "Explore Premium",
+  "outOfEnergyChatPassTitle": "10-min Chat Pass",
+  "outOfEnergyPayOnce": "Pay once",
+  "outOfEnergyChatPassDesc": "Chat for 10 minutes without using energy",
+  "outOfEnergyBuyAndStart": "Buy & start now · {price}",
+  "@outOfEnergyBuyAndStart": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "outOfEnergyWaitTitle": "Wait to recharge",
+  "outOfEnergyFree": "Free",
+  "outOfEnergyNextRecharge": "Next recharge in @@TIME@@.",
+  "outOfEnergyComeBackLater": "I'll come back later",
+  "outOfEnergyReturnHomeHint": "You'll return to the home screen",
+  "outOfEnergyClose": "Close",
+  "outOfEnergyPushReminderTitle": "Want a reminder when your energy is full?",
+  "outOfEnergyNotifyMe": "Notify me",
+  "outOfEnergyMaybeLater": "Maybe later",
+  "outOfEnergyPlayingTitle": "Keep the conversation going",
+  "outOfEnergyPlayingSubtitle": "Tap an option below to learn more.",
+  "playingEnergyInductionEnergyLabel": "Energy:",
+  "playingEnergyInductionTitle": "Want to keep chatting?",
+  "playingEnergyInductionBody": "You're out of energy.\nSee how you can keep chatting.",
+  "playingEnergyInductionCta": "See options",
   "endRoleplay": "End Roleplay",
   "energyEnablePushTitle": "Enable Notifications",
   "energyEnablePushSubtitle": "Turn on notifications and fully refill your Energy.",
@@ -460,6 +493,8 @@
   "paywallMonthlyPlanSubtitle": "Flexible monthly access.",
   "paywallBestBadge": "BEST",
   "paywallCta": "Start Now",
+  "paywallTrialCaptionAnnual": "Billed annually after 7 days free",
+  "paywallTrialCaptionMonthly": "Billed monthly after 7 days free",
   "paywallAutoRenewNotice": "Subscriptions renew automatically unless canceled at least 24 hours before the end of the current billing period.",
   "paywallPricePerMonth": "{price}/month",
   "@paywallPricePerMonth": {

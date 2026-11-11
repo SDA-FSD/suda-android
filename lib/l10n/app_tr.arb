@@ -354,6 +354,39 @@
   "energyInfoFull": "Enerjin dolu.",
   "energyInfoUnlimitedEndsIn": "Sınırsız Mod Aktif",
   "energyInsufficient": "Yeterli enerjin yok.",
+  "outOfEnergyTitle": "Enerjin bitti",
+  "outOfEnergySubtitle": "Sohbete başlamak için enerjini doldur.",
+  "outOfEnergyRecommended": "Önerilen",
+  "outOfEnergyPremiumBenefitEnergy": "Maks. 30 enerjiye yükselt",
+  "outOfEnergyPremiumBenefitFeedback": "Yapay zekâ cümle geri bildirimi",
+  "outOfEnergyTry7DaysFree": "7 gün ücretsiz dene",
+  "outOfEnergyExplorePremium": "Premium'u keşfet",
+  "outOfEnergyChatPassTitle": "10 dk sohbet geçişi",
+  "outOfEnergyPayOnce": "Tek seferlik",
+  "outOfEnergyChatPassDesc": "Enerji harcamadan 10 dakika sohbet",
+  "outOfEnergyBuyAndStart": "Satın al ve başla · {price}",
+  "@outOfEnergyBuyAndStart": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "outOfEnergyWaitTitle": "Şarj olmasını bekle",
+  "outOfEnergyFree": "Ücretsiz",
+  "outOfEnergyNextRecharge": "Sonraki şarja @@TIME@@ kaldı.",
+  "outOfEnergyComeBackLater": "Sonra döneceğim",
+  "outOfEnergyReturnHomeHint": "Ana ekrana döneceksin",
+  "outOfEnergyClose": "Kapat",
+  "outOfEnergyPushReminderTitle": "Enerjin dolunca haber verilsin mi?",
+  "outOfEnergyNotifyMe": "Bana bildir",
+  "outOfEnergyMaybeLater": "Sonra",
+  "outOfEnergyPlayingTitle": "Sohbete devam et",
+  "outOfEnergyPlayingSubtitle": "Daha fazlası için aşağıdaki bir seçeneğe dokun.",
+  "playingEnergyInductionEnergyLabel": "Enerji:",
+  "playingEnergyInductionTitle": "Sohbete devam edelim mi?",
+  "playingEnergyInductionBody": "Enerjin bitti.\nSohbete nasıl devam edebileceğini gör.",
+  "playingEnergyInductionCta": "Seçenekleri gör",
   "endRoleplay": "Rol Yapmayı Bitir",
   "energyEnablePushTitle": "Bildirimleri Aç",
   "energyEnablePushSubtitle": "Bildirimleri aç ve enerjini tamamen doldur.",
@@ -391,6 +424,8 @@
   "paywallMonthlyPlanSubtitle": "Esnek aylık erişim.",
   "paywallBestBadge": "EN İYİ",
   "paywallCta": "Şimdi Abone Ol",
+  "paywallTrialCaptionAnnual": "7 gün ücretsizden sonra yıllık ücretlendirme",
+  "paywallTrialCaptionMonthly": "7 gün ücretsizden sonra aylık ücretlendirme",
   "paywallAutoRenewNotice": "Abonelik, mevcut faturalandırma dönemi sona ermeden en az 24 saat önce iptal edilmezse otomatik olarak yenilenir.",
   "paywallPricePerMonth": "{price}/ay",
   "@paywallPricePerMonth": {

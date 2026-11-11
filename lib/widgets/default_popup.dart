@@ -34,6 +34,7 @@ class DefaultPopupButton {
 /// - 버튼 탭 시: **항상 팝업을 닫은 뒤** `onPressed`를 호출한다.
 class DefaultPopup extends StatelessWidget {
   static const double cardBorderRadius = 16;
+  static const double sheetGlassBorderRadius = 24;
 
   final Widget? topWidget;
   final String? titleText;
@@ -45,6 +46,15 @@ class DefaultPopup extends StatelessWidget {
   /// Default remains shrink-wrap to label.
   final bool expandPrimaryButtons;
 
+  /// 기본 `0.8`. 에너지 충전 시트처럼 전폭이면 `1.0`.
+  final double maxWidthFactor;
+
+  /// true면 하단 에너지 시트와 동일한 glass: `#FFF` 2% + blur 40.
+  final bool sheetGlassSurface;
+
+  /// 버튼끼리 세로 간격. 기본 20.
+  final double buttonSpacing;
+
   const DefaultPopup({
     super.key,
     this.topWidget,
@@ -53,6 +63,9 @@ class DefaultPopup extends StatelessWidget {
     this.buttons = const [],
     this.barrierDismissible = false,
     this.expandPrimaryButtons = false,
+    this.maxWidthFactor = 0.8,
+    this.sheetGlassSurface = false,
+    this.buttonSpacing = 20,
   });
 
   static Future<void> show(
@@ -63,6 +76,9 @@ class DefaultPopup extends StatelessWidget {
     List<DefaultPopupButton> buttons = const [],
     bool barrierDismissible = false,
     bool expandPrimaryButtons = false,
+    double maxWidthFactor = 0.8,
+    bool sheetGlassSurface = false,
+    double buttonSpacing = 20,
   }) {
     return showDialog<void>(
       context: context,
@@ -76,6 +92,9 @@ class DefaultPopup extends StatelessWidget {
         buttons: buttons,
         barrierDismissible: barrierDismissible,
         expandPrimaryButtons: expandPrimaryButtons,
+        maxWidthFactor: maxWidthFactor,
+        sheetGlassSurface: sheetGlassSurface,
+        buttonSpacing: buttonSpacing,
       ),
     );
   }
@@ -210,45 +229,55 @@ class DefaultPopup extends StatelessWidget {
           Center(
             child: ConstrainedBox(
               constraints: BoxConstraints(
-                maxWidth: screenWidth * 0.8,
+                maxWidth: screenWidth * maxWidthFactor.clamp(0.5, 1.0),
                 maxHeight: screenHeight * 0.8,
               ),
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(cardBorderRadius),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.14),
-                      blurRadius: 10,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(cardBorderRadius),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                    child: DecoratedBox(
+              child: sheetGlassSurface
+                  ? _SheetGlassCard(
+                      radius: sheetGlassBorderRadius,
+                      child: cardContent,
+                    )
+                  : DecoratedBox(
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(cardBorderRadius),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.36),
-                          width: 1,
-                        ),
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            Colors.white.withValues(alpha: 0.18),
-                            Colors.white.withValues(alpha: 0.10),
-                          ],
+                        borderRadius:
+                            BorderRadius.circular(cardBorderRadius),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.14),
+                            blurRadius: 10,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius:
+                            BorderRadius.circular(cardBorderRadius),
+                        child: BackdropFilter(
+                          filter:
+                              ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(
+                                cardBorderRadius,
+                              ),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.36),
+                                width: 1,
+                              ),
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  Colors.white.withValues(alpha: 0.18),
+                                  Colors.white.withValues(alpha: 0.10),
+                                ],
+                              ),
+                            ),
+                            child: cardContent,
+                          ),
                         ),
                       ),
-                      child: cardContent,
                     ),
-                  ),
-                ),
-              ),
             ),
           ),
         ],
@@ -261,7 +290,7 @@ class DefaultPopup extends StatelessWidget {
     final elevatedBase = Theme.of(context).elevatedButtonTheme.style;
     final textBase = Theme.of(context).textButtonTheme.style;
     for (var i = 0; i < buttons.length; i++) {
-      if (i > 0) out.add(const SizedBox(height: 20));
+      if (i > 0) out.add(SizedBox(height: buttonSpacing));
       final b = buttons[i];
       final expandPrimary =
           expandPrimaryButtons &&
@@ -315,5 +344,88 @@ class DefaultPopup extends StatelessWidget {
       );
     }
     return out;
+  }
+}
+
+/// 에너지 부족 하단 시트와 동일: `#FFF` 2% + blur 40 + 유리 각도형 1px stroke.
+class _SheetGlassCard extends StatelessWidget {
+  final double radius;
+  final Widget child;
+
+  const _SheetGlassCard({required this.radius, required this.child});
+
+  static const _borderGradient = SweepGradient(
+    startAngle: -1.5707963267948966,
+    colors: [
+      Color(0x28FFFFFF),
+      Color(0x4FFFFFFF),
+      Color(0x28FFFFFF),
+      Color(0x4FFFFFFF),
+      Color(0x28FFFFFF),
+      Color(0x28FFFFFF),
+    ],
+    stops: [0.0, 0.13, 0.37, 0.62, 0.87, 1.0],
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final borderRadius = BorderRadius.circular(radius);
+    return ClipRRect(
+      borderRadius: borderRadius,
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
+              child: ColoredBox(
+                color: Colors.white.withValues(alpha: 0.02),
+              ),
+            ),
+          ),
+          child,
+          Positioned.fill(
+            child: IgnorePointer(
+              child: CustomPaint(
+                painter: _SoftGlassBorderPainter(
+                  gradient: _borderGradient,
+                  borderRadius: borderRadius,
+                  strokeWidth: 1,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SoftGlassBorderPainter extends CustomPainter {
+  final Gradient gradient;
+  final BorderRadius borderRadius;
+  final double strokeWidth;
+
+  const _SoftGlassBorderPainter({
+    required this.gradient,
+    required this.borderRadius,
+    required this.strokeWidth,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = Offset.zero & size;
+    final rrect = borderRadius.toRRect(rect).deflate(strokeWidth / 2);
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..shader = gradient.createShader(rect);
+    canvas.drawRRect(rrect, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _SoftGlassBorderPainter oldDelegate) {
+    return oldDelegate.gradient != gradient ||
+        oldDelegate.borderRadius != borderRadius ||
+        oldDelegate.strokeWidth != strokeWidth;
   }
 }

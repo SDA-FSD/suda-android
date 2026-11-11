@@ -354,6 +354,39 @@
   "energyInfoFull": "आपकी एनर्जी पूरी भरी है।",
   "energyInfoUnlimitedEndsIn": "अनलिमिटेड मोड चालू है",
   "energyInsufficient": "आपके पास पर्याप्त एनर्जी नहीं है।",
+  "outOfEnergyTitle": "आपकी एनर्जी खत्म हो गई",
+  "outOfEnergySubtitle": "चैट शुरू करने के लिए एनर्जी रिचार्ज करें।",
+  "outOfEnergyRecommended": "सुझाया गया",
+  "outOfEnergyPremiumBenefitEnergy": "अधिकतम 30 एनर्जी में अपग्रेड",
+  "outOfEnergyPremiumBenefitFeedback": "AI वाक्य फ़ीडबैक",
+  "outOfEnergyTry7DaysFree": "7 दिन मुफ़्त आज़माएँ",
+  "outOfEnergyExplorePremium": "प्रीमियम देखें",
+  "outOfEnergyChatPassTitle": "10-मिनट चैट पास",
+  "outOfEnergyPayOnce": "एक बार खरीद",
+  "outOfEnergyChatPassDesc": "एनर्जी खर्च किए बिना 10 मिनट चैट",
+  "outOfEnergyBuyAndStart": "खरीदें और शुरू करें · {price}",
+  "@outOfEnergyBuyAndStart": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "outOfEnergyWaitTitle": "रिचार्ज का इंतज़ार",
+  "outOfEnergyFree": "मुफ़्त",
+  "outOfEnergyNextRecharge": "अगला रिचार्ज @@TIME@@ में।",
+  "outOfEnergyComeBackLater": "बाद में वापस आऊँगा/आऊँगी",
+  "outOfEnergyReturnHomeHint": "आप होम स्क्रीन पर लौटेंगे",
+  "outOfEnergyClose": "बंद करें",
+  "outOfEnergyPushReminderTitle": "एनर्जी भरने पर सूचित करें?",
+  "outOfEnergyNotifyMe": "मुझे सूचित करें",
+  "outOfEnergyMaybeLater": "बाद में",
+  "outOfEnergyPlayingTitle": "बातचीत जारी रखें",
+  "outOfEnergyPlayingSubtitle": "और जानने के लिए नीचे कोई विकल्प टैप करें।",
+  "playingEnergyInductionEnergyLabel": "एनर्जी:",
+  "playingEnergyInductionTitle": "बात जारी रखें?",
+  "playingEnergyInductionBody": "आपकी एनर्जी खत्म हो गई।\nबात जारी रखने के तरीके देखें।",
+  "playingEnergyInductionCta": "विकल्प देखें",
   "endRoleplay": "रोलप्ले खत्म करें",
   "energyEnablePushTitle": "नोटिफ़िकेशन चालू करें",
   "energyEnablePushSubtitle": "नोटिफ़िकेशन चालू करें और अपनी एनर्जी पूरी भरें।",
@@ -391,6 +424,8 @@
   "paywallMonthlyPlanSubtitle": "महीने के हिसाब से सुविधाजनक ऐक्सेस।",
   "paywallBestBadge": "बेस्ट",
   "paywallCta": "अभी शुरू करें",
+  "paywallTrialCaptionAnnual": "7 दिन मुफ़्त के बाद वार्षिक बिलिंग",
+  "paywallTrialCaptionMonthly": "7 दिन मुफ़्त के बाद मासिक बिलिंग",
   "paywallAutoRenewNotice": "सब्सक्रिप्शन तब तक अपने-आप रिन्यू होता रहेगा, जब तक इसे मौजूदा बिलिंग अवधि खत्म होने से कम-से-कम 24 घंटे पहले कैंसल न किया जाए।",
   "paywallPricePerMonth": "{price}/माह",
   "@paywallPricePerMonth": {

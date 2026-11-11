@@ -354,6 +354,39 @@
   "energyInfoFull": "Năng lượng đã đầy.",
   "energyInfoUnlimitedEndsIn": "Chế độ không giới hạn đang hoạt động",
   "energyInsufficient": "Bạn không có đủ năng lượng.",
+  "outOfEnergyTitle": "Bạn đã hết năng lượng",
+  "outOfEnergySubtitle": "Hãy nạp năng lượng để bắt đầu trò chuyện.",
+  "outOfEnergyRecommended": "Đề xuất",
+  "outOfEnergyPremiumBenefitEnergy": "Nâng cấp tối đa 30 năng lượng",
+  "outOfEnergyPremiumBenefitFeedback": "Phản hồi câu từ AI",
+  "outOfEnergyTry7DaysFree": "Dùng thử miễn phí 7 ngày",
+  "outOfEnergyExplorePremium": "Khám phá Premium",
+  "outOfEnergyChatPassTitle": "Vé chat 10 phút",
+  "outOfEnergyPayOnce": "Mua một lần",
+  "outOfEnergyChatPassDesc": "Chat 10 phút không tốn năng lượng",
+  "outOfEnergyBuyAndStart": "Mua và bắt đầu · {price}",
+  "@outOfEnergyBuyAndStart": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "outOfEnergyWaitTitle": "Chờ nạp lại",
+  "outOfEnergyFree": "Miễn phí",
+  "outOfEnergyNextRecharge": "Lần nạp tiếp theo còn @@TIME@@.",
+  "outOfEnergyComeBackLater": "Tôi sẽ quay lại sau",
+  "outOfEnergyReturnHomeHint": "Bạn sẽ quay về màn hình chính",
+  "outOfEnergyClose": "Đóng",
+  "outOfEnergyPushReminderTitle": "Nhắc bạn khi năng lượng đầy chứ?",
+  "outOfEnergyNotifyMe": "Nhắc tôi",
+  "outOfEnergyMaybeLater": "Để sau",
+  "outOfEnergyPlayingTitle": "Tiếp tục cuộc trò chuyện",
+  "outOfEnergyPlayingSubtitle": "Chạm một tùy chọn bên dưới để tìm hiểu thêm.",
+  "playingEnergyInductionEnergyLabel": "Năng lượng:",
+  "playingEnergyInductionTitle": "Muốn trò chuyện tiếp chứ?",
+  "playingEnergyInductionBody": "Bạn đã hết năng lượng.\nXem cách tiếp tục trò chuyện.",
+  "playingEnergyInductionCta": "Xem tùy chọn",
   "endRoleplay": "Kết thúc nhập vai",
   "energyEnablePushTitle": "Bật thông báo",
   "energyEnablePushSubtitle": "Bật thông báo để nạp đầy năng lượng.",
@@ -391,6 +424,8 @@
   "paywallMonthlyPlanSubtitle": "Linh hoạt theo từng tháng.",
   "paywallBestBadge": "TỐT NHẤT",
   "paywallCta": "Đăng ký ngay",
+  "paywallTrialCaptionAnnual": "Thanh toán theo năm sau 7 ngày dùng thử miễn phí",
+  "paywallTrialCaptionMonthly": "Thanh toán theo tháng sau 7 ngày dùng thử miễn phí",
   "paywallAutoRenewNotice": "Gói đăng ký sẽ tự động gia hạn, trừ khi bạn hủy ít nhất 24 giờ trước khi kỳ thanh toán hiện tại kết thúc.",
   "paywallPricePerMonth": "{price}/tháng",
   "@paywallPricePerMonth": {

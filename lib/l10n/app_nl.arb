@@ -354,6 +354,39 @@
   "energyInfoFull": "Je energie is vol.",
   "energyInfoUnlimitedEndsIn": "Onbeperkte modus actief",
   "energyInsufficient": "Je hebt niet genoeg energie.",
+  "outOfEnergyTitle": "Je energie is op",
+  "outOfEnergySubtitle": "Laad energie op om te chatten.",
+  "outOfEnergyRecommended": "Aanbevolen",
+  "outOfEnergyPremiumBenefitEnergy": "Upgrade naar max. 30 energie",
+  "outOfEnergyPremiumBenefitFeedback": "AI-zinsfeedback",
+  "outOfEnergyTry7DaysFree": "7 dagen gratis proberen",
+  "outOfEnergyExplorePremium": "Premium ontdekken",
+  "outOfEnergyChatPassTitle": "10-min chatpas",
+  "outOfEnergyPayOnce": "Eenmalige aankoop",
+  "outOfEnergyChatPassDesc": "10 minuten chatten zonder energie",
+  "outOfEnergyBuyAndStart": "Kopen en starten · {price}",
+  "@outOfEnergyBuyAndStart": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "outOfEnergyWaitTitle": "Wachten op opladen",
+  "outOfEnergyFree": "Gratis",
+  "outOfEnergyNextRecharge": "Volgende oplading over @@TIME@@.",
+  "outOfEnergyComeBackLater": "Ik kom later terug",
+  "outOfEnergyReturnHomeHint": "Je keert terug naar het startscherm",
+  "outOfEnergyClose": "Sluiten",
+  "outOfEnergyPushReminderTitle": "Melding wanneer je energie vol is?",
+  "outOfEnergyNotifyMe": "Meld het me",
+  "outOfEnergyMaybeLater": "Later",
+  "outOfEnergyPlayingTitle": "Ga door met het gesprek",
+  "outOfEnergyPlayingSubtitle": "Tik hieronder op een optie voor meer info.",
+  "playingEnergyInductionEnergyLabel": "Energie:",
+  "playingEnergyInductionTitle": "Nog even chatten?",
+  "playingEnergyInductionBody": "Je energie is op.\nBekijk hoe je kunt blijven chatten.",
+  "playingEnergyInductionCta": "Opties bekijken",
   "endRoleplay": "Rollenspel beëindigen",
   "energyEnablePushTitle": "Meldingen inschakelen",
   "energyEnablePushSubtitle": "Zet meldingen aan en vul je energie helemaal aan.",
@@ -391,6 +424,8 @@
   "paywallMonthlyPlanSubtitle": "Flexibele toegang per maand.",
   "paywallBestBadge": "BESTE",
   "paywallCta": "Nu abonneren",
+  "paywallTrialCaptionAnnual": "Jaarlijkse facturering na 7 dagen gratis",
+  "paywallTrialCaptionMonthly": "Maandelijkse facturering na 7 dagen gratis",
   "paywallAutoRenewNotice": "Je abonnement wordt automatisch verlengd, tenzij je het minimaal 24 uur vóór het einde van de huidige factureringsperiode opzegt.",
   "paywallPricePerMonth": "{price}/maand",
   "@paywallPricePerMonth": {

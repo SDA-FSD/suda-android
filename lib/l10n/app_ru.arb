@@ -354,6 +354,39 @@
   "energyInfoFull": "Энергия полностью восстановлена.",
   "energyInfoUnlimitedEndsIn": "Безлимитный режим активен",
   "energyInsufficient": "Недостаточно энергии.",
+  "outOfEnergyTitle": "Энергия закончилась",
+  "outOfEnergySubtitle": "Пополните энергию, чтобы начать общение.",
+  "outOfEnergyRecommended": "Рекомендуем",
+  "outOfEnergyPremiumBenefitEnergy": "До 30 энергии максимум",
+  "outOfEnergyPremiumBenefitFeedback": "ИИ-обратная связь по фразам",
+  "outOfEnergyTry7DaysFree": "Попробовать 7 дней бесплатно",
+  "outOfEnergyExplorePremium": "Узнать о Premium",
+  "outOfEnergyChatPassTitle": "Чат-пасс на 10 мин",
+  "outOfEnergyPayOnce": "Разовая покупка",
+  "outOfEnergyChatPassDesc": "10 минут общения без траты энергии",
+  "outOfEnergyBuyAndStart": "Купить и начать · {price}",
+  "@outOfEnergyBuyAndStart": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "outOfEnergyWaitTitle": "Подождать зарядку",
+  "outOfEnergyFree": "Бесплатно",
+  "outOfEnergyNextRecharge": "До следующей зарядки @@TIME@@.",
+  "outOfEnergyComeBackLater": "Вернусь позже",
+  "outOfEnergyReturnHomeHint": "Вы вернётесь на главный экран",
+  "outOfEnergyClose": "Закрыть",
+  "outOfEnergyPushReminderTitle": "Напомнить, когда энергия заполнится?",
+  "outOfEnergyNotifyMe": "Напомнить",
+  "outOfEnergyMaybeLater": "Позже",
+  "outOfEnergyPlayingTitle": "Продолжайте разговор",
+  "outOfEnergyPlayingSubtitle": "Нажмите вариант ниже, чтобы узнать больше.",
+  "playingEnergyInductionEnergyLabel": "Энергия:",
+  "playingEnergyInductionTitle": "Хотите продолжить общение?",
+  "playingEnergyInductionBody": "Энергия закончилась.\nПосмотрите, как продолжить разговор.",
+  "playingEnergyInductionCta": "Посмотреть варианты",
   "endRoleplay": "Завершить ролевую игру",
   "energyEnablePushTitle": "Включить уведомления",
   "energyEnablePushSubtitle": "Включите уведомления и полностью восстановите энергию.",
@@ -391,6 +424,8 @@
   "paywallMonthlyPlanSubtitle": "Гибкая помесячная подписка.",
   "paywallBestBadge": "ВЫГОДНО",
   "paywallCta": "Оформить подписку",
+  "paywallTrialCaptionAnnual": "Годовая оплата после 7 дней бесплатно",
+  "paywallTrialCaptionMonthly": "Ежемесячная оплата после 7 дней бесплатно",
   "paywallAutoRenewNotice": "Подписка продлевается автоматически, если её не отменить минимум за 24 часа до окончания текущего расчётного периода.",
   "paywallPricePerMonth": "{price}/мес.",
   "@paywallPricePerMonth": {

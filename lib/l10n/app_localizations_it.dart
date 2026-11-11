@@ -1026,6 +1026,90 @@ class AppLocalizationsIt extends AppLocalizations {
   String get energyInsufficient => 'Non hai abbastanza energia.';
 
   @override
+  String get outOfEnergyTitle => 'Energia esaurita';
+
+  @override
+  String get outOfEnergySubtitle =>
+      'Ricarica l\'energia per iniziare a chattare.';
+
+  @override
+  String get outOfEnergyRecommended => 'Consigliato';
+
+  @override
+  String get outOfEnergyPremiumBenefitEnergy => 'Passa a 30 di energia max';
+
+  @override
+  String get outOfEnergyPremiumBenefitFeedback => 'Feedback IA sulle frasi';
+
+  @override
+  String get outOfEnergyTry7DaysFree => 'Prova 7 giorni gratis';
+
+  @override
+  String get outOfEnergyExplorePremium => 'Scopri Premium';
+
+  @override
+  String get outOfEnergyChatPassTitle => 'Pass chat 10 min';
+
+  @override
+  String get outOfEnergyPayOnce => 'Acquisto unico';
+
+  @override
+  String get outOfEnergyChatPassDesc => 'Chatta 10 minuti senza usare energia';
+
+  @override
+  String outOfEnergyBuyAndStart(String price) {
+    return 'Acquista e inizia · $price';
+  }
+
+  @override
+  String get outOfEnergyWaitTitle => 'Aspetta la ricarica';
+
+  @override
+  String get outOfEnergyFree => 'Gratis';
+
+  @override
+  String get outOfEnergyNextRecharge => 'Prossima ricarica tra @@TIME@@.';
+
+  @override
+  String get outOfEnergyComeBackLater => 'Torno più tardi';
+
+  @override
+  String get outOfEnergyReturnHomeHint => 'Tornerai alla schermata Home';
+
+  @override
+  String get outOfEnergyClose => 'Chiudi';
+
+  @override
+  String get outOfEnergyPushReminderTitle =>
+      'Vuoi un avviso quando l\'energia è piena?';
+
+  @override
+  String get outOfEnergyNotifyMe => 'Avvisami';
+
+  @override
+  String get outOfEnergyMaybeLater => 'Più tardi';
+
+  @override
+  String get outOfEnergyPlayingTitle => 'Continua la conversazione';
+
+  @override
+  String get outOfEnergyPlayingSubtitle =>
+      'Tocca un\'opzione qui sotto per saperne di più.';
+
+  @override
+  String get playingEnergyInductionEnergyLabel => 'Energia:';
+
+  @override
+  String get playingEnergyInductionTitle => 'Vuoi continuare a chattare?';
+
+  @override
+  String get playingEnergyInductionBody =>
+      'Hai finito l\'energia.\nScopri come continuare a chattare.';
+
+  @override
+  String get playingEnergyInductionCta => 'Vedi opzioni';
+
+  @override
   String get endRoleplay => 'Termina il roleplay';
 
   @override
@@ -1142,6 +1226,14 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get paywallCta => 'Inizia ora';
+
+  @override
+  String get paywallTrialCaptionAnnual =>
+      'Addebito annuale dopo 7 giorni gratis';
+
+  @override
+  String get paywallTrialCaptionMonthly =>
+      'Addebito mensile dopo 7 giorni gratis';
 
   @override
   String get paywallAutoRenewNotice =>

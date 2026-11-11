@@ -354,6 +354,39 @@
   "energyInfoFull": "エネルギーは満タンです。",
   "energyInfoUnlimitedEndsIn": "無制限モード利用中",
   "energyInsufficient": "エネルギーが足りません。",
+  "outOfEnergyTitle": "エネルギーが足りません",
+  "outOfEnergySubtitle": "会話を始めるにはエネルギーをチャージしてください。",
+  "outOfEnergyRecommended": "おすすめ",
+  "outOfEnergyPremiumBenefitEnergy": "最大エネルギー30にアップグレード",
+  "outOfEnergyPremiumBenefitFeedback": "AI文章フィードバック",
+  "outOfEnergyTry7DaysFree": "7日間無料で試す",
+  "outOfEnergyExplorePremium": "プレミアムを見る",
+  "outOfEnergyChatPassTitle": "10分チャットパス",
+  "outOfEnergyPayOnce": "1回購入",
+  "outOfEnergyChatPassDesc": "エネルギーを使わず10分会話",
+  "outOfEnergyBuyAndStart": "購入して開始 · {price}",
+  "@outOfEnergyBuyAndStart": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "outOfEnergyWaitTitle": "チャージを待つ",
+  "outOfEnergyFree": "無料",
+  "outOfEnergyNextRecharge": "次のチャージまで @@TIME@@",
+  "outOfEnergyComeBackLater": "チャージしたら戻ってきます",
+  "outOfEnergyReturnHomeHint": "ホーム画面に戻ります",
+  "outOfEnergyClose": "閉じる",
+  "outOfEnergyPushReminderTitle": "エネルギーが満タンになったらお知らせしますか？",
+  "outOfEnergyNotifyMe": "通知を受け取る",
+  "outOfEnergyMaybeLater": "あとで",
+  "outOfEnergyPlayingTitle": "会話を続けましょう",
+  "outOfEnergyPlayingSubtitle": "下の方法をタップして確認してください。",
+  "playingEnergyInductionEnergyLabel": "エネルギー:",
+  "playingEnergyInductionTitle": "もう少し話しませんか？",
+  "playingEnergyInductionBody": "エネルギーを使い切りました。\n会話を続ける方法を確認しましょう。",
+  "playingEnergyInductionCta": "続ける方法を見る",
   "endRoleplay": "ロールプレイを終了",
   "energyEnablePushTitle": "通知をオンにする",
   "energyEnablePushSubtitle": "通知をオンにして、エネルギーを全回復しましょう。",
@@ -391,6 +424,8 @@
   "paywallMonthlyPlanSubtitle": "月ごとに気軽に利用できます。",
   "paywallBestBadge": "おすすめ",
   "paywallCta": "今すぐ始める",
+  "paywallTrialCaptionAnnual": "7日間無料体験後に年額請求",
+  "paywallTrialCaptionMonthly": "7日間無料体験後に月額請求",
   "paywallAutoRenewNotice": "定期購入は、現在の請求期間が終了する24時間以上前までに解約しない限り、自動的に更新されます。",
   "paywallPricePerMonth": "{price}/月",
   "@paywallPricePerMonth": {

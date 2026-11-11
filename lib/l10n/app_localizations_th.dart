@@ -1000,6 +1000,89 @@ class AppLocalizationsTh extends AppLocalizations {
   String get energyInsufficient => 'พลังงานไม่พอ';
 
   @override
+  String get outOfEnergyTitle => 'พลังงานของคุณหมดแล้ว';
+
+  @override
+  String get outOfEnergySubtitle => 'เติมพลังงานเพื่อเริ่มสนทนา';
+
+  @override
+  String get outOfEnergyRecommended => 'แนะนำ';
+
+  @override
+  String get outOfEnergyPremiumBenefitEnergy => 'อัปเกรดพลังงานสูงสุดเป็น 30';
+
+  @override
+  String get outOfEnergyPremiumBenefitFeedback => 'ฟีดแบ็กประโยคจาก AI';
+
+  @override
+  String get outOfEnergyTry7DaysFree => 'ทดลองใช้ฟรี 7 วัน';
+
+  @override
+  String get outOfEnergyExplorePremium => 'ดูพรีเมียม';
+
+  @override
+  String get outOfEnergyChatPassTitle => 'พาสแชท 10 นาที';
+
+  @override
+  String get outOfEnergyPayOnce => 'ซื้อครั้งเดียว';
+
+  @override
+  String get outOfEnergyChatPassDesc => 'คุย 10 นาทีโดยไม่ใช้พลังงาน';
+
+  @override
+  String outOfEnergyBuyAndStart(String price) {
+    return 'ซื้อแล้วเริ่ม · $price';
+  }
+
+  @override
+  String get outOfEnergyWaitTitle => 'รอเติมพลังงาน';
+
+  @override
+  String get outOfEnergyFree => 'ฟรี';
+
+  @override
+  String get outOfEnergyNextRecharge => 'เติมพลังงานครั้งถัดไปใน @@TIME@@';
+
+  @override
+  String get outOfEnergyComeBackLater => 'เดี๋ยวค่อยกลับมา';
+
+  @override
+  String get outOfEnergyReturnHomeHint => 'คุณจะกลับไปหน้าแรก';
+
+  @override
+  String get outOfEnergyClose => 'ปิด';
+
+  @override
+  String get outOfEnergyPushReminderTitle =>
+      'ต้องการแจ้งเตือนเมื่อพลังงานเต็มไหม?';
+
+  @override
+  String get outOfEnergyNotifyMe => 'แจ้งเตือนฉัน';
+
+  @override
+  String get outOfEnergyMaybeLater => 'ไว้ทีหลัง';
+
+  @override
+  String get outOfEnergyPlayingTitle => 'คุยต่อเลย';
+
+  @override
+  String get outOfEnergyPlayingSubtitle =>
+      'แตะตัวเลือกด้านล่างเพื่อดูรายละเอียด';
+
+  @override
+  String get playingEnergyInductionEnergyLabel => 'พลังงาน:';
+
+  @override
+  String get playingEnergyInductionTitle => 'อยากคุยต่อไหม?';
+
+  @override
+  String get playingEnergyInductionBody =>
+      'คุณใช้พลังงานหมดแล้ว\nดูวิธีคุยต่อได้ที่นี่';
+
+  @override
+  String get playingEnergyInductionCta => 'ดูตัวเลือก';
+
+  @override
   String get endRoleplay => 'จบโรลเพลย์';
 
   @override
@@ -1114,6 +1197,12 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get paywallCta => 'สมัครเลย';
+
+  @override
+  String get paywallTrialCaptionAnnual => 'ชำระรายปีหลังทดลองใช้ฟรี 7 วัน';
+
+  @override
+  String get paywallTrialCaptionMonthly => 'ชำระรายเดือนหลังทดลองใช้ฟรี 7 วัน';
 
   @override
   String get paywallAutoRenewNotice =>

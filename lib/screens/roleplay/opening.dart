@@ -7,6 +7,7 @@ import 'package:just_audio/just_audio.dart';
 import '../../config/app_config.dart';
 import '../../widgets/energy_header_badge.dart';
 import '../../widgets/energy_info_popup.dart';
+import '../../widgets/out_of_energy_bottom_sheet.dart';
 import '../../widgets/roleplay_overview_backdrop.dart';
 import '../../widgets/roleplay_scaffold.dart';
 import '../../services/series_state_service.dart';
@@ -243,7 +244,7 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen>
         return;
       }
       if (sessionId == '0') {
-        await showEnergyInsufficientPopup(
+        await showOpeningOutOfEnergyBottomSheet(
           context,
           screen: EnergyOfferScreen.openingInsufficient,
         );

@@ -354,6 +354,39 @@
   "energyInfoFull": "Masz pełną energię.",
   "energyInfoUnlimitedEndsIn": "Aktywny tryb bez limitu",
   "energyInsufficient": "Masz za mało energii.",
+  "outOfEnergyTitle": "Brak energii",
+  "outOfEnergySubtitle": "Doładuj energię, aby zacząć rozmowę.",
+  "outOfEnergyRecommended": "Polecane",
+  "outOfEnergyPremiumBenefitEnergy": "Ulepsz do maks. 30 energii",
+  "outOfEnergyPremiumBenefitFeedback": "Feedback AI do zdań",
+  "outOfEnergyTry7DaysFree": "Wypróbuj 7 dni za darmo",
+  "outOfEnergyExplorePremium": "Poznaj Premium",
+  "outOfEnergyChatPassTitle": "Karnet czatu 10 min",
+  "outOfEnergyPayOnce": "Jednorazowy zakup",
+  "outOfEnergyChatPassDesc": "Czatuj 10 min bez zużycia energii",
+  "outOfEnergyBuyAndStart": "Kup i zacznij · {price}",
+  "@outOfEnergyBuyAndStart": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "outOfEnergyWaitTitle": "Poczekaj na doładowanie",
+  "outOfEnergyFree": "Za darmo",
+  "outOfEnergyNextRecharge": "Następne doładowanie za @@TIME@@.",
+  "outOfEnergyComeBackLater": "Wrócę później",
+  "outOfEnergyReturnHomeHint": "Wrócisz do ekranu głównego",
+  "outOfEnergyClose": "Zamknij",
+  "outOfEnergyPushReminderTitle": "Powiadomić, gdy energia będzie pełna?",
+  "outOfEnergyNotifyMe": "Powiadom mnie",
+  "outOfEnergyMaybeLater": "Później",
+  "outOfEnergyPlayingTitle": "Kontynuuj rozmowę",
+  "outOfEnergyPlayingSubtitle": "Dotknij opcji poniżej, aby dowiedzieć się więcej.",
+  "playingEnergyInductionEnergyLabel": "Energia:",
+  "playingEnergyInductionTitle": "Chcesz dalej rozmawiać?",
+  "playingEnergyInductionBody": "Skończyła Ci się energia.\nZobacz, jak możesz kontynuować rozmowę.",
+  "playingEnergyInductionCta": "Zobacz opcje",
   "endRoleplay": "Zakończ scenkę",
   "energyEnablePushTitle": "Włącz powiadomienia",
   "energyEnablePushSubtitle": "Włącz powiadomienia i uzupełnij energię do pełna.",
@@ -391,6 +424,8 @@
   "paywallMonthlyPlanSubtitle": "Elastyczny dostęp co miesiąc.",
   "paywallBestBadge": "NAJLEPSZY",
   "paywallCta": "Subskrybuj",
+  "paywallTrialCaptionAnnual": "Rozliczenie roczne po 7 dniach za darmo",
+  "paywallTrialCaptionMonthly": "Rozliczenie miesięczne po 7 dniach za darmo",
   "paywallAutoRenewNotice": "Subskrypcja odnawia się automatycznie, chyba że anulujesz ją co najmniej 24 godziny przed końcem bieżącego okresu rozliczeniowego.",
   "paywallPricePerMonth": "{price}/miesiąc",
   "@paywallPricePerMonth": {

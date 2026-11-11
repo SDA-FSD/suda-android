@@ -1024,6 +1024,89 @@ class AppLocalizationsRu extends AppLocalizations {
   String get energyInsufficient => 'Недостаточно энергии.';
 
   @override
+  String get outOfEnergyTitle => 'Энергия закончилась';
+
+  @override
+  String get outOfEnergySubtitle => 'Пополните энергию, чтобы начать общение.';
+
+  @override
+  String get outOfEnergyRecommended => 'Рекомендуем';
+
+  @override
+  String get outOfEnergyPremiumBenefitEnergy => 'До 30 энергии максимум';
+
+  @override
+  String get outOfEnergyPremiumBenefitFeedback => 'ИИ-обратная связь по фразам';
+
+  @override
+  String get outOfEnergyTry7DaysFree => 'Попробовать 7 дней бесплатно';
+
+  @override
+  String get outOfEnergyExplorePremium => 'Узнать о Premium';
+
+  @override
+  String get outOfEnergyChatPassTitle => 'Чат-пасс на 10 мин';
+
+  @override
+  String get outOfEnergyPayOnce => 'Разовая покупка';
+
+  @override
+  String get outOfEnergyChatPassDesc => '10 минут общения без траты энергии';
+
+  @override
+  String outOfEnergyBuyAndStart(String price) {
+    return 'Купить и начать · $price';
+  }
+
+  @override
+  String get outOfEnergyWaitTitle => 'Подождать зарядку';
+
+  @override
+  String get outOfEnergyFree => 'Бесплатно';
+
+  @override
+  String get outOfEnergyNextRecharge => 'До следующей зарядки @@TIME@@.';
+
+  @override
+  String get outOfEnergyComeBackLater => 'Вернусь позже';
+
+  @override
+  String get outOfEnergyReturnHomeHint => 'Вы вернётесь на главный экран';
+
+  @override
+  String get outOfEnergyClose => 'Закрыть';
+
+  @override
+  String get outOfEnergyPushReminderTitle =>
+      'Напомнить, когда энергия заполнится?';
+
+  @override
+  String get outOfEnergyNotifyMe => 'Напомнить';
+
+  @override
+  String get outOfEnergyMaybeLater => 'Позже';
+
+  @override
+  String get outOfEnergyPlayingTitle => 'Продолжайте разговор';
+
+  @override
+  String get outOfEnergyPlayingSubtitle =>
+      'Нажмите вариант ниже, чтобы узнать больше.';
+
+  @override
+  String get playingEnergyInductionEnergyLabel => 'Энергия:';
+
+  @override
+  String get playingEnergyInductionTitle => 'Хотите продолжить общение?';
+
+  @override
+  String get playingEnergyInductionBody =>
+      'Энергия закончилась.\nПосмотрите, как продолжить разговор.';
+
+  @override
+  String get playingEnergyInductionCta => 'Посмотреть варианты';
+
+  @override
   String get endRoleplay => 'Завершить ролевую игру';
 
   @override
@@ -1138,6 +1221,14 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get paywallCta => 'Оформить подписку';
+
+  @override
+  String get paywallTrialCaptionAnnual =>
+      'Годовая оплата после 7 дней бесплатно';
+
+  @override
+  String get paywallTrialCaptionMonthly =>
+      'Ежемесячная оплата после 7 дней бесплатно';
 
   @override
   String get paywallAutoRenewNotice =>

@@ -240,6 +240,8 @@ class _PaywallScreenState extends State<PaywallScreen> {
   bool _purchasing = false;
   bool _presentingCompleted = false;
   String? _paywallSessionId;
+  /// `subscriptionEverYn != Y` → 무료체험 CTA/Caption.
+  bool _trialEligible = false;
 
   bool get _subscribeLocked {
     if (_purchasing) return true;
@@ -264,6 +266,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
     IapPurchaseService.instance.userNotice.addListener(_onIapNotice);
     unawaited(_loadPrices());
     unawaited(_initPaywallSession());
+    unawaited(_loadTrialEligibility());
   }
 
   @override
@@ -307,6 +310,20 @@ class _PaywallScreenState extends State<PaywallScreen> {
         .loadPremiumSubscriptionPrices();
     if (!mounted) return;
     setState(() => _prices = prices);
+  }
+
+  Future<void> _loadTrialEligibility() async {
+    try {
+      final accessToken = await TokenStorage.loadAccessToken();
+      if (!mounted || accessToken == null || accessToken.isEmpty) return;
+      final energy = await SudaApiClient.getUserEnergySimple(
+        accessToken: accessToken,
+      );
+      if (!mounted) return;
+      setState(() => _trialEligible = !energy.hasSubscriptionEver);
+    } catch (e, st) {
+      debugPrint('[DEBUG] Paywall trial eligibility failed: $e\n$st');
+    }
   }
 
   Future<void> _initPaywallSession() async {
@@ -976,6 +993,23 @@ class _PaywallScreenState extends State<PaywallScreen> {
                             const SizedBox(height: 12),
                             _buildMonthlyPlan(),
                             SizedBox(height: size.height * 0.028),
+                            if (_trialEligible) ...[
+                              Text(
+                                _selected == _PaywallPlan.annual
+                                    ? AppLocalizations.of(
+                                        context,
+                                      )!.paywallTrialCaptionAnnual
+                                    : AppLocalizations.of(
+                                        context,
+                                      )!.paywallTrialCaptionMonthly,
+                                textAlign: TextAlign.center,
+                                style: _style(
+                                  size: 14,
+                                  color: Colors.white.withValues(alpha: 0.80),
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                            ],
                             _buildCta(),
                             const SizedBox(height: 12),
                             Text(
@@ -1674,7 +1708,9 @@ class _PaywallScreenState extends State<PaywallScreen> {
                   ),
                 ),
                 child: Text(
-                  AppLocalizations.of(context)!.paywallCta,
+                  _trialEligible
+                      ? AppLocalizations.of(context)!.outOfEnergyTry7DaysFree
+                      : AppLocalizations.of(context)!.paywallCta,
                   style: _style(
                     size: 18,
                     weight: FontWeight.w700,

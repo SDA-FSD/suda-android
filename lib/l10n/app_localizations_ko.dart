@@ -972,6 +972,87 @@ class AppLocalizationsKo extends AppLocalizations {
   String get energyInsufficient => '에너지가 부족해요.';
 
   @override
+  String get outOfEnergyTitle => '에너지가 부족해요';
+
+  @override
+  String get outOfEnergySubtitle => '대화를 시작하려면 에너지를 충전하세요.';
+
+  @override
+  String get outOfEnergyRecommended => '추천';
+
+  @override
+  String get outOfEnergyPremiumBenefitEnergy => '최대 에너지 30개로 업그레이드';
+
+  @override
+  String get outOfEnergyPremiumBenefitFeedback => 'AI 문장 피드백 제공';
+
+  @override
+  String get outOfEnergyTry7DaysFree => '7일 무료 체험하기';
+
+  @override
+  String get outOfEnergyExplorePremium => '프리미엄 알아보기';
+
+  @override
+  String get outOfEnergyChatPassTitle => '10분 대화 패스';
+
+  @override
+  String get outOfEnergyPayOnce => '1회 구매';
+
+  @override
+  String get outOfEnergyChatPassDesc => '에너지 소모 없는 10분 대화';
+
+  @override
+  String outOfEnergyBuyAndStart(String price) {
+    return '구매하고 시작하기 · $price';
+  }
+
+  @override
+  String get outOfEnergyWaitTitle => '충전 기다리기';
+
+  @override
+  String get outOfEnergyFree => '무료';
+
+  @override
+  String get outOfEnergyNextRecharge => '다음 에너지 충전까지 @@TIME@@ 남았어요.';
+
+  @override
+  String get outOfEnergyComeBackLater => '충전되면 다시 올게요';
+
+  @override
+  String get outOfEnergyReturnHomeHint => '홈 화면으로 이동해요';
+
+  @override
+  String get outOfEnergyClose => '닫기';
+
+  @override
+  String get outOfEnergyPushReminderTitle => '에너지가 가득 차면 알려드릴까요?';
+
+  @override
+  String get outOfEnergyNotifyMe => '알림 받기';
+
+  @override
+  String get outOfEnergyMaybeLater => '나중에';
+
+  @override
+  String get outOfEnergyPlayingTitle => '대화를 계속 이어가세요';
+
+  @override
+  String get outOfEnergyPlayingSubtitle => '아래 방법을 눌러 확인해보세요.';
+
+  @override
+  String get playingEnergyInductionEnergyLabel => '에너지:';
+
+  @override
+  String get playingEnergyInductionTitle => '더 이야기해볼까요?';
+
+  @override
+  String get playingEnergyInductionBody =>
+      '에너지를 모두 사용했어요.\n대화를 이어갈 방법을 확인해보세요.';
+
+  @override
+  String get playingEnergyInductionCta => '계속할 방법 보기';
+
+  @override
   String get endRoleplay => '롤플레이 종료하기';
 
   @override
@@ -1081,6 +1162,12 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get paywallCta => '구독하기';
+
+  @override
+  String get paywallTrialCaptionAnnual => '7일 무료 체험 후 연간 결제';
+
+  @override
+  String get paywallTrialCaptionMonthly => '7일 무료 체험 후 월간 결제';
 
   @override
   String get paywallAutoRenewNotice =>

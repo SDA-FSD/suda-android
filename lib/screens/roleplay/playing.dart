@@ -84,6 +84,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     initPlayingEnergy();
     checkCanSpendPlayingEnergy = hasSpendablePlayingEnergy;
     onPlayingEnergySpent = decrementPlayingEnergyCount;
+    showPlayingEnergyBlockedUi = showPlayingEnergyBlockedFlow;
     showPlayingKebab = widget.showCloseButton;
     onPlayingKebabTap = _onHamburgerTap;
     onPlayingEnergyExitRequested = () {

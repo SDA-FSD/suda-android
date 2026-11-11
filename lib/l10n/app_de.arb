@@ -354,6 +354,39 @@
   "energyInfoFull": "Deine Energie ist voll.",
   "energyInfoUnlimitedEndsIn": "Unbegrenzter Modus aktiv",
   "energyInsufficient": "Du hast nicht genug Energie.",
+  "outOfEnergyTitle": "Deine Energie ist alle",
+  "outOfEnergySubtitle": "Lade Energie auf, um zu chatten.",
+  "outOfEnergyRecommended": "Empfohlen",
+  "outOfEnergyPremiumBenefitEnergy": "Upgrade auf max. 30 Energie",
+  "outOfEnergyPremiumBenefitFeedback": "KI-Satzfeedback",
+  "outOfEnergyTry7DaysFree": "7 Tage gratis testen",
+  "outOfEnergyExplorePremium": "Premium entdecken",
+  "outOfEnergyChatPassTitle": "10-Min-Chat-Pass",
+  "outOfEnergyPayOnce": "Einmalkauf",
+  "outOfEnergyChatPassDesc": "10 Minuten chatten ohne Energieverbrauch",
+  "outOfEnergyBuyAndStart": "Kaufen & starten · {price}",
+  "@outOfEnergyBuyAndStart": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "outOfEnergyWaitTitle": "Aufladen abwarten",
+  "outOfEnergyFree": "Kostenlos",
+  "outOfEnergyNextRecharge": "Nächste Aufladung in @@TIME@@.",
+  "outOfEnergyComeBackLater": "Ich komme später wieder",
+  "outOfEnergyReturnHomeHint": "Du kehrst zum Startbildschirm zurück",
+  "outOfEnergyClose": "Schließen",
+  "outOfEnergyPushReminderTitle": "Benachrichtigung, wenn deine Energie voll ist?",
+  "outOfEnergyNotifyMe": "Benachrichtigen",
+  "outOfEnergyMaybeLater": "Später",
+  "outOfEnergyPlayingTitle": "Setze das Gespräch fort",
+  "outOfEnergyPlayingSubtitle": "Tippe unten auf eine Option, um mehr zu erfahren.",
+  "playingEnergyInductionEnergyLabel": "Energie:",
+  "playingEnergyInductionTitle": "Weiter chatten?",
+  "playingEnergyInductionBody": "Deine Energie ist alle.\nSieh, wie du weiterchatten kannst.",
+  "playingEnergyInductionCta": "Optionen ansehen",
   "endRoleplay": "Rollenspiel beenden",
   "energyEnablePushTitle": "Benachrichtigungen aktivieren",
   "energyEnablePushSubtitle": "Aktiviere Benachrichtigungen und fülle deine Energie vollständig auf.",
@@ -391,6 +424,8 @@
   "paywallMonthlyPlanSubtitle": "Flexibel Monat für Monat.",
   "paywallBestBadge": "TOP",
   "paywallCta": "Jetzt abonnieren",
+  "paywallTrialCaptionAnnual": "Jährliche Abrechnung nach 7 Tagen gratis",
+  "paywallTrialCaptionMonthly": "Monatliche Abrechnung nach 7 Tagen gratis",
   "paywallAutoRenewNotice": "Abonnements verlängern sich automatisch, sofern sie nicht mindestens 24 Stunden vor Ende des aktuellen Abrechnungszeitraums gekündigt werden.",
   "paywallPricePerMonth": "{price}/Monat",
   "@paywallPricePerMonth": {
