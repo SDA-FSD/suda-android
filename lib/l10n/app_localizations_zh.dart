@@ -1142,6 +1142,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get paywallCta => '立即订阅';
 
   @override
+  String get paywallTrialCaptionAnnual => '7天免费试用后按年计费';
+
+  @override
+  String get paywallTrialCaptionMonthly => '7天免费试用后按月计费';
+
+  @override
   String get paywallAutoRenewNotice => '除非在当前计费周期结束前至少24小时取消订阅，否则订阅将自动续订。';
 
   @override
@@ -2519,6 +2525,12 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get paywallCta => '立即订阅';
 
   @override
+  String get paywallTrialCaptionAnnual => '7天免费试用后按年计费';
+
+  @override
+  String get paywallTrialCaptionMonthly => '7天免费试用后按月计费';
+
+  @override
   String get paywallAutoRenewNotice => '除非在当前计费周期结束前至少24小时取消订阅，否则订阅将自动续订。';
 
   @override
@@ -3894,6 +3906,12 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get paywallCta => '立即訂閱';
+
+  @override
+  String get paywallTrialCaptionAnnual => '7天免費試用後按年計費';
+
+  @override
+  String get paywallTrialCaptionMonthly => '7天免費試用後按月計費';
 
   @override
   String get paywallAutoRenewNotice => '若未在本期計費週期結束前至少 24 小時取消訂閱，訂閱將自動續訂。';

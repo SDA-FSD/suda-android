@@ -1217,6 +1217,14 @@ class AppLocalizationsEs extends AppLocalizations {
   String get paywallCta => 'Empezar ahora';
 
   @override
+  String get paywallTrialCaptionAnnual =>
+      'Cobro anual después de 7 días gratis';
+
+  @override
+  String get paywallTrialCaptionMonthly =>
+      'Cobro mensual después de 7 días gratis';
+
+  @override
   String get paywallAutoRenewNotice =>
       'Las suscripciones se renuevan automáticamente, a menos que se cancelen al menos 24 horas antes de que finalice el período de facturación actual.';
 
@@ -2685,6 +2693,14 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
 
   @override
   String get paywallCta => 'Empezar ahora';
+
+  @override
+  String get paywallTrialCaptionAnnual =>
+      'Cobro anual después de 7 días gratis';
+
+  @override
+  String get paywallTrialCaptionMonthly =>
+      'Cobro mensual después de 7 días gratis';
 
   @override
   String get paywallAutoRenewNotice =>

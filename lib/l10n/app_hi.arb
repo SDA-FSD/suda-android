@@ -422,6 +422,8 @@
   "paywallMonthlyPlanSubtitle": "महीने के हिसाब से सुविधाजनक ऐक्सेस।",
   "paywallBestBadge": "बेस्ट",
   "paywallCta": "अभी शुरू करें",
+  "paywallTrialCaptionAnnual": "7 दिन मुफ़्त के बाद वार्षिक बिलिंग",
+  "paywallTrialCaptionMonthly": "7 दिन मुफ़्त के बाद मासिक बिलिंग",
   "paywallAutoRenewNotice": "सब्सक्रिप्शन तब तक अपने-आप रिन्यू होता रहेगा, जब तक इसे मौजूदा बिलिंग अवधि खत्म होने से कम-से-कम 24 घंटे पहले कैंसल न किया जाए।",
   "paywallPricePerMonth": "{price}/माह",
   "@paywallPricePerMonth": {

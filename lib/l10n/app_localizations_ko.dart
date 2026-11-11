@@ -1158,6 +1158,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get paywallCta => '구독하기';
 
   @override
+  String get paywallTrialCaptionAnnual => '7일 무료 체험 후 연간 결제';
+
+  @override
+  String get paywallTrialCaptionMonthly => '7일 무료 체험 후 월간 결제';
+
+  @override
   String get paywallAutoRenewNotice =>
       '구독은 현재 결제 기간이 종료되기 최소 24시간 전에 취소하지 않으면\n자동으로 갱신됩니다.';
 

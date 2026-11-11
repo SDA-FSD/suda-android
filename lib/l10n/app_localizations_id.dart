@@ -1209,6 +1209,14 @@ class AppLocalizationsId extends AppLocalizations {
   String get paywallCta => 'Berlangganan sekarang';
 
   @override
+  String get paywallTrialCaptionAnnual =>
+      'Ditagih tahunan setelah 7 hari gratis';
+
+  @override
+  String get paywallTrialCaptionMonthly =>
+      'Ditagih bulanan setelah 7 hari gratis';
+
+  @override
   String get paywallAutoRenewNotice =>
       'Langganan diperpanjang secara otomatis kecuali dibatalkan setidaknya 24 jam sebelum periode penagihan saat ini berakhir.';
 

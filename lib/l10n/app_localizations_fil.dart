@@ -1223,6 +1223,14 @@ class AppLocalizationsFil extends AppLocalizations {
   String get paywallCta => 'Mag-subscribe Ngayon';
 
   @override
+  String get paywallTrialCaptionAnnual =>
+      'Sisingilin taun-taon pagkatapos ng 7 araw na libre';
+
+  @override
+  String get paywallTrialCaptionMonthly =>
+      'Sisingilin buwan-buwan pagkatapos ng 7 araw na libre';
+
+  @override
   String get paywallAutoRenewNotice =>
       'Awtomatikong mare-renew ang subscription maliban kung kanselahin ito nang hindi bababa sa 24 na oras bago matapos ang kasalukuyang billing period.';
 

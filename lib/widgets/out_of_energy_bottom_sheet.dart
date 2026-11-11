@@ -618,14 +618,14 @@ class _AccordionCard extends StatelessWidget {
           radius: radius,
           fill: const Color(0xFF0CABA8),
           fillOpacity: 0.28,
-          withFigmaShadows: true,
+          borderGradient: _chatPassBorderGradient,
           child: content,
         ),
       _CardVariant.wait => _TintedGlassCard(
           radius: radius,
           fill: const Color(0xFF2A2A2A),
           fillOpacity: 0.55,
-          withFigmaShadows: true,
+          borderGradient: _waitBorderGradient,
           child: content,
         ),
     };
@@ -647,6 +647,30 @@ const _cardDropShadows = <BoxShadow>[
     spreadRadius: -8,
   ),
 ];
+
+/// ChatPass 각도형 stroke: 12% #00FFFA 70% · 62% #80D7CF 100%.
+const _chatPassBorderGradient = SweepGradient(
+  colors: [
+    Color(0xB300FFFA), // 12% #00FFFA 70%
+    Color(0x00FFFFFF), // 37% white 0%
+    Color(0xFF80D7CF), // 62% #80D7CF 100%
+    Color(0x00FFFFFF), // 87% white 0%
+    Color(0xB300FFFA),
+  ],
+  stops: [0.12, 0.37, 0.62, 0.87, 1.0],
+);
+
+/// Wait 각도형 stroke: 12% #FFF 30% · 62% #FFF 65%.
+const _waitBorderGradient = SweepGradient(
+  colors: [
+    Color(0x4DFFFFFF), // 12% #FFFFFF 30%
+    Color(0x00FFFFFF), // 37% white 0%
+    Color(0xA6FFFFFF), // 62% #FFFFFF 65%
+    Color(0x00FFFFFF), // 87% white 0%
+    Color(0x4DFFFFFF),
+  ],
+  stops: [0.12, 0.37, 0.62, 0.87, 1.0],
+);
 
 /// 피그마 Premium: fill `#8A38F5` 40% 단색 + 각도형(Sweep) 1px stroke 보더.
 /// (예전 inset+전체 gradient 트릭은 반투명 fill에 각도형이 면 전체로 비침)
@@ -741,42 +765,52 @@ class _TintedGlassCard extends StatelessWidget {
   final BorderRadius radius;
   final Color fill;
   final double fillOpacity;
-  final bool withFigmaShadows;
+  final SweepGradient borderGradient;
   final Widget child;
 
   const _TintedGlassCard({
     required this.radius,
     required this.fill,
     required this.fillOpacity,
-    required this.withFigmaShadows,
+    required this.borderGradient,
     required this.child,
   });
 
   @override
   Widget build(BuildContext context) {
+    // Premium과 동일: drop shadow + fill blur + Sweep 1px stroke.
     return AnimatedContainer(
       duration: const Duration(milliseconds: 220),
       curve: Curves.easeInOut,
       decoration: BoxDecoration(
         borderRadius: radius,
-        boxShadow: withFigmaShadows ? _cardDropShadows : null,
+        boxShadow: _cardDropShadows,
       ),
       child: ClipRRect(
         borderRadius: radius,
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              borderRadius: radius,
-              color: fill.withValues(alpha: fillOpacity),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.24),
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                child: ColoredBox(
+                  color: fill.withValues(alpha: fillOpacity),
+                ),
               ),
             ),
-            child: withFigmaShadows
-                ? _InnerGlow(radius: radius, child: child)
-                : child,
-          ),
+            _InnerGlow(radius: radius, child: child),
+            Positioned.fill(
+              child: IgnorePointer(
+                child: CustomPaint(
+                  painter: _SweepBorderPainter(
+                    gradient: borderGradient,
+                    borderRadius: radius,
+                    strokeWidth: 1,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

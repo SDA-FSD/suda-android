@@ -1215,6 +1215,14 @@ class AppLocalizationsNl extends AppLocalizations {
   String get paywallCta => 'Nu abonneren';
 
   @override
+  String get paywallTrialCaptionAnnual =>
+      'Jaarlijkse facturering na 7 dagen gratis';
+
+  @override
+  String get paywallTrialCaptionMonthly =>
+      'Maandelijkse facturering na 7 dagen gratis';
+
+  @override
   String get paywallAutoRenewNotice =>
       'Je abonnement wordt automatisch verlengd, tenzij je het minimaal 24 uur vóór het einde van de huidige factureringsperiode opzegt.';
 

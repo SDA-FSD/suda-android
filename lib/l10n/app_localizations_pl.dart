@@ -1218,6 +1218,14 @@ class AppLocalizationsPl extends AppLocalizations {
   String get paywallCta => 'Subskrybuj';
 
   @override
+  String get paywallTrialCaptionAnnual =>
+      'Rozliczenie roczne po 7 dniach za darmo';
+
+  @override
+  String get paywallTrialCaptionMonthly =>
+      'Rozliczenie miesięczne po 7 dniach za darmo';
+
+  @override
   String get paywallAutoRenewNotice =>
       'Subskrypcja odnawia się automatycznie, chyba że anulujesz ją co najmniej 24 godziny przed końcem bieżącego okresu rozliczeniowego.';
 

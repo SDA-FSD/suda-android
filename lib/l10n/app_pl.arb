@@ -422,6 +422,8 @@
   "paywallMonthlyPlanSubtitle": "Elastyczny dostęp co miesiąc.",
   "paywallBestBadge": "NAJLEPSZY",
   "paywallCta": "Subskrybuj",
+  "paywallTrialCaptionAnnual": "Rozliczenie roczne po 7 dniach za darmo",
+  "paywallTrialCaptionMonthly": "Rozliczenie miesięczne po 7 dniach za darmo",
   "paywallAutoRenewNotice": "Subskrypcja odnawia się automatycznie, chyba że anulujesz ją co najmniej 24 godziny przed końcem bieżącego okresu rozliczeniowego.",
   "paywallPricePerMonth": "{price}/miesiąc",
   "@paywallPricePerMonth": {

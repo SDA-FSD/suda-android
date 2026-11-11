@@ -422,6 +422,8 @@
   "paywallMonthlyPlanSubtitle": "Acceso mensual flexible.",
   "paywallBestBadge": "MEJOR",
   "paywallCta": "Empezar ahora",
+  "paywallTrialCaptionAnnual": "Cobro anual después de 7 días gratis",
+  "paywallTrialCaptionMonthly": "Cobro mensual después de 7 días gratis",
   "paywallAutoRenewNotice": "Las suscripciones se renuevan automáticamente, a menos que se cancelen al menos 24 horas antes de que finalice el período de facturación actual.",
   "paywallPricePerMonth": "{price}/mes",
   "@paywallPricePerMonth": {

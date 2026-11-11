@@ -422,6 +422,8 @@
   "paywallMonthlyPlanSubtitle": "Linh hoạt theo từng tháng.",
   "paywallBestBadge": "TỐT NHẤT",
   "paywallCta": "Đăng ký ngay",
+  "paywallTrialCaptionAnnual": "Thanh toán theo năm sau 7 ngày dùng thử miễn phí",
+  "paywallTrialCaptionMonthly": "Thanh toán theo tháng sau 7 ngày dùng thử miễn phí",
   "paywallAutoRenewNotice": "Gói đăng ký sẽ tự động gia hạn, trừ khi bạn hủy ít nhất 24 giờ trước khi kỳ thanh toán hiện tại kết thúc.",
   "paywallPricePerMonth": "{price}/tháng",
   "@paywallPricePerMonth": {

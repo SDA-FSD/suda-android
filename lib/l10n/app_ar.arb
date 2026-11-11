@@ -422,6 +422,8 @@
   "paywallMonthlyPlanSubtitle": "اشتراك شهري مرن.",
   "paywallBestBadge": "الأفضل",
   "paywallCta": "ابدأ الآن",
+  "paywallTrialCaptionAnnual": "يتم الفوترة سنويًا بعد 7 أيام مجانًا",
+  "paywallTrialCaptionMonthly": "يتم الفوترة شهريًا بعد 7 أيام مجانًا",
   "paywallAutoRenewNotice": "تتجدد الاشتراكات تلقائيًا ما لم تُلغَ قبل 24 ساعة على الأقل من نهاية فترة الفوترة الحالية.",
   "paywallPricePerMonth": "{price}/شهر",
   "@paywallPricePerMonth": {

@@ -1216,6 +1216,14 @@ class AppLocalizationsRu extends AppLocalizations {
   String get paywallCta => 'Оформить подписку';
 
   @override
+  String get paywallTrialCaptionAnnual =>
+      'Годовая оплата после 7 дней бесплатно';
+
+  @override
+  String get paywallTrialCaptionMonthly =>
+      'Ежемесячная оплата после 7 дней бесплатно';
+
+  @override
   String get paywallAutoRenewNotice =>
       'Подписка продлевается автоматически, если её не отменить минимум за 24 часа до окончания текущего расчётного периода.';
 

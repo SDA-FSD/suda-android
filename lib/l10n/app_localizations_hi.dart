@@ -1207,6 +1207,12 @@ class AppLocalizationsHi extends AppLocalizations {
   String get paywallCta => 'अभी शुरू करें';
 
   @override
+  String get paywallTrialCaptionAnnual => '7 दिन मुफ़्त के बाद वार्षिक बिलिंग';
+
+  @override
+  String get paywallTrialCaptionMonthly => '7 दिन मुफ़्त के बाद मासिक बिलिंग';
+
+  @override
   String get paywallAutoRenewNotice =>
       'सब्सक्रिप्शन तब तक अपने-आप रिन्यू होता रहेगा, जब तक इसे मौजूदा बिलिंग अवधि खत्म होने से कम-से-कम 24 घंटे पहले कैंसल न किया जाए।';
 

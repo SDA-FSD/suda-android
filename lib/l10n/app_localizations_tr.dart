@@ -1203,6 +1203,14 @@ class AppLocalizationsTr extends AppLocalizations {
   String get paywallCta => 'Şimdi Abone Ol';
 
   @override
+  String get paywallTrialCaptionAnnual =>
+      '7 gün ücretsizden sonra yıllık ücretlendirme';
+
+  @override
+  String get paywallTrialCaptionMonthly =>
+      '7 gün ücretsizden sonra aylık ücretlendirme';
+
+  @override
   String get paywallAutoRenewNotice =>
       'Abonelik, mevcut faturalandırma dönemi sona ermeden en az 24 saat önce iptal edilmezse otomatik olarak yenilenir.';
 

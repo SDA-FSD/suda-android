@@ -422,6 +422,8 @@
   "paywallMonthlyPlanSubtitle": "Flexibel Monat für Monat.",
   "paywallBestBadge": "TOP",
   "paywallCta": "Jetzt abonnieren",
+  "paywallTrialCaptionAnnual": "Jährliche Abrechnung nach 7 Tagen gratis",
+  "paywallTrialCaptionMonthly": "Monatliche Abrechnung nach 7 Tagen gratis",
   "paywallAutoRenewNotice": "Abonnements verlängern sich automatisch, sofern sie nicht mindestens 24 Stunden vor Ende des aktuellen Abrechnungszeitraums gekündigt werden.",
   "paywallPricePerMonth": "{price}/Monat",
   "@paywallPricePerMonth": {

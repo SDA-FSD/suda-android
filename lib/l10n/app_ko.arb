@@ -422,6 +422,8 @@
   "paywallMonthlyPlanSubtitle": "월 단위로 부담없이 이용",
   "paywallBestBadge": "BEST",
   "paywallCta": "구독하기",
+  "paywallTrialCaptionAnnual": "7일 무료 체험 후 연간 결제",
+  "paywallTrialCaptionMonthly": "7일 무료 체험 후 월간 결제",
   "paywallAutoRenewNotice": "구독은 현재 결제 기간이 종료되기 최소 24시간 전에 취소하지 않으면\n자동으로 갱신됩니다.",
   "paywallPricePerMonth": "{price}/월",
   "@paywallPricePerMonth": {

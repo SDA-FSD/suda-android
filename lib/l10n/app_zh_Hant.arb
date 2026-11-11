@@ -422,6 +422,8 @@
   "paywallMonthlyPlanSubtitle": "彈性按月使用。",
   "paywallBestBadge": "最划算",
   "paywallCta": "立即訂閱",
+  "paywallTrialCaptionAnnual": "7天免費試用後按年計費",
+  "paywallTrialCaptionMonthly": "7天免費試用後按月計費",
   "paywallAutoRenewNotice": "若未在本期計費週期結束前至少 24 小時取消訂閱，訂閱將自動續訂。",
   "paywallPricePerMonth": "{price}/月",
   "@paywallPricePerMonth": {

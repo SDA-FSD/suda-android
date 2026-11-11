@@ -1222,6 +1222,14 @@ class AppLocalizationsDe extends AppLocalizations {
   String get paywallCta => 'Jetzt abonnieren';
 
   @override
+  String get paywallTrialCaptionAnnual =>
+      'Jährliche Abrechnung nach 7 Tagen gratis';
+
+  @override
+  String get paywallTrialCaptionMonthly =>
+      'Monatliche Abrechnung nach 7 Tagen gratis';
+
+  @override
   String get paywallAutoRenewNotice =>
       'Abonnements verlängern sich automatisch, sofern sie nicht mindestens 24 Stunden vor Ende des aktuellen Abrechnungszeitraums gekündigt werden.';
 

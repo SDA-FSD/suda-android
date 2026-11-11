@@ -422,6 +422,8 @@
   "paywallMonthlyPlanSubtitle": "Flexible na access buwan-buwan.",
   "paywallBestBadge": "PINAKASULIT",
   "paywallCta": "Mag-subscribe Ngayon",
+  "paywallTrialCaptionAnnual": "Sisingilin taun-taon pagkatapos ng 7 araw na libre",
+  "paywallTrialCaptionMonthly": "Sisingilin buwan-buwan pagkatapos ng 7 araw na libre",
   "paywallAutoRenewNotice": "Awtomatikong mare-renew ang subscription maliban kung kanselahin ito nang hindi bababa sa 24 na oras bago matapos ang kasalukuyang billing period.",
   "paywallPricePerMonth": "{price}/buwan",
   "@paywallPricePerMonth": {

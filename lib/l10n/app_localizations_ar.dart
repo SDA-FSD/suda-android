@@ -1202,6 +1202,14 @@ class AppLocalizationsAr extends AppLocalizations {
   String get paywallCta => 'ابدأ الآن';
 
   @override
+  String get paywallTrialCaptionAnnual =>
+      'يتم الفوترة سنويًا بعد 7 أيام مجانًا';
+
+  @override
+  String get paywallTrialCaptionMonthly =>
+      'يتم الفوترة شهريًا بعد 7 أيام مجانًا';
+
+  @override
   String get paywallAutoRenewNotice =>
       'تتجدد الاشتراكات تلقائيًا ما لم تُلغَ قبل 24 ساعة على الأقل من نهاية فترة الفوترة الحالية.';
 

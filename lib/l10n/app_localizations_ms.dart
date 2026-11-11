@@ -1214,6 +1214,14 @@ class AppLocalizationsMs extends AppLocalizations {
   String get paywallCta => 'Langgan Sekarang';
 
   @override
+  String get paywallTrialCaptionAnnual =>
+      'Dibil secara tahunan selepas 7 hari percuma';
+
+  @override
+  String get paywallTrialCaptionMonthly =>
+      'Dibil secara bulanan selepas 7 hari percuma';
+
+  @override
   String get paywallAutoRenewNotice =>
       'Langganan diperbaharui secara automatik kecuali dibatalkan sekurang-kurangnya 24 jam sebelum tempoh pengebilan semasa berakhir.';
 

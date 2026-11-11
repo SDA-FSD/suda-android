@@ -1209,6 +1209,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paywallCta => 'Start Now';
 
   @override
+  String get paywallTrialCaptionAnnual => 'Billed annually after 7 days free';
+
+  @override
+  String get paywallTrialCaptionMonthly => 'Billed monthly after 7 days free';
+
+  @override
   String get paywallAutoRenewNotice =>
       'Subscriptions renew automatically unless canceled at least 24 hours before the end of the current billing period.';
 

@@ -1227,6 +1227,14 @@ class AppLocalizationsFr extends AppLocalizations {
   String get paywallCta => 'Commencer';
 
   @override
+  String get paywallTrialCaptionAnnual =>
+      'Facturation annuelle après 7 jours gratuits';
+
+  @override
+  String get paywallTrialCaptionMonthly =>
+      'Facturation mensuelle après 7 jours gratuits';
+
+  @override
   String get paywallAutoRenewNotice =>
       'Les abonnements sont renouvelés automatiquement, sauf s’ils sont résiliés au moins 24 heures avant la fin de la période de facturation en cours.';
 

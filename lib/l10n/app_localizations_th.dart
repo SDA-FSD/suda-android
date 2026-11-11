@@ -1192,6 +1192,12 @@ class AppLocalizationsTh extends AppLocalizations {
   String get paywallCta => 'สมัครเลย';
 
   @override
+  String get paywallTrialCaptionAnnual => 'ชำระรายปีหลังทดลองใช้ฟรี 7 วัน';
+
+  @override
+  String get paywallTrialCaptionMonthly => 'ชำระรายเดือนหลังทดลองใช้ฟรี 7 วัน';
+
+  @override
   String get paywallAutoRenewNotice =>
       'การสมัครสมาชิกจะต่ออายุอัตโนมัติ เว้นแต่จะยกเลิกอย่างน้อย 24 ชั่วโมงก่อนสิ้นสุดรอบการเรียกเก็บเงินปัจจุบัน';
 

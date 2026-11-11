@@ -14,7 +14,8 @@ class UserEnergyDto {
   /// Play Billing base plan id (예: `bp-premium-monthly` / `bp-premium-yearly`).
   final String? subscriptionBasePlanId;
 
-  /// detail 전용. 구독 이력 한 번이라도 있으면 `Y` (무료체험 CTA). simple은 `N`.
+  /// 구독 이력(체험 포함 entitled) 한 번이라도 있으면 `Y` (무료체험 CTA).
+  /// detail·simple 모두 응답. 구버전 simple 미포함 시 `N`.
   final String subscriptionEverYn;
 
   /// detail 전용. simple 응답에는 없음 → 기본 `N`.

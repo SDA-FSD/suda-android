@@ -1203,6 +1203,14 @@ class AppLocalizationsVi extends AppLocalizations {
   String get paywallCta => 'Đăng ký ngay';
 
   @override
+  String get paywallTrialCaptionAnnual =>
+      'Thanh toán theo năm sau 7 ngày dùng thử miễn phí';
+
+  @override
+  String get paywallTrialCaptionMonthly =>
+      'Thanh toán theo tháng sau 7 ngày dùng thử miễn phí';
+
+  @override
   String get paywallAutoRenewNotice =>
       'Gói đăng ký sẽ tự động gia hạn, trừ khi bạn hủy ít nhất 24 giờ trước khi kỳ thanh toán hiện tại kết thúc.';
 

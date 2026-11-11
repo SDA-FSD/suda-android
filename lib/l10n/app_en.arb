@@ -491,6 +491,8 @@
   "paywallMonthlyPlanSubtitle": "Flexible monthly access.",
   "paywallBestBadge": "BEST",
   "paywallCta": "Start Now",
+  "paywallTrialCaptionAnnual": "Billed annually after 7 days free",
+  "paywallTrialCaptionMonthly": "Billed monthly after 7 days free",
   "paywallAutoRenewNotice": "Subscriptions renew automatically unless canceled at least 24 hours before the end of the current billing period.",
   "paywallPricePerMonth": "{price}/month",
   "@paywallPricePerMonth": {

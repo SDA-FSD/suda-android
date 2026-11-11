@@ -422,6 +422,8 @@
   "paywallMonthlyPlanSubtitle": "Flexibele toegang per maand.",
   "paywallBestBadge": "BESTE",
   "paywallCta": "Nu abonneren",
+  "paywallTrialCaptionAnnual": "Jaarlijkse facturering na 7 dagen gratis",
+  "paywallTrialCaptionMonthly": "Maandelijkse facturering na 7 dagen gratis",
   "paywallAutoRenewNotice": "Je abonnement wordt automatisch verlengd, tenzij je het minimaal 24 uur vóór het einde van de huidige factureringsperiode opzegt.",
   "paywallPricePerMonth": "{price}/maand",
   "@paywallPricePerMonth": {

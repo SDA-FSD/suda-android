@@ -1223,6 +1223,12 @@ class AppLocalizationsPt extends AppLocalizations {
   String get paywallCta => 'Assinar agora';
 
   @override
+  String get paywallTrialCaptionAnnual => 'Cobrança anual após 7 dias grátis';
+
+  @override
+  String get paywallTrialCaptionMonthly => 'Cobrança mensal após 7 dias grátis';
+
+  @override
   String get paywallAutoRenewNotice =>
       'A assinatura é renovada automaticamente, a menos que seja cancelada com pelo menos 24 horas de antecedência do fim do período de cobrança atual.';
 

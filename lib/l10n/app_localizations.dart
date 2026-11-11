@@ -2279,6 +2279,18 @@ abstract class AppLocalizations {
   /// **'Start Now'**
   String get paywallCta;
 
+  /// No description provided for @paywallTrialCaptionAnnual.
+  ///
+  /// In en, this message translates to:
+  /// **'Billed annually after 7 days free'**
+  String get paywallTrialCaptionAnnual;
+
+  /// No description provided for @paywallTrialCaptionMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Billed monthly after 7 days free'**
+  String get paywallTrialCaptionMonthly;
+
   /// No description provided for @paywallAutoRenewNotice.
   ///
   /// In en, this message translates to:

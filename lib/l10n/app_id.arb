@@ -422,6 +422,8 @@
   "paywallMonthlyPlanSubtitle": "Akses bulanan yang fleksibel.",
   "paywallBestBadge": "TERBAIK",
   "paywallCta": "Berlangganan sekarang",
+  "paywallTrialCaptionAnnual": "Ditagih tahunan setelah 7 hari gratis",
+  "paywallTrialCaptionMonthly": "Ditagih bulanan setelah 7 hari gratis",
   "paywallAutoRenewNotice": "Langganan diperpanjang secara otomatis kecuali dibatalkan setidaknya 24 jam sebelum periode penagihan saat ini berakhir.",
   "paywallPricePerMonth": "{price}/bulan",
   "@paywallPricePerMonth": {

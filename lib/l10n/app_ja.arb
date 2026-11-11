@@ -422,6 +422,8 @@
   "paywallMonthlyPlanSubtitle": "月ごとに気軽に利用できます。",
   "paywallBestBadge": "おすすめ",
   "paywallCta": "今すぐ始める",
+  "paywallTrialCaptionAnnual": "7日間無料体験後に年額請求",
+  "paywallTrialCaptionMonthly": "7日間無料体験後に月額請求",
   "paywallAutoRenewNotice": "定期購入は、現在の請求期間が終了する24時間以上前までに解約しない限り、自動的に更新されます。",
   "paywallPricePerMonth": "{price}/月",
   "@paywallPricePerMonth": {

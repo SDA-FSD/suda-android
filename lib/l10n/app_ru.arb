@@ -422,6 +422,8 @@
   "paywallMonthlyPlanSubtitle": "Гибкая помесячная подписка.",
   "paywallBestBadge": "ВЫГОДНО",
   "paywallCta": "Оформить подписку",
+  "paywallTrialCaptionAnnual": "Годовая оплата после 7 дней бесплатно",
+  "paywallTrialCaptionMonthly": "Ежемесячная оплата после 7 дней бесплатно",
   "paywallAutoRenewNotice": "Подписка продлевается автоматически, если её не отменить минимум за 24 часа до окончания текущего расчётного периода.",
   "paywallPricePerMonth": "{price}/мес.",
   "@paywallPricePerMonth": {

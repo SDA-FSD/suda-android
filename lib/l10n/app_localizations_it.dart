@@ -1221,6 +1221,14 @@ class AppLocalizationsIt extends AppLocalizations {
   String get paywallCta => 'Inizia ora';
 
   @override
+  String get paywallTrialCaptionAnnual =>
+      'Addebito annuale dopo 7 giorni gratis';
+
+  @override
+  String get paywallTrialCaptionMonthly =>
+      'Addebito mensile dopo 7 giorni gratis';
+
+  @override
   String get paywallAutoRenewNotice =>
       'L\'abbonamento si rinnova automaticamente, a meno che non venga annullato almeno 24 ore prima della fine del periodo di fatturazione in corso.';
 

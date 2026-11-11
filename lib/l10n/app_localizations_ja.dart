@@ -1152,6 +1152,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get paywallCta => '今すぐ始める';
 
   @override
+  String get paywallTrialCaptionAnnual => '7日間無料体験後に年額請求';
+
+  @override
+  String get paywallTrialCaptionMonthly => '7日間無料体験後に月額請求';
+
+  @override
   String get paywallAutoRenewNotice =>
       '定期購入は、現在の請求期間が終了する24時間以上前までに解約しない限り、自動的に更新されます。';
 

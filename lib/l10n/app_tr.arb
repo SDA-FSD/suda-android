@@ -422,6 +422,8 @@
   "paywallMonthlyPlanSubtitle": "Esnek aylık erişim.",
   "paywallBestBadge": "EN İYİ",
   "paywallCta": "Şimdi Abone Ol",
+  "paywallTrialCaptionAnnual": "7 gün ücretsizden sonra yıllık ücretlendirme",
+  "paywallTrialCaptionMonthly": "7 gün ücretsizden sonra aylık ücretlendirme",
   "paywallAutoRenewNotice": "Abonelik, mevcut faturalandırma dönemi sona ermeden en az 24 saat önce iptal edilmezse otomatik olarak yenilenir.",
   "paywallPricePerMonth": "{price}/ay",
   "@paywallPricePerMonth": {
