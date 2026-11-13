@@ -479,7 +479,8 @@ class _OutOfEnergyBottomSheetState extends State<OutOfEnergyBottomSheet> {
     final media = MediaQuery.of(context);
     final bottom = media.padding.bottom;
     // 피그마: 시트 top이 더 아래(중하단).
-    final topInset = media.size.height * 0.36;
+    final topInset =
+        media.size.height * (widget.playingHeader ? 0.30 : 0.36);
 
     return Padding(
       padding: EdgeInsets.only(top: topInset),
