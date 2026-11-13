@@ -16,7 +16,10 @@ import 'models/common_models.dart';
 import 'models/home_models.dart';
 import 'models/user_models.dart';
 import 'services/pending_app_path_service.dart';
+import 'services/pending_out_of_energy_push_reminder.dart';
 import 'services/token_storage.dart';
+import 'widgets/out_of_energy_bottom_sheet.dart'
+    show presentOutOfEnergyPushReminderIfPending;
 import 'services/iap_purchase_service.dart';
 import 'services/suda_api_client.dart';
 import 'services/version_check_service.dart';
@@ -207,6 +210,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     PendingAppPathService.instance.pendingNotifier.addListener(
       _onPendingAppPathChanged,
     );
+    PendingOutOfEnergyPushReminder.instance.pendingNotifier.addListener(
+      _onPendingOutOfEnergyPushReminder,
+    );
     // initState에서는 버전 체크를 실행하지 않음
     // MaterialApp 빌드 후 builder에서 실행
   }
@@ -221,6 +227,43 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   void _onPendingAppPathChanged() {
     if (mounted) setState(() {});
+  }
+
+  /// Wait 후 푸시 유도: GNB Home + Opening 스택 제거가 끝난 뒤에만 시트.
+  void _onPendingOutOfEnergyPushReminder() {
+    if (!mounted) return;
+    if (!PendingOutOfEnergyPushReminder.instance.hasPending) return;
+    setState(() {
+      _currentMainScreen = 'home';
+      _homeTabSelectedCounter++;
+    });
+    unawaited(_presentOutOfEnergyPushReminderWhenOnHome());
+  }
+
+  /// Opening/Series가 위에 있으면 제거하고, pop 전환(~300ms) 후 홈에서만 시트.
+  Future<void> _presentOutOfEnergyPushReminderWhenOnHome() async {
+    final nav = _navigatorKey.currentState;
+    if (nav == null) return;
+
+    if (nav.canPop()) {
+      nav.popUntil((route) => route.isFirst);
+    }
+    // SubScreen/Opening pop 애니메이션이 끝난 뒤 시트 (중첩 Opening 방지)
+    await Future<void>.delayed(const Duration(milliseconds: 350));
+    if (!mounted) return;
+    if (!PendingOutOfEnergyPushReminder.instance.hasPending) return;
+
+    if (nav.canPop()) {
+      nav.popUntil((route) => route.isFirst);
+      await Future<void>.delayed(const Duration(milliseconds: 350));
+      if (!mounted) return;
+    }
+    // 아직 Opening 등이 남아 있으면 시트 금지
+    if (nav.canPop()) return;
+
+    final ctx = nav.overlay?.context ?? _navigatorKey.currentContext;
+    if (ctx == null || !ctx.mounted) return;
+    await presentOutOfEnergyPushReminderIfPending(ctx);
   }
 
   bool _shouldShowReregistrationBlockedPopup(UserDto user) {
@@ -409,6 +452,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     HomeContentsReload.instance.unregister(_showHomeAndReload);
     PendingAppPathService.instance.pendingNotifier.removeListener(
       _onPendingAppPathChanged,
+    );
+    PendingOutOfEnergyPushReminder.instance.pendingNotifier.removeListener(
+      _onPendingOutOfEnergyPushReminder,
     );
     TokenRefreshService.instance.stop();
     WidgetsBinding.instance.removeObserver(this);

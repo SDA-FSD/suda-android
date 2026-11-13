@@ -815,7 +815,7 @@
 - footer Start 버튼 아래 AI 안내(`l10n.roleplayOpeningAiDisclaimer`): `labelSmall`·`#8C8C8C`·중앙 정렬·두 문장 줄바꿈(`\n`). 버튼↔문구 12dp, 문구 아래 50dp.
 - **Start 마이크 권한**: status→request→영구거부 시 설정 안내만. 복귀 후 사용자가 다시 Start. iOS `PERMISSION_MICROPHONE=1` + `NSMicrophoneUsageDescription`. 상세 `CONTEXT_ROLEPLAY_S2.md` Opening Start.
 - 세션 초기화 응답 분기 (`POST /rps2/sessions`):
-  - `sessionId == '0'`: `showOpeningOutOfEnergyBottomSheet`(`opening_insufficient`) — Premium/10분패스/Wait 아코디언. Premium CTA는 `subscriptionEverYn`으로 Try 7 days free / Explore Premium. Wait: 푸시 미허용이면 알림 유도 Popup→PushAgreement(`autoEnableOnOpen`) 후 Home, 허용이면 Home. Close면 Opening 유지
+  - `sessionId == '0'`: `showOpeningOutOfEnergyBottomSheet`(`opening_insufficient`) — Premium/10분패스/Wait 아코디언. Premium CTA는 `subscriptionEverYn`으로 Try 7 days free / Explore Premium. Wait「충전되면 다시 올게요」→ rootNavigator로 Main까지 pop 후 Home에서만 알림 유도 바텀시트→PushAgreement(`autoEnableOnOpen`). 허용이면 Home만. Close면 Opening 유지
   - 정상 sessionId: Playing 진입(에너지 소비는 Playing 발화 처리 시)
 
 ---

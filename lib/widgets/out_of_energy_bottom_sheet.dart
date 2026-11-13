@@ -9,19 +9,50 @@ import '../screens/paywall/paywall.dart';
 import '../screens/setting/push_agreement.dart';
 import '../services/energy_refresh_bus.dart';
 import '../services/iap_purchase_service.dart';
+import '../services/pending_out_of_energy_push_reminder.dart';
 import '../services/suda_api_client.dart';
 import '../services/token_refresh_service.dart';
 import '../services/token_storage.dart';
 import '../utils/default_toast.dart';
 import '../utils/paywall_impression_screen.dart';
 import '../utils/sub_screen_route.dart';
-import 'default_popup.dart';
 
 enum _OutOfEnergyCard { premium, chatPass, wait }
 
 const _pink = Color(0xFFFF00A6);
+const _ctaPurple = Color(0xFF8A38F5);
 
 enum _OutOfEnergySheetResult { goHome, askPush }
+
+/// 충전/유도 시트와 동일 chrome
+const _energySheetRadius = BorderRadius.vertical(top: Radius.circular(24));
+/// 시트 외곽: Explorar 계열 — 0% 투명 없음·0==1 seam·이음은 하단(덜 보임).
+const _energySheetBorderGradient = SweepGradient(
+  startAngle: 1.5707963267948966, // 90° bottom seam
+  colors: [
+    Color(0x29FFFFFF), // 0.0 == 1.0
+    Color(0x4FFFFFFF), // ~31%
+    Color(0x1AFFFFFF), // ~10% floor (끊김 방지)
+    Color(0x4FFFFFFF),
+    Color(0x1AFFFFFF),
+    Color(0x29FFFFFF),
+  ],
+  stops: [0.0, 0.12, 0.37, 0.62, 0.87, 1.0],
+);
+
+/// Wait: 50%/70% 피크, 골은 ~12% (0% 금지).
+const _waitBorderGradient = SweepGradient(
+  startAngle: 1.5707963267948966,
+  colors: [
+    Color(0x80FFFFFF), // seam / 50%
+    Color(0x80FFFFFF), // 12% 50%
+    Color(0x1FFFFFFF), // 37% ~12%
+    Color(0xB3FFFFFF), // 62% 70%
+    Color(0x1FFFFFFF), // 87% ~12%
+    Color(0x80FFFFFF),
+  ],
+  stops: [0.0, 0.12, 0.37, 0.62, 0.87, 1.0],
+);
 
 /// Opening/Playing 에너지 부족 충전 바텀시트.
 /// [playingHeader]면 타이틀·안내만 Playing 문구 + Betty 웃는 이미지.
@@ -58,45 +89,178 @@ Future<void> showOpeningOutOfEnergyBottomSheet(
       playingHeader: playingHeader,
     ),
   );
-  if (!context.mounted) return;
-
-  if (result == _OutOfEnergySheetResult.goHome) {
-    Navigator.of(context).popUntil((route) => route.isFirst);
+  if (result != _OutOfEnergySheetResult.goHome &&
+      result != _OutOfEnergySheetResult.askPush) {
     return;
   }
-  if (result != _OutOfEnergySheetResult.askPush) return;
 
-  final l10n = AppLocalizations.of(context)!;
-  await DefaultPopup.show(
-    context,
-    topWidget: Image.asset(
-      'assets/images/icons/energy_notification_bell.png',
-      width: 64,
-      height: 64,
-    ),
-    titleText: l10n.outOfEnergyPushReminderTitle,
-    expandPrimaryButtons: true,
-    maxWidthFactor: 1.0,
-    sheetGlassSurface: true,
-    buttonSpacing: 8,
-    buttons: [
-      DefaultPopupButton(
-        type: DefaultPopupButtonType.primary,
-        label: l10n.outOfEnergyNotifyMe,
-        onPressed: () {
-          unawaited(_openPushAgreementThenHome(context, accessToken));
-        },
-      ),
-      DefaultPopupButton(
-        type: DefaultPopupButtonType.text,
-        label: l10n.outOfEnergyMaybeLater,
-        onPressed: () {},
-      ),
-    ],
-  );
+  // Wait CTA: 먼저 Main(root)까지. 푸시 유도는 Home 도착 후에만.
+  if (context.mounted) {
+    Navigator.of(context, rootNavigator: true)
+        .popUntil((route) => route.isFirst);
+  }
+  if (result == _OutOfEnergySheetResult.askPush) {
+    // Opening pop 애니메이션이 시작되도록 한 프레임 뒤에 pending.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      PendingOutOfEnergyPushReminder.instance.request(accessToken);
+    });
+  }
 }
 
-Future<void> _openPushAgreementThenHome(
+/// Home(스택에 Opening 없음)에서만 pending 푸시 유도 시트를 소비·노출.
+Future<void> presentOutOfEnergyPushReminderIfPending(
+  BuildContext context,
+) async {
+  if (!PendingOutOfEnergyPushReminder.instance.hasPending) return;
+  if (!context.mounted) return;
+
+  final accessToken = PendingOutOfEnergyPushReminder.instance.take();
+  if (accessToken == null) return;
+  if (!context.mounted) {
+    // 컨텍스트가 죽었으면 pending 복구해 다음 기회에 띄운다.
+    PendingOutOfEnergyPushReminder.instance.request(accessToken);
+    return;
+  }
+
+  final notify = await showModalBottomSheet<bool>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    barrierColor: const Color(0x66000000),
+    useRootNavigator: true,
+    builder: (ctx) => const OutOfEnergyPushReminderSheet(),
+  );
+  if (!context.mounted) return;
+  if (notify == true) {
+    await openPushAgreementThenHome(context, accessToken);
+  }
+}
+
+/// Wait 후 푸시 미허용 시 — 홈 위 하단 시트.
+class OutOfEnergyPushReminderSheet extends StatelessWidget {
+  const OutOfEnergyPushReminderSheet();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final media = MediaQuery.of(context);
+    final bottom = media.padding.bottom;
+    final theme = Theme.of(context).textTheme;
+
+    return Padding(
+      padding: EdgeInsets.only(top: media.size.height * 0.36),
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: ClipRRect(
+          borderRadius: _energySheetRadius,
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
+                  child: ColoredBox(
+                    color: Colors.black.withValues(alpha: 0.30),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(24, 24, 24, 16 + bottom),
+                child: SafeArea(
+                  top: false,
+                  bottom: false,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Center(
+                        child: Image.asset(
+                          'assets/images/icons/energy_notification_bell.png',
+                          width: 64,
+                          height: 64,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        l10n.outOfEnergyPushReminderTitle,
+                        textAlign: TextAlign.center,
+                        style: theme.headlineMedium?.copyWith(
+                              color: Colors.white,
+                            ) ??
+                            const TextStyle(
+                              color: Colors.white,
+                              fontSize: 24,
+                              fontWeight: FontWeight.w600,
+                            ),
+                      ),
+                      const SizedBox(height: 24),
+                      SizedBox(
+                        height: 48,
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () => Navigator.of(context).pop(true),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: _ctaPurple,
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            shape: const StadiumBorder(),
+                          ),
+                          child: Text(
+                            l10n.outOfEnergyNotifyMe,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 18,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(false),
+                        style: TextButton.styleFrom(
+                          minimumSize: Size.zero,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        child: Text(
+                          l10n.outOfEnergyMaybeLater,
+                          style: theme.bodySmall?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w400,
+                              ) ??
+                              const TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w400,
+                              ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const Positioned.fill(
+                child: IgnorePointer(
+                  child: CustomPaint(
+                    painter: _SweepBorderPainter(
+                      gradient: _energySheetBorderGradient,
+                      borderRadius: _energySheetRadius,
+                      strokeWidth: 1,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+Future<void> openPushAgreementThenHome(
   BuildContext context,
   String accessToken,
 ) async {
@@ -317,28 +481,12 @@ class _OutOfEnergyBottomSheetState extends State<OutOfEnergyBottomSheet> {
     // 피그마: 시트 top이 더 아래(중하단).
     final topInset = media.size.height * 0.36;
 
-    const sheetRadius = BorderRadius.vertical(top: Radius.circular(24));
-    // 앱 공통 유리 테두리(페이월/프리미엄 버튼과 동일 계열):
-    // 흰 31% ↔ soft 16% 각도형 stroke (끊김 없이 둘레 유지)
-    const sheetBorderGradient = SweepGradient(
-      startAngle: -1.5707963267948966, // -90°
-      colors: [
-        Color(0x28FFFFFF), // soft ~16%
-        Color(0x4FFFFFFF), // 31% @ 13%
-        Color(0x28FFFFFF), // soft @ 37%
-        Color(0x4FFFFFFF), // 31% @ 62%
-        Color(0x28FFFFFF), // soft @ 87%
-        Color(0x28FFFFFF), // seam
-      ],
-      stops: [0.0, 0.13, 0.37, 0.62, 0.87, 1.0],
-    );
-
     return Padding(
       padding: EdgeInsets.only(top: topInset),
       child: Align(
         alignment: Alignment.bottomCenter,
         child: ClipRRect(
-          borderRadius: sheetRadius,
+          borderRadius: _energySheetRadius,
           child: Stack(
             children: [
               Positioned.fill(
@@ -505,8 +653,8 @@ class _OutOfEnergyBottomSheetState extends State<OutOfEnergyBottomSheet> {
                 child: IgnorePointer(
                   child: CustomPaint(
                     painter: _SweepBorderPainter(
-                      gradient: sheetBorderGradient,
-                      borderRadius: sheetRadius,
+                      gradient: _energySheetBorderGradient,
+                      borderRadius: _energySheetRadius,
                       strokeWidth: 1,
                     ),
                   ),
@@ -648,28 +796,18 @@ const _cardDropShadows = <BoxShadow>[
   ),
 ];
 
-/// ChatPass 각도형 stroke: 12% #00FFFA 70% · 62% #80D7CF 100%.
+/// ChatPass: 골을 완전 투명이 아닌 soft floor로.
 const _chatPassBorderGradient = SweepGradient(
+  startAngle: 1.5707963267948966,
   colors: [
-    Color(0xB300FFFA), // 12% #00FFFA 70%
-    Color(0x00FFFFFF), // 37% white 0%
-    Color(0xFF80D7CF), // 62% #80D7CF 100%
-    Color(0x00FFFFFF), // 87% white 0%
+    Color(0xB300FFFA),
+    Color(0xB300FFFA),
+    Color(0x1A80D7CF), // ~10% floor
+    Color(0xFF80D7CF),
+    Color(0x1A80D7CF),
     Color(0xB300FFFA),
   ],
-  stops: [0.12, 0.37, 0.62, 0.87, 1.0],
-);
-
-/// Wait 각도형 stroke: 12% #FFF 30% · 62% #FFF 65%.
-const _waitBorderGradient = SweepGradient(
-  colors: [
-    Color(0x4DFFFFFF), // 12% #FFFFFF 30%
-    Color(0x00FFFFFF), // 37% white 0%
-    Color(0xA6FFFFFF), // 62% #FFFFFF 65%
-    Color(0x00FFFFFF), // 87% white 0%
-    Color(0x4DFFFFFF),
-  ],
-  stops: [0.12, 0.37, 0.62, 0.87, 1.0],
+  stops: [0.0, 0.12, 0.37, 0.62, 0.87, 1.0],
 );
 
 /// 피그마 Premium: fill `#8A38F5` 40% 단색 + 각도형(Sweep) 1px stroke 보더.
@@ -681,14 +819,16 @@ class _PremiumGlassCard extends StatelessWidget {
   const _PremiumGlassCard({required this.radius, required this.child});
 
   static const _borderGradient = SweepGradient(
+    startAngle: 1.5707963267948966,
     colors: [
-      Color(0xCCD538F5), // 12% #D538F5 80%
-      Color(0x00FFFFFF), // 37% white 0%
-      Color(0xFF8A38F5), // 62% #8A38F5 100%
-      Color(0x00FFFFFF), // 87% white 0%
+      Color(0xCCD538F5),
+      Color(0xCCD538F5),
+      Color(0x1A8A38F5), // ~10% floor
+      Color(0xFF8A38F5),
+      Color(0x1A8A38F5),
       Color(0xCCD538F5),
     ],
-    stops: [0.12, 0.37, 0.62, 0.87, 1.0],
+    stops: [0.0, 0.12, 0.37, 0.62, 0.87, 1.0],
   );
 
   @override
@@ -744,12 +884,14 @@ class _SweepBorderPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final rect = Offset.zero & size;
-    final rrect = borderRadius.toRRect(rect).deflate(strokeWidth / 2);
+    final half = strokeWidth / 2;
+    final rrect = borderRadius.toRRect(Offset.zero & size).deflate(half);
     final paint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
-      ..shader = gradient.createShader(rect);
+      ..isAntiAlias = true
+      ..strokeJoin = StrokeJoin.round
+      ..shader = gradient.createShader(rrect.outerRect);
     canvas.drawRRect(rrect, paint);
   }
 

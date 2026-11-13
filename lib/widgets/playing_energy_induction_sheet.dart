@@ -12,6 +12,7 @@ const _energyZeroColor = Color(0xFFE60000);
 const _ctaPurple = Color(0xFF8A38F5);
 
 /// Playing 에너지 0 첫 차단 시 대화 유도 바텀시트.
+/// 시트 chrome은 Out of Energy 충전 시트와 동일(blur + black 30% + 흰 Sweep 보더).
 Future<PlayingEnergyInductionResult?> showPlayingEnergyInductionSheet(
   BuildContext context, {
   required UserEnergyDto? energy,
@@ -30,6 +31,21 @@ class _PlayingEnergyInductionSheet extends StatelessWidget {
 
   const _PlayingEnergyInductionSheet({required this.energy});
 
+  static const _sheetRadius = BorderRadius.vertical(top: Radius.circular(24));
+  // 충전 시트와 동일 — soft floor·하단 seam
+  static const _sheetBorderGradient = SweepGradient(
+    startAngle: 1.5707963267948966,
+    colors: [
+      Color(0x29FFFFFF),
+      Color(0x4FFFFFFF),
+      Color(0x1AFFFFFF),
+      Color(0x4FFFFFFF),
+      Color(0x1AFFFFFF),
+      Color(0x29FFFFFF),
+    ],
+    stops: [0.0, 0.12, 0.37, 0.62, 0.87, 1.0],
+  );
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -47,12 +63,18 @@ class _PlayingEnergyInductionSheet extends StatelessWidget {
       child: Align(
         alignment: Alignment.bottomCenter,
         child: ClipRRect(
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
-            child: ColoredBox(
-              color: Colors.black.withValues(alpha: 0.72),
-              child: Padding(
+          borderRadius: _sheetRadius,
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
+                  child: ColoredBox(
+                    color: Colors.black.withValues(alpha: 0.30),
+                  ),
+                ),
+              ),
+              Padding(
                 // SafeArea와 이중으로 bottom을 넣지 않음 — 닫기가 하단에 가깝게.
                 padding: EdgeInsets.fromLTRB(24, 20, 24, 8 + bottom),
                 child: SafeArea(
@@ -113,7 +135,6 @@ class _PlayingEnergyInductionSheet extends StatelessWidget {
                       Text(
                         l10n.playingEnergyInductionTitle,
                         textAlign: TextAlign.center,
-                        // H2 = headlineMedium
                         style: theme.headlineMedium?.copyWith(
                               color: Colors.white,
                             ) ??
@@ -135,7 +156,6 @@ class _PlayingEnergyInductionSheet extends StatelessWidget {
                       Text(
                         l10n.playingEnergyInductionBody,
                         textAlign: TextAlign.center,
-                        // body-default 18
                         style: theme.bodyLarge?.copyWith(
                               color: Colors.white.withValues(alpha: 0.92),
                               height: 1.35,
@@ -199,10 +219,53 @@ class _PlayingEnergyInductionSheet extends StatelessWidget {
                   ),
                 ),
               ),
-            ),
+              const Positioned.fill(
+                child: IgnorePointer(
+                  child: CustomPaint(
+                    painter: _SweepBorderPainter(
+                      gradient: _sheetBorderGradient,
+                      borderRadius: _sheetRadius,
+                      strokeWidth: 1,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
+  }
+}
+
+class _SweepBorderPainter extends CustomPainter {
+  final Gradient gradient;
+  final BorderRadius borderRadius;
+  final double strokeWidth;
+
+  const _SweepBorderPainter({
+    required this.gradient,
+    required this.borderRadius,
+    required this.strokeWidth,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final half = strokeWidth / 2;
+    final rrect = borderRadius.toRRect(Offset.zero & size).deflate(half);
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..isAntiAlias = true
+      ..strokeJoin = StrokeJoin.round
+      ..shader = gradient.createShader(rrect.outerRect);
+    canvas.drawRRect(rrect, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _SweepBorderPainter oldDelegate) {
+    return oldDelegate.gradient != gradient ||
+        oldDelegate.borderRadius != borderRadius ||
+        oldDelegate.strokeWidth != strokeWidth;
   }
 }

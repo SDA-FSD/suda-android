@@ -125,7 +125,7 @@ xcrun altool --upload-app --type ios -f build/ios/ipa/suda.ipa --apiKey "$(cat ~
 - `EnergyOfferScreen`: `home`·`opening`·`opening_insufficient`·`playing`·`playing_insufficient`·`overview`·`lab`. Overview 배지 탭 detail `screen=overview`
 - 비가시(비활성 탭·위 라우트)면 타이머·GET 중단. 결제 성공은 `EnergyRefreshBus`로 추가 GET 없이 반영
 - Playing 0/402 → `showPlayingEnergyInsufficientPopup` → `endRoleplay`면 Wait 레이어(세션 유지)
-- Opening Start `sessionId=='0'` → Out of Energy 바텀시트(`out_of_energy_bottom_sheet.dart`). detail `subscriptionEverYn`으로 Premium CTA 분기. Playing 에너지 0: 세션 첫 차단은 유도 시트(`playing_energy_induction_sheet.dart`) → See options/이후는 동일 충전 시트에 Playing 헤더(웃는 Betty + Keep the conversation going, `playingHeader`). Paywall도 simple `subscriptionEverYn`으로 체험 CTA/Caption 분기(대상만 Try 7 days free + 연/월 결제 안내)
+- Opening Start `sessionId=='0'` → Out of Energy 바텀시트(`out_of_energy_bottom_sheet.dart`). detail `subscriptionEverYn`으로 Premium CTA 분기. Playing 에너지 0: 세션 첫 차단은 유도 시트(`playing_energy_induction_sheet.dart`) → See options/이후는 동일 충전 시트에 Playing 헤더(웃는 Betty + Keep the conversation going, `playingHeader`). Wait「충전되면 다시 올게요」→ **rootNavigator로 Main까지 pop** 후(~350ms), 스택에 상위 라우트 없을 때만 Home에서 푸시 유도 바텀시트(`PendingOutOfEnergyPushReminder`). 유도·충전·푸시유도 chrome 동일(blur 40 + black 30% + soft Sweep 1px, 투명 0% 없이 floor·하단 seam으로 끊김 완화). Paywall도 simple `subscriptionEverYn`으로 체험 CTA/Caption 분기(대상만 Try 7 days free + 연/월 결제 안내)
 - 팝업 INAPP 탭: `POST /v1/impressions/products` (팝업 생명주기 내 동일 키 1회)
 - Enable Notifications 슬롯: SUDA-1252 이후 detail `showEnablePushFreeChargeYn` 항상 N → 팝업 미노출(구버전 포함). 클라 슬롯 코드·Setting>Notification(`PushAgreement`)은 유지. 과거 조건은 `Y` **그리고** `screen` ∈ {`home`,`opening`,`opening_insufficient`}
 

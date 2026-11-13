@@ -180,7 +180,7 @@ Home (시리즈 썸네일)
      - **설정 복귀 후**: Opening(또는 iOS 스택 리셋 시 홈)에 그대로 두고, 사용자가 **다시 Start**
      - **iOS 필수:** `ios/Podfile` `PERMISSION_MICROPHONE=1` + `Info.plist` `NSMicrophoneUsageDescription` (없으면 `request()`가 no-op처럼 동작할 수 있음). 요약: `.docs/CONTEXT.md` §2·`CONTEXT_IOS.md`
   2. `POST /rps2/sessions` `{seriesId, episodeId}`
-  3. `sessionId == '0'`: `showOpeningOutOfEnergyBottomSheet` → Opening 유지(Close) 또는 Wait/푸시 후 Home
+  3. `sessionId == '0'`: `showOpeningOutOfEnergyBottomSheet` → Opening 유지(Close) 또는 Wait 즉시 Home(+ 푸시 미허용 시 Home에서 유도 시트)
   4. `sessionId`가 `-`로 시작: "Cannot start roleplay" 토스트 → Opening 유지
   5. 정상 sessionId → `SeriesStateService.setSession(session)` → `replaceWithPlaying` (에너지 소비는 Playing 발화 처리 시, Start 시점 소비 없음)
   6. **우상단 `EnergyHeaderBadge`**: Home과 동일 글래스 타이머 pill(충전 `mm:ss` / Full / 무제한 남은시간+∞ 아이콘) — 화면 체류 중 30분 충전·무제한 만료 시 서버 재조회
