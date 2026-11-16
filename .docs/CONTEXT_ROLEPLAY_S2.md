@@ -67,7 +67,7 @@ Home (시리즈 썸네일)
     ↓
 ③ 사용자 발화 — 녹음/타이핑 API
     ↓
-④ 서버 응답 처리 — 사용자 말풍선 + 턴바 등급 효과 + 미션 완료 효과 + 나레이션 + 후속 AI 말풍선·음성
+④ 서버 응답 처리 — 사용자 말풍선 + 미션 완료 효과 + 나레이션 + 후속 AI 말풍선·음성 (RpS3: 턴바는 완료 칸만 민트·등급 리액션 없음, `userGrade`·Result 유지)
     ↓
 ⑤ ③~④ 반복 — `requiredSpeechCount`회 사용자 발화 완료 시 분석중 blink(결과 호출·이동은 추후)
 ```
@@ -80,7 +80,7 @@ Home (시리즈 썸네일)
 | **① AI 시작** | 진입 직후 첫 AI 말풍선·TTS·번역 아이콘 | 텍스트: `cefrMap[시리즈 CEFR].startLine` · 음성: `session.aiSound` · 아바타: `aiCharacter.rpImgPath` · 번역: `GET /rps2/sessions/{id}/translation?rpMsgId=` | ✅ `playing_conversation_mixin.dart` **`startAiOpeningFlow`만**. iOS: Opening AVPlayer teardown를 `IosAudioTeardown` 큐(job timeout 2s)로 직렬화, CDN을 파일로 받아 `setFilePath`, duration=0을 로드 실패로 보지 않음. Playing iOS 오디오 세션은 TTS부터 `playAndRecord`+`defaultToSpeaker`(Bluetooth 미사용 전제, 탭 시 category 전환 없음). **AOS Playing `AudioPlayer.stop()`은 Opening과 같은 2s timeout** (`_stopPlayingAudioPlayer`: TTS prepare·힌트/finish `stopPlayingConversationAudio`). HTTP·나레이션·`setAudioSource`는 timeout 대상 아님. |
 | **② 힌트 자동** | AI 발화 후 조건부 | `_autoHintEnabled` + `GET /rps2/sessions/{id}/hint/{rpMsgId}` (`rpMsgId` = 마지막 AI의 서버 id, 없으면 `conversationIndex`) | ✅ `playing_hint_mixin.dart` — 오토힌트 ON 자동 노출 후 사용자 턴·OFF 아이콘 탭+사용자 턴·AI 음성 종료 트리거·3s blink. 힌트 텍스트 202 not-ready 시 최대 15회 재시도 |
 | **③ 사용자 발화** | 마이크/타이핑 전송 | `POST /rps2/sessions/{id}/user-message/audio`, `POST /rps2/sessions/{id}/user-message/text` | ✅ `playing_input_mixin.dart`. iOS: 탭 시 세션 재설정 없이 `recorder.start`(플러그인 `manageAudioSession=false`). 말풍선은 start 전에 노출. AOS 녹음 경로는 세션 전환 없음(기존과 동일). **`recorder.stop`/`cancel`은 Playing 오디오와 같은 2s timeout** (`_stopRecording`. 직렬 큐 유지. POST/말한 길이와 무관). 무발화는 업로드하지 않음: 녹음 중 100ms dBFS, 처음 150ms 제외, 0은 제외. 하위 20%와 최댓값 차이가 10dB 미만이고 최댓값도 -30dBFS 미만이면 무발화. 유효 샘플 3개 미만이면 업로드. 무발화로 지우면 `MIC_RECORDING_NO_SPEECH`. |
-| **④ 나레이션+후속 AI+턴바** | 사용자 1회 발화 후 서버 처리 | `RpS2UserMessageResponseDto(userText,userGrade,narration,aiText,missionCompletedIndex,serviceMessage?)` + `GET /rps2/sessions/{id}/ai-message/audio` | ✅ 사용자 말풍선·턴바 등급 효과·미션 완료 효과·나레이션·후속 AI 말풍선/음성 |
+| **④ 나레이션+후속 AI+턴바** | 사용자 1회 발화 후 서버 처리 | `RpS2UserMessageResponseDto(userText,userGrade,narration,aiText,missionCompletedIndex,serviceMessage?)` + `GET /rps2/sessions/{id}/ai-message/audio` | ✅ 사용자 말풍선·미션 완료 효과·나레이션·후속 AI. **턴바(RpS3)**: 미발화 회색, 발화 완료 칸만 민트. wow·등급색(녹/황/빨) 없음. `userGrade`·Result는 유지 |
 | **⑤ 반복·종료** | 턴 소진·finish | `requiredSpeechCount` | ✅ 마지막 턴 나레이션·후속 AI·분석중 blink 후 `PUT /rps2/sessions/{id}/finish` 분기. 상세 §3-2 |
 
 ### 입력(마이크·타이핑) 활성 규칙
@@ -209,10 +209,11 @@ Home (시리즈 썸네일)
   - **턴박스 내부**(세로, height 20 안):
     - **하단**: turn bar — height **4**, **좌우 둥근 캡슐**(borderRadius = height/2 = **2**) — 턴 상태 색
     - **상단 나머지**: turn bar 색 변경 시 그 바 **바로 위**에 노출할 라벨 텍스트 예비 영역 (`labelTexts`, 초기 `null`)
-  - **초기 turn bar 색**: 전 턴 `#635F5F` **40%** (`Color(0x66635F5F)`, `RoleplayTurnBarArea.defaultBarColor`)
+  - **초기 turn bar 색**: 미발화 `#635F5F` **40%** (`defaultBarColor`)
+  - **발화 완료 (RpS3)**: 해당 칸만 민트 `#0CABA8` (`completedBarColor`, `_markTurnBarCompleted`). 등급별 녹/황/빨·wow 라벨·dim 없음
   - **상태 보관** (`playing.dart`): `_turnBarColors`, `_turnLabelTexts`, `_turnLabelColors` (길이 = `_turnCount`)
-  - **진행 정책**: 사용자 발화 **1회 완료**마다 해당 턴 turn bar 색 1개 갱신 → `requiredSpeechCount`회 발화 완료(마지막 턴) 시에도 나레이션·후속 AI 말풍선/음성을 노출한 뒤 서버 `serviceMessage`(없으면 `roleplayAnalyzing`) blink(결과 호출·이동은 추후).
-  - **등급 효과**: A `#0CABA8` 라벨 l10n `roleplayTurnGradeA`, B `#62FF00` `roleplayTurnGradeB`, C `#FFB700` `roleplayTurnGradeC`, D `#FF0000` `roleplayTurnGradeD`. bar 색·라벨 즉시 100% pop(1.0→1.42→1.0, 320ms). **2초 후** 라벨 150ms fade-out + bar 등급색 **20%**(`pastTurnBarOpacity`)로 dim(다음 사용자 턴 시작과 무관).
+  - **진행 정책**: 사용자 발화 1회 완료마다 해당 칸 민트 → 마지막 턴 후 나레이션·후속 AI·`serviceMessage`(없으면 `roleplayAnalyzing`) blink
+  - **등급**: Playing 미노출. Result Speech Feedback에서만. `_animateTurnBarGrade`·l10n은 복구용으로 코드 유지
 - **시스템 뒤로가기**: `PopScope` → X와 동일하게 확인 레이어
 - **나가기 확정**: `RoleplayRouter.popToOverview` → Series Overview
 - **설정패널 (configuration panel)** — `lib/widgets/roleplay_configuration_panel.dart`
@@ -267,7 +268,7 @@ Home (시리즈 썸네일)
 **입력 활성 조건**: `_isUserTurn == true`일 때만 마이크·타이핑·Send 활성. 턴 엔진 전체는 **§3-1** 참조.
 
 - **현재**: AI 음성 종료 후 오토힌트 조건 처리 뒤 사용자 턴 활성. 발화 전송 중 입력 잠금, 응답 실패 시 사용자 턴 복구.
-- 턴바 색·라벨 갱신: 사용자 발화 응답 `userGrade` 기준.
+- 턴바(RpS3): 미발화 회색 → 발화 완료 칸만 민트. 등급 라벨/색 없음(Result에서만 등급 확인).
 
 힌트 202 not-ready: 150/250/400/700/1500ms ×3, 최대 15회. 녹음 시작 시 우측 `...` wave 말풍선(150ms fade-in). **duration/타임아웃 없음.**
 

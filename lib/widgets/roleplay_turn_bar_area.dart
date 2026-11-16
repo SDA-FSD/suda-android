@@ -12,7 +12,11 @@ class RoleplayTurnBarArea extends StatelessWidget {
   static const double turnBarBorderRadius = turnBarHeight / 2;
   static const double horizontalMargin = 24;
   static const double turnBoxGap = 6;
-  static const Color defaultBarColor = Color(0x66635F5F); // #635F5F 40%
+  /// 미발화 턴 기본색 `#635F5F` 40%.
+  static const Color defaultBarColor = Color(0x66635F5F);
+
+  /// RpS3: 발화 완료 턴 — 등급색 대신 민트 통일 (`#0CABA8`).
+  static const Color completedBarColor = Color(0xFF0CABA8);
 
   /// 등급 색 100% 노출 유지 시간. 이후 bar·라벨 dim.
   static const Duration turnGradeHighlightDuration = Duration(seconds: 2);

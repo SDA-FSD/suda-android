@@ -181,7 +181,8 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     if (!mounted) return;
     setState(() => _completedSpeechCount = nextCompletedSpeechCount);
 
-    _animateTurnBarGrade(turnIndex, response.userGrade);
+    // RpS3 UI: 등급 라벨·등급색 없음. 발화 완료 칸만 민트.
+    _markTurnBarCompleted(turnIndex);
     _handleMissionCompleted(response.missionCompletedIndex);
 
     final narrationText = response.narration?.trim() ?? '';
@@ -263,6 +264,17 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
       debugPrint('[DEBUG] RpS2 AI audio error: $e');
       return null;
     }
+  }
+
+  /// RpS3: 발화 완료 턴바만 민트. wow 등 등급 라벨·A/B/C/D 색 없음.
+  void _markTurnBarCompleted(int index) {
+    if (index < 0 || index >= _turnCount) return;
+    setState(() {
+      _turnBarColors[index] = RoleplayTurnBarArea.completedBarColor;
+      _turnLabelTexts[index] = null;
+      _turnLabelColors[index] = null;
+      _turnLabelFadeOuts[index] = false;
+    });
   }
 
   void _animateTurnBarGrade(int index, String? rawGrade) {
