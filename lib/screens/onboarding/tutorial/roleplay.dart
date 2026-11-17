@@ -10,6 +10,7 @@ import 'package:just_audio/just_audio.dart';
 import 'package:record/record.dart';
 
 import '../../../api/endpoints/onboarding_tutorial_api.dart';
+import '../../../api/endpoints/onboarding_tutorial_progress.dart';
 import '../../../api/suda_api_client.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../models/series_models.dart';
@@ -117,6 +118,8 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
   bool _showMicGuide = false;
   bool _showMicPointer = false;
   bool _micEnabled = false;
+  bool _firstMicReadyReported = false;
+  bool _firstMicPressReported = false;
   bool _micPulsing = false;
   // ignore: prefer_final_fields — 홀드/짧은 탭/무인식 시 setState로 바꿈
   _TutorialMicGuide _micGuide = _TutorialMicGuide.afterVoice;
@@ -196,7 +199,13 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
         DefaultPopupButton(
           type: DefaultPopupButtonType.primary,
           label: l10n.tutorialRoleplaySkipConfirm,
-          onPressed: widget.onSkip,
+          onPressed: () {
+            reportOnboardingTutorialProgress(
+              preview: widget.preview,
+              step: OnboardingTutorialProgressStep.skipConfirmed,
+            );
+            widget.onSkip();
+          },
         ),
         DefaultPopupButton(
           type: DefaultPopupButtonType.text,
@@ -293,6 +302,13 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
     }
     if (!mounted) return;
     setState(() => _micEnabled = true);
+    if (!_firstMicReadyReported) {
+      _firstMicReadyReported = true;
+      reportOnboardingTutorialProgress(
+        preview: widget.preview,
+        step: OnboardingTutorialProgressStep.firstMicReady,
+      );
+    }
     Future<void>.delayed(const Duration(milliseconds: 300), () {
       if (!mounted || !_micEnabled) {
         return;
@@ -303,6 +319,13 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
 
   void _onMicHoldStart() {
     if (_sending || !_micEnabled) return;
+    if (_answeredTurnCount == 0 && !_firstMicPressReported) {
+      _firstMicPressReported = true;
+      reportOnboardingTutorialProgress(
+        preview: widget.preview,
+        step: OnboardingTutorialProgressStep.firstMicPressed,
+      );
+    }
     setState(() {
       _showRecordingBubble = true;
       _micHeld = true;
@@ -578,6 +601,22 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
         _hintPlayingIndex = null;
         if (aiMsgId != null) _lastAiMsgId = aiMsgId;
       });
+      if (_answeredTurnCount == 1) {
+        reportOnboardingTutorialProgress(
+          preview: widget.preview,
+          step: OnboardingTutorialProgressStep.turn1Accepted,
+        );
+      } else if (_answeredTurnCount == 2) {
+        reportOnboardingTutorialProgress(
+          preview: widget.preview,
+          step: OnboardingTutorialProgressStep.turn2Accepted,
+        );
+      } else if (_answeredTurnCount == 3) {
+        reportOnboardingTutorialProgress(
+          preview: widget.preview,
+          step: OnboardingTutorialProgressStep.turn3Accepted,
+        );
+      }
       armHint = _answeredTurnCount == 1 && !_hintCoachDismissed;
       _scrollTalkToEnd();
       if (missionJustCompleted) _playMissionSuccess();
@@ -719,6 +758,8 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
   void _applyHint(String english, String? native) {
     final shownNative = (native ?? '').trim();
     final opening = _hintEnglish == null;
+    final firstContent =
+        opening && english.trim().isNotEmpty && !_hintBoxOpened;
     setState(() {
       _hintEnglish = english.trim().isEmpty ? null : english.trim();
       _hintNative = shownNative.isEmpty ? null : shownNative;
@@ -733,6 +774,12 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
       }
       _hideFreeAnswerGuide();
     });
+    if (firstContent) {
+      reportOnboardingTutorialProgress(
+        preview: widget.preview,
+        step: OnboardingTutorialProgressStep.firstHintOpened,
+      );
+    }
     _scrollHintIntoView();
   }
 

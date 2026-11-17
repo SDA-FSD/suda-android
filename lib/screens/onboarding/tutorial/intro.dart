@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../../l10n/app_localizations.dart';
+import '../../../api/endpoints/onboarding_tutorial_progress.dart';
 import '../../../services/suda_api_client.dart';
 import '../../../services/token_storage.dart';
 import '../../../utils/default_toast.dart';
@@ -149,10 +150,18 @@ class _TutorialIntroScreenState extends State<TutorialIntroScreen>
   Future<void> _onStartTutorial() async {
     if (_requestingMic || _sceneRunning) return;
     _requestingMic = true;
+    reportOnboardingTutorialProgress(
+      preview: widget.preview,
+      step: OnboardingTutorialProgressStep.startTapped,
+    );
     final ok = await _ensureMicrophonePermission(context);
     if (!mounted) return;
     _requestingMic = false;
     if (!ok) return;
+    reportOnboardingTutorialProgress(
+      preview: widget.preview,
+      step: OnboardingTutorialProgressStep.micPermissionPassed,
+    );
     await _playSceneThenStart();
   }
 

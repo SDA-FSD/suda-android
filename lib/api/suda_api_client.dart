@@ -801,6 +801,16 @@ class SudaApiClient {
     return UserApi.postOnboardingUsername(accessToken: accessToken);
   }
 
+  static Future<void> postOnboardingTutorialProgress({
+    required String accessToken,
+    required String step,
+  }) {
+    return UserApi.postOnboardingTutorialProgress(
+      accessToken: accessToken,
+      step: step,
+    );
+  }
+
   static Future<void> postOnboardingTutorialShown({required String accessToken}) {
     return UserApi.postOnboardingTutorialShown(accessToken: accessToken);
   }
