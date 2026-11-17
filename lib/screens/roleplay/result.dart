@@ -117,6 +117,9 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
 
   int get _likePoint => _s2History?.likePoint ?? 0;
 
+  /// `missionStatYn != 'N'`이면 Mission 칸 노출 (구 기록 Y / 미수신 Y).
+  bool get _showMissionStat => _s2History?.missionStatYn != 'N';
+
   static String _httpErrorBrief(Object error) {
     final text = error.toString();
     final match = RegExp(r'HTTP (\d{3})').firstMatch(text);
@@ -728,12 +731,14 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildStatCard(
-                  context,
-                  title: 'Mission',
-                  child: _buildMissionIcons(),
-                ),
-                const SizedBox(width: 10),
+                if (_showMissionStat) ...[
+                  _buildStatCard(
+                    context,
+                    title: 'Mission',
+                    child: _buildMissionIcons(),
+                  ),
+                  const SizedBox(width: 10),
+                ],
                 _buildStatCard(
                   context,
                   title: 'Words',

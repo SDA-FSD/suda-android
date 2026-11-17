@@ -359,6 +359,8 @@ class RpS2UserHistoryDto {
   final Map<int, RpS2UserFeedbackVo>? speechFeedback;
   /// `'Y'`면 Speech Feedback 잠금(Feedback 탭 → Paywall). 미수신 시 `'N'`.
   final String feedbackLockedYn;
+  /// `'Y'`=Result Mission 지표 노출, `'N'`=미노출(RpS3). 미수신 시 `'Y'`.
+  final String missionStatYn;
   final int? userStarRating;
   final String? mainTitle;
   final String? subTitle;
@@ -380,6 +382,7 @@ class RpS2UserHistoryDto {
     this.keyExpressions = const [],
     this.speechFeedback,
     this.feedbackLockedYn = 'N',
+    this.missionStatYn = 'Y',
     this.userStarRating,
     this.mainTitle,
     this.subTitle,
@@ -403,6 +406,7 @@ class RpS2UserHistoryDto {
       keyExpressions: _keyExpressionsFromJson(json['keyExpressions']),
       speechFeedback: _speechFeedbackMapFromJson(json['speechFeedback']),
       feedbackLockedYn: json['feedbackLockedYn'] as String? ?? 'N',
+      missionStatYn: json['missionStatYn'] as String? ?? 'Y',
       userStarRating: _optionalInt(json['userStarRating']),
       mainTitle: json['mainTitle'] as String?,
       subTitle: json['subTitle'] as String?,

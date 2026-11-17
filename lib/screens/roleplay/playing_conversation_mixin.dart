@@ -27,8 +27,8 @@ class PlayingConversationLayout {
   /// 미션 패널 오버레이 top (본문 Stack 내, [bodyTopGap] 아래).
   static const double missionPanelTop = 2;
 
-  /// 본문 스크롤 영역 상단부터 첫 말풍선까지 고정 여백 (미션 패널에 가리지 않도록).
-  static const double firstBubbleTopOffset = 68;
+  /// 본문 스크롤 상단~첫 말풍선 여백. RpS3 미션 패널 off → 패널 높이(68) 대신 소폭.
+  static const double firstBubbleTopOffset = 12;
 
   /// 미션 패널 하단까지 본문 상단 페이드 (`#121212` 100% → 0%).
   static const Color topContentFadeColor = Color(0xFF121212);

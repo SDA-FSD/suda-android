@@ -228,9 +228,9 @@ Home (시리즈 썸네일)
 
 | 구역 | 슬롯 | 스펙 | 현재 상태 |
 |------|------|------|-----------|
-| **본문** | `RoleplayScaffold.body` | 상단 gap **8** → `Expanded`(Stack) → 하단 gap **8**, 좌우 마진 **24**(스캐폴드) | **미션 패널 오버레이** + AI/User/나레이션/힌트 대화 스크롤 |
+| **본문** | `RoleplayScaffold.body` | 상단 gap **8** → `Expanded`(Stack) → 하단 gap **8**, 좌우 마진 **24**(스캐폴드) | 대화 스크롤. **RpS3 테스트: 미션 패널 UI 미노출** (`topOverlay` shrink, `firstBubbleTopOffset` 12). 서버 미션·프롬프트 유지 |
 
-**미션 패널 (mission panel)** — `lib/widgets/roleplay_mission_panel.dart`, 본문 `Stack` 상단 고정 오버레이
+**미션 패널 (mission panel)** — 위젯·완료 이펙트 코드는 유지, Playing/온보딩 튜토리얼에서는 **미마운트**. 상세(과거 스펙):
 
 - **데이터**: `selectedEpisode.cefrMap[시리즈 CEFR].missions` (`List<RpS2CefrMissionDto>`, 보통 3개). `instruction`은 `SudaJsonUtil.localizedMapText`
 - **위치**: 본문 `Stack` 상단에서 **top 2** (`PlayingConversationLayout.missionPanelTop`, gap 8 아래 추가 여백)
@@ -310,7 +310,7 @@ Home (시리즈 썸네일)
 
 - **S2 진입 판별**: `SeriesStateService.cachedUserHistory != null`
 - **로딩 애니메이션**(별점·패널·LikeProgressEffect): `RpS2UserHistoryDto` — `mainTitle`, `subTitle`, `starScore`, `missions`, `words`, `likePoint`, `before/afterLikePoint·Level·ProgressPercentage`
-  - Mission 아이콘: `missions(bool[])` → `rps2_mission_on/off.png` 20×20, gap 2
+  - **지표 행 (RpS3)**: history `missionStatYn` — `N`이면 **Words / Like만**, `Y`(구 기록·미수신)면 Mission+Words+Like. Mission 아이콘: `missions(bool[])` → on/off 20×20. NORMAL_END complete 시 back이 `N` 저장, 기존 행은 DB `DEFAULT 'Y'`
 - **애니메이션 이후 본문** (`result.dart` S2 전용):
   - **Feedback 영역**: 삭제(S2)
   - **Key Expression**: `keyExpressions` — 카드 체크+`keyExpression(학습언어)` / `keyExpression(앱 언어)` / `sampleAnswer(학습언어)` / `sampleAnswer(앱 언어)`. 학습 본문은 이력의 `targetLanguage`에 따라 `ko`/`en`을 직접 선택한다(구응답·null은 EN, KO 누락 시 영어 대체 없음). 현재 사용자 학습언어를 바꿔도 과거 이력은 원래 언어를 유지한다. 카드 전체 탭(북마크 제외) → `GET /rps2/user-histories/{rpUserHistoryId}/expressions/{expressionIndex}/sound`(`TtsResultDto`, index 0-based). fetch 중 16×16 `CircularProgressIndicator`(strokeWidth 2, `#0CABA8` 70%), 재생 중 `megaphone_fill.png` `#0CABA8`, 타 카드 탭 시 이전 재생 중단. 북마크 OFF→ON: `POST /rps2/user-histories/{id}/expressions/{index}` → `bookmark_on.png` + l10n `expressionSavedToProfile`. ON→OFF: `DELETE` 동일 경로 → `bookmark_off.png`(토스트 없음). 실패 시 HTTP 코드·간단 문구 토스트. 진입 시 북마크 UI 전부 off.

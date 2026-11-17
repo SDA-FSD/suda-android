@@ -569,7 +569,6 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
         accessToken: token,
         sessionId: sessionId,
       );
-      var missionJustCompleted = false;
       var showGreetingSuccess = false;
       final done = response.missionCompletedIndex;
       final completesGreeting =
@@ -585,10 +584,8 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
             done < _turnCount &&
             !_completedMissionIndexes.contains(done)) {
           _completedMissionIndexes.add(done);
-          _flashMissionIndex = done;
-          _showMissionCompletedFlash = true;
           _completedMissions = _completedMissionIndexes.length;
-          missionJustCompleted = true;
+          // RpS3: 패널·이펙트 없음. greeting 성공 연출만 유지.
           if (done == 0) {
             _showGreetingSuccess = true;
             showGreetingSuccess = true;
@@ -619,7 +616,6 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
       }
       armHint = _answeredTurnCount == 1 && !_hintCoachDismissed;
       _scrollTalkToEnd();
-      if (missionJustCompleted) _playMissionSuccess();
       if (showGreetingSuccess) {
         await _greetingSuccess.forward(from: 0);
         if (!mounted) return;
@@ -1151,7 +1147,6 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
   Widget _buildPlayingBody(AppLocalizations l10n, TextTheme theme) {
     final locale = Localizations.localeOf(context);
     final showTranslation = locale.languageCode != 'en';
-    final missions = _missionDtos(l10n);
 
     return Padding(
       padding: const EdgeInsets.symmetric(
@@ -1253,24 +1248,7 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
                     ],
                   ),
                 ),
-                Positioned(
-                  top: PlayingConversationLayout.missionPanelTop,
-                  left: 0,
-                  right: 0,
-                  child: IgnorePointer(
-                    ignoring: _mustTapHint,
-                    child: RoleplayMissionPanel(
-                      missions: missions,
-                      activeMissionIndex: _showMissionCompletedFlash
-                          ? _flashMissionIndex
-                          : _answeredTurnCount.clamp(0, _turnCount - 1),
-                      completedCount: _completedMissions,
-                      completedMissionIndexes: _completedMissionIndexes,
-                      showCompletedBackgroundFlash: _showMissionCompletedFlash,
-                      missionIconAnchorKey: _missionIconAnchorKey,
-                    ),
-                  ),
-                ),
+                // RpS3 테스트: 온보딩 튜토리얼 미션 패널 미노출.
               ],
             ),
           ),

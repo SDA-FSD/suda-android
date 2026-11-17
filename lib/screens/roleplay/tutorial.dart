@@ -1070,27 +1070,10 @@ class _TutorialResultStatRow extends StatelessWidget {
     final valueStyle = Theme.of(context).textTheme.bodyLarge?.copyWith(
           color: Colors.white,
         );
+    // RpS3 테스트: Mission 제외, Words / Like만.
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _card(
-          'Mission',
-          Wrap(
-            alignment: WrapAlignment.center,
-            spacing: 2,
-            runSpacing: 2,
-            children: [
-              for (var i = 0; i < 3; i++)
-                Image.asset(
-                  'assets/images/icons/rps2_mission_on.png',
-                  width: 20,
-                  height: 20,
-                  fit: BoxFit.contain,
-                ),
-            ],
-          ),
-        ),
-        const SizedBox(width: 8),
         _card('Words', Text('08', style: valueStyle)),
         const SizedBox(width: 8),
         _card(

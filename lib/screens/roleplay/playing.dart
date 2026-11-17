@@ -334,37 +334,12 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
   }
 
   void _handleMissionCompleted(int? completedIndex) {
+    // RpS3 테스트: 미션 패널·완료 이펙트 미노출. 서버 missionProgress는 유지.
     if (completedIndex == null) return;
     if (completedIndex < 0 || completedIndex >= _missions.length) return;
-    if (_completedMissionIndexes.contains(completedIndex)) {
-      debugPrint(
-        '[DEBUG] RpS2 duplicate missionCompletedIndex ignored: $completedIndex',
-      );
-      return;
-    }
-    _missionCompleteTimer?.cancel();
-    setState(() {
-      _activeMissionIndex = completedIndex;
-      _completedMissionIndexes.add(completedIndex);
-      _completedMissionCount = _completedMissionIndexes.length;
-      _showMissionCompletedFlash = true;
-    });
-    MissionCompleteEffect.play(context, anchorKey: _missionIconAnchorKey);
-    _missionCompleteTimer = Timer(
-      RoleplayMissionPanel.completedBackgroundDuration,
-      () {
-        if (!mounted) return;
-        final nextIndex = _firstIncompleteMissionIndex();
-        setState(() {
-          _showMissionCompletedFlash = false;
-          if (nextIndex != null) {
-            _activeMissionIndex = nextIndex;
-          } else {
-            _missionPanelOpacity = 0;
-          }
-        });
-      },
-    );
+    if (_completedMissionIndexes.contains(completedIndex)) return;
+    _completedMissionIndexes.add(completedIndex);
+    _completedMissionCount = _completedMissionIndexes.length;
   }
 
   int? _firstIncompleteMissionIndex() {
@@ -750,15 +725,9 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
                 : 0,
             body: buildPlayingBody(
               scaffoldBodyLeadHeight: _scaffoldBodyLeadHeight(),
-              missionPanelOpacity: _missionPanelOpacity,
-              topOverlay: RoleplayMissionPanel(
-                missions: _missions,
-                activeMissionIndex: _activeMissionIndex,
-                completedCount: _completedMissionCount,
-                completedMissionIndexes: _completedMissionIndexes,
-                showCompletedBackgroundFlash: _showMissionCompletedFlash,
-                missionIconAnchorKey: _missionIconAnchorKey,
-              ),
+              // RpS3 테스트: 미션 패널 미노출 (서버 미션·프롬프트 유지).
+              missionPanelOpacity: 0,
+              topOverlay: const SizedBox.shrink(),
               conversationBuilder: _buildConversationWithHint,
             ),
             footer: buildPlayingFooter(),
