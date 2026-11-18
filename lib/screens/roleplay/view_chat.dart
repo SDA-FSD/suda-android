@@ -1437,7 +1437,10 @@ class _ViewChatFeedbackButton extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Feedback',
+              AppLocalizations.of(context)!.roleplayResultViewFeedback,
+              maxLines: 1,
+              softWrap: false,
+              overflow: TextOverflow.ellipsis,
               style: theme.labelSmall?.copyWith(color: _teal),
             ),
             const SizedBox(width: 4),

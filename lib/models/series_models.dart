@@ -349,6 +349,12 @@ class RpS2UserHistoryDto {
   final int? id;
   /// 이력 생성 시 학습 언어. 구버전 응답에서 없으면 EN으로 표시한다.
   final String? targetLanguage;
+  /// Result/History 배경용 에피소드 썸네일 CDN path.
+  final String? thumbnailImgPath;
+  /// 시리즈 내 에피소드 순서(1-based).
+  final int? episodeOrder;
+  /// 에피소드 제목 언어맵 (앱 언어로 해석).
+  final Map<String, String> episodeTitle;
   final List<RpS2UserHistoryMsgDto> messages;
   final List<bool> missions;
   final int? starScore;
@@ -374,6 +380,9 @@ class RpS2UserHistoryDto {
   const RpS2UserHistoryDto({
     this.id,
     this.targetLanguage,
+    this.thumbnailImgPath,
+    this.episodeOrder,
+    this.episodeTitle = const {},
     this.messages = const [],
     this.missions = const [],
     this.starScore,
@@ -398,6 +407,9 @@ class RpS2UserHistoryDto {
     return RpS2UserHistoryDto(
       id: _optionalInt(json['id']),
       targetLanguage: json['targetLanguage'] as String?,
+      thumbnailImgPath: json['thumbnailImgPath'] as String?,
+      episodeOrder: _optionalInt(json['episodeOrder']),
+      episodeTitle: SudaJsonUtil.localizedMapFromJson(json['episodeTitle']),
       messages: _userHistoryMessagesFromJson(json['messages']),
       missions: _boolListFromJson(json['missions']),
       starScore: _optionalInt(json['starScore']),

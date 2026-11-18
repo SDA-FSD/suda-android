@@ -647,6 +647,32 @@ class AppLocalizationsFil extends AppLocalizations {
   String get roleplayResultCompleteSeries => 'Kumpletuhin ang serye';
 
   @override
+  String get roleplayResultConversationComplete => 'Tapos na ang usapan!';
+
+  @override
+  String get roleplayResultWordsSpoken => 'Mga salitang sinabi';
+
+  @override
+  String get roleplayResultLikesEarned => 'Nakuhang Like';
+
+  @override
+  String get roleplayResultKeyExpressions => 'Mahahalagang ekspresyon';
+
+  @override
+  String get roleplayResultWhatYouSaid => 'Sinabi mo';
+
+  @override
+  String get roleplayResultViewChat => 'Tingnan ang chat';
+
+  @override
+  String get roleplayResultViewFeedback => 'Tingnan ang feedback';
+
+  @override
+  String roleplayResultEpisodeLabel(int order, String title) {
+    return 'EP#$order $title';
+  }
+
+  @override
   String get reportTitle => 'I-report ang Problema';
 
   @override

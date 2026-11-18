@@ -625,6 +625,32 @@ class AppLocalizationsTh extends AppLocalizations {
   String get roleplayResultCompleteSeries => 'จบซีรีส์';
 
   @override
+  String get roleplayResultConversationComplete => 'บทสนทนาเสร็จสิ้น!';
+
+  @override
+  String get roleplayResultWordsSpoken => 'จำนวนคำที่พูด';
+
+  @override
+  String get roleplayResultLikesEarned => 'Like ที่ได้รับ';
+
+  @override
+  String get roleplayResultKeyExpressions => 'สำนวนสำคัญ';
+
+  @override
+  String get roleplayResultWhatYouSaid => 'สิ่งที่คุณพูด';
+
+  @override
+  String get roleplayResultViewChat => 'ดูแชท';
+
+  @override
+  String get roleplayResultViewFeedback => 'ดูฟีดแบ็ก';
+
+  @override
+  String roleplayResultEpisodeLabel(int order, String title) {
+    return 'EP#$order $title';
+  }
+
+  @override
   String get reportTitle => 'รายงานปัญหา';
 
   @override

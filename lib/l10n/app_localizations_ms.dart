@@ -639,6 +639,32 @@ class AppLocalizationsMs extends AppLocalizations {
   String get roleplayResultCompleteSeries => 'Selesaikan siri';
 
   @override
+  String get roleplayResultConversationComplete => 'Perbualan selesai!';
+
+  @override
+  String get roleplayResultWordsSpoken => 'Perkataan disebut';
+
+  @override
+  String get roleplayResultLikesEarned => 'Like diperoleh';
+
+  @override
+  String get roleplayResultKeyExpressions => 'Ungkapan utama';
+
+  @override
+  String get roleplayResultWhatYouSaid => 'Apa yang anda kata';
+
+  @override
+  String get roleplayResultViewChat => 'Lihat sembang';
+
+  @override
+  String get roleplayResultViewFeedback => 'Lihat maklum balas';
+
+  @override
+  String roleplayResultEpisodeLabel(int order, String title) {
+    return 'EP#$order $title';
+  }
+
+  @override
   String get reportTitle => 'Laporkan Masalah';
 
   @override

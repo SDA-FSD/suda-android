@@ -636,6 +636,32 @@ class AppLocalizationsVi extends AppLocalizations {
   String get roleplayResultCompleteSeries => 'Hoàn thành series';
 
   @override
+  String get roleplayResultConversationComplete => 'Cuộc trò chuyện hoàn tất!';
+
+  @override
+  String get roleplayResultWordsSpoken => 'Số từ đã nói';
+
+  @override
+  String get roleplayResultLikesEarned => 'Like nhận được';
+
+  @override
+  String get roleplayResultKeyExpressions => 'Cụm từ chính';
+
+  @override
+  String get roleplayResultWhatYouSaid => 'Những gì bạn đã nói';
+
+  @override
+  String get roleplayResultViewChat => 'Xem hội thoại';
+
+  @override
+  String get roleplayResultViewFeedback => 'Xem phản hồi';
+
+  @override
+  String roleplayResultEpisodeLabel(int order, String title) {
+    return 'EP#$order $title';
+  }
+
+  @override
   String get reportTitle => 'Báo cáo sự cố';
 
   @override

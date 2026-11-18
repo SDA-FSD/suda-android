@@ -24,6 +24,7 @@ import '../../utils/paywall_impression_screen.dart';
 import '../../utils/speech_feedback_premium.dart';
 import '../../utils/sub_screen_route.dart';
 import '../../utils/suda_json_util.dart';
+import '../../widgets/cdn_thumb_image.dart';
 import 'suda_tts_audio_player.dart';
 import 'view_chat.dart';
 
@@ -59,19 +60,13 @@ class RoleplayResultScreen extends StatefulWidget {
 
 class _RoleplayResultScreenState extends State<RoleplayResultScreen>
     with TickerProviderStateMixin {
-  static const Color _topBg = Color(0xFF054544);
-  static const Color _bottomBg = Color(0xFF0CABA8);
   static const Color _teal = Color(0xFF0CABA8);
   static const Color _mint = Color(0xFF80D7CF);
-  static const Color _cardBg = Color(0x8080D7CF);
-  static const Color _reportText = Color(0xFF054544);
+  static const Color _backdropBase = Color(0xFF121212);
+  static const Color _reportText = Color(0xFF80D7CF);
   static const String _starGold = 'assets/images/star_gold.png';
   static const String _starSilver = 'assets/images/star_silver.png';
   static const String _likeAtResult = 'assets/images/like_at_result.png';
-  static const String _rps2MissionOn =
-      'assets/images/icons/rps2_mission_on.png';
-  static const String _rps2MissionOff =
-      'assets/images/icons/rps2_mission_off.png';
 
   late final AnimationController _panelMoveController;
   late final AnimationController _keyExpressionSectionEntranceController;
@@ -109,16 +104,38 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
 
   int get _starResult => _s2History?.starScore ?? 0;
 
-  String get _mainTitle => _s2History?.mainTitle ?? '';
-
-  String get _subTitle => _s2History?.subTitle ?? '';
-
   int get _words => _s2History?.words ?? 0;
 
   int get _likePoint => _s2History?.likePoint ?? 0;
 
-  /// `missionStatYn != 'N'`이면 Mission 칸 노출 (구 기록 Y / 미수신 Y).
-  bool get _showMissionStat => _s2History?.missionStatYn != 'N';
+  String? get _thumbnailImgPath {
+    final path = _s2History?.thumbnailImgPath;
+    if (path != null && path.isNotEmpty) return path;
+    return SeriesStateService.instance.selectedEpisode?.thumbnailImgPath;
+  }
+
+  String _episodeLabel(AppLocalizations l10n) {
+    final history = _s2History;
+    final titleFromHistory = SudaJsonUtil.localizedMapText(history?.episodeTitle);
+    final title = titleFromHistory.isNotEmpty
+        ? titleFromHistory
+        : SudaJsonUtil.localizedMapText(
+            SeriesStateService.instance.selectedEpisode?.title,
+          );
+    final order = history?.episodeOrder ?? _fallbackEpisodeOrder();
+    if (order == null || title.isEmpty) {
+      return title;
+    }
+    return l10n.roleplayResultEpisodeLabel(order, title);
+  }
+
+  int? _fallbackEpisodeOrder() {
+    final overview = SeriesStateService.instance.overview;
+    final episodeId = SeriesStateService.instance.selectedEpisodeId;
+    if (overview == null || episodeId == null) return null;
+    final idx = overview.episodes.indexWhere((e) => e.id == episodeId);
+    return idx >= 0 ? idx + 1 : null;
+  }
 
   static String _httpErrorBrief(Object error) {
     final text = error.toString();
@@ -155,11 +172,8 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
     _footerFadeController.addStatusListener(_onFooterFadeStatus);
     _resultScrollController.addListener(_handleResultScroll);
     if (widget.skipEntranceAnimation) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          _bootstrapSkipEntrance();
-        }
-      });
+      // History: 첫 프레임부터 완료 UI (중간 Result 요약 플래시 방지).
+      _bootstrapSkipEntrance();
     } else {
       _scheduleStarSequence();
     }
@@ -171,14 +185,12 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
     final targetGoldStars = (_starResult >= 1 && _starResult <= 3)
         ? _starResult
         : 0;
-    setState(() {
-      _revealedGoldStars = targetGoldStars;
-      _panelMoveController.value = 1.0;
-      _effectDone = true;
-      _showFooterActions = true;
-      _keyExpressionSectionEntranceController.value = 1.0;
-      _footerFadeController.value = 1.0;
-    });
+    _revealedGoldStars = targetGoldStars;
+    _panelMoveController.value = 1.0;
+    _effectDone = true;
+    _showFooterActions = true;
+    _keyExpressionSectionEntranceController.value = 1.0;
+    _footerFadeController.value = 1.0;
     unawaited(PerfMonitoringService.instance.stop('feedback_screen_ready'));
   }
 
@@ -608,32 +620,6 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
     );
   }
 
-  Widget _buildMissionIcons() {
-    final missionIcons = <Widget>[];
-
-    for (final success in _s2History?.missions ?? const <bool>[]) {
-      missionIcons.add(
-        Image.asset(
-          success ? _rps2MissionOn : _rps2MissionOff,
-          width: 20,
-          height: 20,
-          fit: BoxFit.contain,
-        ),
-      );
-    }
-
-    if (missionIcons.isEmpty) {
-      return const Text('—', style: TextStyle(color: Colors.white));
-    }
-
-    return Wrap(
-      alignment: WrapAlignment.center,
-      spacing: 2,
-      runSpacing: 2,
-      children: missionIcons,
-    );
-  }
-
   Widget _buildLikeText(BuildContext context) {
     final theme = Theme.of(context).textTheme;
     final likeValue = '$_likePoint'.padLeft(2, '0');
@@ -670,17 +656,21 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
           color: Colors.white,
         );
 
+    // 스크롤 시 BackdropFilter 깜빡임 방지: 블러 없이 반투명+테두리+피그마 그림자.
     return Expanded(
       child: Container(
         height: 75,
         decoration: BoxDecoration(
-          color: _cardBg,
+          color: Colors.white.withValues(alpha: 0.14),
           borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.36),
+          ),
           boxShadow: const [
             BoxShadow(
-              color: Color(0x33000000),
-              blurRadius: 18,
-              offset: Offset(0, 10),
+              color: Color(0x40000000), // #000 25%
+              blurRadius: 20,
+              offset: Offset(0, 8),
             ),
           ],
         ),
@@ -688,7 +678,20 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(title, style: labelPrimary, textAlign: TextAlign.center),
+            // pl 등 긴 라벨은 폭에 맞게 축소해 1줄 유지.
+            SizedBox(
+              width: double.infinity,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  title,
+                  maxLines: 1,
+                  softWrap: false,
+                  textAlign: TextAlign.center,
+                  style: labelPrimary,
+                ),
+              ),
+            ),
             Expanded(child: Center(child: child)),
           ],
         ),
@@ -698,7 +701,9 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
 
   Widget _buildPanel(BuildContext context) {
     final theme = Theme.of(context).textTheme;
+    final l10n = AppLocalizations.of(context)!;
     final wordsDisplay = '$_words'.padLeft(2, '0');
+    final episodeLabel = _episodeLabel(l10n);
 
     return ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 560),
@@ -710,38 +715,32 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
             const SizedBox(height: 50),
             _buildStarsRow(),
             const SizedBox(height: 5),
-            Text(
-              _mainTitle,
-              style: theme.headlineLarge?.copyWith(color: Colors.white),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 5),
-            Text(
-              _subTitle,
-              style: const TextStyle(
-                fontFamily: 'ChironGoRoundTC',
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                fontVariations: [FontVariation('wght', 600)],
-                color: _mint,
+            if (episodeLabel.isNotEmpty) ...[
+              Text(
+                episodeLabel,
+                style: const TextStyle(
+                  fontFamily: 'ChironGoRoundTC',
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  fontVariations: [FontVariation('wght', 600)],
+                  color: _mint,
+                ),
+                textAlign: TextAlign.center,
               ),
+              const SizedBox(height: 5),
+            ],
+            Text(
+              l10n.roleplayResultConversationComplete,
+              style: theme.headlineLarge?.copyWith(color: Colors.white),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 30),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (_showMissionStat) ...[
-                  _buildStatCard(
-                    context,
-                    title: 'Mission',
-                    child: _buildMissionIcons(),
-                  ),
-                  const SizedBox(width: 10),
-                ],
                 _buildStatCard(
                   context,
-                  title: 'Words',
+                  title: l10n.roleplayResultWordsSpoken,
                   child: Text(
                     wordsDisplay,
                     style: theme.bodyLarge?.copyWith(color: Colors.white),
@@ -750,7 +749,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
                 const SizedBox(width: 10),
                 _buildStatCard(
                   context,
-                  title: 'Like',
+                  title: l10n.roleplayResultLikesEarned,
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -775,20 +774,21 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
 
   Widget _buildViewChatButton(BuildContext context, {VoidCallback? onTap}) {
     final theme = Theme.of(context).textTheme;
+    final l10n = AppLocalizations.of(context)!;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: Container(
-        width: 80,
         height: 24,
         alignment: Alignment.center,
+        padding: const EdgeInsets.symmetric(horizontal: 10),
         decoration: BoxDecoration(
           color: Colors.transparent,
           border: Border.all(color: Colors.white, width: 1),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Text(
-          'View Chat',
+          l10n.roleplayResultViewChat,
           style: theme.labelSmall?.copyWith(color: Colors.white),
         ),
       ),
@@ -1325,7 +1325,10 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildSectionTitleRow(context, title: 'Key Expression'),
+            _buildSectionTitleRow(
+              context,
+              title: AppLocalizations.of(context)!.roleplayResultKeyExpressions,
+            ),
             const SizedBox(height: 16),
             _buildKeyExpressionCarousel(context),
           ],
@@ -1356,7 +1359,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
           children: [
             _buildSectionTitleRow(
               context,
-              title: 'Speech Feedback',
+              title: AppLocalizations.of(context)!.roleplayResultWhatYouSaid,
               trailing: _buildViewChatButton(context, onTap: _onS2ViewChatTap),
             ),
             const SizedBox(height: 16),
@@ -1633,20 +1636,66 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
   Widget _buildS2PostEffectBody(BuildContext context) {
     final bottomInset = MediaQuery.paddingOf(context).bottom;
 
-    return SingleChildScrollView(
-      controller: _resultScrollController,
-      padding: EdgeInsets.only(bottom: 16 + bottomInset),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          KeyedSubtree(key: _panelKey, child: _buildPanel(context)),
-          const SizedBox(height: 32),
-          _buildKeyExpressionLayer(context),
-          const SizedBox(height: 28),
-          _buildSpeechFeedbackLayer(context),
-          if (_showFooterActions) _buildS2FooterActions(context),
-        ],
-      ),
+    // 별·EP·타이틀·Words/Like 상단 고정. 그 아래만 세로 스크롤.
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        KeyedSubtree(key: _panelKey, child: _buildPanel(context)),
+        Expanded(
+          child: SingleChildScrollView(
+            controller: _resultScrollController,
+            padding: EdgeInsets.only(top: 32, bottom: 16 + bottomInset),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _buildKeyExpressionLayer(context),
+                const SizedBox(height: 28),
+                _buildSpeechFeedbackLayer(context),
+                if (_showFooterActions) _buildS2FooterActions(context),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildResultBackdrop(BuildContext context) {
+    final path = _thumbnailImgPath;
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        const ColoredBox(color: _backdropBase),
+        if (path != null && path.isNotEmpty)
+          CdnProgressiveNetworkImage(
+            path: path,
+            fit: BoxFit.cover,
+            alignment: Alignment.center,
+            errorWidget: (context, url, error) =>
+                const ColoredBox(color: _backdropBase),
+          ),
+        // 위 투명(밝음) → 아래 #121212 불투명.
+        const DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0x00121212),
+                Color(0xFF121212),
+              ],
+            ),
+          ),
+        ),
+        IgnorePointer(
+          child: AnimatedOpacity(
+            opacity: _effectDone ? 0.45 : 0.0,
+            duration: const Duration(milliseconds: 400),
+            curve: Curves.easeOut,
+            child: const ColoredBox(color: _backdropBase),
+          ),
+        ),
+      ],
     );
   }
 
@@ -1672,55 +1721,47 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
         }
       },
       child: Scaffold(
-        backgroundColor: Colors.transparent,
-        body: DecoratedBox(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [_topBg, _bottomBg],
-            ),
-          ),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              if (_effectDone)
-                _buildS2PostEffectBody(context)
-              else
-                Column(
-                  children: [
-                    SizedBox(
-                      height: boxHeight,
-                      width: double.infinity,
-                      child: Container(
-                        alignment: Alignment.center,
-                        child: KeyedSubtree(
-                          key: _panelKey,
-                          child: _buildPanel(context),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              if (widget.showCloseButton)
-                PositionedDirectional(
-                  top: MediaQuery.paddingOf(context).top + 16,
-                  start: 16,
-                  child: AnimatedOpacity(
-                    opacity: _closeButtonVisible ? 1 : 0,
-                    duration: const Duration(milliseconds: 200),
-                    child: IgnorePointer(
-                      ignoring: !_closeButtonVisible,
-                      child: _ResultCloseButton(
-                        onPressed: _isLeavingToOverview
-                            ? null
-                            : () => _onClosePressed(context),
+        backgroundColor: _backdropBase,
+        body: Stack(
+          fit: StackFit.expand,
+          children: [
+            _buildResultBackdrop(context),
+            if (_effectDone)
+              _buildS2PostEffectBody(context)
+            else
+              Column(
+                children: [
+                  SizedBox(
+                    height: boxHeight,
+                    width: double.infinity,
+                    child: Container(
+                      alignment: Alignment.center,
+                      child: KeyedSubtree(
+                        key: _panelKey,
+                        child: _buildPanel(context),
                       ),
                     ),
                   ),
+                ],
+              ),
+            if (widget.showCloseButton)
+              PositionedDirectional(
+                top: MediaQuery.paddingOf(context).top + 16,
+                start: 16,
+                child: AnimatedOpacity(
+                  opacity: _closeButtonVisible ? 1 : 0,
+                  duration: const Duration(milliseconds: 200),
+                  child: IgnorePointer(
+                    ignoring: !_closeButtonVisible,
+                    child: _ResultCloseButton(
+                      onPressed: _isLeavingToOverview
+                          ? null
+                          : () => _onClosePressed(context),
+                    ),
+                  ),
                 ),
-            ],
-          ),
+              ),
+          ],
         ),
       ),
     );
@@ -2249,7 +2290,13 @@ class _SpeechFeedbackFeedbackButton extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Feedback', style: theme.labelSmall?.copyWith(color: _teal)),
+            Text(
+              AppLocalizations.of(context)!.roleplayResultViewFeedback,
+              maxLines: 1,
+              softWrap: false,
+              overflow: TextOverflow.ellipsis,
+              style: theme.labelSmall?.copyWith(color: _teal),
+            ),
             const SizedBox(width: 4),
             if (loading)
               SizedBox(

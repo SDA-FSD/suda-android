@@ -959,9 +959,10 @@
 - **Complete Series**·시스템 뒤로가기·X: `feedbackLockedYn=='Y'`이면 Paywall(`screen=rp_result_got_it`)을 Result 위에 올리고, 전환이 끝나면 Result를 제거. 페이월이 닫히면 Overview. 구독 성공 시 `GET /v1/users` 재반영. `'N'`·History(`exitViaPop`)는 페이월 없이 기존 닫기. `N` 경로는 `popToOverview`.
 
 ### 스크린 내부 구현 특이사항
-- 박스레이어: 별 + titles + Mission/Words/Like (`rps2_mission_on/off.png`). 1초 후 상단 이동 + `LikeProgressEffect`. 연출이 끝나면 이 패널과 Key Expression·Speech Feedback·하단 버튼이 한 세로 스크롤. 패널과 Key Expression 사이 32. X는 스크롤이 상태표시줄+56을 넘으면 200ms fade-out, 위로 돌아오면 fade-in. History도 동일.
-- 본문: Key Expression + Speech Feedback + 하단 버튼/Report. 하단 버튼은 다음 에피소드 `roleplayResultNextEpisode`, 마지막 에피소드 `roleplayResultCompleteSeries`. 다음 에피소드는 처음 `#353535`·`#8C8C8C`·자물쇠(`seriesOverviewLocked`)이고, 버튼 전체가 화면에 들어오면(처음부터 보이면 푸터 fade 직후) Overview와 같은 자물쇠 팝 뒤 `#80D7CF` 알약이 오른쪽에서 들어온다. 글자 스타일은 Result 버튼(18 w600), 해금 글자는 흰색. 그림자 유지. 연출 전 탭 없음. 한 번만. 시리즈 완료·History Got it은 청록 버튼. History는 `Got it!`·Report 없음(`showReportLink: false`).
-- Speech Feedback 펼침: `feedbackLockedYn`. Result `'Y'` Paywall. Profile History `'Y'`는 구독 조회 후 토스트 또는 Paywall. `'N'` feedback TTS 후 펼침+재생.
+- 배경: 에피소드 썸네일 cover + `#121212` 위0%→아래100% 그라데이션. Like 효과 후 추가 딤. History 동일.
+- 박스레이어: 별 + 민트 `EP#{order} {title}` + l10n 완료 타이틀 + Words/Like 반투명 2칸(Mission 미노출, BackdropFilter 없음·피그마 그림자). 1초 후 상단 이동 + `LikeProgressEffect`. 연출 후 **패널 상단 고정**, Key Expression·Speech Feedback·하단 버튼만 세로 스크롤(간격 32). X는 아래 스크롤이 상태표시줄+56을 넘으면 200ms fade-out, 위로 돌아오면 fade-in. History도 동일.
+- 본문: Key Expression(`roleplayResultKeyExpressions`) + Speech Feedback(`roleplayResultWhatYouSaid` + View chat) + 하단 버튼/Report. 하단 버튼은 다음 에피소드 `roleplayResultNextEpisode`, 마지막 에피소드 `roleplayResultCompleteSeries`. 다음 에피소드는 처음 `#353535`·`#8C8C8C`·자물쇠(`seriesOverviewLocked`)이고, 버튼 전체가 화면에 들어오면(처음부터 보이면 푸터 fade 직후) Overview와 같은 자물쇠 팝 뒤 `#80D7CF` 알약이 오른쪽에서 들어온다. 글자 스타일은 Result 버튼(18 w600), 해금 글자는 흰색. 그림자 유지. 연출 전 탭 없음. 한 번만. 시리즈 완료·History Got it은 청록 버튼. History는 `Got it!`·Report 없음(`showReportLink: false`).
+- Speech Feedback 펼침: `feedbackLockedYn`. Result `'Y'` Paywall. Profile History `'Y'`는 구독 조회 후 토스트 또는 Paywall. `'N'` feedback TTS 후 펼침+재생. pill 문구 `roleplayResultViewFeedback`.
 - Key Expression 카드 탭: `GET …/expressions/{i}/sound`. 북마크 POST/DELETE 동일 경로.
 - iOS TTS(Key Expression·Speech Feedback): `SudaTtsAudioPlayer` — Playing과 동일 파일 재생. History·View Chat 공유.
 - 시스템 뒤로가기·X = Complete Series 경로 (`PopScope`·X). 잠금 시 Result 위 `rp_result_got_it` 후 Overview. 다음 에피소드 버튼의 잠금 페이월은 Result를 덮은 뒤, 그 아래에서 다음 에피소드로 교체. Overview는 이 페이월을 띄우지 않는다.
@@ -1015,7 +1016,7 @@
 
 ### 스크린 내부 구현 특이사항
 - **로드**: `GET /rps2/user-histories/{rpUserHistoryId}` → `SeriesStateService.setCachedUserHistory`
-- **표시**: `RoleplayResultScreen(skipEntranceAnimation: true, exitViaPop: true, showCloseButton: true, showReportLink: false)` — LikeProgressEffect·패널 이동·별 순차 애니 생략, effect 완료 상태 본문 즉시 노출. **하단 `Got it!` 유지**·**좌상단 X**·**Report 링크 미노출**. Speech Feedback 구독 가드는 Result와 동일.
+- **표시**: `RoleplayResultScreen(skipEntranceAnimation: true, exitViaPop: true, showCloseButton: true, showReportLink: false)` — LikeProgressEffect·패널 이동·별 순차 애니 생략. `initState`에서 `_effectDone` 등 완료 상태를 **동기 세팅**해 첫 프레임부터 상단 고정+스크롤 본문 노출(한 프레임 Result 요약 플래시 없음). **하단 `Got it!` 유지**·**좌상단 X**·**Report 링크 미노출**. Speech Feedback 구독 가드는 Result와 동일.
 - **종료**: dispose 시 `SeriesStateService.cachedUserHistory` clear
 
 ---

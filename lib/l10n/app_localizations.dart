@@ -1283,6 +1283,54 @@ abstract class AppLocalizations {
   /// **'Complete Series'**
   String get roleplayResultCompleteSeries;
 
+  /// No description provided for @roleplayResultConversationComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Conversation complete!'**
+  String get roleplayResultConversationComplete;
+
+  /// No description provided for @roleplayResultWordsSpoken.
+  ///
+  /// In en, this message translates to:
+  /// **'Words spoken'**
+  String get roleplayResultWordsSpoken;
+
+  /// No description provided for @roleplayResultLikesEarned.
+  ///
+  /// In en, this message translates to:
+  /// **'Likes earned'**
+  String get roleplayResultLikesEarned;
+
+  /// No description provided for @roleplayResultKeyExpressions.
+  ///
+  /// In en, this message translates to:
+  /// **'Key expressions'**
+  String get roleplayResultKeyExpressions;
+
+  /// No description provided for @roleplayResultWhatYouSaid.
+  ///
+  /// In en, this message translates to:
+  /// **'What you said'**
+  String get roleplayResultWhatYouSaid;
+
+  /// No description provided for @roleplayResultViewChat.
+  ///
+  /// In en, this message translates to:
+  /// **'View chat'**
+  String get roleplayResultViewChat;
+
+  /// No description provided for @roleplayResultViewFeedback.
+  ///
+  /// In en, this message translates to:
+  /// **'View feedback'**
+  String get roleplayResultViewFeedback;
+
+  /// No description provided for @roleplayResultEpisodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'EP#{order} {title}'**
+  String roleplayResultEpisodeLabel(int order, String title);
+
   /// No description provided for @reportTitle.
   ///
   /// In en, this message translates to:

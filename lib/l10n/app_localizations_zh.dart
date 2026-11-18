@@ -597,6 +597,32 @@ class AppLocalizationsZh extends AppLocalizations {
   String get roleplayResultCompleteSeries => '完成系列';
 
   @override
+  String get roleplayResultConversationComplete => '对话完成！';
+
+  @override
+  String get roleplayResultWordsSpoken => '说出的单词数';
+
+  @override
+  String get roleplayResultLikesEarned => '获得的Like';
+
+  @override
+  String get roleplayResultKeyExpressions => '关键表达';
+
+  @override
+  String get roleplayResultWhatYouSaid => '你说的话';
+
+  @override
+  String get roleplayResultViewChat => '查看对话';
+
+  @override
+  String get roleplayResultViewFeedback => '查看反馈';
+
+  @override
+  String roleplayResultEpisodeLabel(int order, String title) {
+    return 'EP#$order $title';
+  }
+
+  @override
   String get reportTitle => '报告问题';
 
   @override
@@ -1989,6 +2015,32 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get roleplayResultCompleteSeries => '完成系列';
 
   @override
+  String get roleplayResultConversationComplete => '对话完成！';
+
+  @override
+  String get roleplayResultWordsSpoken => '说出的单词数';
+
+  @override
+  String get roleplayResultLikesEarned => '获得的Like';
+
+  @override
+  String get roleplayResultKeyExpressions => '关键表达';
+
+  @override
+  String get roleplayResultWhatYouSaid => '你说的话';
+
+  @override
+  String get roleplayResultViewChat => '查看对话';
+
+  @override
+  String get roleplayResultViewFeedback => '查看反馈';
+
+  @override
+  String roleplayResultEpisodeLabel(int order, String title) {
+    return 'EP#$order $title';
+  }
+
+  @override
   String get reportTitle => '报告问题';
 
   @override
@@ -3379,6 +3431,32 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get roleplayResultCompleteSeries => '完成系列';
+
+  @override
+  String get roleplayResultConversationComplete => '對話完成！';
+
+  @override
+  String get roleplayResultWordsSpoken => '說過的單字數';
+
+  @override
+  String get roleplayResultLikesEarned => '獲得的Like';
+
+  @override
+  String get roleplayResultKeyExpressions => '關鍵表達';
+
+  @override
+  String get roleplayResultWhatYouSaid => '你說的話';
+
+  @override
+  String get roleplayResultViewChat => '查看對話';
+
+  @override
+  String get roleplayResultViewFeedback => '查看回饋';
+
+  @override
+  String roleplayResultEpisodeLabel(int order, String title) {
+    return 'EP#$order $title';
+  }
 
   @override
   String get reportTitle => '回報問題';

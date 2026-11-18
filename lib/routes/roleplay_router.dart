@@ -195,13 +195,13 @@ class RoleplayRouter {
 
   /// Ending/Playing → Result 전환. FullScreenRoute + bottom-up.
   static void replaceWithResult(BuildContext context) {
-    const teal = Color(0xFF0CABA8);
+    const backdrop = Color(0xFF121212);
     Navigator.pushReplacement(
       context,
       FullScreenRoute(
         transition: FullScreenTransition.bottomUp,
         settings: const RouteSettings(name: RoleplayResultScreen.routeName),
-        page: Container(color: teal, child: const RoleplayResultScreen()),
+        page: Container(color: backdrop, child: const RoleplayResultScreen()),
       ),
     );
   }

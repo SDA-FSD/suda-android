@@ -639,6 +639,32 @@ class AppLocalizationsEs extends AppLocalizations {
   String get roleplayResultCompleteSeries => 'Completar serie';
 
   @override
+  String get roleplayResultConversationComplete => '¡Conversación completada!';
+
+  @override
+  String get roleplayResultWordsSpoken => 'Palabras habladas';
+
+  @override
+  String get roleplayResultLikesEarned => 'Likes obtenidos';
+
+  @override
+  String get roleplayResultKeyExpressions => 'Expresiones clave';
+
+  @override
+  String get roleplayResultWhatYouSaid => 'Lo que dijiste';
+
+  @override
+  String get roleplayResultViewChat => 'Ver chat';
+
+  @override
+  String get roleplayResultViewFeedback => 'Ver feedback';
+
+  @override
+  String roleplayResultEpisodeLabel(int order, String title) {
+    return 'EP#$order $title';
+  }
+
+  @override
   String get reportTitle => 'Reportar un problema';
 
   @override
@@ -2125,6 +2151,32 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
 
   @override
   String get roleplayResultCompleteSeries => 'Completar serie';
+
+  @override
+  String get roleplayResultConversationComplete => '¡Conversación completada!';
+
+  @override
+  String get roleplayResultWordsSpoken => 'Palabras habladas';
+
+  @override
+  String get roleplayResultLikesEarned => 'Likes obtenidos';
+
+  @override
+  String get roleplayResultKeyExpressions => 'Expresiones clave';
+
+  @override
+  String get roleplayResultWhatYouSaid => 'Lo que dijiste';
+
+  @override
+  String get roleplayResultViewChat => 'Ver chat';
+
+  @override
+  String get roleplayResultViewFeedback => 'Ver feedback';
+
+  @override
+  String roleplayResultEpisodeLabel(int order, String title) {
+    return 'EP#$order $title';
+  }
 
   @override
   String get reportTitle => 'Reportar un problema';

@@ -644,6 +644,32 @@ class AppLocalizationsFr extends AppLocalizations {
   String get roleplayResultCompleteSeries => 'Terminer la série';
 
   @override
+  String get roleplayResultConversationComplete => 'Conversation terminée !';
+
+  @override
+  String get roleplayResultWordsSpoken => 'Mots prononcés';
+
+  @override
+  String get roleplayResultLikesEarned => 'Likes gagnés';
+
+  @override
+  String get roleplayResultKeyExpressions => 'Expressions clés';
+
+  @override
+  String get roleplayResultWhatYouSaid => 'Ce que vous avez dit';
+
+  @override
+  String get roleplayResultViewChat => 'Voir la conversation';
+
+  @override
+  String get roleplayResultViewFeedback => 'Voir le feedback';
+
+  @override
+  String roleplayResultEpisodeLabel(int order, String title) {
+    return 'EP#$order $title';
+  }
+
+  @override
   String get reportTitle => 'Signaler un problème';
 
   @override

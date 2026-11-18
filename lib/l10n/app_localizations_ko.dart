@@ -607,6 +607,32 @@ class AppLocalizationsKo extends AppLocalizations {
   String get roleplayResultCompleteSeries => '시리즈 완료하기';
 
   @override
+  String get roleplayResultConversationComplete => '대화를 마쳤어요!';
+
+  @override
+  String get roleplayResultWordsSpoken => '말한 단어 수';
+
+  @override
+  String get roleplayResultLikesEarned => '획득한 Like';
+
+  @override
+  String get roleplayResultKeyExpressions => '주요 표현';
+
+  @override
+  String get roleplayResultWhatYouSaid => '내가 한 말';
+
+  @override
+  String get roleplayResultViewChat => '전체 대화 보기';
+
+  @override
+  String get roleplayResultViewFeedback => '피드백 보기';
+
+  @override
+  String roleplayResultEpisodeLabel(int order, String title) {
+    return 'EP#$order $title';
+  }
+
+  @override
   String get reportTitle => '문제 신고';
 
   @override

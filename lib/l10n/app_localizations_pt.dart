@@ -642,6 +642,32 @@ class AppLocalizationsPt extends AppLocalizations {
   String get roleplayResultCompleteSeries => 'Concluir série';
 
   @override
+  String get roleplayResultConversationComplete => 'Conversa concluída!';
+
+  @override
+  String get roleplayResultWordsSpoken => 'Palavras faladas';
+
+  @override
+  String get roleplayResultLikesEarned => 'Likes ganhos';
+
+  @override
+  String get roleplayResultKeyExpressions => 'Expressões-chave';
+
+  @override
+  String get roleplayResultWhatYouSaid => 'O que você disse';
+
+  @override
+  String get roleplayResultViewChat => 'Ver conversa';
+
+  @override
+  String get roleplayResultViewFeedback => 'Ver feedback';
+
+  @override
+  String roleplayResultEpisodeLabel(int order, String title) {
+    return 'EP#$order $title';
+  }
+
+  @override
   String get reportTitle => 'Relatar Problema';
 
   @override

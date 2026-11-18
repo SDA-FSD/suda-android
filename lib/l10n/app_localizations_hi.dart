@@ -637,6 +637,32 @@ class AppLocalizationsHi extends AppLocalizations {
   String get roleplayResultCompleteSeries => 'सीरीज़ पूरी करें';
 
   @override
+  String get roleplayResultConversationComplete => 'बातचीत पूरी हुई!';
+
+  @override
+  String get roleplayResultWordsSpoken => 'बोले गए शब्द';
+
+  @override
+  String get roleplayResultLikesEarned => 'मिले Like';
+
+  @override
+  String get roleplayResultKeyExpressions => 'मुख्य अभिव्यक्तियाँ';
+
+  @override
+  String get roleplayResultWhatYouSaid => 'आपने क्या कहा';
+
+  @override
+  String get roleplayResultViewChat => 'चैट देखें';
+
+  @override
+  String get roleplayResultViewFeedback => 'फ़ीडबैक देखें';
+
+  @override
+  String roleplayResultEpisodeLabel(int order, String title) {
+    return 'EP#$order $title';
+  }
+
+  @override
   String get reportTitle => 'समस्या रिपोर्ट करें';
 
   @override
