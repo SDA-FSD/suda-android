@@ -609,6 +609,9 @@ class AppLocalizationsHi extends AppLocalizations {
       'एआई से गलतियाँ हो सकती हैं।\nकृपया निजी या संवेदनशील जानकारी शेयर न करें।';
 
   @override
+  String get roleplayOpeningReplayTutorial => 'ट्यूटोरियल फिर से देखें';
+
+  @override
   String get endingFailTitle => 'आप सभी मिशन पूरे नहीं कर पाए!';
 
   @override

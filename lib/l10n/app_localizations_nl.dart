@@ -610,6 +610,9 @@ class AppLocalizationsNl extends AppLocalizations {
       'AI kan fouten maken.\nDeel geen persoonlijke of gevoelige informatie.';
 
   @override
+  String get roleplayOpeningReplayTutorial => 'Tutorial opnieuw bekijken';
+
+  @override
   String get endingFailTitle => 'Je hebt niet alle missies voltooid!';
 
   @override

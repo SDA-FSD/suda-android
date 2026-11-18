@@ -226,6 +226,7 @@
   "roleplayOpeningAiCharacter": "Watak AI",
   "roleplayOpeningScenario": "Senario",
   "roleplayOpeningAiDisclaimer": "AI boleh melakukan kesilapan.\nJangan kongsi maklumat peribadi atau sensitif.",
+  "roleplayOpeningReplayTutorial": "Tonton semula tutorial",
   "endingFailTitle": "Anda belum menyelesaikan semua misi!",
   "endingFailSubtitle": "Cuba lagi dan temui keseluruhan cerita.",
   "roleplayTryAgainMessage": "Malangnya, markah anda tidak cukup tinggi untuk memperoleh ganjaran.",

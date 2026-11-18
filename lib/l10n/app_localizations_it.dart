@@ -614,6 +614,9 @@ class AppLocalizationsIt extends AppLocalizations {
       'L\'IA può commettere errori.\nNon condividere informazioni personali o sensibili.';
 
   @override
+  String get roleplayOpeningReplayTutorial => 'Rivedi il tutorial';
+
+  @override
   String get endingFailTitle => 'Non hai completato tutte le missioni!';
 
   @override

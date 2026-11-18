@@ -613,6 +613,9 @@ class AppLocalizationsDe extends AppLocalizations {
       'KI kann Fehler machen.\nTeile keine persönlichen oder sensiblen Informationen.';
 
   @override
+  String get roleplayOpeningReplayTutorial => 'Tutorial erneut ansehen';
+
+  @override
   String get endingFailTitle => 'Du hast nicht alle Missionen abgeschlossen!';
 
   @override

@@ -226,6 +226,7 @@
   "roleplayOpeningAiCharacter": "ตัวละคร AI",
   "roleplayOpeningScenario": "สถานการณ์",
   "roleplayOpeningAiDisclaimer": "AI อาจผิดพลาดได้\nอย่าแชร์ข้อมูลส่วนตัวหรือข้อมูลที่ละเอียดอ่อน",
+  "roleplayOpeningReplayTutorial": "ดูบทแนะนำอีกครั้ง",
   "endingFailTitle": "คุณทำภารกิจไม่ครบ!",
   "endingFailSubtitle": "ลองอีกครั้งเพื่อดูเรื่องราวทั้งหมด",
   "roleplayTryAgainMessage": "น่าเสียดาย คะแนนของคุณยังไม่พอรับรางวัล",

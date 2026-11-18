@@ -226,6 +226,7 @@
   "roleplayOpeningAiCharacter": "Postać AI",
   "roleplayOpeningScenario": "Scenariusz",
   "roleplayOpeningAiDisclaimer": "AI może się mylić.\nNie udostępniaj danych osobowych ani poufnych informacji.",
+  "roleplayOpeningReplayTutorial": "Obejrzyj tutorial ponownie",
   "endingFailTitle": "Nie udało ci się ukończyć wszystkich misji!",
   "endingFailSubtitle": "Spróbuj ponownie i odkryj całą historię.",
   "roleplayTryAgainMessage": "Niestety twój wynik był zbyt niski, aby zdobyć nagrodę.",

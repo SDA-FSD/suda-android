@@ -226,6 +226,7 @@
   "roleplayOpeningAiCharacter": "Персонаж ИИ",
   "roleplayOpeningScenario": "Сценарий",
   "roleplayOpeningAiDisclaimer": "ИИ может ошибаться.\nНе сообщайте личную или конфиденциальную информацию.",
+  "roleplayOpeningReplayTutorial": "Посмотреть туториал снова",
   "endingFailTitle": "Вы выполнили не все миссии!",
   "endingFailSubtitle": "Попробуйте снова и узнайте всю историю.",
   "roleplayTryAgainMessage": "К сожалению, вы набрали недостаточно баллов, чтобы получить награду.",

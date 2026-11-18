@@ -226,6 +226,7 @@
   "roleplayOpeningAiCharacter": "एआई कैरेक्टर",
   "roleplayOpeningScenario": "सिनेरियो",
   "roleplayOpeningAiDisclaimer": "एआई से गलतियाँ हो सकती हैं।\nकृपया निजी या संवेदनशील जानकारी शेयर न करें।",
+  "roleplayOpeningReplayTutorial": "ट्यूटोरियल फिर से देखें",
   "endingFailTitle": "आप सभी मिशन पूरे नहीं कर पाए!",
   "endingFailSubtitle": "फिर कोशिश करें और पूरी कहानी जानें।",
   "roleplayTryAgainMessage": "अफ़सोस, आपका स्कोर इनाम पाने के लिए काफ़ी नहीं था।",

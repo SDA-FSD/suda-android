@@ -570,6 +570,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get roleplayOpeningAiDisclaimer => 'AI 可能会出错。\n请勿分享个人信息或敏感信息。';
 
   @override
+  String get roleplayOpeningReplayTutorial => '重看教程';
+
+  @override
   String get endingFailTitle => '你还没有完成所有任务！';
 
   @override
@@ -1959,6 +1962,9 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get roleplayOpeningAiDisclaimer => 'AI 可能会出错。\n请勿分享个人信息或敏感信息。';
 
   @override
+  String get roleplayOpeningReplayTutorial => '重看教程';
+
+  @override
   String get endingFailTitle => '你还没有完成所有任务！';
 
   @override
@@ -3346,6 +3352,9 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get roleplayOpeningAiDisclaimer => 'AI 可能會出錯。\n請勿分享個人或敏感資訊。';
+
+  @override
+  String get roleplayOpeningReplayTutorial => '再看一次教學';
 
   @override
   String get endingFailTitle => '你沒有完成所有任務！';

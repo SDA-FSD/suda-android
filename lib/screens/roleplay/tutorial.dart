@@ -18,12 +18,16 @@ class RoleplayTutorialScreen extends StatefulWidget {
   const RoleplayTutorialScreen({
     super.key,
     this.preview = false,
+    this.replay = false,
   });
 
   static const String routeName = '/roleplay/tutorial';
 
   /// Lab 미리보기. 완료 API·Opening 전환 없이 닫기만 한다.
   final bool preview;
+
+  /// Opening 「튜토리얼 다시보기」.
+  final bool replay;
 
   @override
   State<RoleplayTutorialScreen> createState() => _RoleplayTutorialScreenState();
@@ -39,7 +43,10 @@ class _RoleplayTutorialScreenState extends State<RoleplayTutorialScreen>
   OverlayEntry? _resultEntry;
   late final AnimationController _resultReveal;
   late final AnimationController _resultDim;
-  late final AnimationController _resultRing;
+  /// 3장 Feedback 버튼: 0=민트 아웃라인 → 1=#054544 채움.
+  late final AnimationController _feedbackFill;
+  /// 채운 뒤 1~2회 펄스(스케일).
+  late final AnimationController _feedbackPulse;
   int _resultGen = 0;
   bool _playbackSyncQueued = false;
   late final AnimationController _readyBlink;
@@ -47,6 +54,8 @@ class _RoleplayTutorialScreenState extends State<RoleplayTutorialScreen>
   int _tutorialStepHigh = 0;
   bool _isCheckingUser = true;
   bool _isSubmitting = false;
+  /// 3장: 상세 피드백 카드가 한 번 노출된 뒤에만 Opening 탭 허용.
+  bool _slide3TapEnabled = false;
 
   static const int _totalPages = 3;
   static const double _readySlotHeight = 72;
@@ -100,15 +109,19 @@ class _RoleplayTutorialScreenState extends State<RoleplayTutorialScreen>
       vsync: this,
       duration: const Duration(milliseconds: 420),
     );
-    _resultRing = AnimationController(
+    _feedbackFill = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 900),
-    )..addListener(() => _resultEntry?.markNeedsBuild());
+      duration: const Duration(milliseconds: 230),
+    );
+    _feedbackPulse = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 700),
+    );
     _readyBlink = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1200),
     )..repeat(reverse: true);
-    if (widget.preview) {
+    if (widget.preview || widget.replay) {
       _isCheckingUser = false;
     } else {
       _checkTutorialStatus();
@@ -138,13 +151,22 @@ class _RoleplayTutorialScreenState extends State<RoleplayTutorialScreen>
         if (_play[i]) {
           _play[i] = false;
           changed = true;
-          if (i == 2) _stopResultLoop();
+          if (i == 2) {
+            _stopResultLoop();
+            if (_slide3TapEnabled) {
+              _slide3TapEnabled = false;
+              changed = true;
+            }
+          }
         }
       } else if (!_play[i] && _playDelay[i] == null) {
         _playDelay[i] = Timer(const Duration(milliseconds: 500), () {
           if (!mounted) return;
           _playDelay[i] = null;
-          setState(() => _play[i] = true);
+          setState(() {
+            _play[i] = true;
+            if (i == 2) _slide3TapEnabled = false;
+          });
           if (i == 2) _startResultLoop();
         });
       }
@@ -185,8 +207,18 @@ class _RoleplayTutorialScreenState extends State<RoleplayTutorialScreen>
     }
     _resultDim.stop();
     _resultDim.value = 0;
-    _resultRing.stop();
-    _resultRing.value = 0;
+    _feedbackFill.stop();
+    _feedbackFill.value = 0;
+    _feedbackPulse.stop();
+    _feedbackPulse.value = 0;
+  }
+
+  /// 0→1→0 두 번(펄스 2회).
+  double get _feedbackPulseAmount {
+    final t = _feedbackPulse.value;
+    final cycle = (t * 2) % 1.0;
+    final ping = cycle <= 0.5 ? cycle * 2 : (1 - cycle) * 2;
+    return Curves.easeInOut.transform(ping);
   }
 
   void _ensureResultEntry() {
@@ -210,14 +242,25 @@ class _RoleplayTutorialScreenState extends State<RoleplayTutorialScreen>
     _resultGen++;
     final gen = _resultGen;
     _ensureResultEntry();
+    var firstOpen = true;
     while (mounted && _play[2] && gen == _resultGen) {
-      await _resultRing.forward(from: 0);
+      _feedbackFill.value = 0;
+      _feedbackPulse.value = 0;
+      // 잠깐 아웃라인 상태로 둔 뒤, 버튼 채움→펄스→상세 카드.
+      await Future<void>.delayed(const Duration(milliseconds: 550));
       if (!mounted || !_play[2] || gen != _resultGen) return;
-      _resultRing.value = 0;
+      await _feedbackFill.forward(from: 0);
+      if (!mounted || !_play[2] || gen != _resultGen) return;
+      await _feedbackPulse.forward(from: 0);
+      if (!mounted || !_play[2] || gen != _resultGen) return;
       final open = _resultReveal.forward(from: 0);
       final dimIn = _resultDim.forward(from: 0);
       await Future.wait<void>([open, dimIn]);
       if (!mounted || !_play[2] || gen != _resultGen) return;
+      if (firstOpen) {
+        firstOpen = false;
+        if (mounted) setState(() => _slide3TapEnabled = true);
+      }
       for (var i = 0; i < 30; i++) {
         await Future<void>.delayed(const Duration(milliseconds: 100));
         if (!mounted || !_play[2] || gen != _resultGen) return;
@@ -227,7 +270,9 @@ class _RoleplayTutorialScreenState extends State<RoleplayTutorialScreen>
         _resultDim.reverse(),
       ]);
       if (!mounted || !_play[2] || gen != _resultGen) return;
-      await Future<void>.delayed(const Duration(seconds: 1));
+      await _feedbackFill.reverse();
+      if (!mounted || !_play[2] || gen != _resultGen) return;
+      await Future<void>.delayed(const Duration(milliseconds: 800));
     }
   }
 
@@ -244,8 +289,6 @@ class _RoleplayTutorialScreenState extends State<RoleplayTutorialScreen>
     return IgnorePointer(
       child: Stack(
         children: [
-          if (t == 0 && buttonCenter != null)
-            _resultRings(buttonCenter, _resultRingAmount),
           if (t > 0)
             Center(
               child: Opacity(
@@ -291,36 +334,6 @@ class _RoleplayTutorialScreenState extends State<RoleplayTutorialScreen>
     final height = 16 + 18 + 8 + 40 + 8 + 18 + 8 + 40 + 16 + 12 + painter.height + 16;
     painter.dispose();
     return height;
-  }
-
-  double get _resultRingAmount {
-    final t = _resultRing.value;
-    final ping = t <= 0.5 ? t * 2 : (1 - t) * 2;
-    return Curves.easeInOut.transform(ping);
-  }
-
-  Widget _resultRings(Offset center, double amount) {
-    if (amount <= 0.01) return const SizedBox.shrink();
-    final scale = 0.82 + 0.18 * amount;
-    const canvas = _TutorialTranslateAim.canvas;
-    return Positioned(
-      left: center.dx - canvas / 2,
-      top: center.dy - canvas / 2,
-      width: canvas,
-      height: canvas,
-      child: Opacity(
-        opacity: amount,
-        child: CustomPaint(
-          painter: _AimRingsPainter(
-            color: const Color(0xFFFF00A6),
-            innerRadius: _TutorialTranslateAim.innerRadius * scale,
-            outerRadius: _TutorialTranslateAim.outerRadius * scale,
-            innerStroke: _TutorialTranslateAim.innerStroke,
-            outerStroke: _TutorialTranslateAim.outerStroke,
-          ),
-        ),
-      ),
-    );
   }
 
   Widget _resultLessonCard(AppLocalizations l10n) {
@@ -445,7 +458,8 @@ class _RoleplayTutorialScreenState extends State<RoleplayTutorialScreen>
     _stopResultLoop();
     _resultReveal.dispose();
     _resultDim.dispose();
-    _resultRing.dispose();
+    _feedbackFill.dispose();
+    _feedbackPulse.dispose();
     _readyBlink.dispose();
     _pageController.dispose();
     super.dispose();
@@ -549,8 +563,11 @@ class _RoleplayTutorialScreenState extends State<RoleplayTutorialScreen>
   void _handleBottomTap(int index) {
     if (_isSubmitting) return;
     if (index >= _totalPages - 1) {
+      if (!_slide3TapEnabled) return;
       if (widget.preview) {
         Navigator.of(context).pop();
+      } else if (widget.replay) {
+        _scheduleReplaceWithOpening();
       } else {
         _handleComplete();
       }
@@ -880,11 +897,18 @@ class _RoleplayTutorialScreenState extends State<RoleplayTutorialScreen>
                   ),
                 ),
                 const SizedBox(height: 12),
-                _TutorialSpeechFeedbackCard(
-                  buttonKey: _feedbackButtonKey,
-                  gradeLabel: 'NEEDS IMPROVEMENT',
-                  gradeColor: const Color(0xFFFFB700),
-                  speech: 'I want coffee.',
+                AnimatedBuilder(
+                  animation: Listenable.merge([_feedbackFill, _feedbackPulse]),
+                  builder: (context, _) {
+                    return _TutorialSpeechFeedbackCard(
+                      buttonKey: _feedbackButtonKey,
+                      gradeLabel: 'NEEDS IMPROVEMENT',
+                      gradeColor: const Color(0xFFFFB700),
+                      speech: 'I want coffee.',
+                      fill: _feedbackFill.value,
+                      pulse: _feedbackPulseAmount,
+                    );
+                  },
                 ),
                 const SizedBox(height: 16),
                 const _TutorialSpeechFeedbackCard(
@@ -1122,16 +1146,30 @@ class _TutorialSpeechFeedbackCard extends StatelessWidget {
     required this.gradeColor,
     required this.speech,
     this.buttonKey,
+    this.fill = 0,
+    this.pulse = 0,
   });
 
   final String gradeLabel;
   final Color gradeColor;
   final String speech;
   final Key? buttonKey;
+  /// 0=민트 아웃라인, 1=#054544 채움.
+  final double fill;
+  /// 0~1 펄스 강도(스케일).
+  final double pulse;
+
+  static const _outline = Color(0xFF0CABA8);
+  static const _filled = Color(0xFF054544);
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context).textTheme;
+    final t = fill.clamp(0.0, 1.0);
+    final bg = Color.lerp(Colors.transparent, _filled, t)!;
+    final border = Color.lerp(_outline, _filled, t)!;
+    final fg = Color.lerp(_outline, Colors.white, t)!;
+    final scale = 1 + 0.08 * pulse.clamp(0.0, 1.0);
     return DecoratedBox(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -1195,36 +1233,39 @@ class _TutorialSpeechFeedbackCard extends StatelessWidget {
             const SizedBox(height: 12),
             Align(
               alignment: Alignment.centerRight,
-              child: Container(
-                key: buttonKey,
-                height: 24,
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                decoration: BoxDecoration(
-                  border: Border.all(color: const Color(0xFF0CABA8)),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Feedback',
-                      style: theme.labelSmall?.copyWith(
-                        color: const Color(0xFF0CABA8),
+              child: Transform.scale(
+                scale: scale,
+                alignment: Alignment.center,
+                child: Container(
+                  key: buttonKey,
+                  height: 24,
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  decoration: BoxDecoration(
+                    color: bg,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: border, width: 1),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Feedback',
+                        style: theme.labelSmall?.copyWith(color: fg),
                       ),
-                    ),
-                    const SizedBox(width: 4),
-                    Transform.flip(
-                      flipY: true,
-                      child: Image.asset(
-                        'assets/images/icons/click_to_fold.png',
-                        width: 12,
-                        height: 12,
-                        fit: BoxFit.contain,
-                        color: const Color(0xFF0CABA8),
-                        colorBlendMode: BlendMode.srcIn,
+                      const SizedBox(width: 4),
+                      Transform.flip(
+                        flipY: true,
+                        child: Image.asset(
+                          'assets/images/icons/click_to_fold.png',
+                          width: 12,
+                          height: 12,
+                          fit: BoxFit.contain,
+                          color: fg,
+                          colorBlendMode: BlendMode.srcIn,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -1335,7 +1376,7 @@ class _ExteriorOnlyClipper extends CustomClipper<Path> {
 }
 
 /// 1번 슬라이드. 영어 발화는 고정이고, 번역 줄만 사용자 언어.
-/// 조준 원은 말풍선 너비에 넣지 않고 Overlay에 그린다.
+/// 번역 아이콘 확대·색 변화만 강조(원형 조준 링 없음).
 class _TutorialTranslatorSample extends StatefulWidget {
   const _TutorialTranslatorSample({
     required this.translation,
@@ -1366,13 +1407,10 @@ class _TutorialTranslatorSampleState extends State<_TutorialTranslatorSample>
   static const _avatarSize = 32.0;
   static const _iconGap = 5.0;
 
-  final LayerLink _iconLink = LayerLink();
   bool _expanded = false;
   OverlayEntry? _hintEntry;
   final LayerLink _hintLink = LayerLink();
   late final AnimationController _rings;
-  late final Animation<double> _ringScale;
-  OverlayEntry? _ringsEntry;
   Timer? _activeHold;
 
   @override
@@ -1382,7 +1420,6 @@ class _TutorialTranslatorSampleState extends State<_TutorialTranslatorSample>
       vsync: this,
       duration: const Duration(milliseconds: 1000),
     )..addStatusListener(_onRingStatus);
-    _ringScale = CurvedAnimation(parent: _rings, curve: Curves.easeInOut);
     if (widget.frozen) {
       _expanded = true;
     }
@@ -1397,7 +1434,6 @@ class _TutorialTranslatorSampleState extends State<_TutorialTranslatorSample>
   }
 
   void _beginTranslationLoop() {
-    _insertRings();
     if (_rings.isAnimating || _activeHold != null) return;
     _rings.forward(from: 0);
   }
@@ -1407,8 +1443,6 @@ class _TutorialTranslatorSampleState extends State<_TutorialTranslatorSample>
     _activeHold = null;
     _rings.stop();
     _rings.value = 0;
-    _ringsEntry?.remove();
-    _ringsEntry = null;
     if (_expanded) setState(() => _expanded = false);
   }
 
@@ -1497,50 +1531,11 @@ class _TutorialTranslatorSampleState extends State<_TutorialTranslatorSample>
     overlay.insert(_hintEntry!);
   }
 
-  void _insertRings() {
-    if (_ringsEntry != null) return;
-    final overlay = Overlay.maybeOf(context);
-    if (overlay == null) return;
-    _ringsEntry = OverlayEntry(builder: _buildRings);
-    overlay.insert(_ringsEntry!);
-  }
-
-  Widget _buildRings(BuildContext context) {
-    return IgnorePointer(
-      child: CompositedTransformFollower(
-        link: _iconLink,
-        showWhenUnlinked: false,
-        targetAnchor: Alignment.center,
-        followerAnchor: Alignment.center,
-        child: AnimatedBuilder(
-          animation: _ringScale,
-          builder: (context, _) {
-            final scale = 0.82 + (1 - 0.82) * _ringScale.value;
-            return SizedBox(
-              width: _TutorialTranslateAim.canvas,
-              height: _TutorialTranslateAim.canvas,
-              child: CustomPaint(
-                painter: _AimRingsPainter(
-                  innerRadius: _TutorialTranslateAim.innerRadius * scale,
-                  outerRadius: _TutorialTranslateAim.outerRadius * scale,
-                  innerStroke: _TutorialTranslateAim.innerStroke,
-                  outerStroke: _TutorialTranslateAim.outerStroke,
-                ),
-              ),
-            );
-          },
-        ),
-      ),
-    );
-  }
-
   @override
   void dispose() {
     _activeHold?.cancel();
     _hintEntry?.remove();
     _hintEntry = null;
-    _ringsEntry?.remove();
-    _ringsEntry = null;
     _rings.dispose();
     super.dispose();
   }
@@ -1644,42 +1639,39 @@ class _TutorialTranslatorSampleState extends State<_TutorialTranslatorSample>
               ),
             ),
             const SizedBox(width: _iconGap),
-            CompositedTransformTarget(
-              link: _iconLink,
-              child: SizedBox(
-                width: _TutorialTranslateAim.iconSize,
-                height: _TutorialTranslateAim.iconSize,
-                child: TweenAnimationBuilder<double>(
-                  tween: Tween<double>(end: _expanded ? 1 : 0),
-                  duration: const Duration(milliseconds: 220),
-                  curve: Curves.easeInOut,
-                  builder: (context, t, _) {
-                    return Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Image.asset(
-                          'assets/images/icons/translation_grey.png',
-                          width: _TutorialTranslateAim.iconSize,
-                          height: _TutorialTranslateAim.iconSize,
-                        ),
-                        Opacity(
-                          opacity: t,
-                          child: ColorFiltered(
-                            colorFilter: const ColorFilter.mode(
-                              Colors.white,
-                              BlendMode.srcIn,
-                            ),
-                            child: Image.asset(
-                              'assets/images/icons/translation_grey.png',
-                              width: _TutorialTranslateAim.iconSize,
-                              height: _TutorialTranslateAim.iconSize,
-                            ),
+            SizedBox(
+              width: _TutorialTranslateAim.iconSize,
+              height: _TutorialTranslateAim.iconSize,
+              child: TweenAnimationBuilder<double>(
+                tween: Tween<double>(end: _expanded ? 1 : 0),
+                duration: const Duration(milliseconds: 220),
+                curve: Curves.easeInOut,
+                builder: (context, t, _) {
+                  return Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Image.asset(
+                        'assets/images/icons/translation_grey.png',
+                        width: _TutorialTranslateAim.iconSize,
+                        height: _TutorialTranslateAim.iconSize,
+                      ),
+                      Opacity(
+                        opacity: t,
+                        child: ColorFiltered(
+                          colorFilter: const ColorFilter.mode(
+                            Colors.white,
+                            BlendMode.srcIn,
+                          ),
+                          child: Image.asset(
+                            'assets/images/icons/translation_grey.png',
+                            width: _TutorialTranslateAim.iconSize,
+                            height: _TutorialTranslateAim.iconSize,
                           ),
                         ),
-                      ],
-                    );
-                  },
-                ),
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
           ],
@@ -1692,55 +1684,9 @@ class _TutorialTranslatorSampleState extends State<_TutorialTranslatorSample>
 
 class _TutorialTranslateAim {
   static const iconSize = 36.0;
-  static const innerStroke = 5.0;
-  static const outerStroke = 3.0;
-  static const gap = 10.0;
-  static const pad = 4.0;
-
-  /// 아이콘+여백 기준 안쪽 원 중심 반지름의 1.5배.
-  static const innerRadius =
-      (iconSize / 2 + pad + innerStroke / 2) * 1.5;
-  static const outerRadius =
-      innerRadius + innerStroke / 2 + gap + outerStroke / 2;
-  static const canvas = (outerRadius + outerStroke / 2) * 2 + 2;
 }
 
-class _AimRingsPainter extends CustomPainter {
-  const _AimRingsPainter({
-    this.color = Colors.white,
-    required this.innerRadius,
-    required this.outerRadius,
-    required this.innerStroke,
-    required this.outerStroke,
-  });
-
-  final Color color;
-  final double innerRadius;
-  final double outerRadius;
-  final double innerStroke;
-  final double outerStroke;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = size.center(Offset.zero);
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke;
-    paint.strokeWidth = innerStroke;
-    canvas.drawCircle(center, innerRadius, paint);
-    paint.strokeWidth = outerStroke;
-    canvas.drawCircle(center, outerRadius, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant _AimRingsPainter oldDelegate) {
-    return oldDelegate.color != color ||
-        oldDelegate.innerRadius != innerRadius ||
-        oldDelegate.outerRadius != outerRadius;
-  }
-}
-
-/// 2번 슬라이드 힌트. 메가폰 강조선 뒤 문장 물들임, 이어서 please만 반복.
+/// 2번 슬라이드 힌트. Playing 최신 힌트박스 + 확성기·영문 확대/색 애니(원형 링 없음).
 class _TutorialHintCoach extends StatefulWidget {
   const _TutorialHintCoach();
 
@@ -1751,15 +1697,18 @@ class _TutorialHintCoach extends StatefulWidget {
 class _TutorialHintCoachState extends State<_TutorialHintCoach>
     with SingleTickerProviderStateMixin {
   static const _words = ['Just', 'a', 'latte,', 'please.'];
-  static const _header = Color(0xFF054544);
+  static const _bg = Color(0xFF0CABA8);
   static const _accent = Color(0xFF80D7CF);
-  static const _teal = Color(0xFF0CABA8);
-  static const _bubble = Color(0xFF194847);
+  static const _playback = Color(0xFF054544);
+  static const _shadow = [
+    BoxShadow(
+      color: Color(0x40000000),
+      blurRadius: 16,
+      offset: Offset(0, 8),
+    ),
+  ];
 
-  final GlobalKey _megaphoneKey = GlobalKey();
-  final GlobalKey _pleaseKey = GlobalKey();
   late final AnimationController _cycle;
-  OverlayEntry? _ringsEntry;
   Timer? _startDelay;
 
   @override
@@ -1768,29 +1717,20 @@ class _TutorialHintCoachState extends State<_TutorialHintCoach>
     _cycle = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 6400),
-    )..addListener(() => _ringsEntry?.markNeedsBuild());
+    )..addListener(() {
+        if (mounted) setState(() {});
+      });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      _insertRings();
       _startDelay = Timer(const Duration(milliseconds: 500), () {
         if (mounted) _cycle.repeat();
       });
     });
   }
 
-  void _insertRings() {
-    if (_ringsEntry != null) return;
-    final overlay = Overlay.maybeOf(context);
-    if (overlay == null) return;
-    _ringsEntry = OverlayEntry(builder: _buildRings);
-    overlay.insert(_ringsEntry!);
-  }
-
   @override
   void dispose() {
     _startDelay?.cancel();
-    _ringsEntry?.remove();
-    _ringsEntry = null;
     _cycle.dispose();
     super.dispose();
   }
@@ -1800,73 +1740,55 @@ class _TutorialHintCoachState extends State<_TutorialHintCoach>
     return Curves.easeInOut.transform((t - start) / (end - start));
   }
 
+  /// 구간 안에서 0→1→0.
+  double _ping(double t, double start, double end) {
+    if (t <= start || t >= end) return 0;
+    final u = (t - start) / (end - start);
+    final up = u < 0.5 ? u * 2 : (1 - u) * 2;
+    return Curves.easeInOut.transform(up);
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
-    final labelStyle =
-        theme.elevatedButtonTheme.style?.textStyle
-            ?.resolve(const <WidgetState>{})
-            ?.copyWith(color: _accent, decoration: TextDecoration.none) ??
-        theme.textTheme.bodyMedium?.copyWith(
-          color: _accent,
-          decoration: TextDecoration.none,
-        );
-    final lineStyle = theme.textTheme.bodyMedium?.copyWith(
-      color: _accent,
-      decoration: TextDecoration.none,
-    );
-    final wordStyle = (theme.textTheme.headlineSmall ?? theme.textTheme.bodyLarge)
-        ?.copyWith(
-          height: 1.35,
-          fontStyle: FontStyle.italic,
-          decoration: TextDecoration.none,
-        );
+    final labelStyle = theme.textTheme.bodyMedium?.copyWith(color: _accent);
+    final nativeStyle = theme.textTheme.bodyLarge?.copyWith(color: Colors.white);
+    final englishLabelStyle =
+        theme.textTheme.bodySmall?.copyWith(color: _accent);
+    final headline = theme.textTheme.headlineSmall ?? theme.textTheme.bodyLarge;
+    final t = _cycle.value;
+    final mega = _ping(t, 0.02, 0.30);
+    final sentenceFlow =
+        t < 0.08 || t >= 0.48 ? 0.0 : _window(t, 0.08, 0.36);
+    final sentenceFade =
+        t >= 0.36 && t < 0.48 ? _window(t, 0.36, 0.48) : 0.0;
+    final pleaseRing = _ping(t, 0.54, 0.86);
+    final pleaseFlow =
+        t < 0.60 || t >= 0.90 ? 0.0 : _window(t, 0.60, 0.78);
+    final pleaseFade =
+        t >= 0.78 && t < 0.90 ? _window(t, 0.78, 0.90) : 0.0;
+    final tint = _bg.withValues(alpha: 0.92);
+    final sentencePlaying = sentenceFlow > 0 || sentenceFade > 0;
+    final pleasePlaying = pleaseFlow > 0 || pleaseFade > 0;
+    final playing = sentencePlaying || pleasePlaying || mega > 0.01;
 
-    return AnimatedBuilder(
-      animation: _cycle,
-      builder: (context, _) {
-        final t = _cycle.value;
-        final mega = _ping(t, 0.02, 0.30);
-        final sentenceFlow = t < 0.08 || t >= 0.48
-            ? 0.0
-            : _window(t, 0.08, 0.36);
-        final sentenceFade = t >= 0.36 && t < 0.48
-            ? _window(t, 0.36, 0.48)
-            : 0.0;
-        final pleaseRing = _ping(t, 0.54, 0.86);
-        final pleaseFlow = t < 0.60 || t >= 0.90
-            ? 0.0
-            : _window(t, 0.60, 0.78);
-        final pleaseFade = t >= 0.78 && t < 0.90
-            ? _window(t, 0.78, 0.90)
-            : 0.0;
-        return Container(
-          clipBehavior: Clip.none,
-          decoration: BoxDecoration(
-            color: _bubble.withValues(alpha: 0.7),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Container(
-                height: 27,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: _header,
-                  borderRadius: BorderRadius.circular(13.5),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Color(0x66000000),
-                      blurRadius: 6,
-                      offset: Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: _shadow,
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: ColoredBox(
+          color: tint,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 10, 8, 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
                   children: [
                     ColorFiltered(
                       colorFilter: const ColorFilter.mode(
@@ -1880,86 +1802,100 @@ class _TutorialHintCoachState extends State<_TutorialHintCoach>
                       ),
                     ),
                     const SizedBox(width: 6),
-                    Text(l10n.roleplayHintLabel, style: labelStyle),
+                    Expanded(
+                      child: Text(
+                        l10n.roleplayHintLabel,
+                        style: labelStyle,
+                        textAlign: TextAlign.start,
+                      ),
+                    ),
+                    const SizedBox(
+                      width: 40,
+                      height: 40,
+                      child: Icon(Icons.close, size: 20, color: Colors.white),
+                    ),
                   ],
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
-                child: Text(
-                  l10n.tutorialSlide2HintLine,
-                  style: lineStyle,
-                  textAlign: TextAlign.center,
+                Padding(
+                  padding: const EdgeInsets.only(top: 4, right: 8),
+                  child: Text(
+                    l10n.tutorialSlide2HintLine,
+                    textAlign: TextAlign.start,
+                    style: nativeStyle,
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
-                child: Center(
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 1,
+                    child: ColoredBox(color: Color(0xFF0CABA8)),
+                  ),
+                ),
+                Text(l10n.roleplayHintEnglishLabel, style: englishLabelStyle),
+                Padding(
+                  padding: const EdgeInsets.only(top: 8, right: 8),
                   child: Row(
-                    mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Transform.scale(
                         scale: 1 + 0.28 * mega,
                         alignment: Alignment.center,
-                        child: SizedBox(
-                          key: _megaphoneKey,
-                          width: 40,
-                          height: 40,
-                          child: Center(
-                            child: ColorFiltered(
-                              colorFilter: ColorFilter.mode(
-                                Color.lerp(Colors.white, _teal, mega)!,
-                                BlendMode.srcIn,
-                              ),
-                              child: Image.asset(
-                                'assets/images/icons/megaphone.png',
-                                width: 24,
-                                height: 24,
-                              ),
-                            ),
+                        child: ColorFiltered(
+                          colorFilter: ColorFilter.mode(
+                            Color.lerp(
+                              Colors.white,
+                              _playback,
+                              mega.clamp(0.0, 1.0),
+                            )!,
+                            BlendMode.srcIn,
+                          ),
+                          child: Image.asset(
+                            playing
+                                ? 'assets/images/icons/megaphone_fill.png'
+                                : 'assets/images/icons/megaphone.png',
+                            width: 24,
+                            height: 24,
                           ),
                         ),
                       ),
-                      Wrap(
-                        crossAxisAlignment: WrapCrossAlignment.center,
-                        alignment: WrapAlignment.center,
-                        children: [
-                          for (var i = 0; i < _words.length; i++) ...[
-                            if (i > 0)
-                              Text(
-                                ' ',
-                                style: wordStyle?.copyWith(color: Colors.white),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Wrap(
+                          alignment: WrapAlignment.start,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          runSpacing: 4,
+                          children: [
+                            for (var i = 0; i < _words.length; i++) ...[
+                              if (i > 0)
+                                Text(
+                                  ' ',
+                                  style: headline?.copyWith(
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              _word(
+                                i,
+                                headline,
+                                sentenceFlow,
+                                sentenceFade,
+                                pleaseRing,
+                                pleaseFlow,
+                                pleaseFade,
                               ),
-                            _word(
-                              i,
-                              wordStyle,
-                              sentenceFlow,
-                              sentenceFade,
-                              pleaseRing,
-                              pleaseFlow,
-                              pleaseFade,
-                            ),
+                            ],
                           ],
-                        ],
+                        ),
                       ),
                     ],
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        );
-      },
+        ),
+      ),
     );
-  }
-
-  /// 구간 안에서 0→1→0.
-  double _ping(double t, double start, double end) {
-    if (t <= start || t >= end) return 0;
-    final u = (t - start) / (end - start);
-    final up = u < 0.5 ? u * 2 : (1 - u) * 2;
-    return Curves.easeInOut.transform(up);
   }
 
   Widget _word(
@@ -1997,6 +1933,9 @@ class _TutorialHintCoachState extends State<_TutorialHintCoach>
           ),
         ),
     ];
+    final underlineColor = (pleaseOn || sentenceFlow > 0 || sentenceFade > 0)
+        ? _playback
+        : Colors.white;
     return Transform.scale(
       scale: scale,
       alignment: Alignment.center,
@@ -2004,7 +1943,6 @@ class _TutorialHintCoachState extends State<_TutorialHintCoach>
         mainAxisSize: MainAxisSize.min,
         children: [
           Text.rich(
-            key: isPlease ? _pleaseKey : null,
             TextSpan(children: spans),
             textDirection: TextDirection.ltr,
           ),
@@ -2012,8 +1950,10 @@ class _TutorialHintCoachState extends State<_TutorialHintCoach>
           SizedBox(
             width: _measureWordWidth(word, base),
             height: 3,
-            child: const CustomPaint(
-              painter: _TutorialHintDottedUnderlinePainter(color: _teal),
+            child: CustomPaint(
+              painter: _TutorialHintDottedUnderlinePainter(
+                color: underlineColor,
+              ),
             ),
           ),
         ],
@@ -2059,46 +1999,8 @@ class _TutorialHintCoachState extends State<_TutorialHintCoach>
   Color _flowColor(int index, int count, double progress, double fade) {
     if (count <= 0 || (progress <= 0 && fade <= 0)) return Colors.white;
     final local = (progress * (count + 1) - index).clamp(0.0, 1.0);
-    final flowed = Color.lerp(Colors.white, _teal, local)!;
+    final flowed = Color.lerp(Colors.white, _playback, local)!;
     return Color.lerp(flowed, Colors.white, fade)!;
-  }
-
-  Widget _buildRings(BuildContext context) {
-    final t = _cycle.value;
-    final mega = _ping(t, 0.02, 0.30);
-    final please = _ping(t, 0.54, 0.86);
-    final showPlease = please > mega;
-    final amount = showPlease ? please : mega;
-    final key = showPlease ? _pleaseKey : _megaphoneKey;
-    if (amount <= 0.01) return const SizedBox.shrink();
-    final box = key.currentContext?.findRenderObject() as RenderBox?;
-    if (box == null || !box.attached || !box.hasSize) {
-      return const SizedBox.shrink();
-    }
-    final center = box.localToGlobal(box.size.center(Offset.zero));
-    final canvas = _TutorialTranslateAim.canvas;
-    final scale = (0.78 + 0.22 * amount) * (showPlease ? 1.3 : 1);
-    final draw = canvas * scale;
-    return IgnorePointer(
-      child: Stack(
-        children: [
-          Positioned(
-            left: center.dx - draw / 2,
-            top: center.dy - draw / 2,
-            width: draw,
-            height: draw,
-            child: CustomPaint(
-              painter: _AimRingsPainter(
-                innerRadius: _TutorialTranslateAim.innerRadius * scale,
-                outerRadius: _TutorialTranslateAim.outerRadius * scale,
-                innerStroke: _TutorialTranslateAim.innerStroke,
-                outerStroke: _TutorialTranslateAim.outerStroke,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }
 

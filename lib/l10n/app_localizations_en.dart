@@ -606,6 +606,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'AI can make mistakes.\nPlease don\'t share personal or sensitive information.';
 
   @override
+  String get roleplayOpeningReplayTutorial => 'Replay tutorial';
+
+  @override
   String get endingFailTitle => 'You didn\'t complete all the missions!';
 
   @override

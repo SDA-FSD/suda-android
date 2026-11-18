@@ -226,6 +226,7 @@
   "roleplayOpeningAiCharacter": "KI-Charakter",
   "roleplayOpeningScenario": "Szenario",
   "roleplayOpeningAiDisclaimer": "KI kann Fehler machen.\nTeile keine persönlichen oder sensiblen Informationen.",
+  "roleplayOpeningReplayTutorial": "Tutorial erneut ansehen",
   "endingFailTitle": "Du hast nicht alle Missionen abgeschlossen!",
   "endingFailSubtitle": "Versuche es erneut und entdecke die ganze Geschichte.",
   "roleplayTryAgainMessage": "Leider war deine Punktzahl nicht hoch genug für die Belohnung.",

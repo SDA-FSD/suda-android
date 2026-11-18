@@ -226,6 +226,7 @@
   "roleplayOpeningAiCharacter": "AI 角色",
   "roleplayOpeningScenario": "场景",
   "roleplayOpeningAiDisclaimer": "AI 可能会出错。\n请勿分享个人信息或敏感信息。",
+  "roleplayOpeningReplayTutorial": "重看教程",
   "endingFailTitle": "你还没有完成所有任务！",
   "endingFailSubtitle": "再试一次，解锁完整故事。",
   "roleplayTryAgainMessage": "很遗憾，你的得分不足，无法获得奖励。",

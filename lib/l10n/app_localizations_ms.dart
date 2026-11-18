@@ -611,6 +611,9 @@ class AppLocalizationsMs extends AppLocalizations {
       'AI boleh melakukan kesilapan.\nJangan kongsi maklumat peribadi atau sensitif.';
 
   @override
+  String get roleplayOpeningReplayTutorial => 'Tonton semula tutorial';
+
+  @override
   String get endingFailTitle => 'Anda belum menyelesaikan semua misi!';
 
   @override

@@ -83,6 +83,17 @@ class RoleplayRouter {
     );
   }
 
+  /// Opening 「튜토리얼 다시보기」
+  static void replaceWithTutorialReplay(BuildContext context) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const RoleplayTutorialScreen(replay: true),
+        settings: const RouteSettings(name: RoleplayTutorialScreen.routeName),
+      ),
+    );
+  }
+
   static void pushOpening(BuildContext context) {
     Navigator.push(
       context,

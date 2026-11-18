@@ -610,6 +610,9 @@ class AppLocalizationsEs extends AppLocalizations {
       'La IA puede cometer errores.\nNo compartas información personal ni sensible.';
 
   @override
+  String get roleplayOpeningReplayTutorial => 'Volver a ver el tutorial';
+
+  @override
   String get endingFailTitle => '¡No completaste todas las misiones!';
 
   @override
@@ -2093,6 +2096,9 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
   @override
   String get roleplayOpeningAiDisclaimer =>
       'La IA puede cometer errores.\nNo compartas información personal ni sensible.';
+
+  @override
+  String get roleplayOpeningReplayTutorial => 'Volver a ver el tutorial';
 
   @override
   String get endingFailTitle => '¡No completaste todas las misiones!';

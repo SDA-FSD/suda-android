@@ -226,6 +226,7 @@
   "roleplayOpeningAiCharacter": "AI Character",
   "roleplayOpeningScenario": "Scenario",
   "roleplayOpeningAiDisclaimer": "Maaaring magkamali ang AI.\nHuwag magbahagi ng personal o sensitibong impormasyon.",
+  "roleplayOpeningReplayTutorial": "Panoorin ulit ang tutorial",
   "endingFailTitle": "Hindi mo nakumpleto ang lahat ng mission!",
   "endingFailSubtitle": "Subukan muli at tuklasin ang buong kuwento.",
   "roleplayTryAgainMessage": "Sayang, hindi sapat ang score mo para makuha ang reward.",

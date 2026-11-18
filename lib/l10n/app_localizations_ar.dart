@@ -601,6 +601,9 @@ class AppLocalizationsAr extends AppLocalizations {
       'قد يخطئ الذكاء الاصطناعي.\nيرجى عدم مشاركة معلومات شخصية أو حساسة.';
 
   @override
+  String get roleplayOpeningReplayTutorial => 'إعادة مشاهدة الدليل';
+
+  @override
   String get endingFailTitle => 'لم تُكمل جميع المهام!';
 
   @override

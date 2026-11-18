@@ -226,6 +226,7 @@
   "roleplayOpeningAiCharacter": "Nhân vật AI",
   "roleplayOpeningScenario": "Tình huống",
   "roleplayOpeningAiDisclaimer": "AI có thể mắc lỗi.\nĐừng chia sẻ thông tin cá nhân hoặc thông tin nhạy cảm.",
+  "roleplayOpeningReplayTutorial": "Xem lại hướng dẫn",
   "endingFailTitle": "Bạn chưa hoàn thành tất cả nhiệm vụ!",
   "endingFailSubtitle": "Thử lại để khám phá toàn bộ câu chuyện.",
   "roleplayTryAgainMessage": "Tiếc quá, điểm của bạn chưa đủ để nhận phần thưởng.",

@@ -226,6 +226,7 @@
   "roleplayOpeningAiCharacter": "AI-personage",
   "roleplayOpeningScenario": "Scenario",
   "roleplayOpeningAiDisclaimer": "AI kan fouten maken.\nDeel geen persoonlijke of gevoelige informatie.",
+  "roleplayOpeningReplayTutorial": "Tutorial opnieuw bekijken",
   "endingFailTitle": "Je hebt niet alle missies voltooid!",
   "endingFailSubtitle": "Probeer het opnieuw en ontdek het hele verhaal.",
   "roleplayTryAgainMessage": "Helaas was je score niet hoog genoeg voor de beloning.",

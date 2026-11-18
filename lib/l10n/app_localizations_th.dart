@@ -597,6 +597,9 @@ class AppLocalizationsTh extends AppLocalizations {
       'AI อาจผิดพลาดได้\nอย่าแชร์ข้อมูลส่วนตัวหรือข้อมูลที่ละเอียดอ่อน';
 
   @override
+  String get roleplayOpeningReplayTutorial => 'ดูบทแนะนำอีกครั้ง';
+
+  @override
   String get endingFailTitle => 'คุณทำภารกิจไม่ครบ!';
 
   @override

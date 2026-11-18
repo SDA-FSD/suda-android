@@ -608,6 +608,9 @@ class AppLocalizationsVi extends AppLocalizations {
       'AI có thể mắc lỗi.\nĐừng chia sẻ thông tin cá nhân hoặc thông tin nhạy cảm.';
 
   @override
+  String get roleplayOpeningReplayTutorial => 'Xem lại hướng dẫn';
+
+  @override
   String get endingFailTitle => 'Bạn chưa hoàn thành tất cả nhiệm vụ!';
 
   @override

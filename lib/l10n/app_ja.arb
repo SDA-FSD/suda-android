@@ -226,6 +226,7 @@
   "roleplayOpeningAiCharacter": "AIキャラクター",
   "roleplayOpeningScenario": "シナリオ",
   "roleplayOpeningAiDisclaimer": "AIは間違えることがあります。\n個人情報や機密性の高い情報を共有しないでください。",
+  "roleplayOpeningReplayTutorial": "チュートリアルをもう一度見る",
   "endingFailTitle": "すべてのミッションをクリアできませんでした！",
   "endingFailSubtitle": "もう一度挑戦して、物語の全貌を明らかにしましょう。",
   "roleplayTryAgainMessage": "残念ながら、スコアが足りず報酬を獲得できませんでした。",

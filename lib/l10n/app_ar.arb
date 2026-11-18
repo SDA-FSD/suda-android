@@ -226,6 +226,7 @@
   "roleplayOpeningAiCharacter": "شخصية الذكاء الاصطناعي",
   "roleplayOpeningScenario": "السيناريو",
   "roleplayOpeningAiDisclaimer": "قد يخطئ الذكاء الاصطناعي.\nيرجى عدم مشاركة معلومات شخصية أو حساسة.",
+  "roleplayOpeningReplayTutorial": "إعادة مشاهدة الدليل",
   "endingFailTitle": "لم تُكمل جميع المهام!",
   "endingFailSubtitle": "حاول مرة أخرى لاكتشاف القصة كاملة.",
   "roleplayTryAgainMessage": "للأسف، لم تكن نتيجتك عالية بما يكفي للحصول على المكافأة.",

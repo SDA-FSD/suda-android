@@ -611,6 +611,9 @@ class AppLocalizationsRu extends AppLocalizations {
       'ИИ может ошибаться.\nНе сообщайте личную или конфиденциальную информацию.';
 
   @override
+  String get roleplayOpeningReplayTutorial => 'Посмотреть туториал снова';
+
+  @override
   String get endingFailTitle => 'Вы выполнили не все миссии!';
 
   @override

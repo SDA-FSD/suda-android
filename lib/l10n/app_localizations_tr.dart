@@ -605,6 +605,9 @@ class AppLocalizationsTr extends AppLocalizations {
       'Yapay zekâ hata yapabilir.\nLütfen kişisel veya hassas bilgilerini paylaşma.';
 
   @override
+  String get roleplayOpeningReplayTutorial => 'Eğitimi tekrar izle';
+
+  @override
   String get endingFailTitle => 'Tüm görevleri tamamlayamadın!';
 
   @override

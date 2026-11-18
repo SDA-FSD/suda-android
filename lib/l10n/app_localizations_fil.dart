@@ -618,6 +618,9 @@ class AppLocalizationsFil extends AppLocalizations {
       'Maaaring magkamali ang AI.\nHuwag magbahagi ng personal o sensitibong impormasyon.';
 
   @override
+  String get roleplayOpeningReplayTutorial => 'Panoorin ulit ang tutorial';
+
+  @override
   String get endingFailTitle => 'Hindi mo nakumpleto ang lahat ng mission!';
 
   @override

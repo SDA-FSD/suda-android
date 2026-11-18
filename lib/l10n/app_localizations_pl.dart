@@ -611,6 +611,9 @@ class AppLocalizationsPl extends AppLocalizations {
       'AI może się mylić.\nNie udostępniaj danych osobowych ani poufnych informacji.';
 
   @override
+  String get roleplayOpeningReplayTutorial => 'Obejrzyj tutorial ponownie';
+
+  @override
   String get endingFailTitle => 'Nie udało ci się ukończyć wszystkich misji!';
 
   @override

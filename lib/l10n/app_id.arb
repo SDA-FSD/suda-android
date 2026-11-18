@@ -226,6 +226,7 @@
   "roleplayOpeningAiCharacter": "Karakter AI",
   "roleplayOpeningScenario": "Skenario",
   "roleplayOpeningAiDisclaimer": "AI dapat membuat kesalahan.\nJangan bagikan informasi pribadi atau sensitif.",
+  "roleplayOpeningReplayTutorial": "Putar ulang tutorial",
   "endingFailTitle": "Anda belum menyelesaikan semua misi!",
   "endingFailSubtitle": "Coba lagi untuk mengungkap seluruh cerita.",
   "roleplayTryAgainMessage": "Sayangnya, skor Anda belum cukup untuk mendapatkan hadiah.",

@@ -226,6 +226,7 @@
   "roleplayOpeningAiCharacter": "Personaggio IA",
   "roleplayOpeningScenario": "Scenario",
   "roleplayOpeningAiDisclaimer": "L'IA può commettere errori.\nNon condividere informazioni personali o sensibili.",
+  "roleplayOpeningReplayTutorial": "Rivedi il tutorial",
   "endingFailTitle": "Non hai completato tutte le missioni!",
   "endingFailSubtitle": "Riprova e scopri la storia completa.",
   "roleplayTryAgainMessage": "Purtroppo, il punteggio non è sufficiente per ottenere la ricompensa.",

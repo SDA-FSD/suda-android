@@ -577,6 +577,9 @@ class AppLocalizationsJa extends AppLocalizations {
       'AIは間違えることがあります。\n個人情報や機密性の高い情報を共有しないでください。';
 
   @override
+  String get roleplayOpeningReplayTutorial => 'チュートリアルをもう一度見る';
+
+  @override
   String get endingFailTitle => 'すべてのミッションをクリアできませんでした！';
 
   @override

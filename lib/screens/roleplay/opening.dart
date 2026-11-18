@@ -44,6 +44,7 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen>
   bool _isLoading = false;
   bool _routeSubscribed = false;
   bool _briefingStarted = false;
+  bool _showReplayTutorial = false;
   final AudioPlayer _briefingAudioPlayer = AudioPlayer();
 
   void _restoreButton() {
@@ -57,7 +58,30 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen>
       if (!mounted) return;
       unawaited(_precacheAiCharacterImage());
       _playBriefingWhenVisible();
+      unawaited(_resolveReplayTutorialVisibility());
     });
+  }
+
+  /// 앱 통틀어 First RP(NORMAL_END 0회) + 튜토리얼 완료일 때만 다시보기 노출.
+  Future<void> _resolveReplayTutorialVisibility() async {
+    final user = SeriesStateService.instance.user;
+    if (user == null ||
+        !user.hasMetaInfoValue(key: 'TUTORIAL', value: 'Y')) {
+      return;
+    }
+    try {
+      final accessToken = await TokenStorage.loadAccessToken();
+      if (!mounted || accessToken == null) return;
+      final progress =
+          await SudaApiClient.getProgress(accessToken: accessToken);
+      if (!mounted) return;
+      final show = progress.roleplayCount == 0;
+      if (show != _showReplayTutorial) {
+        setState(() => _showReplayTutorial = show);
+      }
+    } catch (_) {
+      // 조회 실패 시 미노출
+    }
   }
 
   @override
@@ -416,6 +440,29 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen>
             footer: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                if (_showReplayTutorial) ...[
+                  OutlinedButton.icon(
+                    onPressed: _isLoading
+                        ? null
+                        : () => RoleplayRouter.replaceWithTutorialReplay(
+                              context,
+                            ),
+                    icon: const Icon(Icons.replay, size: 18),
+                    label: Text(l10n.roleplayOpeningReplayTutorial),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: const Color(0x99FFFFFF),
+                      side: const BorderSide(color: Color(0x99FFFFFF)),
+                      shape: const StadiumBorder(),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                ],
                 ElevatedButton(
                   onPressed: _isLoading
                       ? null

@@ -258,6 +258,8 @@ class MyProfileDto {
 class UserProgressDto {
   final int currentStreakDays;
   final int wordsSpokenCount;
+  /// 누적 RP NORMAL_END 횟수. 0이면 앱 통틀어 First RP 미완료.
+  final int roleplayCount;
   final int currentLevel;
   final int progressPercentage;
   final int claimableRewardLevel;
@@ -270,6 +272,7 @@ class UserProgressDto {
   const UserProgressDto({
     required this.currentStreakDays,
     required this.wordsSpokenCount,
+    this.roleplayCount = 0,
     required this.currentLevel,
     required this.progressPercentage,
     required this.claimableRewardLevel,
@@ -298,6 +301,7 @@ class UserProgressDto {
     return UserProgressDto(
       currentStreakDays: asInt(json['currentStreakDays']),
       wordsSpokenCount: asInt(json['wordsSpokenCount']),
+      roleplayCount: asInt(json['roleplayCount']),
       currentLevel: asInt(json['currentLevel']),
       progressPercentage: asInt(json['progressPercentage']),
       claimableRewardLevel: asInt(json['claimableRewardLevel']),

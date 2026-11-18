@@ -1229,6 +1229,12 @@ abstract class AppLocalizations {
   /// **'AI can make mistakes.\nPlease don\'t share personal or sensitive information.'**
   String get roleplayOpeningAiDisclaimer;
 
+  /// No description provided for @roleplayOpeningReplayTutorial.
+  ///
+  /// In en, this message translates to:
+  /// **'Replay tutorial'**
+  String get roleplayOpeningReplayTutorial;
+
   /// No description provided for @endingFailTitle.
   ///
   /// In en, this message translates to:

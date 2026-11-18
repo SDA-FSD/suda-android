@@ -226,6 +226,7 @@
   "roleplayOpeningAiCharacter": "Yapay Zekâ Karakteri",
   "roleplayOpeningScenario": "Senaryo",
   "roleplayOpeningAiDisclaimer": "Yapay zekâ hata yapabilir.\nLütfen kişisel veya hassas bilgilerini paylaşma.",
+  "roleplayOpeningReplayTutorial": "Eğitimi tekrar izle",
   "endingFailTitle": "Tüm görevleri tamamlayamadın!",
   "endingFailSubtitle": "Tekrar dene ve hikâyenin tamamını keşfet.",
   "roleplayTryAgainMessage": "Ne yazık ki puanın ödül kazanmak için yeterince yüksek değildi.",
