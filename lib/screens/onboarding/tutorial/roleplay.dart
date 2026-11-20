@@ -202,6 +202,10 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
           onPressed: () {
             reportOnboardingTutorialProgress(
               preview: widget.preview,
+              step: _skipStepNow(),
+            );
+            reportOnboardingTutorialProgress(
+              preview: widget.preview,
               step: OnboardingTutorialProgressStep.skipConfirmed,
             );
             widget.onSkip();
@@ -214,6 +218,29 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
         ),
       ],
     );
+  }
+
+  /// Skip 확정 시점의 가장 앞선 단계. 한 사용자는 단계 Skip 중 한 칸만 오른다.
+  String _skipStepNow() {
+    if (_answeredTurnCount >= 3) {
+      return OnboardingTutorialProgressStep.skipAfterTurn3;
+    }
+    if (_answeredTurnCount >= 2) {
+      return OnboardingTutorialProgressStep.skipBeforeTurn3;
+    }
+    if (_hintBoxOpened) {
+      return OnboardingTutorialProgressStep.skipBeforeTurn2;
+    }
+    if (_answeredTurnCount >= 1) {
+      return OnboardingTutorialProgressStep.skipBeforeHint;
+    }
+    if (_firstMicPressReported) {
+      return OnboardingTutorialProgressStep.skipBeforeTurn1;
+    }
+    if (_firstMicReadyReported) {
+      return OnboardingTutorialProgressStep.skipBeforeMicPressed;
+    }
+    return OnboardingTutorialProgressStep.skipBeforeMicReady;
   }
 
   /// 접힌 미션+마이크만 → 화면 전환 직후 Betty 말풍선+음성 → 음성 종료 후 안내.

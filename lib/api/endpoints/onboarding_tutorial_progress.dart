@@ -15,6 +15,13 @@ class OnboardingTutorialProgressStep {
   static const firstHintOpened = 'FIRST_HINT_OPENED';
   static const turn2Accepted = 'TURN_2_ACCEPTED';
   static const turn3Accepted = 'TURN_3_ACCEPTED';
+  static const skipBeforeMicReady = 'SKIP_BEFORE_MIC_READY';
+  static const skipBeforeMicPressed = 'SKIP_BEFORE_MIC_PRESSED';
+  static const skipBeforeTurn1 = 'SKIP_BEFORE_TURN_1';
+  static const skipBeforeHint = 'SKIP_BEFORE_HINT';
+  static const skipBeforeTurn2 = 'SKIP_BEFORE_TURN_2';
+  static const skipBeforeTurn3 = 'SKIP_BEFORE_TURN_3';
+  static const skipAfterTurn3 = 'SKIP_AFTER_TURN_3';
   static const skipConfirmed = 'SKIP_CONFIRMED';
 }
 
