@@ -14,6 +14,7 @@ import '../../utils/paywall_impression_screen.dart';
 import '../../utils/speech_feedback_premium.dart';
 import '../../widgets/app_scaffold.dart';
 import 'suda_tts_audio_player.dart';
+import '../../widgets/suda_tap.dart';
 
 const String _kRoleUser = 'USER';
 const String _kRoleAiCharacter = 'AI_CHARACTER';
@@ -92,7 +93,7 @@ class _ViewChatScreenState extends State<ViewChatScreen> {
   void _showNoAudioToast() {
     if (!mounted) return;
     final l10n = AppLocalizations.of(context)!;
-    DefaultToast.show(context, l10n.reviewChatNoAudioToPlay, isError: true);
+    DefaultToast.show(context, l10n.reviewChatNoAudioToPlay, isError: true, negative: true);
   }
 
   Future<void> _stopPlayback() async {
@@ -475,7 +476,7 @@ class _ViewChatScreenState extends State<ViewChatScreen> {
           backgroundColor: Colors.transparent,
           usePadding: false,
           actions: [
-            GestureDetector(
+            SudaTap(
               behavior: HitTestBehavior.opaque,
               onTap: () => unawaited(_onHeaderMegaphoneTap()),
               child: SizedBox(
@@ -609,7 +610,7 @@ class _ViewChatScreenState extends State<ViewChatScreen> {
                 _bubblePaddingH * 2 -
                 (isLoading ? 24 : 0) -
                 (canPlay ? 32 : 0);
-            return GestureDetector(
+            return SudaTap(
               onTap: canPlay ? () => unawaited(_onBubbleTap(message)) : null,
               behavior: HitTestBehavior.opaque,
               child: AnimatedContainer(
@@ -644,7 +645,7 @@ class _ViewChatScreenState extends State<ViewChatScreen> {
                       ),
                     ] else if (canPlay) ...[
                       const SizedBox(width: 8),
-                      GestureDetector(
+                      SudaTap(
                         onTap: () => unawaited(_onBubbleTap(message)),
                         behavior: HitTestBehavior.opaque,
                         child: _buildMegaphoneIcon(
@@ -873,6 +874,7 @@ class _ViewChatUserCardState extends State<_ViewChatUserCard> {
       DefaultToast.show(
         context,
         AppLocalizations.of(context)!.speechFeedbackNoRecording,
+        negative: true,
       );
       return;
     }
@@ -921,7 +923,7 @@ class _ViewChatUserCardState extends State<_ViewChatUserCard> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          GestureDetector(
+          SudaTap(
             onTap: _onMegaphoneTap,
             behavior: HitTestBehavior.opaque,
             child: SizedBox(
@@ -971,7 +973,7 @@ class _ViewChatUserCardState extends State<_ViewChatUserCard> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            GestureDetector(
+            SudaTap(
               onTap: widget.onImprovedTap,
               behavior: HitTestBehavior.opaque,
               child: SizedBox(
@@ -1158,7 +1160,7 @@ class _ViewChatUserCardState extends State<_ViewChatUserCard> {
 
     return Align(
       alignment: Alignment.centerRight,
-      child: GestureDetector(
+      child: SudaTap(
         onTap: _onFeedbackTap,
         behavior: HitTestBehavior.opaque,
         child: card,
@@ -1422,7 +1424,7 @@ class _ViewChatFeedbackButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context).textTheme;
-    return GestureDetector(
+    return SudaTap(
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: Container(

@@ -17,6 +17,7 @@ import '../../utils/paywall_impression_screen.dart';
 import '../../utils/sub_screen_route.dart';
 import '../webview_screen.dart';
 import 'paywall_completed.dart';
+import '../../widgets/suda_tap.dart';
 
 /// Premium 구독 Paywall (Full Screen).
 ///
@@ -419,7 +420,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
 
       if (result.pendingApproval) {
         final l10n = AppLocalizations.of(context)!;
-        DefaultToast.show(context, l10n.energyPurchasePendingApproval);
+        DefaultToast.show(context, l10n.energyPurchasePendingApproval, negative: true);
         setState(() => _purchasing = false);
         return;
       }
@@ -430,7 +431,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
           DefaultToast.show(
             context,
             l10n.energyPurchaseNotCompleted,
-            isError: true,
+            isError: true, negative: true,
           );
         }
         setState(() => _purchasing = false);
@@ -464,12 +465,12 @@ class _PaywallScreenState extends State<PaywallScreen> {
 
       final l10n = AppLocalizations.of(context)!;
       if (result.outcome == IapPurchaseOutcome.nothingToRestore) {
-        DefaultToast.show(context, l10n.restorePurchasesNothing);
+        DefaultToast.show(context, l10n.restorePurchasesNothing, negative: true);
         setState(() => _purchasing = false);
         return;
       }
       if (result.pendingApproval) {
-        DefaultToast.show(context, l10n.energyPurchasePendingApproval);
+        DefaultToast.show(context, l10n.energyPurchasePendingApproval, negative: true);
         setState(() => _purchasing = false);
         return;
       }
@@ -479,7 +480,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
           DefaultToast.show(
             context,
             l10n.energyPurchaseNotCompleted,
-            isError: true,
+            isError: true, negative: true,
           );
         }
         setState(() => _purchasing = false);
@@ -965,7 +966,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
                           PositionedDirectional(
                             start: 8,
                             top: topPad + closeTop,
-                            child: IconButton(
+                            child: SudaIconButton(
                               onPressed: () => Navigator.of(context).maybePop(),
                               icon: const Icon(
                                 Icons.close,
@@ -1668,7 +1669,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
         child: Material(
           color: Colors.transparent,
           clipBehavior: Clip.none,
-          child: InkWell(
+          child: SudaInkWell(
             onTap: onTap,
             borderRadius: radius,
             child: cardWithBadge,
@@ -1683,7 +1684,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
       child: IntrinsicWidth(
         child: Opacity(
           opacity: _subscribeLocked ? 0.7 : 1,
-          child: GestureDetector(
+          child: SudaTap(
             onTap: _subscribeLocked ? null : () => unawaited(_onSubscribeTap()),
             child: Container(
               height: 52,

@@ -10,6 +10,7 @@ import '../../../services/token_storage.dart';
 import '../../../utils/default_toast.dart';
 import 'intro_stage.dart';
 import 'backdrop.dart';
+import '../../../widgets/suda_tap.dart';
 
 /// 온보딩 Username 다음. 프로필·문구·Start → 마이크 권한 → 장면 문구 → 롤플레이.
 class TutorialIntroScreen extends StatefulWidget {
@@ -126,11 +127,11 @@ class _TutorialIntroScreenState extends State<TutorialIntroScreen>
         builder: (ctx) => AlertDialog(
           content: Text(l10n.microphonePermissionDenied),
           actions: [
-            TextButton(
+            SudaTextButton(
               onPressed: () => Navigator.of(ctx).pop(false),
               child: Text(l10n.accountGoBack),
             ),
-            TextButton(
+            SudaTextButton(
               onPressed: () => Navigator.of(ctx).pop(true),
               child: Text(l10n.openSettings),
             ),
@@ -143,7 +144,7 @@ class _TutorialIntroScreenState extends State<TutorialIntroScreen>
       return false;
     }
 
-    DefaultToast.show(context, l10n.microphonePermissionDenied);
+    DefaultToast.show(context, l10n.microphonePermissionDenied, negative: true);
     return false;
   }
 
@@ -219,7 +220,7 @@ class _TutorialIntroScreenState extends State<TutorialIntroScreen>
       canPop: widget.preview && !_sceneRunning,
       child: Scaffold(
         backgroundColor: const Color(0xFF121212),
-        body: GestureDetector(
+        body: SudaTap(
           behavior: HitTestBehavior.opaque,
           onTap: _continueReady && !_continued ? _onTapContinue : null,
           child: Stack(
@@ -264,7 +265,7 @@ class _TutorialIntroScreenState extends State<TutorialIntroScreen>
                       opacity: _continueFade,
                       child: IgnorePointer(
                         ignoring: !_continueReady,
-                        child: GestureDetector(
+                        child: SudaTap(
                           onTap: _onTapContinue,
                           behavior: HitTestBehavior.opaque,
                           child: FadeTransition(

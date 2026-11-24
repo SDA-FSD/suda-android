@@ -17,6 +17,7 @@ import '../widgets/suda_label_tabs.dart';
 import '../widgets/suda_neighbors_row.dart';
 import 'character.dart';
 import 'rank/rank_crown_avatar.dart';
+import '../widgets/suda_tap.dart';
 
 class OtherUserProfileScreen extends StatefulWidget {
   final int userId;
@@ -728,7 +729,7 @@ class _FriendPill extends StatelessWidget {
 
     return Opacity(
       opacity: busy ? 0.7 : 1,
-      child: GestureDetector(onTap: busy ? null : onTap, child: child),
+      child: SudaTap(onTap: busy ? null : onTap, child: child),
     );
   }
 }

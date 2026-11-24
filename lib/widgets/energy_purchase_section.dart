@@ -14,6 +14,7 @@ import '../theme/app_theme.dart';
 import '../utils/default_toast.dart';
 import '../utils/language_util.dart';
 import '../utils/sub_screen_route.dart';
+import 'suda_tap.dart';
 
 enum _EnergyPurchaseKind { enablePush, unlimited, capacity6, capacity7 }
 
@@ -390,7 +391,7 @@ class _EnergyPurchaseSectionState extends State<EnergyPurchaseSection> {
 
     if (result.pendingApproval) {
       final l10n = AppLocalizations.of(context)!;
-      DefaultToast.show(context, l10n.energyPurchasePendingApproval);
+      DefaultToast.show(context, l10n.energyPurchasePendingApproval, negative: true);
       setState(() {
         _themeTintOpacity = _themeTintIdle;
         _busyKind = null;
@@ -404,7 +405,7 @@ class _EnergyPurchaseSectionState extends State<EnergyPurchaseSection> {
         DefaultToast.show(
           context,
           l10n.energyPurchaseNotCompleted,
-          isError: true,
+          isError: true, negative: true,
         );
       }
       setState(() {
@@ -720,7 +721,7 @@ class _PurchaseProductButton extends StatelessWidget {
 
     return Opacity(
       opacity: enabled ? 1 : 0.7,
-      child: GestureDetector(
+      child: SudaTap(
         onTap: enabled ? onTap : null,
         behavior: HitTestBehavior.opaque,
         child: SizedBox(
@@ -927,7 +928,7 @@ class _GoPremiumButton extends StatelessWidget {
 
     return Opacity(
       opacity: enabled ? 1 : 0.7,
-      child: GestureDetector(
+      child: SudaTap(
         onTap: enabled ? onTap : null,
         behavior: HitTestBehavior.opaque,
         child: SizedBox(

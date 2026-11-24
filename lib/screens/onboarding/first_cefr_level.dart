@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:vibration/vibration.dart';
-
 import '../../l10n/app_localizations.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
 import '../../utils/default_toast.dart';
 import '../../utils/english_level_util.dart';
 import '../../widgets/onboarding_step_bar.dart';
+import '../../widgets/suda_tap.dart';
 
 /// 최초 서비스 이용 동의 직후 1회 노출되는 CEFR 레벨 선택 Full Screen.
 class FirstCefrLevelScreen extends StatefulWidget {
@@ -86,7 +85,7 @@ class _FirstCefrLevelScreenState extends State<FirstCefrLevelScreen> {
 
   void _onPageChanged(int index) {
     setState(() => _currentIndex = index);
-    Vibration.vibrate(duration: 80);
+    SudaHaptics.vibrate(duration: 80);
   }
 
   double _itemScale(int index) {
@@ -120,7 +119,7 @@ class _FirstCefrLevelScreenState extends State<FirstCefrLevelScreen> {
         DefaultToast.show(
           context,
           'Failed to update language level: $e',
-          isError: true,
+          isError: true, negative: true,
         );
       }
     } finally {
@@ -341,7 +340,7 @@ class _FirstCefrLevelScreenState extends State<FirstCefrLevelScreen> {
                 const SizedBox(height: 14),
                 SizedBox(
                   height: 60,
-                  child: ElevatedButton(
+                  child: SudaElevatedButton(
                     onPressed: _isSubmitting ? null : _onConfirm,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,

@@ -52,6 +52,12 @@ class AppLocalizationsId extends AppLocalizations {
   String get settingsNotification => 'Notifikasi';
 
   @override
+  String get settingsVibration => 'Getar';
+
+  @override
+  String get settingsVibrationDesc => 'Getaran untuk ketukan dan umpan balik.';
+
+  @override
   String get settingsTutorial => 'Tutorial';
 
   @override

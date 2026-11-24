@@ -14,6 +14,8 @@
   "restorePurchasesNothing": "Walang biniling maire-restore.",
   "restorePurchasesCompleted": "Na-restore na ang mga binili.",
   "settingsNotification": "Mga Notification",
+  "settingsVibration": "Pag-vibrate",
+  "settingsVibrationDesc": "Vibration sa pag-tap at sa mga tugon.",
   "settingsTutorial": "Tutorial",
   "settingsCefrLevel": "Antas ng English",
   "settingsAppLanguage": "Wika ng app",

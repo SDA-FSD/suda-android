@@ -52,6 +52,12 @@ class AppLocalizationsPt extends AppLocalizations {
   String get settingsNotification => 'Notificações';
 
   @override
+  String get settingsVibration => 'Vibração';
+
+  @override
+  String get settingsVibrationDesc => 'Toques e respostas com vibração.';
+
+  @override
   String get settingsTutorial => 'Tutorial';
 
   @override

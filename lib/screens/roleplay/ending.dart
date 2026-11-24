@@ -8,6 +8,7 @@ import '../../services/series_state_service.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
 import '../../utils/suda_json_util.dart';
+import '../../widgets/suda_tap.dart';
 
 /// Roleplay Ending Screen (Full Screen)
 ///
@@ -113,11 +114,11 @@ class _RoleplayEndingScreenState extends State<RoleplayEndingScreen>
         title: const Text('Notification'),
         content: const Text('Exit from ending screen'),
         actions: [
-          TextButton(
+          SudaTextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
             child: const Text('Cancel'),
           ),
-          TextButton(
+          SudaTextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
             child: const Text('OK'),
           ),
@@ -271,7 +272,7 @@ class _RoleplayEndingScreenState extends State<RoleplayEndingScreen>
                                           padding: EdgeInsets.only(
                                             right: i < 4 ? 5 : 0,
                                           ),
-                                          child: GestureDetector(
+                                          child: SudaTap(
                                             onTap: () =>
                                                 _onStarSelected(i + 1),
                                             child: Image.asset(
@@ -293,7 +294,7 @@ class _RoleplayEndingScreenState extends State<RoleplayEndingScreen>
                           ),
                           Expanded(
                             child: Center(
-                              child: ElevatedButton(
+                              child: SudaElevatedButton(
                                 onPressed: () => _onNext(context),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: const Color(0xFF0CABA8),

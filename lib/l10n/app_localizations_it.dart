@@ -52,6 +52,12 @@ class AppLocalizationsIt extends AppLocalizations {
   String get settingsNotification => 'Notifiche';
 
   @override
+  String get settingsVibration => 'Vibrazione';
+
+  @override
+  String get settingsVibrationDesc => 'Tocchi e risposte con vibrazione.';
+
+  @override
   String get settingsTutorial => 'Tutorial';
 
   @override

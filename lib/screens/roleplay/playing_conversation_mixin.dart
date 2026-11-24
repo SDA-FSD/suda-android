@@ -15,6 +15,7 @@ import '../../services/series_state_service.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
 import 'ios_audio_teardown.dart';
+import '../../widgets/suda_tap.dart';
 
 /// S2 Playing — **단계 1(AI 시작 말풍선·음성·번역)** 및 힌트 트리거 훅.
 /// 나레이션·사용자 턴·후속 AI는 `.docs/CONTEXT_ROLEPLAY_S2.md` §「S2 Playing 턴 엔진」참조.
@@ -835,7 +836,7 @@ mixin PlayingConversationMixin<T extends StatefulWidget> on State<T> {
               ),
             ),
             const SizedBox(width: gapBeforeAiTranslationIcon),
-            GestureDetector(
+            SudaTap(
               onTap: () => unawaited(_toggleTranslation(entry)),
               child: Image.asset(
                 entry.isTranslationExpanded

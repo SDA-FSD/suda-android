@@ -19,6 +19,7 @@ import '../utils/default_toast.dart';
 import '../utils/sub_screen_route.dart';
 import '../widgets/review_login_dialog.dart';
 import 'webview_screen.dart';
+import '../widgets/suda_tap.dart';
 
 class LoginScreen extends StatefulWidget {
   final Future<void> Function()? onSignIn;
@@ -292,7 +293,7 @@ class _LoginScreenState extends State<LoginScreen>
       widget.onAgreementComplete?.call();
     } catch (e) {
       if (mounted) {
-        DefaultToast.show(context, 'Error: $e', isError: true);
+        DefaultToast.show(context, 'Error: $e', isError: true, negative: true);
       }
     } finally {
       if (mounted) setState(() => _isAgreementSubmitting = false);
@@ -385,7 +386,7 @@ class _LoginScreenState extends State<LoginScreen>
 
       if (result.idToken == null) {
         final l10n = AppLocalizations.of(context)!;
-        DefaultToast.show(context, l10n.loginErrorIdToken, isError: true);
+        DefaultToast.show(context, l10n.loginErrorIdToken, isError: true, negative: true);
         setState(() {
           _isLoading = false;
         });
@@ -419,7 +420,7 @@ class _LoginScreenState extends State<LoginScreen>
       DefaultToast.show(
         context,
         l10n.loginErrorFailed(error.toString()),
-        isError: true,
+        isError: true, negative: true,
       );
       setState(() {
         _isLoading = false;
@@ -479,7 +480,7 @@ class _LoginScreenState extends State<LoginScreen>
       DefaultToast.show(
         context,
         l10n.loginErrorFailed(error.toString()),
-        isError: true,
+        isError: true, negative: true,
       );
       setState(() {
         _isLoading = false;
@@ -620,7 +621,7 @@ class _LoginScreenState extends State<LoginScreen>
 
   Widget _buildGoogleLoginButton(double buttonWidth) {
     // Apple과 동일 슬롯(폭·높이·radius 8)을 클릭 영역으로 두고, 이미지는 중앙·높이 90%.
-    return GestureDetector(
+    return SudaTap(
       behavior: HitTestBehavior.opaque,
       onTap: _handleGoogleSignIn,
       child: Container(
@@ -863,7 +864,7 @@ class _LoginScreenState extends State<LoginScreen>
                     child: child!,
                   );
                 },
-                child: GestureDetector(
+                child: SudaTap(
                   behavior: HitTestBehavior.opaque,
                   onTap: _onCenterLogoTap,
                   child: SizedBox(
@@ -885,7 +886,7 @@ class _LoginScreenState extends State<LoginScreen>
                 Positioned.fill(
                   child: FadeTransition(
                     opacity: _agreementFadeAnimation,
-                    child: GestureDetector(
+                    child: SudaTap(
                       onTap: _closeAgreementLayer,
                       child: BackdropFilter(
                         filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
@@ -1011,7 +1012,7 @@ class _AgreementBottomSheet extends StatelessWidget {
                 },
               ),
               const SizedBox(height: 48),
-              ElevatedButton(
+              SudaElevatedButton(
                 onPressed: isAllAgreed && !isSubmitting ? onSubmit : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: isAllAgreed
@@ -1096,7 +1097,7 @@ class _AgreementRow extends StatelessWidget {
         ),
         if (linkLabel != null) ...[
           const SizedBox(width: 8),
-          GestureDetector(
+          SudaTap(
             behavior: HitTestBehavior.opaque,
             onTap: onLinkTap,
             child: Text(
@@ -1111,7 +1112,7 @@ class _AgreementRow extends StatelessWidget {
       ],
     );
 
-    return GestureDetector(
+    return SudaTap(
       behavior: HitTestBehavior.opaque,
       onTap: () => onChanged(!isChecked),
       child: Row(

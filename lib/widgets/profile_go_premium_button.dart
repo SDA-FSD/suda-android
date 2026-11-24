@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'suda_tap.dart';
 
 /// Profile 무료 사용자용 Premium CTA (레벨바 아래).
 class ProfileGoPremiumButton extends StatefulWidget {
@@ -270,7 +271,7 @@ class _ProfileGoPremiumButtonState extends State<ProfileGoPremiumButton>
     final radius = _buttonHeight / 2;
     final innerRadius = radius - 1;
 
-    return GestureDetector(
+    return SudaTap(
       onTap: widget.onTap,
       behavior: HitTestBehavior.opaque,
       child: SizedBox(

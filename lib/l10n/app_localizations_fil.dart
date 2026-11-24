@@ -55,6 +55,12 @@ class AppLocalizationsFil extends AppLocalizations {
   String get settingsNotification => 'Mga Notification';
 
   @override
+  String get settingsVibration => 'Pag-vibrate';
+
+  @override
+  String get settingsVibrationDesc => 'Vibration sa pag-tap at sa mga tugon.';
+
+  @override
   String get settingsTutorial => 'Tutorial';
 
   @override

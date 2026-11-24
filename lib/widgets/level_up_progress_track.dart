@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'suda_tap.dart';
 
 /// Progress 탭 레벨업 리워드 트랙. 시작점 마커 없음. 탭은 선물만.
 class LevelUpProgressTrack extends StatelessWidget {
@@ -190,7 +191,7 @@ class _RewardBoxGiftState extends State<_RewardBoxGift>
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return SudaTap(
       behavior: HitTestBehavior.opaque,
       onTap: widget.claiming ? null : widget.onTap,
       child: widget.claiming

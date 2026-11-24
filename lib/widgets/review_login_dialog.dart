@@ -4,6 +4,7 @@ import 'dart:ui' show ImageFilter;
 import 'package:flutter/material.dart';
 
 import '../utils/default_toast.dart';
+import 'suda_tap.dart';
 
 /// iOS App Store 심사용 hidden login. LoginScreen 중앙 로고 5연타로만 노출.
 class ReviewLoginDialog extends StatefulWidget {
@@ -63,7 +64,7 @@ class _ReviewLoginDialogState extends State<ReviewLoginDialog> {
     final id = _idController.text.trim();
     final password = _passwordController.text;
     if (id.isEmpty || password.isEmpty) {
-      DefaultToast.show(context, 'Enter your email and password.', isError: true);
+      DefaultToast.show(context, 'Enter your email and password.', isError: true, negative: true);
       return;
     }
 
@@ -77,7 +78,7 @@ class _ReviewLoginDialogState extends State<ReviewLoginDialog> {
       DefaultToast.show(
         context,
         'Sign-in failed. Check your credentials and try again.',
-        isError: true,
+        isError: true, negative: true,
       );
       setState(() => _isSubmitting = false);
     }
@@ -122,7 +123,7 @@ class _ReviewLoginDialogState extends State<ReviewLoginDialog> {
       child: Stack(
         children: [
           Positioned.fill(
-            child: GestureDetector(
+            child: SudaTap(
               behavior: HitTestBehavior.opaque,
               onTap: _close,
               child: BackdropFilter(
@@ -176,7 +177,7 @@ class _ReviewLoginDialogState extends State<ReviewLoginDialog> {
                             children: [
                               Align(
                                 alignment: Alignment.centerRight,
-                                child: IconButton(
+                                child: SudaIconButton(
                                   onPressed: _close,
                                   icon: Icon(
                                     Icons.close,
@@ -228,7 +229,7 @@ class _ReviewLoginDialogState extends State<ReviewLoginDialog> {
                                       ),
                                       decoration: _fieldDecoration('Password')
                                           .copyWith(
-                                        suffixIcon: IconButton(
+                                        suffixIcon: SudaIconButton(
                                           onPressed: _isSubmitting
                                               ? null
                                               : () => setState(
@@ -250,7 +251,7 @@ class _ReviewLoginDialogState extends State<ReviewLoginDialog> {
                                     const SizedBox(height: 20),
                                     SizedBox(
                                       height: 48,
-                                      child: ElevatedButton(
+                                      child: SudaElevatedButton(
                                         onPressed:
                                             _isSubmitting ? null : _submit,
                                         style: ElevatedButton.styleFrom(

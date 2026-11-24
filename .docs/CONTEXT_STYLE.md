@@ -164,6 +164,16 @@ Text('더 작은 보조', style: theme.labelMini);   // body-tiny2 (extension)
   - 타이포 그래피 규칙은 이 문서에서 관리
   - 색상 팔레트/상세 컬러 규칙이 추가될 경우 이 문서에 섹션을 확장해서 기록
 
+### 4.4 조작 진동
+
+구현: `lib/utils/suda_haptics.dart`. 탭 위젯은 `lib/widgets/suda_tap.dart` (`SudaTap`, `SudaInkWell`, `SudaElevatedButton`, `SudaTextButton`, `SudaIconButton`).
+
+- **탭**: 50ms, amplitude 255. 조작 `onTap`/`onPressed`가 불릴 때. `haptic: false`는 키보드를 닫는 빈 탭, 터치를 삼키는 빈 탭, 토스트를 닫는 탭. 15ms·amplitude 60은 이 기기 모터가 반응하지 않아 쓰지 않는다.
+- **홀드**: 탭과 같은 50ms. 마이크 홀드가 권한 확인 뒤 녹음으로 이어질 때(Playing, 튜토리얼 롤플레이). 권한 거부는 진동 없이 거부 토스트만.
+- **거부**: `DefaultToast.show(..., negative: true)`. 패턴 `[0, 60, 80, 90]`, intensity 255. 같은 탭에서 바로 거부 토스트가 뜨면 탭 진동은 내지 않는다. 저장 완료·복원 완료 같은 안내 토스트에는 `negative`를 주지 않는다.
+- 캐러셀 스냅, 랭킹 bump, 미션 완료, Like 오버레이, 보상 언박싱, 에피소드 해금, 엔딩 잠금 카드 진동도 `SudaHaptics.vibrate`를 탄다.
+- meta `DISABLE_VIBRATION=Y`이면 위 진동을 모두 내지 않는다. 없음·`N`은 켠다. 설정 진동 화면에서 끄면 `Y`, 다시 켜면 `N`. 저장 직후 앱 안의 진동이 바뀐다.
+
 ### 4.3 DefaultPopup (공통 팝업 프레임)
 
 - **구현 파일**: `lib/widgets/default_popup.dart`

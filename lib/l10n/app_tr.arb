@@ -14,6 +14,8 @@
   "restorePurchasesNothing": "Geri yüklenecek satın alım yok.",
   "restorePurchasesCompleted": "Satın alımlar geri yüklendi.",
   "settingsNotification": "Bildirimler",
+  "settingsVibration": "Titreşim",
+  "settingsVibrationDesc": "Dokunuşlar ve geri bildirimler titreşimle gelir.",
   "settingsTutorial": "Eğitim",
   "settingsCefrLevel": "İngilizce Seviyesi",
   "settingsAppLanguage": "Uygulama dili",

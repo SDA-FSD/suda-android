@@ -52,6 +52,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get settingsNotification => 'Notificaciones';
 
   @override
+  String get settingsVibration => 'Vibración';
+
+  @override
+  String get settingsVibrationDesc =>
+      'Vibración al tocar y al recibir respuestas.';
+
+  @override
   String get settingsTutorial => 'Tutorial';
 
   @override
@@ -1564,6 +1571,13 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
 
   @override
   String get settingsNotification => 'Notificaciones';
+
+  @override
+  String get settingsVibration => 'Vibración';
+
+  @override
+  String get settingsVibrationDesc =>
+      'Vibración al tocar y al recibir respuestas.';
 
   @override
   String get settingsTutorial => 'Tutorial';

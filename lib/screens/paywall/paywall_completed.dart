@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../utils/full_screen_route.dart';
+import '../../widgets/suda_tap.dart';
 
 class PaywallCompletedScreen extends StatelessWidget {
   const PaywallCompletedScreen({super.key});
@@ -83,7 +84,7 @@ class PaywallCompletedScreen extends StatelessWidget {
               Positioned(
                 left: 8,
                 top: topPad + 8,
-                child: IconButton(
+                child: SudaIconButton(
                   onPressed: () => Navigator.of(context).pop(true),
                   icon: const Icon(Icons.close, color: Colors.white, size: 28),
                   padding: const EdgeInsets.all(8),
@@ -146,7 +147,7 @@ class PaywallCompletedScreen extends StatelessWidget {
                               ),
                             ],
                           ),
-                          child: ElevatedButton(
+                          child: SudaElevatedButton(
                             onPressed: () => Navigator.of(context).pop(true),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFF0CABA8),

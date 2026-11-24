@@ -847,6 +847,16 @@ class SudaApiClient {
     );
   }
 
+  static Future<void> updateVibration({
+    required String accessToken,
+    required String value,
+  }) {
+    return UserApi.updateVibration(
+      accessToken: accessToken,
+      value: value,
+    );
+  }
+
   static Future<void> updateTargetLanguage({
     required String accessToken,
     required String targetLanguage,

@@ -7,6 +7,7 @@ import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
 import '../../utils/default_toast.dart';
 import '../../widgets/roleplay_configuration_panel.dart';
+import '../../widgets/suda_tap.dart';
 
 class FeedbackScreen extends StatefulWidget {
   const FeedbackScreen({super.key});
@@ -69,7 +70,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
         DefaultToast.show(
           context,
           'Failed to send feedback: $e',
-          isError: true,
+          isError: true, negative: true,
         );
       }
     } finally {
@@ -155,7 +156,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
           Center(
             child: SizedBox(
               height: 56,
-              child: ElevatedButton(
+              child: SudaElevatedButton(
                 onPressed: (_canSubmit && !_isSubmitting) ? _handleSend : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF0CABA8),

@@ -14,6 +14,8 @@
   "restorePurchasesNothing": "没有可恢复的购买项目。",
   "restorePurchasesCompleted": "购买项目已恢复。",
   "settingsNotification": "通知",
+  "settingsVibration": "振动",
+  "settingsVibrationDesc": "用振动提示点击和反馈。",
   "settingsTutorial": "教程",
   "settingsCefrLevel": "英语水平",
   "settingsAppLanguage": "应用语言",

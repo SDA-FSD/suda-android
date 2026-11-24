@@ -6,8 +6,6 @@ import 'dart:ui' show lerpDouble;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:vibration/vibration.dart';
-
 import '../../api/suda_api_client.dart';
 import '../../effects/like_progress_effect.dart';
 import '../../l10n/app_localizations.dart';
@@ -27,6 +25,7 @@ import '../../utils/suda_json_util.dart';
 import '../../widgets/cdn_thumb_image.dart';
 import 'suda_tts_audio_player.dart';
 import 'view_chat.dart';
+import '../../widgets/suda_tap.dart';
 
 const Color _exprTextPrimary = Color(0xFF121212);
 const Color _exprTextSecondary = Color(0xFF676767);
@@ -249,7 +248,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
         return;
       }
       setState(() => _revealedGoldStars = i);
-      Vibration.vibrate(duration: 80);
+      SudaHaptics.vibrate(duration: 80);
     }
   }
 
@@ -775,7 +774,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
   Widget _buildViewChatButton(BuildContext context, {VoidCallback? onTap}) {
     final theme = Theme.of(context).textTheme;
     final l10n = AppLocalizations.of(context)!;
-    return GestureDetector(
+    return SudaTap(
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: Container(
@@ -1229,7 +1228,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
         return;
       }
       if (token == null || historyId == null) {
-        DefaultToast.show(context, 'HTTP 401 · Request failed', isError: true);
+        DefaultToast.show(context, 'HTTP 401 · Request failed', isError: true, negative: true);
         return;
       }
 
@@ -1266,7 +1265,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
       if (!mounted) {
         return;
       }
-      DefaultToast.show(context, _httpErrorBrief(e), isError: true);
+      DefaultToast.show(context, _httpErrorBrief(e), isError: true, negative: true);
     } finally {
       _keyExpressionBookmarkInFlight = false;
     }
@@ -1550,7 +1549,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
                 ),
               ),
             )
-          : GestureDetector(
+          : SudaTap(
               onTap: () async {
                 final result = await RoleplayRouter.pushResultReport<bool>(
                   context,
@@ -1603,7 +1602,7 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
                         ),
                       ],
                     ),
-                    child: ElevatedButton(
+                    child: SudaElevatedButton(
                       onPressed: _isLeavingToOverview
                           ? null
                           : () => _onResultPrimaryAction(context),
@@ -1839,7 +1838,7 @@ class _NextEpisodeRevealButtonState extends State<_NextEpisodeRevealButton>
 
   Future<void> _vibrateUnlock() async {
     try {
-      await Vibration.vibrate(
+      await SudaHaptics.vibrate(
         pattern: [0, 30, 40, 160],
         intensities: [0, 255, 0, 255],
         sharpness: 1,
@@ -1911,7 +1910,7 @@ class _NextEpisodeRevealButtonState extends State<_NextEpisodeRevealButton>
           ),
         ],
       ),
-      child: GestureDetector(
+      child: SudaTap(
         onTap: _interactive ? widget.onPressed : null,
         behavior: HitTestBehavior.opaque,
         child: ClipRRect(
@@ -1975,7 +1974,7 @@ class _ResultCloseButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return SudaTap(
       onTap: onPressed,
       behavior: HitTestBehavior.opaque,
       child: SizedBox(
@@ -2276,7 +2275,7 @@ class _SpeechFeedbackFeedbackButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context).textTheme;
-    return GestureDetector(
+    return SudaTap(
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: Container(
@@ -2422,6 +2421,7 @@ class _SpeechFeedbackRowState extends State<_SpeechFeedbackRow> {
         DefaultToast.show(
           context,
           AppLocalizations.of(context)!.speechFeedbackUnavailable,
+          negative: true,
         );
         return;
       }
@@ -2476,6 +2476,7 @@ class _SpeechFeedbackRowState extends State<_SpeechFeedbackRow> {
       DefaultToast.show(
         context,
         AppLocalizations.of(context)!.speechFeedbackNoRecording,
+        negative: true,
       );
       return;
     }
@@ -2521,7 +2522,7 @@ class _SpeechFeedbackRowState extends State<_SpeechFeedbackRow> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          GestureDetector(
+          SudaTap(
             onTap: _onMegaphoneTap,
             behavior: HitTestBehavior.opaque,
             child: SizedBox(
@@ -2569,7 +2570,7 @@ class _SpeechFeedbackRowState extends State<_SpeechFeedbackRow> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            GestureDetector(
+            SudaTap(
               onTap: widget.onImprovedTap,
               behavior: HitTestBehavior.opaque,
               child: SizedBox(
@@ -2728,7 +2729,7 @@ class _SpeechFeedbackRowState extends State<_SpeechFeedbackRow> {
       ),
     );
 
-    return GestureDetector(
+    return SudaTap(
       onTap: () => unawaited(_onFeedbackTap()),
       behavior: HitTestBehavior.opaque,
       child: card,
@@ -2807,7 +2808,7 @@ class _KeyExpressionCard extends StatelessWidget {
       item.sampleAnswer,
     );
 
-    return GestureDetector(
+    return SudaTap(
       onTap: onCardTap,
       behavior: HitTestBehavior.opaque,
       child: DecoratedBox(
@@ -2882,7 +2883,7 @@ class _KeyExpressionCard extends StatelessWidget {
                         isLoading: fetchingActive,
                         isPlaying: playingActive,
                       ),
-                      GestureDetector(
+                      SudaTap(
                         onTap: onBookmarkTap,
                         behavior: HitTestBehavior.opaque,
                         child: Image.asset(

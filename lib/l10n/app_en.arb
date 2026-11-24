@@ -14,6 +14,8 @@
   "restorePurchasesNothing": "No purchases to restore.",
   "restorePurchasesCompleted": "Purchases restored.",
   "settingsNotification": "Notification",
+  "settingsVibration": "Vibration",
+  "settingsVibrationDesc": "Vibration for taps and feedback.",
   "settingsTutorial": "Tutorial",
   "settingsCefrLevel": "Language Level",
   "settingsAppLanguage": "App Language",

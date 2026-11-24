@@ -4,8 +4,6 @@ import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:vibration/vibration.dart';
-
 import '../../l10n/app_localizations.dart';
 import '../../models/common_models.dart';
 import '../../models/user_models.dart';
@@ -13,6 +11,7 @@ import '../../services/token_storage.dart';
 import '../../services/suda_api_client.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../utils/default_toast.dart';
+import '../../widgets/suda_tap.dart';
 
 class PushAgreementScreen extends StatefulWidget {
   final UserDto? user;
@@ -238,7 +237,7 @@ class _PushAgreementScreenState extends State<PushAgreementScreen> {
               ),
             ),
             const SizedBox(width: 16),
-            GestureDetector(
+            SudaTap(
               onTap: onTap,
               child: _buildToggle(isOn),
             ),
@@ -302,7 +301,7 @@ class _PushAgreementScreenState extends State<PushAgreementScreen> {
       if (token == null) {
         if (mounted) {
           setState(() => _isUpdating = false);
-          DefaultToast.show(context, 'Authentication required.');
+          DefaultToast.show(context, 'Authentication required.', negative: true);
         }
         return;
       }
@@ -311,7 +310,7 @@ class _PushAgreementScreenState extends State<PushAgreementScreen> {
         agreementYn: nextOn ? 'Y' : 'N',
       );
       if (mounted) {
-        Vibration.vibrate(duration: 80);
+        SudaHaptics.vibrate(duration: 80);
         setState(() {
           _isOn = nextOn;
           _isUpdating = false;
@@ -334,7 +333,7 @@ class _PushAgreementScreenState extends State<PushAgreementScreen> {
         DefaultToast.show(
           context,
           'Failed to update: $e',
-          isError: true,
+          isError: true, negative: true,
         );
       }
     }
@@ -361,7 +360,7 @@ class _PushAgreementScreenState extends State<PushAgreementScreen> {
       DefaultToast.show(
         context,
         'Failed to update: $e',
-        isError: true,
+        isError: true, negative: true,
       );
     }
   }
@@ -384,7 +383,7 @@ class _PushAgreementScreenState extends State<PushAgreementScreen> {
       if (token == null) {
         if (mounted) {
           setState(() => _isUpdating = false);
-          DefaultToast.show(context, 'Authentication required.');
+          DefaultToast.show(context, 'Authentication required.', negative: true);
         }
         return;
       }
@@ -398,7 +397,7 @@ class _PushAgreementScreenState extends State<PushAgreementScreen> {
         socialUpdatesYn: socialUpdatesYn,
       );
       if (mounted) {
-        Vibration.vibrate(duration: 80);
+        SudaHaptics.vibrate(duration: 80);
         setState(() {
           apply(next);
           _isUpdating = false;
@@ -410,7 +409,7 @@ class _PushAgreementScreenState extends State<PushAgreementScreen> {
         DefaultToast.show(
           context,
           'Failed to update: $e',
-          isError: true,
+          isError: true, negative: true,
         );
       }
     }
@@ -466,11 +465,11 @@ class _PushAgreementScreenState extends State<PushAgreementScreen> {
         title: Text(l10n.notificationPermissionBlockedTitle),
         content: Text(l10n.notificationPermissionBlockedMessage),
         actions: [
-          TextButton(
+          SudaTextButton(
             onPressed: () => Navigator.of(context).pop(),
             child: Text(l10n.accountGoBack),
           ),
-          TextButton(
+          SudaTextButton(
             onPressed: () {
               Navigator.of(context).pop();
               openAppSettings();

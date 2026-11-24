@@ -11,6 +11,7 @@ import '../utils/default_markdown.dart';
 import '../utils/suda_json_util.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/gnb_bar.dart';
+import '../widgets/suda_tap.dart';
 
 /// 줄바꿈으로 2줄 이상이면 첫 줄만 남기고 U+2026(…)을 붙인다.
 /// 한 줄뿐이면 [text] 그대로(가로 초과는 [TextOverflow.ellipsis]).
@@ -484,7 +485,7 @@ class _NotificationBoxScreenState extends State<NotificationBoxScreen> {
     return Padding(
       key: _cardKeyFor(item.id),
       padding: const EdgeInsets.only(bottom: 24),
-      child: GestureDetector(
+      child: SudaTap(
         behavior: HitTestBehavior.opaque,
         onTap: () {
           final wasExpanded = _expandedIds.contains(item.id);

@@ -4,7 +4,6 @@ import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:vibration/vibration.dart';
 import '../../l10n/app_localizations.dart';
 import '../../routes/roleplay_router.dart';
 import '../../services/main_user_sync.dart';
@@ -13,6 +12,7 @@ import '../../services/series_state_service.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
 import '../../utils/default_toast.dart';
+import '../../widgets/suda_tap.dart';
 
 class RoleplayTutorialScreen extends StatefulWidget {
   const RoleplayTutorialScreen({
@@ -557,7 +557,7 @@ class _RoleplayTutorialScreenState extends State<RoleplayTutorialScreen>
   }
 
   void _vibrate() {
-    Vibration.vibrate(duration: 80, amplitude: 200);
+    SudaHaptics.vibrate(duration: 80, amplitude: 200);
   }
 
   void _handleBottomTap(int index) {
@@ -614,7 +614,7 @@ class _RoleplayTutorialScreenState extends State<RoleplayTutorialScreen>
       DefaultToast.show(
         context,
         'Failed to save tutorial. Please try again.',
-        isError: true,
+        isError: true, negative: true,
       );
     }
   }
@@ -987,7 +987,7 @@ class _RoleplayTutorialScreenState extends State<RoleplayTutorialScreen>
     final screenHeight = MediaQuery.sizeOf(context).height;
     final top = MediaQuery.paddingOf(context).top;
     final bottom = MediaQuery.paddingOf(context).bottom;
-    return GestureDetector(
+    return SudaTap(
       behavior: HitTestBehavior.opaque,
       onTap: () => _handleBottomTap(index),
       child: ColoredBox(

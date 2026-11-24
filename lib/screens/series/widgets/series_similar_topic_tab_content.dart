@@ -9,6 +9,7 @@ import '../../../services/suda_api_client.dart';
 import '../../../services/token_storage.dart';
 import '../../../utils/suda_json_util.dart';
 import '../../../widgets/cdn_thumb_image.dart';
+import '../../../widgets/suda_tap.dart';
 
 /// Series Overview Similar Topic 탭 — 카테고리 시리즈 3열 그리드 + 페이징.
 class SeriesSimilarTopicTabContent extends StatefulWidget {
@@ -364,7 +365,7 @@ class _SimilarSeriesThumbnail extends StatelessWidget {
           fontSize: 12,
         );
 
-    return GestureDetector(
+    return SudaTap(
       onTap: onTap,
       child: SizedBox(
         width: width,

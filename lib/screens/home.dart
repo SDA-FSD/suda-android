@@ -21,6 +21,7 @@ import '../widgets/energy_header_badge.dart';
 import '../widgets/gnb_bar.dart';
 import '../widgets/first_rp_recommend_popup.dart';
 import '../widgets/welcome_gift_layer.dart';
+import '../widgets/suda_tap.dart';
 
 class HomeScreen extends StatefulWidget {
   final VoidCallback? onNavigateToAlarm;
@@ -556,7 +557,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               );
               if (!hasAppPath) return content;
 
-              return GestureDetector(
+              return SudaTap(
                 behavior: HitTestBehavior.opaque,
                 onTap: () => widget.onOpenAppPath?.call(appPath),
                 child: content,
@@ -752,7 +753,7 @@ class SeriesThumbnail extends StatelessWidget {
 
     return Align(
       alignment: Alignment.topCenter,
-      child: GestureDetector(
+      child: SudaTap(
         onTap: onTap,
         child: SizedBox(
           width: width,

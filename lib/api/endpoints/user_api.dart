@@ -790,6 +790,42 @@ class UserApi {
     );
   }
 
+  static Future<void> updateVibration({
+    required String accessToken,
+    required String value,
+  }) async {
+    final uri = SudaHttpClient.buildUri('/v1/users/vibration', {
+      'value': value,
+    });
+
+    late final http.Response response;
+    try {
+      response = await SudaHttpClient.client
+          .put(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+              'Content-Type': 'application/json',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      rethrow;
+    }
+
+    if (response.statusCode == 401) {
+      throw UnauthorizedException('Access token expired');
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return;
+    }
+
+    throw Exception(
+      'PUT /v1/users/vibration failed: HTTP ${response.statusCode} ${response.body}',
+    );
+  }
+
   static Future<void> updateTargetLanguage({
     required String accessToken,
     required String targetLanguage,

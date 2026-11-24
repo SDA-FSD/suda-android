@@ -4,6 +4,7 @@ import '../l10n/app_localizations.dart';
 import '../models/user_models.dart';
 import 'cdn_thumb_image.dart';
 import 'character_rarity_frame.dart';
+import 'suda_tap.dart';
 
 class SudaNeighborsRow extends StatelessWidget {
   const SudaNeighborsRow({
@@ -58,7 +59,7 @@ class SudaNeighborsRow extends StatelessWidget {
                   separatorBuilder: (_, _) => const SizedBox(width: _gap),
                   itemBuilder: (context, index) {
                     final item = portraits[index];
-                    return GestureDetector(
+                    return SudaTap(
                       onTap: onCharacterTap == null
                           ? null
                           : () => onCharacterTap!(item),

@@ -14,6 +14,8 @@
   "restorePurchasesNothing": "復元できる購入項目がありません。",
   "restorePurchasesCompleted": "購入を復元しました。",
   "settingsNotification": "通知",
+  "settingsVibration": "振動",
+  "settingsVibrationDesc": "タップや反応を振動で知らせます。",
   "settingsTutorial": "チュートリアル",
   "settingsCefrLevel": "英語レベル",
   "settingsAppLanguage": "アプリの言語",

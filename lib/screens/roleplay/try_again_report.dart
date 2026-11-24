@@ -8,6 +8,7 @@ import '../../services/token_storage.dart';
 import '../../utils/default_toast.dart';
 import '../../widgets/roleplay_configuration_panel.dart';
 import '../../widgets/roleplay_scaffold.dart';
+import '../../widgets/suda_tap.dart';
 
 /// Roleplay Try Again Report Screen (Sub Screen)
 ///
@@ -77,7 +78,7 @@ class _RoleplayTryAgainReportScreenState
         DefaultToast.show(
           context,
           'Failed to send report: $e',
-          isError: true,
+          isError: true, negative: true,
         );
       }
     } finally {
@@ -189,7 +190,7 @@ class _RoleplayTryAgainReportScreenState
                 Center(
                   child: SizedBox(
                     height: 56,
-                    child: ElevatedButton(
+                    child: SudaElevatedButton(
                       onPressed:
                           (_canSubmit && !_isSubmitting) ? _handleSend : null,
                       style: ElevatedButton.styleFrom(

@@ -9,6 +9,7 @@ import '../services/energy_refresh_bus.dart';
 import '../services/main_user_sync.dart';
 import '../services/suda_api_client.dart';
 import '../services/token_storage.dart';
+import 'suda_tap.dart';
 
 /// 앱 기동당 WelcomeGift 레이어 노출 시도 1회 가드.
 class WelcomeGiftLayerGate {
@@ -318,7 +319,7 @@ class _WelcomeGiftLayerState extends State<WelcomeGiftLayer>
                 scale: 0.9 + 0.1 * t,
                 child: SizedBox(
                   height: 44,
-                  child: ElevatedButton(
+                  child: SudaElevatedButton(
                     onPressed: _claiming ? null : () => unawaited(_onStartNow()),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: _mint,

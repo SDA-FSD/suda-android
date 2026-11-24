@@ -24,6 +24,7 @@ import 'playing_energy_mixin.dart';
 import 'playing_finish_mixin.dart';
 import 'playing_hint_mixin.dart';
 import 'playing_input_mixin.dart';
+import '../../widgets/suda_tap.dart';
 
 /// S2 Roleplay Playing Screen (Full Screen)
 ///
@@ -585,7 +586,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
                   style: theme.bodyLarge?.copyWith(color: Colors.white),
                   textAlign: TextAlign.center,
                 ),
-                ElevatedButton(
+                SudaElevatedButton(
                   onPressed: _dismissExitLayer,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: guideColor,
@@ -599,7 +600,7 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
                   ),
                   child: Text(l10n.roleplayExitKeepPlaying),
                 ),
-                GestureDetector(
+                SudaTap(
                   onTap: () => unawaited(_confirmExit(context)),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 16),

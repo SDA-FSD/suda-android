@@ -54,6 +54,12 @@ class AppLocalizationsVi extends AppLocalizations {
   String get settingsNotification => 'Thông báo';
 
   @override
+  String get settingsVibration => 'Rung';
+
+  @override
+  String get settingsVibrationDesc => 'Rung khi chạm và khi có phản hồi.';
+
+  @override
   String get settingsTutorial => 'Hướng dẫn';
 
   @override

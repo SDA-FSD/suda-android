@@ -52,6 +52,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsNotification => 'Notification';
 
   @override
+  String get settingsVibration => 'Vibration';
+
+  @override
+  String get settingsVibrationDesc => 'Vibration for taps and feedback.';
+
+  @override
   String get settingsTutorial => 'Tutorial';
 
   @override

@@ -9,6 +9,7 @@ import '../models/home_models.dart';
 import '../utils/cdn_thumbnail.dart';
 import '../utils/language_util.dart';
 import '../utils/suda_json_util.dart';
+import 'suda_tap.dart';
 
 /// 홈 첫 롤플레이 추천. 딤 탭으로는 닫히지 않는다.
 class FirstRpRecommendPopup extends StatelessWidget {
@@ -74,7 +75,8 @@ class FirstRpRecommendPopup extends StatelessWidget {
     return Stack(
       children: [
         Positioned.fill(
-          child: GestureDetector(
+          child: SudaTap(
+            haptic: false,
             behavior: HitTestBehavior.opaque,
             onTap: () {},
             child: const ColoredBox(color: _dim),
@@ -89,7 +91,7 @@ class FirstRpRecommendPopup extends StatelessWidget {
                 Positioned(
                   top: 0,
                   right: 0,
-                  child: GestureDetector(
+                  child: SudaTap(
                     onTap: onClose,
                     behavior: HitTestBehavior.opaque,
                     child: SizedBox(
@@ -253,7 +255,7 @@ class FirstRpRecommendPopup extends StatelessWidget {
         SizedBox(
           width: double.infinity,
           height: 44,
-          child: ElevatedButton(
+          child: SudaElevatedButton(
             onPressed: onPlay,
             style: ElevatedButton.styleFrom(
               backgroundColor: _primary,

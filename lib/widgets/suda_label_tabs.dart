@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
+import 'suda_tap.dart';
 
 /// 탭 레이블: [SudaTabLabel.fixed]는 고정 문자열, [SudaTabLabel.l10n]은 locale별 l10n.
 class SudaTabLabel {
@@ -120,7 +121,7 @@ class _SudaLabelTabsState extends State<SudaLabelTabs> {
     final selected = index == _effectiveIndex;
     final label = widget.tabs[index].label.resolve(context);
 
-    return GestureDetector(
+    return SudaTap(
       onTap: () => _selectTab(index),
       behavior: HitTestBehavior.opaque,
       child: IntrinsicWidth(

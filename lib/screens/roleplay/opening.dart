@@ -23,6 +23,7 @@ import '../../routes/roleplay_router.dart';
 import '../../utils/suda_json_util.dart';
 import '../../utils/default_markdown.dart';
 import 'ios_audio_teardown.dart';
+import '../../widgets/suda_tap.dart';
 
 /// Roleplay Opening Screen (Full Screen)
 ///
@@ -197,11 +198,11 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen>
         builder: (ctx) => AlertDialog(
           content: Text(l10n.microphonePermissionDenied),
           actions: [
-            TextButton(
+            SudaTextButton(
               onPressed: () => Navigator.of(ctx).pop(false),
               child: Text(l10n.accountGoBack),
             ),
-            TextButton(
+            SudaTextButton(
               onPressed: () => Navigator.of(ctx).pop(true),
               child: Text(l10n.openSettings),
             ),
@@ -214,7 +215,7 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen>
       return false;
     }
 
-    DefaultToast.show(context, l10n.microphonePermissionDenied);
+    DefaultToast.show(context, l10n.microphonePermissionDenied, negative: true);
     return false;
   }
 
@@ -237,7 +238,7 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen>
       return;
     }
     if (accessToken == null) {
-      DefaultToast.show(context, 'Authentication required.');
+      DefaultToast.show(context, 'Authentication required.', negative: true);
       _restoreButton();
       return;
     }
@@ -245,7 +246,7 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen>
     final seriesId = SeriesStateService.instance.seriesId;
     final episodeId = SeriesStateService.instance.selectedEpisodeId;
     if (seriesId == null || episodeId == null) {
-      DefaultToast.show(context, 'Cannot start roleplay');
+      DefaultToast.show(context, 'Cannot start roleplay', negative: true);
       _restoreButton();
       return;
     }
@@ -263,7 +264,7 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen>
       }
       final sessionId = session.sessionId;
       if (sessionId == null || sessionId.isEmpty) {
-        DefaultToast.show(context, 'Cannot start roleplay');
+        DefaultToast.show(context, 'Cannot start roleplay', negative: true);
         _restoreButton();
         return;
       }
@@ -276,7 +277,7 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen>
         return;
       }
       if (sessionId.startsWith('-')) {
-        DefaultToast.show(context, 'Cannot start roleplay');
+        DefaultToast.show(context, 'Cannot start roleplay', negative: true);
         _restoreButton();
         return;
       }
@@ -298,11 +299,11 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen>
         return;
       }
       if (e.toString().contains('HTTP 500')) {
-        DefaultToast.show(context, 'Cannot start roleplay');
+        DefaultToast.show(context, 'Cannot start roleplay', negative: true);
         _restoreButton();
         return;
       }
-      DefaultToast.show(context, 'Cannot start roleplay');
+      DefaultToast.show(context, 'Cannot start roleplay', negative: true);
       _restoreButton();
     } finally {
       await PerfMonitoringService.instance.stop('roleplay_session_start');
@@ -463,7 +464,7 @@ class _RoleplayOpeningScreenState extends State<RoleplayOpeningScreen>
                   ),
                   const SizedBox(height: 20),
                 ],
-                ElevatedButton(
+                SudaElevatedButton(
                   onPressed: _isLoading
                       ? null
                       : () async {

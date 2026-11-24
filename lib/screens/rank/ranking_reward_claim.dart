@@ -10,6 +10,7 @@ import '../../utils/user_img_path.dart';
 import '../../widgets/gnb_bar.dart';
 import '../../widgets/procedural_sunburst.dart';
 import 'rank_crown_avatar.dart';
+import '../../widgets/suda_tap.dart';
 
 /// 1~3등 Ranking Reward Claim 전면 패널.
 /// 배경·sunburst는 화면 하단(GNB 뒤)까지. 콘텐츠는 GNB 위 inset.
@@ -510,7 +511,7 @@ class _RankingRewardClaimButton extends StatelessWidget {
     final elevated = Theme.of(context).elevatedButtonTheme.style;
     return SizedBox(
       height: 52,
-      child: ElevatedButton(
+      child: SudaElevatedButton(
         onPressed: submitting ? null : onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.white,
@@ -567,5 +568,5 @@ class _RenderOverlayBlend extends RenderProxyBox {
 
 void showRankingRewardClaimErrorToast(BuildContext context) {
   final l10n = AppLocalizations.of(context)!;
-  DefaultToast.show(context, l10n.rankingRewardClaimError, isError: true);
+  DefaultToast.show(context, l10n.rankingRewardClaimError, isError: true, negative: true);
 }

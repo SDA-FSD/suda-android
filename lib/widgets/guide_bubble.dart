@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'suda_tap.dart';
 
 enum GuideBubbleTail { top, bottom, left, right }
 
@@ -144,7 +145,7 @@ class _GuideBubbleState extends State<GuideBubble>
         child: bubble,
       );
     }
-    return GestureDetector(
+    return SudaTap(
       onTap: widget.onTap,
       behavior: HitTestBehavior.opaque,
       child: bubble,

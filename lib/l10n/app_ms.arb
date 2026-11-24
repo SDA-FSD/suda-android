@@ -14,6 +14,8 @@
   "restorePurchasesNothing": "Tiada pembelian untuk dipulihkan.",
   "restorePurchasesCompleted": "Pembelian dipulihkan.",
   "settingsNotification": "Pemberitahuan",
+  "settingsVibration": "Getaran",
+  "settingsVibrationDesc": "Getaran untuk ketikan dan maklum balas.",
   "settingsTutorial": "Tutorial",
   "settingsCefrLevel": "Tahap Bahasa Inggeris",
   "settingsAppLanguage": "Bahasa aplikasi",

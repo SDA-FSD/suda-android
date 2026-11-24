@@ -29,6 +29,7 @@ import 'series_information.dart';
 import 'cefr_level_up_popup.dart';
 import 'widgets/series_episode_tab_content.dart';
 import 'widgets/series_similar_topic_tab_content.dart';
+import '../../widgets/suda_tap.dart';
 
 /// Series Overview Screen (Sub Screen, S2)
 class SeriesOverviewScreen extends StatefulWidget {
@@ -572,7 +573,7 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      GestureDetector(
+                      SudaTap(
                         onTap: _toggleSeriesCefr,
                         behavior: HitTestBehavior.opaque,
                         child: SizedBox(
@@ -679,7 +680,7 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
             ),
           ),
           for (final code in EnglishLevelUtil.visibleLevels)
-            GestureDetector(
+            SudaTap(
               onTap: () => _selectSeriesCefr(code),
               behavior: HitTestBehavior.opaque,
               child: SizedBox(
@@ -819,7 +820,7 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
   }
 
   Widget _buildInfoIcon({VoidCallback? onTap}) {
-    return GestureDetector(
+    return SudaTap(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Image.asset(
@@ -1060,7 +1061,7 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
                           _buildProgressBarArea(overview),
                         if (synopsis.isNotEmpty) ...[
                           const SizedBox(height: 8),
-                          GestureDetector(
+                          SudaTap(
                             onTap: () => setState(
                               () => _isSynopsisExpanded = !_isSynopsisExpanded,
                             ),
@@ -1120,7 +1121,7 @@ class _SeriesOverviewScreenState extends State<SeriesOverviewScreen>
                 final show =
                     _cefrExpanded || _cefrListController.value > 0;
                 if (!show) return const SizedBox.shrink();
-                return GestureDetector(
+                return SudaTap(
                   onTap: () => _enqueueCefr(_closeSeriesCefr),
                   behavior: HitTestBehavior.opaque,
                 );

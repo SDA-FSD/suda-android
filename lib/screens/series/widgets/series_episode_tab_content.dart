@@ -4,7 +4,6 @@ import 'dart:ui' show ImageFilter, lerpDouble;
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:vibration/vibration.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../../config/app_config.dart';
@@ -13,6 +12,7 @@ import '../../../models/series_models.dart';
 import '../../../utils/default_toast.dart';
 import '../../../utils/suda_json_util.dart';
 import '../../../widgets/cdn_thumb_image.dart';
+import '../../../widgets/suda_tap.dart';
 
 enum _EpisodePlayButtonKind { replay, unlock, locked }
 
@@ -392,7 +392,7 @@ class _SeriesEpisodeTabContentState extends State<SeriesEpisodeTabContent>
   /// 자물쇠가 사라지고 Play가 들어오기 시작하는 순간. 짧은 강타 뒤 무거운 한 방.
   Future<void> _vibrateUnlock() async {
     try {
-      await Vibration.vibrate(
+      await SudaHaptics.vibrate(
         pattern: [0, 30, 40, 160],
         intensities: [0, 255, 0, 255],
         sharpness: 1,
@@ -600,9 +600,9 @@ class _SeriesEpisodeTabContentState extends State<SeriesEpisodeTabContent>
           child: _playLabelRow(context, l10n),
         );
       case _EpisodePlayButtonKind.locked:
-        return GestureDetector(
+        return SudaTap(
           onTap: () {
-            DefaultToast.show(context, l10n.seriesOverviewEpisodeLockedToast);
+            DefaultToast.show(context, l10n.seriesOverviewEpisodeLockedToast, negative: true);
           },
           behavior: HitTestBehavior.opaque,
           child: _lockedChrome(
@@ -655,7 +655,7 @@ class _SeriesEpisodeTabContentState extends State<SeriesEpisodeTabContent>
         .clamp(0.0, 1.0);
     final slide = Curves.easeOutCubic.transform(slideT);
 
-    return GestureDetector(
+    return SudaTap(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: SizedBox(
@@ -700,7 +700,7 @@ class _SeriesEpisodeTabContentState extends State<SeriesEpisodeTabContent>
     final innerRadius = BorderRadius.circular(
       (_playButtonHeight / 2 - borderWidth).clamp(0.0, _playButtonHeight / 2),
     );
-    return GestureDetector(
+    return SudaTap(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: DecoratedBox(
@@ -733,7 +733,7 @@ class _SeriesEpisodeTabContentState extends State<SeriesEpisodeTabContent>
     required Widget child,
     VoidCallback? onTap,
   }) {
-    return GestureDetector(
+    return SudaTap(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: DecoratedBox(
@@ -1103,7 +1103,7 @@ class _SeriesEpisodeTabContentState extends State<SeriesEpisodeTabContent>
 
   Future<void> _vibrateEndingShake() async {
     try {
-      await Vibration.vibrate(
+      await SudaHaptics.vibrate(
         pattern: [30, 45, 75, 45, 75, 45],
         intensities: [0, 255, 0, 255, 0, 255],
         sharpness: 1,
@@ -1114,6 +1114,7 @@ class _SeriesEpisodeTabContentState extends State<SeriesEpisodeTabContent>
   void _onEndingTap() {
     if (_endingUnlockPlaying) return;
     if (_endingCleared) {
+      SudaHaptics.tap();
       widget.onOpenEnding?.call();
       return;
     }
@@ -1152,7 +1153,8 @@ class _SeriesEpisodeTabContentState extends State<SeriesEpisodeTabContent>
     final lockedCaptionOpacity = _endingLockedCaptionOpacity.clamp(0.0, 1.0);
     final titleOpacity = _endingTitleOpacity.clamp(0.0, 1.0);
 
-    final card = GestureDetector(
+    final card = SudaTap(
+      haptic: false,
       onTap: _onEndingTap,
       behavior: HitTestBehavior.opaque,
       child: SizedBox(

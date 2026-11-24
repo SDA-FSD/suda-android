@@ -14,6 +14,8 @@
   "restorePurchasesNothing": "Er zijn geen aankopen om te herstellen.",
   "restorePurchasesCompleted": "Aankopen hersteld.",
   "settingsNotification": "Meldingen",
+  "settingsVibration": "Trillen",
+  "settingsVibrationDesc": "Trillen bij tikken en reacties.",
   "settingsTutorial": "Tutorial",
   "settingsCefrLevel": "Engelsniveau",
   "settingsAppLanguage": "App-taal",

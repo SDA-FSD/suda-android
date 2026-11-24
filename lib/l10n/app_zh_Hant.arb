@@ -14,6 +14,8 @@
   "restorePurchasesNothing": "沒有可恢復的購買項目。",
   "restorePurchasesCompleted": "購買項目已恢復。",
   "settingsNotification": "通知",
+  "settingsVibration": "震動",
+  "settingsVibrationDesc": "以震動提示點擊與回饋。",
   "settingsTutorial": "教學",
   "settingsCefrLevel": "英語程度",
   "settingsAppLanguage": "應用程式語言",

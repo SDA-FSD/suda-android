@@ -27,6 +27,7 @@ import 'ranking_reward_claim.dart';
 import 'rank_crown_avatar.dart';
 import 'rank_podium_painter.dart';
 import 'top_3_rewards_popup.dart';
+import '../../widgets/suda_tap.dart';
 
 enum _MeRowSlot { below, visible, above }
 
@@ -698,7 +699,7 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
 
   Future<void> _vibrateBump(int durationMs, int amplitude) async {
     try {
-      await Vibration.vibrate(duration: durationMs, amplitude: amplitude);
+      await SudaHaptics.vibrate(duration: durationMs, amplitude: amplitude);
     } catch (_) {}
   }
 
@@ -1691,7 +1692,7 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
                   child: Opacity(opacity: v, child: child),
                 );
               },
-              child: GestureDetector(
+              child: SudaTap(
                 onTap: _onStickyTap,
                 behavior: HitTestBehavior.opaque,
                 child: _RankMyEntrySticky(
@@ -1978,7 +1979,7 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
         else if (_loadFailed && _screen == null)
           Expanded(
             child: Center(
-              child: TextButton(
+              child: SudaTextButton(
                 onPressed: () => unawaited(_loadScreen()),
                 child: const Text(
                   'Retry',
@@ -2240,7 +2241,7 @@ class _RankingState extends State<Ranking> with TickerProviderStateMixin {
               ),
             ),
             const SizedBox(width: helpGap),
-            GestureDetector(
+            SudaTap(
               onTap: () => unawaited(showTop3RewardsPopup(context)),
               behavior: HitTestBehavior.opaque,
               child: Padding(
@@ -2613,7 +2614,7 @@ class _PodiumSlot extends StatelessWidget {
                 Positioned(
                   top: 0,
                   left: avatarLeft * s,
-                  child: GestureDetector(
+                  child: SudaTap(
                     onTap: onOpenProfile,
                     behavior: HitTestBehavior.opaque,
                     child: RankCrownAvatar(
@@ -2640,7 +2641,7 @@ class _PodiumSlot extends StatelessWidget {
             ),
           ),
           SizedBox(height: 4 * s),
-          GestureDetector(
+          SudaTap(
             onTap: onOpenProfile,
             behavior: HitTestBehavior.opaque,
             child: SizedBox(
@@ -2804,7 +2805,7 @@ class _RankListRow extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 10),
-          GestureDetector(
+          SudaTap(
             onTap: onOpenProfile,
             behavior: HitTestBehavior.opaque,
             child: Stack(
@@ -2832,7 +2833,7 @@ class _RankListRow extends StatelessWidget {
           ),
           const SizedBox(width: 10),
           Expanded(
-            child: GestureDetector(
+            child: SudaTap(
               onTap: onOpenProfile,
               behavior: HitTestBehavior.opaque,
               child: Row(
@@ -3089,7 +3090,7 @@ class _RankNotRankedOverlay extends StatelessWidget {
                 const SizedBox(height: 20),
                 SizedBox(
                   height: 44,
-                  child: ElevatedButton(
+                  child: SudaElevatedButton(
                     onPressed: onPlayNow,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,
@@ -3618,7 +3619,7 @@ class _CompactPodiumSlot extends StatelessWidget {
               Positioned(
                 top: _CompactPodiumBar._avatarTop,
                 left: avatarLeft,
-                child: GestureDetector(
+                child: SudaTap(
                   onTap: () => onOpen(entry),
                   behavior: HitTestBehavior.opaque,
                   child: SizedBox(
@@ -3670,7 +3671,7 @@ class _CompactPodiumSlot extends StatelessWidget {
                 left: 2,
                 right: 2,
                 height: 16,
-                child: GestureDetector(
+                child: SudaTap(
                   onTap: () => onOpen(entry),
                   behavior: HitTestBehavior.opaque,
                   child: Row(

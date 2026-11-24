@@ -11,6 +11,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'l10n/app_localizations.dart';
 
 import 'services/auth_service.dart';
+import 'utils/suda_haptics.dart';
 import 'services/home_contents_reload.dart';
 import 'models/common_models.dart';
 import 'models/home_models.dart';
@@ -314,10 +315,15 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     TokenRefreshService.instance.stop();
   }
 
+  void _storeUser(UserDto? user) {
+    _user = user;
+    SudaHaptics.apply(user);
+  }
+
   void _onMainUserUpdatedFromSubflow(UserDto user) {
     if (!mounted) return;
     _precacheUserAvatar(user);
-    setState(() => _user = user);
+    setState(() => _storeUser(user));
   }
 
   void _precacheUserAvatar(UserDto user) {
@@ -439,7 +445,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       final user = await SudaApiClient.getCurrentUser(accessToken: token);
       if (!mounted) return;
       _precacheUserAvatar(user);
-      setState(() => _user = user);
+      setState(() => _storeUser(user));
     } catch (_) {
       // best-effort: 복귀 직후 동기화 실패 시 기존 메모리 상태 유지
     }
@@ -541,7 +547,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       setState(() {
         _accessToken = null;
         _googleUser = null;
-        _user = null;
+        _storeUser(null);
         _isLoading = false;
       });
       print('[BOOT] setState loading=false → LoginScreen');
@@ -572,7 +578,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         setState(() {
           _googleUser = null;
           _accessToken = null;
-          _user = null;
+          _storeUser(null);
           _isLoading = false;
         });
         return;
@@ -594,7 +600,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       setState(() {
         _accessToken = storedAccessToken;
         _googleUser = account ?? AuthService.currentUser;
-        _user = user;
+        _storeUser(user);
         _assignEntryFlags(user);
         _isLoading = false;
       });
@@ -607,7 +613,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       setState(() {
         _accessToken = null;
         _googleUser = null;
-        _user = null;
+        _storeUser(null);
         _isLoading = false;
       });
       await _removeNativeSplashAfterFlutterFrame();
@@ -630,7 +636,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       TokenRefreshService.instance.stop();
       setState(() {
         _accessToken = null;
-        _user = null;
+        _storeUser(null);
       });
       return;
     }
@@ -655,7 +661,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         setState(() {
           _googleUser = null;
           _accessToken = null;
-          _user = null;
+          _storeUser(null);
           _needsAgreement = false;
         });
         return;
@@ -674,7 +680,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       );
       setState(() {
         _accessToken = token;
-        _user = user;
+        _storeUser(user);
         _assignEntryFlags(user);
       });
     } catch (_) {
@@ -683,7 +689,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       if (!mounted) return;
       setState(() {
         _accessToken = null;
-        _user = null;
+        _storeUser(null);
       });
     }
   }
@@ -696,7 +702,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     setState(() {
       _googleUser = null;
       _accessToken = null;
-      _user = null;
+      _storeUser(null);
       _needsAgreement = false;
       _needsFirstAppLanguage = false;
       _needsFirstCefrLevel = false;
@@ -807,7 +813,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   void _onFirstAppLanguageSaved(UserDto? user) {
     if (user == null) return;
     setState(() {
-      _user = user;
+      _storeUser(user);
       _needsFirstAppLanguage = false;
       _needsFirstCefrLevel = !AppLanguage.hasEnglishLevel(user);
     });
@@ -824,8 +830,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   void _onFirstProfileImageComplete(UserDto? updatedUser) {
     setState(() {
       _needsFirstProfileImage = false;
-      _user = (updatedUser ?? _user)
-          ?.upsertMetaInfo(key: 'ONBOARDING_PROFILE_IMAGE', value: 'Y');
+      _storeUser(
+        (updatedUser ?? _user)
+            ?.upsertMetaInfo(key: 'ONBOARDING_PROFILE_IMAGE', value: 'Y'),
+      );
     });
   }
 
@@ -833,8 +841,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   void _onFirstUsernameComplete(UserDto? updatedUser) {
     setState(() {
       _needsFirstUsername = false;
-      _user = (updatedUser ?? _user)
-          ?.upsertMetaInfo(key: 'ONBOARDING_USERNAME', value: 'Y');
+      _storeUser(
+        (updatedUser ?? _user)
+            ?.upsertMetaInfo(key: 'ONBOARDING_USERNAME', value: 'Y'),
+      );
       final needsIntro = !(_user?.hasMetaInfoValue(
             key: 'ONBOARDING_TUTORIAL',
             value: 'Y',
@@ -858,7 +868,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     unawaited(_postOnboardingTutorialBestEffort());
     setState(() {
       _needsTutorialRoleplay = false;
-      _user = _user?.upsertMetaInfo(key: 'ONBOARDING_TUTORIAL', value: 'Y');
+      _storeUser(
+        _user?.upsertMetaInfo(key: 'ONBOARDING_TUTORIAL', value: 'Y'),
+      );
     });
   }
 
@@ -885,7 +897,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     setState(() {
       _googleUser = null;
       _accessToken = null;
-      _user = null;
+      _storeUser(null);
       _needsAgreement = false;
       _needsFirstAppLanguage = false;
       _needsFirstCefrLevel = false;
@@ -1047,7 +1059,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                     onSignOut: _onSignOut,
                     user: _user,
                     onUserUpdated: (user) {
-                      if (mounted) setState(() => _user = user);
+                      if (mounted) setState(() => _storeUser(user));
                     },
                     getCurrentUser: () => _user,
                     onNavigateToHome: _navigateToHome,
@@ -1267,7 +1279,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                           user: _user,
                           onUserUpdated: (user) {
                             setState(() {
-                              _user = user;
+                              _storeUser(user);
                             });
                           },
                           isActive: _currentMainScreen == 'profile',

@@ -10,6 +10,7 @@ import '../../widgets/energy_info_popup.dart';
 import '../../widgets/out_of_energy_bottom_sheet.dart';
 import '../../widgets/playing_energy_indicator.dart';
 import '../../widgets/playing_energy_induction_sheet.dart';
+import '../../widgets/suda_tap.dart';
 
 /// Playing 화면 에너지 상태·충전 타이머·로컬 차감.
 mixin PlayingEnergyMixin<T extends StatefulWidget> on State<T> {
@@ -56,7 +57,7 @@ mixin PlayingEnergyMixin<T extends StatefulWidget> on State<T> {
   }
 
   Widget buildPlayingEnergyFooterIndicator() {
-    return GestureDetector(
+    return SudaTap(
       onTap: _onPlayingEnergyIndicatorTap,
       behavior: HitTestBehavior.opaque,
       child: IntrinsicWidth(

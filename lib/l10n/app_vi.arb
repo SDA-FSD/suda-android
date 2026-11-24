@@ -14,6 +14,8 @@
   "restorePurchasesNothing": "Không có giao dịch mua nào để khôi phục.",
   "restorePurchasesCompleted": "Đã khôi phục giao dịch mua.",
   "settingsNotification": "Thông báo",
+  "settingsVibration": "Rung",
+  "settingsVibrationDesc": "Rung khi chạm và khi có phản hồi.",
   "settingsTutorial": "Hướng dẫn",
   "settingsCefrLevel": "Trình độ tiếng Anh",
   "settingsAppLanguage": "Ngôn ngữ ứng dụng",

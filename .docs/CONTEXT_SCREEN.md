@@ -491,6 +491,7 @@
 ### 이후 스크린 정보 (이동 가능한 다른 스크린)
 - **AccountScreen** (Sub Screen): "Account" 클릭 시
 - **PushAgreementScreen** (Sub Screen): "Notification" 클릭 시
+- **VibrationSettingScreen** (Sub Screen): 알림과 언어레벨 사이 "진동". 토글 기본 ON(meta `DISABLE_VIBRATION` 없음·`N`). 끄면 `PUT /v1/users/vibration?value=Y`, 켜면 `N`. 설명은 l10n `settingsVibrationDesc`
 - **CefrLevelScreen** (Sub Screen): "Language Level" 클릭 시
 - **FeedbackScreen** (Sub Screen): "Feedback" 클릭 시
 - **AnnouncementsScreen** (Sub Screen): "Announcements" 클릭 시

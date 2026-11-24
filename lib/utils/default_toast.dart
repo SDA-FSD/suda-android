@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import 'suda_haptics.dart';
+
 /// Overlay 기반 토스트 메시지.
 ///
 /// 스펙:
@@ -29,9 +31,11 @@ class DefaultToast {
     BuildContext context,
     String message, {
     bool isError = false,
+    bool negative = false,
     Duration duration = const Duration(seconds: 2),
     OverlayState? overlay,
   }) {
+    if (negative) SudaHaptics.negative();
     _currentEntry?.remove();
     _currentEntry = null;
 

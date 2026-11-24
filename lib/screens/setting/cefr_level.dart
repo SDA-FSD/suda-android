@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:vibration/vibration.dart';
-
 import '../../l10n/app_localizations.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
 import '../../utils/default_toast.dart';
 import '../../utils/english_level_util.dart';
 import '../../widgets/app_scaffold.dart';
+import '../../widgets/suda_tap.dart';
 
 class CefrLevelScreen extends StatefulWidget {
   final UserDto? user;
@@ -141,7 +140,7 @@ class _CefrLevelScreenState extends State<CefrLevelScreen>
   }
 
   Widget _buildBackButton() {
-    return GestureDetector(
+    return SudaTap(
       onTap: _isClosing ? null : _closeWithSideFadeOut,
       child: Container(
         width: 40,
@@ -254,7 +253,7 @@ class _CefrLevelScreenState extends State<CefrLevelScreen>
 
   void _onPageChanged(int index) {
     setState(() => _currentIndex = index);
-    Vibration.vibrate(duration: 80);
+    SudaHaptics.vibrate(duration: 80);
   }
 
   double _itemScale(int index) {
@@ -301,7 +300,7 @@ class _CefrLevelScreenState extends State<CefrLevelScreen>
         DefaultToast.show(
           context,
           'Failed to update language level: $e',
-          isError: true,
+          isError: true, negative: true,
         );
         setState(() => _isSubmitting = false);
       }
@@ -419,7 +418,7 @@ class _CefrLevelScreenState extends State<CefrLevelScreen>
                   diameter: diameter,
                 );
                 if (isCenter) {
-                  circle = GestureDetector(
+                  circle = SudaTap(
                     onTap: (_isSubmitting || _isClosing) ? null : _onConfirm,
                     behavior: HitTestBehavior.opaque,
                     child: circle,
@@ -493,7 +492,7 @@ class _CefrLevelScreenState extends State<CefrLevelScreen>
           child: Center(
             child: SizedBox(
               height: 60,
-              child: ElevatedButton(
+              child: SudaElevatedButton(
                 onPressed: (_isSubmitting || _isClosing) ? null : _onConfirm,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white,

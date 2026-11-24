@@ -17,6 +17,7 @@ import '../utils/user_img_path.dart';
 import '../widgets/character_rarity_frame.dart';
 import '../widgets/default_popup.dart';
 import 'home.dart';
+import '../widgets/suda_tap.dart';
 
 class CharacterScreen extends StatefulWidget {
   const CharacterScreen({super.key, required this.characterId});
@@ -70,7 +71,7 @@ class _CharacterScreenState extends State<CharacterScreen> {
       });
     } catch (e) {
       if (!mounted) return;
-      DefaultToast.show(context, 'Failed to load character: $e', isError: true);
+      DefaultToast.show(context, 'Failed to load character: $e', isError: true, negative: true);
       Navigator.of(context).maybePop();
     }
   }
@@ -141,7 +142,7 @@ class _CharacterScreenState extends State<CharacterScreen> {
         DefaultToast.show(
           context,
           AppLocalizations.of(context)!.characterChangeFailed,
-          isError: true,
+          isError: true, negative: true,
         );
         return;
       }
@@ -155,7 +156,7 @@ class _CharacterScreenState extends State<CharacterScreen> {
       DefaultToast.show(
         context,
         AppLocalizations.of(context)!.characterChangeFailed,
-        isError: true,
+        isError: true, negative: true,
       );
     } finally {
       if (mounted) setState(() => _savingProfile = false);
@@ -185,7 +186,7 @@ class _CharacterScreenState extends State<CharacterScreen> {
           SafeArea(
             child: Align(
               alignment: AlignmentDirectional.topStart,
-              child: IconButton(
+              child: SudaIconButton(
                 onPressed: () => Navigator.of(context).maybePop(),
                 icon: const Icon(Icons.close, color: Colors.white, size: 28),
               ),
@@ -435,7 +436,7 @@ class _CharacterScreenState extends State<CharacterScreen> {
     final l10n = AppLocalizations.of(context)!;
     return Column(
       children: [
-        GestureDetector(
+        SudaTap(
           onTap: owned ? () => setState(() => _zoomPath = path) : null,
           child: SizedBox(
             width: size,
@@ -497,7 +498,7 @@ class _CharacterScreenState extends State<CharacterScreen> {
           ),
         ),
         if (owned && !current)
-          GestureDetector(
+          SudaTap(
             onTap: () => unawaited(_confirmSetProfile(path)),
             child: Padding(
               padding: const EdgeInsets.only(top: 6),
@@ -518,10 +519,10 @@ class _CharacterScreenState extends State<CharacterScreen> {
     return Center(
       child: FractionallySizedBox(
         widthFactor: 0.9,
-        child: GestureDetector(
+        child: SudaTap(
         onTap: unlocked
             ? null
-            : () => DefaultToast.show(context, l10n.characterSecretLocked),
+            : () => DefaultToast.show(context, l10n.characterSecretLocked, negative: true),
         child: Container(
           constraints: BoxConstraints(minHeight: unlocked ? 0 : 130),
           height: unlocked ? null : 130,
@@ -582,12 +583,13 @@ class _CharacterScreenState extends State<CharacterScreen> {
     final current = _isCurrentProfile(path);
     final width = MediaQuery.sizeOf(context).width - 48;
     return Positioned.fill(
-      child: GestureDetector(
+      child: SudaTap(
         onTap: () => setState(() => _zoomPath = null),
         child: ColoredBox(
           color: Colors.black.withValues(alpha: 0.4),
           child: Center(
-            child: GestureDetector(
+            child: SudaTap(
+              haptic: false,
               onTap: () {},
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -634,7 +636,7 @@ class _ZoomSetButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final elevatedBase = Theme.of(context).elevatedButtonTheme.style;
-    return ElevatedButton(
+    return SudaElevatedButton(
       onPressed: onTap,
       style: ElevatedButton.styleFrom(
         backgroundColor: const Color(0xFF0CABA8),

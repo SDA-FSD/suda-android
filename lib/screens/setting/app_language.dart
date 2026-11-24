@@ -53,7 +53,7 @@ class _AppLanguageScreenState extends State<AppLanguageScreen> {
       DefaultToast.show(
         context,
         AppLocalizations.of(context)!.requestFailed,
-        isError: true,
+        isError: true, negative: true,
       );
       setState(() => _isSubmitting = false);
     }

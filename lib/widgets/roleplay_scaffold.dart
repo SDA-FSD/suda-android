@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'suda_tap.dart';
 
 /// 롤플레이 단계별 스크린(Opening, Playing, Ending, Try Again, Result) 전용 스캐폴드
 /// 롤플레이 도메인 특화 레이아웃 [전용 X 헤더 - 스크롤 본문 - 고정 푸터]를 제공합니다.
@@ -242,7 +243,7 @@ class _RoleplayCloseButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return SudaTap(
       onTap: onPressed ?? () => Navigator.pop(context),
       child: Container(
         width: 40,

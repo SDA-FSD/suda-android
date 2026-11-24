@@ -14,6 +14,7 @@ import '../widgets/default_popup.dart';
 import '../widgets/suda_label_tabs.dart';
 import 'other_user_profile.dart';
 import 'rank/rank_crown_avatar.dart';
+import '../widgets/suda_tap.dart';
 
 /// 내 프로필 Friends 칸에서 여는 친구·받은 요청 Sub Screen.
 class FriendsScreen extends StatefulWidget {
@@ -60,7 +61,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _loading = false);
-      DefaultToast.show(context, 'Failed to load friends: $e', isError: true);
+      DefaultToast.show(context, 'Failed to load friends: $e', isError: true, negative: true);
     }
   }
 
@@ -207,7 +208,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
       builder: (buttonContext) {
         return SizedBox(
           height: 44,
-          child: ElevatedButton(
+          child: SudaElevatedButton(
             onPressed: () => unawaited(_shareLink(buttonContext)),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.white,
@@ -302,7 +303,7 @@ class _FriendEntry extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         children: [
-          GestureDetector(
+          SudaTap(
             onTap: onOpen,
             behavior: HitTestBehavior.opaque,
             child: Stack(
@@ -331,7 +332,7 @@ class _FriendEntry extends StatelessWidget {
           ),
           const SizedBox(width: 10),
           Expanded(
-            child: GestureDetector(
+            child: SudaTap(
               onTap: onOpen,
               behavior: HitTestBehavior.opaque,
               child: Row(
@@ -388,7 +389,7 @@ class _ResponseButton extends StatelessWidget {
     return Material(
       color: color,
       shape: const StadiumBorder(),
-      child: InkWell(
+      child: SudaInkWell(
         customBorder: const StadiumBorder(),
         onTap: onTap,
         child: Padding(

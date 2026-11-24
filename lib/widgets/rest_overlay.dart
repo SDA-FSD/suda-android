@@ -6,6 +6,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../services/rest_status_service.dart';
 import '../utils/language_util.dart';
+import 'suda_tap.dart';
 
 /// Overview 진입 전 휴식 안내 레이어.
 /// restYn/restStartsAt/restEndsAt 확인 후 노출되며, 닫기 시 레이어만 제거.
@@ -61,7 +62,7 @@ class _RestOverlayState extends State<RestOverlay> {
           Positioned(
             left: 30,
             top: 60,
-            child: GestureDetector(
+            child: SudaTap(
               onTap: () => Navigator.of(context).pop(),
               behavior: HitTestBehavior.opaque,
               child: SizedBox(

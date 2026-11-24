@@ -52,6 +52,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settingsNotification => 'الإشعارات';
 
   @override
+  String get settingsVibration => 'الاهتزاز';
+
+  @override
+  String get settingsVibrationDesc => 'اهتزاز عند النقر وعند الردود.';
+
+  @override
   String get settingsTutorial => 'البرنامج التعليمي';
 
   @override

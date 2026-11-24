@@ -52,6 +52,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get settingsNotification => 'Bildirimler';
 
   @override
+  String get settingsVibration => 'Titreşim';
+
+  @override
+  String get settingsVibrationDesc =>
+      'Dokunuşlar ve geri bildirimler titreşimle gelir.';
+
+  @override
   String get settingsTutorial => 'Eğitim';
 
   @override

@@ -43,6 +43,7 @@ import '../rank/ranking.dart';
 import '../reward/reward_unboxing.dart';
 import '../../models/character_reward_models.dart';
 import '../../utils/paywall_impression_screen.dart';
+import '../../widgets/suda_tap.dart';
 
 /// Lab에서 재현 가능한 `DefaultPopup` 목록.
 /// `DefaultPopup` 전환이 완료될 때마다 여기에 **한 항목씩** 추가한다.
@@ -224,7 +225,7 @@ class _LabIndexRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context).textTheme;
-    return InkWell(
+    return SudaInkWell(
       onTap: onTap,
       child: SizedBox(
         height: 52,
@@ -254,7 +255,7 @@ class _LabActionRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context).textTheme;
     final enabled = onTap != null;
-    return InkWell(
+    return SudaInkWell(
       onTap: onTap,
       child: SizedBox(
         height: 48,
@@ -854,6 +855,7 @@ class _LabFeedbackPageState extends State<_LabFeedbackPage> {
             context,
             'Test Popup, Test Toast',
             isError: _toastIsWarning,
+            negative: _toastIsWarning,
           ),
         ),
         _LabActionRow(
@@ -862,6 +864,7 @@ class _LabFeedbackPageState extends State<_LabFeedbackPage> {
             context,
             _longToastTestMessage,
             isError: _toastIsWarning,
+            negative: _toastIsWarning,
           ),
         ),
         const SizedBox(height: 16),
@@ -1004,7 +1007,7 @@ class _LabAccountPageState extends State<_LabAccountPage> {
         DefaultToast.show(
           context,
           'TARGET_LANGUAGE load failed: $error',
-          isError: true,
+          isError: true, negative: true,
         );
       }
     }
@@ -1039,7 +1042,7 @@ class _LabAccountPageState extends State<_LabAccountPage> {
         DefaultToast.show(
           context,
           'TARGET_LANGUAGE update failed: $error',
-          isError: true,
+          isError: true, negative: true,
         );
       }
     } finally {
@@ -1073,7 +1076,7 @@ class _LabAccountPageState extends State<_LabAccountPage> {
       widget.onSignOut?.call();
     } catch (error) {
       if (mounted) {
-        DefaultToast.show(context, 'Remove MetaInfo failed: $error', isError: true);
+        DefaultToast.show(context, 'Remove MetaInfo failed: $error', isError: true, negative: true);
       }
     } finally {
       if (mounted) setState(() => _removingMetaInfo = false);
@@ -1117,7 +1120,7 @@ class _LabAccountPageState extends State<_LabAccountPage> {
         SizedBox(
           width: double.infinity,
           height: 56,
-          child: ElevatedButton(
+          child: SudaElevatedButton(
             onPressed: _removingMetaInfo ? null : () => unawaited(_removeMetaInfo()),
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF0CABA8),

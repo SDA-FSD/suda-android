@@ -12,6 +12,7 @@ import '../../utils/sub_screen_route.dart';
 import '../../widgets/default_popup.dart';
 import '../../widgets/app_scaffold.dart';
 import 'announcement_detail.dart';
+import '../../widgets/suda_tap.dart';
 
 class AnnouncementsScreen extends StatefulWidget {
   const AnnouncementsScreen({super.key});
@@ -205,7 +206,7 @@ class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
               ),
               if (_error != null) ...[
                 const SizedBox(height: 16),
-                TextButton(
+                SudaTextButton(
                   onPressed: () {
                     setState(() => _error = null);
                     _fetchPage(0);
@@ -245,7 +246,7 @@ class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
 
         return Padding(
           padding: const EdgeInsets.only(bottom: 12),
-          child: InkWell(
+          child: SudaInkWell(
             onTap: () => _onItemTap(context, item),
             child: Container(
               width: double.infinity,

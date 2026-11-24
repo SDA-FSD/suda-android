@@ -14,6 +14,8 @@
   "restorePurchasesNothing": "لا توجد مشتريات لاستعادتها.",
   "restorePurchasesCompleted": "تمت استعادة المشتريات.",
   "settingsNotification": "الإشعارات",
+  "settingsVibration": "الاهتزاز",
+  "settingsVibrationDesc": "اهتزاز عند النقر وعند الردود.",
   "settingsTutorial": "البرنامج التعليمي",
   "settingsCefrLevel": "مستوى اللغة الإنجليزية",
   "settingsAppLanguage": "لغة التطبيق",

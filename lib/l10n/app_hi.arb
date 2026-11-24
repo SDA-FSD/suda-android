@@ -14,6 +14,8 @@
   "restorePurchasesNothing": "रीस्टोर करने के लिए कोई खरीदारी नहीं है।",
   "restorePurchasesCompleted": "खरीदारी रीस्टोर हो गई।",
   "settingsNotification": "नोटिफ़िकेशन",
+  "settingsVibration": "कंपन",
+  "settingsVibrationDesc": "टैप और प्रतिक्रिया पर कंपन।",
   "settingsTutorial": "ट्यूटोरियल",
   "settingsCefrLevel": "अंग्रेज़ी का स्तर",
   "settingsAppLanguage": "ऐप की भाषा",

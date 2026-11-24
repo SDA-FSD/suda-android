@@ -18,11 +18,13 @@ import 'account.dart';
 import 'app_language.dart';
 import 'cefr_level.dart';
 import 'push_agreement.dart';
+import 'vibration.dart';
 import 'feedback.dart';
 import 'announcements.dart';
 import 'lab.dart';
 import '../webview_screen.dart';
 import 'open_source_license.dart';
+import '../../widgets/suda_tap.dart';
 
 class SettingScreen extends StatelessWidget {
   final VoidCallback? onSignOut;
@@ -70,7 +72,7 @@ class SettingScreen extends StatelessWidget {
       }
     } catch (error) {
       if (context.mounted) {
-        DefaultToast.show(context, 'Logout failed: $error', isError: true);
+        DefaultToast.show(context, 'Logout failed: $error', isError: true, negative: true);
       }
     }
   }
@@ -102,6 +104,17 @@ class SettingScreen extends StatelessWidget {
             () => _navigateToSubScreen(
               context,
               PushAgreementScreen(
+                user: getCurrentUser?.call() ?? user,
+                onUserUpdated: onUserUpdated,
+              ),
+            ),
+          ),
+          _buildMenuItem(
+            context,
+            l10n.settingsVibration,
+            () => _navigateToSubScreen(
+              context,
+              VibrationSettingScreen(
                 user: getCurrentUser?.call() ?? user,
                 onUserUpdated: onUserUpdated,
               ),
@@ -238,7 +251,7 @@ class SettingScreen extends StatelessWidget {
     if (!context.mounted) return;
 
     if (result.outcome == IapPurchaseOutcome.nothingToRestore) {
-      DefaultToast.show(context, l10n.restorePurchasesNothing);
+      DefaultToast.show(context, l10n.restorePurchasesNothing, negative: true);
       return;
     }
     if (!result.isSuccess) {
@@ -247,13 +260,13 @@ class SettingScreen extends StatelessWidget {
         DefaultToast.show(
           context,
           l10n.energyPurchaseNotCompleted,
-          isError: true,
+          isError: true, negative: true,
         );
       }
       return;
     }
     if (result.pendingApproval) {
-      DefaultToast.show(context, l10n.energyPurchasePendingApproval);
+      DefaultToast.show(context, l10n.energyPurchasePendingApproval, negative: true);
     } else {
       DefaultToast.show(context, l10n.restorePurchasesCompleted);
     }
@@ -268,7 +281,7 @@ class SettingScreen extends StatelessWidget {
     final theme = Theme.of(context).textTheme;
     return Material(
       color: Colors.transparent,
-      child: InkWell(
+      child: SudaInkWell(
         onTap: onTap,
         splashColor: const Color(0xFF353535),
         highlightColor: const Color(0xFF353535),
@@ -286,7 +299,7 @@ class SettingScreen extends StatelessWidget {
 
   Widget _buildFooterMenuItem(BuildContext context, String text, VoidCallback onTap) {
     final theme = Theme.of(context).textTheme;
-    return GestureDetector(
+    return SudaTap(
       onTap: onTap,
       child: Text(
         text,

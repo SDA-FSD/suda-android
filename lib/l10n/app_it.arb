@@ -14,6 +14,8 @@
   "restorePurchasesNothing": "Nessun acquisto da ripristinare.",
   "restorePurchasesCompleted": "Acquisti ripristinati.",
   "settingsNotification": "Notifiche",
+  "settingsVibration": "Vibrazione",
+  "settingsVibrationDesc": "Tocchi e risposte con vibrazione.",
   "settingsTutorial": "Tutorial",
   "settingsCefrLevel": "Livello di inglese",
   "settingsAppLanguage": "Lingua dell'app",

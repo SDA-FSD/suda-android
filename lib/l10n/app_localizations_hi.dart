@@ -53,6 +53,12 @@ class AppLocalizationsHi extends AppLocalizations {
   String get settingsNotification => 'नोटिफ़िकेशन';
 
   @override
+  String get settingsVibration => 'कंपन';
+
+  @override
+  String get settingsVibrationDesc => 'टैप और प्रतिक्रिया पर कंपन।';
+
+  @override
   String get settingsTutorial => 'ट्यूटोरियल';
 
   @override

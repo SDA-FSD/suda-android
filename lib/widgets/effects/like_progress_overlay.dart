@@ -6,6 +6,7 @@ import 'package:vibration/vibration.dart';
 import 'package:vibration/vibration_presets.dart';
 
 import '../../effects/like_progress_effect.dart';
+import '../../utils/suda_haptics.dart';
 
 class LikeProgressOverlay extends StatefulWidget {
   final LikeProgressEffectParams params;
@@ -321,7 +322,7 @@ class _LikeProgressOverlayState extends State<LikeProgressOverlay>
   Future<void> _playPhase6ProgressHaptic(int generation) async {
     if (!mounted || generation != _phase6HapticGeneration) return;
     try {
-      await Vibration.vibrate(preset: VibrationPreset.rapidTapFeedback);
+      await SudaHaptics.vibrate(preset: VibrationPreset.rapidTapFeedback);
     } catch (_) {}
     if (!mounted || generation != _phase6HapticGeneration) return;
     _schedulePhase6HapticTick(
@@ -333,7 +334,7 @@ class _LikeProgressOverlayState extends State<LikeProgressOverlay>
   Future<void> _playLevelUpTicketHaptic(int generation) async {
     if (!mounted || generation != _phase6HapticGeneration) return;
     try {
-      await Vibration.vibrate(preset: VibrationPreset.doubleBuzz);
+      await SudaHaptics.vibrate(preset: VibrationPreset.doubleBuzz);
     } catch (_) {}
     if (!mounted || generation != _phase6HapticGeneration) return;
     _schedulePhase6Resume(

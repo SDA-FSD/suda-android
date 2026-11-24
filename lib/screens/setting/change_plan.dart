@@ -11,6 +11,7 @@ import '../../utils/app_language.dart';
 import '../../utils/default_toast.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../widgets/default_popup.dart';
+import '../../widgets/suda_tap.dart';
 
 enum _PlanKind { monthly, yearly }
 
@@ -297,14 +298,14 @@ class _ChangePlanScreenState extends State<ChangePlanScreen> {
         DefaultToast.show(
           context,
           l10n.changePlanOldPurchaseMissing,
-          isError: true,
+          isError: true, negative: true,
         );
         setState(() => _purchasing = false);
         return;
       }
 
       if (result.pendingApproval) {
-        DefaultToast.show(context, l10n.energyPurchasePendingApproval);
+        DefaultToast.show(context, l10n.energyPurchasePendingApproval, negative: true);
         setState(() => _purchasing = false);
         return;
       }
@@ -315,7 +316,7 @@ class _ChangePlanScreenState extends State<ChangePlanScreen> {
           DefaultToast.show(
             context,
             l10n.energyPurchaseNotCompleted,
-            isError: true,
+            isError: true, negative: true,
           );
         }
         setState(() => _purchasing = false);
@@ -361,7 +362,7 @@ class _ChangePlanScreenState extends State<ChangePlanScreen> {
               style: theme.bodyLarge?.copyWith(color: Colors.white),
             ),
             const SizedBox(height: 24),
-            ElevatedButton(
+            SudaElevatedButton(
               onPressed: () => unawaited(_load()),
               style: ElevatedButton.styleFrom(
                 backgroundColor: _accent,
@@ -430,7 +431,7 @@ class _ChangePlanScreenState extends State<ChangePlanScreen> {
             child: SizedBox(
               width: double.infinity,
               height: 48,
-              child: ElevatedButton(
+              child: SudaElevatedButton(
                 onPressed: (_availableSelected && !_changeLocked)
                     ? _onChangePlanTap
                     : null,
@@ -511,7 +512,7 @@ class _ChangePlanScreenState extends State<ChangePlanScreen> {
 
     return Material(
       color: Colors.transparent,
-      child: InkWell(
+      child: SudaInkWell(
         onTap: () => setState(() => _availableSelected = !_availableSelected),
         borderRadius: BorderRadius.circular(16),
         child: Container(

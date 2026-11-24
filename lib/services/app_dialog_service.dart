@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../widgets/suda_tap.dart';
 
 /// 앱 전역 다이얼로그 서비스
 ///
@@ -42,7 +43,7 @@ class AppDialogService {
             title: const Text('Notification'),
             content: const Text('Please update SUDA app'),
             actions: <Widget>[
-              TextButton(
+              SudaTextButton(
                 child: const Text('OK'),
                 onPressed: () async {
                   try {
@@ -82,7 +83,7 @@ class AppDialogService {
             title: const Text('Notification'),
             content: const Text('Network Error'),
             actions: <Widget>[
-              TextButton(
+              SudaTextButton(
                 child: const Text('OK'),
                 onPressed: () {
                   // 앱 종료

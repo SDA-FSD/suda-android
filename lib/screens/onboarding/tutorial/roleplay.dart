@@ -27,6 +27,7 @@ import '../../../widgets/roleplay_turn_bar_area.dart';
 import 'pointer.dart';
 import 'result.dart';
 import 'backdrop.dart';
+import '../../../widgets/suda_tap.dart';
 
 /// 마이크 가이드 문구. 기본은 AI 발화 후, 나머지는 홀드/짧은 탭/무인식.
 enum _TutorialMicGuide { afterVoice, holding, tooShort, noSpeech }
@@ -408,6 +409,7 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
       _restoreMicGuide(_TutorialMicGuide.afterVoice);
       return;
     }
+    SudaHaptics.hold();
     final ext = Platform.isIOS ? 'wav' : 'm4a';
     final path =
         '${Directory.systemTemp.path}/tutorial_record_${DateTime.now().millisecondsSinceEpoch}.$ext';
@@ -1064,7 +1066,7 @@ class _TutorialRoleplayScreenState extends State<TutorialRoleplayScreen>
                                       ),
                                       Align(
                                         alignment: Alignment.centerRight,
-                                        child: TextButton(
+                                        child: SudaTextButton(
                                           onPressed: _showSkipPopup,
                                           style: TextButton.styleFrom(
                                             foregroundColor: Colors.white,
@@ -1374,7 +1376,7 @@ class _ClassicHintCard extends StatelessWidget {
         Expanded(
           child: Text(label, style: labelStyle, textAlign: TextAlign.start),
         ),
-        GestureDetector(
+        SudaTap(
           onTap: onClose,
           behavior: HitTestBehavior.opaque,
           child: const SizedBox(
@@ -1398,7 +1400,7 @@ class _ClassicHintCard extends StatelessWidget {
           child: Material(
             color: _buttonFill,
             borderRadius: BorderRadius.circular(25),
-            child: InkWell(
+            child: SudaInkWell(
               onTap: onReveal,
               borderRadius: BorderRadius.circular(25),
               child: Container(
@@ -1438,7 +1440,7 @@ class _ClassicHintCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            GestureDetector(
+            SudaTap(
               onTap: onSentence,
               behavior: HitTestBehavior.opaque,
               child: ColorFiltered(
@@ -1653,7 +1655,7 @@ class _HintWord extends StatelessWidget {
     )..layout();
     final width = painter.width;
     painter.dispose();
-    return GestureDetector(
+    return SudaTap(
       onTap: onTap,
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -2586,7 +2588,7 @@ class _PlayingLikeDisabledFooter extends StatelessWidget {
                               duration: const Duration(milliseconds: 560),
                               curve: Curves.easeOutCubic,
                               opacity: hintEnabled ? 1 : 0.4,
-                              child: GestureDetector(
+                              child: SudaTap(
                                 onTap: hintEnabled ? onHintTap : null,
                                 child: _HintBulb(sparkle: hintSparkle),
                               ),

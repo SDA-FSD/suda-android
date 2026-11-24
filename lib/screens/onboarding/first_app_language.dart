@@ -57,7 +57,7 @@ class _FirstAppLanguageScreenState extends State<FirstAppLanguageScreen> {
       DefaultToast.show(
         context,
         AppLocalizations.of(context)!.requestFailed,
-        isError: true,
+        isError: true, negative: true,
       );
       setState(() => _isSubmitting = false);
     }

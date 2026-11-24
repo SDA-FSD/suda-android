@@ -12,6 +12,7 @@ import '../../widgets/onboarding_step_bar.dart';
 import '../../widgets/user_profile_avatar.dart';
 import 'tutorial/intro.dart';
 import 'tutorial/intro_stage.dart';
+import '../../widgets/suda_tap.dart';
 
 /// 온보딩(meta `ONBOARDING_USERNAME` != Y)의 이름 확인·수정 Full Screen.
 class FirstUsernameScreen extends StatefulWidget {
@@ -123,7 +124,7 @@ class _FirstUsernameScreenState extends State<FirstUsernameScreen>
     } catch (_) {
       if (mounted) {
         final l10n = AppLocalizations.of(context)!;
-        DefaultToast.show(context, l10n.requestFailed, isError: true);
+        DefaultToast.show(context, l10n.requestFailed, isError: true, negative: true);
       }
     } finally {
       if (mounted) {
@@ -160,7 +161,8 @@ class _FirstUsernameScreenState extends State<FirstUsernameScreen>
 
     return PopScope(
       canPop: false,
-      child: GestureDetector(
+      child: SudaTap(
+        haptic: false,
         onTap: () {
           if (!_transitioning) _nameFocusNode.unfocus();
         },
@@ -313,7 +315,7 @@ class _FirstUsernameScreenState extends State<FirstUsernameScreen>
   }
 
   Widget _buildNameField(TextTheme theme) {
-    return GestureDetector(
+    return SudaTap(
       onTap: () => _nameFocusNode.requestFocus(),
       child: Container(
         width: double.infinity,
@@ -369,7 +371,7 @@ class _FirstUsernameScreenState extends State<FirstUsernameScreen>
           const SizedBox(height: 14),
           SizedBox(
             height: 60,
-            child: ElevatedButton(
+            child: SudaElevatedButton(
               onPressed: _canSubmit ? _onConfirm : null,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,

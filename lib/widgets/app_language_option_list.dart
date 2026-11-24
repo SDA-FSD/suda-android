@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../utils/app_language_options.dart';
+import 'suda_tap.dart';
 
 class AppLanguageOptionList extends StatelessWidget {
   final List<AppLanguageOption> options;
@@ -58,7 +59,7 @@ class AppLanguageOptionList extends StatelessWidget {
                                 width: 1,
                               ),
                       ),
-                      child: InkWell(
+                      child: SudaInkWell(
                         customBorder: const StadiumBorder(),
                         onTap: submitting ? null : () => onSelect(option.id),
                         child: SizedBox(
@@ -107,7 +108,7 @@ class AppLanguageOptionList extends StatelessWidget {
               child: Center(
                 child: SizedBox(
                   height: 60,
-                  child: ElevatedButton(
+                  child: SudaElevatedButton(
                     onPressed: onConfirm,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,

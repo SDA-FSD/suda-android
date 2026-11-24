@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'gnb_bar.dart';
+import 'suda_tap.dart';
 
 /// 앱 전체의 공통 레이아웃 표준을 정의하는 베이스 스캐폴드
 /// 
@@ -180,7 +181,7 @@ class AppScaffold extends StatelessWidget {
 
   /// 공통적으로 사용되는 뒤로가기 버튼 생성 헬퍼
   static Widget backButton(BuildContext context) {
-    return GestureDetector(
+    return SudaTap(
       onTap: () => Navigator.pop(context),
       child: Container(
         width: 40,

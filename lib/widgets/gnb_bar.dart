@@ -6,6 +6,7 @@ import '../models/user_models.dart';
 import '../utils/user_img_path.dart';
 import 'cdn_thumb_image.dart';
 import 'default_profile_avatar.dart';
+import 'suda_tap.dart';
 
 /// Main Screen 하단 GNB. 본문 위에 오버레이, 투명+블러 배경.
 /// 아이콘: Home 12.5% / Alarm 37.5% / Rank 62.5% / Profile 87.5% (각 아이콘 중심).
@@ -85,28 +86,28 @@ class GnbBar extends StatelessWidget {
                       Row(
                         children: [
                           Expanded(
-                            child: GestureDetector(
+                            child: SudaTap(
                               behavior: HitTestBehavior.opaque,
                               onTap: onHomeTap,
                               child: const SizedBox.expand(),
                             ),
                           ),
                           Expanded(
-                            child: GestureDetector(
+                            child: SudaTap(
                               behavior: HitTestBehavior.opaque,
                               onTap: onAlarmTap,
                               child: const SizedBox.expand(),
                             ),
                           ),
                           Expanded(
-                            child: GestureDetector(
+                            child: SudaTap(
                               behavior: HitTestBehavior.opaque,
                               onTap: onRankTap,
                               child: const SizedBox.expand(),
                             ),
                           ),
                           Expanded(
-                            child: GestureDetector(
+                            child: SudaTap(
                               behavior: HitTestBehavior.opaque,
                               onTap: onProfileTap,
                               child: const SizedBox.expand(),

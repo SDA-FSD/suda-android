@@ -10,6 +10,7 @@ import '../services/token_storage.dart';
 import '../utils/energy_icon.dart';
 import '../utils/energy_timer_refetch.dart';
 import 'energy_info_popup.dart';
+import 'suda_tap.dart';
 
 const _energyZeroColor = Color(0xFFE60000);
 const _timerMint = Color(0xFF0CABA8);
@@ -212,7 +213,7 @@ class _EnergyHeaderBadgeState extends State<EnergyHeaderBadge> {
 
   @override
   Widget build(BuildContext context) {
-    final badge = GestureDetector(
+    final badge = SudaTap(
       onTap: _onTap,
       behavior: HitTestBehavior.opaque,
       child: SizedBox(

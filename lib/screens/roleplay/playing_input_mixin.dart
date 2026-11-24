@@ -18,6 +18,7 @@ import '../../widgets/roleplay_mic_button_area.dart';
 import '../../widgets/roleplay_mission_panel.dart';
 import 'playing_conversation_mixin.dart';
 import 'playing_hint_mixin.dart';
+import '../../widgets/suda_tap.dart';
 
 enum _PlayingInputMode { recording, typing }
 
@@ -583,7 +584,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
           : null,
     );
     if (!showPlayingKebab || onPlayingKebabTap == null) return slot;
-    return GestureDetector(
+    return SudaTap(
       onTap: onPlayingKebabTap,
       behavior: HitTestBehavior.opaque,
       child: slot,
@@ -614,7 +615,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
                   child: child,
                 );
               },
-              child: GestureDetector(
+              child: SudaTap(
                 onTap: _isHintEnabled ? _onHintTap : null,
                 child: SizedBox(
                   width: 40,
@@ -750,7 +751,7 @@ mixin PlayingInputMixin<T extends StatefulWidget>
                         ),
                       ),
                       const SizedBox(width: 10),
-                      GestureDetector(
+                      SudaTap(
                         onTap:
                             _isTypingEnabled && _isUserTurn && !_isInputLocked
                             ? _handleSend
@@ -1047,10 +1048,11 @@ mixin PlayingInputMixin<T extends StatefulWidget>
       DefaultToast.show(
         context,
         'Cannot start without microphone permission.',
-        isError: true,
+        isError: true, negative: true,
       );
       return;
     }
+    SudaHaptics.hold();
 
     final ext = Platform.isIOS ? 'wav' : 'm4a';
     final path =

@@ -2,6 +2,7 @@ import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'suda_tap.dart';
 
 enum DefaultPopupButtonType {
   /// Primary action (spec name: "default"): height 44, width shrink-wrap to label,
@@ -218,7 +219,7 @@ class DefaultPopup extends StatelessWidget {
       child: Stack(
         children: [
           Positioned.fill(
-            child: GestureDetector(
+            child: SudaTap(
               behavior: HitTestBehavior.opaque,
               onTap: barrierDismissible
                   ? () => Navigator.of(context).pop()
@@ -303,7 +304,7 @@ class DefaultPopup extends StatelessWidget {
             height: 44,
             width: expandPrimary ? double.infinity : null,
             child: switch (b.type) {
-              DefaultPopupButtonType.primary => ElevatedButton(
+              DefaultPopupButtonType.primary => SudaElevatedButton(
                 onPressed: () => _popThenCallback(context, b.onPressed),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF0CABA8),
@@ -315,7 +316,7 @@ class DefaultPopup extends StatelessWidget {
                 ).merge(elevatedBase),
                 child: Text(b.label),
               ),
-              DefaultPopupButtonType.primaryLight => ElevatedButton(
+              DefaultPopupButtonType.primaryLight => SudaElevatedButton(
                 onPressed: () => _popThenCallback(context, b.onPressed),
                 style: (elevatedBase ?? const ButtonStyle()).merge(
                   ElevatedButton.styleFrom(
@@ -329,7 +330,7 @@ class DefaultPopup extends StatelessWidget {
                 ),
                 child: Text(b.label),
               ),
-              DefaultPopupButtonType.text => TextButton(
+              DefaultPopupButtonType.text => SudaTextButton(
                 onPressed: () => _popThenCallback(context, b.onPressed),
                 style: TextButton.styleFrom(
                   foregroundColor: Colors.white,

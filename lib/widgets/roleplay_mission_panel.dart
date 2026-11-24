@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../models/series_models.dart';
 import '../utils/suda_json_util.dart';
+import 'suda_tap.dart';
 
 /// S2 Playing **미션 패널** — 본문 상단 고정 오버레이.
 ///
@@ -230,7 +231,7 @@ class _RoleplayMissionPanelState extends State<RoleplayMissionPanel> {
         final textGutterBefore = textGutterTotal / 2;
         final textGutterAfter = textGutterTotal / 2;
 
-        return GestureDetector(
+        return SudaTap(
           onTap: _toggleExpanded,
           behavior: HitTestBehavior.opaque,
           child: AnimatedSize(

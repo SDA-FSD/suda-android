@@ -53,6 +53,12 @@ class AppLocalizationsNl extends AppLocalizations {
   String get settingsNotification => 'Meldingen';
 
   @override
+  String get settingsVibration => 'Trillen';
+
+  @override
+  String get settingsVibrationDesc => 'Trillen bij tikken en reacties.';
+
+  @override
   String get settingsTutorial => 'Tutorial';
 
   @override

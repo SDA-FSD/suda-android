@@ -14,6 +14,8 @@
   "restorePurchasesNothing": "Brak zakupów do przywrócenia.",
   "restorePurchasesCompleted": "Zakupy przywrócone.",
   "settingsNotification": "Powiadomienia",
+  "settingsVibration": "Wibracje",
+  "settingsVibrationDesc": "Wibracje przy dotknięciach i reakcjach.",
   "settingsTutorial": "Samouczek",
   "settingsCefrLevel": "Poziom angielskiego",
   "settingsAppLanguage": "Język aplikacji",

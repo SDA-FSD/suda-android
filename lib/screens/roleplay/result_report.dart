@@ -9,6 +9,7 @@ import '../../services/token_storage.dart';
 import '../../utils/default_toast.dart';
 import '../../widgets/roleplay_configuration_panel.dart';
 import '../../widgets/roleplay_scaffold.dart';
+import '../../widgets/suda_tap.dart';
 
 /// Roleplay Result Report Screen (Sub Screen)
 ///
@@ -62,7 +63,7 @@ class _RoleplayResultReportScreenState extends State<RoleplayResultReportScreen>
         DefaultToast.show(
           context,
           'No result id',
-          isError: true,
+          isError: true, negative: true,
         );
       }
       return;
@@ -90,7 +91,7 @@ class _RoleplayResultReportScreenState extends State<RoleplayResultReportScreen>
         DefaultToast.show(
           context,
           'Failed to send report: $e',
-          isError: true,
+          isError: true, negative: true,
         );
       }
     } finally {
@@ -202,7 +203,7 @@ class _RoleplayResultReportScreenState extends State<RoleplayResultReportScreen>
                 Center(
                   child: SizedBox(
                     height: 56,
-                    child: ElevatedButton(
+                    child: SudaElevatedButton(
                       onPressed:
                           (_canSubmit && !_isSubmitting) ? _handleSend : null,
                       style: ElevatedButton.styleFrom(

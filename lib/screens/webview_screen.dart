@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import '../widgets/suda_tap.dart';
 
 /// 웹뷰를 표시하는 화면
 class WebViewScreen extends StatefulWidget {
@@ -49,7 +50,7 @@ class _WebViewScreenState extends State<WebViewScreen> {
       backgroundColor: const Color(0xFF121212),
       appBar: AppBar(
         backgroundColor: const Color(0xFF121212),
-        leading: IconButton(
+        leading: SudaIconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),

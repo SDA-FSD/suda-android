@@ -51,6 +51,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsNotification => '通知';
 
   @override
+  String get settingsVibration => '振动';
+
+  @override
+  String get settingsVibrationDesc => '用振动提示点击和反馈。';
+
+  @override
   String get settingsTutorial => '教程';
 
   @override
@@ -1469,6 +1475,12 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get settingsNotification => '通知';
 
   @override
+  String get settingsVibration => '振动';
+
+  @override
+  String get settingsVibrationDesc => '用振动提示点击和反馈。';
+
+  @override
   String get settingsTutorial => '教程';
 
   @override
@@ -2885,6 +2897,12 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get settingsNotification => '通知';
+
+  @override
+  String get settingsVibration => '震動';
+
+  @override
+  String get settingsVibrationDesc => '以震動提示點擊與回饋。';
 
   @override
   String get settingsTutorial => '教學';

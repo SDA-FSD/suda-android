@@ -13,6 +13,7 @@ import '../../services/token_storage.dart';
 import '../../utils/language_util.dart';
 import '../../widgets/roleplay_overview_backdrop.dart';
 import 'playing_conversation_mixin.dart';
+import '../../widgets/suda_tap.dart';
 
 class PlayingHintEntry {
   final GlobalKey key = GlobalKey();
@@ -445,7 +446,7 @@ class _PlayingHintCard extends StatelessWidget {
         Expanded(
           child: Text(label, style: labelStyle, textAlign: TextAlign.start),
         ),
-        GestureDetector(
+        SudaTap(
           onTap: onClose,
           behavior: HitTestBehavior.opaque,
           child: const SizedBox(
@@ -473,7 +474,7 @@ class _PlayingHintCard extends StatelessWidget {
           child: Material(
             color: _buttonFill,
             borderRadius: BorderRadius.circular(25),
-            child: InkWell(
+            child: SudaInkWell(
               onTap: onReveal,
               borderRadius: BorderRadius.circular(25),
               child: Container(
@@ -527,7 +528,7 @@ class _PlayingHintCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            GestureDetector(
+            SudaTap(
               onTap: onSentence,
               behavior: HitTestBehavior.opaque,
               child: ColorFiltered(
@@ -745,7 +746,7 @@ class _PlayingHintWord extends StatelessWidget {
     )..layout();
     final width = painter.width;
     painter.dispose();
-    return GestureDetector(
+    return SudaTap(
       onTap: onTap,
       child: Column(
         mainAxisSize: MainAxisSize.min,

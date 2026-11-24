@@ -16,6 +16,7 @@ import '../services/token_storage.dart';
 import '../utils/default_toast.dart';
 import '../utils/paywall_impression_screen.dart';
 import '../utils/sub_screen_route.dart';
+import 'suda_tap.dart';
 
 enum _OutOfEnergyCard { premium, chatPass, wait }
 
@@ -196,7 +197,7 @@ class OutOfEnergyPushReminderSheet extends StatelessWidget {
                       SizedBox(
                         height: 48,
                         width: double.infinity,
-                        child: ElevatedButton(
+                        child: SudaElevatedButton(
                           onPressed: () => Navigator.of(context).pop(true),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: _ctaPurple,
@@ -214,7 +215,7 @@ class OutOfEnergyPushReminderSheet extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      TextButton(
+                      SudaTextButton(
                         onPressed: () => Navigator.of(context).pop(false),
                         style: TextButton.styleFrom(
                           minimumSize: Size.zero,
@@ -414,6 +415,7 @@ class _OutOfEnergyBottomSheetState extends State<OutOfEnergyBottomSheet> {
       DefaultToast.show(
         context,
         AppLocalizations.of(context)!.energyPurchasePendingApproval,
+        negative: true,
       );
       return;
     }
@@ -422,7 +424,7 @@ class _OutOfEnergyBottomSheetState extends State<OutOfEnergyBottomSheet> {
         DefaultToast.show(
           context,
           AppLocalizations.of(context)!.energyPurchaseNotCompleted,
-          isError: true,
+          isError: true, negative: true,
         );
       }
       return;
@@ -635,7 +637,7 @@ class _OutOfEnergyBottomSheetState extends State<OutOfEnergyBottomSheet> {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      TextButton(
+                      SudaTextButton(
                         onPressed: () => Navigator.of(context).pop(),
                         child: Text(
                           l10n.outOfEnergyClose,
@@ -708,7 +710,7 @@ class _AccordionCard extends StatelessWidget {
     const leftPad = 22.0;
     final content = Material(
       color: Colors.transparent,
-      child: InkWell(
+      child: SudaInkWell(
         borderRadius: radius,
         onTap: onHeaderTap,
         child: Padding(
@@ -1261,7 +1263,7 @@ class _SheetCtaButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       height: 48,
-      child: ElevatedButton(
+      child: SudaElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: color,

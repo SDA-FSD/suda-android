@@ -21,6 +21,7 @@ import '../paywall/paywall.dart';
 import '../../utils/paywall_impression_screen.dart';
 import 'change_plan.dart';
 import 'change_profile_image.dart';
+import '../../widgets/suda_tap.dart';
 
 class AccountScreen extends StatefulWidget {
   final VoidCallback? onSignOut;
@@ -197,7 +198,7 @@ class _AccountScreenState extends State<AccountScreen> with SingleTickerProvider
         DefaultToast.show(
           context,
           AppLocalizations.of(context)!.requestFailed,
-          isError: true,
+          isError: true, negative: true,
         );
       }
     }
@@ -243,7 +244,7 @@ class _AccountScreenState extends State<AccountScreen> with SingleTickerProvider
   }
 
   Widget _accountAvatar() {
-    return GestureDetector(
+    return SudaTap(
       onTap: () => unawaited(_openChangeProfileImage()),
       child: UserProfileAvatar(
         imgPath: _user?.imgPath,
@@ -306,7 +307,8 @@ class _AccountScreenState extends State<AccountScreen> with SingleTickerProvider
 
     return Stack(
       children: [
-        GestureDetector(
+        SudaTap(
+          haptic: false,
           onTap: () {
             if (_nameFocusNode.hasFocus) _nameFocusNode.unfocus();
           },
@@ -324,7 +326,7 @@ class _AccountScreenState extends State<AccountScreen> with SingleTickerProvider
                           const SizedBox(height: 24),
                           Center(child: _accountAvatar()),
                           const SizedBox(height: 8),
-                          GestureDetector(
+                          SudaTap(
                             onTap: () => unawaited(_openChangeProfileImage()),
                             behavior: HitTestBehavior.opaque,
                             child: Text(
@@ -339,7 +341,7 @@ class _AccountScreenState extends State<AccountScreen> with SingleTickerProvider
                             child: Text(l10n.accountName, style: theme.headlineMedium?.copyWith(color: const Color(0xFF0CABA8))),
                           ),
                           const SizedBox(height: 24),
-                          GestureDetector(
+                          SudaTap(
                             onTap: () => _nameFocusNode.requestFocus(),
                             child: Container(
                               width: double.infinity,
@@ -361,7 +363,7 @@ class _AccountScreenState extends State<AccountScreen> with SingleTickerProvider
                                       decoration: const InputDecoration(border: InputBorder.none, isDense: true, contentPadding: EdgeInsets.zero),
                                     ),
                                   ),
-                                  GestureDetector(
+                                  SudaTap(
                                     onTap: () {
                                       if (!_nameFocusNode.hasFocus) {
                                         _nameFocusNode.requestFocus();
@@ -409,7 +411,7 @@ class _AccountScreenState extends State<AccountScreen> with SingleTickerProvider
                                           PositionedDirectional(
                                             end: 8,
                                             bottom: 12,
-                                            child: GestureDetector(
+                                            child: SudaTap(
                                               onTap: _onChangePlanTap,
                                               behavior: HitTestBehavior.opaque,
                                               child: Row(
@@ -510,7 +512,7 @@ class _AccountScreenState extends State<AccountScreen> with SingleTickerProvider
                               if (_showFreePlanCard)
                                 Material(
                                   color: Colors.transparent,
-                                  child: InkWell(
+                                  child: SudaInkWell(
                                     onTap: () => unawaited(_onFreePlanTap()),
                                     borderRadius: BorderRadius.circular(16),
                                     child: Container(
@@ -571,7 +573,7 @@ class _AccountScreenState extends State<AccountScreen> with SingleTickerProvider
                           const Spacer(),
                           Padding(
                             padding: const EdgeInsets.only(bottom: 44),
-                            child: GestureDetector(
+                            child: SudaTap(
                               onTap: _openDeleteConfirm,
                               child: Center(
                                 child: Text(l10n.accountDelete, style: theme.bodySmall?.copyWith(color: Colors.white54)),
@@ -593,7 +595,7 @@ class _AccountScreenState extends State<AccountScreen> with SingleTickerProvider
           Positioned.fill(
             child: FadeTransition(
               opacity: _fadeAnimation,
-              child: GestureDetector(
+              child: SudaTap(
                 onTap: _closeDeleteConfirm,
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
@@ -631,7 +633,7 @@ class _AccountScreenState extends State<AccountScreen> with SingleTickerProvider
                         ),
                       ),
                       const SizedBox(height: 20),
-                      ElevatedButton(
+                      SudaElevatedButton(
                         onPressed: _closeDeleteConfirm,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF0CABA8),
@@ -642,7 +644,7 @@ class _AccountScreenState extends State<AccountScreen> with SingleTickerProvider
                         child: Text(l10n.accountGoBack, style: theme.bodyLarge?.copyWith(color: Colors.white)),
                       ),
                       const SizedBox(height: 60),
-                      GestureDetector(
+                      SudaTap(
                         onTap: _handleDeleteAccount,
                         child: Text(
                           l10n.accountDeleteAction,

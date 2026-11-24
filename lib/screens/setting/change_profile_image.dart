@@ -13,6 +13,7 @@ import '../../widgets/cdn_thumb_image.dart';
 import '../../widgets/character_rarity_frame.dart';
 import '../../widgets/default_profile_avatar.dart';
 import '../../widgets/user_profile_avatar.dart';
+import '../../widgets/suda_tap.dart';
 
 class _ProfileImageChoice {
   const _ProfileImageChoice._({
@@ -155,7 +156,7 @@ class _ChangeProfileImageScreenState extends State<ChangeProfileImageScreen> {
       }
     } catch (e) {
       if (mounted) {
-        DefaultToast.show(context, 'Failed to load profile images: $e', isError: true);
+        DefaultToast.show(context, 'Failed to load profile images: $e', isError: true, negative: true);
       }
     }
     if (!mounted) return;
@@ -328,7 +329,7 @@ class _ChangeProfileImageScreenState extends State<ChangeProfileImageScreen> {
         DefaultToast.show(
           context,
           'Failed to update profile image: $e',
-          isError: true,
+          isError: true, negative: true,
         );
         setState(() => _saving = false);
       }
@@ -411,7 +412,7 @@ class _ChangeProfileImageScreenState extends State<ChangeProfileImageScreen> {
             width: cell,
             height: cell,
             child: i < tiles.length
-                ? GestureDetector(
+                ? SudaTap(
                     onTap: () => _onTileTap(tiles[i]),
                     child: _gridFace(
                       tiles[i],
@@ -483,7 +484,7 @@ class _ChangeProfileImageScreenState extends State<ChangeProfileImageScreen> {
                     SizedBox(
                       width: cell,
                       height: cell,
-                      child: GestureDetector(
+                      child: SudaTap(
                         onTap: () => _onPanelTap(images[i]),
                         child: _gridFace(
                           images[i],
@@ -557,7 +558,7 @@ class _ChangeProfileImageScreenState extends State<ChangeProfileImageScreen> {
         child: Material(
           color: Colors.white,
           shape: const StadiumBorder(),
-          child: InkWell(
+          child: SudaInkWell(
             customBorder: const StadiumBorder(),
             onTap: enabled ? () => unawaited(_onDone()) : null,
             child: Padding(

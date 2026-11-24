@@ -14,6 +14,8 @@
   "restorePurchasesNothing": "복원할 구매 내역이 없습니다.",
   "restorePurchasesCompleted": "구매가 복원되었습니다.",
   "settingsNotification": "알림",
+  "settingsVibration": "진동",
+  "settingsVibrationDesc": "탭과 반응을 진동으로 알려줍니다.",
   "settingsTutorial": "튜토리얼",
   "settingsCefrLevel": "언어 레벨",
   "settingsAppLanguage": "앱 언어",

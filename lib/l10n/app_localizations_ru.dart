@@ -52,6 +52,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsNotification => 'Уведомления';
 
   @override
+  String get settingsVibration => 'Вибрация';
+
+  @override
+  String get settingsVibrationDesc => 'Вибрация при нажатиях и откликах.';
+
+  @override
   String get settingsTutorial => 'Обучение';
 
   @override

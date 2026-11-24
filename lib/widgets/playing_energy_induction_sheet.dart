@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
 import '../models/user_models.dart';
 import '../utils/energy_icon.dart';
+import 'suda_tap.dart';
 
 enum PlayingEnergyInductionResult { seeOptions, closed }
 
@@ -170,7 +171,7 @@ class _PlayingEnergyInductionSheet extends StatelessWidget {
                       SizedBox(
                         height: 48,
                         width: double.infinity,
-                        child: ElevatedButton(
+                        child: SudaElevatedButton(
                           onPressed: () => Navigator.of(context).pop(
                             PlayingEnergyInductionResult.seeOptions,
                           ),
@@ -190,7 +191,7 @@ class _PlayingEnergyInductionSheet extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      TextButton(
+                      SudaTextButton(
                         onPressed: () => Navigator.of(context).pop(
                           PlayingEnergyInductionResult.closed,
                         ),

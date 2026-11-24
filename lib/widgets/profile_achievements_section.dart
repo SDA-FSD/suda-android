@@ -4,6 +4,7 @@ import 'package:marquee/marquee.dart';
 import '../l10n/app_localizations.dart';
 import '../models/user_models.dart';
 import 'default_popup.dart';
+import 'suda_tap.dart';
 
 const knownActivityAchievementCodes = <String>{
   'PG',
@@ -351,7 +352,7 @@ class _AchievementCell extends StatelessWidget {
     final claiming = showClaim && item.claimable;
     return Column(
       children: [
-        GestureDetector(
+        SudaTap(
           behavior: HitTestBehavior.opaque,
           onTap: tapEnabled ? () => _showPopup(context, l10n, theme, copy) : null,
           child: AspectRatio(
@@ -382,7 +383,7 @@ class _AchievementCell extends StatelessWidget {
         SizedBox(height: titleGap),
         if (claiming)
           Center(
-            child: TextButton(
+            child: SudaTextButton(
               style: TextButton.styleFrom(
                 backgroundColor: const Color(0xFF0CABA8),
                 foregroundColor: Colors.white,

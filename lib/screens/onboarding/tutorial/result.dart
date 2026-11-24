@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../l10n/app_localizations.dart';
+import '../../../widgets/suda_tap.dart';
 
 /// 온보딩 롤플레이 엔딩. 이미지 페이드 후 그라데이션, 문구, 버튼이 차례로 나온다.
 class TutorialResultScreen extends StatefulWidget {
@@ -168,7 +169,7 @@ class _TutorialResultScreenState extends State<TutorialResultScreen>
                       child: Material(
                         color: TutorialResultScreen.main,
                         borderRadius: BorderRadius.circular(28),
-                        child: InkWell(
+                        child: SudaInkWell(
                           onTap: widget.onContinue,
                           borderRadius: BorderRadius.circular(28),
                           child: Padding(

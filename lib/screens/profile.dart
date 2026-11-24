@@ -35,6 +35,7 @@ import 'roleplay/history.dart';
 import 'roleplay/suda_tts_audio_player.dart';
 import 'setting/change_profile_image.dart';
 import 'setting/setting.dart';
+import '../widgets/suda_tap.dart';
 
 enum _ProfileContentTab { progress, saved, history }
 
@@ -649,7 +650,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       }
     } catch (error) {
       if (mounted) {
-        DefaultToast.show(context, 'Logout failed: $error', isError: true);
+        DefaultToast.show(context, 'Logout failed: $error', isError: true, negative: true);
       }
     }
   }
@@ -986,7 +987,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
               const Spacer(),
-              GestureDetector(
+              SudaTap(
                 onTap: () => setState(
                   () => _achievementsExpanded = !_achievementsExpanded,
                 ),
@@ -1271,7 +1272,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final token = await TokenStorage.loadAccessToken();
       if (!mounted) return;
       if (token == null || token.isEmpty) {
-        DefaultToast.show(context, 'HTTP 401 · Request failed', isError: true);
+        DefaultToast.show(context, 'HTTP 401 · Request failed', isError: true, negative: true);
         return;
       }
 
@@ -1323,6 +1324,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 isPlaying: false,
                 onTap: () {},
                 onDeleteTap: () {},
+                haptic: false,
               ),
             ),
           ),
@@ -1331,7 +1333,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       setState(() {});
     } catch (e) {
       if (!mounted) return;
-      DefaultToast.show(context, e.toString(), isError: true);
+      DefaultToast.show(context, e.toString(), isError: true, negative: true);
     } finally {
       _savedExpressionMutationInFlight = false;
     }
@@ -1482,7 +1484,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return AppScaffold(
       showBackButton: false,
       actions: [
-        GestureDetector(
+        SudaTap(
           onTap: _openSettings,
           child: SizedBox(
             width: 40,
@@ -1567,7 +1569,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     width: double.infinity,
                     child: Row(
                       children: [
-                        GestureDetector(
+                        SudaTap(
                           onTap: showProfileShimmer
                               ? null
                               : () => unawaited(_openChangeProfileImage()),
@@ -1644,7 +1646,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     ),
                                     const _ProfileStatDivider(),
                                     Expanded(
-                                      child: GestureDetector(
+                                      child: SudaTap(
                                         onTap: showProfileShimmer
                                             ? null
                                             : () {
@@ -1697,6 +1699,7 @@ class _SavedExpressionCard extends StatelessWidget {
   final bool isPlaying;
   final VoidCallback onTap;
   final VoidCallback onDeleteTap;
+  final bool haptic;
 
   const _SavedExpressionCard({
     required this.item,
@@ -1705,6 +1708,7 @@ class _SavedExpressionCard extends StatelessWidget {
     required this.isPlaying,
     required this.onTap,
     required this.onDeleteTap,
+    this.haptic = true,
   });
 
   static const Color _exprTextPrimary = Color(0xFF121212);
@@ -1751,8 +1755,9 @@ class _SavedExpressionCard extends StatelessWidget {
     final meaning = item.meaningUserLanguage ?? '';
     final rephrased = item.rephrasedSentence ?? '';
 
-    return GestureDetector(
+    return SudaTap(
       onTap: onTap,
+      haptic: haptic,
       behavior: HitTestBehavior.opaque,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(18),
@@ -1809,8 +1814,9 @@ class _SavedExpressionCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     _buildMegaphoneAudioIcon(),
-                    GestureDetector(
+                    SudaTap(
                       onTap: onDeleteTap,
+                      haptic: haptic,
                       behavior: HitTestBehavior.opaque,
                       child: Image.asset(
                         _bookmarkOnPng,
@@ -2096,7 +2102,7 @@ class _HistoryThumbnail extends StatelessWidget {
       ),
     );
     if (onTap != null) {
-      return GestureDetector(
+      return SudaTap(
         onTap: onTap,
         behavior: HitTestBehavior.opaque,
         child: content,

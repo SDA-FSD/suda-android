@@ -51,6 +51,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settingsNotification => '알림';
 
   @override
+  String get settingsVibration => '진동';
+
+  @override
+  String get settingsVibrationDesc => '탭과 반응을 진동으로 알려줍니다.';
+
+  @override
   String get settingsTutorial => '튜토리얼';
 
   @override

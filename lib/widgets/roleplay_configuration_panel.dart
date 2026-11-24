@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
+import 'suda_tap.dart';
 
 /// S2 Playing 설정패널 (configuration panel) — 케밥 버튼 위 글래스 오버레이.
 class RoleplayConfigurationPanel extends StatelessWidget {
@@ -122,7 +123,7 @@ class _ConfigToggleRow extends StatelessWidget {
         children: [
           Text(label, style: labelStyle),
           const Spacer(),
-          GestureDetector(
+          SudaTap(
             onTap: enabled ? () => onChanged(!isOn) : null,
             child: Opacity(
               opacity: enabled ? 1 : 0.4,

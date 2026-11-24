@@ -52,6 +52,12 @@ class AppLocalizationsMs extends AppLocalizations {
   String get settingsNotification => 'Pemberitahuan';
 
   @override
+  String get settingsVibration => 'Getaran';
+
+  @override
+  String get settingsVibrationDesc => 'Getaran untuk ketikan dan maklum balas.';
+
+  @override
   String get settingsTutorial => 'Tutorial';
 
   @override

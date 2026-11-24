@@ -221,6 +221,18 @@ abstract class AppLocalizations {
   /// **'Notification'**
   String get settingsNotification;
 
+  /// No description provided for @settingsVibration.
+  ///
+  /// In en, this message translates to:
+  /// **'Vibration'**
+  String get settingsVibration;
+
+  /// No description provided for @settingsVibrationDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Vibration for taps and feedback.'**
+  String get settingsVibrationDesc;
+
   /// No description provided for @settingsTutorial.
   ///
   /// In en, this message translates to:

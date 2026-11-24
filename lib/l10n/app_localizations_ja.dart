@@ -51,6 +51,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settingsNotification => '通知';
 
   @override
+  String get settingsVibration => '振動';
+
+  @override
+  String get settingsVibrationDesc => 'タップや反応を振動で知らせます。';
+
+  @override
   String get settingsTutorial => 'チュートリアル';
 
   @override

@@ -1,14 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:vibration/vibration.dart';
-
 import '../../l10n/app_localizations.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
 import '../../utils/default_toast.dart';
 import '../../widgets/default_profile_avatar.dart';
 import '../../widgets/onboarding_step_bar.dart';
+import '../../widgets/suda_tap.dart';
 
 /// 온보딩(meta `ONBOARDING_PROFILE_IMAGE` != Y)의 기본 프로필 이미지 선택 Full Screen.
 class FirstProfileImageScreen extends StatefulWidget {
@@ -64,7 +63,7 @@ class _FirstProfileImageScreenState extends State<FirstProfileImageScreen> {
 
   void _onPageChanged(int index) {
     setState(() => _currentIndex = index);
-    Vibration.vibrate(duration: 80);
+    SudaHaptics.vibrate(duration: 80);
   }
 
   double _itemScale(int index) {
@@ -103,7 +102,7 @@ class _FirstProfileImageScreenState extends State<FirstProfileImageScreen> {
         DefaultToast.show(
           context,
           'Failed to update profile image: $e',
-          isError: true,
+          isError: true, negative: true,
         );
       }
     } finally {
@@ -247,7 +246,7 @@ class _FirstProfileImageScreenState extends State<FirstProfileImageScreen> {
           const SizedBox(height: 14),
           SizedBox(
             height: 60,
-            child: ElevatedButton(
+            child: SudaElevatedButton(
               onPressed: _isSubmitting ? null : _onConfirm,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,

@@ -1,11 +1,11 @@
 import 'dart:async' show unawaited;
 
 import 'package:flutter/widgets.dart';
-import 'package:vibration/vibration.dart';
 import 'package:vibration/vibration_presets.dart';
 
 import '../services/effect_overlay_service.dart';
 import '../widgets/effects/mission_complete_overlay.dart';
+import '../utils/suda_haptics.dart';
 
 class MissionCompleteEffect {
   MissionCompleteEffect._();
@@ -31,7 +31,7 @@ class MissionCompleteEffect {
 
   static Future<void> _playCelebrationHaptic() async {
     try {
-      await Vibration.vibrate(preset: VibrationPreset.quickSuccessAlert);
+      await SudaHaptics.vibrate(preset: VibrationPreset.quickSuccessAlert);
     } catch (_) {}
   }
 }

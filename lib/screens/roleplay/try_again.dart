@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
 import '../../routes/roleplay_router.dart';
 import '../../widgets/roleplay_scaffold.dart';
+import '../../widgets/suda_tap.dart';
 
 /// Roleplay Try Again Screen (Full Screen)
 ///
@@ -155,7 +156,7 @@ class _RoleplayTryAgainScreenState extends State<RoleplayTryAgainScreen>
                     ),
                   ),
                   Center(
-                    child: ElevatedButton(
+                    child: SudaElevatedButton(
                       onPressed: () => _retry(context),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
@@ -184,7 +185,7 @@ class _RoleplayTryAgainScreenState extends State<RoleplayTryAgainScreen>
                             ),
                           ),
                         )
-                      : GestureDetector(
+                      : SudaTap(
                           onTap: () async {
                             final result =
                                 await RoleplayRouter.pushTryAgainReport<bool>(

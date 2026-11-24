@@ -51,6 +51,12 @@ class AppLocalizationsTh extends AppLocalizations {
   String get settingsNotification => 'การแจ้งเตือน';
 
   @override
+  String get settingsVibration => 'การสั่น';
+
+  @override
+  String get settingsVibrationDesc => 'สั่นเมื่อแตะและเมื่อมีผลตอบกลับ';
+
+  @override
   String get settingsTutorial => 'บทแนะนำ';
 
   @override

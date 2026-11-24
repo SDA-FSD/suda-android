@@ -4,8 +4,6 @@ import 'dart:math' as math;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:vibration/vibration.dart';
-
 import '../../l10n/app_localizations.dart';
 import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
@@ -15,6 +13,7 @@ import '../../widgets/cdn_thumb_image.dart';
 import '../../widgets/character_rarity_frame.dart';
 import '../character.dart';
 import '../../widgets/procedural_sunburst.dart';
+import '../../widgets/suda_tap.dart';
 
 enum _UnboxingStage { idle, tense, confirmed, unlocking, done }
 
@@ -324,13 +323,13 @@ class _RewardUnboxingState extends State<RewardUnboxing>
 
   Future<void> _vibeWeak() async {
     try {
-      await Vibration.vibrate(duration: 35, amplitude: 64);
+      await SudaHaptics.vibrate(duration: 35, amplitude: 64);
     } catch (_) {}
   }
 
   Future<void> _vibeStrong() async {
     try {
-      await Vibration.vibrate(duration: 90, amplitude: 255);
+      await SudaHaptics.vibrate(duration: 90, amplitude: 255);
     } catch (_) {}
   }
 
@@ -614,7 +613,7 @@ class _RewardUnboxingState extends State<RewardUnboxing>
             height: boxH,
             child: IgnorePointer(
               ignoring: !tappable,
-              child: GestureDetector(
+              child: SudaTap(
                 behavior: HitTestBehavior.opaque,
                 onTap: _onBoxTap,
                 child: wobble(
@@ -1061,7 +1060,7 @@ class _RewardUnboxingState extends State<RewardUnboxing>
     return PositionedDirectional(
       top: top + 16,
       start: 16,
-      child: GestureDetector(
+      child: SudaTap(
         onTap: _close,
         child: Container(
           width: 40,
@@ -1258,7 +1257,7 @@ class _UnboxingCtaButton extends StatelessWidget {
     final elevated = Theme.of(context).elevatedButtonTheme.style;
     return SizedBox(
       height: 52,
-      child: ElevatedButton(
+      child: SudaElevatedButton(
         onPressed: submitting ? null : onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.white,
