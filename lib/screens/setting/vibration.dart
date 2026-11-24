@@ -88,29 +88,57 @@ class _VibrationSettingScreenState extends State<VibrationSettingScreen> {
     final theme = Theme.of(context).textTheme;
     return AppScaffold(
       centerTitle: l10n.settingsVibration,
-      body: Container(
-        width: double.infinity,
-        margin: const EdgeInsets.symmetric(vertical: 8),
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
-        decoration: BoxDecoration(
-          color: _boxBg,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
+      body: SingleChildScrollView(
+        child: Column(
           children: [
-            Expanded(
-              child: Text(
-                l10n.settingsVibrationDesc,
-                style: (theme.bodySmall ?? const TextStyle(fontSize: 14)).copyWith(
-                  color: _trackOn,
+            Container(
+              width: double.infinity,
+              margin: const EdgeInsets.symmetric(vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+              decoration: BoxDecoration(
+                color: _boxBg,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            l10n.settingsVibration,
+                            style: const TextStyle(
+                              fontFamily: 'ChironGoRoundTC',
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              fontVariations: [FontVariation('wght', 600)],
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            l10n.settingsVibrationDesc,
+                            style: (theme.bodySmall ?? const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                              height: 1.2,
+                            )).copyWith(color: _trackOn),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    SudaTap(
+                      onTap: _isUpdating ? null : () => unawaited(_onToggleTap()),
+                      child: _toggle(_isOn),
+                    ),
+                  ],
                 ),
               ),
-            ),
-            const SizedBox(width: 16),
-            SudaTap(
-              onTap: _isUpdating ? null : () => unawaited(_onToggleTap()),
-              child: _toggle(_isOn),
             ),
           ],
         ),
