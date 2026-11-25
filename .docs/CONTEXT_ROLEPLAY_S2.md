@@ -228,9 +228,11 @@ Home (시리즈 썸네일)
 
 | 구역 | 슬롯 | 스펙 | 현재 상태 |
 |------|------|------|-----------|
-| **본문** | `RoleplayScaffold.body` | 상단 gap **8** → `Expanded`(Stack) → 하단 gap **8**, 좌우 마진 **24**(스캐폴드) | 대화 스크롤. **RpS3 테스트: 미션 패널 UI 미노출** (`topOverlay` shrink, `firstBubbleTopOffset` 12). 서버 미션·프롬프트 유지 |
+| **본문** | `RoleplayScaffold.body` | 상단 gap **8** → `Expanded`(Stack) → 하단 gap **8**, 좌우 마진 **24**(스캐폴드) | 대화 스크롤. **v2: 미션 패널·미션 상태·`missionCompletedIndex` 처리 없음** (`buildPlayingBody`에 `topOverlay`/`missionPanelOpacity` 없음, 상단 페이드 = 리드 높이 + `topFadeExtent` 2, `firstBubbleTopOffset` 12) |
 
-**미션 패널 (mission panel)** — 위젯·완료 이펙트 코드는 유지, Playing/온보딩 튜토리얼에서는 **미마운트**. 상세(과거 스펙):
+**v2 요약**: 메인 Playing에 미션 패널·판정 없음. overview `cefrMap[].missions`는 항상 빈 배열(플레이 미션 UI용). `RpS2UserHistoryDto.rpVersion`(int?, 미수신 시 1). Result「주요 표현」은 history `keyExpressions`가 있을 때 노출 — **v2도 NORMAL_END complete가 DB mission row에서 KE 스냅샷**(규칙·용어 변경 전까지 유지). 비면 섹션·간격 생략.
+
+**미션 패널 (mission panel)** — 위젯·완료 이펙트 코드는 **온보딩 튜토리얼(`onboarding/tutorial/roleplay.dart`) 전용으로만 유지**, 메인 Playing에서는 **미마운트**. 상세(과거 스펙, 아래 `missionPanelTop`은 제거됨):
 
 - **데이터**: `selectedEpisode.cefrMap[시리즈 CEFR].missions` (`List<RpS2CefrMissionDto>`, 보통 3개). `instruction`은 `SudaJsonUtil.localizedMapText`
 - **위치**: 본문 `Stack` 상단에서 **top 2** (`PlayingConversationLayout.missionPanelTop`, gap 8 아래 추가 여백)
@@ -361,7 +363,7 @@ Home (시리즈 썸네일)
 **모델 파일**: `lib/models/series_models.dart`  
 (`RpS2SessionRequestDto`, `RpS2SessionDto`, `RpS2SoundResDto`, `RpS2UserMessageResponseDto`, `RpS2SeriesOverviewDto`, `RpS2SeriesEpisodeDto`, …)
 
-**`RpS2UserHistoryDto` 응답 필드(클라이언트 사용분만)**: `id`, `targetLanguage`(EN/KO, 구응답은 EN), `thumbnailImgPath`, `episodeOrder`(시리즈 episodeIds 1-based), `episodeTitle`(언어맵), `messages[]`(`id`, `role`, `content`, `audioInputYn`, `audioPath`), `missions`, `starScore`, `words`, `likePoint`, `keyExpressions`, `speechFeedback`(nullable — `feedbackLockedYn=='Y'`이면 grade만, score·feedback 본문은 null), `feedbackLockedYn`(`Y`/`N`, 미수신 시 `N`), `missionStatYn`(서버 유지·Result Mission UI는 미사용), `userStarRating`, `mainTitle`/`subTitle`(서버 별점 칭찬·Result UI 미사용), `before/afterLikePoint·Level·ProgressPercentage`. 메타(`userId`·`seriesId`·`hints`·`translations` 등) 및 `messages` 타임스탬프 필드는 클라 미사용(back→api 내부에는 존재).
+**`RpS2UserHistoryDto` 응답 필드(클라이언트 사용분만)**: `id`, `targetLanguage`(EN/KO, 구응답은 EN), `thumbnailImgPath`, `episodeOrder`(시리즈 episodeIds 1-based), `episodeTitle`(언어맵), `messages[]`(`id`, `role`, `content`, `audioInputYn`, `audioPath`), `starScore`, `words`, `likePoint`, `keyExpressions`, `rpVersion`(int, 미수신 시 1), `speechFeedback`(nullable — `feedbackLockedYn=='Y'`이면 grade만, score·feedback 본문은 null), `feedbackLockedYn`(`Y`/`N`, 미수신 시 `N`), `userStarRating`, `mainTitle`/`subTitle`(서버 별점 칭찬·Result UI 미사용), `before/afterLikePoint·Level·ProgressPercentage`. 서버 JSON의 `missions`/`missionStatYn`은 호환용·클라 미파싱. 메타(`userId`·`seriesId`·`hints`·`translations` 등) 및 `messages` 타임스탬프 필드는 클라 미사용(back→api 내부에는 존재).
 
 **API 파일**: `lib/api/endpoints/series_api.dart` → `SudaApiClient.createRpS2Session`
 

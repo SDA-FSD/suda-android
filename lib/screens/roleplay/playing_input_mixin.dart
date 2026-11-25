@@ -15,7 +15,6 @@ import '../../services/token_storage.dart';
 import '../../services/perf_monitoring_service.dart';
 import '../../utils/default_toast.dart';
 import '../../widgets/roleplay_mic_button_area.dart';
-import '../../widgets/roleplay_mission_panel.dart';
 import 'playing_conversation_mixin.dart';
 import 'playing_hint_mixin.dart';
 import '../../widgets/suda_tap.dart';
@@ -97,8 +96,6 @@ mixin PlayingInputMixin<T extends StatefulWidget>
   bool _suppressHoldToSpeakOnRelease = false;
   bool _hasLoggedStartScriptPlaybackEnded = false;
   bool _hasLoggedFirstUtteranceSubmitted = false;
-  double _missionPanelHeight = RoleplayMissionPanel.collapsedHeight;
-  final GlobalKey _missionPanelSizeKey = GlobalKey();
   void Function()? onPlayingEnergyExitRequested;
 
   bool Function()? checkCanSpendPlayingEnergy;
@@ -275,18 +272,13 @@ mixin PlayingInputMixin<T extends StatefulWidget>
     });
   }
 
-  /// 본문: 스크롤 영역 + 상단 페이드 + 미션 패널 오버레이.
+  /// 본문: 스크롤 영역 + 상단 페이드.
   Widget buildPlayingBody({
     required double scaffoldBodyLeadHeight,
-    required Widget topOverlay,
-    required double missionPanelOpacity,
     required List<Widget> Function(double bodyWidth) conversationBuilder,
   }) {
-    final missionPanelFadeExtent = _missionPanelHeight * missionPanelOpacity;
     final fadeHeight =
-        scaffoldBodyLeadHeight +
-        PlayingConversationLayout.missionPanelTop +
-        missionPanelFadeExtent;
+        scaffoldBodyLeadHeight + PlayingConversationLayout.topFadeExtent;
     final fadeHorizontalBleed =
         PlayingConversationLayout.scaffoldBodyHorizontalInset;
 
@@ -338,43 +330,6 @@ mixin PlayingInputMixin<T extends StatefulWidget>
                           PlayingConversationLayout.topContentFadeColor
                               .withValues(alpha: 0),
                         ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              Positioned(
-                top: PlayingConversationLayout.missionPanelTop,
-                left: 0,
-                right: 0,
-                child: AnimatedOpacity(
-                  opacity: missionPanelOpacity,
-                  duration:
-                      RoleplayMissionPanel.completedBackgroundFadeDuration,
-                  curve: Curves.easeOutCubic,
-                  child: IgnorePointer(
-                    ignoring: missionPanelOpacity < 1,
-                    child: NotificationListener<SizeChangedLayoutNotification>(
-                      onNotification: (notification) {
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          if (!mounted) return;
-                          final renderBox =
-                              _missionPanelSizeKey.currentContext
-                                      ?.findRenderObject()
-                                  as RenderBox?;
-                          if (renderBox == null || !renderBox.hasSize) return;
-                          final nextHeight = renderBox.size.height;
-                          if (nextHeight != _missionPanelHeight) {
-                            setState(() => _missionPanelHeight = nextHeight);
-                          }
-                        });
-                        return false;
-                      },
-                      child: SizeChangedLayoutNotifier(
-                        child: KeyedSubtree(
-                          key: _missionPanelSizeKey,
-                          child: topOverlay,
-                        ),
                       ),
                     ),
                   ),

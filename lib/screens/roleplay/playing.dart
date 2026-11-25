@@ -11,13 +11,11 @@ import '../../services/suda_api_client.dart';
 import '../../services/token_storage.dart';
 import '../../services/perf_monitoring_service.dart';
 import '../../utils/suda_json_util.dart';
-import '../../effects/mission_complete_effect.dart';
 import '../../widgets/guide_bubble.dart';
 import '../../widgets/roleplay_configuration_panel.dart';
 import '../../widgets/roleplay_overview_backdrop.dart';
 import '../../widgets/roleplay_scaffold.dart';
 import '../../models/series_models.dart';
-import '../../widgets/roleplay_mission_panel.dart';
 import '../../widgets/roleplay_turn_bar_area.dart';
 import 'playing_conversation_mixin.dart';
 import 'playing_energy_mixin.dart';
@@ -62,18 +60,10 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
   late List<String?> _turnLabelTexts;
   late List<Color?> _turnLabelColors;
   late List<bool> _turnLabelFadeOuts;
-  late final List<RpS2CefrMissionDto> _missions;
-  int _activeMissionIndex = 0;
-  int _completedMissionCount = 0;
   int _completedSpeechCount = 0;
-  final Set<int> _completedMissionIndexes = {};
-  final GlobalKey _missionIconAnchorKey = GlobalKey();
   final List<Timer> _turnEffectTimers = [];
-  Timer? _missionCompleteTimer;
   bool _lastTurnAwaitingAiPresentation = false;
 
-  bool _showMissionCompletedFlash = false;
-  double _missionPanelOpacity = 1;
   final GlobalKey _playingStackKey = GlobalKey();
   Rect? _kebabAnchor;
   double? _playingStackHeight;
@@ -99,7 +89,6 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     onManualHintShown = _onManualHintShown;
     onUserTurnActivated = _maybeShowAutoHintGuide;
     _turnCount = _resolveRequiredSpeechCount();
-    _missions = _resolveMissions();
     _turnBarColors = List<Color>.filled(
       _turnCount,
       RoleplayTurnBarArea.defaultBarColor,
@@ -184,8 +173,6 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
 
     // RpS3 UI: 등급 라벨·등급색 없음. 발화 완료 칸만 민트.
     _markTurnBarCompleted(turnIndex);
-    _handleMissionCompleted(response.missionCompletedIndex);
-
     final narrationText = response.narration?.trim() ?? '';
     final aiText = response.aiText?.trim() ?? '';
     if (reachedRequiredSpeechCount) {
@@ -334,22 +321,6 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     };
   }
 
-  void _handleMissionCompleted(int? completedIndex) {
-    // RpS3 테스트: 미션 패널·완료 이펙트 미노출. 서버 missionProgress는 유지.
-    if (completedIndex == null) return;
-    if (completedIndex < 0 || completedIndex >= _missions.length) return;
-    if (_completedMissionIndexes.contains(completedIndex)) return;
-    _completedMissionIndexes.add(completedIndex);
-    _completedMissionCount = _completedMissionIndexes.length;
-  }
-
-  int? _firstIncompleteMissionIndex() {
-    for (var i = 0; i < _missions.length; i++) {
-      if (!_completedMissionIndexes.contains(i)) return i;
-    }
-    return null;
-  }
-
   List<Widget> _buildConversationWithHint(double bodyWidth) {
     final hint = buildHintBubble(bodyWidth);
     final hasActiveHint = hint != null;
@@ -377,21 +348,11 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
     for (final timer in _turnEffectTimers) {
       timer.cancel();
     }
-    _missionCompleteTimer?.cancel();
     disposePlayingHint();
     disposePlayingConversation();
     disposePlayingInput();
     disposePlayingEnergy();
     super.dispose();
-  }
-
-  List<RpS2CefrMissionDto> _resolveMissions() {
-    final episode = SeriesStateService.instance.selectedEpisode;
-    final user = SeriesStateService.instance.user;
-    if (episode == null) return const [];
-
-    final cefrCode = SeriesStateService.instance.playableCefrLevel(user);
-    return episode.cefrMap[cefrCode]?.missions ?? const [];
   }
 
   /// `selectedEpisode.cefrMap[시리즈 CEFR].requiredSpeechCount`
@@ -726,9 +687,6 @@ class _RoleplayPlayingScreenState extends State<RoleplayPlayingScreen>
                 : 0,
             body: buildPlayingBody(
               scaffoldBodyLeadHeight: _scaffoldBodyLeadHeight(),
-              // RpS3 테스트: 미션 패널 미노출 (서버 미션·프롬프트 유지).
-              missionPanelOpacity: 0,
-              topOverlay: const SizedBox.shrink(),
               conversationBuilder: _buildConversationWithHint,
             ),
             footer: buildPlayingFooter(),

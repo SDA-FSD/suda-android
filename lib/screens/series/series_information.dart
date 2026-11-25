@@ -204,57 +204,14 @@ class SeriesInformationScreen extends StatelessWidget {
     );
   }
 
-  List<String> _keyExpressionsForEpisode(
-    RpS2SeriesEpisodeDto episode,
-    String cefrCode,
-  ) {
-    final cefr = episode.cefrMap[cefrCode];
-    if (cefr == null) return const [];
-
-    final languageCode = overview.targetLanguage == 'KO' ? 'ko' : 'en';
-    return cefr.missions
-        .map((mission) => mission.keyExpression[languageCode] ?? '')
-        .where((text) => text.isNotEmpty)
-        .toList();
-  }
-
-  Widget _buildKeyExpressionList(List<String> expressions, TextTheme theme) {
-    if (expressions.isEmpty) return const SizedBox.shrink();
-
-    final captionStyle = theme.bodySmall?.copyWith(color: Colors.white);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        for (int i = 0; i < expressions.length; i++) ...[
-          if (i > 0) const SizedBox(height: 4),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('• ', style: captionStyle),
-              Expanded(
-                child: Text(
-                  expressions[i],
-                  style: captionStyle,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ],
-    );
-  }
-
   Widget _buildEpisodeBlock(
     RpS2SeriesEpisodeDto episode,
     int episodeNumber,
-    String cefrCode,
     TextTheme theme,
   ) {
     final learningFunction =
         SudaJsonUtil.localizedMapText(episode.learningFunction);
     final episodeTitle = SudaJsonUtil.localizedMapText(episode.title);
-    final keyExpressions = _keyExpressionsForEpisode(episode, cefrCode);
 
     return _buildQuoteBar(
       children: [
@@ -276,9 +233,6 @@ class SeriesInformationScreen extends StatelessWidget {
               fontVariations: const [FontVariation('wght', 400)],
             ),
           ),
-        if (episodeTitle.isNotEmpty && keyExpressions.isNotEmpty)
-          const SizedBox(height: 8),
-        _buildKeyExpressionList(keyExpressions, theme),
       ],
     );
   }
@@ -298,7 +252,6 @@ class SeriesInformationScreen extends StatelessWidget {
       seriesTitle,
       headerTitleStyle,
     );
-    final cefrCode = SeriesStateService.instance.playableCefrLevel(user);
     final heroHeight = _heroHeight(context);
     final scaffoldBackground = Theme.of(context).scaffoldBackgroundColor;
 
@@ -357,7 +310,6 @@ class SeriesInformationScreen extends StatelessWidget {
                   _buildEpisodeBlock(
                     overview.episodes[i],
                     i + 1,
-                    cefrCode,
                     theme,
                   ),
                 ],

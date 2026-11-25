@@ -356,7 +356,6 @@ class RpS2UserHistoryDto {
   /// 에피소드 제목 언어맵 (앱 언어로 해석).
   final Map<String, String> episodeTitle;
   final List<RpS2UserHistoryMsgDto> messages;
-  final List<bool> missions;
   final int? starScore;
   final int? words;
   final int? likePoint;
@@ -365,8 +364,8 @@ class RpS2UserHistoryDto {
   final Map<int, RpS2UserFeedbackVo>? speechFeedback;
   /// `'Y'`면 Speech Feedback 잠금(Feedback 탭 → Paywall). 미수신 시 `'N'`.
   final String feedbackLockedYn;
-  /// `'Y'`=Result Mission 지표 노출, `'N'`=미노출(RpS3). 미수신 시 `'Y'`.
-  final String missionStatYn;
+  /// 이력 생성 시 Roleplay 버전. 미수신(구버전 응답) 시 1. v2=미션 판정 없음(KE 스냅샷은 유지).
+  final int? rpVersion;
   final int? userStarRating;
   final String? mainTitle;
   final String? subTitle;
@@ -384,14 +383,13 @@ class RpS2UserHistoryDto {
     this.episodeOrder,
     this.episodeTitle = const {},
     this.messages = const [],
-    this.missions = const [],
     this.starScore,
     this.words,
     this.likePoint,
     this.keyExpressions = const [],
     this.speechFeedback,
     this.feedbackLockedYn = 'N',
-    this.missionStatYn = 'Y',
+    this.rpVersion = 1,
     this.userStarRating,
     this.mainTitle,
     this.subTitle,
@@ -411,14 +409,13 @@ class RpS2UserHistoryDto {
       episodeOrder: _optionalInt(json['episodeOrder']),
       episodeTitle: SudaJsonUtil.localizedMapFromJson(json['episodeTitle']),
       messages: _userHistoryMessagesFromJson(json['messages']),
-      missions: _boolListFromJson(json['missions']),
       starScore: _optionalInt(json['starScore']),
       words: _optionalInt(json['words']),
       likePoint: _optionalInt(json['likePoint']),
       keyExpressions: _keyExpressionsFromJson(json['keyExpressions']),
       speechFeedback: _speechFeedbackMapFromJson(json['speechFeedback']),
       feedbackLockedYn: json['feedbackLockedYn'] as String? ?? 'N',
-      missionStatYn: json['missionStatYn'] as String? ?? 'Y',
+      rpVersion: _optionalInt(json['rpVersion']) ?? 1,
       userStarRating: _optionalInt(json['userStarRating']),
       mainTitle: json['mainTitle'] as String?,
       subTitle: json['subTitle'] as String?,
@@ -560,11 +557,6 @@ List<RpS2UserHistoryMsgDto> _userHistoryMessagesFromJson(dynamic raw) {
         ),
       )
       .toList();
-}
-
-List<bool> _boolListFromJson(dynamic raw) {
-  if (raw is! List) return const [];
-  return raw.map((item) => item == true).toList();
 }
 
 List<RpS2KeyExpressionVo> _keyExpressionsFromJson(dynamic raw) {

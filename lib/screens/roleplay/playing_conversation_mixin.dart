@@ -25,13 +25,13 @@ class PlayingConversationLayout {
   /// 본문 Column 상단 gap (턴바 직하).
   static const double bodyTopGap = 8;
 
-  /// 미션 패널 오버레이 top (본문 Stack 내, [bodyTopGap] 아래).
-  static const double missionPanelTop = 2;
+  /// 상단 페이드가 본문 리드 높이 아래로 추가로 덮는 높이.
+  static const double topFadeExtent = 2;
 
-  /// 본문 스크롤 상단~첫 말풍선 여백. RpS3 미션 패널 off → 패널 높이(68) 대신 소폭.
+  /// 본문 스크롤 상단~첫 말풍선 여백. (v2: 미션 패널 없음)
   static const double firstBubbleTopOffset = 12;
 
-  /// 미션 패널 하단까지 본문 상단 페이드 (`#121212` 100% → 0%).
+  /// 본문 상단 페이드 (`#121212` 100% → 0%).
   static const Color topContentFadeColor = Color(0xFF121212);
 
   /// `RoleplayScaffold` 본문·푸터 좌우 `Padding` — 상단 페이드 레이어는 이 inset을 상쇄해 디스플레이 전폭으로 확장.

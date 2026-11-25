@@ -1648,7 +1648,9 @@ class _RoleplayResultScreenState extends State<RoleplayResultScreen>
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 _buildKeyExpressionLayer(context),
-                const SizedBox(height: 28),
+                // keyExpressions가 있을 때만 아래 Speech Feedback과 간격.
+                if (_s2History?.keyExpressions.isNotEmpty ?? false)
+                  const SizedBox(height: 28),
                 _buildSpeechFeedbackLayer(context),
                 if (_showFooterActions) _buildS2FooterActions(context),
               ],
