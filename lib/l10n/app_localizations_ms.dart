@@ -1519,4 +1519,10 @@ class AppLocalizationsMs extends AppLocalizations {
 
   @override
   String get firstRpRecommendPlay => 'Main sekarang';
+
+  @override
+  String get homeContinuePlayingSection => 'Teruskan bermain';
+
+  @override
+  String get homeContinuePlayingButton => 'Teruskan';
 }

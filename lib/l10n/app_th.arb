@@ -558,5 +558,7 @@
   "cefrLevelUpTryNext": "ลองระดับถัดไป",
   "cefrLevelUpLater": "ไว้ทีหลัง",
   "firstRpRecommendBadge": "แนะนำ",
-  "firstRpRecommendPlay": "เล่นเลย"
+  "firstRpRecommendPlay": "เล่นเลย",
+  "homeContinuePlayingSection": "ซีรีส์ที่กำลังเล่น",
+  "homeContinuePlayingButton": "เล่นต่อ"
 }

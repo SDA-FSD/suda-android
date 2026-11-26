@@ -558,5 +558,7 @@
   "cefrLevelUpTryNext": "次のレベルに挑戦",
   "cefrLevelUpLater": "あとで",
   "firstRpRecommendBadge": "おすすめ",
-  "firstRpRecommendPlay": "今すぐプレイ"
+  "firstRpRecommendPlay": "今すぐプレイ",
+  "homeContinuePlayingSection": "プレイ中のシリーズ",
+  "homeContinuePlayingButton": "続きから"
 }

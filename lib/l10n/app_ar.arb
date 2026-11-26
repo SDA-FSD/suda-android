@@ -558,5 +558,7 @@
   "cefrLevelUpTryNext": "جرّب المستوى التالي",
   "cefrLevelUpLater": "ربما لاحقًا",
   "firstRpRecommendBadge": "موصى به",
-  "firstRpRecommendPlay": "العب الآن"
+  "firstRpRecommendPlay": "العب الآن",
+  "homeContinuePlayingSection": "متابعة اللعب",
+  "homeContinuePlayingButton": "متابعة"
 }

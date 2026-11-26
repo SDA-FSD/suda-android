@@ -1523,6 +1523,12 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get firstRpRecommendPlay => 'Jugar ahora';
+
+  @override
+  String get homeContinuePlayingSection => 'Seguir jugando';
+
+  @override
+  String get homeContinuePlayingButton => 'Continuar';
 }
 
 /// The translations for Spanish Castilian, as used in Latin America and the Caribbean (`es_419`).
@@ -3044,4 +3050,10 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
 
   @override
   String get firstRpRecommendPlay => 'Jugar ahora';
+
+  @override
+  String get homeContinuePlayingSection => 'Seguir jugando';
+
+  @override
+  String get homeContinuePlayingButton => 'Continuar';
 }

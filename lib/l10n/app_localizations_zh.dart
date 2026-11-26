@@ -1426,6 +1426,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get firstRpRecommendPlay => '立即开始';
+
+  @override
+  String get homeContinuePlayingSection => '继续游玩';
+
+  @override
+  String get homeContinuePlayingButton => '继续';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -2850,6 +2856,12 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get firstRpRecommendPlay => '立即开始';
+
+  @override
+  String get homeContinuePlayingSection => '继续游玩';
+
+  @override
+  String get homeContinuePlayingButton => '继续';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -4274,4 +4286,10 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get firstRpRecommendPlay => '立即開始';
+
+  @override
+  String get homeContinuePlayingSection => '繼續遊玩';
+
+  @override
+  String get homeContinuePlayingButton => '繼續';
 }

@@ -1510,4 +1510,10 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get firstRpRecommendPlay => 'Şimdi oyna';
+
+  @override
+  String get homeContinuePlayingSection => 'Oynamaya devam et';
+
+  @override
+  String get homeContinuePlayingButton => 'Devam';
 }

@@ -1499,4 +1499,10 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get firstRpRecommendPlay => 'अभी खेलें';
+
+  @override
+  String get homeContinuePlayingSection => 'खेलना जारी रखें';
+
+  @override
+  String get homeContinuePlayingButton => 'जारी रखें';
 }

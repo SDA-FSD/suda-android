@@ -1513,4 +1513,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get firstRpRecommendPlay => 'Play Now';
+
+  @override
+  String get homeContinuePlayingSection => 'Continue Playing';
+
+  @override
+  String get homeContinuePlayingButton => 'Continue';
 }

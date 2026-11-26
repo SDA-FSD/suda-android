@@ -558,5 +558,7 @@
   "cefrLevelUpTryNext": "Sonraki seviyeyi dene",
   "cefrLevelUpLater": "Daha sonra",
   "firstRpRecommendBadge": "Önerilen",
-  "firstRpRecommendPlay": "Şimdi oyna"
+  "firstRpRecommendPlay": "Şimdi oyna",
+  "homeContinuePlayingSection": "Oynamaya devam et",
+  "homeContinuePlayingButton": "Devam"
 }

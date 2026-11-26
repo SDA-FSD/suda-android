@@ -1531,4 +1531,10 @@ class AppLocalizationsFil extends AppLocalizations {
 
   @override
   String get firstRpRecommendPlay => 'Maglaro ngayon';
+
+  @override
+  String get homeContinuePlayingSection => 'Magpatuloy sa paglalaro';
+
+  @override
+  String get homeContinuePlayingButton => 'Magpatuloy';
 }

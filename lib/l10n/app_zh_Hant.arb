@@ -558,5 +558,7 @@
   "cefrLevelUpTryNext": "挑戰下一級",
   "cefrLevelUpLater": "以後再說",
   "firstRpRecommendBadge": "推薦",
-  "firstRpRecommendPlay": "立即開始"
+  "firstRpRecommendPlay": "立即開始",
+  "homeContinuePlayingSection": "繼續遊玩",
+  "homeContinuePlayingButton": "繼續"
 }

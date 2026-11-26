@@ -558,5 +558,7 @@
   "cefrLevelUpTryNext": "Probeer het volgende niveau",
   "cefrLevelUpLater": "Misschien later",
   "firstRpRecommendBadge": "Aanbevolen",
-  "firstRpRecommendPlay": "Nu spelen"
+  "firstRpRecommendPlay": "Nu spelen",
+  "homeContinuePlayingSection": "Verder spelen",
+  "homeContinuePlayingButton": "Doorgaan"
 }

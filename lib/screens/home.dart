@@ -13,15 +13,22 @@ import '../services/suda_api_client.dart';
 import '../services/iap_purchase_service.dart';
 import '../services/perf_monitoring_service.dart';
 import '../config/app_config.dart';
+import '../routes/roleplay_router.dart';
 import '../routes/series_router.dart';
+import '../services/series_state_service.dart';
+import '../services/version_check_service.dart';
+import '../utils/default_toast.dart';
+import '../utils/english_level_util.dart';
 import '../utils/suda_json_util.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/cdn_thumb_image.dart';
 import '../widgets/energy_header_badge.dart';
 import '../widgets/gnb_bar.dart';
 import '../widgets/first_rp_recommend_popup.dart';
+import '../widgets/home_continue_playing_section.dart';
 import '../widgets/welcome_gift_layer.dart';
 import '../widgets/suda_tap.dart';
+import '../l10n/app_localizations.dart';
 
 class HomeScreen extends StatefulWidget {
   final VoidCallback? onNavigateToAlarm;
@@ -65,6 +72,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   bool _isLoadingBanners = true;
   List<HomeSeriesGroupDto>? _seriesGroups;
   bool _isLoadingSeriesGroups = true;
+  List<HomeContinuePlayingDto> _continuePlaying = const [];
+  bool _continueOpeningInFlight = false;
   String? _accessToken;
   late PageController _pageController;
   int _currentPage = 0;
@@ -126,6 +135,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       _recommendRefreshGen++;
       _seriesGroups = null;
       _isLoadingSeriesGroups = true;
+      _continuePlaying = const [];
       _visibleCategoryCount = 0;
       _firstRpRecommend = null;
       _recommendDismissed = false;
@@ -138,7 +148,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         widget.isActive &&
         (returned || becameActive)) {
       setState(() => _recommendDismissed = true);
-      unawaited(_refreshFirstRpRecommend());
+      unawaited(_refreshHomeSoftFields());
     }
   }
 
@@ -218,6 +228,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         setState(() {
           _banners = banners;
           _seriesGroups = groups;
+          _continuePlaying = home.continuePlaying;
           _firstRpRecommend = home.firstRpRecommend;
           _isLoadingBanners = false;
           _isLoadingSeriesGroups = false;
@@ -245,8 +256,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     });
   }
 
-  /// 홈에 다시 들어올 때 추천만 다시 받는다. 배너·목록은 유지한다.
-  Future<void> _refreshFirstRpRecommend() async {
+  /// 홈에 다시 들어올 때 추천·Continue Playing만 다시 받는다. 배너·카테고리 목록은 유지.
+  Future<void> _refreshHomeSoftFields() async {
     final token = _accessToken;
     if (token == null || token.isEmpty) return;
     final gen = ++_recommendRefreshGen;
@@ -255,11 +266,81 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       if (!mounted || gen != _recommendRefreshGen) return;
       setState(() {
         _firstRpRecommend = home.firstRpRecommend;
+        _continuePlaying = home.continuePlaying;
         _recommendDismissed = false;
       });
     } catch (_) {
       if (!mounted || gen != _recommendRefreshGen) return;
       setState(() => _recommendDismissed = false);
+    }
+  }
+
+  Future<void> _onContinuePlaying(HomeContinuePlayingDto item) async {
+    if (_continueOpeningInFlight) return;
+    final token = _accessToken;
+    if (token == null || token.isEmpty) return;
+    if (item.seriesId <= 0 || item.episodeId <= 0) return;
+
+    _continueOpeningInFlight = true;
+    try {
+      if (RestStatusService.instance.shouldShowRestOverlay()) {
+        SeriesRouter.pushOverview(context, item.seriesId, user: widget.user);
+        return;
+      }
+
+      final overview = await SudaApiClient.getSeriesOverview(
+        accessToken: token,
+        seriesId: item.seriesId,
+      );
+      if (!mounted) return;
+      if (overview.episodes.isEmpty) {
+        HomeContentsReload.instance.request();
+        return;
+      }
+
+      final hasEpisode = overview.episodes.any((e) => e.id == item.episodeId);
+      if (!hasEpisode) {
+        SeriesRouter.pushOverview(context, item.seriesId, user: widget.user);
+        return;
+      }
+
+      SeriesStateService.instance.setSeriesOverview(
+        seriesId: item.seriesId,
+        overview: overview,
+        user: widget.user,
+      );
+      try {
+        final level = await SudaApiClient.getSeriesCefrLevel(
+          accessToken: token,
+          seriesId: item.seriesId,
+        );
+        SeriesStateService.instance.setSeriesCefrLevel(
+          EnglishLevelUtil.toPlayable(level),
+        );
+      } catch (_) {
+        SeriesStateService.instance.setSeriesCefrLevel(
+          SeriesStateService.instance.playableCefrLevel(widget.user),
+        );
+      }
+      SeriesStateService.instance.setSelectedEpisodeId(item.episodeId);
+      if (widget.user != null) {
+        SeriesStateService.instance.setUser(widget.user);
+      }
+
+      if (!mounted) return;
+      if (VersionCheckService.skipRoleplayTutorial) {
+        RoleplayRouter.pushOpening(context);
+      } else {
+        RoleplayRouter.pushTutorial(context);
+      }
+    } catch (_) {
+      if (!mounted) return;
+      DefaultToast.show(
+        context,
+        AppLocalizations.of(context)!.requestFailed,
+      );
+    } finally {
+      _continueOpeningInFlight = false;
     }
   }
 
@@ -430,8 +511,18 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             child: Column(
               children: [
                 _buildBannerSection(),
-                const SizedBox(height: 10), // 배너 하단 gap 10 추가
-                const SizedBox(height: 32), // 배너와 첫 카테고리 사이 간격 (표준화)
+                const SizedBox(height: 10), // 배너 하단 gap
+                if (_continuePlaying.isNotEmpty) ...[
+                  const SizedBox(height: 12), // 배너 ↔ Continue Playing
+                  HomeContinuePlayingSection(
+                    items: _continuePlaying,
+                    onContinue: (item) {
+                      unawaited(_onContinuePlaying(item));
+                    },
+                  ),
+                  const SizedBox(height: 32),
+                ] else
+                  const SizedBox(height: 32), // 배너 ↔ 첫 카테고리
                 _buildSeriesGroupsSection(),
                 const SizedBox(height: 40), // 하단 여백
               ],

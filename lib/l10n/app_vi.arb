@@ -558,5 +558,7 @@
   "cefrLevelUpTryNext": "Thử cấp độ tiếp theo",
   "cefrLevelUpLater": "Để sau",
   "firstRpRecommendBadge": "Đề xuất",
-  "firstRpRecommendPlay": "Chơi ngay"
+  "firstRpRecommendPlay": "Chơi ngay",
+  "homeContinuePlayingSection": "Tiếp tục chơi",
+  "homeContinuePlayingButton": "Tiếp tục"
 }

@@ -1521,4 +1521,10 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get firstRpRecommendPlay => 'Nu spelen';
+
+  @override
+  String get homeContinuePlayingSection => 'Verder spelen';
+
+  @override
+  String get homeContinuePlayingButton => 'Doorgaan';
 }

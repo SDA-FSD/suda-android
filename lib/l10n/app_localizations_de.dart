@@ -1530,4 +1530,10 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get firstRpRecommendPlay => 'Jetzt spielen';
+
+  @override
+  String get homeContinuePlayingSection => 'Weiterspielen';
+
+  @override
+  String get homeContinuePlayingButton => 'Weiter';
 }

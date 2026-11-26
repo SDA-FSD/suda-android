@@ -558,5 +558,7 @@
   "cefrLevelUpTryNext": "Coba level berikutnya",
   "cefrLevelUpLater": "Nanti saja",
   "firstRpRecommendBadge": "Rekomendasi",
-  "firstRpRecommendPlay": "Main sekarang"
+  "firstRpRecommendPlay": "Main sekarang",
+  "homeContinuePlayingSection": "Lanjutkan bermain",
+  "homeContinuePlayingButton": "Lanjutkan"
 }

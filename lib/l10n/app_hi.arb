@@ -558,5 +558,7 @@
   "cefrLevelUpTryNext": "अगला स्तर आज़माएँ",
   "cefrLevelUpLater": "बाद में",
   "firstRpRecommendBadge": "सुझाव",
-  "firstRpRecommendPlay": "अभी खेलें"
+  "firstRpRecommendPlay": "अभी खेलें",
+  "homeContinuePlayingSection": "खेलना जारी रखें",
+  "homeContinuePlayingButton": "जारी रखें"
 }

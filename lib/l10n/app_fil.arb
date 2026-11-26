@@ -558,5 +558,7 @@
   "cefrLevelUpTryNext": "Subukan ang susunod na level",
   "cefrLevelUpLater": "Mamaya na",
   "firstRpRecommendBadge": "Inirerekomenda",
-  "firstRpRecommendPlay": "Maglaro ngayon"
+  "firstRpRecommendPlay": "Maglaro ngayon",
+  "homeContinuePlayingSection": "Magpatuloy sa paglalaro",
+  "homeContinuePlayingButton": "Magpatuloy"
 }

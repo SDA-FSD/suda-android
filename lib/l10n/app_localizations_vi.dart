@@ -1497,4 +1497,10 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get firstRpRecommendPlay => 'Chơi ngay';
+
+  @override
+  String get homeContinuePlayingSection => 'Tiếp tục chơi';
+
+  @override
+  String get homeContinuePlayingButton => 'Tiếp tục';
 }

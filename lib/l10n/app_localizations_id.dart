@@ -1514,4 +1514,10 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get firstRpRecommendPlay => 'Main sekarang';
+
+  @override
+  String get homeContinuePlayingSection => 'Lanjutkan bermain';
+
+  @override
+  String get homeContinuePlayingButton => 'Lanjutkan';
 }

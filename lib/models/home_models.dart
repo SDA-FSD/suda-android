@@ -20,6 +20,7 @@ class HomeDto {
   final String profileBadgeYn;
   final List<MainHomeBannerDto> banners;
   final List<HomeSeriesGroupDto> seriesList;
+  final List<HomeContinuePlayingDto> continuePlaying;
   final HomeFirstRpRecommendDto? firstRpRecommend;
 
   const HomeDto({
@@ -31,6 +32,7 @@ class HomeDto {
     this.profileBadgeYn = 'N',
     required this.banners,
     required this.seriesList,
+    this.continuePlaying = const [],
     this.firstRpRecommend,
   });
 
@@ -73,6 +75,17 @@ class HomeDto {
               )
               .toList();
 
+    final continueRaw = json['continuePlaying'];
+    final List<HomeContinuePlayingDto> continuePlaying = continueRaw == null
+        ? []
+        : (continueRaw as List<dynamic>)
+              .map(
+                (item) => HomeContinuePlayingDto.fromJson(
+                  item as Map<String, dynamic>,
+                ),
+              )
+              .toList();
+
     return HomeDto(
       restYn: restYn,
       restStartsAt: parseInstant(json['restStartsAt']),
@@ -82,9 +95,43 @@ class HomeDto {
       profileBadgeYn: sudaYnFromJson(json['profileBadgeYn']),
       banners: banners,
       seriesList: seriesList,
+      continuePlaying: continuePlaying,
       firstRpRecommend: HomeFirstRpRecommendDto.fromJson(
         json['firstRpRecommend'],
       ),
+    );
+  }
+}
+
+/// 홈 Continue Playing 카드. frontier 에피소드 + 클리어 진행률.
+class HomeContinuePlayingDto {
+  final int seriesId;
+  final String? thumbnailImgPath;
+  final Map<String, String> title;
+  final int episodeId;
+  final int episodeOrder;
+  final Map<String, String> episodeTitle;
+  final int progressPercent;
+
+  const HomeContinuePlayingDto({
+    required this.seriesId,
+    this.thumbnailImgPath,
+    this.title = const {},
+    required this.episodeId,
+    required this.episodeOrder,
+    this.episodeTitle = const {},
+    this.progressPercent = 0,
+  });
+
+  factory HomeContinuePlayingDto.fromJson(Map<String, dynamic> json) {
+    return HomeContinuePlayingDto(
+      seriesId: (json['seriesId'] as num?)?.toInt() ?? 0,
+      thumbnailImgPath: json['thumbnailImgPath'] as String?,
+      title: _localizedMapFromJson(json['title']),
+      episodeId: (json['episodeId'] as num?)?.toInt() ?? 0,
+      episodeOrder: (json['episodeOrder'] as num?)?.toInt() ?? 0,
+      episodeTitle: _localizedMapFromJson(json['episodeTitle']),
+      progressPercent: (json['progressPercent'] as num?)?.toInt() ?? 0,
     );
   }
 }

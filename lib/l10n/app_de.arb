@@ -558,5 +558,7 @@
   "cefrLevelUpTryNext": "Nächstes Level versuchen",
   "cefrLevelUpLater": "Vielleicht später",
   "firstRpRecommendBadge": "Empfohlen",
-  "firstRpRecommendPlay": "Jetzt spielen"
+  "firstRpRecommendPlay": "Jetzt spielen",
+  "homeContinuePlayingSection": "Weiterspielen",
+  "homeContinuePlayingButton": "Weiter"
 }

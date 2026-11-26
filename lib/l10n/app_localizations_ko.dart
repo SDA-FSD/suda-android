@@ -1443,4 +1443,10 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get firstRpRecommendPlay => '지금 플레이하기';
+
+  @override
+  String get homeContinuePlayingSection => '플레이 중인 시리즈';
+
+  @override
+  String get homeContinuePlayingButton => '이어하기';
 }

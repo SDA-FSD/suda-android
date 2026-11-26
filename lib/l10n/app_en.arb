@@ -651,5 +651,7 @@
   "cefrLevelUpTryNext": "Try the Next Level",
   "cefrLevelUpLater": "Maybe Later",
   "firstRpRecommendBadge": "Recommended",
-  "firstRpRecommendPlay": "Play Now"
+  "firstRpRecommendPlay": "Play Now",
+  "homeContinuePlayingSection": "Continue Playing",
+  "homeContinuePlayingButton": "Continue"
 }

@@ -326,6 +326,7 @@
       - 구현: `AppScaffold(usePadding: false)`를 적용하여 배너가 화면 끝까지 닿도록 함
       - 기능: 무한 루프 스와이프, 자동 슬라이드(4초), 인디케이터, 다국어 오버레이
       - `MainHomeBannerDto.appPath`가 있으면 배너 탭 시 기존 appPath 규칙으로 화면 이동
+    - **Continue Playing** (`HomeContinuePlayingSection`): 배너 아래·카테고리 위. `continuePlaying` 비면 숨김. 타이틀+카드 패널(좌측만 radius 24·우측 직각, 타원 방사형(정사각 Radial stretch) 중앙 `#0CABA8`→stop 0.65 `#054544`). 카드 ~320×172·외곽 1px 선형·좌측 썸네일 ~40% cover topLeft·우측 콘텐츠 선형 `#182D2E`→`#131C1B`·spaceBetween·% 흰색·카드 간격 12·가로 스냅(폭+간격). Continue → overview 로드 후 frontier ep Opening(또는 튜토리얼). 홈 탭 재진입 시 contents soft refresh. 카피 전 locale arb.
     - **시리즈 카테고리** (S2):
       - 구성: 카테고리명(h3, `HomeCategoryDto.name` Map) + 가로 스크롤 썸네일 리스트
       - 썸네일: 30% 너비, radius 10, 음영 박스 오버레이 타이틀 (`HomeSeriesDto.title` Map). 이미지는 `CdnThumbSlot.seriesRow`(`_300`, 없으면 원본).  
@@ -334,7 +335,7 @@
       - 탭: `SeriesOverviewScreen` (Sub)
 - **API 연동**:
   - **홈 콘텐츠 통합 조회**: `GET /v3/home/contents` (`SudaApiClient.getHomeContents()`)
-    - 응답: HomeDto (banners, seriesList, restYn, restStartsAt, restEndsAt, notiboxUnreadYn, firstRpRecommend)
+    - 응답: HomeDto (banners, seriesList, continuePlaying, restYn, restStartsAt, restEndsAt, notiboxUnreadYn, firstRpRecommend)
     - **첫 롤플레이 추천**: `firstRpRecommend`가 있고 홈 탭이 보일 때 2:3 팝업. 딤 `0x66000000`, 딤 탭은 닫지 않음. 닫기는 카드 밖 오른쪽 위. 이번 홈 체류에서만 닫힘. 홈에 다시 들어오면 contents를 다시 받아 아직 값이 있으면 다시 연다. WelcomeGift가 위에 있고, 그게 닫힌 뒤에 보인다. 썸네일 `BoxFit.cover`. 카드 모서리 24, 테두리 1px 흰색 16%. 아래 10% `#121212`, 그 위 40% 높이까지 그라데이션. 배지 l10n `#0CABA8`(`bodySmall`). 카테고리·난이도 태그는 흰색 3.8%·배경 흐림 12·모서리 24·바깥 1px 흰색 16%. 난이도 글자는 Easy/Normal/Hard. 영어가 아니고 `localizedTitleShowYn=Y`일 때만 제목(`headlineSmall`, 최대 3줄, 넘치면 잘림, 그림자 X0 Y4 blur6 `#000` 90%). Play는 팝업을 닫고 `SeriesRouter.pushOverview`.
     - banners: `MainHomeBannerDto(imgPath, overlayText, appPath?)`
   - **시리즈 페이징 조회**: `GET /v2/home/series?category={enumValue}&pageNum=…` (`SudaApiClient.getSeriesByCategory()`)

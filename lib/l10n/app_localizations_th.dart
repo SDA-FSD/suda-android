@@ -1482,4 +1482,10 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get firstRpRecommendPlay => 'เล่นเลย';
+
+  @override
+  String get homeContinuePlayingSection => 'ซีรีส์ที่กำลังเล่น';
+
+  @override
+  String get homeContinuePlayingButton => 'เล่นต่อ';
 }

@@ -558,5 +558,7 @@
   "cefrLevelUpTryNext": "Попробовать следующий уровень",
   "cefrLevelUpLater": "Позже",
   "firstRpRecommendBadge": "Рекомендуем",
-  "firstRpRecommendPlay": "Играть"
+  "firstRpRecommendPlay": "Играть",
+  "homeContinuePlayingSection": "Продолжить игру",
+  "homeContinuePlayingButton": "Продолжить"
 }

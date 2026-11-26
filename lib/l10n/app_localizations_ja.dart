@@ -1438,4 +1438,10 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get firstRpRecommendPlay => '今すぐプレイ';
+
+  @override
+  String get homeContinuePlayingSection => 'プレイ中のシリーズ';
+
+  @override
+  String get homeContinuePlayingButton => '続きから';
 }

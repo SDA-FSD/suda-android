@@ -558,5 +558,7 @@
   "cefrLevelUpTryNext": "Cuba tahap seterusnya",
   "cefrLevelUpLater": "Mungkin kemudian",
   "firstRpRecommendBadge": "Disyorkan",
-  "firstRpRecommendPlay": "Main sekarang"
+  "firstRpRecommendPlay": "Main sekarang",
+  "homeContinuePlayingSection": "Teruskan bermain",
+  "homeContinuePlayingButton": "Teruskan"
 }

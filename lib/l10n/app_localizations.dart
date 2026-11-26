@@ -2806,6 +2806,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Play Now'**
   String get firstRpRecommendPlay;
+
+  /// No description provided for @homeContinuePlayingSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue Playing'**
+  String get homeContinuePlayingSection;
+
+  /// No description provided for @homeContinuePlayingButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get homeContinuePlayingButton;
 }
 
 class _AppLocalizationsDelegate

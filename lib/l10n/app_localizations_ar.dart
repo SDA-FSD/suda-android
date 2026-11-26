@@ -1507,4 +1507,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get firstRpRecommendPlay => 'العب الآن';
+
+  @override
+  String get homeContinuePlayingSection => 'متابعة اللعب';
+
+  @override
+  String get homeContinuePlayingButton => 'متابعة';
 }
