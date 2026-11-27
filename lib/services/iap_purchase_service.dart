@@ -12,7 +12,6 @@ import '../api/suda_api_client.dart';
 import '../models/user_models.dart';
 import '../utils/iap_obfuscated_account_id.dart';
 import '../utils/iap_price_format.dart';
-import 'appsflyer_service.dart';
 import 'google_analytics_service.dart';
 import 'iap_price_cache.dart';
 import 'perf_monitoring_service.dart';
@@ -1171,10 +1170,10 @@ class IapPurchaseService with WidgetsBindingObserver {
           pending: basePlanId,
         );
         try {
-          await _reportAppsflyerPurchase(purchase, plan);
+          await _reportPurchaseRevenue(purchase, plan);
         } catch (e, st) {
           debugPrint(
-            '[DEBUG] IapPurchaseService AF purchase report failed: $e\n$st',
+            '[DEBUG] IapPurchaseService purchase revenue report failed: $e\n$st',
           );
         }
       }
@@ -1251,7 +1250,7 @@ class IapPurchaseService with WidgetsBindingObserver {
     );
   }
 
-  Future<void> _reportAppsflyerPurchase(
+  Future<void> _reportPurchaseRevenue(
     PurchaseDetails purchase,
     String? basePlanId,
   ) async {
@@ -1261,24 +1260,10 @@ class IapPurchaseService with WidgetsBindingObserver {
     final price = await _revenuePrice(productId, basePlanId);
     if (price == null) {
       debugPrint(
-        '[DEBUG] IapPurchaseService AF purchase skip no price '
+        '[DEBUG] IapPurchaseService purchase revenue skip no price '
         'productId=$productId basePlanId=$basePlanId',
       );
       return;
-    }
-    try {
-      await AppsflyerService.logPurchase(
-        subscription: subscription,
-        revenue: price.rawPrice,
-        currencyCode: price.currencyCode,
-        contentId: productId,
-        orderId: purchase.purchaseID,
-        basePlanId: subscription ? basePlanId : null,
-      );
-    } catch (e, st) {
-      debugPrint(
-        '[DEBUG] IapPurchaseService AF purchase report failed: $e\n$st',
-      );
     }
     try {
       await GoogleAnalyticsService.logStorePurchase(

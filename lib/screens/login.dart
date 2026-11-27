@@ -12,7 +12,6 @@ import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import '../config/app_config.dart';
 import '../l10n/app_localizations.dart';
 import '../services/auth_service.dart';
-import '../services/appsflyer_service.dart';
 import '../services/google_analytics_service.dart';
 import '../services/suda_api_client.dart';
 import '../services/token_storage.dart';
@@ -290,7 +289,6 @@ class _LoginScreenState extends State<LoginScreen>
     setState(() => _isAgreementSubmitting = true);
     try {
       await SudaApiClient.updateAgreement(accessToken: token);
-      await AppsflyerService.logEvent('af_complete_registration');
       await GoogleAnalyticsService.logSignUp();
       widget.onAgreementComplete?.call();
     } catch (e) {
