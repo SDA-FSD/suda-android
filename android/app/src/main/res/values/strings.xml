@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">SUDA</string>
+    <string name="facebook_app_id">1264040849127418</string>
+    <string name="facebook_client_token">e3de880645090200e336fce6d0614300</string>
+    <string name="fb_login_protocol_scheme">fb1264040849127418</string>
     <!-- Google Sign-In Client ID (Default - used if flavor-specific value not found) -->
     <!-- Note: Flavor-specific values in src/{flavor}/res/values/strings.xml override this -->
 </resources>

@@ -13,6 +13,7 @@ import '../models/user_models.dart';
 import '../utils/iap_obfuscated_account_id.dart';
 import '../utils/iap_price_format.dart';
 import 'google_analytics_service.dart';
+import 'meta_app_events_service.dart';
 import 'iap_price_cache.dart';
 import 'perf_monitoring_service.dart';
 import 'token_storage.dart';
@@ -1277,6 +1278,20 @@ class IapPurchaseService with WidgetsBindingObserver {
     } catch (e, st) {
       debugPrint(
         '[DEBUG] IapPurchaseService GA purchase report failed: $e\n$st',
+      );
+    }
+    try {
+      await MetaAppEventsService.logStorePurchase(
+        subscription: subscription,
+        revenue: price.rawPrice,
+        currencyCode: price.currencyCode,
+        contentId: productId,
+        orderId: purchase.purchaseID,
+        basePlanId: subscription ? basePlanId : null,
+      );
+    } catch (e, st) {
+      debugPrint(
+        '[DEBUG] IapPurchaseService Meta purchase report failed: $e\n$st',
       );
     }
   }

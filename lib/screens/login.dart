@@ -13,6 +13,7 @@ import '../config/app_config.dart';
 import '../l10n/app_localizations.dart';
 import '../services/auth_service.dart';
 import '../services/google_analytics_service.dart';
+import '../services/meta_app_events_service.dart';
 import '../services/suda_api_client.dart';
 import '../services/token_storage.dart';
 import '../utils/default_toast.dart';
@@ -290,6 +291,7 @@ class _LoginScreenState extends State<LoginScreen>
     try {
       await SudaApiClient.updateAgreement(accessToken: token);
       await GoogleAnalyticsService.logSignUp();
+      await MetaAppEventsService.logSignUp();
       widget.onAgreementComplete?.call();
     } catch (e) {
       if (mounted) {

@@ -17,6 +17,15 @@ PODS:
     - Flutter
   - device_info_plus (0.0.1):
     - Flutter
+  - facebook_app_events (0.32.0):
+    - FBSDKCoreKit (~> 19.0)
+    - Flutter
+  - FBAEMKit (19.0.0):
+    - FBSDKCoreKit_Basics (= 19.0.0)
+  - FBSDKCoreKit (19.0.0):
+    - FBAEMKit (= 19.0.0)
+    - FBSDKCoreKit_Basics (= 19.0.0)
+  - FBSDKCoreKit_Basics (19.0.0)
   - Firebase/Analytics (11.15.0):
     - Firebase/Core
   - Firebase/Core (11.15.0):
@@ -245,6 +254,7 @@ DEPENDENCIES:
   - audio_session (from `.symlinks/plugins/audio_session/ios`)
   - connectivity_plus (from `.symlinks/plugins/connectivity_plus/ios`)
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
+  - facebook_app_events (from `.symlinks/plugins/facebook_app_events/ios`)
   - firebase_analytics (from `.symlinks/plugins/firebase_analytics/ios`)
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
   - firebase_messaging (from `.symlinks/plugins/firebase_messaging/ios`)
@@ -272,6 +282,9 @@ SPEC REPOS:
   trunk:
     - AppAuth
     - AppCheckCore
+    - FBAEMKit
+    - FBSDKCoreKit
+    - FBSDKCoreKit_Basics
     - Firebase
     - FirebaseABTesting
     - FirebaseAnalytics
@@ -304,6 +317,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/connectivity_plus/ios"
   device_info_plus:
     :path: ".symlinks/plugins/device_info_plus/ios"
+  facebook_app_events:
+    :path: ".symlinks/plugins/facebook_app_events/ios"
   firebase_analytics:
     :path: ".symlinks/plugins/firebase_analytics/ios"
   firebase_core:
@@ -355,6 +370,10 @@ SPEC CHECKSUMS:
   audio_session: 9bb7f6c970f21241b19f5a3658097ae459681ba0
   connectivity_plus: cb623214f4e1f6ef8fe7403d580fdad517d2f7dd
   device_info_plus: 21fcca2080fbcd348be798aa36c3e5ed849eefbe
+  facebook_app_events: 7a6df5315d2c03d689886f587b265da776de7de2
+  FBAEMKit: feeb39dc63c2de0ce729b642749766f872bb5cae
+  FBSDKCoreKit: 8ab2f41763606700686aff3dde1f997e3e7669c8
+  FBSDKCoreKit_Basics: 89dc0713ac15ffd0b2cf22a05bbf083eb426d6da
   Firebase: d99ac19b909cd2c548339c2241ecd0d1599ab02e
   firebase_analytics: 0e25ca1d4001ccedd40b4e5b74c0ec34e18f6425
   firebase_core: 995454a784ff288be5689b796deb9e9fa3601818

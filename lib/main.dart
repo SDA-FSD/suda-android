@@ -27,6 +27,7 @@ import 'services/version_check_service.dart';
 import 'services/token_refresh_service.dart';
 import 'services/main_user_sync.dart';
 import 'services/font_pack_service.dart';
+import 'services/meta_app_events_service.dart';
 import 'services/perf_monitoring_service.dart';
 import 'services/series_state_service.dart';
 import 'routes/series_router.dart';
@@ -109,6 +110,7 @@ void main() async {
   print('[BOOT] Firebase.initializeApp() done');
   await PerfMonitoringService.instance.configure();
   print('[BOOT] PerfMonitoring configure done');
+  unawaited(MetaAppEventsService.initialize());
 
   // 푸시 알림으로 앱이 켜진 경우 appPath·notificationId 보관 (로그인/동의 후 Main 진입 시 적용)
   // iOS(특히 시뮬레이터)에서 getInitialMessage가 무한 대기하면 네이티브 스플래시만 남는다.

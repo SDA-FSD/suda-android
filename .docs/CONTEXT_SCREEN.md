@@ -141,7 +141,7 @@
 - **스크린 타입**: **Full Screen**
 - **appPath**: 해당 없음 (인증 플로우)
 - **진입 연출**: `#121212` 배경 위 중앙 스틸에서 시작한다. **1000ms 대기** 후 스틸 500ms fade-out, 로고 파트 1000ms 중앙 이동, 포스터·하단 영역은 fade-in 없이 각각 등장 연출한다. 포스터 1~3행은 행별로 화면 밖→노출 위치 1000ms(`easeOutCubic`) 슬라인 후 마키(1행 좌에서 등장·우로·60s, 2행 우에서 등장·좌로·70s, 3행 좌에서 등장·우로·66s). 하단 노출 영역은 화면 아래 밖에서 1000ms 상승(`easeOutCubic`).
-- **서비스 이용 동의(레이어)**: 로그인 후 사용자 metaInfo의 `SUDA_AGREEMENT != 'Y'`인 경우, LoginScreen 위에 **bottom-up 레이어**(배경 blur+dim)로 동의 UI를 노출한다. 순서: 약관 → 개인정보 → 구분선(`#353535` 1px) → **Agree All**(`agreementAllLabel`, 링크 없음·가운데 정렬). Agree All은 약관·개인정보를 함께 켜고 끄며, 두 항목이 모두 체크되면 자동 체크된다. 레이어 바깥 탭 시 닫힌다. 동의 완료 시 `POST /v1/users/agreement` + GA4 `sign_up`(prd) 이벤트를 호출한 뒤 **FirstAppLanguageScreen**(§1.1a, `LANGUAGE_TAG` 없을 때)으로 전환한다.
+- **서비스 이용 동의(레이어)**: 로그인 후 사용자 metaInfo의 `SUDA_AGREEMENT != 'Y'`인 경우, LoginScreen 위에 **bottom-up 레이어**(배경 blur+dim)로 동의 UI를 노출한다. 순서: 약관 → 개인정보 → 구분선(`#353535` 1px) → **Agree All**(`agreementAllLabel`, 링크 없음·가운데 정렬). Agree All은 약관·개인정보를 함께 켜고 끄며, 두 항목이 모두 체크되면 자동 체크된다. 레이어 바깥 탭 시 닫힌다. 동의 완료 시 `POST /v1/users/agreement` + GA4 `sign_up`(prd) + Meta Completed Registration(prd) 이벤트를 호출한 뒤 **FirstAppLanguageScreen**(§1.1a, `LANGUAGE_TAG` 없을 때)으로 전환한다.
 
 ---
 
